@@ -219,7 +219,7 @@ class MenuStyle with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -245,19 +245,19 @@ class MenuStyle with Diagnosticable {
   /// Returns a copy of this MenuStyle with the given fields replaced with
   /// the new values.
   MenuStyle copyWith({
-    MaterialStateProperty<Color?>? backgroundColor,
-    MaterialStateProperty<Color?>? shadowColor,
-    MaterialStateProperty<Color?>? surfaceTintColor,
-    MaterialStateProperty<double?>? elevation,
-    MaterialStateProperty<EdgeInsetsGeometry?>? padding,
-    MaterialStateProperty<Size?>? minimumSize,
-    MaterialStateProperty<Size?>? fixedSize,
-    MaterialStateProperty<Size?>? maximumSize,
-    MaterialStateProperty<BorderSide?>? side,
-    MaterialStateProperty<OutlinedBorder?>? shape,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    VisualDensity? visualDensity,
-    AlignmentGeometry? alignment,
+    final MaterialStateProperty<Color?>? backgroundColor,
+    final MaterialStateProperty<Color?>? shadowColor,
+    final MaterialStateProperty<Color?>? surfaceTintColor,
+    final MaterialStateProperty<double?>? elevation,
+    final MaterialStateProperty<EdgeInsetsGeometry?>? padding,
+    final MaterialStateProperty<Size?>? minimumSize,
+    final MaterialStateProperty<Size?>? fixedSize,
+    final MaterialStateProperty<Size?>? maximumSize,
+    final MaterialStateProperty<BorderSide?>? side,
+    final MaterialStateProperty<OutlinedBorder?>? shape,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final VisualDensity? visualDensity,
+    final AlignmentGeometry? alignment,
   }) {
     return MenuStyle(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -281,7 +281,7 @@ class MenuStyle with Diagnosticable {
   ///
   /// In other words, [style] is used to fill in unspecified (null) fields
   /// this MenuStyle.
-  MenuStyle merge(MenuStyle? style) {
+  MenuStyle merge(final MenuStyle? style) {
     if (style == null) {
       return this;
     }
@@ -303,7 +303,7 @@ class MenuStyle with Diagnosticable {
   }
 
   /// Linearly interpolate between two [MenuStyle]s.
-  static MenuStyle? lerp(MenuStyle? a, MenuStyle? b, double t) {
+  static MenuStyle? lerp(final MenuStyle? a, final MenuStyle? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -325,7 +325,7 @@ class MenuStyle with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('shadowColor', shadowColor, defaultValue: null));
@@ -353,7 +353,7 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
   final double t;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
+  BorderSide? resolve(final Set<MaterialState> states) {
     final BorderSide? resolvedA = a?.resolve(states);
     final BorderSide? resolvedB = b?.resolve(states);
     if (resolvedA == null && resolvedB == null) {

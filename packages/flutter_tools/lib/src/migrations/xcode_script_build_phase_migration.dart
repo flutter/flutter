@@ -9,7 +9,7 @@ import '../xcode_project.dart';
 // Migrate Xcode build phases that build and embed the Flutter and
 // compiled dart frameworks.
 class XcodeScriptBuildPhaseMigration extends ProjectMigrator {
-  XcodeScriptBuildPhaseMigration(XcodeBasedProject project, super.logger)
+  XcodeScriptBuildPhaseMigration(final XcodeBasedProject project, super.logger)
     : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;

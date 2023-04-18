@@ -296,7 +296,7 @@ abstract class BindingBase {
   /// `SchedulerBinding`) that is calling the method. It is used in
   /// error messages.
   @protected
-  static T checkInstance<T extends BindingBase>(T? instance) {
+  static T checkInstance<T extends BindingBase>(final T? instance) {
     assert(() {
       if (_debugInitializedType == null && instance == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -472,7 +472,7 @@ abstract class BindingBase {
   /// bindings used with [flutter_test] do this as they make heavy use of zones
   /// to drive the framework with an artificial clock and to catch errors and
   /// report them as test failures.)
-  bool debugCheckZone(String entryPoint) {
+  bool debugCheckZone(final String entryPoint) {
     assert(() {
       assert(_debugBindingZone != null, 'debugCheckZone can only be used after the binding is fully initialized.');
       if (Zone.current != _debugBindingZone) {
@@ -545,14 +545,14 @@ abstract class BindingBase {
       registerStringServiceExtension(
         name: FoundationServiceExtensions.connectedVmServiceUri.name,
         getter: () async => connectedVmServiceUri ?? '',
-        setter: (String uri) async {
+        setter: (final String uri) async {
           connectedVmServiceUri = uri;
         },
       );
       registerStringServiceExtension(
         name: FoundationServiceExtensions.activeDevToolsServerAddress.name,
         getter: () async => activeDevToolsServerAddress ?? '',
-        setter: (String serverAddress) async {
+        setter: (final String serverAddress) async {
           activeDevToolsServerAddress = serverAddress;
         },
       );
@@ -561,7 +561,7 @@ abstract class BindingBase {
     assert(() {
       registerServiceExtension(
         name: FoundationServiceExtensions.platformOverride.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
               case 'android':
@@ -596,7 +596,7 @@ abstract class BindingBase {
 
       registerServiceExtension(
         name: FoundationServiceExtensions.brightnessOverride.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           if (parameters.containsKey('value')) {
             switch (parameters['value']) {
               case 'Brightness.light':
@@ -645,7 +645,7 @@ abstract class BindingBase {
   ///
   /// The [Future] returned by the `callback` argument is returned by [lockEvents].
   @protected
-  Future<void> lockEvents(Future<void> Function() callback) {
+  Future<void> lockEvents(final Future<void> Function() callback) {
     final developer.TimelineTask timelineTask = developer.TimelineTask()..start('Lock events');
 
     _lockCount += 1;
@@ -717,12 +717,12 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerSignalServiceExtension({
-    required String name,
-    required AsyncCallback callback,
+    required final String name,
+    required final AsyncCallback callback,
   }) {
     registerServiceExtension(
       name: name,
-      callback: (Map<String, String> parameters) async {
+      callback: (final Map<String, String> parameters) async {
         await callback();
         return <String, dynamic>{};
       },
@@ -745,13 +745,13 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerBoolServiceExtension({
-    required String name,
-    required AsyncValueGetter<bool> getter,
-    required AsyncValueSetter<bool> setter,
+    required final String name,
+    required final AsyncValueGetter<bool> getter,
+    required final AsyncValueSetter<bool> setter,
   }) {
     registerServiceExtension(
       name: name,
-      callback: (Map<String, String> parameters) async {
+      callback: (final Map<String, String> parameters) async {
         if (parameters.containsKey('enabled')) {
           await setter(parameters['enabled'] == 'true');
           _postExtensionStateChangedEvent(name, await getter() ? 'true' : 'false');
@@ -776,13 +776,13 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerNumericServiceExtension({
-    required String name,
-    required AsyncValueGetter<double> getter,
-    required AsyncValueSetter<double> setter,
+    required final String name,
+    required final AsyncValueGetter<double> getter,
+    required final AsyncValueSetter<double> setter,
   }) {
     registerServiceExtension(
       name: name,
-      callback: (Map<String, String> parameters) async {
+      callback: (final Map<String, String> parameters) async {
         if (parameters.containsKey(name)) {
           await setter(double.parse(parameters[name]!));
           _postExtensionStateChangedEvent(name, (await getter()).toString());
@@ -803,7 +803,7 @@ abstract class BindingBase {
   /// This will be called automatically for service extensions registered via
   /// [registerBoolServiceExtension], [registerNumericServiceExtension], or
   /// [registerStringServiceExtension].
-  void _postExtensionStateChangedEvent(String name, dynamic value) {
+  void _postExtensionStateChangedEvent(final String name, final dynamic value) {
     postEvent(
       'Flutter.ServiceExtensionStateChanged',
       <String, dynamic>{
@@ -817,7 +817,7 @@ abstract class BindingBase {
   /// calling [developer.postEvent] directly so that tests for [BindingBase]
   /// can track which events were dispatched by overriding this method.
   @protected
-  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+  void postEvent(final String eventKind, final Map<String, dynamic> eventData) {
     developer.postEvent(eventKind, eventData);
   }
 
@@ -835,13 +835,13 @@ abstract class BindingBase {
   /// {@macro flutter.foundation.BindingBase.registerServiceExtension}
   @protected
   void registerStringServiceExtension({
-    required String name,
-    required AsyncValueGetter<String> getter,
-    required AsyncValueSetter<String> setter,
+    required final String name,
+    required final AsyncValueGetter<String> getter,
+    required final AsyncValueSetter<String> setter,
   }) {
     registerServiceExtension(
       name: name,
-      callback: (Map<String, String> parameters) async {
+      callback: (final Map<String, String> parameters) async {
         if (parameters.containsKey('value')) {
           await setter(parameters['value']!);
           _postExtensionStateChangedEvent(name, await getter());
@@ -904,11 +904,11 @@ abstract class BindingBase {
   /// {@endtemplate}
   @protected
   void registerServiceExtension({
-    required String name,
-    required ServiceExtensionCallback callback,
+    required final String name,
+    required final ServiceExtensionCallback callback,
   }) {
     final String methodName = 'ext.flutter.$name';
-    developer.registerExtension(methodName, (String method, Map<String, String> parameters) async {
+    developer.registerExtension(methodName, (final String method, final Map<String, String> parameters) async {
       assert(method == methodName);
       assert(() {
         if (debugInstrumentationEnabled) {

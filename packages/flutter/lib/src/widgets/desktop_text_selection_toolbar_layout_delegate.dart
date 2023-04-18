@@ -27,12 +27,12 @@ class DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegat
   final Offset anchor;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     return constraints.loosen();
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     final Offset overhang = Offset(
       anchor.dx + childSize.width - size.width,
       anchor.dy + childSize.height - size.height,
@@ -44,7 +44,7 @@ class DesktopTextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegat
   }
 
   @override
-  bool shouldRelayout(DesktopTextSelectionToolbarLayoutDelegate oldDelegate) {
+  bool shouldRelayout(final DesktopTextSelectionToolbarLayoutDelegate oldDelegate) {
     return anchor != oldDelegate.anchor;
   }
 }

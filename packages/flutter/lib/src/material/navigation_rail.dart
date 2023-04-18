@@ -334,7 +334,7 @@ class NavigationRail extends StatefulWidget {
   ///
   /// ** See code in examples/api/lib/material/navigation_rail/navigation_rail.extended_animation.0.dart **
   /// {@end-tool}
-  static Animation<double> extendedAnimation(BuildContext context) {
+  static Animation<double> extendedAnimation(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ExtendedNavigationRailAnimation>()!.animation;
   }
 
@@ -361,7 +361,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 
   @override
-  void didUpdateWidget(NavigationRail oldWidget) {
+  void didUpdateWidget(final NavigationRail oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.extended != oldWidget.extended) {
@@ -390,7 +390,7 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final NavigationRailThemeData navigationRailTheme = NavigationRailTheme.of(context);
     final NavigationRailThemeData defaults = Theme.of(context).useMaterial3 ? _NavigationRailDefaultsM3(context) : _NavigationRailDefaultsM2(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -490,13 +490,13 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
   }
 
   void _initControllers() {
-    _destinationControllers = List<AnimationController>.generate(widget.destinations.length, (int index) {
+    _destinationControllers = List<AnimationController>.generate(widget.destinations.length, (final int index) {
       return AnimationController(
         duration: kThemeAnimationDuration,
         vsync: this,
       )..addListener(_rebuild);
     });
-    _destinationAnimations = _destinationControllers.map((AnimationController controller) => controller.view).toList();
+    _destinationAnimations = _destinationControllers.map((final AnimationController controller) => controller.view).toList();
     if (widget.selectedIndex != null) {
       _destinationControllers[widget.selectedIndex!].value = 1.0;
     }
@@ -571,7 +571,7 @@ class _RailDestination extends StatelessWidget {
   final Animation<double> _positionAnimation;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(
       useIndicator || indicatorColor == null,
       '[NavigationRail.indicatorColor] does not have an effect when [NavigationRail.useIndicator] is false',
@@ -784,8 +784,8 @@ class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
     super.child,
     super.onTap,
-    ShapeBorder? customBorder,
-    BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final BorderRadius? borderRadius,
     super.splashColor,
     super.hoverColor,
     required this.useMaterial3,
@@ -801,7 +801,7 @@ class _IndicatorInkWell extends InkResponse {
   final Offset indicatorOffset;
 
   @override
-  RectCallback? getRectCallback(RenderBox referenceBox) {
+  RectCallback? getRectCallback(final RenderBox referenceBox) {
     if (useMaterial3) {
       return () {
         return Rect.fromLTWH(
@@ -839,7 +839,7 @@ class _AddIndicator extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (!addIndicator) {
       return child;
     }
@@ -904,7 +904,7 @@ class NavigationRailDestination {
   /// and may still be used if [NavigationRail.extended] is true.
   const NavigationRailDestination({
     required this.icon,
-    Widget? selectedIcon,
+    final Widget? selectedIcon,
     this.indicatorColor,
     this.indicatorShape,
     required this.label,
@@ -965,7 +965,7 @@ class _ExtendedNavigationRailAnimation extends InheritedWidget {
   final Animation<double> animation;
 
   @override
-  bool updateShouldNotify(_ExtendedNavigationRailAnimation old) => animation != old.animation;
+  bool updateShouldNotify(final _ExtendedNavigationRailAnimation old) => animation != old.animation;
 }
 
 // There don't appear to be tokens for these values, but they are
@@ -980,7 +980,7 @@ const double _horizontalDestinationSpacingM3 = 12.0;
 
 // Hand coded defaults based on Material Design 2.
 class _NavigationRailDefaultsM2 extends NavigationRailThemeData {
-  _NavigationRailDefaultsM2(BuildContext context)
+  _NavigationRailDefaultsM2(final BuildContext context)
     : _theme = Theme.of(context),
       _colors = Theme.of(context).colorScheme,
       super(

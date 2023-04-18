@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'binding.dart';
 
 /// Ensure the appropriate test binding is initialized.
-TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
+TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting final Map<String, String>? environment]) {
   return AutomatedTestWidgetsFlutterBinding.ensureInitialized();
 }
 

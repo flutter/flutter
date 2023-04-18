@@ -10,9 +10,9 @@ import 'package:flutter/material.dart';
 import '../common.dart';
 
 Map<String, WidgetBuilder> gradientPerfRoutes = <String, WidgetBuilder>{
-  kGradientPerfRecreateDynamicRouteName: (BuildContext _) => const RecreateDynamicPainterPage(),
-  kGradientPerfRecreateConsistentRouteName: (BuildContext _) => const RecreateConsistentPainterPage(),
-  kGradientPerfStaticConsistentRouteName: (BuildContext _) => const StaticConsistentPainterPage(),
+  kGradientPerfRecreateDynamicRouteName: (final BuildContext _) => const RecreateDynamicPainterPage(),
+  kGradientPerfRecreateConsistentRouteName: (final BuildContext _) => const RecreateConsistentPainterPage(),
+  kGradientPerfStaticConsistentRouteName: (final BuildContext _) => const StaticConsistentPainterPage(),
 };
 
 typedef CustomPaintFactory = CustomPainter Function(double hue);
@@ -21,7 +21,7 @@ class GradientPerfHomePage extends StatelessWidget {
   const GradientPerfHomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Gradient Perf')),
       body: ListView(
@@ -68,7 +68,7 @@ class RecreateDynamicPainterPage extends _PainterPage {
   const RecreateDynamicPainterPage({super.key})
       : super(title: 'Recreate Dynamic Gradients', factory: makePainter);
 
-  static CustomPainter makePainter(double f) {
+  static CustomPainter makePainter(final double f) {
     return RecreatedDynamicGradients(baseFactor: f);
   }
 }
@@ -77,7 +77,7 @@ class RecreateConsistentPainterPage extends _PainterPage {
   const RecreateConsistentPainterPage({super.key})
       : super(title: 'Recreate Same Gradients', factory: makePainter);
 
-  static CustomPainter makePainter(double f) {
+  static CustomPainter makePainter(final double f) {
     return RecreatedConsistentGradients(baseFactor: f);
   }
 }
@@ -86,7 +86,7 @@ class StaticConsistentPainterPage extends _PainterPage {
   const StaticConsistentPainterPage({super.key})
       : super(title: 'Reuse Same Gradients', factory: makePainter);
 
-  static CustomPainter makePainter(double f) {
+  static CustomPainter makePainter(final double f) {
     return StaticConsistentGradients(baseFactor: f);
   }
 }
@@ -108,7 +108,7 @@ class _PainterPageState extends State<_PainterPage> with SingleTickerProviderSta
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -116,7 +116,7 @@ class _PainterPageState extends State<_PainterPage> with SingleTickerProviderSta
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return CustomPaint(
               size: const Size(paintW, paintH),
               painter: widget.factory(_controller.value),
@@ -129,7 +129,7 @@ class _PainterPageState extends State<_PainterPage> with SingleTickerProviderSta
   }
 }
 
-Color color(double factor) {
+Color color(final double factor) {
   int v = ((factor * 255 * 3) % (255 * 3)).round();
   if (v < 0) {
     v += 255 * 3;
@@ -154,7 +154,7 @@ Color color(double factor) {
   return Color.fromARGB(255, r, g, b);
 }
 
-Shader rotatingGradient(double factor, double x, double y, double h) {
+Shader rotatingGradient(final double factor, final double x, final double y, final double h) {
   final double s = sin(factor * 2 * pi) * h/8;
   final double c = cos(factor * 2 * pi) * h/8;
   final double cx = x;
@@ -176,15 +176,15 @@ const double vGap = 5;
 const double paintW = hGap + (cellW + hGap) * nAcross;
 const double paintH = vGap + (cellH + vGap) * nDown;
 
-double x(int i, int j) {
+double x(final int i, final int j) {
   return hGap + i * (cellW + hGap);
 }
 
-double y(int i, int j) {
+double y(final int i, final int j) {
   return vGap + j * (cellH + vGap);
 }
 
-Shader gradient(double baseFactor, int i, int j) {
+Shader gradient(final double baseFactor, final int i, final int j) {
   final double lineFactor = baseFactor + 1/3 + 0.5 * (j + 1) / (nDown + 1);
   final double cellFactor = lineFactor + 1/3 * (i + 1) / (nAcross + 1);
   return rotatingGradient(cellFactor, x(i, j) + cellW / 2, y(i, j), cellH);
@@ -196,7 +196,7 @@ class RecreatedDynamicGradients extends CustomPainter {
   final double baseFactor;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint p = Paint();
     p.color = color(baseFactor);
     canvas.drawRect(Offset.zero & size, p);
@@ -209,7 +209,7 @@ class RecreatedDynamicGradients extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(final CustomPainter oldDelegate) => true;
 }
 
 class RecreatedConsistentGradients extends CustomPainter {
@@ -218,7 +218,7 @@ class RecreatedConsistentGradients extends CustomPainter {
   final double baseFactor;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint p = Paint();
     p.color = color(baseFactor);
     canvas.drawRect(Offset.zero & size, p);
@@ -231,7 +231,7 @@ class RecreatedConsistentGradients extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(final CustomPainter oldDelegate) => true;
 }
 
 class StaticConsistentGradients extends CustomPainter {
@@ -248,7 +248,7 @@ class StaticConsistentGradients extends CustomPainter {
   ];
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint p = Paint();
     p.color = color(baseFactor);
     canvas.drawRect(Offset.zero & size, p);
@@ -261,5 +261,5 @@ class StaticConsistentGradients extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(final CustomPainter oldDelegate) => true;
 }

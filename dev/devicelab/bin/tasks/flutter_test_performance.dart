@@ -36,7 +36,7 @@ enum TestStep {
   testPassed,
 }
 
-Future<int> runTest({bool coverage = false, bool noPub = false}) async {
+Future<int> runTest({final bool coverage = false, final bool noPub = false}) async {
   final Stopwatch clock = Stopwatch()..start();
   final Process analysis = await startFlutter(
     'test',
@@ -50,7 +50,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   int badLines = 0;
   TestStep step = TestStep.starting;
 
-  analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
+  analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((final String entry) {
     print('test stdout ($step): $entry');
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
@@ -83,7 +83,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
       }
     }
   });
-  analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String entry) {
+  analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((final String entry) {
     print('test stderr: $entry');
     badLines += 1;
   });
@@ -102,7 +102,7 @@ Future<int> runTest({bool coverage = false, bool noPub = false}) async {
   return clock.elapsedMilliseconds;
 }
 
-Future<void> pubGetDependencies(List<Directory> directories) async {
+Future<void> pubGetDependencies(final List<Directory> directories) async {
   for (final Directory directory in directories) {
     await inDirectory<void>(directory, () async {
       await flutter('pub', options: <String>['get']);

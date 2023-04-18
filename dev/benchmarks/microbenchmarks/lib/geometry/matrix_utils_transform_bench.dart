@@ -15,7 +15,7 @@ void main() {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
   print('MatrixUtils.transformRect and .transformPoint benchmark...');
 
-  Matrix4 makePerspective(double radius, double angle, double perspective) {
+  Matrix4 makePerspective(final double radius, final double angle, final double perspective) {
     return MatrixUtils.createCylindricalProjectionTransform(
       radius: radius,
       angle: angle,

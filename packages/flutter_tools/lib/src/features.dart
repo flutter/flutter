@@ -53,7 +53,7 @@ abstract class FeatureFlags {
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
-  bool isEnabled(Feature feature);
+  bool isEnabled(final Feature feature);
 }
 
 /// All current Flutter feature flags.
@@ -73,7 +73,7 @@ const List<Feature> allFeatures = <Feature>[
 /// All current Flutter feature flags that can be configured.
 ///
 /// [Feature.configSetting] is not `null`.
-Iterable<Feature> get allConfigurableFeatures => allFeatures.where((Feature feature) => feature.configSetting != null);
+Iterable<Feature> get allConfigurableFeatures => allFeatures.where((final Feature feature) => feature.configSetting != null);
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature.fullyEnabled(
@@ -262,7 +262,7 @@ class Feature {
   }
 
   /// Retrieve the correct setting for the provided `channel`.
-  FeatureChannelSetting getSettingForChannel(String channel) {
+  FeatureChannelSetting getSettingForChannel(final String channel) {
     switch (channel) {
       case 'stable':
         return stable;

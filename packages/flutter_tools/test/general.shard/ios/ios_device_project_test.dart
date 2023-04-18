@@ -78,7 +78,7 @@ flutter:
   });
 }
 
-IOSDevice setUpIOSDevice(FileSystem fileSystem) {
+IOSDevice setUpIOSDevice(final FileSystem fileSystem) {
   final Platform platform = FakePlatform(operatingSystem: 'macos');
   final Logger logger = BufferLogger.test();
   final ProcessManager processManager = FakeProcessManager.any();

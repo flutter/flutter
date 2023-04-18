@@ -12,7 +12,7 @@ class SuffixIconExampleApp extends StatelessWidget {
   const SuffixIconExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: InputDecoratorExample()),
     );
@@ -23,7 +23,7 @@ class InputDecoratorExample extends StatelessWidget {
   const InputDecoratorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const TextField(
       decoration: InputDecoration(
         border: OutlineInputBorder(),

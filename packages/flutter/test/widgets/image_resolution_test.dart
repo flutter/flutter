@@ -16,8 +16,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../image_data.dart';
 
-ByteData testByteData(double scale) => ByteData(8)..setFloat64(0, scale);
-double scaleOf(ByteData data) => data.getFloat64(0);
+ByteData testByteData(final double scale) => ByteData(8)..setFloat64(0, scale);
+double scaleOf(final ByteData data) => data.getFloat64(0);
 
 final Map<Object?, Object?> testManifest = json.decode('''
 {
@@ -31,14 +31,14 @@ final Map<Object?, Object?> testManifest = json.decode('''
 ''') as Map<Object?, Object?>;
 
 class TestAssetBundle extends CachingAssetBundle {
-  TestAssetBundle({ required Map<Object?, Object?> manifest }) {
+  TestAssetBundle({ required final Map<Object?, Object?> manifest }) {
     this.manifest = const StandardMessageCodec().encodeMessage(manifest)!;
   }
 
   late final ByteData manifest;
 
   @override
-  Future<ByteData> load(String key) {
+  Future<ByteData> load(final String key) {
     late ByteData data;
     switch (key) {
       case 'AssetManifest.bin':
@@ -64,7 +64,7 @@ class TestAssetBundle extends CachingAssetBundle {
 }
 
 class FakeImageStreamCompleter extends ImageStreamCompleter {
-  FakeImageStreamCompleter(Future<ImageInfo> image) {
+  FakeImageStreamCompleter(final Future<ImageInfo> image) {
     image.then<void>(setImage);
   }
 }
@@ -75,9 +75,9 @@ class TestAssetImage extends AssetImage {
   final Map<double, ui.Image> images;
 
   @override
-  ImageStreamCompleter loadImage(AssetBundleImageKey key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(final AssetBundleImageKey key, final ImageDecoderCallback decode) {
     late ImageInfo imageInfo;
-    key.bundle.load(key.name).then<void>((ByteData data) {
+    key.bundle.load(key.name).then<void>((final ByteData data) {
       final ui.Image image = images[scaleOf(data)]!;
       imageInfo = ImageInfo(image: image, scale: key.scale);
     });
@@ -87,7 +87,7 @@ class TestAssetImage extends AssetImage {
   }
 }
 
-Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize, Map<double, ui.Image> images, [ AssetBundle? bundle ]) {
+Widget buildImageAtRatio(final String imageName, final Key key, final double ratio, final bool inferSize, final Map<double, ui.Image> images, [ final AssetBundle? bundle ]) {
   const double windowSize = 500.0; // 500 logical pixels
   const double imageSize = 200.0; // 200 logical pixels
 
@@ -118,7 +118,7 @@ Widget buildImageAtRatio(String imageName, Key key, double ratio, bool inferSize
   );
 }
 
-Widget buildImageCacheResized(String name, Key key, int width, int height, int cacheWidth, int cacheHeight) {
+Widget buildImageCacheResized(final String name, final Key key, final int width, final int height, final int cacheWidth, final int cacheHeight) {
   return Center(
     child: RepaintBoundary(
       child: SizedBox(
@@ -142,11 +142,11 @@ Widget buildImageCacheResized(String name, Key key, int width, int height, int c
   );
 }
 
-RenderImage getRenderImage(WidgetTester tester, Key key) {
+RenderImage getRenderImage(final WidgetTester tester, final Key key) {
   return tester.renderObject<RenderImage>(find.byKey(key));
 }
 
-Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
+Future<void> pumpTreeToLayout(final WidgetTester tester, final Widget widget) {
   const Duration pumpDuration = Duration.zero;
   const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
@@ -163,7 +163,7 @@ void main() {
     }
   });
 
-  testWidgets('Image for device pixel ratio 1.0', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 1.0', (final WidgetTester tester) async {
     const double ratio = 1.0;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
@@ -175,7 +175,7 @@ void main() {
     expect(getRenderImage(tester, key).scale, 1.0);
   });
 
-  testWidgets('Image for device pixel ratio 0.5', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 0.5', (final WidgetTester tester) async {
     const double ratio = 0.5;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
@@ -187,7 +187,7 @@ void main() {
     expect(getRenderImage(tester, key).scale, 1.0);
   });
 
-  testWidgets('Image for device pixel ratio 1.5', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 1.5', (final WidgetTester tester) async {
     const double ratio = 1.5;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
@@ -202,7 +202,7 @@ void main() {
   // A 1.75 DPR screen is typically a low-resolution screen, such that physical
   // pixels are visible to the user. For such screens we prefer to pick the
   // higher resolution image, if available.
-  testWidgets('Image for device pixel ratio 1.75', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 1.75', (final WidgetTester tester) async {
     const double ratio = 1.75;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
@@ -214,7 +214,7 @@ void main() {
     expect(getRenderImage(tester, key).scale, 2.0);
   });
 
-  testWidgets('Image for device pixel ratio 2.3', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 2.3', (final WidgetTester tester) async {
     const double ratio = 2.3;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
@@ -226,7 +226,7 @@ void main() {
     expect(getRenderImage(tester, key).scale, 2.0);
   });
 
-  testWidgets('Image for device pixel ratio 3.7', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 3.7', (final WidgetTester tester) async {
     const double ratio = 3.7;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
@@ -238,7 +238,7 @@ void main() {
     expect(getRenderImage(tester, key).scale, 4.0);
   });
 
-  testWidgets('Image for device pixel ratio 5.1', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 5.1', (final WidgetTester tester) async {
     const double ratio = 5.1;
     Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images));
@@ -250,7 +250,7 @@ void main() {
     expect(getRenderImage(tester, key).scale, 4.0);
   });
 
-  testWidgets('Image for device pixel ratio 1.0, with a main asset and a 1.0x asset', (WidgetTester tester) async {
+  testWidgets('Image for device pixel ratio 1.0, with a main asset and a 1.0x asset', (final WidgetTester tester) async {
     // If both a main asset and a 1.0x asset are specified, then prefer
     // the 1.0x asset.
 
@@ -280,19 +280,19 @@ void main() {
     expect(getRenderImage(tester, key).image!.height, 480);
   });
 
-  testWidgets('Image cache resize upscale display 5', (WidgetTester tester) async {
+  testWidgets('Image cache resize upscale display 5', (final WidgetTester tester) async {
     final Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 20, 20));
     expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
   });
 
-  testWidgets('Image cache resize upscale display 50', (WidgetTester tester) async {
+  testWidgets('Image cache resize upscale display 50', (final WidgetTester tester) async {
     final Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 50, 50, 20, 20));
     expect(getRenderImage(tester, key).size, const Size(50.0, 50.0));
   });
 
-  testWidgets('Image cache resize downscale display 5', (WidgetTester tester) async {
+  testWidgets('Image cache resize downscale display 5', (final WidgetTester tester) async {
     final Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageCacheResized(image, key, 5, 5, 1, 1));
     expect(getRenderImage(tester, key).size, const Size(5.0, 5.0));
@@ -302,7 +302,7 @@ void main() {
   // visible physical pixel size (see the test for 1.75 DPR above). However,
   // if higher resolution assets are not available we will pick the best
   // available.
-  testWidgets('Low-resolution assets', (WidgetTester tester) async {
+  testWidgets('Low-resolution assets', (final WidgetTester tester) async {
     final Map<Object?, Object?> manifest = json.decode('''
       {
         "assets/image.png" : [
@@ -312,7 +312,7 @@ void main() {
     ''') as Map<Object?, Object?>;
     final AssetBundle bundle = TestAssetBundle(manifest: manifest);
 
-    Future<void> testRatio({required double ratio, required double expectedScale}) async {
+    Future<void> testRatio({required final double ratio, required final double expectedScale}) async {
       Key key = GlobalKey();
       await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, images, bundle));
       expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));

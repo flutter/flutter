@@ -16,7 +16,7 @@ import 'mocks_for_image_cache.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+  Future<ui.Codec> basicDecoder(final ui.ImmutableBuffer bytes, {final int? cacheWidth, final int? cacheHeight, final bool? allowUpscaling}) {
     return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
@@ -37,7 +37,7 @@ void main() {
 
   test('AssetImageProvider - evicts on failure to load', () async {
     final Completer<FlutterError> error = Completer<FlutterError>();
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       error.complete(details.exception as FlutterError);
     };
 
@@ -62,7 +62,7 @@ void main() {
     final MemoryImage imageProvider = MemoryImage(bytes);
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();
-    stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
+    stream.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) => completer.complete()));
     await completer.future;
 
     expect(imageCache.currentSize, 1);
@@ -80,10 +80,10 @@ void main() {
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
     final Completer<void> completer = Completer<void>();
     final Completer<void> cacheCompleter = Completer<void>();
-    stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+    stream.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {
       completer.complete();
     }));
-    cacheStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+    cacheStream.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {
       cacheCompleter.complete();
     }));
     await Future.wait(<Future<void>>[completer.future, cacheCompleter.future]);
@@ -98,13 +98,13 @@ void main() {
   test('ImageProvider errors can always be caught', () async {
     final ErrorImageProvider imageProvider = ErrorImageProvider();
     final Completer<bool> caughtError = Completer<bool>();
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       caughtError.complete(false);
     };
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+    stream.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {
       caughtError.complete(false);
-    }, onError: (dynamic error, StackTrace? stackTrace) {
+    }, onError: (final dynamic error, final StackTrace? stackTrace) {
       caughtError.complete(true);
     }));
     expect(await caughtError.future, true);

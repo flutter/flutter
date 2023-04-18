@@ -32,7 +32,7 @@ void main() {
     const double slightlySmaller = 438.85714285714283;
     final List<dynamic> exceptions = <dynamic>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
     const BoxConstraints square = BoxConstraints.tightFor(width: slightlyLarger, height: 100.0);
@@ -230,7 +230,7 @@ void main() {
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
-    Offset getOffset(RenderBox box) {
+    Offset getOffset(final RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
     }
@@ -261,7 +261,7 @@ void main() {
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
-    Offset getOffset(RenderBox box) {
+    Offset getOffset(final RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
     }
@@ -272,7 +272,7 @@ void main() {
     expect(getOffset(box3).dx, equals(400.0));
     expect(box3.size.width, equals(100.0));
 
-    void setFit(RenderBox box, FlexFit fit) {
+    void setFit(final RenderBox box, final FlexFit fit) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       parentData.flex = 1;
       parentData.fit = fit;
@@ -314,7 +314,7 @@ void main() {
       maxWidth: 500.0,
       maxHeight: 400.0,
     ));
-    Offset getOffset(RenderBox box) {
+    Offset getOffset(final RenderBox box) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       return parentData.offset;
     }
@@ -326,7 +326,7 @@ void main() {
     expect(box3.size.width, equals(100.0));
     expect(flex.size.width, equals(300.0));
 
-    void setFit(RenderBox box, FlexFit fit) {
+    void setFit(final RenderBox box, final FlexFit fit) {
       final FlexParentData parentData = box.parentData! as FlexParentData;
       parentData.flex = 1;
       parentData.fit = fit;
@@ -358,7 +358,7 @@ void main() {
   });
 
   test('MainAxisSize.min inside unconstrained', () {
-    FlutterError.onError = (FlutterErrorDetails details) => throw details.exception;
+    FlutterError.onError = (final FlutterErrorDetails details) => throw details.exception;
     const BoxConstraints square = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: square);
     final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: square);
@@ -638,7 +638,7 @@ void main() {
     ));
 
     final Matcher cannotCalculateIntrinsics = throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
+      (final AssertionError e) => e.message,
       'message',
       'Intrinsics are not available for CrossAxisAlignment.baseline.',
     ));

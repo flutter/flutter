@@ -375,7 +375,7 @@ void main() {
           // Attach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
           // Attach: 00008027-00192736010F802E
           // Detach: d83d5bc53967baa0ee18626ba87b6254b2ab5418
-          xcdevice.observedDeviceEvents()!.listen((XCDeviceEventNotification event) {
+          xcdevice.observedDeviceEvents()!.listen((final XCDeviceEventNotification event) {
             if (event.eventType == XCDeviceEvent.attach) {
               if (event.deviceIdentifier == 'd83d5bc53967baa0ee18626ba87b6254b2ab5418') {
                 attach1.complete();

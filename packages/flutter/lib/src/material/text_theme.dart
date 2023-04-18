@@ -86,86 +86,86 @@ class TextTheme with Diagnosticable {
   /// other is allowed in this constructor. The 2018 styles are deprecated and
   /// will eventually be removed.
   const TextTheme({
-    TextStyle? displayLarge,
-    TextStyle? displayMedium,
-    TextStyle? displaySmall,
+    final TextStyle? displayLarge,
+    final TextStyle? displayMedium,
+    final TextStyle? displaySmall,
     this.headlineLarge,
-    TextStyle? headlineMedium,
-    TextStyle? headlineSmall,
-    TextStyle? titleLarge,
-    TextStyle? titleMedium,
-    TextStyle? titleSmall,
-    TextStyle? bodyLarge,
-    TextStyle? bodyMedium,
-    TextStyle? bodySmall,
-    TextStyle? labelLarge,
+    final TextStyle? headlineMedium,
+    final TextStyle? headlineSmall,
+    final TextStyle? titleLarge,
+    final TextStyle? titleMedium,
+    final TextStyle? titleSmall,
+    final TextStyle? bodyLarge,
+    final TextStyle? bodyMedium,
+    final TextStyle? bodySmall,
+    final TextStyle? labelLarge,
     this.labelMedium,
-    TextStyle? labelSmall,
+    final TextStyle? labelSmall,
     @Deprecated(
       'Use displayLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline1,
+    final TextStyle? headline1,
     @Deprecated(
       'Use displayMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline2,
+    final TextStyle? headline2,
     @Deprecated(
       'Use displaySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline3,
+    final TextStyle? headline3,
     @Deprecated(
       'Use headlineMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline4,
+    final TextStyle? headline4,
     @Deprecated(
       'Use headlineSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline5,
+    final TextStyle? headline5,
     @Deprecated(
       'Use titleLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline6,
+    final TextStyle? headline6,
     @Deprecated(
       'Use titleMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle1,
+    final TextStyle? subtitle1,
     @Deprecated(
       'Use titleSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle2,
+    final TextStyle? subtitle2,
     @Deprecated(
       'Use bodyLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText1,
+    final TextStyle? bodyText1,
     @Deprecated(
       'Use bodyMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText2,
+    final TextStyle? bodyText2,
     @Deprecated(
       'Use bodySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? caption,
+    final TextStyle? caption,
     @Deprecated(
       'Use labelLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? button,
+    final TextStyle? button,
     @Deprecated(
       'Use labelSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? overline,
+    final TextStyle? overline,
   }) : assert(
          (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
              headlineSmall == null && titleLarge == null && titleMedium == null && titleSmall == null &&
@@ -421,86 +421,86 @@ class TextTheme with Diagnosticable {
   ///  * [merge] is used instead of [copyWith] when you want to merge all
   ///    of the fields of a TextTheme instead of individual fields.
   TextTheme copyWith({
-    TextStyle? displayLarge,
-    TextStyle? displayMedium,
-    TextStyle? displaySmall,
-    TextStyle? headlineLarge,
-    TextStyle? headlineMedium,
-    TextStyle? headlineSmall,
-    TextStyle? titleLarge,
-    TextStyle? titleMedium,
-    TextStyle? titleSmall,
-    TextStyle? bodyLarge,
-    TextStyle? bodyMedium,
-    TextStyle? bodySmall,
-    TextStyle? labelLarge,
-    TextStyle? labelMedium,
-    TextStyle? labelSmall,
+    final TextStyle? displayLarge,
+    final TextStyle? displayMedium,
+    final TextStyle? displaySmall,
+    final TextStyle? headlineLarge,
+    final TextStyle? headlineMedium,
+    final TextStyle? headlineSmall,
+    final TextStyle? titleLarge,
+    final TextStyle? titleMedium,
+    final TextStyle? titleSmall,
+    final TextStyle? bodyLarge,
+    final TextStyle? bodyMedium,
+    final TextStyle? bodySmall,
+    final TextStyle? labelLarge,
+    final TextStyle? labelMedium,
+    final TextStyle? labelSmall,
     @Deprecated(
       'Use displayLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline1,
+    final TextStyle? headline1,
     @Deprecated(
       'Use displayMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline2,
+    final TextStyle? headline2,
     @Deprecated(
       'Use displaySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline3,
+    final TextStyle? headline3,
     @Deprecated(
       'Use headlineMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline4,
+    final TextStyle? headline4,
     @Deprecated(
       'Use headlineSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline5,
+    final TextStyle? headline5,
     @Deprecated(
       'Use titleLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? headline6,
+    final TextStyle? headline6,
     @Deprecated(
       'Use titleMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle1,
+    final TextStyle? subtitle1,
     @Deprecated(
       'Use titleSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? subtitle2,
+    final TextStyle? subtitle2,
     @Deprecated(
       'Use bodyLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText1,
+    final TextStyle? bodyText1,
     @Deprecated(
       'Use bodyMedium instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? bodyText2,
+    final TextStyle? bodyText2,
     @Deprecated(
       'Use bodySmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? caption,
+    final TextStyle? caption,
     @Deprecated(
       'Use labelLarge instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? button,
+    final TextStyle? button,
     @Deprecated(
       'Use labelSmall instead. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    TextStyle? overline,
+    final TextStyle? overline,
   }) {
     assert(
       (displayLarge == null && displayMedium == null && displaySmall == null && headlineMedium == null &&
@@ -581,7 +581,7 @@ class TextTheme with Diagnosticable {
   ///  * [copyWith] is used instead of [merge] when you wish to override
   ///    individual fields in the [TextTheme] instead of merging all of the
   ///    fields of two [TextTheme]s.
-  TextTheme merge(TextTheme? other) {
+  TextTheme merge(final TextTheme? other) {
     if (other == null) {
       return this;
     }
@@ -615,16 +615,16 @@ class TextTheme with Diagnosticable {
   /// the typography styles in the Material Design specification, as a starting
   /// point.
   TextTheme apply({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    String? package,
-    double fontSizeFactor = 1.0,
-    double fontSizeDelta = 0.0,
-    Color? displayColor,
-    Color? bodyColor,
-    TextDecoration? decoration,
-    Color? decorationColor,
-    TextDecorationStyle? decorationStyle,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final String? package,
+    final double fontSizeFactor = 1.0,
+    final double fontSizeDelta = 0.0,
+    final Color? displayColor,
+    final Color? bodyColor,
+    final TextDecoration? decoration,
+    final Color? decorationColor,
+    final TextDecorationStyle? decorationStyle,
   }) {
     return TextTheme(
       displayLarge: displayLarge?.apply(
@@ -798,7 +798,7 @@ class TextTheme with Diagnosticable {
   /// Linearly interpolate between two text themes.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TextTheme lerp(TextTheme? a, TextTheme? b, double t) {
+  static TextTheme lerp(final TextTheme? a, final TextTheme? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -822,7 +822,7 @@ class TextTheme with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -867,7 +867,7 @@ class TextTheme with Diagnosticable {
   );
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final TextTheme defaultTheme = Typography.material2018(platform: defaultTargetPlatform).black;
     properties.add(DiagnosticsProperty<TextStyle>('displayLarge', displayLarge, defaultValue: defaultTheme.displayLarge));

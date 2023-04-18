@@ -208,9 +208,9 @@ class CupertinoListSection extends StatelessWidget {
     this.decoration,
     this.clipBehavior = Clip.none,
     this.dividerMargin = _kBaseDividerMargin,
-    double? additionalDividerMargin,
+    final double? additionalDividerMargin,
     this.topMargin = _kMarginTop,
-    bool hasLeading = true,
+    final bool hasLeading = true,
     this.separatorColor,
   }) : assert((children != null && children.length > 0) || header != null),
        type = CupertinoListSectionType.base,
@@ -267,14 +267,14 @@ class CupertinoListSection extends StatelessWidget {
     this.children,
     this.header,
     this.footer,
-    EdgeInsetsGeometry? margin,
+    final EdgeInsetsGeometry? margin,
     this.backgroundColor = CupertinoColors.systemGroupedBackground,
     this.decoration,
     this.clipBehavior = Clip.hardEdge,
     this.dividerMargin = _kInsetDividerMargin,
-    double? additionalDividerMargin,
+    final double? additionalDividerMargin,
     this.topMargin,
-    bool hasLeading = true,
+    final bool hasLeading = true,
     this.separatorColor,
   }) : assert((children != null && children.length > 0) || header != null),
        type = CupertinoListSectionType.insetGrouped,
@@ -353,7 +353,7 @@ class CupertinoListSection extends StatelessWidget {
   final Color? separatorColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color dividerColor = separatorColor ?? CupertinoColors.separator.resolveFrom(context);
     final double dividerHeight = 1.0 / MediaQuery.devicePixelRatioOf(context);
 
@@ -415,7 +415,7 @@ class CupertinoListSection extends StatelessWidget {
         childrenWithDividers.add(longDivider);
       }
 
-      children!.sublist(0, children!.length - 1).forEach((Widget widget) {
+      children!.sublist(0, children!.length - 1).forEach((final Widget widget) {
         childrenWithDividers.add(widget);
         childrenWithDividers.add(shortDivider);
       });

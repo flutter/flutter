@@ -39,7 +39,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   final BorderRadiusGeometry borderRadius;
 
   @override
-  ShapeBorder scale(double t) {
+  ShapeBorder scale(final double t) {
     return BeveledRectangleBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
@@ -47,7 +47,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (a is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -58,7 +58,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (b is BeveledRectangleBorder) {
       return BeveledRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -71,14 +71,14 @@ class BeveledRectangleBorder extends OutlinedBorder {
   /// Returns a copy of this RoundedRectangleBorder with the given fields
   /// replaced with the new values.
   @override
-  BeveledRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
+  BeveledRectangleBorder copyWith({ final BorderSide? side, final BorderRadiusGeometry? borderRadius }) {
     return BeveledRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
     );
   }
 
-  Path _getPath(RRect rrect) {
+  Path _getPath(final RRect rrect) {
     final Offset centerLeft = Offset(rrect.left, rrect.center.dy);
     final Offset centerRight = Offset(rrect.right, rrect.center.dy);
     final Offset centerTop = Offset(rrect.center.dx, rrect.top);
@@ -108,17 +108,17 @@ class BeveledRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(final Rect rect, { final TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.strokeInset));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(final Rect rect, { final TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+  void paint(final Canvas canvas, final Rect rect, { final TextDirection? textDirection }) {
     if (rect.isEmpty) {
       return;
     }
@@ -135,7 +135,7 @@ class BeveledRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

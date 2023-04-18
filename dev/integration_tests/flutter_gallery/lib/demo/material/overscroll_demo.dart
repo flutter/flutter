@@ -28,7 +28,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   Future<void> _handleRefresh() {
     final Completer<void> completer = Completer<void>();
     Timer(const Duration(seconds: 3), () => completer.complete());
-    return completer.future.then((_) {
+    return completer.future.then((final _) {
       if (!mounted) {
         return;
       }
@@ -45,7 +45,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pull to refresh'),
@@ -68,7 +68,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
             primary: true,
             padding: kMaterialListPadding,
             itemCount: _items.length,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               final String item = _items[index];
               return ListTile(
                 isThreeLine: true,

@@ -33,7 +33,7 @@ bool debugProfilePlatformChannels = false;
 /// haven't been inadvertently changed.
 ///
 /// See [the services library](services/services-library.html) for a complete list.
-bool debugAssertAllServicesVarsUnset(String reason) {
+bool debugAssertAllServicesVarsUnset(final String reason) {
   assert(() {
     if (debugKeyEventSimulatorTransitModeOverride != null) {
       throw FlutterError(reason);

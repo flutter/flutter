@@ -24,20 +24,20 @@ class _TestStateState extends State<TestState> {
     widget.log.add('created new state');
   }
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }
 
 void main() {
-  testWidgets('Visibility', (WidgetTester tester) async {
+  testWidgets('Visibility', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<String> log = <String>[];
 
     final Widget testChild = GestureDetector(
       onTap: () { log.add('tap'); },
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           final bool animating = TickerMode.of(context);
           return TestState(
             log: log,
@@ -440,7 +440,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Visibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+  testWidgets('Visibility does not force compositing when visible and maintain*', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Visibility(
         maintainSize: true,
@@ -456,7 +456,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
   });
 
-  testWidgets('SliverVisibility does not force compositing when visible and maintain*', (WidgetTester tester) async {
+  testWidgets('SliverVisibility does not force compositing when visible and maintain*', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -486,7 +486,7 @@ void main() {
     expect(tester.layers.last, isA<PictureLayer>());
   });
 
-  testWidgets('Visibility.of returns correct value', (WidgetTester tester) async {
+  testWidgets('Visibility.of returns correct value', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -519,13 +519,13 @@ void main() {
     expect(find.text('is visible ? false', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('Visibility.of works when multiple Visibility widgets are in hierarchy', (WidgetTester tester) async {
+  testWidgets('Visibility.of works when multiple Visibility widgets are in hierarchy', (final WidgetTester tester) async {
     bool didChangeDependencies = false;
     void handleDidChangeDependencies() {
       didChangeDependencies = true;
     }
 
-    Widget newWidget({required bool ancestorIsVisible, required bool descendantIsVisible}) {
+    Widget newWidget({required final bool ancestorIsVisible, required final bool descendantIsVisible}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Visibility(
@@ -586,7 +586,7 @@ class _ShowVisibilityState extends State<_ShowVisibility> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Text('is visible ? ${Visibility.of(context)}');
   }
 }

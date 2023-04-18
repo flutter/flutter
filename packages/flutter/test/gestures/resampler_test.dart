@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   PointerEvent createSimulatedPointerAddedEvent(
-      int timeStampUs,
-      double x,
-      double y,
+      final int timeStampUs,
+      final double x,
+      final double y,
   ) {
     return PointerAddedEvent(
         timeStamp: Duration(microseconds: timeStampUs),
@@ -18,9 +18,9 @@ void main() {
   }
 
   PointerEvent createSimulatedPointerRemovedEvent(
-      int timeStampUs,
-      double x,
-      double y,
+      final int timeStampUs,
+      final double x,
+      final double y,
   ) {
     return PointerRemovedEvent(
         timeStamp: Duration(microseconds: timeStampUs),
@@ -29,9 +29,9 @@ void main() {
   }
 
   PointerEvent createSimulatedPointerDownEvent(
-      int timeStampUs,
-      double x,
-      double y,
+      final int timeStampUs,
+      final double x,
+      final double y,
   ) {
     return PointerDownEvent(
         timeStamp: Duration(microseconds: timeStampUs),
@@ -40,11 +40,11 @@ void main() {
   }
 
   PointerEvent createSimulatedPointerMoveEvent(
-      int timeStampUs,
-      double x,
-      double y,
-      double deltaX,
-      double deltaY,
+      final int timeStampUs,
+      final double x,
+      final double y,
+      final double deltaX,
+      final double deltaY,
   ) {
     return PointerMoveEvent(
         timeStamp: Duration(microseconds: timeStampUs),
@@ -54,11 +54,11 @@ void main() {
   }
 
   PointerEvent createSimulatedPointerHoverEvent(
-      int timeStampUs,
-      double x,
-      double y,
-      double deltaX,
-      double deltaY,
+      final int timeStampUs,
+      final double x,
+      final double y,
+      final double deltaX,
+      final double deltaY,
   ) {
     return PointerHoverEvent(
         timeStamp: Duration(microseconds: timeStampUs),
@@ -68,9 +68,9 @@ void main() {
   }
 
   PointerEvent createSimulatedPointerUpEvent(
-      int timeStampUs,
-      double x,
-      double y,
+      final int timeStampUs,
+      final double x,
+      final double y,
   ) {
     return PointerUpEvent(
         timeStamp: Duration(microseconds: timeStampUs),

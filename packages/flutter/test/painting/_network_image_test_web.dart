@@ -17,7 +17,7 @@ void runTests() {
   });
 
   testWidgets('loads an image from the network with headers',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
       ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))
@@ -43,7 +43,7 @@ void runTests() {
   });
 
   testWidgets('loads an image from the network with unsuccessful HTTP code',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 404
       ..mockEvent = MockEvent('error', createDomEvent('Event', 'test error'));
@@ -68,7 +68,7 @@ void runTests() {
   });
 
   testWidgets('loads an image from the network with empty response',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final TestHttpRequest testHttpRequest = TestHttpRequest()
       ..status = 200
       ..mockEvent = MockEvent('load', createDomEvent('Event', 'test error'))

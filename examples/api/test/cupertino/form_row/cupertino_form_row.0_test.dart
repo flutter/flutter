@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/form_row/cupertino_form_row.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Cupertino form section displays cupertino form rows', (WidgetTester tester) async {
+  testWidgets('Cupertino form section displays cupertino form rows', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoFormRowApp(),
     );

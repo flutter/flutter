@@ -191,7 +191,7 @@ abstract class FlutterCommand extends Command<void> {
     _requiresPubspecYaml = true;
   }
 
-  void usesWebOptions({ required bool verboseHelp }) {
+  void usesWebOptions({ required final bool verboseHelp }) {
     argParser.addOption('web-hostname',
       defaultsTo: 'localhost',
       help:
@@ -281,7 +281,7 @@ abstract class FlutterCommand extends Command<void> {
     _usesTargetOption = true;
   }
 
-  void usesFatalWarningsOption({ required bool verboseHelp }) {
+  void usesFatalWarningsOption({ required final bool verboseHelp }) {
     argParser.addFlag(FlutterOptions.kFatalWarnings,
         hide: !verboseHelp,
         help: 'Causes the command to fail if warnings are sent to the console '
@@ -322,7 +322,7 @@ abstract class FlutterCommand extends Command<void> {
           ? stringsArg(FlutterOptions.kFileSystemRoot)
           : null;
 
-  void usesPubOption({bool hide = false}) {
+  void usesPubOption({final bool hide = false}) {
     argParser.addFlag('pub',
       defaultsTo: true,
       hide: hide,
@@ -334,7 +334,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// The `hide` argument indicates whether or not to hide these options when
   /// the user asks for help.
-  void usesFilesystemOptions({ required bool hide }) {
+  void usesFilesystemOptions({ required final bool hide }) {
     argParser
       ..addOption('output-dill',
         hide: hide,
@@ -356,7 +356,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Adds options for connecting to the Dart VM Service port.
-  void usesPortOptions({ required bool verboseHelp }) {
+  void usesPortOptions({ required final bool verboseHelp }) {
     argParser.addOption(vmServicePortOption,
         help: '(deprecated; use host-vmservice-port instead) '
               'Listen to the given port for a Dart VM Service connection.\n'
@@ -399,7 +399,7 @@ abstract class FlutterCommand extends Command<void> {
             'Currently supported for subcommands: aar, web.');
   }
 
-  void addDevToolsOptions({required bool verboseHelp}) {
+  void addDevToolsOptions({required final bool verboseHelp}) {
     argParser.addFlag(
       kEnableDevTools,
       hide: !verboseHelp,
@@ -417,7 +417,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addDdsOptions({required bool verboseHelp}) {
+  void addDdsOptions({required final bool verboseHelp}) {
     argParser.addOption('dds-port',
       help: 'When this value is provided, the Dart Development Service (DDS) will be '
             'bound to the provided port.\n'
@@ -442,7 +442,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addServeObservatoryOptions({required bool verboseHelp}) {
+  void addServeObservatoryOptions({required final bool verboseHelp}) {
     argParser.addFlag('serve-observatory',
       hide: !verboseHelp,
       help: 'Serve the legacy Observatory developer tooling through the VM service.',
@@ -554,7 +554,7 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  void addPublishPort({ bool enabledByDefault = true, bool verboseHelp = false }) {
+  void addPublishPort({ final bool enabledByDefault = true, final bool verboseHelp = false }) {
     argParser.addFlag('publish-port',
       hide: !verboseHelp,
       help: 'Publish the VM service port over mDNS. Disable to prevent the '
@@ -565,7 +565,7 @@ abstract class FlutterCommand extends Command<void> {
 
   Future<bool> get disablePortPublication async => !boolArg('publish-port');
 
-  void usesIpv6Flag({required bool verboseHelp}) {
+  void usesIpv6Flag({required final bool verboseHelp}) {
     argParser.addFlag(ipv6Flag,
       negatable: false,
       help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool '
@@ -628,7 +628,7 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       FlutterOptions.kWebRendererFlag,
       defaultsTo: WebRendererMode.auto.name,
-      allowed: WebRendererMode.values.map((WebRendererMode e) => e.name),
+      allowed: WebRendererMode.values.map((final WebRendererMode e) => e.name),
       help: 'The renderer implementation to use when building for the web.',
       allowedHelp: CliEnum.allowedHelp(WebRendererMode.values)
     );
@@ -718,10 +718,10 @@ abstract class FlutterCommand extends Command<void> {
   );
 
   void addBuildModeFlags({
-    required bool verboseHelp,
-    bool defaultToRelease = true,
-    bool excludeDebug = false,
-    bool excludeRelease = false,
+    required final bool verboseHelp,
+    final bool defaultToRelease = true,
+    final bool excludeDebug = false,
+    final bool excludeRelease = false,
   }) {
     // A release build must be the default if a debug build is not possible.
     assert(defaultToRelease || !excludeDebug);
@@ -780,7 +780,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addBundleSkSLPathOption({ required bool hide }) {
+  void addBundleSkSLPathOption({ required final bool hide }) {
     argParser.addOption(FlutterOptions.kBundleSkSLPathOption,
       help: 'A path to a file containing precompiled SkSL shaders generated '
         'during "flutter run". These can be included in an application to '
@@ -791,7 +791,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   void addTreeShakeIconsFlag({
-    bool? enabledByDefault
+    final bool? enabledByDefault
   }) {
     argParser.addFlag('tree-shake-icons',
       defaultsTo: enabledByDefault
@@ -800,7 +800,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addShrinkingFlag({ required bool verboseHelp }) {
+  void addShrinkingFlag({ required final bool verboseHelp }) {
     argParser.addFlag('shrink',
       hide: !verboseHelp,
       help: 'This flag has no effect. Code shrinking is always enabled in release builds. '
@@ -808,7 +808,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addNullSafetyModeOptions({ required bool hide }) {
+  void addNullSafetyModeOptions({ required final bool hide }) {
     argParser.addFlag(FlutterOptions.kNullSafety,
       help: 'This flag is deprecated as only null-safe code is supported.',
       defaultsTo: true,
@@ -822,7 +822,7 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Enables support for the hidden options --extra-front-end-options and
   /// --extra-gen-snapshot-options.
-  void usesExtraDartFlagOptions({ required bool verboseHelp }) {
+  void usesExtraDartFlagOptions({ required final bool verboseHelp }) {
     argParser.addMultiOption(FlutterOptions.kExtraFrontEndOptions,
       aliases: <String>[ kExtraFrontEndOptions ], // supported for historical reasons
       help: 'A comma-separated list of additional command line arguments that will be passed directly to the Dart front end. '
@@ -840,7 +840,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesFuchsiaOptions({ bool hide = false }) {
+  void usesFuchsiaOptions({ final bool hide = false }) {
     argParser.addOption(
       'target-model',
       help: 'Target model that determines what core libraries are available.',
@@ -857,7 +857,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableExperimentation({ required bool hide }) {
+  void addEnableExperimentation({ required final bool hide }) {
     argParser.addMultiOption(
       FlutterOptions.kEnableExperiment,
       help:
@@ -867,7 +867,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addBuildPerformanceFile({ bool hide = false }) {
+  void addBuildPerformanceFile({ final bool hide = false }) {
     argParser.addOption(
       FlutterOptions.kPerformanceMeasurementFile,
       help:
@@ -877,7 +877,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addAndroidSpecificBuildOptions({ bool hide = false }) {
+  void addAndroidSpecificBuildOptions({ final bool hide = false }) {
     argParser.addFlag(
       FlutterOptions.kAndroidGradleDaemon,
       help: 'Whether to enable the Gradle daemon when performing an Android build. '
@@ -897,7 +897,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addNativeNullAssertions({ bool hide = false }) {
+  void addNativeNullAssertions({ final bool hide = false }) {
     argParser.addFlag('native-null-assertions',
       defaultsTo: true,
       hide: hide,
@@ -910,7 +910,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesInitializeFromDillOption({ required bool hide }) {
+  void usesInitializeFromDillOption({ required final bool hide }) {
     argParser.addOption(FlutterOptions.kInitializeFromDill,
       help: 'Initializes the resident compiler with a specific kernel file instead of '
         'the default cached location.',
@@ -923,7 +923,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addMultidexOption({ bool hide = false }) {
+  void addMultidexOption({ final bool hide = false }) {
     argParser.addFlag('multidex',
       defaultsTo: true,
       help: 'When enabled, indicates that the app should be built with multidex support. This '
@@ -932,7 +932,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addIgnoreDeprecationOption({ bool hide = false }) {
+  void addIgnoreDeprecationOption({ final bool hide = false }) {
     argParser.addFlag('ignore-deprecation',
       negatable: false,
       help: 'Indicates that the app should ignore deprecation warnings and continue to build '
@@ -942,7 +942,7 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   /// Adds build options common to all of the desktop build commands.
-  void addCommonDesktopBuildOptions({ required bool verboseHelp }) {
+  void addCommonDesktopBuildOptions({ required final bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     addBuildPerformanceFile(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
@@ -979,7 +979,7 @@ abstract class FlutterCommand extends Command<void> {
       boolArg('profile'),
       releaseResult,
     ];
-    if (modeFlags.where((bool flag) => flag).length > 1) {
+    if (modeFlags.where((final bool flag) => flag).length > 1) {
       throw UsageException('Only one of "--debug", "--profile", "--jit-release", '
                            'or "--release" can be specified.', '');
     }
@@ -1007,7 +1007,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void usesTrackWidgetCreation({ bool hasEffect = true, required bool verboseHelp }) {
+  void usesTrackWidgetCreation({ final bool hasEffect = true, required final bool verboseHelp }) {
     argParser.addFlag(
       'track-widget-creation',
       hide: !hasEffect && !verboseHelp,
@@ -1036,7 +1036,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableImpellerFlag({required bool verboseHelp}) {
+  void addEnableImpellerFlag({required final bool verboseHelp}) {
     argParser.addFlag('enable-impeller',
         hide: !verboseHelp,
         defaultsTo: null,
@@ -1048,7 +1048,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableVulkanValidationFlag({required bool verboseHelp}) {
+  void addEnableVulkanValidationFlag({required final bool verboseHelp}) {
     argParser.addFlag('enable-vulkan-validation',
         hide: !verboseHelp,
         help: 'Enable vulkan validation on the Impeller rendering backend if '
@@ -1057,7 +1057,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addImpellerForceGLFlag({required bool verboseHelp}) {
+  void addImpellerForceGLFlag({required final bool verboseHelp}) {
     argParser.addFlag('impeller-force-gl',
         hide: !verboseHelp,
         help: 'On platforms that support OpenGL Rendering using Impeller, force '
@@ -1067,7 +1067,7 @@ abstract class FlutterCommand extends Command<void> {
     );
   }
 
-  void addEnableEmbedderApiFlag({required bool verboseHelp}) {
+  void addEnableEmbedderApiFlag({required final bool verboseHelp}) {
     argParser.addFlag('enable-embedder-api',
         hide: !verboseHelp,
         help: 'Whether to enable the experimental embedder API on iOS.',
@@ -1080,7 +1080,7 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// Throws a [ToolExit] if the current set of options is not compatible with
   /// each other.
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+  Future<BuildInfo> getBuildInfo({ final BuildMode? forcedBuildMode, final File? forcedTargetFile }) async {
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
       boolArg('track-widget-creation');
 
@@ -1199,7 +1199,7 @@ abstract class FlutterCommand extends Command<void> {
     if (argParser.options.containsKey(FlutterOptions.kWebResourcesCdnFlag)) {
       final bool hasLocalWebSdk = argParser.options.containsKey('local-web-sdk') && stringArg('local-web-sdk') != null;
       if (boolArg(FlutterOptions.kWebResourcesCdnFlag) && !hasLocalWebSdk) {
-        if (!dartDefines.any((String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
+        if (!dartDefines.any((final String define) => define.startsWith('FLUTTER_WEB_CANVASKIT_URL='))) {
           dartDefines.add('FLUTTER_WEB_CANVASKIT_URL=https://www.gstatic.com/flutter-canvaskit/${globals.flutterVersion.engineRevision}/');
         }
       }
@@ -1320,7 +1320,7 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  List<String> extractDartDefines({Map<String, Object>? defineConfigJsonMap}) {
+  List<String> extractDartDefines({final Map<String, Object>? defineConfigJsonMap}) {
     final List<String> dartDefines = <String>[];
 
     if (argParser.options.containsKey(FlutterOptions.kDartDefinesOption)) {
@@ -1330,7 +1330,7 @@ abstract class FlutterCommand extends Command<void> {
     if (defineConfigJsonMap == null) {
       return dartDefines;
     }
-    defineConfigJsonMap.forEach((String key, Object value) {
+    defineConfigJsonMap.forEach((final String key, final Object value) {
       dartDefines.add('$key=$value');
     });
 
@@ -1356,7 +1356,7 @@ abstract class FlutterCommand extends Command<void> {
         try {
           // Fix json convert Object value :type '_InternalLinkedHashMap<String, dynamic>' is not a subtype of type 'Map<String, Object>' in type cast
           (json.decode(configJsonRaw) as Map<String, dynamic>)
-              .forEach((String key, dynamic value) {
+              .forEach((final String key, final dynamic value) {
             dartDefineConfigJsonMap[key] = value as Object;
           });
         } on FormatException catch (err) {
@@ -1372,18 +1372,18 @@ abstract class FlutterCommand extends Command<void> {
 
   /// Updates dart-defines based on [webRenderer].
   @visibleForTesting
-  static List<String> updateDartDefines(List<String> dartDefines, WebRendererMode webRenderer) {
+  static List<String> updateDartDefines(final List<String> dartDefines, final WebRendererMode webRenderer) {
     final Set<String> dartDefinesSet = dartDefines.toSet();
-    if (!dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
-        && dartDefines.any((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
-      dartDefinesSet.removeWhere((String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
+    if (!dartDefines.any((final String d) => d.startsWith('FLUTTER_WEB_AUTO_DETECT='))
+        && dartDefines.any((final String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='))) {
+      dartDefinesSet.removeWhere((final String d) => d.startsWith('FLUTTER_WEB_USE_SKIA='));
     }
     dartDefinesSet.addAll(webRenderer.dartDefines);
     return dartDefinesSet.toList();
   }
 
-  void _registerSignalHandlers(String commandPath, DateTime startTime) {
-    void handler(io.ProcessSignal s) {
+  void _registerSignalHandlers(final String commandPath, final DateTime startTime) {
+    void handler(final io.ProcessSignal s) {
       globals.cache.releaseLock();
       _sendPostUsage(
         commandPath,
@@ -1401,10 +1401,10 @@ abstract class FlutterCommand extends Command<void> {
   /// For example, the command path (e.g. `build/apk`) and the result,
   /// as well as the time spent running it.
   void _sendPostUsage(
-    String commandPath,
-    FlutterCommandResult commandResult,
-    DateTime startTime,
-    DateTime endTime,
+    final String commandPath,
+    final FlutterCommandResult commandResult,
+    final DateTime startTime,
+    final DateTime endTime,
   ) {
     // Send command result.
     CommandResultEvent(commandPath, commandResult.toString()).send();
@@ -1417,7 +1417,7 @@ abstract class FlutterCommand extends Command<void> {
     ];
 
     final String label = labels
-        .where((String? label) => label != null && !_isBlank(label))
+        .where((final String? label) => label != null && !_isBlank(label))
         .join('-');
     globals.flutterUsage.sendTiming(
       'flutter',
@@ -1439,7 +1439,7 @@ abstract class FlutterCommand extends Command<void> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand(final String? commandPath) async {
     if (argParser.options.containsKey(FlutterOptions.kNullSafety) &&
         argResults![FlutterOptions.kNullSafety] == false &&
         globals.nonNullSafeBuilds == NonNullSafeBuilds.notAllowed) {
@@ -1523,7 +1523,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
     return runCommand();
   }
 
-  Future<void> _sendNullSafetyAnalyticsEvents(FlutterProject project) async {
+  Future<void> _sendNullSafetyAnalyticsEvents(final FlutterProject project) async {
     final BuildInfo buildInfo = await getBuildInfo();
     NullSafetyAnalysisEvent(
       buildInfo.packageConfig,
@@ -1549,7 +1549,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If no device can be found that meets specified criteria,
   /// then print an error message and return null.
   Future<List<Device>?> findAllTargetDevices({
-    bool includeDevicesUnsupportedByProject = false,
+    final bool includeDevicesUnsupportedByProject = false,
   }) async {
     return _targetDevices.findAllTargetDevices(
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
@@ -1565,7 +1565,7 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   /// If [includeDevicesUnsupportedByProject] is true, the tool does not filter
   /// the list by the current project support list.
   Future<Device?> findTargetDevice({
-    bool includeDevicesUnsupportedByProject = false,
+    final bool includeDevicesUnsupportedByProject = false,
   }) async {
     List<Device>? deviceList = await findAllTargetDevices(
       includeDevicesUnsupportedByProject: includeDevicesUnsupportedByProject,
@@ -1634,16 +1634,16 @@ Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and 
   ///
   /// If no flag named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  bool boolArg(String name) => argResults![name] as bool;
+  bool boolArg(final String name) => argResults![name] as bool;
 
   /// Gets the parsed command-line option named [name] as a `String`.
   ///
   /// If no option named [name] was added to the [ArgParser], an [ArgumentError]
   /// will be thrown.
-  String? stringArg(String name) => argResults![name] as String?;
+  String? stringArg(final String name) => argResults![name] as String?;
 
   /// Gets the parsed command-line option named [name] as `List<String>`.
-  List<String> stringsArg(String name) {
+  List<String> stringsArg(final String name) {
     return argResults![name]! as List<String>? ?? <String>[];
   }
 }
@@ -1680,7 +1680,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
 // Returns the development artifact for the target platform, or null
 // if none is supported
 @protected
-DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
+DevelopmentArtifact? artifactFromTargetPlatform(final TargetPlatform targetPlatform) {
   switch (targetPlatform) {
     case TargetPlatform.android:
     case TargetPlatform.android_arm:
@@ -1716,7 +1716,7 @@ DevelopmentArtifact? artifactFromTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 /// Returns true if s is either null, empty or is solely made of whitespace characters (as defined by String.trim).
-bool _isBlank(String s) => s.trim().isEmpty;
+bool _isBlank(final String s) => s.trim().isEmpty;
 
 /// Whether the tool should allow non-null safe builds.
 ///

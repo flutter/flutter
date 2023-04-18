@@ -12,7 +12,7 @@ final String rootDirectoryPath = Directory.current.path;
 
 void main() {
   for (final String language in kWidgetsSupportedLanguages) {
-    testWidgets('translations exist for $language', (WidgetTester tester) async {
+    testWidgets('translations exist for $language', (final WidgetTester tester) async {
       final Locale locale = Locale(language);
 
       expect(GlobalWidgetsLocalizations.delegate.isSupported(locale), isTrue);

@@ -12,7 +12,7 @@ class FocusTraversalGroupExampleApp extends StatelessWidget {
   const FocusTraversalGroupExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FocusTraversalGroupExample(),
     );
@@ -58,7 +58,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   }
 
   @override
-  void didUpdateWidget(OrderedButton<T> oldWidget) {
+  void didUpdateWidget(final OrderedButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     focusNode.canRequestFocus = widget.canRequestFocus;
   }
@@ -70,7 +70,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     FocusOrder order;
     if (widget.order is num) {
       order = NumericFocusOrder((widget.order as num).toDouble());
@@ -78,7 +78,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
       order = LexicalFocusOrder(widget.order.toString());
     }
 
-    Color? overlayColor(Set<MaterialState> states) {
+    Color? overlayColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.focused)) {
         return Colors.red;
       }
@@ -88,7 +88,7 @@ class _OrderedButtonState<T> extends State<OrderedButton<T>> {
       return null; // defer to the default overlayColor
     }
 
-    Color? foregroundColor(Set<MaterialState> states) {
+    Color? foregroundColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.focused) || states.contains(MaterialState.hovered)) {
         return Colors.white;
       }
@@ -118,7 +118,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
   const FocusTraversalGroupExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.white,
       child: FocusTraversalGroup(
@@ -131,7 +131,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
               policy: OrderedTraversalPolicy(),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List<Widget>.generate(3, (int index) {
+                children: List<Widget>.generate(3, (final int index) {
                   return OrderedButton<num>(
                     name: 'num: $index',
                     // TRY THIS: change this to "3 - index" and see how the order changes.
@@ -145,7 +145,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
               policy: OrderedTraversalPolicy(),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List<Widget>.generate(3, (int index) {
+                children: List<Widget>.generate(3, (final int index) {
                   // Order as "C" "B", "A".
                   final String order = String.fromCharCode('A'.codeUnitAt(0) + (2 - index));
                   return OrderedButton<String>(
@@ -165,7 +165,7 @@ class FocusTraversalGroupExample extends StatelessWidget {
               policy: WidgetOrderTraversalPolicy(),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: List<Widget>.generate(3, (int index) {
+                children: List<Widget>.generate(3, (final int index) {
                   return OrderedButton<num>(
                     name: 'ignored num: ${3 - index}',
                     order: 3 - index,

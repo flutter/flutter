@@ -14,8 +14,8 @@ void main() {
   const ProcessManager processManager = LocalProcessManager();
 
   group('run.dart script', () {
-    Future<ProcessResult> runScript(List<String> testNames,
-        [List<String> otherArgs = const <String>[]]) async {
+    Future<ProcessResult> runScript(final List<String> testNames,
+        [final List<String> otherArgs = const <String>[]]) async {
       final String dart = path.absolute(
           path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(<String>[
@@ -29,9 +29,9 @@ void main() {
     }
 
     Future<void> expectScriptResult(
-        List<String> testNames,
-        int expectedExitCode,
-        {String? deviceId}
+        final List<String> testNames,
+        final int expectedExitCode,
+        {final String? deviceId}
       ) async {
       final ProcessResult result = await runScript(testNames, <String>[
         if (deviceId != null) ...<String>['-d', deviceId],

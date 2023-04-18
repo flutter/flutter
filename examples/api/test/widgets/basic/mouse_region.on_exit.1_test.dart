@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/basic/mouse_region.on_exit.1.dart' a
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MouseRegion update mouse hover with a delay', (WidgetTester tester) async {
+  testWidgets('MouseRegion update mouse hover with a delay', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.MouseRegionApp()),
     );

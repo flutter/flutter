@@ -17,7 +17,7 @@ void main() {
 
   test('Publishers dispatch events in debug mode', () async {
     int eventCount = 0;
-    void listener(ObjectEvent event) => eventCount++;
+    void listener(final ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
     final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
@@ -47,7 +47,7 @@ class _TestRenderObject extends RenderObject {
 
 class _TestLayer extends Layer{
   @override
-  void addToScene(ui.SceneBuilder builder) {}
+  void addToScene(final ui.SceneBuilder builder) {}
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.

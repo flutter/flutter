@@ -21,7 +21,7 @@ class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp>
   final ExpansionTileController controller = ExpansionTileController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -60,7 +60,7 @@ class _ExpansionTileControllerAppState extends State<ExpansionTileControllerApp>
               title: const Text('ExpansionTile with implicit controller.'),
               children: <Widget>[
                 Builder(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return Container(
                       padding: const EdgeInsets.all(24),
                       alignment: Alignment.center,

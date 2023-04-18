@@ -13,7 +13,7 @@ void main() {
   }
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
-  testWidgets('Pesto appbar heroics', (WidgetTester tester) async {
+  testWidgets('Pesto appbar heroics', (final WidgetTester tester) async {
     await tester.pumpWidget(
       // The bug only manifests itself when the screen's orientation is portrait
       const Center(
@@ -43,7 +43,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Pesto can be scrolled all the way down', (WidgetTester tester) async {
+  testWidgets('Pesto can be scrolled all the way down', (final WidgetTester tester) async {
     await tester.pumpWidget(const GalleryApp(testMode: true));
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame

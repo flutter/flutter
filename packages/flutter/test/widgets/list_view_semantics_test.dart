@@ -14,7 +14,7 @@ void main() {
     const int itemCount = 10;
     const double itemHeight = 150.0;
 
-    testWidgets('forward vertical', (WidgetTester tester) async {
+    testWidgets('forward vertical', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
 
@@ -24,7 +24,7 @@ void main() {
           child: ListView.builder(
             controller: controller,
             itemCount: itemCount,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return SizedBox(
                 height: itemHeight,
                 child: Text('Tile $index'),
@@ -44,7 +44,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('reverse vertical', (WidgetTester tester) async {
+    testWidgets('reverse vertical', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
 
@@ -55,7 +55,7 @@ void main() {
             reverse: true,
             controller: controller,
             itemCount: itemCount,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return SizedBox(
                 height: itemHeight,
                 child: Text('Tile $index'),
@@ -75,7 +75,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('forward horizontal', (WidgetTester tester) async {
+    testWidgets('forward horizontal', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
 
@@ -86,7 +86,7 @@ void main() {
             scrollDirection: Axis.horizontal,
             controller: controller,
             itemCount: itemCount,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return SizedBox(
                 height: itemHeight,
                 child: Text('Tile $index'),
@@ -106,7 +106,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('reverse horizontal', (WidgetTester tester) async {
+    testWidgets('reverse horizontal', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ScrollController controller = ScrollController();
 
@@ -118,7 +118,7 @@ void main() {
             reverse: true,
             controller: controller,
             itemCount: itemCount,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return SizedBox(
                 height: itemHeight,
                 child: Text('Tile $index'),

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/divider/vertical_divider.0.dart' as
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Vertical Divider', (WidgetTester tester) async {
+  testWidgets('Vertical Divider', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

@@ -7,7 +7,7 @@
 import 'package:flutter/material.dart';
 
 class ButtonsDemo {
-  void setState(VoidCallback callback) { }
+  void setState(final VoidCallback callback) { }
   late BuildContext context;
 
   void buttons() {
@@ -94,7 +94,7 @@ String? dropdownValue;
 // Dropdown button with string values.
 DropdownButton<String>(
   value: dropdownValue,
-  onChanged: (String? newValue) {
+  onChanged: (final String? newValue) {
     // null indicates the user didn't select a
     // new value.
     setState(() {
@@ -104,7 +104,7 @@ DropdownButton<String>(
     });
   },
   items: <String>['One', 'Two', 'Free', 'Four']
-    .map<DropdownMenuItem<String>>((String value) {
+    .map<DropdownMenuItem<String>>((final String value) {
       return DropdownMenuItem<String>(
         value: value,
         child: Text(value));
@@ -146,7 +146,7 @@ Scaffold(
 
 
 class SelectionControls {
-  void setState(VoidCallback callback) { }
+  void setState(final VoidCallback callback) { }
 
   void selectionControls() {
 
@@ -157,7 +157,7 @@ bool? checkboxValue = false;
 // Create a checkbox.
 Checkbox(
   value: checkboxValue,
-  onChanged: (bool? value) {
+  onChanged: (final bool? value) {
     setState(() {
       checkboxValue = value;
     });
@@ -168,7 +168,7 @@ Checkbox(
 Checkbox(
   tristate: true,
   value: checkboxValue,
-  onChanged: (bool? value) {
+  onChanged: (final bool? value) {
     setState(() {
       checkboxValue = value;
     });
@@ -187,7 +187,7 @@ const Checkbox(value: false, onChanged: null);
 int? radioValue = 0;
 
 // Method setting value.
-void handleRadioValueChanged(int? value) {
+void handleRadioValueChanged(final int? value) {
   setState(() {
     radioValue = value;
   });
@@ -230,7 +230,7 @@ bool switchValue = false;
 // Create a switch.
 Switch(
   value: switchValue,
-  onChanged: (bool value) {
+  onChanged: (final bool value) {
     setState(() {
       switchValue = value;
     }
@@ -262,7 +262,7 @@ GridView.count(
     'https://example.com/image-2.jpg',
     '...',
     'https://example.com/image-n.jpg',
-  ].map<Widget>((String url) {
+  ].map<Widget>((final String url) {
     return GridTile(
       footer: GridTileBar(
         title: Text(url),

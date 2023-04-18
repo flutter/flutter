@@ -12,7 +12,7 @@ class SliverOpacityExampleApp extends StatelessWidget {
   const SliverOpacityExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: SliverOpacityExample(),
     );
@@ -35,7 +35,7 @@ class _SliverOpacityExampleState extends State<SliverOpacityExample> {
   bool _visible = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('SliverOpacity demo'),

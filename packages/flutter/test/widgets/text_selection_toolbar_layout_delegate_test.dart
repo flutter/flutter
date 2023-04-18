@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits', (final WidgetTester tester) async {
     late StateSetter setState;
     const double height = 43.0;
     const double anchorBelowY = 500.0;
@@ -18,7 +18,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               return CustomSingleChildLayout(
                 delegate: TextSelectionToolbarLayoutDelegate(

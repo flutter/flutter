@@ -34,9 +34,9 @@ import 'fuchsia_sdk.dart';
 /// A simple wrapper for the Fuchsia SDK's 'ffx' tool.
 class FuchsiaFfx {
   FuchsiaFfx({
-    FuchsiaArtifacts? fuchsiaArtifacts,
-    Logger? logger,
-    ProcessManager? processManager,
+    final FuchsiaArtifacts? fuchsiaArtifacts,
+    final Logger? logger,
+    final ProcessManager? processManager,
   })  : _fuchsiaArtifacts = fuchsiaArtifacts ?? globals.fuchsiaArtifacts,
         _logger = logger ?? globals.logger,
         _processUtils = ProcessUtils(
@@ -51,7 +51,7 @@ class FuchsiaFfx {
   /// formatted as follows:
   ///
   /// abcd::abcd:abc:abcd:abcd%qemu scare-cable-skip-joy
-  Future<List<String>?> list({Duration? timeout}) async {
+  Future<List<String>?> list({final Duration? timeout}) async {
     final File? ffx = _fuchsiaArtifacts?.ffx;
     if (ffx == null || !ffx.existsSync()) {
       throwToolExit('Fuchsia ffx tool not found.');
@@ -81,7 +81,7 @@ class FuchsiaFfx {
   ///
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
-  Future<String?> resolve(String deviceName) async {
+  Future<String?> resolve(final String deviceName) async {
     final File? ffx = _fuchsiaArtifacts?.ffx;
     if (ffx == null || !ffx.existsSync()) {
       throwToolExit('Fuchsia ffx tool not found.');
@@ -129,7 +129,7 @@ class FuchsiaFfx {
   /// [url] should be formatted as a Fuchsia-style package URL, e.g.:
   ///     fuchsia-pkg://fuchsia.com/flutter_gallery#meta/flutter_gallery.cmx
   /// Returns true on success and false on failure.
-  Future<bool> sessionAdd(String url) async {
+  Future<bool> sessionAdd(final String url) async {
     final File? ffx = _fuchsiaArtifacts?.ffx;
     if (ffx == null || !ffx.existsSync()) {
       throwToolExit('Fuchsia ffx tool not found.');

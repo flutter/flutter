@@ -17,7 +17,7 @@ const String kIndent = '  ';
 class Animation {
   const Animation(this.size, this.paths);
 
-  factory Animation.fromFrameData(List<FrameData> frames) {
+  factory Animation.fromFrameData(final List<FrameData> frames) {
     _validateFramesData(frames);
     final Point<double> size = frames[0].size;
     final List<PathAnimation> paths = <PathAnimation>[];
@@ -33,7 +33,7 @@ class Animation {
   /// List of paths in the animation.
   final List<PathAnimation> paths;
 
-  static void _validateFramesData(List<FrameData> frames) {
+  static void _validateFramesData(final List<FrameData> frames) {
     final Point<double> size = frames[0].size;
     final int numPaths = frames[0].paths.length;
     for (int i = 0; i < frames.length; i += 1) {
@@ -55,7 +55,7 @@ class Animation {
     }
   }
 
-  String toDart(String className, String varName) {
+  String toDart(final String className, final String varName) {
     final StringBuffer sb = StringBuffer();
     sb.write('const $className $varName = const $className(\n');
     sb.write('${kIndent}const Size(${size.x}, ${size.y}),\n');
@@ -73,7 +73,7 @@ class Animation {
 class PathAnimation {
   const PathAnimation(this.commands, {required this.opacities});
 
-  factory PathAnimation.fromFrameData(List<FrameData> frames, int pathIdx) {
+  factory PathAnimation.fromFrameData(final List<FrameData> frames, final int pathIdx) {
     if (frames.isEmpty) {
       return const PathAnimation(<PathCommandAnimation>[], opacities: <double>[]);
     }
@@ -101,7 +101,7 @@ class PathAnimation {
     }
 
     final List<double> opacities =
-      frames.map<double>((FrameData d) => d.paths[pathIdx].opacity).toList();
+      frames.map<double>((final FrameData d) => d.paths[pathIdx].opacity).toList();
 
     return PathAnimation(commands, opacities: opacities);
   }
@@ -189,7 +189,7 @@ class PathCommandAnimation {
 /// This does not support the SVG specification, but is just built to
 /// support SVG files exported by a specific tool the motion design team is
 /// using.
-FrameData interpretSvg(String svgFilePath) {
+FrameData interpretSvg(final String svgFilePath) {
   final File file = File(svgFilePath);
   final String fileData = file.readAsStringSync();
   final XmlElement svgElement = _extractSvgElement(XmlDocument.parse(fileData));
@@ -201,7 +201,7 @@ FrameData interpretSvg(String svgFilePath) {
   return FrameData(Point<double>(width, height), paths);
 }
 
-List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
+List<SvgPath> _interpretSvgGroup(final List<XmlNode> children, final _Transform transform) {
   final List<SvgPath> paths = <SvgPath>[];
   for (final XmlNode node in children) {
     if (node.nodeType != XmlNodeType.ELEMENT) {
@@ -250,7 +250,7 @@ final RegExp _pointMatcher = RegExp(r'^ *([\-\.0-9]+) *,? *([\-\.0-9]+)(.*)');
 /// [Point(25.0, 1.0), Point(12.0, 12.0), Point(23.0, 9.0)].
 ///
 /// Commas are optional.
-List<Point<double>> parsePoints(String points) {
+List<Point<double>> parsePoints(final String points) {
   String unParsed = points;
   final List<Point<double>> result = <Point<double>>[];
   while (unParsed.isNotEmpty && _pointMatcher.hasMatch(unParsed)) {
@@ -273,7 +273,7 @@ class FrameData {
   final List<SvgPath> paths;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -304,7 +304,7 @@ class SvgPath {
   static final RegExp _pathCommandValidator = RegExp('^($_pathCommandAtom)*\$');
   static final RegExp _pathCommandMatcher = RegExp(_pathCommandAtom);
 
-  static SvgPath fromElement(XmlElement pathElement) {
+  static SvgPath fromElement(final XmlElement pathElement) {
     assert(pathElement.name.local == 'path');
     final String id = _extractAttr(pathElement, 'id');
     final String dAttr = _extractAttr(pathElement, 'd');
@@ -321,14 +321,14 @@ class SvgPath {
     return SvgPath(id, commands);
   }
 
-  SvgPath _applyTransform(_Transform transform) {
+  SvgPath _applyTransform(final _Transform transform) {
     final List<SvgPathCommand> transformedCommands =
-      commands.map<SvgPathCommand>((SvgPathCommand c) => c._applyTransform(transform)).toList();
+      commands.map<SvgPathCommand>((final SvgPathCommand c) => c._applyTransform(transform)).toList();
     return SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -368,7 +368,7 @@ class SvgPathCommand {
   /// List of points used by this command.
   final List<Point<double>> points;
 
-  SvgPathCommand _applyTransform(_Transform transform) {
+  SvgPathCommand _applyTransform(final _Transform transform) {
     final List<Point<double>> transformedPoints =
     _vector3ArrayToPoints(
         transform.transformMatrix.applyToVector3Array(
@@ -379,7 +379,7 @@ class SvgPathCommand {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -409,10 +409,10 @@ class SvgPathCommandBuilder {
   Point<double> lastPoint = const Point<double>(0.0, 0.0);
   Point<double> subPathStartPoint = const Point<double>(0.0, 0.0);
 
-  SvgPathCommand build(String type, List<Point<double>> points) {
+  SvgPathCommand build(final String type, final List<Point<double>> points) {
     List<Point<double>> absPoints = points;
     if (_isRelativeCommand(type)) {
-      absPoints = points.map<Point<double>>((Point<double> p) => p + lastPoint).toList();
+      absPoints = points.map<Point<double>>((final Point<double> p) => p + lastPoint).toList();
     }
 
     if (type == 'M' || type == 'm') {
@@ -428,12 +428,12 @@ class SvgPathCommandBuilder {
     return SvgPathCommand(type.toUpperCase(), absPoints);
   }
 
-  static bool _isRelativeCommand(String type) {
+  static bool _isRelativeCommand(final String type) {
     return kRelativeCommands.containsKey(type);
   }
 }
 
-List<double> _pointsToVector3Array(List<Point<double>> points) {
+List<double> _pointsToVector3Array(final List<Point<double>> points) {
   final List<double> result = List<double>.filled(points.length * 3, 0.0);
   for (int i = 0; i < points.length; i += 1) {
     result[i * 3] = points[i].x;
@@ -443,7 +443,7 @@ List<double> _pointsToVector3Array(List<Point<double>> points) {
   return result;
 }
 
-List<Point<double>> _vector3ArrayToPoints(List<double> vector) {
+List<Point<double>> _vector3ArrayToPoints(final List<double> vector) {
   final int numPoints = (vector.length / 3).floor();
   final List<Point<double>> points = <Point<double>>[
     for (int i = 0; i < numPoints; i += 1)
@@ -459,13 +459,13 @@ List<Point<double>> _vector3ArrayToPoints(List<double> vector) {
 class _Transform {
 
   /// Constructs a new _Transform, default arguments create a no-op transform.
-  _Transform({Matrix3? transformMatrix, this.opacity = 1.0}) :
+  _Transform({final Matrix3? transformMatrix, this.opacity = 1.0}) :
       transformMatrix = transformMatrix ?? Matrix3.identity();
 
   final Matrix3 transformMatrix;
   final double opacity;
 
-  _Transform applyTransform(_Transform transform) {
+  _Transform applyTransform(final _Transform transform) {
     return _Transform(
         transformMatrix: transform.transformMatrix.multiplied(transformMatrix),
         opacity: transform.opacity * opacity,
@@ -478,7 +478,7 @@ const String _transformCommandAtom = r' *([^(]+)\(([^)]*)\)';
 final RegExp _transformValidator = RegExp('^($_transformCommandAtom)*\$');
 final RegExp _transformCommand = RegExp(_transformCommandAtom);
 
-Matrix3 _parseSvgTransform(String transform) {
+Matrix3 _parseSvgTransform(final String transform) {
   if (!_transformValidator.hasMatch(transform)) {
     throw Exception('illegal or unsupported transform: $transform');
   }
@@ -506,7 +506,7 @@ Matrix3 _parseSvgTransform(String transform) {
 
 final RegExp _valueSeparator = RegExp('( *, *| +)');
 
-Matrix3 _parseSvgTranslate(String paramsStr) {
+Matrix3 _parseSvgTranslate(final String paramsStr) {
   final List<String> params = paramsStr.split(_valueSeparator);
   assert(params.isNotEmpty);
   assert(params.length <= 2);
@@ -515,7 +515,7 @@ Matrix3 _parseSvgTranslate(String paramsStr) {
   return _matrix(1.0, 0.0, 0.0, 1.0, x, y);
 }
 
-Matrix3 _parseSvgScale(String paramsStr) {
+Matrix3 _parseSvgScale(final String paramsStr) {
   final List<String> params = paramsStr.split(_valueSeparator);
   assert(params.isNotEmpty);
   assert(params.length <= 2);
@@ -524,14 +524,14 @@ Matrix3 _parseSvgScale(String paramsStr) {
   return _matrix(x, 0.0, 0.0, y, 0.0, 0.0);
 }
 
-Matrix3 _parseSvgRotate(String paramsStr) {
+Matrix3 _parseSvgRotate(final String paramsStr) {
   final List<String> params = paramsStr.split(_valueSeparator);
   assert(params.length == 1);
   final double a = radians(double.parse(params[0]));
   return _matrix(cos(a), sin(a), -sin(a), cos(a), 0.0, 0.0);
 }
 
-Matrix3 _matrix(double a, double b, double c, double d, double e, double f) {
+Matrix3 _matrix(final double a, final double b, final double c, final double d, final double e, final double f) {
   return Matrix3(a, b, 0.0, c, d, 0.0, e, f, 1.0);
 }
 
@@ -541,7 +541,7 @@ final RegExp _pixelsExp = RegExp(r'^([0-9]+)px$');
 
 /// Parses a pixel expression, e.g "14px", and returns the number.
 /// Throws an [ArgumentError] if the given string doesn't match the pattern.
-int parsePixels(String pixels) {
+int parsePixels(final String pixels) {
   if (!_pixelsExp.hasMatch(pixels)) {
     throw ArgumentError(
       "illegal pixels expression: '$pixels'"
@@ -550,9 +550,9 @@ int parsePixels(String pixels) {
   return int.parse(_pixelsExp.firstMatch(pixels)!.group(1)!);
 }
 
-String _extractAttr(XmlElement element, String name) {
+String _extractAttr(final XmlElement element, final String name) {
   try {
-    return element.attributes.singleWhere((XmlAttribute x) => x.name.local == name)
+    return element.attributes.singleWhere((final XmlAttribute x) => x.name.local == name)
         .value;
   } catch (e) {
     throw ArgumentError(
@@ -562,15 +562,15 @@ String _extractAttr(XmlElement element, String name) {
   }
 }
 
-bool _hasAttr(XmlElement element, String name) {
-  return element.attributes.where((XmlAttribute a) => a.name.local == name).isNotEmpty;
+bool _hasAttr(final XmlElement element, final String name) {
+  return element.attributes.where((final XmlAttribute a) => a.name.local == name).isNotEmpty;
 }
 
-XmlElement _extractSvgElement(XmlDocument document) {
+XmlElement _extractSvgElement(final XmlDocument document) {
   return document.children.singleWhere(
-    (XmlNode node) => node.nodeType  == XmlNodeType.ELEMENT &&
+    (final XmlNode node) => node.nodeType  == XmlNodeType.ELEMENT &&
       _asElement(node).name.local == 'svg'
   ) as XmlElement;
 }
 
-XmlElement _asElement(XmlNode node) => node as XmlElement;
+XmlElement _asElement(final XmlNode node) => node as XmlElement;

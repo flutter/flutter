@@ -51,9 +51,9 @@ class DropdownMenuThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DropdownMenuThemeData copyWith({
-    TextStyle? textStyle,
-    InputDecorationTheme? inputDecorationTheme,
-    MenuStyle? menuStyle,
+    final TextStyle? textStyle,
+    final InputDecorationTheme? inputDecorationTheme,
+    final MenuStyle? menuStyle,
   }) {
     return DropdownMenuThemeData(
       textStyle: textStyle ?? this.textStyle,
@@ -63,7 +63,7 @@ class DropdownMenuThemeData with Diagnosticable {
   }
 
   /// Linearly interpolates between two dropdown menu themes.
-  static DropdownMenuThemeData lerp(DropdownMenuThemeData? a, DropdownMenuThemeData? b, double t) {
+  static DropdownMenuThemeData lerp(final DropdownMenuThemeData? a, final DropdownMenuThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -82,7 +82,7 @@ class DropdownMenuThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -96,7 +96,7 @@ class DropdownMenuThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, defaultValue: null));
@@ -136,7 +136,7 @@ class DropdownMenuTheme extends InheritedTheme {
   ///
   ///  * [maybeOf], which returns null if it doesn't find a
   ///    [DropdownMenuTheme] ancestor.
-  static DropdownMenuThemeData of(BuildContext context) {
+  static DropdownMenuThemeData of(final BuildContext context) {
     return maybeOf(context) ?? Theme.of(context).dropdownMenuTheme;
   }
 
@@ -164,15 +164,15 @@ class DropdownMenuTheme extends InheritedTheme {
   ///
   ///  * [of], which will return [ThemeData.dropdownMenuTheme] if it doesn't
   ///    find a [DropdownMenuTheme] ancestor, instead of returning null.
-  static DropdownMenuThemeData? maybeOf(BuildContext context) {
+  static DropdownMenuThemeData? maybeOf(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DropdownMenuTheme>()?.data;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return DropdownMenuTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(DropdownMenuTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final DropdownMenuTheme oldWidget) => data != oldWidget.data;
 }

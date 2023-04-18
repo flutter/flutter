@@ -7,7 +7,7 @@ import 'package:flutter_gallery/demo/material/chip_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Chip demo has semantic labels', (WidgetTester tester) async {
+  testWidgets('Chip demo has semantic labels', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),

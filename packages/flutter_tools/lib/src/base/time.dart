@@ -8,13 +8,13 @@ class SystemClock {
   const SystemClock();
 
   /// Create a clock with a fixed current time.
-  const factory SystemClock.fixed(DateTime time) = _FixedTimeClock;
+  const factory SystemClock.fixed(final DateTime time) = _FixedTimeClock;
 
   /// Retrieve the current time.
   DateTime now() => DateTime.now();
 
   /// Compute the time a given duration ago.
-  DateTime ago(Duration duration) {
+  DateTime ago(final Duration duration) {
     return now().subtract(duration);
   }
 }
@@ -30,7 +30,7 @@ class _FixedTimeClock extends SystemClock {
 
 /// Format time as 'yyyy-MM-dd HH:mm:ss Z' where Z is the difference between the
 /// timezone of t and UTC formatted according to RFC 822.
-String formatDateTime(DateTime t) {
+String formatDateTime(final DateTime t) {
   final String sign = t.timeZoneOffset.isNegative ? '-' : '+';
   final Duration tzOffset = t.timeZoneOffset.abs();
   final int hoursOffset = tzOffset.inHours;
@@ -39,6 +39,6 @@ String formatDateTime(DateTime t) {
   assert(hoursOffset < 24);
   assert(minutesOffset < 60);
 
-  String twoDigits(int n) => (n >= 10) ? '$n' : '0$n';
+  String twoDigits(final int n) => (n >= 10) ? '$n' : '0$n';
   return '$t $sign${twoDigits(hoursOffset)}${twoDigits(minutesOffset)}';
 }

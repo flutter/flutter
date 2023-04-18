@@ -12,7 +12,7 @@ class BottomSheetApp extends StatelessWidget {
   const BottomSheetApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Bottom Sheet Sample')),
@@ -26,14 +26,14 @@ class BottomSheetExample extends StatelessWidget {
   const BottomSheetExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: ElevatedButton(
         child: const Text('showModalBottomSheet'),
         onPressed: () {
           showModalBottomSheet<void>(
             context: context,
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Container(
                 height: 200,
                 color: Colors.amber,

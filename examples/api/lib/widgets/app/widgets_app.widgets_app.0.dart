@@ -12,14 +12,14 @@ class WidgetsAppExampleApp extends StatelessWidget {
   const WidgetsAppExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return WidgetsApp(
       title: 'Example',
       color: const Color(0xFF000000),
       home: const Center(child: Text('Hello World')),
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) => PageRouteBuilder<T>(
+      pageRouteBuilder: <T>(final RouteSettings settings, final WidgetBuilder builder) => PageRouteBuilder<T>(
         settings: settings,
-        pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+        pageBuilder: (final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) =>
             builder(context),
       ),
     );

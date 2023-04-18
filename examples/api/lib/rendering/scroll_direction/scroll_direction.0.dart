@@ -13,7 +13,7 @@ class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: MyWidget(),
     );
@@ -66,7 +66,7 @@ class _MyWidgetState extends State<MyWidget> {
     }
   }
 
-  void _onAxisDirectionChanged(AxisDirection? axisDirection) {
+  void _onAxisDirectionChanged(final AxisDirection? axisDirection) {
     if (axisDirection != null && axisDirection != _axisDirection) {
       setState(() {
         // Respond to change in axis direction.
@@ -143,7 +143,7 @@ class _MyWidgetState extends State<MyWidget> {
     );
   }
 
-  bool _handleNotification(UserScrollNotification notification) {
+  bool _handleNotification(final UserScrollNotification notification) {
     if (notification.direction != scrollDirection) {
       setState(() {
         scrollDirection = notification.direction;
@@ -153,7 +153,7 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ScrollDirections'),
@@ -179,7 +179,7 @@ class _MyWidgetState extends State<MyWidget> {
           slivers: <Widget>[
             SliverList.builder(
               itemCount: 27,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 final Widget child;
                 if (index == 0) {
                   child = _getLeading();

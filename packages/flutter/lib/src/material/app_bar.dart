@@ -43,22 +43,22 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
   final double toolbarHeight;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     return constraints.tighten(height: toolbarHeight);
   }
 
   @override
-  Size getSize(BoxConstraints constraints) {
+  Size getSize(final BoxConstraints constraints) {
     return Size(constraints.maxWidth, toolbarHeight);
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     return Offset(0.0, size.height - childSize.height);
   }
 
   @override
-  bool shouldRelayout(_ToolbarContainerLayout oldDelegate) =>
+  bool shouldRelayout(final _ToolbarContainerLayout oldDelegate) =>
       toolbarHeight != oldDelegate.toolbarHeight;
 }
 
@@ -215,7 +215,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// `AppBarTheme.of(context).toolbarHeight` is non-null. In that case the
   /// return value is the sum of the theme's toolbar height and the height of
   /// the app bar's [AppBar.bottom] widget.
-  static double preferredHeightFor(BuildContext context, Size preferredSize) {
+  static double preferredHeightFor(final BuildContext context, final Size preferredSize) {
     if (preferredSize is _PreferredAppBarSize && preferredSize.toolbarHeight == null) {
       return (AppBarTheme.of(context).toolbarHeight ?? kToolbarHeight) + (preferredSize.bottomHeight ?? 0);
     }
@@ -720,7 +720,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// {@macro flutter.material.Material.clipBehavior}
   final Clip? clipBehavior;
 
-  bool _getEffectiveCenterTitle(ThemeData theme) {
+  bool _getEffectiveCenterTitle(final ThemeData theme) {
     bool platformCenter() {
       switch (theme.platform) {
         case TargetPlatform.android:
@@ -764,7 +764,7 @@ class _AppBarState extends State<AppBar> {
     super.dispose();
   }
 
-  void _handleScrollNotification(ScrollNotification notification) {
+  void _handleScrollNotification(final ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && widget.notificationPredicate(notification)) {
       final bool oldScrolledUnder = _scrolledUnder;
       final ScrollMetrics metrics = notification.metrics;
@@ -790,13 +790,13 @@ class _AppBarState extends State<AppBar> {
     }
   }
 
-  Color _resolveColor(Set<MaterialState> states, Color? widgetColor, Color? themeColor, Color defaultColor) {
+  Color _resolveColor(final Set<MaterialState> states, final Color? widgetColor, final Color? themeColor, final Color defaultColor) {
     return MaterialStateProperty.resolveAs<Color?>(widgetColor, states)
       ?? MaterialStateProperty.resolveAs<Color?>(themeColor, states)
       ?? MaterialStateProperty.resolveAs<Color>(defaultColor, states);
   }
 
-  SystemUiOverlayStyle _systemOverlayStyleForBrightness(Brightness brightness, [Color? backgroundColor]) {
+  SystemUiOverlayStyle _systemOverlayStyleForBrightness(final Brightness brightness, [final Color? backgroundColor]) {
     final SystemUiOverlayStyle style = brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark;
@@ -810,7 +810,7 @@ class _AppBarState extends State<AppBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
@@ -1252,7 +1252,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final PersistentHeaderShowOnScreenConfiguration? showOnScreenConfiguration;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
     final double extraToolbarHeight = math.max(minExtent - _bottomHeight - topPadding - (toolbarHeight ?? kToolbarHeight), 0.0);
     final double visibleToolbarHeight = visibleMainHeight - _bottomHeight - extraToolbarHeight;
@@ -1320,7 +1320,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(covariant _SliverAppBarDelegate oldDelegate) {
+  bool shouldRebuild(covariant final _SliverAppBarDelegate oldDelegate) {
     return leading != oldDelegate.leading
         || automaticallyImplyLeading != oldDelegate.automaticallyImplyLeading
         || title != oldDelegate.title
@@ -1933,7 +1933,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   }
 
   @override
-  void didUpdateWidget(SliverAppBar oldWidget) {
+  void didUpdateWidget(final SliverAppBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating) {
       _updateSnapConfiguration();
@@ -1944,7 +1944,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double bottomHeight = widget.bottom?.preferredSize.height ?? 0.0;
     final double topPadding = widget.primary ? MediaQuery.paddingOf(context).top : 0.0;
@@ -2044,14 +2044,14 @@ class _AppBarTitleBox extends SingleChildRenderObjectWidget {
   const _AppBarTitleBox({ required Widget super.child });
 
   @override
-  _RenderAppBarTitleBox createRenderObject(BuildContext context) {
+  _RenderAppBarTitleBox createRenderObject(final BuildContext context) {
     return _RenderAppBarTitleBox(
       textDirection: Directionality.of(context),
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderAppBarTitleBox renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderAppBarTitleBox renderObject) {
     renderObject.textDirection = Directionality.of(context);
   }
 }
@@ -2062,7 +2062,7 @@ class _RenderAppBarTitleBox extends RenderAligningShiftedBox {
   }) : super(alignment: Alignment.center);
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     final BoxConstraints innerConstraints = constraints.copyWith(maxHeight: double.infinity);
     final Size childSize = child!.getDryLayout(innerConstraints);
     return constraints.constrain(childSize);
@@ -2097,7 +2097,7 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
   final double bottomHeight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     late final ThemeData theme = Theme.of(context);
     late final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final AppBarTheme defaults = theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);

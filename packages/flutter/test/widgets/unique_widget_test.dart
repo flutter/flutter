@@ -14,11 +14,11 @@ class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
 
 class TestUniqueWidgetState extends State<TestUniqueWidget> {
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }
 
 void main() {
-  testWidgets('Unique widget control test', (WidgetTester tester) async {
+  testWidgets('Unique widget control test', (final WidgetTester tester) async {
     final TestUniqueWidget widget = TestUniqueWidget(key: GlobalKey<TestUniqueWidgetState>());
 
     await tester.pumpWidget(widget);

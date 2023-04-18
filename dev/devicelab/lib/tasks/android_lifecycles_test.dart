@@ -20,7 +20,7 @@ final RegExp _lifecycleSentinelRegExp = RegExp(r'==== lifecycle\: (.+) ====');
 /// Tests the following Android lifecycles: Activity#onStop(), Activity#onResume(), Activity#onPause(),
 /// and Activity#onDestroy() from Dart perspective in debug, profile, and release modes.
 TaskFunction androidLifecyclesTest({
-  Map<String, String>? environment,
+  final Map<String, String>? environment,
 }) {
   final Directory tempDir = Directory.systemTemp
       .createTempSync('flutter_devicelab_activity_destroy.');
@@ -69,7 +69,7 @@ void main() {
 }
 ''', flush: true);
 
-      Future<TaskResult> runTestFor(String mode) async {
+      Future<TaskResult> runTestFor(final String mode) async {
         final AndroidDevice device = await devices.workingDevice as AndroidDevice;
         await device.unlock();
 
@@ -89,7 +89,7 @@ void main() {
         final StreamSubscription<void> stdout = run.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String log) {
+          .listen((final String log) {
             final RegExpMatch? match = _lifecycleSentinelRegExp.firstMatch(log);
               print('stdout: $log');
               if (match == null) {
@@ -103,11 +103,11 @@ void main() {
         final StreamSubscription<void> stderr = run.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String log) {
+          .listen((final String log) {
             print('stderr: $log');
           });
 
-        Future<void> expectedLifecycle(String expected) async {
+        Future<void> expectedLifecycle(final String expected) async {
           section('Wait for lifecycle: $expected (mode: $mode)');
           await lifecycleItr.moveNext();
           final String got = lifecycleItr.current;

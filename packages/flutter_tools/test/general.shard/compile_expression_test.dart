@@ -81,7 +81,7 @@ void main() {
       packageConfig: PackageConfig.empty,
       projectRootPath: '',
       fs: fileSystem,
-    ).then((CompilerOutput? output) {
+    ).then((final CompilerOutput? output) {
       expect(frontendServerStdIn.getAndClear(),
           'compile file:///path/to/main.dart\n');
       expect(testLogger.errorText,
@@ -94,7 +94,7 @@ void main() {
           )));
       generator.compileExpression(
           '2+2', null, null, null, null, false).then(
-              (CompilerOutput? outputExpression) {
+              (final CompilerOutput? outputExpression) {
                 expect(outputExpression, isNotNull);
                 expect(outputExpression!.expressionData, <int>[1, 2, 3, 4]);
               }
@@ -125,7 +125,7 @@ void main() {
         packageConfig: PackageConfig.empty,
         projectRootPath: '',
         fs: MemoryFileSystem(),
-      ).then((CompilerOutput? outputCompile) {
+      ).then((final CompilerOutput? outputCompile) {
         expect(testLogger.errorText,
             equals('line1\nline2\n'));
         expect(outputCompile!.outputFilename, equals('/path/to/main.dart.dill'));
@@ -143,7 +143,7 @@ void main() {
     final Completer<bool> lastExpressionCompleted = Completer<bool>();
     unawaited(
       generator.compileExpression('0+1', null, null, null, null, false).then(
-        (CompilerOutput? outputExpression) {
+        (final CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression!.expressionData, <int>[0, 1, 2, 3]);
 
@@ -160,7 +160,7 @@ void main() {
     // The test manages timing via completers.
     unawaited(
       generator.compileExpression('1+1', null, null, null, null, false).then(
-        (CompilerOutput? outputExpression) {
+        (final CompilerOutput? outputExpression) {
           expect(outputExpression, isNotNull);
           expect(outputExpression!.expressionData, <int>[4, 5, 6, 7]);
           lastExpressionCompleted.complete(true);
@@ -194,12 +194,12 @@ class FakeProcessManager extends Fake implements ProcessManager {
   final FakeProcess process = FakeProcess();
 
   @override
-  bool canRun(dynamic executable, {String? workingDirectory}) {
+  bool canRun(final dynamic executable, {final String? workingDirectory}) {
     return true;
   }
 
   @override
-  Future<Process> start(List<Object> command, {String? workingDirectory, Map<String, String>? environment, bool includeParentEnvironment = true, bool runInShell = false, ProcessStartMode mode = ProcessStartMode.normal}) async {
+  Future<Process> start(final List<Object> command, {final String? workingDirectory, final Map<String, String>? environment, final bool includeParentEnvironment = true, final bool runInShell = false, final ProcessStartMode mode = ProcessStartMode.normal}) async {
     return process;
   }
 }

@@ -36,7 +36,7 @@ a.txt: b.txt c.txt d.txt
 ''');
     final Depfile depfile = depfileService.parse(depfileSource);
 
-    expect(depfile.inputs.map((File file) => file.path), <String>[
+    expect(depfile.inputs.map((final File file) => file.path), <String>[
       'b.txt',
       'c.txt',
       'd.txt',
@@ -51,7 +51,7 @@ a.txt c.txt d.txt: b.txt
     final Depfile depfile = depfileService.parse(depfileSource);
 
     expect(depfile.inputs.single.path, 'b.txt');
-    expect(depfile.outputs.map((File file) => file.path), <String>[
+    expect(depfile.outputs.map((final File file) => file.path), <String>[
       'a.txt',
       'c.txt',
       'd.txt',
@@ -147,7 +147,7 @@ file:///Users/foo/canonicalized_map.dart
 
     final Depfile depfile = depfileService.parseDart2js(dart2jsDependencyFile, fileSystem.file('foo.dart.js'));
 
-    expect(depfile.inputs.map((File file) => file.path), <String>[
+    expect(depfile.inputs.map((final File file) => file.path), <String>[
       fileSystem.path.absolute(fileSystem.path.join('Users', 'foo', 'collection.dart')),
       fileSystem.path.absolute(fileSystem.path.join('Users', 'foo', 'algorithms.dart')),
       fileSystem.path.absolute(fileSystem.path.join('Users', 'foo', 'canonicalized_map.dart')),
@@ -164,7 +164,7 @@ file:///Users/foo/canonicalized_map.dart
 
     final Depfile depfile = depfileService.parseDart2js(dart2jsDependencyFile, fileSystem.file('foo.dart.js'));
 
-    expect(depfile.inputs.map((File file) => file.path), <String>[
+    expect(depfile.inputs.map((final File file) => file.path), <String>[
       fileSystem.path.absolute(fileSystem.path.join('Users', 'foo', 'collection.dart')),
       fileSystem.path.absolute(fileSystem.path.join('Users', 'foo', 'canonicalized_map.dart')),
     ]);

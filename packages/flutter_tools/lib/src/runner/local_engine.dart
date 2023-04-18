@@ -28,11 +28,11 @@ import '../dart/package_map.dart';
 /// For more information on local engines, see CONTRIBUTING.md.
 class LocalEngineLocator {
   LocalEngineLocator({
-    required Platform platform,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required String flutterRoot,
-    required UserMessages userMessages,
+    required final Platform platform,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final String flutterRoot,
+    required final UserMessages userMessages,
   }) : _platform = platform,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -46,7 +46,7 @@ class LocalEngineLocator {
   final UserMessages _userMessages;
 
   /// Returns the engine build path of a local engine if one is located, otherwise `null`.
-  Future<EngineBuildPaths?> findEnginePath({String? engineSourcePath, String? localEngine, String? localWebSdk, String? packagePath}) async {
+  Future<EngineBuildPaths?> findEnginePath({String? engineSourcePath, final String? localEngine, final String? localWebSdk, final String? packagePath}) async {
     engineSourcePath ??= _platform.environment[kFlutterEngineEnvironmentVariableName];
     if (engineSourcePath == null && localEngine == null && localWebSdk == null && packagePath == null) {
       return null;
@@ -95,7 +95,7 @@ class LocalEngineLocator {
     return null;
   }
 
-  String? _findEngineSourceByBuildPath(String buildPath) {
+  String? _findEngineSourceByBuildPath(final String buildPath) {
     // When the local engine is an absolute path to a variant inside the
     // out directory, parse the engine source.
     // --local-engine /path/to/cache/builder/src/out/host_debug_unopt
@@ -111,7 +111,7 @@ class LocalEngineLocator {
     return null;
   }
 
-  Future<String?> _findEngineSourceByPackageConfig(String? packagePath) async {
+  Future<String?> _findEngineSourceByPackageConfig(final String? packagePath) async {
     final PackageConfig packageConfig = await loadPackageConfigWithLogging(
       _fileSystem.file(
         // TODO(zanderso): update to package_config
@@ -158,7 +158,7 @@ class LocalEngineLocator {
 
   // Determine the host engine directory associated with the local engine:
   // Strip '_sim' since there are no host simulator builds.
-  String _getHostEngineBasename(String localEngineBasename) {
+  String _getHostEngineBasename(final String localEngineBasename) {
     if (localEngineBasename.startsWith('web_') ||
         localEngineBasename.startsWith('wasm_') ||
         localEngineBasename.startsWith('host_')) {
@@ -176,7 +176,7 @@ class LocalEngineLocator {
     return 'host_$tmpBasename';
   }
 
-  EngineBuildPaths _findEngineBuildPath(String? localEngine, String? localWebSdk, String enginePath) {
+  EngineBuildPaths _findEngineBuildPath(final String? localEngine, final String? localWebSdk, final String enginePath) {
     if (localEngine == null && localWebSdk == null) {
       throwToolExit(_userMessages.runnerLocalEngineOrWebSdkRequired, exitCode: 2);
     }
@@ -210,7 +210,7 @@ class LocalEngineLocator {
     return EngineBuildPaths(targetEngine: engineBuildPath, webSdk: webSdkPath, hostEngine: engineHostBuildPath);
   }
 
-  String? _tryEnginePath(String enginePath) {
+  String? _tryEnginePath(final String enginePath) {
     if (_fileSystem.isDirectorySync(_fileSystem.path.join(enginePath, 'out'))) {
       return enginePath;
     }

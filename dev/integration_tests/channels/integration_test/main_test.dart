@@ -10,10 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 final Finder statusField = find.byKey(const ValueKey<String>('status'));
 final Finder stepButton = find.byKey(const ValueKey<String>('step'));
 
-String getStatus(WidgetTester tester) => tester.widget<Text>(statusField).data!;
+String getStatus(final WidgetTester tester) => tester.widget<Text>(statusField).data!;
 
 void main() {
-  testWidgets('step through', (WidgetTester tester) async {
+  testWidgets('step through', (final WidgetTester tester) async {
     // TODO(goderbauer): Remove this once https://github.com/flutter/flutter/issues/116663 is diagnosed.
     debugPrintHitTestResults = true;
 

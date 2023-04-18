@@ -34,9 +34,9 @@ enum ShaderTarget {
 /// A wrapper around [ShaderCompiler] to support hot reload of shader sources.
 class DevelopmentShaderCompiler {
   DevelopmentShaderCompiler({
-    required ShaderCompiler shaderCompiler,
-    required FileSystem fileSystem,
-    @visibleForTesting math.Random? random,
+    required final ShaderCompiler shaderCompiler,
+    required final FileSystem fileSystem,
+    @visibleForTesting final math.Random? random,
   }) : _shaderCompiler = shaderCompiler,
        _fileSystem = fileSystem,
        _random = random ?? math.Random();
@@ -52,7 +52,7 @@ class DevelopmentShaderCompiler {
 
   /// Configure the output format of the shader compiler for a particular
   /// flutter device.
-  void configureCompiler(TargetPlatform? platform, { required ImpellerStatus impellerStatus }) {
+  void configureCompiler(final TargetPlatform? platform, { required final ImpellerStatus impellerStatus }) {
     switch (platform) {
       case TargetPlatform.ios:
         _shaderTarget = ShaderTarget.impelleriOS;
@@ -85,7 +85,7 @@ class DevelopmentShaderCompiler {
 
   /// Recompile the input shader and return a devfs content that should be synced
   /// to the attached device in its place.
-  Future<DevFSContent?> recompileShader(DevFSContent inputShader) async {
+  Future<DevFSContent?> recompileShader(final DevFSContent inputShader) async {
     assert(_debugConfigured);
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
     late File inputFile;
@@ -127,10 +127,10 @@ class DevelopmentShaderCompiler {
 /// impellerc.
 class ShaderCompiler {
   ShaderCompiler({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Artifacts artifacts,
   }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
@@ -158,11 +158,11 @@ class ShaderCompiler {
   /// stderr to the log and throw a [ShaderCompilerException]. Otherwise, it
   /// will return true.
   Future<bool> compileShader({
-    required File input,
-    required String outputPath,
-    required ShaderTarget target,
-    bool fatal = true,
-    required bool json,
+    required final File input,
+    required final String outputPath,
+    required final ShaderTarget target,
+    final bool fatal = true,
+    required final bool json,
   }) async {
     final File impellerc = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.impellerc),

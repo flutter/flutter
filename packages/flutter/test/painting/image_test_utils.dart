@@ -18,28 +18,28 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   int loadCallCount = 0;
 
   @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<TestImageProvider> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
-  void resolveStreamForKey(ImageConfiguration config, ImageStream stream, TestImageProvider key, ImageErrorListener handleError) {
+  void resolveStreamForKey(final ImageConfiguration config, final ImageStream stream, final TestImageProvider key, final ImageErrorListener handleError) {
     configuration = config;
     super.resolveStreamForKey(config, stream, key, handleError);
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(final TestImageProvider key, final DecoderCallback decode) {
     throw UnsupportedError('Use ImageProvider.loadImage instead.');
   }
 
   @override
-  ImageStreamCompleter loadBuffer(TestImageProvider key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(final TestImageProvider key, final DecoderBufferCallback decode) {
     throw UnsupportedError('Use ImageProvider.loadImage instead.');
   }
 
   @override
-  ImageStreamCompleter loadImage(TestImageProvider key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(final TestImageProvider key, final ImageDecoderCallback decode) {
     loadCallCount += 1;
     return OneFrameImageStreamCompleter(_completer.future);
   }

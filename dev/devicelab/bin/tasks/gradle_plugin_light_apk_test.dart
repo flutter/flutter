@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     try {
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+      await runPluginProjectTest((final FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug with target platform = android-arm');
 
         await inDirectory(pluginProject.exampleAndroidPath, () {
@@ -164,7 +164,7 @@ Future<void> main() async {
         ], apkFiles);
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew assembleDebug');
         await inDirectory(project.rootPath, () {
           return flutter(
@@ -196,7 +196,7 @@ Future<void> main() async {
         await project.runGradleTask('assembleLocal');
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew assembleLocal with plugin (custom debug build)');
 
         final Directory tempDir = Directory.systemTemp.createTempSync('flutter_plugin.');
@@ -226,13 +226,13 @@ Future<void> main() async {
         await project.runGradleTask('assembleLocal');
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew assembleBeta (custom release build)');
         await project.addCustomBuildType('beta', initWith: 'release');
         await project.runGradleTask('assembleBeta');
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew assembleLocal (plugin with custom build type)');
         await project.addCustomBuildType('local', initWith: 'debug');
         section('Add plugin');
@@ -242,13 +242,13 @@ Future<void> main() async {
         await project.runGradleTask('assembleLocal');
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew assembleFreeDebug (product flavor)');
         await project.addProductFlavors(<String>['free']);
         await project.runGradleTask('assembleFreeDebug');
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew on build script with error');
         await project.introduceError();
         ProcessResult result = await inDirectory(project.rootPath, () {
@@ -308,7 +308,7 @@ Future<void> main() async {
         }
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew assembleDebug forwards stderr');
         await project.introducePubspecError();
         final ProcessResult result = await inDirectory(project.rootPath, () {

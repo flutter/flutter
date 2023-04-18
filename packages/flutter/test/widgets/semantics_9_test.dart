@@ -11,7 +11,7 @@ import 'semantics_tester.dart';
 
 void main() {
   group('BlockSemantics', () {
-    testWidgets('hides semantic nodes of siblings', (WidgetTester tester) async {
+    testWidgets('hides semantic nodes of siblings', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(Stack(
@@ -49,7 +49,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('does not hides semantic nodes of siblings outside the current semantic boundary', (WidgetTester tester) async {
+    testWidgets('does not hides semantic nodes of siblings outside the current semantic boundary', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
 
       await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: Stack(
@@ -103,7 +103,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('node is semantic boundary and blocking previously painted nodes', (WidgetTester tester) async {
+    testWidgets('node is semantic boundary and blocking previously painted nodes', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final GlobalKey stackKey = GlobalKey();
 
@@ -140,14 +140,14 @@ class BoundaryBlockSemantics extends SingleChildRenderObjectWidget {
   const BoundaryBlockSemantics({ super.key, required Widget super.child });
 
   @override
-  RenderBoundaryBlockSemantics createRenderObject(BuildContext context) => RenderBoundaryBlockSemantics();
+  RenderBoundaryBlockSemantics createRenderObject(final BuildContext context) => RenderBoundaryBlockSemantics();
 }
 
 class RenderBoundaryBlockSemantics extends RenderProxyBox {
   RenderBoundaryBlockSemantics();
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     config

@@ -12,7 +12,7 @@ class ListenerApp extends StatelessWidget {
   const ListenerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Listener Sample')),
@@ -37,21 +37,21 @@ class _ListenerExampleState extends State<ListenerExample> {
   double x = 0.0;
   double y = 0.0;
 
-  void _incrementDown(PointerEvent details) {
+  void _incrementDown(final PointerEvent details) {
     _updateLocation(details);
     setState(() {
       _downCounter++;
     });
   }
 
-  void _incrementUp(PointerEvent details) {
+  void _incrementUp(final PointerEvent details) {
     _updateLocation(details);
     setState(() {
       _upCounter++;
     });
   }
 
-  void _updateLocation(PointerEvent details) {
+  void _updateLocation(final PointerEvent details) {
     setState(() {
       x = details.position.dx;
       y = details.position.dy;
@@ -59,7 +59,7 @@ class _ListenerExampleState extends State<ListenerExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints.tight(const Size(300.0, 200.0)),
       child: Listener(

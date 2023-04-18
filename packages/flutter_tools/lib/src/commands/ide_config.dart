@@ -80,7 +80,7 @@ class IdeConfigCommand extends FlutterCommand {
   Directory get _flutterRoot => globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot!));
 
   // Returns true if any entire path element is equal to dir.
-  bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
+  bool _hasDirectoryInPath(final FileSystemEntity entity, final String dir) {
     String path = entity.absolute.path;
     while (path.isNotEmpty && globals.fs.path.dirname(path) != path) {
       if (globals.fs.path.basename(path) == dir) {
@@ -92,12 +92,12 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   // Returns true if child is anywhere underneath parent.
-  bool _isChildDirectoryOf(FileSystemEntity parent, FileSystemEntity child) {
+  bool _isChildDirectoryOf(final FileSystemEntity parent, final FileSystemEntity child) {
     return child.absolute.path.startsWith(parent.absolute.path);
   }
 
   // Checks the contents of the two files to see if they have changes.
-  bool _fileIsIdentical(File src, File dest) {
+  bool _fileIsIdentical(final File src, final File dest) {
     if (src.lengthSync() != dest.lengthSync()) {
       return false;
     }
@@ -243,7 +243,7 @@ class IdeConfigCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  int _renderTemplate(String templateName, String dirPath, Map<String, Object> context) {
+  int _renderTemplate(final String templateName, final String dirPath, final Map<String, Object> context) {
     final Template template = Template(
       _templateDirectory,
       null,
@@ -261,7 +261,7 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String? _validateFlutterDir(String dirPath, { String? flutterRoot }) {
+String? _validateFlutterDir(final String dirPath, { final String? flutterRoot }) {
   final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
   switch (type) { // ignore: exhaustive_cases, https://github.com/dart-lang/linter/issues/3017

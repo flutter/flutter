@@ -4,7 +4,7 @@
 
 import 'localizations_utils.dart';
 
-String generateCupertinoHeader(String regenerateInstructions) {
+String generateCupertinoHeader(final String regenerateInstructions) {
   return '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -31,7 +31,7 @@ import '../cupertino_localizations.dart';
 
 /// Returns the source of the constructor for a GlobalCupertinoLocalizations
 /// subclass.
-String generateCupertinoConstructor(LocaleInfo locale) {
+String generateCupertinoConstructor(final LocaleInfo locale) {
   final String localeName = locale.originalString;
   return '''
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.

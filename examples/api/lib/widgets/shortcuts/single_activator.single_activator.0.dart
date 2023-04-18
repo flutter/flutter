@@ -13,7 +13,7 @@ class SingleActivatorExampleApp extends StatelessWidget {
   const SingleActivatorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SingleActivator Sample')),
@@ -40,7 +40,7 @@ class _SingleActivatorExampleState extends State<SingleActivatorExample> {
   int count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Shortcuts(
       shortcuts: const <ShortcutActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.keyC, control: true): IncrementIntent(),
@@ -48,7 +48,7 @@ class _SingleActivatorExampleState extends State<SingleActivatorExample> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           IncrementIntent: CallbackAction<IncrementIntent>(
-            onInvoke: (IncrementIntent intent) => setState(() {
+            onInvoke: (final IncrementIntent intent) => setState(() {
               count = count + 1;
             }),
           ),

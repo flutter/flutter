@@ -13,7 +13,7 @@ List<String> items = <String>[
   'five',
 ];
 
-Widget buildCard(BuildContext context, int index) {
+Widget buildCard(final BuildContext context, final int index) {
   // We still want to populate the list with items beyond the list
   // provided.
   if (index >= items.length) {
@@ -40,7 +40,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgets('ListView is a build function (smoketest)', (WidgetTester tester) async {
+  testWidgets('ListView is a build function (smoketest)', (final WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
     expect(find.text('one'), findsOneWidget);
     expect(find.text('two'), findsOneWidget);

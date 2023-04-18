@@ -7,16 +7,16 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugPrintGestureArenaDiagnostics', (WidgetTester tester) async {
+  testWidgets('debugPrintGestureArenaDiagnostics', (final WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String? s, { int? wrapWidth }) { log.add(s ?? ''); };
+    debugPrint = (final String? s, { final int? wrapWidth }) { log.add(s ?? ''); };
 
     final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTapDown = (TapDownDetails details) { }
-      ..onTapUp = (TapUpDetails details) { }
+      ..onTapDown = (final TapDownDetails details) { }
+      ..onTapUp = (final TapUpDetails details) { }
       ..onTap = () { }
       ..onTapCancel = () { };
     expect(log, isEmpty);
@@ -53,16 +53,16 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
+  testWidgets('debugPrintRecognizerCallbacksTrace', (final WidgetTester tester) async {
     PointerEvent event;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String? s, { int? wrapWidth }) { log.add(s ?? ''); };
+    debugPrint = (final String? s, { final int? wrapWidth }) { log.add(s ?? ''); };
 
     final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTapDown = (TapDownDetails details) { }
-      ..onTapUp = (TapUpDetails details) { }
+      ..onTapDown = (final TapDownDetails details) { }
+      ..onTapUp = (final TapUpDetails details) { }
       ..onTap = () { }
       ..onTapCancel = () { };
     expect(log, isEmpty);
@@ -95,17 +95,17 @@ void main() {
     debugPrint = oldCallback;
   });
 
-  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (WidgetTester tester) async {
+  testWidgets('debugPrintGestureArenaDiagnostics and debugPrintRecognizerCallbacksTrace', (final WidgetTester tester) async {
     PointerEvent event;
     debugPrintGestureArenaDiagnostics = true;
     debugPrintRecognizerCallbacksTrace = true;
     final DebugPrintCallback oldCallback = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String? s, { int? wrapWidth }) { log.add(s ?? ''); };
+    debugPrint = (final String? s, { final int? wrapWidth }) { log.add(s ?? ''); };
 
     final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTapDown = (TapDownDetails details) { }
-      ..onTapUp = (TapUpDetails details) { }
+      ..onTapDown = (final TapDownDetails details) { }
+      ..onTapUp = (final TapUpDetails details) { }
       ..onTap = () { }
       ..onTapCancel = () { };
     expect(log, isEmpty);

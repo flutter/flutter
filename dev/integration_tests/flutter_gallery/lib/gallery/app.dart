@@ -80,7 +80,7 @@ class _GalleryAppState extends State<GalleryApp> {
     super.dispose();
   }
 
-  void _handleOptionsChanged(GalleryOptions newOptions) {
+  void _handleOptionsChanged(final GalleryOptions newOptions) {
     setState(() {
       if (_options!.timeDilation != newOptions.timeDilation) {
         _timeDilationTimer?.cancel();
@@ -101,9 +101,9 @@ class _GalleryAppState extends State<GalleryApp> {
     });
   }
 
-  Widget _applyTextScaleFactor(Widget child) {
+  Widget _applyTextScaleFactor(final Widget child) {
     return Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaleFactor: _options!.textScaleFactor!.scale,
@@ -115,7 +115,7 @@ class _GalleryAppState extends State<GalleryApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget home = GalleryHome(
       testMode: widget.testMode,
       optionsPage: GalleryOptionsPage(
@@ -151,14 +151,14 @@ class _GalleryAppState extends State<GalleryApp> {
         checkerboardOffscreenLayers: _options!.showOffscreenLayersCheckerboard,
         checkerboardRasterCacheImages: _options!.showRasterCacheImagesCheckerboard,
         routes: _buildRoutes(),
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return Directionality(
             textDirection: _options!.textDirection,
             child: _applyTextScaleFactor(
               // Specifically use a blank Cupertino theme here and do not transfer
               // over the Material primary color etc except the brightness to
               // showcase standard iOS looks.
-              Builder(builder: (BuildContext context) {
+              Builder(builder: (final BuildContext context) {
                 return CupertinoTheme(
                   data: CupertinoThemeData(
                     brightness: Theme.of(context).brightness,

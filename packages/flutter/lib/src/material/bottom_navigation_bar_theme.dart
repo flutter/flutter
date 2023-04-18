@@ -135,20 +135,20 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomNavigationBarThemeData copyWith({
-    Color? backgroundColor,
-    double? elevation,
-    IconThemeData? selectedIconTheme,
-    IconThemeData? unselectedIconTheme,
-    Color? selectedItemColor,
-    Color? unselectedItemColor,
-    TextStyle? selectedLabelStyle,
-    TextStyle? unselectedLabelStyle,
-    bool? showSelectedLabels,
-    bool? showUnselectedLabels,
-    BottomNavigationBarType? type,
-    bool? enableFeedback,
-    BottomNavigationBarLandscapeLayout? landscapeLayout,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final Color? backgroundColor,
+    final double? elevation,
+    final IconThemeData? selectedIconTheme,
+    final IconThemeData? unselectedIconTheme,
+    final Color? selectedItemColor,
+    final Color? unselectedItemColor,
+    final TextStyle? selectedLabelStyle,
+    final TextStyle? unselectedLabelStyle,
+    final bool? showSelectedLabels,
+    final bool? showUnselectedLabels,
+    final BottomNavigationBarType? type,
+    final bool? enableFeedback,
+    final BottomNavigationBarLandscapeLayout? landscapeLayout,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return BottomNavigationBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -173,7 +173,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomNavigationBarThemeData lerp(BottomNavigationBarThemeData? a, BottomNavigationBarThemeData? b, double t) {
+  static BottomNavigationBarThemeData lerp(final BottomNavigationBarThemeData? a, final BottomNavigationBarThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -214,7 +214,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -239,7 +239,7 @@ class BottomNavigationBarThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
@@ -297,11 +297,11 @@ class BottomNavigationBarTheme extends InheritedWidget {
   /// ```dart
   /// BottomNavigationBarThemeData theme = BottomNavigationBarTheme.of(context);
   /// ```
-  static BottomNavigationBarThemeData of(BuildContext context) {
+  static BottomNavigationBarThemeData of(final BuildContext context) {
     final BottomNavigationBarTheme? bottomNavTheme = context.dependOnInheritedWidgetOfExactType<BottomNavigationBarTheme>();
     return bottomNavTheme?.data ?? Theme.of(context).bottomNavigationBarTheme;
   }
 
   @override
-  bool updateShouldNotify(BottomNavigationBarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final BottomNavigationBarTheme oldWidget) => data != oldWidget.data;
 }

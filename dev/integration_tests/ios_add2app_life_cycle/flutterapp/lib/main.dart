@@ -54,7 +54,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(final AppLifecycleState state) {
     setState(() {
       _actualLifeCycleSequence = List<AppLifecycleState>.from(_actualLifeCycleSequence!);
       _actualLifeCycleSequence?.add(state);
@@ -62,7 +62,7 @@ class _LifeCycleSpyState extends State<LifeCycleSpy> with WidgetsBindingObserver
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (const ListEquality<AppLifecycleState?>().equals(_actualLifeCycleSequence, _expectedLifeCycleSequence)) {
       // Rewires the semantics harness if test passes.
       SwitchableSemanticsBinding.instance.semanticsEnabled = true;
@@ -97,7 +97,7 @@ class SwitchableSemanticsBinding extends WidgetsFlutterBinding {
   @override
   bool get semanticsEnabled => _semanticsEnabled.value;
   final ValueNotifier<bool> _semanticsEnabled = ValueNotifier<bool>(false);
-  set semanticsEnabled(bool value) {
+  set semanticsEnabled(final bool value) {
     _semanticsEnabled.value = value;
     _updateHandler();
   }
@@ -113,12 +113,12 @@ class SwitchableSemanticsBinding extends WidgetsFlutterBinding {
   }
 
   @override
-  void addSemanticsEnabledListener(VoidCallback listener) {
+  void addSemanticsEnabledListener(final VoidCallback listener) {
     _semanticsEnabled.addListener(listener);
   }
 
   @override
-  void removeSemanticsEnabledListener(VoidCallback listener) {
+  void removeSemanticsEnabledListener(final VoidCallback listener) {
     _semanticsEnabled.removeListener(listener);
   }
 }

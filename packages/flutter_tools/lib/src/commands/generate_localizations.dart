@@ -23,10 +23,10 @@ import '../runner/flutter_command.dart';
 /// [internationalization user guide](flutter.dev/go/i18n-user-guide).
 class GenerateLocalizationsCommand extends FlutterCommand {
   GenerateLocalizationsCommand({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Artifacts artifacts,
+    required final ProcessManager processManager,
   }) :
     _fileSystem = fileSystem,
     _logger = logger,

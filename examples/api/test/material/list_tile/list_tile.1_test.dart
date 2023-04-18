@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/list_tile/list_tile.1.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTiles wrapped in Card widgets', (WidgetTester tester) async {
+  testWidgets('ListTiles wrapped in Card widgets', (final WidgetTester tester) async {
     const int totalTiles = 7;
 
     await tester.pumpWidget(

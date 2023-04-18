@@ -12,7 +12,7 @@ class NavBarApp extends StatelessWidget {
   const NavBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: NavBarExample(),
@@ -29,7 +29,7 @@ class NavBarExample extends StatefulWidget {
 
 class _NavBarExampleState extends State<NavBarExample> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         // Try removing opacity to observe the lack of a blur effect and of sliding content.

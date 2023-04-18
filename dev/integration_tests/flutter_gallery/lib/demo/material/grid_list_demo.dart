@@ -52,7 +52,7 @@ class _GridTitleText extends StatelessWidget {
   final String? text;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FittedBox(
       fit: BoxFit.scaleDown,
       alignment: Alignment.centerLeft,
@@ -84,7 +84,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   // The maximum offset value is 0,0. If the size of this renderer's box is w,h
   // then the minimum offset value is w - _scale * w, h - _scale * h.
-  Offset _clampOffset(Offset offset) {
+  Offset _clampOffset(final Offset offset) {
     final Size size = context.size!;
     final Offset minOffset = Offset(size.width, size.height) * (1.0 - _scale);
     return Offset(
@@ -99,7 +99,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     });
   }
 
-  void _handleOnScaleStart(ScaleStartDetails details) {
+  void _handleOnScaleStart(final ScaleStartDetails details) {
     setState(() {
       _previousScale = _scale;
       _normalizedOffset = (details.focalPoint - _offset) / _scale;
@@ -108,7 +108,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     });
   }
 
-  void _handleOnScaleUpdate(ScaleUpdateDetails details) {
+  void _handleOnScaleUpdate(final ScaleUpdateDetails details) {
     setState(() {
       _scale = (_previousScale * details.scale).clamp(1.0, 4.0);
       // Ensure that image location under the focal point stays in the same place despite scaling.
@@ -116,7 +116,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     });
   }
 
-  void _handleOnScaleEnd(ScaleEndDetails details) {
+  void _handleOnScaleEnd(final ScaleEndDetails details) {
     final double magnitude = details.velocity.pixelsPerSecond.distance;
     if (magnitude < _kMinFlingVelocity) {
       return;
@@ -133,7 +133,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onScaleStart: _handleOnScaleStart,
       onScaleUpdate: _handleOnScaleUpdate,
@@ -166,9 +166,9 @@ class GridDemoPhotoItem extends StatelessWidget {
   final GridDemoTileStyle tileStyle;
   final BannerTapCallback onBannerTap; // User taps on the photo's header or footer.
 
-  void showPhoto(BuildContext context) {
+  void showPhoto(final BuildContext context) {
     Navigator.push(context, MaterialPageRoute<void>(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return Scaffold(
           appBar: AppBar(
             title: Text(photo.title!),
@@ -185,7 +185,7 @@ class GridDemoPhotoItem extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget image = Semantics(
       label: '${photo.title} - ${photo.caption}',
       child: GestureDetector(
@@ -331,14 +331,14 @@ class GridListDemoState extends State<GridListDemo> {
     ),
   ];
 
-  void changeTileStyle(GridDemoTileStyle value) {
+  void changeTileStyle(final GridDemoTileStyle value) {
     setState(() {
       _tileStyle = value;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return Scaffold(
       appBar: AppBar(
@@ -347,7 +347,7 @@ class GridListDemoState extends State<GridListDemo> {
           MaterialDemoDocumentationButton(GridListDemo.routeName),
           PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
-            itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
+            itemBuilder: (final BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
               const PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.imageOnly,
                 child: Text('Image only'),
@@ -376,11 +376,11 @@ class GridListDemoState extends State<GridListDemo> {
                 crossAxisSpacing: 4.0,
                 padding: const EdgeInsets.all(4.0),
                 childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
-                children: photos.map<Widget>((Photo photo) {
+                children: photos.map<Widget>((final Photo photo) {
                   return GridDemoPhotoItem(
                     photo: photo,
                     tileStyle: _tileStyle,
-                    onBannerTap: (Photo photo) {
+                    onBannerTap: (final Photo photo) {
                       setState(() {
                         photo.isFavorite = !photo.isFavorite;
                       });

@@ -7,7 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes) {
+void checkEncoding<T>(final MessageCodec<T> codec, final T message, final List<int> expectedBytes) {
   final ByteData encoded = codec.encodeMessage(message)!;
   expect(
     encoded.buffer.asUint8List(0, encoded.lengthInBytes),
@@ -15,7 +15,7 @@ void checkEncoding<T>(MessageCodec<T> codec, T message, List<int> expectedBytes)
   );
 }
 
-void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
+void checkEncodeDecode<T>(final MessageCodec<T> codec, final T message) {
   final ByteData? encoded = codec.encodeMessage(message);
   final T? decoded = codec.decodeMessage(encoded);
   if (message == null) {
@@ -31,7 +31,7 @@ void checkEncodeDecode<T>(MessageCodec<T> codec, T message) {
   }
 }
 
-bool deepEquals(dynamic valueA, dynamic valueB) {
+bool deepEquals(final dynamic valueA, final dynamic valueB) {
   if (valueA is TypedData) {
     return valueB is TypedData && deepEqualsTypedData(valueA, valueB);
   }
@@ -47,7 +47,7 @@ bool deepEquals(dynamic valueA, dynamic valueB) {
   return valueA == valueB;
 }
 
-bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
+bool deepEqualsTypedData(final TypedData valueA, final TypedData valueB) {
   if (valueA is ByteData) {
     return valueB is ByteData
         && deepEqualsList(valueA.buffer.asUint8List(), valueB.buffer.asUint8List());
@@ -70,7 +70,7 @@ bool deepEqualsTypedData(TypedData valueA, TypedData valueB) {
   throw 'Unexpected typed data: $valueA';
 }
 
-bool deepEqualsList(List<dynamic> valueA, List<dynamic> valueB) {
+bool deepEqualsList(final List<dynamic> valueA, final List<dynamic> valueB) {
   if (valueA.length != valueB.length) {
     return false;
   }
@@ -82,7 +82,7 @@ bool deepEqualsList(List<dynamic> valueA, List<dynamic> valueB) {
   return true;
 }
 
-bool deepEqualsMap(Map<dynamic, dynamic> valueA, Map<dynamic, dynamic> valueB) {
+bool deepEqualsMap(final Map<dynamic, dynamic> valueA, final Map<dynamic, dynamic> valueB) {
   if (valueA.length != valueB.length) {
     return false;
   }

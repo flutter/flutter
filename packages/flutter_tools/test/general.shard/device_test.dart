@@ -56,7 +56,7 @@ void main() {
         logger: logger,
       );
 
-      Future<void> expectDevice(String id, List<Device> expected) async {
+      Future<void> expectDevice(final String id, final List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id), expected);
       }
       await expectDevice('01abfc49119c410e', <Device>[device2]);
@@ -85,7 +85,7 @@ void main() {
         wellKnownId: 'windows',
       );
 
-      Future<void> expectDevice(String id, List<Device> expected) async {
+      Future<void> expectDevice(final String id, final List<Device> expected) async {
         deviceManager.specifiedDeviceId = id;
         expect(await deviceManager.getDevicesById(id), expected);
       }
@@ -112,7 +112,7 @@ void main() {
         logger: logger,
       );
 
-      Future<void> expectDevice(String id, List<Device> expected) async {
+      Future<void> expectDevice(final String id, final List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id), expected);
       }
       await expectDevice('Nexus 5', <Device>[device1]);
@@ -134,7 +134,7 @@ void main() {
         logger: logger,
       );
 
-      Future<void> expectDevice(String id, List<Device> expected) async {
+      Future<void> expectDevice(final String id, final List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id), expected);
       }
       await expectDevice('Nexus 5', <Device>[device1]);
@@ -231,7 +231,7 @@ void main() {
   });
 
   testWithoutContext('PollingDeviceDiscovery startPolling', () {
-    FakeAsync().run((FakeAsync time) {
+    FakeAsync().run((final FakeAsync time) {
       final FakePollingDeviceDiscovery pollingDeviceDiscovery = FakePollingDeviceDiscovery();
       pollingDeviceDiscovery.startPolling();
       time.elapse(const Duration(milliseconds: 4001));
@@ -610,7 +610,7 @@ void main() {
 
   group('Simultaneous device discovery', () {
     testWithoutContext('Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing last', () async {
-      FakeAsync().run((FakeAsync time) {
+      FakeAsync().run((final FakeAsync time) {
         final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
         final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
 
@@ -658,7 +658,7 @@ void main() {
     });
 
     testWithoutContext('Run getAllDevices and refreshAllDevices at same time with refreshAllDevices finishing first', () async {
-      fakeAsync((FakeAsync async) {
+      fakeAsync((final FakeAsync async) {
         final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
         final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
 
@@ -706,7 +706,7 @@ void main() {
     });
 
     testWithoutContext('refreshAllDevices twice', () async {
-      fakeAsync((FakeAsync async) {
+      fakeAsync((final FakeAsync async) {
         final FakeDevice device1 = FakeDevice('Nexus 5', '0553790d0a4e726f');
         final FakeDevice device2 = FakeDevice('Nexus 5X', '01abfc49119c410e');
 
@@ -758,8 +758,8 @@ void main() {
       expect(
         // This tests that fakeDevices is a list of tuples where "second" is the
         // correct JSON representation of the "first". Actual values are irrelevant
-        await Future.wait(fakeDevices.map((FakeDeviceJsonData d) => d.dev.toJson())),
-        fakeDevices.map((FakeDeviceJsonData d) => d.json)
+        await Future.wait(fakeDevices.map((final FakeDeviceJsonData d) => d.dev.toJson())),
+        fakeDevices.map((final FakeDeviceJsonData d) => d.json)
       );
     });
   });
@@ -1070,11 +1070,11 @@ void main() {
 
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager(
-    List<Device> allDevices, {
-    List<DeviceDiscovery>? deviceDiscoveryOverrides,
+    final List<Device> allDevices, {
+    final List<DeviceDiscovery>? deviceDiscoveryOverrides,
     required super.logger,
-    String? wellKnownId,
-    FakePollingDeviceDiscovery? fakeDiscoverer,
+    final String? wellKnownId,
+    final FakePollingDeviceDiscovery? fakeDiscoverer,
   }) : _fakeDeviceDiscoverer = fakeDiscoverer ?? FakePollingDeviceDiscovery(),
        _deviceDiscoverers = <DeviceDiscovery>[],
        super() {
@@ -1092,7 +1092,7 @@ class TestDeviceManager extends DeviceManager {
   final List<DeviceDiscovery> _deviceDiscoverers;
   final FakePollingDeviceDiscovery _fakeDeviceDiscoverer;
 
-  void resetDevices(List<Device> allDevices) {
+  void resetDevices(final List<Device> allDevices) {
     _fakeDeviceDiscoverer.setDevices(allDevices);
   }
 }
@@ -1106,7 +1106,7 @@ class TestDeviceDiscoverySupportFilter extends DeviceDiscoverySupportFilter {
   bool? isAlwaysSupportedForProjectOverride;
 
   @override
-  bool isDeviceSupportedForProject(Device device) {
+  bool isDeviceSupportedForProject(final Device device) {
     if (isAlwaysSupportedForProjectOverride != null) {
       return isAlwaysSupportedForProjectOverride!;
     }
@@ -1117,7 +1117,7 @@ class TestDeviceDiscoverySupportFilter extends DeviceDiscoverySupportFilter {
 class FakePollingDeviceDiscoveryWithTimeout extends FakePollingDeviceDiscovery {
   FakePollingDeviceDiscoveryWithTimeout(
     this._devices, {
-    Duration? timeout,
+    final Duration? timeout,
   }): defaultTimeout = timeout ?? const Duration(seconds: 2);
 
   final List<List<Device>> _devices;
@@ -1142,7 +1142,7 @@ class LongPollingDeviceDiscovery extends PollingDeviceDiscovery {
   final Completer<List<Device>> _completer = Completer<List<Device>>();
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({ final Duration? timeout }) async {
     return _completer.future;
   }
 
@@ -1170,7 +1170,7 @@ class ThrowingPollingDeviceDiscovery extends PollingDeviceDiscovery {
   ThrowingPollingDeviceDiscovery() : super('throw');
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({ final Duration? timeout }) async {
     throw const ProcessException('fake-discovery', <String>[]);
   }
 

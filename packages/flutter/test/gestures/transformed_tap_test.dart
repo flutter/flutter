@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('gets local coordinates', (WidgetTester tester) async {
+  testWidgets('gets local coordinates', (final WidgetTester tester) async {
     int tapCount = 0;
     int tapCancelCount = 0;
     final List<TapDownDetails> downDetails = <TapDownDetails>[];
@@ -23,10 +23,10 @@ void main() {
           onTapCancel: () {
             tapCancelCount++;
           },
-          onTapDown: (TapDownDetails details) {
+          onTapDown: (final TapDownDetails details) {
             downDetails.add(details);
           },
-          onTapUp: (TapUpDetails details) {
+          onTapUp: (final TapUpDetails details) {
             upDetails.add(details);
           },
           child: Container(
@@ -48,7 +48,7 @@ void main() {
     expect(upDetails.single.globalPosition, const Offset(400, 300));
   });
 
-  testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (WidgetTester tester) async {
+  testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (final WidgetTester tester) async {
     int tapCount = 0;
     int tapCancelCount = 0;
     final List<TapDownDetails> downDetails = <TapDownDetails>[];
@@ -66,10 +66,10 @@ void main() {
                 onTapCancel: () {
                   tapCancelCount++;
                 },
-                onTapDown: (TapDownDetails details) {
+                onTapDown: (final TapDownDetails details) {
                   downDetails.add(details);
                 },
-                onTapUp: (TapUpDetails details) {
+                onTapUp: (final TapUpDetails details) {
                   upDetails.add(details);
                 },
                 child: Container(
@@ -111,7 +111,7 @@ void main() {
     expect(upDetails, isEmpty);
   });
 
-  testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (WidgetTester tester) async {
+  testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (final WidgetTester tester) async {
     int tapCount = 0;
     int tapCancelCount = 0;
     final List<TapDownDetails> downDetails = <TapDownDetails>[];
@@ -129,10 +129,10 @@ void main() {
                 onTapCancel: () {
                   tapCancelCount++;
                 },
-                onTapDown: (TapDownDetails details) {
+                onTapDown: (final TapDownDetails details) {
                   downDetails.add(details);
                 },
-                onTapUp: (TapUpDetails details) {
+                onTapUp: (final TapUpDetails details) {
                   upDetails.add(details);
                 },
                 child: Container(

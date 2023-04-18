@@ -28,7 +28,7 @@ class ChangerState extends State<Changer> {
   void test() { setState(() { _state = true; }); }
 
   @override
-  Widget build(BuildContext context) => _state ? Wrapper(widget.child) : widget.child;
+  Widget build(final BuildContext context) => _state ? Wrapper(widget.child) : widget.child;
 }
 
 class Wrapper extends StatelessWidget {
@@ -37,7 +37,7 @@ class Wrapper extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }
 
 class Leaf extends StatefulWidget {
@@ -48,11 +48,11 @@ class Leaf extends StatefulWidget {
 
 class LeafState extends State<Leaf> {
   @override
-  Widget build(BuildContext context) => const Text('leaf', textDirection: TextDirection.ltr);
+  Widget build(final BuildContext context) => const Text('leaf', textDirection: TextDirection.ltr);
 }
 
 void main() {
-  testWidgets('three-way setState() smoke test', (WidgetTester tester) async {
+  testWidgets('three-way setState() smoke test', (final WidgetTester tester) async {
     await tester.pumpWidget(const Changer(Wrapper(Leaf())));
     await tester.pumpWidget(const Changer(Wrapper(Leaf())));
     changer.test();

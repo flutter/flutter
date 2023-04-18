@@ -12,7 +12,7 @@ class TextButtonExampleApp extends StatelessWidget {
   const TextButtonExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('TextButton Sample')),
@@ -26,7 +26,7 @@ class TextButtonExample extends StatelessWidget {
   const TextButtonExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,

@@ -77,7 +77,7 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   /// {@macro flutter.widgets.RawAutocomplete.initialValue}
   final TextEditingValue? initialValue;
 
-  static Widget _defaultFieldViewBuilder(BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+  static Widget _defaultFieldViewBuilder(final BuildContext context, final TextEditingController textEditingController, final FocusNode focusNode, final VoidCallback onFieldSubmitted) {
     return _AutocompleteField(
       focusNode: focusNode,
       textEditingController: textEditingController,
@@ -86,13 +86,13 @@ class Autocomplete<T extends Object> extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RawAutocomplete<T>(
       displayStringForOption: displayStringForOption,
       fieldViewBuilder: fieldViewBuilder,
       initialValue: initialValue,
       optionsBuilder: optionsBuilder,
-      optionsViewBuilder: optionsViewBuilder ?? (BuildContext context, AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
+      optionsViewBuilder: optionsViewBuilder ?? (final BuildContext context, final AutocompleteOnSelected<T> onSelected, final Iterable<T> options) {
         return _AutocompleteOptions<T>(
           displayStringForOption: displayStringForOption,
           onSelected: onSelected,
@@ -120,11 +120,11 @@ class _AutocompleteField extends StatelessWidget {
   final TextEditingController textEditingController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextFormField(
       controller: textEditingController,
       focusNode: focusNode,
-      onFieldSubmitted: (String value) {
+      onFieldSubmitted: (final String value) {
         onFieldSubmitted();
       },
     );
@@ -149,7 +149,7 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
   final double maxOptionsHeight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Align(
       alignment: Alignment.topLeft,
       child: Material(
@@ -160,17 +160,17 @@ class _AutocompleteOptions<T extends Object> extends StatelessWidget {
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             itemCount: options.length,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               final T option = options.elementAt(index);
               return InkWell(
                 onTap: () {
                   onSelected(option);
                 },
                 child: Builder(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     final bool highlight = AutocompleteHighlightedOption.of(context) == index;
                     if (highlight) {
-                      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+                      SchedulerBinding.instance.addPostFrameCallback((final Duration timeStamp) {
                         Scrollable.ensureVisible(context, alignment: 0.5);
                       });
                     }

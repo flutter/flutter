@@ -18,20 +18,20 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
+  testWidgets('Switch can toggle on tap', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 key: switchKey,
                 value: value,
                 dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) {
+                onChanged: (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -48,16 +48,16 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('CupertinoSwitch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('CupertinoSwitch can be toggled by keyboard shortcuts', (final WidgetTester tester) async {
     bool value = true;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return CupertinoApp(
         home: CupertinoPageScaffold(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return CupertinoSwitch(
                 value: value,
-                onChanged: enabled ? (bool newValue) {
+                onChanged: enabled ? (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -81,13 +81,13 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Switch emits light haptic vibration on tap', (WidgetTester tester) async {
+  testWidgets('Switch emits light haptic vibration on tap', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
 
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -96,13 +96,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 key: switchKey,
                 value: value,
                 dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) {
+                onChanged: (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -121,14 +121,14 @@ void main() {
     expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
+  testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     final Key switchKey2 = UniqueKey();
     bool value = false;
     bool value2 = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -137,14 +137,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: Column(
                 children: <Widget>[
                   CupertinoSwitch(
                     key: switchKey,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -153,7 +153,7 @@ void main() {
                   CupertinoSwitch(
                     key: switchKey2,
                     value: value2,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value2 = newValue;
                       });
@@ -192,11 +192,11 @@ void main() {
     expect(log[3], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
+  testWidgets('Haptic vibration triggers on drag', (final WidgetTester tester) async {
     bool value = false;
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -205,12 +205,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 value: value,
                 dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) {
+                onChanged: (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -230,12 +230,12 @@ void main() {
     expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('No haptic vibration triggers from a programmatic value change', (WidgetTester tester) async {
+  testWidgets('No haptic vibration triggers from a programmatic value change', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
 
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -244,7 +244,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: Column(
                 children: <Widget>[
@@ -259,7 +259,7 @@ void main() {
                   CupertinoSwitch(
                     key: switchKey,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -282,18 +282,18 @@ void main() {
     expect(log, hasLength(0));
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
+  testWidgets('Switch can drag (LTR)', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                onChanged: (bool newValue) {
+                onChanged: (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -326,19 +326,19 @@ void main() {
     expect(value, isFalse);
   });
 
-  testWidgets('Switch can drag with dragStartBehavior', (WidgetTester tester) async {
+  testWidgets('Switch can drag with dragStartBehavior', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 value: value,
                 dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) {
+                onChanged: (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -367,11 +367,11 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 value: value,
-                onChanged: (bool newValue) {
+                onChanged: (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -412,19 +412,19 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('Switch can drag (RTL)', (WidgetTester tester) async {
+  testWidgets('Switch can drag (RTL)', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 value: value,
                 dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) {
+                onChanged: (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -457,20 +457,20 @@ void main() {
     expect(value, isFalse);
   });
 
-  testWidgets('can veto switch dragging result', (WidgetTester tester) async {
+  testWidgets('can veto switch dragging result', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Material(
               child: Center(
                 child: CupertinoSwitch(
                   dragStartBehavior: DragStartBehavior.down,
                   value: value,
-                  onChanged: (bool newValue) {
+                  onChanged: (final bool newValue) {
                     setState(() {
                       value = value || newValue;
                     });
@@ -529,7 +529,7 @@ void main() {
     expect(position.value, 1.0);
   });
 
-  testWidgets('Switch is translucent when disabled', (WidgetTester tester) async {
+  testWidgets('Switch is translucent when disabled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -547,7 +547,7 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
   });
 
-  testWidgets('Switch is using track color when set', (WidgetTester tester) async {
+  testWidgets('Switch is using track color when set', (final WidgetTester tester) async {
     const Color trackColor = Color(0xFF00FF00);
 
     await tester.pumpWidget(
@@ -569,7 +569,7 @@ void main() {
     expect(find.byType(CupertinoSwitch), paints..rrect(color: trackColor));
   });
 
-  testWidgets('Switch is using default thumb color', (WidgetTester tester) async {
+  testWidgets('Switch is using default thumb color', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -595,7 +595,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch is using thumb color when set', (WidgetTester tester) async {
+  testWidgets('Switch is using thumb color when set', (final WidgetTester tester) async {
     const Color thumbColor = Color(0xFF000000);
     await tester.pumpWidget(
       const Directionality(
@@ -623,7 +623,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
+  testWidgets('Switch is opaque when enabled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -631,7 +631,7 @@ void main() {
           child: CupertinoSwitch(
             value: false,
             dragStartBehavior: DragStartBehavior.down,
-            onChanged: (bool newValue) {},
+            onChanged: (final bool newValue) {},
           ),
         ),
       ),
@@ -641,7 +641,7 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
-  testWidgets('Switch turns translucent after becoming disabled', (WidgetTester tester) async {
+  testWidgets('Switch turns translucent after becoming disabled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -649,7 +649,7 @@ void main() {
           child: CupertinoSwitch(
             value: false,
             dragStartBehavior: DragStartBehavior.down,
-            onChanged: (bool newValue) {},
+            onChanged: (final bool newValue) {},
           ),
         ),
       ),
@@ -672,7 +672,7 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
   });
 
-  testWidgets('Switch turns opaque after becoming enabled', (WidgetTester tester) async {
+  testWidgets('Switch turns opaque after becoming enabled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -693,7 +693,7 @@ void main() {
           child: CupertinoSwitch(
             value: false,
             dragStartBehavior: DragStartBehavior.down,
-            onChanged: (bool newValue) {},
+            onChanged: (final bool newValue) {},
           ),
         ),
       ),
@@ -703,21 +703,21 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
-  testWidgets('Switch renders correctly before, during, and after being tapped', (WidgetTester tester) async {
+  testWidgets('Switch renders correctly before, during, and after being tapped', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: RepaintBoundary(
                 child: CupertinoSwitch(
                   key: switchKey,
                   value: value,
                   dragStartBehavior: DragStartBehavior.down,
-                  onChanged: (bool newValue) {
+                  onChanged: (final bool newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -753,7 +753,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch renders correctly in dark mode', (WidgetTester tester) async {
+  testWidgets('Switch renders correctly in dark mode', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
@@ -762,14 +762,14 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Center(
                 child: RepaintBoundary(
                   child: CupertinoSwitch(
                     key: switchKey,
                     value: value,
                     dragStartBehavior: DragStartBehavior.down,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -798,7 +798,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch can apply the ambient theme and be opted out', (WidgetTester tester) async {
+  testWidgets('Switch can apply the ambient theme and be opted out', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
@@ -807,7 +807,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Center(
                 child: RepaintBoundary(
                   child: Column(
@@ -817,7 +817,7 @@ void main() {
                         value: value,
                         dragStartBehavior: DragStartBehavior.down,
                         applyTheme: true,
-                        onChanged: (bool newValue) {
+                        onChanged: (final bool newValue) {
                           setState(() {
                             value = newValue;
                           });
@@ -827,7 +827,7 @@ void main() {
                         value: value,
                         dragStartBehavior: DragStartBehavior.down,
                         applyTheme: false,
-                        onChanged: (bool newValue) {
+                        onChanged: (final bool newValue) {
                           setState(() {
                             value = newValue;
                           });
@@ -858,14 +858,14 @@ void main() {
     );
   });
 
-  testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino switch updates cursor to clickable on Web', (final WidgetTester tester) async {
     const bool value = false;
     // Disabled CupertinoSwitch does not update cursor on Web.
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return const Center(
               child: CupertinoSwitch(
                 value: value,
@@ -889,12 +889,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Center(
               child: CupertinoSwitch(
                 value: value,
                 dragStartBehavior: DragStartBehavior.down,
-                onChanged: (bool newValue) { },
+                onChanged: (final bool newValue) { },
               ),
             );
           },

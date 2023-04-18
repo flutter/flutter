@@ -48,7 +48,7 @@ class _ClipperCachePageState extends State<ClipperCachePage>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue,
       body: ListView(
@@ -73,7 +73,7 @@ class _ClipperCachePageState extends State<ClipperCachePage>
     );
   }
 
-  Widget _makeChild(int itemIndex, bool complex) {
+  Widget _makeChild(final int itemIndex, final bool complex) {
     final BoxDecoration decoration = BoxDecoration(
       color: Colors.white70,
       boxShadow: const <BoxShadow>[

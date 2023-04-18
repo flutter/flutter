@@ -12,7 +12,7 @@ class CupertinoListSectionBaseApp extends StatelessWidget {
   const CupertinoListSectionBaseApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       home: ListSectionBaseExample(),
     );
@@ -23,7 +23,7 @@ class ListSectionBaseExample extends StatelessWidget {
   const ListSectionBaseExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       child: CupertinoListSection(
         header: const Text('My Reminders'),
@@ -38,7 +38,7 @@ class ListSectionBaseExample extends StatelessWidget {
             trailing: const CupertinoListTileChevron(),
             onTap: () => Navigator.of(context).push(
               CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return const _SecondPage(text: 'Open pull request');
                 },
               ),
@@ -64,7 +64,7 @@ class ListSectionBaseExample extends StatelessWidget {
             trailing: const CupertinoListTileChevron(),
             onTap: () => Navigator.of(context).push(
               CupertinoPageRoute<void>(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return const _SecondPage(text: 'Last commit');
                 },
               ),
@@ -82,7 +82,7 @@ class _SecondPage extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       child: Center(
         child: Text(text),

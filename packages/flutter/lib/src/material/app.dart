@@ -758,7 +758,7 @@ class MaterialApp extends StatefulWidget {
   /// Used by the [MaterialApp].
   static HeroController createMaterialHeroController() {
     return HeroController(
-      createRectTween: (Rect? begin, Rect? end) {
+      createRectTween: (final Rect? begin, final Rect? end) {
         return MaterialRectArcTween(begin: begin, end: end);
       },
     );
@@ -811,10 +811,10 @@ class MaterialScrollBehavior extends ScrollBehavior {
   final AndroidOverscrollIndicator? _androidOverscrollIndicator;
 
   @override
-  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
+  TargetPlatform getPlatform(final BuildContext context) => Theme.of(context).platform;
 
   @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(final BuildContext context, final Widget child, final ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
     switch (axisDirectionToAxis(details.direction)) {
@@ -839,7 +839,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(final BuildContext context, final Widget child, final ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
     late final AndroidOverscrollIndicator indicator;
@@ -903,7 +903,7 @@ class _MaterialAppState extends State<MaterialApp> {
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+  Widget _inspectorSelectButtonBuilder(final BuildContext context, final VoidCallback onPressed) {
     return FloatingActionButton(
       onPressed: onPressed,
       mini: true,
@@ -911,7 +911,7 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
-  ThemeData _themeBuilder(BuildContext context) {
+  ThemeData _themeBuilder(final BuildContext context) {
     ThemeData? theme;
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
@@ -930,7 +930,7 @@ class _MaterialAppState extends State<MaterialApp> {
     return theme;
   }
 
-  Widget _materialBuilder(BuildContext context, Widget? child) {
+  Widget _materialBuilder(final BuildContext context, final Widget? child) {
     final ThemeData theme = _themeBuilder(context);
     final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
     final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
@@ -946,7 +946,7 @@ class _MaterialAppState extends State<MaterialApp> {
           curve: widget.themeAnimationCurve,
           child: widget.builder != null
             ? Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   // Why are we surrounding a builder with a builder?
                   //
                   // The widget.builder may contain code that invokes
@@ -967,7 +967,7 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
-  Widget _buildWidgetApp(BuildContext context) {
+  Widget _buildWidgetApp(final BuildContext context) {
     // The color property is always pulled from the light theme, even if dark
     // mode is activated. This was done to simplify the technical details
     // of switching themes and it was deemed acceptable because this color
@@ -1010,7 +1010,7 @@ class _MaterialAppState extends State<MaterialApp> {
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
       navigatorObservers: widget.navigatorObservers!,
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+      pageRouteBuilder: <T>(final RouteSettings settings, final WidgetBuilder builder) {
         return MaterialPageRoute<T>(settings: settings, builder: builder);
       },
       home: widget.home,
@@ -1042,11 +1042,11 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget result = _buildWidgetApp(context);
     result = Focus(
       canRequestFocus: false,
-      onKey: (FocusNode node, RawKeyEvent event) {
+      onKey: (final FocusNode node, final RawKeyEvent event) {
         if (event is! RawKeyDownEvent || event.logicalKey != LogicalKeyboardKey.escape) {
           return KeyEventResult.ignored;
         }

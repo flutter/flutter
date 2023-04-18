@@ -11,27 +11,27 @@ import 'states.dart';
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(final Locale locale) => true;
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(final Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
-  bool shouldReload(MaterialLocalizationsDelegate old) => false;
+  bool shouldReload(final MaterialLocalizationsDelegate old) => false;
 }
 
 class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(final Locale locale) => true;
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+  Future<WidgetsLocalizations> load(final Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
   @override
-  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+  bool shouldReload(final WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget textFieldBoilerplate({ required Widget child }) {
+Widget textFieldBoilerplate({ required final Widget child }) {
   return MaterialApp(
     home: Localizations(
       locale: const Locale('en', 'US'),
@@ -54,7 +54,7 @@ Widget textFieldBoilerplate({ required Widget child }) {
   );
 }
 
-Widget primaryScrollControllerBoilerplate({ required Widget child, required ScrollController controller }) {
+Widget primaryScrollControllerBoilerplate({ required final Widget child, required final ScrollController controller }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(
@@ -68,7 +68,7 @@ Widget primaryScrollControllerBoilerplate({ required Widget child, required Scro
 }
 
 void main() {
-  testWidgets('ListView control test', (WidgetTester tester) async {
+  testWidgets('ListView control test', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -76,7 +76,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children: kStates.map<Widget>((String state) {
+          children: kStates.map<Widget>((final String state) {
             return GestureDetector(
               onTap: () {
                 log.add(state);
@@ -110,14 +110,14 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ListView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView(
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -143,14 +143,14 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('GridView.builder supports null items', (WidgetTester tester) async {
+  testWidgets('GridView.builder supports null items', (final WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 42,
         ),
         itemCount: 42,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           if (index == 5) {
             return null;
           }
@@ -163,11 +163,11 @@ void main() {
     expect(find.text('item'), findsNWidgets(5));
   });
 
-  testWidgets('ListView.builder supports null items', (WidgetTester tester) async {
+  testWidgets('ListView.builder supports null items', (final WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
         itemCount: 42,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           if (index == 5) {
             return null;
           }
@@ -180,12 +180,12 @@ void main() {
     expect(find.text('item'), findsNWidgets(5));
   });
 
-  testWidgets('PageView supports null items in itemBuilder', (WidgetTester tester) async {
+  testWidgets('PageView supports null items in itemBuilder', (final WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: PageView.builder(
         itemCount: 5,
         controller: PageController(viewportFraction: 1/5),
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           if (index == 2) {
             return null;
           }
@@ -198,14 +198,14 @@ void main() {
     expect(find.text('item'), findsNWidgets(2));
   });
 
-  testWidgets('ListView.separated supports null items in itemBuilder', (WidgetTester tester) async {
+  testWidgets('ListView.separated supports null items in itemBuilder', (final WidgetTester tester) async {
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
         itemCount: 42,
-        separatorBuilder: (BuildContext context, int index) {
+        separatorBuilder: (final BuildContext context, final int index) {
           return const Text('separator');
         },
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           if (index == 5) {
             return null;
           }
@@ -219,15 +219,15 @@ void main() {
     expect(find.text('separator'), findsNWidgets(5));
   });
 
-  testWidgets('ListView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView.builder dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (final BuildContext context,final int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -253,15 +253,15 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('ListView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView.custom dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.custom(
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (final BuildContext context,final int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -289,16 +289,16 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('ListView.separated dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView.separated dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
         padding: EdgeInsets.zero,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context,int index) {
+        separatorBuilder: (final BuildContext context, final int index) => const Divider(),
+        itemBuilder: (final BuildContext context,final int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -324,15 +324,15 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('GridView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -358,8 +358,8 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('GridView.builder dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.builder dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
@@ -367,7 +367,7 @@ void main() {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -393,15 +393,15 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('GridView.count dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.count dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.count(
         padding: EdgeInsets.zero,
         crossAxisCount: 2,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -427,15 +427,15 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('GridView.extent dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.extent dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.extent(
         padding: EdgeInsets.zero,
         maxCrossAxisExtent: 300,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -461,8 +461,8 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('GridView.custom dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.custom dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
@@ -470,7 +470,7 @@ void main() {
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (final BuildContext context,final int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -498,13 +498,13 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('ListView dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView(
         padding: EdgeInsets.zero,
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -530,14 +530,14 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('ListView.builder dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView.builder dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.builder(
         padding: EdgeInsets.zero,
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context,int index) {
+        itemBuilder: (final BuildContext context,final int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -563,14 +563,14 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('ListView.custom dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView.custom dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.custom(
         padding: EdgeInsets.zero,
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (final BuildContext context,final int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -598,15 +598,15 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('ListView.separated dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('ListView.separated dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: ListView.separated(
         padding: EdgeInsets.zero,
         itemCount: focusNodes.length,
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-        itemBuilder: (BuildContext context,int index) {
+        separatorBuilder: (final BuildContext context, final int index) => const Divider(),
+        itemBuilder: (final BuildContext context,final int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -632,14 +632,14 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('GridView dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -665,15 +665,15 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('GridView.builder dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.builder dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.builder(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         itemCount: focusNodes.length,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -699,14 +699,14 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('GridView.count dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.count dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.count(
         padding: EdgeInsets.zero,
         crossAxisCount: 2,
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -732,14 +732,14 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('GridView.extent dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.extent dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.extent(
         padding: EdgeInsets.zero,
         maxCrossAxisExtent: 300,
-        children: focusNodes.map((FocusNode focusNode) {
+        children: focusNodes.map((final FocusNode focusNode) {
           return Container(
             height: 50,
             color: Colors.green,
@@ -765,15 +765,15 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('GridView.custom dismiss keyboard manual test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('GridView.custom dismiss keyboard manual test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: GridView.custom(
         padding: EdgeInsets.zero,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:2),
         childrenDelegate: SliverChildBuilderDelegate(
-          (BuildContext context,int index) {
+          (final BuildContext context,final int index) {
             return Container(
               height: 50,
               color: Colors.green,
@@ -801,13 +801,13 @@ void main() {
     expect(textField.focusNode!.hasFocus, isTrue);
   });
 
-  testWidgets('ListView restart ballistic activity out of range', (WidgetTester tester) async {
-    Widget buildListView(int n) {
+  testWidgets('ListView restart ballistic activity out of range', (final WidgetTester tester) async {
+    Widget buildListView(final int n) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children: kStates.take(n).map<Widget>((String state) {
+          children: kStates.take(n).map<Widget>((final String state) {
             return Container(
               height: 200.0,
               color: const Color(0xFF0000FF),
@@ -831,7 +831,7 @@ void main() {
     expect(viewport.offset.pixels, equals(2400.0));
   });
 
-  testWidgets('CustomScrollView control test', (WidgetTester tester) async {
+  testWidgets('CustomScrollView control test', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -842,7 +842,7 @@ void main() {
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildListDelegate(
-                kStates.map<Widget>((String state) {
+                kStates.map<Widget>((final String state) {
                   return GestureDetector(
                     dragStartBehavior: DragStartBehavior.down,
                     onTap: () {
@@ -879,8 +879,8 @@ void main() {
     log.clear();
   });
 
-  testWidgets('CustomScrollView dismiss keyboard onDrag test', (WidgetTester tester) async {
-    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (int i) => FocusNode());
+  testWidgets('CustomScrollView dismiss keyboard onDrag test', (final WidgetTester tester) async {
+    final List<FocusNode> focusNodes = List<FocusNode>.generate(50, (final int i) => FocusNode());
 
     await tester.pumpWidget(textFieldBoilerplate(
       child: CustomScrollView(
@@ -889,7 +889,7 @@ void main() {
         slivers: <Widget>[
           SliverList(
             delegate: SliverChildListDelegate(
-              focusNodes.map((FocusNode focusNode) {
+              focusNodes.map((final FocusNode focusNode) {
                 return Container(
                   height: 50,
                   color: Colors.green,
@@ -918,7 +918,7 @@ void main() {
     expect(textField.focusNode!.hasFocus, isFalse);
   });
 
-  testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
+  testWidgets('Can jumpTo during drag', (final WidgetTester tester) async {
     final List<Type> log = <Type>[];
     final ScrollController controller = ScrollController();
 
@@ -926,13 +926,13 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification notification) {
+          onNotification: (final ScrollNotification notification) {
             log.add(notification.runtimeType);
             return false;
           },
           child: ListView(
             controller: controller,
-            children: kStates.map<Widget>((String state) {
+            children: kStates.map<Widget>((final String state) {
               return SizedBox(
                 height: 200.0,
                 child: Text(state),
@@ -987,12 +987,12 @@ void main() {
      );
   });
 
-  testWidgets('Vertical CustomScrollViews are not primary by default', (WidgetTester tester) async {
+  testWidgets('Vertical CustomScrollViews are not primary by default', (final WidgetTester tester) async {
     const CustomScrollView view = CustomScrollView();
     expect(view.primary, isNull);
   });
 
-  testWidgets('Vertical CustomScrollViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+  testWidgets('Vertical CustomScrollViews use PrimaryScrollController by default on mobile', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: const CustomScrollView(),
@@ -1001,7 +1001,7 @@ void main() {
     expect(controller.hasClients, isTrue);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgets("Vertical CustomScrollViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+  testWidgets("Vertical CustomScrollViews don't use PrimaryScrollController by default on desktop", (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
         child: const CustomScrollView(),
@@ -1010,12 +1010,12 @@ void main() {
     expect(controller.hasClients, isFalse);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Vertical ListViews are not primary by default', (WidgetTester tester) async {
+  testWidgets('Vertical ListViews are not primary by default', (final WidgetTester tester) async {
     final ListView view = ListView();
     expect(view.primary, isNull);
   });
 
-  testWidgets('Vertical ListViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+  testWidgets('Vertical ListViews use PrimaryScrollController by default on mobile', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(),
@@ -1024,7 +1024,7 @@ void main() {
     expect(controller.hasClients, isTrue);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgets("Vertical ListViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+  testWidgets("Vertical ListViews don't use PrimaryScrollController by default on desktop", (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(),
@@ -1033,12 +1033,12 @@ void main() {
     expect(controller.hasClients, isFalse);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Vertical GridViews are not primary by default', (WidgetTester tester) async {
+  testWidgets('Vertical GridViews are not primary by default', (final WidgetTester tester) async {
     final GridView view = GridView.count(crossAxisCount: 1);
     expect(view.primary, isNull);
   });
 
-  testWidgets('Vertical GridViews use PrimaryScrollController by default on mobile', (WidgetTester tester) async {
+  testWidgets('Vertical GridViews use PrimaryScrollController by default on mobile', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(crossAxisCount: 1),
@@ -1047,7 +1047,7 @@ void main() {
     expect(controller.hasClients, isTrue);
   }, variant: TargetPlatformVariant.mobile());
 
-  testWidgets("Vertical GridViews don't use PrimaryScrollController by default on desktop", (WidgetTester tester) async {
+  testWidgets("Vertical GridViews don't use PrimaryScrollController by default on desktop", (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(crossAxisCount: 1),
@@ -1056,7 +1056,7 @@ void main() {
     expect(controller.hasClients, isFalse);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
+  testWidgets('Horizontal CustomScrollViews are non-primary by default', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: CustomScrollView(
@@ -1068,7 +1068,7 @@ void main() {
     expect(controller.hasClients, isFalse);
   });
 
-  testWidgets('Horizontal ListViews are non-primary by default', (WidgetTester tester) async {
+  testWidgets('Horizontal ListViews are non-primary by default', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(
@@ -1080,7 +1080,7 @@ void main() {
     expect(controller.hasClients, isFalse);
   });
 
-  testWidgets('Horizontal GridViews are non-primary by default', (WidgetTester tester) async {
+  testWidgets('Horizontal GridViews are non-primary by default', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(
@@ -1093,7 +1093,7 @@ void main() {
     expect(controller.hasClients, isFalse);
   });
 
-  testWidgets('CustomScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
+  testWidgets('CustomScrollViews with controllers are non-primary by default', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: CustomScrollView(
@@ -1104,7 +1104,7 @@ void main() {
     expect(controller.hasClients, isFalse);
   });
 
-  testWidgets('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
+  testWidgets('ListViews with controllers are non-primary by default', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: ListView(
@@ -1115,7 +1115,7 @@ void main() {
     expect(controller.hasClients, isFalse);
   });
 
-  testWidgets('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
+  testWidgets('GridViews with controllers are non-primary by default', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(primaryScrollControllerBoilerplate(
       child: GridView.count(
@@ -1127,7 +1127,7 @@ void main() {
     expect(controller.hasClients, isFalse);
   });
 
-  testWidgets('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+  testWidgets('CustomScrollView sets PrimaryScrollController when primary', (final WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -1142,7 +1142,7 @@ void main() {
     expect(scrollable.controller, primaryScrollController);
   });
 
-  testWidgets('ListView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+  testWidgets('ListView sets PrimaryScrollController when primary', (final WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -1157,7 +1157,7 @@ void main() {
     expect(scrollable.controller, primaryScrollController);
   });
 
-  testWidgets('GridView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+  testWidgets('GridView sets PrimaryScrollController when primary', (final WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -1172,7 +1172,7 @@ void main() {
     expect(scrollable.controller, primaryScrollController);
   });
 
-  testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('Nested scrollables have a null PrimaryScrollController', (final WidgetTester tester) async {
     const Key innerKey = Key('inner');
     final ScrollController primaryScrollController = ScrollController();
     await tester.pumpWidget(
@@ -1202,33 +1202,33 @@ void main() {
     expect(innerScrollable.controller, isNull);
   });
 
-  testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
+  testWidgets('Primary ListViews are always scrollable', (final WidgetTester tester) async {
     final ListView view = ListView(primary: true);
     expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
-  testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
+  testWidgets('Non-primary ListViews are not always scrollable', (final WidgetTester tester) async {
     final ListView view = ListView(primary: false);
     expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
-  testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
+  testWidgets('Defaulting-to-primary ListViews are always scrollable', (final WidgetTester tester) async {
     final ListView view = ListView();
     expect(view.physics, isA<AlwaysScrollableScrollPhysics>());
   });
 
-  testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
+  testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (final WidgetTester tester) async {
     final ListView view = ListView(scrollDirection: Axis.horizontal);
     expect(view.physics, isNot(isA<AlwaysScrollableScrollPhysics>()));
   });
 
-  testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {
+  testWidgets('primary:true leads to scrolling', (final WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) {
+          onNotification: (final OverscrollNotification message) {
             scrolled = true;
             return false;
           },
@@ -1242,13 +1242,13 @@ void main() {
     expect(scrolled, isTrue);
   });
 
-  testWidgets('primary:false leads to no scrolling', (WidgetTester tester) async {
+  testWidgets('primary:false leads to no scrolling', (final WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) {
+          onNotification: (final OverscrollNotification message) {
             scrolled = true;
             return false;
           },
@@ -1262,13 +1262,13 @@ void main() {
     expect(scrolled, isFalse);
   });
 
-  testWidgets('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior', (WidgetTester tester) async {
+  testWidgets('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior', (final WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) {
+          onNotification: (final OverscrollNotification message) {
             scrolled = true;
             return false;
           },
@@ -1283,13 +1283,13 @@ void main() {
     expect(scrolled, isTrue);
   });
 
-  testWidgets('physics:ScrollPhysics actually overrides primary:true default behavior', (WidgetTester tester) async {
+  testWidgets('physics:ScrollPhysics actually overrides primary:true default behavior', (final WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: NotificationListener<OverscrollNotification>(
-          onNotification: (OverscrollNotification message) {
+          onNotification: (final OverscrollNotification message) {
             scrolled = true;
             return false;
           },
@@ -1304,17 +1304,17 @@ void main() {
     expect(scrolled, isFalse);
   });
 
-  testWidgets('separatorBuilder must return something', (WidgetTester tester) async {
+  testWidgets('separatorBuilder must return something', (final WidgetTester tester) async {
     const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
-    Widget buildFrame(Widget firstSeparator) {
+    Widget buildFrame(final Widget firstSeparator) {
       return MaterialApp(
         home: Material(
           child: ListView.separated(
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return Text(listOfValues[index]);
             },
-            separatorBuilder: (BuildContext context, int index) {
+            separatorBuilder: (final BuildContext context, final int index) {
               if (index == 0) {
                 return firstSeparator;
               } else {
@@ -1332,14 +1332,14 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('when itemBuilder throws, creates Error Widget', (WidgetTester tester) async {
+  testWidgets('when itemBuilder throws, creates Error Widget', (final WidgetTester tester) async {
     const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
 
-    Widget buildFrame(bool throwOnFirstItem) {
+    Widget buildFrame(final bool throwOnFirstItem) {
       return MaterialApp(
         home: Material(
           child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               if (index == 0 && throwOnFirstItem) {
                 throw Exception('itemBuilder fail');
               }
@@ -1363,19 +1363,19 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
-  testWidgets('when separatorBuilder throws, creates ErrorWidget', (WidgetTester tester) async {
+  testWidgets('when separatorBuilder throws, creates ErrorWidget', (final WidgetTester tester) async {
     const List<String> listOfValues = <String>['ALPHA', 'BETA', 'GAMMA', 'DELTA'];
     const Key key = Key('list');
 
-    Widget buildFrame(bool throwOnFirstSeparator) {
+    Widget buildFrame(final bool throwOnFirstSeparator) {
       return MaterialApp(
         home: Material(
           child: ListView.separated(
             key: key,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return Text(listOfValues[index]);
             },
-            separatorBuilder: (BuildContext context, int index) {
+            separatorBuilder: (final BuildContext context, final int index) {
               if (index == 0 && throwOnFirstSeparator) {
                 throw Exception('separatorBuilder fail');
               }
@@ -1399,25 +1399,25 @@ void main() {
     expect(finder, findsOneWidget);
   });
 
-   testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+   testWidgets('ListView asserts on both non-null itemExtent and prototypeItem', (final WidgetTester tester) async {
     expect(() => ListView(
       itemExtent: 100,
       prototypeItem: const SizedBox(),
     ), throwsAssertionError);
   });
 
-  testWidgets('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
+  testWidgets('ListView.builder asserts on negative childCount', (final WidgetTester tester) async {
     expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return const SizedBox();
       },
       itemCount: -1,
     ), throwsAssertionError);
   });
 
-  testWidgets('ListView.builder asserts on negative semanticChildCount', (WidgetTester tester) async {
+  testWidgets('ListView.builder asserts on negative semanticChildCount', (final WidgetTester tester) async {
     expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return const SizedBox();
       },
       itemCount: 1,
@@ -1425,9 +1425,9 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('ListView.builder asserts on nonsensical childCount/semanticChildCount', (WidgetTester tester) async {
+  testWidgets('ListView.builder asserts on nonsensical childCount/semanticChildCount', (final WidgetTester tester) async {
     expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return const SizedBox();
       },
       itemCount: 1,
@@ -1435,9 +1435,9 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('ListView.builder asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+  testWidgets('ListView.builder asserts on both non-null itemExtent and prototypeItem', (final WidgetTester tester) async {
     expect(() => ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return const SizedBox();
       },
       itemExtent: 100,
@@ -1445,10 +1445,10 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('ListView.custom asserts on both non-null itemExtent and prototypeItem', (WidgetTester tester) async {
+  testWidgets('ListView.custom asserts on both non-null itemExtent and prototypeItem', (final WidgetTester tester) async {
     expect(() => ListView.custom(
       childrenDelegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
+        (final BuildContext context, final int index) {
           return const SizedBox();
         },
       ),
@@ -1457,14 +1457,14 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('PrimaryScrollController provides fallback ScrollActions', (WidgetTester tester)  async {
+  testWidgets('PrimaryScrollController provides fallback ScrollActions', (final WidgetTester tester)  async {
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
           primary: true,
           slivers: List<Widget>.generate(
             20,
-            (int index) {
+            (final int index) {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
@@ -1501,7 +1501,7 @@ void main() {
     );
   });
 
-  testWidgets('Fallback ScrollActions handle too many positions with error message', (WidgetTester tester)  async {
+  testWidgets('Fallback ScrollActions handle too many positions with error message', (final WidgetTester tester)  async {
     Widget getScrollView() {
       return SizedBox(
         width: 400.0,
@@ -1509,7 +1509,7 @@ void main() {
           primary: true,
           slivers: List<Widget>.generate(
             20,
-            (int index) {
+            (final int index) {
               return SliverToBoxAdapter(
                 child: Focus(
                   child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
@@ -1550,16 +1550,16 @@ void main() {
     );
   });
 
-  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+  testWidgets('if itemExtent is non-null, children have same extent in the scroll direction', (final WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
 
     await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return ListView.builder(
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return SizedBox(
                         key: ValueKey<int>(numbers[index]),
                         // children with different heights
@@ -1588,16 +1588,16 @@ void main() {
     expect(item2Height, 30.0);
   });
 
-  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (WidgetTester tester) async {
+  testWidgets('if prototypeItem is non-null, children have same extent in the scroll direction', (final WidgetTester tester) async {
     final List<int> numbers = <int>[0,1,2];
 
     await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return ListView.builder(
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return SizedBox(
                         key: ValueKey<int>(numbers[index]),
                         // children with different heights

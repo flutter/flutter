@@ -6031,5 +6031,5 @@ void pathOps607() {
   allPaths.add(path607);
 }
 
-void _runPathTest(Path path) {
+void _runPathTest(final Path path) {
 }

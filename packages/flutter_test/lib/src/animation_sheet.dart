@@ -145,9 +145,9 @@ class AnimationSheetBuilder {
   ///
   ///  * [WidgetTester.pumpFrames], which renders a widget in a series of frames
   ///    with a fixed time interval.
-  Widget record(Widget child, {
-    Key? key,
-    bool recording = true,
+  Widget record(final Widget child, {
+    final Key? key,
+    final bool recording = true,
   }) {
     return _AnimationSheetRecorder(
       key: key,
@@ -248,13 +248,13 @@ class AnimationSheetBuilder {
     'Use AnimationSheetBuilder.collate instead. '
     'This feature was deprecated after v2.3.0-13.0.pre.',
   )
-  Future<Widget> display({Key? key}) async {
+  Future<Widget> display({final Key? key}) async {
     assert(_recordedFrames.isNotEmpty);
     final List<ui.Image> frames = await _frames;
     return _CellSheet(
       key: key,
       cellSize: frameSize,
-      children: frames.map((ui.Image image) => RawImage(
+      children: frames.map((final ui.Image image) => RawImage(
         image: image.clone(),
         width: frameSize.width,
         height: frameSize.height,
@@ -271,7 +271,7 @@ class AnimationSheetBuilder {
   /// per row, from left to right, top to bottom.
   ///
   /// An example of using this method can be found at [AnimationSheetBuilder].
-  Future<ui.Image> collate(int cellsPerRow) async {
+  Future<ui.Image> collate(final int cellsPerRow) async {
     final List<ui.Image> frames = await _frames;
     assert(frames.isNotEmpty,
       'No frames are collected. Have you forgot to set `recording` to true?');
@@ -300,7 +300,7 @@ class AnimationSheetBuilder {
     'The `sheetSize` is only useful for `display`, which should be migrated to `collate`. '
     'This feature was deprecated after v2.3.0-13.0.pre.',
   )
-  Size sheetSize({double maxWidth = _kDefaultTestViewportWidth}) {
+  Size sheetSize({final double maxWidth = _kDefaultTestViewportWidth}) {
     assert(_recordedFrames.isNotEmpty);
     final int cellsPerRow = (maxWidth / frameSize.width).floor();
     final int rowNum = (_recordedFrames.length / cellsPerRow).ceil();
@@ -335,7 +335,7 @@ class _AnimationSheetRecorder extends StatefulWidget {
 class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
   GlobalKey boundaryKey = GlobalKey();
 
-  void _record(Duration duration) {
+  void _record(final Duration duration) {
     assert(widget.handleRecorded != null);
     final _RenderRootableRepaintBoundary boundary = boundaryKey.currentContext!.findRenderObject()! as _RenderRootableRepaintBoundary;
     if (widget.allLayers) {
@@ -346,7 +346,7 @@ class _AnimationSheetRecorderState extends State<_AnimationSheetRecorder> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Align(
       alignment: Alignment.topLeft,
       child: SizedBox.fromSize(
@@ -380,24 +380,24 @@ class _PostFrameCallbacker extends SingleChildRenderObjectWidget {
   final FrameCallback? callback;
 
   @override
-  _RenderPostFrameCallbacker createRenderObject(BuildContext context) => _RenderPostFrameCallbacker(
+  _RenderPostFrameCallbacker createRenderObject(final BuildContext context) => _RenderPostFrameCallbacker(
     callback: callback,
   );
 
   @override
-  void updateRenderObject(BuildContext context, _RenderPostFrameCallbacker renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderPostFrameCallbacker renderObject) {
     renderObject.callback = callback;
   }
 }
 
 class _RenderPostFrameCallbacker extends RenderProxyBox {
   _RenderPostFrameCallbacker({
-    FrameCallback? callback,
+    final FrameCallback? callback,
   }) : _callback = callback;
 
   FrameCallback? get callback => _callback;
   FrameCallback? _callback;
-  set callback(FrameCallback? value) {
+  set callback(final FrameCallback? value) {
     _callback = value;
     if (value != null) {
       markNeedsPaint();
@@ -405,9 +405,9 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (callback != null) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((final Duration duration) {
         callback!(duration);
         markNeedsPaint();
       });
@@ -416,13 +416,13 @@ class _RenderPostFrameCallbacker extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('callback', value: callback != null, ifTrue: 'has a callback'));
   }
 }
 
-Future<ui.Image> _collateFrames(List<ui.Image> frames, Size frameSize, int cellsPerRow) async {
+Future<ui.Image> _collateFrames(final List<ui.Image> frames, final Size frameSize, final int cellsPerRow) async {
   final int rowNum = (frames.length / cellsPerRow).ceil();
 
   final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -458,8 +458,8 @@ class _CellSheet extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+  Widget build(final BuildContext context) {
+    return LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
       final double rowWidth = constraints.biggest.width;
       final int cellsPerRow = (rowWidth / cellSize.width).floor();
       final List<Widget> rows = <Widget>[];
@@ -467,7 +467,7 @@ class _CellSheet extends StatelessWidget {
         final Iterable<Widget> rowTargets = children.sublist(rowStart, math.min(rowStart + cellsPerRow, children.length));
         rows.add(Row(
           textDirection: TextDirection.ltr,
-          children: rowTargets.map((Widget target) => SizedBox.fromSize(
+          children: rowTargets.map((final Widget target) => SizedBox.fromSize(
             size: cellSize,
             child: target,
           )).toList(),
@@ -510,5 +510,5 @@ class _RootableRepaintBoundary extends SingleChildRenderObjectWidget {
   const _RootableRepaintBoundary({ super.key, super.child });
 
   @override
-  _RenderRootableRepaintBoundary createRenderObject(BuildContext context) => _RenderRootableRepaintBoundary();
+  _RenderRootableRepaintBoundary createRenderObject(final BuildContext context) => _RenderRootableRepaintBoundary();
 }

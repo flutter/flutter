@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer.debugFillProperties', (final WidgetTester tester) async {
     final AnimatedContainer container = AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
       decoration: const BoxDecoration(color: Color(0xFF00FF00)),
@@ -24,7 +24,7 @@ void main() {
     expect(container, hasOneLineDescription);
   });
 
-  testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer control test', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     const BoxDecoration decorationA = BoxDecoration(
@@ -102,7 +102,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimatedContainer overanimate test', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer overanimate test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -139,7 +139,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('AnimatedContainer padding visual-to-directional animation', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer padding visual-to-directional animation', (final WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -181,7 +181,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(700.0, 0.0));
   });
 
-  testWidgets('AnimatedContainer alignment visual-to-directional animation', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer alignment visual-to-directional animation', (final WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -223,7 +223,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 400.0));
   });
 
-  testWidgets('Animation rerun', (WidgetTester tester) async {
+  testWidgets('Animation rerun', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: AnimatedContainer(
@@ -291,7 +291,7 @@ void main() {
     expect(text.size.height, equals(100.0));
   });
 
-  testWidgets('AnimatedContainer sets transformAlignment', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer sets transformAlignment', (final WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -339,7 +339,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(target)), const Offset(400.0, 300.0));
   });
 
-  testWidgets('AnimatedContainer sets clipBehavior', (WidgetTester tester) async {
+  testWidgets('AnimatedContainer sets clipBehavior', (final WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedContainer(
         decoration: const BoxDecoration(

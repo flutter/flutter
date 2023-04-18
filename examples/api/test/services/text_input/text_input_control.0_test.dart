@@ -9,7 +9,7 @@ import 'package:flutter_api_samples/services/text_input/text_input_control.0.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Enter text using the VKB', (WidgetTester tester) async {
+  testWidgets('Enter text using the VKB', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.TextInputControlExampleApp());
     await tester.pumpAndSettle();
 

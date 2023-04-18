@@ -13,7 +13,7 @@ class LogicalKeySetExampleApp extends StatelessWidget {
   const LogicalKeySetExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('LogicalKeySet Sample')),
@@ -40,7 +40,7 @@ class _LogicalKeySetExampleState extends State<LogicalKeySetExample> {
   int count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         LogicalKeySet(LogicalKeyboardKey.keyC, LogicalKeyboardKey.controlLeft): const IncrementIntent(),
@@ -48,7 +48,7 @@ class _LogicalKeySetExampleState extends State<LogicalKeySetExample> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           IncrementIntent: CallbackAction<IncrementIntent>(
-            onInvoke: (IncrementIntent intent) => setState(() {
+            onInvoke: (final IncrementIntent intent) => setState(() {
               count = count + 1;
             }),
           ),

@@ -48,7 +48,7 @@ void main() {
     order += 1;
   });
 
-  testWidgets('Registers testTextInput', (WidgetTester tester) async {
+  testWidgets('Registers testTextInput', (final WidgetTester tester) async {
     assert(order == 1);
     expect(tester.testTextInput.isRegistered, isTrue);
     order += 1;
@@ -61,7 +61,7 @@ void main() {
   });
 
   group('elapseBlocking', () {
-    testWidgets('timer is not called', (WidgetTester tester) async {
+    testWidgets('timer is not called', (final WidgetTester tester) async {
       bool timerCalled = false;
       Timer.run(() => timerCalled = true);
 
@@ -71,10 +71,10 @@ void main() {
       binding.idle();
     });
 
-    testWidgets('can use to simulate slow build', (WidgetTester tester) async {
+    testWidgets('can use to simulate slow build', (final WidgetTester tester) async {
       final DateTime beforeTime = binding.clock.now();
 
-      await tester.pumpWidget(Builder(builder: (_) {
+      await tester.pumpWidget(Builder(builder: (final _) {
         bool timerCalled = false;
         Timer.run(() => timerCalled = true);
 
@@ -94,10 +94,10 @@ void main() {
     });
   });
 
-  testWidgets('Assets in the tester can be loaded without turning event loop', (WidgetTester tester) async {
+  testWidgets('Assets in the tester can be loaded without turning event loop', (final WidgetTester tester) async {
     bool responded = false;
     // The particular asset does not matter, as long as it exists.
-    rootBundle.load('AssetManifest.json').then((ByteData data) {
+    rootBundle.load('AssetManifest.json').then((final ByteData data) {
       responded = true;
     });
     expect(responded, true);

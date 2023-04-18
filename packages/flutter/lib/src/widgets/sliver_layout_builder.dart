@@ -33,12 +33,12 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
+  RenderObject createRenderObject(final BuildContext context) => _RenderSliverLayoutBuilder();
 }
 
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
-  double childMainAxisPosition(RenderObject child) {
+  double childMainAxisPosition(final RenderObject child) {
     assert(child == this.child);
     return 0;
   }
@@ -51,13 +51,13 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   }
 
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+  void applyPaintTransform(final RenderObject child, final Matrix4 transform) {
     assert(child == this.child);
     // child's offset is always (0, 0), transform.translate(0, 0) does not mutate the transform.
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     // This renderObject does not introduce additional offset to child's position.
     if (child?.geometry?.visible ?? false) {
       context.paintChild(child!, offset);
@@ -65,7 +65,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, {required double mainAxisPosition, required double crossAxisPosition}) {
+  bool hitTestChildren(final SliverHitTestResult result, {required final double mainAxisPosition, required final double crossAxisPosition}) {
     return child != null
         && child!.geometry!.hitTestExtent > 0
         && child!.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);

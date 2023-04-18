@@ -16,7 +16,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   WindowsCodeGenerator(
     super.keyData,
     super.logicalData,
-    String scancodeToLogical,
+    final String scancodeToLogical,
   ) : _scancodeToLogical = parseMapOfString(scancodeToLogical);
 
   /// This generates the map of Windows scan codes to physical keys.
@@ -36,7 +36,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
     final OutputLines<int> lines = OutputLines<int>('Windows logical map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
       zipStrict(entry.windowsValues, entry.windowsNames,
-        (int windowsValue, String windowsName) {
+        (final int windowsValue, final String windowsName) {
           lines.add(windowsValue,
               '        {${toHex(windowsValue)}, ${toHex(entry.value, digits: 11)}},  '
               '// $windowsName -> ${entry.constantName}');
@@ -53,7 +53,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   /// code), these keys are resolved by scan codes.
   String get _scanCodeToLogicalMap {
     final OutputLines<int> lines = OutputLines<int>('Windows scancode to logical map');
-    _scancodeToLogical.forEach((String scanCodeName, String logicalName) {
+    _scancodeToLogical.forEach((final String scanCodeName, final String logicalName) {
       final PhysicalKeyEntry physicalEntry = keyData.entryByName(scanCodeName);
       final LogicalKeyEntry logicalEntry = logicalData.entryByName(logicalName);
       lines.add(physicalEntry.windowsScanCode!,
@@ -82,7 +82,7 @@ class WindowsCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'windows_flutter_key_map_cc.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+  String outputPath(final String platform) => path.join(PlatformCodeGenerator.engineRoot,
       'shell', 'platform', 'windows', 'flutter_key_map.g.cc');
 
   @override

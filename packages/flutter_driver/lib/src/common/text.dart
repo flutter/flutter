@@ -26,7 +26,7 @@ class GetTextResult extends Result {
   final String text;
 
   /// Deserializes the result from JSON.
-  static GetTextResult fromJson(Map<String, dynamic> json) {
+  static GetTextResult fromJson(final Map<String, dynamic> json) {
     return GetTextResult(json['text'] as String);
   }
 

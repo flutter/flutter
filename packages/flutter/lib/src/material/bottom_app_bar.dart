@@ -171,7 +171,7 @@ class _BottomAppBarState extends State<BottomAppBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isMaterial3 = theme.useMaterial3;
     final BottomAppBarTheme babTheme = BottomAppBarTheme.of(context);
@@ -249,7 +249,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   }
 
   @override
-  Path getClip(Size size) {
+  Path getClip(final Size size) {
     // button is the floating action button's bounding rectangle in the
     // coordinate system whose origin is at the appBar's top left corner,
     // or null if there is no floating action button.
@@ -258,7 +258,7 @@ class _BottomAppBarClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(_BottomAppBarClipper oldClipper) {
+  bool shouldReclip(final _BottomAppBarClipper oldClipper) {
     return oldClipper.geometry != geometry
         || oldClipper.shape != shape
         || oldClipper.notchMargin != notchMargin;

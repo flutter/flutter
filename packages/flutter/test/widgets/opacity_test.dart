@@ -15,7 +15,7 @@ import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Opacity', (WidgetTester tester) async {
+  testWidgets('Opacity', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // Opacity 1.0: Semantics and painting
@@ -152,7 +152,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('offset is correctly handled in Opacity', (WidgetTester tester) async {
+  testWidgets('offset is correctly handled in Opacity', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -160,7 +160,7 @@ void main() {
             child: RepaintBoundary(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List<Widget>.generate(10, (int index) {
+                children: List<Widget>.generate(10, (final int index) {
                   return Opacity(
                     opacity: 0.5,
                     child: Padding(
@@ -184,7 +184,7 @@ void main() {
     );
   });
 
-  testWidgets('empty opacity does not crash', (WidgetTester tester) async {
+  testWidgets('empty opacity does not crash', (final WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(child: Opacity(opacity: 0.5, child: Container())),
     );
@@ -195,7 +195,7 @@ void main() {
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/49857
 
-  testWidgets('Child shows up in the right spot when opacity is disabled', (WidgetTester tester) async {
+  testWidgets('Child shows up in the right spot when opacity is disabled', (final WidgetTester tester) async {
     debugDisableOpacityLayers = true;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(

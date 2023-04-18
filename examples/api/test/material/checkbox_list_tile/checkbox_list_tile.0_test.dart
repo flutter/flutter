@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/checkbox_list_tile/checkbox_list_ti
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CheckboxListTile can be checked', (WidgetTester tester) async {
+  testWidgets('CheckboxListTile can be checked', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CheckboxListTileApp(),
     );

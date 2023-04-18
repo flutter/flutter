@@ -16,7 +16,7 @@ UrlStrategy? get urlStrategy => null;
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
-void setUrlStrategy(UrlStrategy? strategy) {
+void setUrlStrategy(final UrlStrategy? strategy) {
   // No-op in non-web platforms.
 }
 
@@ -44,10 +44,10 @@ class HashUrlStrategy extends UrlStrategy {
   ///
   /// The [PlatformLocation] parameter is useful for testing to mock out browser
   /// integrations.
-  const HashUrlStrategy([PlatformLocation? _]);
+  const HashUrlStrategy([final PlatformLocation? _]);
 
   @override
-  ui.VoidCallback addPopStateListener(EventListener fn) {
+  ui.VoidCallback addPopStateListener(final EventListener fn) {
     // No-op.
     return () {};
   }
@@ -59,20 +59,20 @@ class HashUrlStrategy extends UrlStrategy {
   Object? getState() => null;
 
   @override
-  String prepareExternalUrl(String internalUrl) => '';
+  String prepareExternalUrl(final String internalUrl) => '';
 
   @override
-  void pushState(Object? state, String title, String url) {
+  void pushState(final Object? state, final String title, final String url) {
     // No-op.
   }
 
   @override
-  void replaceState(Object? state, String title, String url) {
+  void replaceState(final Object? state, final String title, final String url) {
     // No-op.
   }
 
   @override
-  Future<void> go(int count) async {
+  Future<void> go(final int count) async {
     // No-op.
   }
 }
@@ -98,5 +98,5 @@ class PathUrlStrategy extends HashUrlStrategy {
   String getPath() => '';
 
   @override
-  String prepareExternalUrl(String internalUrl) => '';
+  String prepareExternalUrl(final String internalUrl) => '';
 }

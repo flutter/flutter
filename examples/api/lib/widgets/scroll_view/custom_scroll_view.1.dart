@@ -12,7 +12,7 @@ class CustomScrollViewExampleApp extends StatelessWidget {
   const CustomScrollViewExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: CustomScrollViewExample(),
     );
@@ -31,7 +31,7 @@ class _CustomScrollViewExampleState extends State<CustomScrollViewExample> {
   List<int> bottom = <int>[0];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const Key centerKey = ValueKey<String>('bottom-sliver-list');
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +51,7 @@ class _CustomScrollViewExampleState extends State<CustomScrollViewExample> {
         slivers: <Widget>[
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (final BuildContext context, final int index) {
                 return Container(
                   alignment: Alignment.center,
                   color: Colors.blue[200 + top[index] % 4 * 100],
@@ -65,7 +65,7 @@ class _CustomScrollViewExampleState extends State<CustomScrollViewExample> {
           SliverList(
             key: centerKey,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (final BuildContext context, final int index) {
                 return Container(
                   alignment: Alignment.center,
                   color: Colors.blue[200 + bottom[index] % 4 * 100],

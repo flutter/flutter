@@ -14,7 +14,7 @@ import '../widgets/semantics_tester.dart';
 const String tooltipText = 'TIP';
 const double _customPaddingValue = 10.0;
 
-void _ensureTooltipVisible(GlobalKey key) {
+void _ensureTooltipVisible(final GlobalKey key) {
   // This function uses "as dynamic"to defeat the static analysis. In general
   // you want to avoid using this style in your code, as it will cause the
   // analyzer to be unable to help you catch errors.
@@ -59,19 +59,19 @@ void main() {
     expect(theme.enableFeedback, null);
   });
 
-  testWidgets('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default TooltipThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('TooltipThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('TooltipThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Duration wait = Duration(milliseconds: 100);
     const Duration show = Duration(milliseconds: 200);
@@ -93,8 +93,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -113,7 +113,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -130,7 +130,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -170,7 +170,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -185,7 +185,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -225,7 +225,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -242,7 +242,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -293,7 +293,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -308,7 +308,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -359,7 +359,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -376,7 +376,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -415,7 +415,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
-  testWidgets('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -430,7 +430,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -469,7 +469,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
-  testWidgets('Tooltip margin - ThemeData', (WidgetTester tester) async {
+  testWidgets('Tooltip margin - ThemeData', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -477,7 +477,7 @@ void main() {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return Theme(
                   data: ThemeData(
                     tooltipTheme: const TooltipThemeData(
@@ -524,7 +524,7 @@ void main() {
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
   });
 
-  testWidgets('Tooltip margin - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip margin - TooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       Directionality(
@@ -532,7 +532,7 @@ void main() {
         child: Overlay(
           initialEntries: <OverlayEntry>[
             OverlayEntry(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return TooltipTheme(
                   data: const TooltipThemeData(
                     padding: EdgeInsets.zero,
@@ -577,7 +577,7 @@ void main() {
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
   });
 
-  testWidgets('Tooltip message textStyle - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip message textStyle - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -607,7 +607,7 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
-  testWidgets('Tooltip message textStyle - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip message textStyle - TooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: TooltipTheme(
@@ -636,8 +636,8 @@ void main() {
     expect(textStyle.decoration, TextDecoration.underline);
   });
 
-  testWidgets('Tooltip message textAlign - TooltipTheme', (WidgetTester tester) async {
-    Future<void> pumpTooltipWithTextAlign({TextAlign? textAlign}) async {
+  testWidgets('Tooltip message textAlign - TooltipTheme', (final WidgetTester tester) async {
+    Future<void> pumpTooltipWithTextAlign({final TextAlign? textAlign}) async {
       final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
       await tester.pumpWidget(
         MaterialApp(
@@ -675,7 +675,7 @@ void main() {
     expect(textAlign, TextAlign.end);
   });
 
-  testWidgets('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip decoration - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
@@ -693,7 +693,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
@@ -716,7 +716,7 @@ void main() {
     expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
-  testWidgets('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip decoration - TooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
@@ -730,7 +730,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
@@ -753,7 +753,7 @@ void main() {
     expect(tip, paints..rrect(color: const Color(0x80800000)));
   });
 
-  testWidgets('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip height and padding - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double customTooltipHeight = 100.0;
     const double customPaddingVal = 20.0;
@@ -771,7 +771,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
@@ -800,7 +800,7 @@ void main() {
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
   });
 
-  testWidgets('Tooltip height and padding - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip height and padding - TooltipTheme', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double customTooltipHeight = 100.0;
     const double customPaddingValue = 20.0;
@@ -816,7 +816,7 @@ void main() {
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Tooltip(
                     key: key,
                     message: tooltipText,
@@ -845,7 +845,7 @@ void main() {
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingValue));
   });
 
-  testWidgets('Tooltip waitDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip waitDuration - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -892,7 +892,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip waitDuration - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip waitDuration - TooltipTheme', (final WidgetTester tester) async {
     const Duration customWaitDuration = Duration(milliseconds: 500);
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
@@ -935,7 +935,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip showDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip showDuration - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     const Duration customShowDuration = Duration(milliseconds: 3000);
     await tester.pumpWidget(
       MaterialApp(
@@ -972,7 +972,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip showDuration - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip showDuration - TooltipTheme', (final WidgetTester tester) async {
     const Duration customShowDuration = Duration(milliseconds: 3000);
     await tester.pumpWidget(
       const MaterialApp(
@@ -1005,7 +1005,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip triggerMode - ThemeData.triggerMode', (WidgetTester tester) async {
+  testWidgets('Tooltip triggerMode - ThemeData.triggerMode', (final WidgetTester tester) async {
     const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
     await tester.pumpWidget(
       MaterialApp(
@@ -1030,7 +1030,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
-  testWidgets('Tooltip triggerMode - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip triggerMode - TooltipTheme', (final WidgetTester tester) async {
     const TooltipTriggerMode triggerMode = TooltipTriggerMode.tap;
     await tester.pumpWidget(
       const MaterialApp(
@@ -1053,7 +1053,7 @@ void main() {
     expect(find.text(tooltipText), findsOneWidget); // Tooltip should show immediately after tap
   });
 
-  testWidgets('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Semantics included by default - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1094,7 +1094,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics included by default - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Semantics included by default - TooltipTheme', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1137,7 +1137,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics excluded - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Semantics excluded - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1181,7 +1181,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics excluded - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Semantics excluded - TooltipTheme', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1223,9 +1223,9 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('has semantic events by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('has semantic events by default - ThemeData.tooltipTheme', (final WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (final dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1266,9 +1266,9 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('has semantic events by default - TooltipTheme', (WidgetTester tester) async {
+  testWidgets('has semantic events by default - TooltipTheme', (final WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (final dynamic message) async {
       semanticEvents.add(message);
     });
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1311,14 +1311,14 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default Tooltip debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Tooltip(message: 'message').debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       '"message"',
@@ -1326,7 +1326,7 @@ void main() {
   });
 }
 
-SemanticsNode findDebugSemantics(RenderObject object) {
+SemanticsNode findDebugSemantics(final RenderObject object) {
   if (object.debugSemantics != null) {
     return object.debugSemantics!;
   }

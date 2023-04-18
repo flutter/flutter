@@ -27,7 +27,7 @@ void main() {
     );
     bool didComplete = false;
     bool didDismiss = false;
-    controller.addStatusListener((AnimationStatus status) {
+    controller.addStatusListener((final AnimationStatus status) {
       if (status == AnimationStatus.completed) {
         didComplete = true;
         controller.value = 0.0;
@@ -893,7 +893,7 @@ void main() {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
-    )..addStatusListener((AnimationStatus status) {
+    )..addStatusListener((final AnimationStatus status) {
       statuses.add(status);
     });
 
@@ -909,7 +909,7 @@ void main() {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
-    )..addStatusListener((AnimationStatus status) {
+    )..addStatusListener((final AnimationStatus status) {
       statuses.add(status);
     });
     controller.reverse(from: 1.0);
@@ -930,7 +930,7 @@ void main() {
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
       duration: const Duration(seconds: 1),
-    )..addStatusListener((AnimationStatus status) {
+    )..addStatusListener((final AnimationStatus status) {
       statuses.add(status);
     });
 
@@ -949,7 +949,7 @@ void main() {
     final AnimationController controller = AnimationController(
       reverseDuration: const Duration(seconds: 2),
       vsync: const TestVSync(),
-    )..addStatusListener((AnimationStatus status) {
+    )..addStatusListener((final AnimationStatus status) {
       statuses.add(status);
     });
 
@@ -1082,11 +1082,11 @@ void main() {
 
 class TestSimulation extends Simulation {
   @override
-  double dx(double time) => time;
+  double dx(final double time) => time;
 
   @override
-  bool isDone(double time) => false;
+  bool isDone(final double time) => false;
 
   @override
-  double x(double time) => time;
+  double x(final double time) => time;
 }

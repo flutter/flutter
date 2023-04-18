@@ -45,9 +45,9 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
       'CTRL': <String>['ControlLeft', 'ControlRight'],
       'ALT': <String>['AltLeft', 'AltRight'],
     };
-    goalsSource.forEach((String flagName, List<String> keys) {
+    goalsSource.forEach((final String flagName, final List<String> keys) {
       int? lineId;
-      final List<String> keysString = keys.map((String keyName) {
+      final List<String> keysString = keys.map((final String keyName) {
         final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
         final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
         lineId ??= physicalKey.usbHidCode;
@@ -69,7 +69,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
     const Map<String, String> goalsSource = <String, String>{
       'CAPS_LOCK': 'CapsLock',
     };
-    goalsSource.forEach((String flagName, String keyName) {
+    goalsSource.forEach((final String flagName, final String keyName) {
       final PhysicalKeyEntry physicalKey = keyData.entryByName(keyName);
       final LogicalKeyEntry logicalKey = logicalData.entryByName(keyName);
       lines.add(physicalKey.usbHidCode,
@@ -98,7 +98,7 @@ class AndroidCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'android_keyboard_map_java.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot, 'shell', 'platform',
+  String outputPath(final String platform) => path.join(PlatformCodeGenerator.engineRoot, 'shell', 'platform',
       path.join('android', 'io', 'flutter', 'embedding', 'android', 'KeyboardMap.java'));
 
   @override

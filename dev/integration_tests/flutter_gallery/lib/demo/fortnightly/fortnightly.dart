@@ -10,7 +10,7 @@ class FortnightlyDemo extends StatelessWidget {
   static const String routeName = '/fortnightly';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Fortnightly Demo',
       theme: _fortnightlyTheme,
@@ -38,7 +38,7 @@ class ShortAppBar extends StatelessWidget {
   final VoidCallback? onBackPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       width: 96,
       height: 50,
@@ -89,7 +89,7 @@ over water meant for the whole central valley of California? The story will shoc
 '''.replaceAll('\n', ' ');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).primaryTextTheme;
 
     return SingleChildScrollView(
@@ -195,7 +195,7 @@ ThemeData _buildFortnightlyTheme() {
   );
 }
 
-TextTheme _buildTextTheme(TextTheme base) {
+TextTheme _buildTextTheme(final TextTheme base) {
   TextTheme theme = base.apply(bodyColor: Colors.black);
   theme = theme.apply(displayColor: Colors.black);
 

@@ -13,7 +13,7 @@ class CallbackShortcutsApp extends StatelessWidget {
   const CallbackShortcutsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('CallbackShortcuts Sample')),
@@ -36,7 +36,7 @@ class _CallbackShortcutsExampleState extends State<CallbackShortcutsExample> {
   int count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         const SingleActivator(LogicalKeyboardKey.arrowUp): () {

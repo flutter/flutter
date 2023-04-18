@@ -110,7 +110,7 @@ mixin AnimationLocalListenersMixin {
   /// Calls the listener every time the value of the animation changes.
   ///
   /// Listeners can be removed with [removeListener].
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     didRegisterListener();
     _listeners.add(listener);
   }
@@ -118,7 +118,7 @@ mixin AnimationLocalListenersMixin {
   /// Stop calling the listener every time the value of the animation changes.
   ///
   /// Listeners can be added with [addListener].
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     final bool removed = _listeners.remove(listener);
     if (removed) {
       didUnregisterListener();
@@ -200,7 +200,7 @@ mixin AnimationLocalStatusListenersMixin {
   /// Calls listener every time the status of the animation changes.
   ///
   /// Listeners can be removed with [removeStatusListener].
-  void addStatusListener(AnimationStatusListener listener) {
+  void addStatusListener(final AnimationStatusListener listener) {
     didRegisterListener();
     _statusListeners.add(listener);
   }
@@ -208,7 +208,7 @@ mixin AnimationLocalStatusListenersMixin {
   /// Stops calling the listener every time the status of the animation changes.
   ///
   /// Listeners can be added with [addStatusListener].
-  void removeStatusListener(AnimationStatusListener listener) {
+  void removeStatusListener(final AnimationStatusListener listener) {
     final bool removed = _statusListeners.remove(listener);
     if (removed) {
       didUnregisterListener();
@@ -232,7 +232,7 @@ mixin AnimationLocalStatusListenersMixin {
   /// will not change which listeners are called during this iteration.
   @protected
   @pragma('vm:notify-debugger-on-exception')
-  void notifyStatusListeners(AnimationStatus status) {
+  void notifyStatusListeners(final AnimationStatus status) {
     final List<AnimationStatusListener> localListeners = _statusListeners.toList(growable: false);
     for (final AnimationStatusListener listener in localListeners) {
       try {

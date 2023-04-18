@@ -16,7 +16,7 @@ import 'package:meta/dart2js.dart';
 // framework's ability to parse stack traces in all build modes.
 Future<void> main() async {
   final StringBuffer errorMessage = StringBuffer();
-  debugPrint = (String? message, { int? wrapWidth }) {
+  debugPrint = (final String? message, { final int? wrapWidth }) {
     errorMessage.writeln(message);
   };
 
@@ -42,7 +42,7 @@ Future<void> main() async {
   );
 }
 
-bool _errorMessageFormattedCorrectly(String errorMessage) {
+bool _errorMessageFormattedCorrectly(final String errorMessage) {
   if (!errorMessage.contains('Test error message')) {
     return false;
   }
@@ -76,7 +76,7 @@ class _ThrowingWidgetState extends State<ThrowingWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }

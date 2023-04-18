@@ -12,11 +12,11 @@ import 'future_data_handler.dart';
 import 'page.dart';
 
 class NestedViewEventPage extends PageWidget {
-  const NestedViewEventPage({Key? key})
+  const NestedViewEventPage({final Key? key})
       : super('Nested View Event Tests', const ValueKey<String>('NestedViewEventTile'), key: key);
 
   @override
-  Widget build(BuildContext context) => const NestedViewEventBody();
+  Widget build(final BuildContext context) => const NestedViewEventBody();
 }
 
 class NestedViewEventBody extends StatefulWidget {
@@ -42,7 +42,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
   bool useHybridComposition = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nested view event'),
@@ -186,7 +186,7 @@ class NestedViewEventBodyState extends State<NestedViewEventBody> {
     await Process.run('input', const <String>['tap', '250', '550']);
   }
 
-  void onPlatformViewCreated(int id) {
+  void onPlatformViewCreated(final int id) {
     this.id = id;
     setState(() {
       viewChannel = MethodChannel('simple_view/$id');

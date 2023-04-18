@@ -16,11 +16,11 @@ void main() {
   late File errorFile;
 
   Future<void> runCommand({
-    List<String> arguments = const <String>[],
-    List<String> statusTextContains = const <String>[],
-    List<String> errorTextContains = const <String>[],
-    String exitMessageContains = '',
-    int exitCode = 0,
+    final List<String> arguments = const <String>[],
+    final List<String> statusTextContains = const <String>[],
+    final List<String> errorTextContains = const <String>[],
+    final String exitMessageContains = '',
+    final int exitCode = 0,
   }) async {
     final ProcessResult result = await processManager.run(<String>[
       fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
@@ -36,7 +36,7 @@ void main() {
     expect(result.stderr, contains(exitMessageContains));
   }
 
-  void createDotPackages(String projectPath, [bool nullSafe = false]) {
+  void createDotPackages(final String projectPath, [final bool nullSafe = false]) {
     final StringBuffer flutterRootUri = StringBuffer('file://');
     final String canonicalizedFlutterRootPath = fileSystem.path.canonicalize(getFlutterRoot());
     if (platform.isWindows) {
@@ -409,7 +409,7 @@ analyzer:
   });
 }
 
-void assertContains(String text, List<String> patterns) {
+void assertContains(final String text, final List<String> patterns) {
   for (final String pattern in patterns) {
     expect(text, contains(pattern));
   }

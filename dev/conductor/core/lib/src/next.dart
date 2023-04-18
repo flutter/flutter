@@ -86,7 +86,7 @@ class NextContext extends Context {
   final bool autoAccept;
   final bool force;
 
-  Future<void> run(pb.ConductorState state) async {
+  Future<void> run(final pb.ConductorState state) async {
     const List<CherrypickState> finishedStates = <CherrypickState>[
       CherrypickState.COMPLETED,
       CherrypickState.ABANDONED,
@@ -363,7 +363,7 @@ class NextContext extends Context {
   /// of the same name on their mirror, or a [GitException] for any other
   /// failures from the underlying git process call.
   @visibleForTesting
-  Future<void> pushWorkingBranch(Repository repository, pb.Repository pbRepository) async {
+  Future<void> pushWorkingBranch(final Repository repository, final pb.Repository pbRepository) async {
     try {
       await repository.pushRef(
           fromRef: 'HEAD',

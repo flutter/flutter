@@ -158,28 +158,28 @@ class ScrollbarThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ScrollbarThemeData copyWith({
-    MaterialStateProperty<bool?>? thumbVisibility,
-    MaterialStateProperty<double?>? thickness,
-    MaterialStateProperty<bool?>? trackVisibility,
-    bool? interactive,
-    Radius? radius,
-    MaterialStateProperty<Color?>? thumbColor,
-    MaterialStateProperty<Color?>? trackColor,
-    MaterialStateProperty<Color?>? trackBorderColor,
-    double? crossAxisMargin,
-    double? mainAxisMargin,
-    double? minThumbLength,
+    final MaterialStateProperty<bool?>? thumbVisibility,
+    final MaterialStateProperty<double?>? thickness,
+    final MaterialStateProperty<bool?>? trackVisibility,
+    final bool? interactive,
+    final Radius? radius,
+    final MaterialStateProperty<Color?>? thumbColor,
+    final MaterialStateProperty<Color?>? trackColor,
+    final MaterialStateProperty<Color?>? trackBorderColor,
+    final double? crossAxisMargin,
+    final double? mainAxisMargin,
+    final double? minThumbLength,
     @Deprecated(
       'Use thumbVisibility instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
-    bool? isAlwaysShown,
+    final bool? isAlwaysShown,
 
     @Deprecated(
       'Use ScrollbarThemeData.trackVisibility to resolve based on the current state instead. '
       'This feature was deprecated after v3.4.0-19.0.pre.',
     )
-    bool? showTrackOnHover,
+    final bool? showTrackOnHover,
   }) {
     return ScrollbarThemeData(
       thumbVisibility: thumbVisibility ?? this.thumbVisibility,
@@ -203,7 +203,7 @@ class ScrollbarThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ScrollbarThemeData lerp(ScrollbarThemeData? a, ScrollbarThemeData? b, double t) {
+  static ScrollbarThemeData lerp(final ScrollbarThemeData? a, final ScrollbarThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -242,7 +242,7 @@ class ScrollbarThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -266,7 +266,7 @@ class ScrollbarThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<bool?>>('thumbVisibility', thumbVisibility, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('thickness', thickness, defaultValue: null));
@@ -284,7 +284,7 @@ class ScrollbarThemeData with Diagnosticable {
   }
 }
 
-bool? _lerpBool(bool? a, bool? b, double t) => t < 0.5 ? a : b;
+bool? _lerpBool(final bool? a, final bool? b, final double t) => t < 0.5 ? a : b;
 
 /// Applies a scrollbar theme to descendant [Scrollbar] widgets.
 ///
@@ -319,16 +319,16 @@ class ScrollbarTheme extends InheritedTheme {
   /// ```dart
   /// ScrollbarThemeData theme = ScrollbarTheme.of(context);
   /// ```
-  static ScrollbarThemeData of(BuildContext context) {
+  static ScrollbarThemeData of(final BuildContext context) {
     final ScrollbarTheme? scrollbarTheme = context.dependOnInheritedWidgetOfExactType<ScrollbarTheme>();
     return scrollbarTheme?.data ?? Theme.of(context).scrollbarTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return ScrollbarTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ScrollbarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ScrollbarTheme oldWidget) => data != oldWidget.data;
 }

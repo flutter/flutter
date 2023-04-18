@@ -17,7 +17,7 @@ import '../image_data.dart';
 import '../painting/mocks_for_image_cache.dart';
 
 void main() {
-  testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with dark background color', (final WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -39,7 +39,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar with light background color', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with light background color', (final WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade100;
     await tester.pumpWidget(
       wrap(
@@ -61,7 +61,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorDark));
   });
 
-  testWidgets('CircleAvatar with image background', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with image background', (final WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CircleAvatar(
@@ -78,7 +78,7 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar with image foreground', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with image foreground', (final WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
         child: CircleAvatar(
@@ -95,7 +95,7 @@ void main() {
     expect(decoration.image!.fit, equals(BoxFit.cover));
   });
 
-  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (WidgetTester tester) async {
+  testWidgets('CircleAvatar backgroundImage is used as a fallback for foregroundImage', (final WidgetTester tester) async {
     final ErrorImageProvider errorImage = ErrorImageProvider();
     bool caughtForegroundImageError = false;
     await tester.pumpWidget(
@@ -105,7 +105,7 @@ void main() {
           foregroundImage: errorImage,
           backgroundImage: MemoryImage(Uint8List.fromList(kBlueRectPng)),
           radius: 50.0,
-          onForegroundImageError: (_,__) => caughtForegroundImageError = true,
+          onForegroundImageError: (final _,final __) => caughtForegroundImageError = true,
           ),
         ),
       ),
@@ -123,7 +123,7 @@ void main() {
     );
   });
 
-  testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
+  testWidgets('CircleAvatar with foreground color', (final WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
@@ -146,7 +146,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(foregroundColor));
   });
 
-  testWidgets('CircleAvatar default colors', (WidgetTester tester) async {
+  testWidgets('CircleAvatar default colors', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       wrap(
@@ -168,7 +168,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(theme.colorScheme.onPrimaryContainer));
   });
 
-  testWidgets('CircleAvatar text does not expand with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('CircleAvatar text does not expand with textScaleFactor', (final WidgetTester tester) async {
     final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       wrap(
@@ -192,7 +192,7 @@ void main() {
           ),
           child: CircleAvatar(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 final MediaQueryData data = MediaQuery.of(context);
 
                 // These should not change.
@@ -212,7 +212,7 @@ void main() {
     expect(tester.getSize(find.text('Z')), equals(const Size(16.0, 16.0)));
   });
 
-  testWidgets('CircleAvatar respects minRadius', (WidgetTester tester) async {
+  testWidgets('CircleAvatar respects minRadius', (final WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -236,7 +236,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar respects maxRadius', (WidgetTester tester) async {
+  testWidgets('CircleAvatar respects maxRadius', (final WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -258,7 +258,7 @@ void main() {
     expect(paragraph.text.style!.color, equals(ThemeData.fallback().primaryColorLight));
   });
 
-  testWidgets('CircleAvatar respects setting both minRadius and maxRadius', (WidgetTester tester) async {
+  testWidgets('CircleAvatar respects setting both minRadius and maxRadius', (final WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
@@ -285,7 +285,7 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgets('CircleAvatar default colors with light theme', (WidgetTester tester) async {
+    testWidgets('CircleAvatar default colors with light theme', (final WidgetTester tester) async {
       final ThemeData theme = ThemeData(
         primaryColor: Colors.grey.shade100,
         primaryColorBrightness: Brightness.light,
@@ -310,7 +310,7 @@ void main() {
       expect(paragraph.text.style!.color, equals(theme.primaryTextTheme.titleLarge!.color));
     });
 
-    testWidgets('CircleAvatar default colors with dark theme', (WidgetTester tester) async {
+    testWidgets('CircleAvatar default colors with dark theme', (final WidgetTester tester) async {
       final ThemeData theme = ThemeData(
         primaryColor: Colors.grey.shade800,
         primaryColorBrightness: Brightness.dark,
@@ -337,7 +337,7 @@ void main() {
   });
 }
 
-Widget wrap({ required Widget child }) {
+Widget wrap({ required final Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: MediaQuery(

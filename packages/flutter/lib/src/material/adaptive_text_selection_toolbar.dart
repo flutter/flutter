@@ -98,11 +98,11 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   AdaptiveTextSelectionToolbar.editable({
     super.key,
-    required ClipboardStatus clipboardStatus,
-    required VoidCallback? onCopy,
-    required VoidCallback? onCut,
-    required VoidCallback? onPaste,
-    required VoidCallback? onSelectAll,
+    required final ClipboardStatus clipboardStatus,
+    required final VoidCallback? onCopy,
+    required final VoidCallback? onCut,
+    required final VoidCallback? onPaste,
+    required final VoidCallback? onSelectAll,
     required this.anchors,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
@@ -124,7 +124,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   AdaptiveTextSelectionToolbar.editableText({
     super.key,
-    required EditableTextState editableTextState,
+    required final EditableTextState editableTextState,
   }) : children = null,
        buttonItems = editableTextState.contextMenuButtonItems,
        anchors = editableTextState.contextMenuAnchors;
@@ -140,9 +140,9 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.editableText}
   AdaptiveTextSelectionToolbar.selectable({
     super.key,
-    required VoidCallback onCopy,
-    required VoidCallback onSelectAll,
-    required SelectionGeometry selectionGeometry,
+    required final VoidCallback onCopy,
+    required final VoidCallback onSelectAll,
+    required final SelectionGeometry selectionGeometry,
     required this.anchors,
   }) : children = null,
        buttonItems = SelectableRegion.getSelectableButtonItems(
@@ -163,7 +163,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.material.AdaptiveTextSelectionToolbar.selectable}
   AdaptiveTextSelectionToolbar.selectableRegion({
     super.key,
-    required SelectableRegionState selectableRegionState,
+    required final SelectableRegionState selectableRegionState,
   }) : children = null,
        buttonItems = selectableRegionState.contextMenuButtonItems,
        anchors = selectableRegionState.contextMenuAnchors;
@@ -184,7 +184,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonType] on any platform.
-  static String getButtonLabel(BuildContext context, ContextMenuButtonItem buttonItem) {
+  static String getButtonLabel(final BuildContext context, final ContextMenuButtonItem buttonItem) {
     if (buttonItem.label != null) {
       return buttonItem.label!;
     }
@@ -238,10 +238,10 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons], which is the
   ///   Cupertino equivalent of this class and builds only the Cupertino
   ///   buttons.
-  static Iterable<Widget> getAdaptiveButtons(BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+  static Iterable<Widget> getAdaptiveButtons(final BuildContext context, final List<ContextMenuButtonItem> buttonItems) {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
-        return buttonItems.map((ContextMenuButtonItem buttonItem) {
+        return buttonItems.map((final ContextMenuButtonItem buttonItem) {
             return CupertinoTextSelectionToolbarButton.text(
               onPressed: buttonItem.onPressed,
               text: getButtonLabel(context, buttonItem),
@@ -261,7 +261,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
         return buttons;
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return buttonItems.map((ContextMenuButtonItem buttonItem) {
+        return buttonItems.map((final ContextMenuButtonItem buttonItem) {
           return DesktopTextSelectionToolbarButton.text(
             context: context,
             onPressed: buttonItem.onPressed,
@@ -269,7 +269,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
           );
         });
       case TargetPlatform.macOS:
-        return buttonItems.map((ContextMenuButtonItem buttonItem) {
+        return buttonItems.map((final ContextMenuButtonItem buttonItem) {
           return CupertinoDesktopTextSelectionToolbarButton.text(
             context: context,
             onPressed: buttonItem.onPressed,
@@ -280,7 +280,7 @@ class AdaptiveTextSelectionToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
     if ((children != null && children!.isEmpty)
       || (buttonItems != null && buttonItems!.isEmpty)) {

@@ -12,7 +12,7 @@ class NavigationRailExampleApp extends StatelessWidget {
   const NavigationRailExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: NavRailExample(),
     );
@@ -34,14 +34,14 @@ class _NavRailExampleState extends State<NavRailExample> {
   double groupAlignment = -1.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Row(
         children: <Widget>[
           NavigationRail(
             selectedIndex: _selectedIndex,
             groupAlignment: groupAlignment,
-            onDestinationSelected: (int index) {
+            onDestinationSelected: (final int index) {
               setState(() {
                 _selectedIndex = index;
               });

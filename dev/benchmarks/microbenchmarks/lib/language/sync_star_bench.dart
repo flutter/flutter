@@ -64,7 +64,7 @@ void main() {
   printer.printToStdout();
 }
 
-int generate(int index) => index;
+int generate(final int index) => index;
 
 // Generate an Iterable using a sync* method.
 Iterable<int> generateIterableSyncStar() sync* {
@@ -82,7 +82,7 @@ Iterable<int> generateIterableList() {
   return items;
 }
 
-int sumIterable(Iterable<int> values) {
+int sumIterable(final Iterable<int> values) {
   int result = 0;
   for (final int value in values) {
     result += value;

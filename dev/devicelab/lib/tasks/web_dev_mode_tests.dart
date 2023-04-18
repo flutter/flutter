@@ -26,7 +26,7 @@ abstract class WebDevice {
   static const String webServer = 'web-server';
 }
 
-TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompiler) {
+TaskFunction createWebDevModeTest(final String webDevice, final bool enableIncrementalCompiler) {
   return () async {
     final List<String> options = <String>[
       '--hot', '-d', webDevice, '--verbose', '--resident', '--target=lib/main.dart',
@@ -58,11 +58,11 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
-              .listen((String line) {
+              .listen((final String line) {
             // non-dwds builds do not know when the browser is loaded so keep trying
             // until this succeeds.
             if (line.contains('Ignoring terminal input')) {
-              Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
+              Future<void>.delayed(const Duration(seconds: 1)).then((final void _) {
                 process.stdin.write(restarted ? 'q' : 'r');
               });
               return;
@@ -108,7 +108,7 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           process.stderr
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
-              .listen((String line) {
+              .listen((final String line) {
             print('stderr: $line');
           }, onDone: () {
             stderrDone.complete();
@@ -137,11 +137,11 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           process.stdout
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
-              .listen((String line) {
+              .listen((final String line) {
             // non-dwds builds do not know when the browser is loaded so keep trying
             // until this succeeds.
             if (line.contains('Ignoring terminal input')) {
-              Future<void>.delayed(const Duration(seconds: 1)).then((void _) {
+              Future<void>.delayed(const Duration(seconds: 1)).then((final void _) {
                 process.stdin.write(restarted ? 'q' : 'r');
               });
               return;
@@ -166,7 +166,7 @@ TaskFunction createWebDevModeTest(String webDevice, bool enableIncrementalCompil
           process.stderr
               .transform<String>(utf8.decoder)
               .transform<String>(const LineSplitter())
-              .listen((String line) {
+              .listen((final String line) {
             print('stderr: $line');
           }, onDone: () {
             stderrDone.complete();

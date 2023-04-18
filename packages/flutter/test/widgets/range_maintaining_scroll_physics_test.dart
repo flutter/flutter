@@ -33,7 +33,7 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     return Container(
       height: _height,
@@ -53,10 +53,10 @@ class _ExpandingBoxState extends State<ExpandingBox> with AutomaticKeepAliveClie
 }
 
 void main() {
-  testWidgets('shrink listview', (WidgetTester tester) async {
+  testWidgets('shrink listview', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
-        itemBuilder: (BuildContext context, int index) => index == 0
+        itemBuilder: (final BuildContext context, final int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
               : Container(height: 300, color: Colors.red),
         itemCount: 2,
@@ -98,10 +98,10 @@ void main() {
     expect(position.pixels, 100.0);
   });
 
-  testWidgets('shrink listview while dragging', (WidgetTester tester) async {
+  testWidgets('shrink listview while dragging', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
-        itemBuilder: (BuildContext context, int index) => index == 0
+        itemBuilder: (final BuildContext context, final int index) => index == 0
               ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
               : Container(height: 300, color: Colors.red),
         itemCount: 2,
@@ -157,13 +157,13 @@ void main() {
     expect(position.pixels, 50.0);
   });
 
-  testWidgets('shrink listview while ballistic', (WidgetTester tester) async {
+  testWidgets('shrink listview while ballistic', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: GestureDetector(
         onTap: () { assert(false); },
         child: ListView.builder(
           physics: const RangeMaintainingScrollPhysics(parent: BouncingScrollPhysics()),
-          itemBuilder: (BuildContext context, int index) => index == 0
+          itemBuilder: (final BuildContext context, final int index) => index == 0
                 ? const ExpandingBox(collapsedSize: 400, expandedSize: 1200)
                 : Container(height: 300, color: Colors.red),
           itemCount: 2,
@@ -220,7 +220,7 @@ void main() {
     expect(position.pixels, 0.0);
   });
 
-  testWidgets('expanding page views', (WidgetTester tester) async {
+  testWidgets('expanding page views', (final WidgetTester tester) async {
     await tester.pumpWidget(const Padding(padding: EdgeInsets.only(right: 200.0), child: TabBarDemo()));
     await tester.tap(find.text('bike'));
     await tester.pump();
@@ -231,8 +231,8 @@ void main() {
     expect(bike2.center, bike1.shift(const Offset(100.0, 0.0)).center);
   });
 
-  testWidgets('changing the size of the viewport when overscrolled', (WidgetTester tester) async {
-    Widget build(double height) {
+  testWidgets('changing the size of the viewport when overscrolled', (final WidgetTester tester) async {
+    Widget build(final double height) {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: ScrollConfiguration(
@@ -265,13 +265,13 @@ void main() {
     expect(oldPosition, newPosition);
   });
 
-  testWidgets('inserting and removing an item when overscrolled', (WidgetTester tester) async {
+  testWidgets('inserting and removing an item when overscrolled', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/62890
 
     const double itemExtent = 100.0;
     final UniqueKey key = UniqueKey();
     final Finder finder = find.byKey(key);
-    Widget build({required bool twoItems}) {
+    Widget build({required final bool twoItems}) {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: ScrollConfiguration(
@@ -346,7 +346,7 @@ class TabBarDemo extends StatelessWidget {
   const TabBarDemo({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: DefaultTabController(
         length: 3,
@@ -378,25 +378,25 @@ class RangeMaintainingTestScrollBehavior extends ScrollBehavior {
   const RangeMaintainingTestScrollBehavior();
 
   @override
-  TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
+  TargetPlatform getPlatform(final BuildContext context) => defaultTargetPlatform;
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(final BuildContext context, final Widget child, final ScrollableDetails details) {
     return child;
   }
 
   @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(final BuildContext context, final Widget child, final ScrollableDetails details) {
     return child;
   }
 
   @override
-  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
-    return (PointerEvent event) => VelocityTracker.withKind(event.kind);
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(final BuildContext context) {
+    return (final PointerEvent event) => VelocityTracker.withKind(event.kind);
   }
 
   @override
-  ScrollPhysics getScrollPhysics(BuildContext context) {
+  ScrollPhysics getScrollPhysics(final BuildContext context) {
     return const BouncingScrollPhysics(parent: RangeMaintainingScrollPhysics());
   }
 }

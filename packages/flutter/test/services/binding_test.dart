@@ -54,7 +54,7 @@ void main() {
   final TestBinding binding = TestBinding();
 
   test('Adds rootBundle LICENSES to LicenseRegistry', () async {
-    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (final ByteData? message) async {
       if (const StringCodec().decodeMessage(message) == 'NOTICES.Z' && !kIsWeb) {
         return Uint8List.fromList(gzip.encode(utf8.encode(combinedLicenses))).buffer.asByteData();
       }
@@ -68,20 +68,20 @@ void main() {
 
     expect(licenses[0].packages, equals(<String>['L1Package1', 'L1Package2', 'L1Package3']));
     expect(
-      licenses[0].paragraphs.map((LicenseParagraph p) => p.text),
+      licenses[0].paragraphs.map((final LicenseParagraph p) => p.text),
       equals(<String>['L1Paragraph1', 'L1Paragraph2', 'L1Paragraph3']),
     );
 
     expect(licenses[1].packages, equals(<String>['L2Package1', 'L2Package2', 'L2Package3']));
     expect(
-      licenses[1].paragraphs.map((LicenseParagraph p) => p.text),
+      licenses[1].paragraphs.map((final LicenseParagraph p) => p.text),
       equals(<String>['L2Paragraph1', 'L2Paragraph2', 'L2Paragraph3']),
     );
   });
 
   test('didHaveMemoryPressure clears asset caches', () async {
     int flutterAssetsCallCount = 0;
-    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (final ByteData? message) async {
       flutterAssetsCallCount += 1;
       return Uint8List.fromList('test_asset_data'.codeUnits).buffer.asByteData();
     });
@@ -96,7 +96,7 @@ void main() {
     expect(flutterAssetsCallCount, 2);
 
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (final _) { });
 
     await rootBundle.loadString('test_asset');
     expect(flutterAssetsCallCount, 3);
@@ -110,7 +110,7 @@ void main() {
 
   test('initInstances sets a default method call handler for SystemChannels.textInput', () async {
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'method': 'TextInput.requestElementsInRect', 'args': null})!;
-    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (ByteData? data) {
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/textinput', message, (final ByteData? data) {
       expect(data, isNotNull);
      });
   });
@@ -118,7 +118,7 @@ void main() {
   test('Calling exitApplication sends a method call to the engine', () async {
     bool sentMessage = false;
     MethodCall? methodCall;
-    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData? message) async {
+    binding.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (final ByteData? message) async {
       methodCall = const JSONMethodCodec().decodeMethodCall(message);
       sentMessage = true;
       return const JSONMethodCodec().encodeSuccessEnvelope(<String, String>{'response': 'cancel'});
@@ -135,7 +135,7 @@ void main() {
     bool receivedReply = false;
     Map<String, dynamic>? result;
     await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/platform', const JSONMethodCodec().encodeMethodCall(incomingCall),
-      (ByteData? message) async {
+      (final ByteData? message) async {
         result = (const JSONMessageCodec().decodeMessage(message) as List<dynamic>)[0] as Map<String, dynamic>;
         receivedReply = true;
       },

@@ -15,7 +15,7 @@ class Item {
 List<Item> items = <Item>[Item(), Item()];
 
 class StatefulLeaf extends StatefulWidget {
-  const StatefulLeaf({ GlobalKey? key }) : super(key: key);
+  const StatefulLeaf({ final GlobalKey? key }) : super(key: key);
 
   @override
   StatefulLeafState createState() => StatefulLeafState();
@@ -25,7 +25,7 @@ class StatefulLeafState extends State<StatefulLeaf> {
   void markNeedsBuild() { setState(() { }); }
 
   @override
-  Widget build(BuildContext context) => const Text('leaf', textDirection: TextDirection.ltr);
+  Widget build(final BuildContext context) => const Text('leaf', textDirection: TextDirection.ltr);
 }
 
 class KeyedWrapper extends StatelessWidget {
@@ -35,7 +35,7 @@ class KeyedWrapper extends StatelessWidget {
   final GlobalKey key2;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       key: key1,
       child: StatefulLeaf(
@@ -55,7 +55,7 @@ Widget builder() {
 }
 
 void main() {
-  testWidgets('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
+  testWidgets('moving subtrees with global keys - smoketest', (final WidgetTester tester) async {
     await tester.pumpWidget(builder());
     final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
     leaf.markNeedsBuild();

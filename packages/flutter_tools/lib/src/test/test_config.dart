@@ -14,7 +14,7 @@ const String _kTestConfigFileName = 'flutter_test_config.dart';
 const String _kProjectRootSentinel = 'pubspec.yaml';
 
 /// Find the `flutter_test_config.dart` file for a specific test file.
-File? findTestConfigFile(File testFile, Logger logger) {
+File? findTestConfigFile(final File testFile, final Logger logger) {
   File? testConfigFile;
   Directory directory = testFile.parent;
   while (directory.path != directory.parent.path) {

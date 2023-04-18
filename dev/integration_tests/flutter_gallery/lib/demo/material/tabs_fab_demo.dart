@@ -71,7 +71,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   void _showExplanatoryText() {
-    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet<void>((final BuildContext context) {
       return Container(
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: Theme.of(context).dividerColor))
@@ -84,9 +84,9 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     });
   }
 
-  Widget buildTabView(_Page page) {
+  Widget buildTabView(final _Page page) {
     return Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return Container(
           key: ValueKey<String?>(page.label),
           padding: const EdgeInsets.fromLTRB(48.0, 48.0, 48.0, 96.0),
@@ -106,7 +106,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     );
   }
 
-  Widget? buildFloatingActionButton(_Page page) {
+  Widget? buildFloatingActionButton(final _Page page) {
     if (!page.fabDefined) {
       return null;
     }
@@ -132,14 +132,14 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('FAB per tab'),
         bottom: TabBar(
           controller: _controller,
-          tabs: _allPages.map<Widget>((_Page page) => Tab(text: page.label!.toUpperCase())).toList(),
+          tabs: _allPages.map<Widget>((final _Page page) => Tab(text: page.label!.toUpperCase())).toList(),
         ),
         actions: <Widget>[
           MaterialDemoDocumentationButton(TabsFabDemo.routeName),

@@ -12,7 +12,7 @@ class CupertinoSwitchApp extends StatelessWidget {
   const CupertinoSwitchApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoSwitchExample(),
@@ -31,7 +31,7 @@ class _CupertinoSwitchExampleState extends State<CupertinoSwitchExample> {
   bool switchValue = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoSwitch Sample'),
@@ -41,7 +41,7 @@ class _CupertinoSwitchExampleState extends State<CupertinoSwitchExample> {
           // This bool value toggles the switch.
           value: switchValue,
           activeColor: CupertinoColors.activeBlue,
-          onChanged: (bool? value) {
+          onChanged: (final bool? value) {
             // This is called when the user toggles the switch.
             setState(() {
               switchValue = value ?? false;

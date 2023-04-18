@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget wrap({ required Widget child, ThemeData? theme }) {
+Widget wrap({ required final Widget child, final ThemeData? theme }) {
   return MaterialApp(
     theme: theme,
     home: Center(
@@ -15,14 +15,14 @@ Widget wrap({ required Widget child, ThemeData? theme }) {
 }
 
 void main() {
-  testWidgets('ExpandIcon test', (WidgetTester tester) async {
+  testWidgets('ExpandIcon test', (final WidgetTester tester) async {
     bool expanded = false;
     IconTheme iconTheme;
 
     // Light mode tests
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        onPressed: (bool isExpanded) {
+        onPressed: (final bool isExpanded) {
           expanded = !expanded;
         },
       ),
@@ -48,7 +48,7 @@ void main() {
     // Dark mode tests
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        onPressed: (bool isExpanded) {
+        onPressed: (final bool isExpanded) {
           expanded = !expanded;
         },
       ),
@@ -73,7 +73,7 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.white60));
   });
 
-  testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
+  testWidgets('ExpandIcon disabled', (final WidgetTester tester) async {
     IconTheme iconTheme;
     // Light mode test
     await tester.pumpWidget(wrap(
@@ -95,12 +95,12 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.white38));
   });
 
-  testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
+  testWidgets('ExpandIcon test isExpanded does not trigger callback', (final WidgetTester tester) async {
     bool expanded = false;
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        onPressed: (bool isExpanded) {
+        onPressed: (final bool isExpanded) {
           expanded = !expanded;
         },
       ),
@@ -109,7 +109,7 @@ void main() {
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         isExpanded: true,
-        onPressed: (bool isExpanded) {
+        onPressed: (final bool isExpanded) {
           expanded = !expanded;
         },
       ),
@@ -118,13 +118,13 @@ void main() {
     expect(expanded, isFalse);
   });
 
-  testWidgets('ExpandIcon is rotated initially if isExpanded is true on first build', (WidgetTester tester) async {
+  testWidgets('ExpandIcon is rotated initially if isExpanded is true on first build', (final WidgetTester tester) async {
     bool expanded = true;
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         isExpanded: expanded,
-        onPressed: (bool isExpanded) {
+        onPressed: (final bool isExpanded) {
           expanded = !isExpanded;
         },
       ),
@@ -133,9 +133,9 @@ void main() {
     expect(rotation.turns.value, 0.5);
   });
 
-  testWidgets('ExpandIcon default size is 24', (WidgetTester tester) async {
+  testWidgets('ExpandIcon default size is 24', (final WidgetTester tester) async {
     final ExpandIcon expandIcon =  ExpandIcon(
-      onPressed: (bool isExpanded) {},
+      onPressed: (final bool isExpanded) {},
     );
 
     await tester.pumpWidget(wrap(
@@ -146,10 +146,10 @@ void main() {
     expect(icon.size, 24);
   });
 
-  testWidgets('ExpandIcon has the correct given size', (WidgetTester tester) async {
+  testWidgets('ExpandIcon has the correct given size', (final WidgetTester tester) async {
     ExpandIcon expandIcon =  ExpandIcon(
       size: 36,
-      onPressed: (bool isExpanded) {},
+      onPressed: (final bool isExpanded) {},
     );
 
     await tester.pumpWidget(wrap(
@@ -161,7 +161,7 @@ void main() {
 
     expandIcon =  ExpandIcon(
       size: 48,
-      onPressed: (bool isExpanded) {},
+      onPressed: (final bool isExpanded) {},
     );
 
     await tester.pumpWidget(wrap(
@@ -172,13 +172,13 @@ void main() {
     expect(icon.size, 48);
   });
 
-  testWidgets('ExpandIcon has correct semantic hints', (WidgetTester tester) async {
+  testWidgets('ExpandIcon has correct semantic hints', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         isExpanded: true,
-        onPressed: (bool _) { },
+        onPressed: (final bool _) { },
       ),
     ));
 
@@ -193,7 +193,7 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        onPressed: (bool _) { },
+        onPressed: (final bool _) { },
       ),
     ));
 
@@ -208,16 +208,16 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('ExpandIcon uses custom icon color and expanded icon color', (WidgetTester tester) async {
+  testWidgets('ExpandIcon uses custom icon color and expanded icon color', (final WidgetTester tester) async {
     bool expanded = false;
     IconTheme iconTheme;
 
     await tester.pumpWidget(wrap(
       child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
+        builder: (final BuildContext context, final StateSetter setState) {
           return ExpandIcon(
             isExpanded: expanded,
-            onPressed: (bool isExpanded) {
+            onPressed: (final bool isExpanded) {
               setState(() {
                 expanded = !isExpanded;
               });
@@ -240,10 +240,10 @@ void main() {
 
     await tester.pumpWidget(wrap(
       child: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
+        builder: (final BuildContext context, final StateSetter setState) {
           return ExpandIcon(
             isExpanded: expanded,
-            onPressed: (bool isExpanded) {
+            onPressed: (final bool isExpanded) {
               setState(() {
                 expanded = !isExpanded;
               });
@@ -269,7 +269,7 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.indigo));
   });
 
-  testWidgets('ExpandIcon uses custom disabled icon color', (WidgetTester tester) async {
+  testWidgets('ExpandIcon uses custom disabled icon color', (final WidgetTester tester) async {
     IconTheme iconTheme;
 
     await tester.pumpWidget(wrap(

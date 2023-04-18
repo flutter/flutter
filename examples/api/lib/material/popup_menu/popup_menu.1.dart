@@ -15,7 +15,7 @@ class PopupMenuApp extends StatelessWidget {
   const PopupMenuApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
       home: const PopupMenuExample(),
@@ -34,19 +34,19 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
   SampleItem? selectedMenu;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('PopupMenuButton')),
       body: Center(
         child: PopupMenuButton<SampleItem>(
           initialValue: selectedMenu,
           // Callback that sets the selected popup menu item.
-          onSelected: (SampleItem item) {
+          onSelected: (final SampleItem item) {
             setState(() {
               selectedMenu = item;
             });
           },
-          itemBuilder: (BuildContext context) => <PopupMenuEntry<SampleItem>>[
+          itemBuilder: (final BuildContext context) => <PopupMenuEntry<SampleItem>>[
             const PopupMenuItem<SampleItem>(
               value: SampleItem.itemOne,
               child: Text('Item 1'),

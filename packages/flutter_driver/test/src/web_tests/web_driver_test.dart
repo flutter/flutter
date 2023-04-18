@@ -93,17 +93,17 @@ void main() {
   });
 }
 
-Matcher _throwsDriverErrorWithMessage(String expectedMessage) {
+Matcher _throwsDriverErrorWithMessage(final String expectedMessage) {
   return throwsA(allOf(
     isA<DriverError>(),
-    predicate<DriverError>((DriverError error) {
+    predicate<DriverError>((final DriverError error) {
       final String actualMessage = error.message;
       return actualMessage == expectedMessage;
     }, 'contains message: $expectedMessage'),
   ));
 }
 
-Matcher _throwsDriverErrorWithDataString(String dataType, String dataString) {
+Matcher _throwsDriverErrorWithDataString(final String dataType, final String dataString) {
   return _throwsDriverErrorWithMessage(
     'Received malformed response from the FlutterDriver extension.\n'
     'Expected a JSON map containing a "response" field and, optionally, an '
@@ -130,7 +130,7 @@ class FakeFlutterWebConnection implements FlutterWebConnection {
   Error? communicationError;
 
   @override
-  Future<Object?> sendCommand(String script, Duration? duration) async {
+  Future<Object?> sendCommand(final String script, final Duration? duration) async {
     if (communicationError != null) {
       throw communicationError!;
     }

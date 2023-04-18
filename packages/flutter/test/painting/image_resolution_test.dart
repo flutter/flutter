@@ -17,7 +17,7 @@ class TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
 
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(final String key) async {
     if (key == 'AssetManifest.bin') {
       return const StandardMessageCodec().encodeMessage(_assetBundleMap)!;
     }
@@ -31,7 +31,7 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+  Future<ui.ImmutableBuffer> loadBuffer(final String key) async {
     final ByteData data = await load(key);
     return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
   }
@@ -39,7 +39,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
 void main() {
   group('1.0 scale device tests', () {
-    void buildAndTestWithOneAsset(String mainAssetPath) {
+    void buildAndTestWithOneAsset(final String mainAssetPath) {
       final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
         <String, List<Map<Object?, Object?>>>{};
 
@@ -52,7 +52,7 @@ void main() {
       const ImageConfiguration configuration = ImageConfiguration.empty;
 
       assetImage.obtainKey(configuration)
-        .then(expectAsync1((AssetBundleImageKey bundleKey) {
+        .then(expectAsync1((final AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
         }));
@@ -104,7 +104,7 @@ void main() {
       );
 
       assetImage.obtainKey(ImageConfiguration.empty)
-        .then(expectAsync1((AssetBundleImageKey bundleKey) {
+        .then(expectAsync1((final AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
         }));
@@ -112,7 +112,7 @@ void main() {
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: 3.0,
-      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
+      )).then(expectAsync1((final AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, variantPath);
         expect(bundleKey.scale, 3.0);
       }));
@@ -135,7 +135,7 @@ void main() {
 
 
       assetImage.obtainKey(ImageConfiguration.empty)
-        .then(expectAsync1((AssetBundleImageKey bundleKey) {
+        .then(expectAsync1((final AssetBundleImageKey bundleKey) {
           expect(bundleKey.name, mainAssetPath);
           expect(bundleKey.scale, 1.0);
         }));
@@ -143,7 +143,7 @@ void main() {
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: 3.0,
-      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
+      )).then(expectAsync1((final AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, mainAssetPath);
         expect(bundleKey.scale, 1.0);
       }));
@@ -156,9 +156,9 @@ void main() {
 
 
     void buildBundleAndTestVariantLogic(
-      double deviceRatio,
-      double chosenAssetRatio,
-      String expectedAssetPath,
+      final double deviceRatio,
+      final double chosenAssetRatio,
+      final String expectedAssetPath,
     ) {
       final Map<String, List<Map<Object?, Object?>>> assetBundleMap =
         <String, List<Map<Object?, Object?>>>{};
@@ -179,7 +179,7 @@ void main() {
       assetImage.obtainKey(ImageConfiguration(
         bundle: testAssetBundle,
         devicePixelRatio: deviceRatio,
-      )).then(expectAsync1((AssetBundleImageKey bundleKey) {
+      )).then(expectAsync1((final AssetBundleImageKey bundleKey) {
         expect(bundleKey.name, expectedAssetPath);
         expect(bundleKey.scale, chosenAssetRatio);
       }));

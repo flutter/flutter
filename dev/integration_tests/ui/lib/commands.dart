@@ -14,20 +14,20 @@ class Test extends SingleChildRenderObjectWidget {
   const Test({ super.key });
 
   @override
-  RenderTest createRenderObject(BuildContext context) => RenderTest();
+  RenderTest createRenderObject(final BuildContext context) => RenderTest();
 }
 
 class RenderTest extends RenderProxyBox {
-  RenderTest({ RenderBox? child }) : super(child);
+  RenderTest({ final RenderBox? child }) : super(child);
 
   @override
-  void debugPaintSize(PaintingContext context, Offset offset) {
+  void debugPaintSize(final PaintingContext context, final Offset offset) {
     super.debugPaintSize(context, offset);
     print('called debugPaintSize');
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     print('called paint');
   }
 

@@ -66,11 +66,11 @@ class DividerThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DividerThemeData copyWith({
-    Color? color,
-    double? space,
-    double? thickness,
-    double? indent,
-    double? endIndent,
+    final Color? color,
+    final double? space,
+    final double? thickness,
+    final double? indent,
+    final double? endIndent,
   }) {
     return DividerThemeData(
       color: color ?? this.color,
@@ -86,7 +86,7 @@ class DividerThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DividerThemeData lerp(DividerThemeData? a, DividerThemeData? b, double t) {
+  static DividerThemeData lerp(final DividerThemeData? a, final DividerThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -109,7 +109,7 @@ class DividerThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -125,7 +125,7 @@ class DividerThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DoubleProperty('space', space, defaultValue: null));
@@ -163,16 +163,16 @@ class DividerTheme extends InheritedTheme {
   /// ```dart
   /// DividerThemeData theme = DividerTheme.of(context);
   /// ```
-  static DividerThemeData of(BuildContext context) {
+  static DividerThemeData of(final BuildContext context) {
     final DividerTheme? dividerTheme = context.dependOnInheritedWidgetOfExactType<DividerTheme>();
     return dividerTheme?.data ?? Theme.of(context).dividerTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return DividerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(DividerTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final DividerTheme oldWidget) => data != oldWidget.data;
 }

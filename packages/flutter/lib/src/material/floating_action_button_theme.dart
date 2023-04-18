@@ -140,27 +140,27 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
-    Color? foregroundColor,
-    Color? backgroundColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? splashColor,
-    double? elevation,
-    double? focusElevation,
-    double? hoverElevation,
-    double? disabledElevation,
-    double? highlightElevation,
-    ShapeBorder? shape,
-    bool? enableFeedback,
-    double? iconSize,
-    BoxConstraints? sizeConstraints,
-    BoxConstraints? smallSizeConstraints,
-    BoxConstraints? largeSizeConstraints,
-    BoxConstraints? extendedSizeConstraints,
-    double? extendedIconLabelSpacing,
-    EdgeInsetsGeometry? extendedPadding,
-    TextStyle? extendedTextStyle,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
+    final Color? focusColor,
+    final Color? hoverColor,
+    final Color? splashColor,
+    final double? elevation,
+    final double? focusElevation,
+    final double? hoverElevation,
+    final double? disabledElevation,
+    final double? highlightElevation,
+    final ShapeBorder? shape,
+    final bool? enableFeedback,
+    final double? iconSize,
+    final BoxConstraints? sizeConstraints,
+    final BoxConstraints? smallSizeConstraints,
+    final BoxConstraints? largeSizeConstraints,
+    final BoxConstraints? extendedSizeConstraints,
+    final double? extendedIconLabelSpacing,
+    final EdgeInsetsGeometry? extendedPadding,
+    final TextStyle? extendedTextStyle,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return FloatingActionButtonThemeData(
       foregroundColor: foregroundColor ?? this.foregroundColor,
@@ -192,7 +192,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static FloatingActionButtonThemeData? lerp(FloatingActionButtonThemeData? a, FloatingActionButtonThemeData? b, double t) {
+  static FloatingActionButtonThemeData? lerp(final FloatingActionButtonThemeData? a, final FloatingActionButtonThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -249,7 +249,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -281,7 +281,7 @@ class FloatingActionButtonThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));

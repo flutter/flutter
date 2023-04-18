@@ -28,7 +28,7 @@ class _WebKeyLocationPair {
 // https://github.com/flutter/flutter/issues/33521
 // This code can only simulate keys which appear in the key maps.
 
-String? _keyLabel(LogicalKeyboardKey key) {
+String? _keyLabel(final LogicalKeyboardKey key) {
   final String keyLabel = key.keyLabel;
   if (keyLabel.length == 1) {
     return keyLabel.toLowerCase();
@@ -40,7 +40,7 @@ String? _keyLabel(LogicalKeyboardKey key) {
 /// utilities.
 abstract final class KeyEventSimulator {
   // Look up a synonym key, and just return the left version of it.
-  static LogicalKeyboardKey _getKeySynonym(LogicalKeyboardKey origKey) {
+  static LogicalKeyboardKey _getKeySynonym(final LogicalKeyboardKey origKey) {
     if (origKey == LogicalKeyboardKey.shift) {
       return LogicalKeyboardKey.shiftLeft;
     }
@@ -56,7 +56,7 @@ abstract final class KeyEventSimulator {
     return origKey;
   }
 
-  static bool _osIsSupported(String platform) {
+  static bool _osIsSupported(final String platform) {
     switch (platform) {
       case 'android':
       case 'fuchsia':
@@ -70,7 +70,7 @@ abstract final class KeyEventSimulator {
     return false;
   }
 
-  static int _getScanCode(PhysicalKeyboardKey key, String platform) {
+  static int _getScanCode(final PhysicalKeyboardKey key, final String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
     late Map<int, PhysicalKeyboardKey> map;
     switch (platform) {
@@ -101,7 +101,7 @@ abstract final class KeyEventSimulator {
     return scanCode!;
   }
 
-  static int _getKeyCode(LogicalKeyboardKey key, String platform) {
+  static int _getKeyCode(final LogicalKeyboardKey key, final String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
     if (kIsWeb) {
       // web doesn't have int type code. This check is used to treeshake
@@ -140,7 +140,7 @@ abstract final class KeyEventSimulator {
     }
   }
 
-  static PhysicalKeyboardKey _inferPhysicalKey(LogicalKeyboardKey key) {
+  static PhysicalKeyboardKey _inferPhysicalKey(final LogicalKeyboardKey key) {
     PhysicalKeyboardKey? result;
     for (final PhysicalKeyboardKey physicalKey in PhysicalKeyboardKey.knownPhysicalKeys) {
       if (physicalKey.debugName == key.debugName) {
@@ -152,7 +152,7 @@ abstract final class KeyEventSimulator {
     return result!;
   }
 
-  static _WebKeyLocationPair _getWebKeyLocation(LogicalKeyboardKey key, String keyLabel) {
+  static _WebKeyLocationPair _getWebKeyLocation(final LogicalKeyboardKey key, final String keyLabel) {
     String? result;
     for (final MapEntry<String, List<LogicalKeyboardKey?>> entry in kWebLocationMap.entries) {
       final int foundIndex = entry.value.lastIndexOf(key);
@@ -176,7 +176,7 @@ abstract final class KeyEventSimulator {
     return _WebKeyLocationPair(result!, 0);
   }
 
-  static String _getWebCode(PhysicalKeyboardKey key) {
+  static String _getWebCode(final PhysicalKeyboardKey key) {
     String? result;
     for (final MapEntry<String, PhysicalKeyboardKey> entry in kWebToPhysicalKey.entries) {
       if (entry.value.usbHidUsage == key.usbHidUsage) {
@@ -188,7 +188,7 @@ abstract final class KeyEventSimulator {
     return result!;
   }
 
-  static PhysicalKeyboardKey _findPhysicalKeyByPlatform(LogicalKeyboardKey key, String platform) {
+  static PhysicalKeyboardKey _findPhysicalKeyByPlatform(final LogicalKeyboardKey key, final String platform) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
     late Map<dynamic, PhysicalKeyboardKey> map;
     if (kIsWeb) {
@@ -226,10 +226,10 @@ abstract final class KeyEventSimulator {
   /// Get a raw key data map given a [LogicalKeyboardKey] and a platform.
   static Map<String, dynamic> getKeyData(
     LogicalKeyboardKey key, {
-    required String platform,
-    bool isDown = true,
+    required final String platform,
+    final bool isDown = true,
     PhysicalKeyboardKey? physicalKey,
-    String? character,
+    final String? character,
   }) {
     assert(_osIsSupported(platform), 'Platform $platform not supported for key simulation');
 
@@ -307,7 +307,7 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static int _getAndroidModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+  static int _getAndroidModifierFlags(final LogicalKeyboardKey newKey, final bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
@@ -354,7 +354,7 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static int _getGlfwModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+  static int _getGlfwModifierFlags(final LogicalKeyboardKey newKey, final bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
@@ -380,7 +380,7 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static int _getWindowsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+  static int _getWindowsModifierFlags(final LogicalKeyboardKey newKey, final bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
@@ -433,7 +433,7 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static int _getFuchsiaModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+  static int _getFuchsiaModifierFlags(final LogicalKeyboardKey newKey, final bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
@@ -471,7 +471,7 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static int _getWebModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+  static int _getWebModifierFlags(final LogicalKeyboardKey newKey, final bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
@@ -515,7 +515,7 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static int _getMacOsModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+  static int _getMacOsModifierFlags(final LogicalKeyboardKey newKey, final bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
@@ -582,7 +582,7 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static int _getIOSModifierFlags(LogicalKeyboardKey newKey, bool isDown) {
+  static int _getIOSModifierFlags(final LogicalKeyboardKey newKey, final bool isDown) {
     int result = 0;
     final Set<LogicalKeyboardKey> pressed = RawKeyboard.instance.keysPressed;
     if (isDown) {
@@ -649,13 +649,13 @@ abstract final class KeyEventSimulator {
     return result;
   }
 
-  static Future<bool> _simulateKeyEventByRawEvent(ValueGetter<Map<String, dynamic>> buildKeyData) async {
+  static Future<bool> _simulateKeyEventByRawEvent(final ValueGetter<Map<String, dynamic>> buildKeyData) async {
     return TestAsyncUtils.guard<bool>(() async {
       final Completer<bool> result = Completer<bool>();
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(buildKeyData()),
-        (ByteData? data) {
+        (final ByteData? data) {
           if (data == null) {
             result.complete(false);
             return;
@@ -678,7 +678,7 @@ abstract final class KeyEventSimulator {
     }
     return result;
   })();
-  static PhysicalKeyboardKey _findPhysicalKey(LogicalKeyboardKey key) {
+  static PhysicalKeyboardKey _findPhysicalKey(final LogicalKeyboardKey key) {
     final PhysicalKeyboardKey? result = _debugNameToPhysicalKey[key.debugName];
     assert(result != null, 'Physical key for $key not found in known physical keys');
     return result!;
@@ -724,10 +724,10 @@ abstract final class KeyEventSimulator {
   ///
   ///  * [simulateKeyUpEvent] to simulate the corresponding key up event.
   static Future<bool> simulateKeyDownEvent(
-    LogicalKeyboardKey key, {
+    final LogicalKeyboardKey key, {
     String? platform,
-    PhysicalKeyboardKey? physicalKey,
-    String? character,
+    final PhysicalKeyboardKey? physicalKey,
+    final String? character,
   }) async {
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
@@ -769,9 +769,9 @@ abstract final class KeyEventSimulator {
   ///
   ///  * [simulateKeyDownEvent] to simulate the corresponding key down event.
   static Future<bool> simulateKeyUpEvent(
-    LogicalKeyboardKey key, {
+    final LogicalKeyboardKey key, {
     String? platform,
-    PhysicalKeyboardKey? physicalKey,
+    final PhysicalKeyboardKey? physicalKey,
   }) async {
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
@@ -813,10 +813,10 @@ abstract final class KeyEventSimulator {
   ///
   ///  * [simulateKeyDownEvent] to simulate the corresponding key down event.
   static Future<bool> simulateKeyRepeatEvent(
-    LogicalKeyboardKey key, {
+    final LogicalKeyboardKey key, {
     String? platform,
-    PhysicalKeyboardKey? physicalKey,
-    String? character,
+    final PhysicalKeyboardKey? physicalKey,
+    final String? character,
   }) async {
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
@@ -865,10 +865,10 @@ abstract final class KeyEventSimulator {
 ///  * [simulateKeyUpEvent] and [simulateKeyRepeatEvent] to simulate the
 ///    corresponding key up and repeat event.
 Future<bool> simulateKeyDownEvent(
-  LogicalKeyboardKey key, {
-  String? platform,
-  PhysicalKeyboardKey? physicalKey,
-  String? character,
+  final LogicalKeyboardKey key, {
+  final String? platform,
+  final PhysicalKeyboardKey? physicalKey,
+  final String? character,
 }) async {
   final bool handled = await KeyEventSimulator.simulateKeyDownEvent(key, platform: platform, physicalKey: physicalKey, character: character);
   final ServicesBinding binding = ServicesBinding.instance;
@@ -897,9 +897,9 @@ Future<bool> simulateKeyDownEvent(
 ///  * [simulateKeyDownEvent] and [simulateKeyRepeatEvent] to simulate the
 ///    corresponding key down and repeat event.
 Future<bool> simulateKeyUpEvent(
-  LogicalKeyboardKey key, {
-  String? platform,
-  PhysicalKeyboardKey? physicalKey,
+  final LogicalKeyboardKey key, {
+  final String? platform,
+  final PhysicalKeyboardKey? physicalKey,
 }) async {
   final bool handled = await KeyEventSimulator.simulateKeyUpEvent(key, platform: platform, physicalKey: physicalKey);
   final ServicesBinding binding = ServicesBinding.instance;
@@ -925,10 +925,10 @@ Future<bool> simulateKeyUpEvent(
 ///  - [simulateKeyDownEvent] and [simulateKeyUpEvent] to simulate the
 ///    corresponding key down and up event.
 Future<bool> simulateKeyRepeatEvent(
-  LogicalKeyboardKey key, {
-  String? platform,
-  PhysicalKeyboardKey? physicalKey,
-  String? character,
+  final LogicalKeyboardKey key, {
+  final String? platform,
+  final PhysicalKeyboardKey? physicalKey,
+  final String? character,
 }) {
   return KeyEventSimulator.simulateKeyRepeatEvent(key, platform: platform, physicalKey: physicalKey, character: character);
 }
@@ -953,7 +953,7 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   final Set<KeyDataTransitMode> values;
 
   @override
-  String describeValue(KeyDataTransitMode value) {
+  String describeValue(final KeyDataTransitMode value) {
     switch (value) {
       case KeyDataTransitMode.rawKeyData:
         return 'RawKeyEvent';
@@ -963,14 +963,14 @@ class KeySimulatorTransitModeVariant extends TestVariant<KeyDataTransitMode> {
   }
 
   @override
-  Future<KeyDataTransitMode?> setUp(KeyDataTransitMode value) async {
+  Future<KeyDataTransitMode?> setUp(final KeyDataTransitMode value) async {
     final KeyDataTransitMode? previousSetting = debugKeyEventSimulatorTransitModeOverride;
     debugKeyEventSimulatorTransitModeOverride = value;
     return previousSetting;
   }
 
   @override
-  Future<void> tearDown(KeyDataTransitMode value, KeyDataTransitMode? memento) async {
+  Future<void> tearDown(final KeyDataTransitMode value, final KeyDataTransitMode? memento) async {
     // ignore: invalid_use_of_visible_for_testing_member
     RawKeyboard.instance.clearKeysPressed();
     // ignore: invalid_use_of_visible_for_testing_member

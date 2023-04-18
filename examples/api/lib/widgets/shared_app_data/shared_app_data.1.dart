@@ -19,12 +19,12 @@ class SharedObject {
   @override
   String toString() => describeIdentity(this);
 
-  static void reset(BuildContext context) {
+  static void reset(final BuildContext context) {
     // Calling SharedAppData.setValue() causes dependent widgets to be rebuilt.
     SharedAppData.setValue<Object, SharedObject>(context, _sharedObjectKey, SharedObject._());
   }
 
-  static SharedObject of(BuildContext context) {
+  static SharedObject of(final BuildContext context) {
     // If a value for _sharedObjectKey has never been set then the third
     // callback parameter is used to generate an initial value.
     return SharedAppData.getValue<Object, SharedObject>(context, _sharedObjectKey, () => SharedObject._());
@@ -37,7 +37,7 @@ class CustomWidget extends StatelessWidget {
   const CustomWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Will be rebuilt if the shared object's value is changed.
     return ElevatedButton(
       child: Text('Replace ${SharedObject.of(context)}'),
@@ -52,7 +52,7 @@ class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Scaffold(
       body: Center(child: CustomWidget()),
     );

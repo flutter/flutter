@@ -33,10 +33,10 @@ const int _kChildCount = 50;
 
 class CupertinoNavigationDemo extends StatelessWidget {
   CupertinoNavigationDemo({ super.key, this.randomSeed })
-      : colorItems = List<Color>.generate(_kChildCount, (int index) {
+      : colorItems = List<Color>.generate(_kChildCount, (final int index) {
           return coolColors[math.Random(randomSeed).nextInt(coolColors.length)];
         }) ,
-        colorNameItems = List<String>.generate(_kChildCount, (int index) {
+        colorNameItems = List<String>.generate(_kChildCount, (final int index) {
           return coolColorNames[math.Random(randomSeed).nextInt(coolColorNames.length)];
         });
 
@@ -47,7 +47,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
   final int? randomSeed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return WillPopScope(
       // Prevent swipe popping of this page. Use explicit exit buttons only.
       onWillPop: () => Future<bool>.value(true),
@@ -70,11 +70,11 @@ class CupertinoNavigationDemo extends StatelessWidget {
               ),
             ],
           ),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             switch (index) {
               case 0:
                 return CupertinoTabView(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
                       colorNameItems: colorNameItems,
@@ -85,12 +85,12 @@ class CupertinoNavigationDemo extends StatelessWidget {
                 );
               case 1:
                 return CupertinoTabView(
-                  builder: (BuildContext context) => const CupertinoDemoTab2(),
+                  builder: (final BuildContext context) => const CupertinoDemoTab2(),
                   defaultTitle: 'Support Chat',
                 );
               case 2:
                 return CupertinoTabView(
-                  builder: (BuildContext context) => const CupertinoDemoTab3(),
+                  builder: (final BuildContext context) => const CupertinoDemoTab3(),
                   defaultTitle: 'Account',
                 );
             }
@@ -107,7 +107,7 @@ class ExitButton extends StatelessWidget {
   const ExitButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoButton(
       padding: EdgeInsets.zero,
       child: const Tooltip(
@@ -145,7 +145,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
   final int? randomSeed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: CupertinoColors.systemGroupedBackground,
       child: CustomScrollView(
@@ -164,7 +164,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
             ).padding,
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
+                (final BuildContext context, final int index) {
                   return Tab1RowItem(
                     index: index,
                     lastItem: index == _kChildCount - 1,
@@ -200,13 +200,13 @@ class Tab1RowItem extends StatelessWidget {
   final int? randomSeed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget row = GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
         Navigator.of(context).push(CupertinoPageRoute<void>(
           title: colorName,
-          builder: (BuildContext context) => Tab1ItemPage(
+          builder: (final BuildContext context) => Tab1ItemPage(
             color: color,
             colorName: colorName,
             index: index,
@@ -301,7 +301,7 @@ class Tab1ItemPage extends StatefulWidget {
 }
 
 class Tab1ItemPageState extends State<Tab1ItemPage> {
-  late final List<Color> relatedColors = List<Color>.generate(10, (int index) {
+  late final List<Color> relatedColors = List<Color>.generate(10, (final int index) {
     final math.Random random = math.Random(widget.randomSeed);
     return Color.fromARGB(
       255,
@@ -312,7 +312,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         trailing: ExitButton(),
@@ -405,7 +405,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
                 scrollDirection: Axis.horizontal,
                 itemCount: 10,
                 itemExtent: 160.0,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   return Padding(
                     padding: const EdgeInsets.only(left: 16.0),
                     child: Container(
@@ -439,7 +439,7 @@ class CupertinoDemoTab2 extends StatelessWidget {
   const CupertinoDemoTab2({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         trailing: trailingButtons,
@@ -464,7 +464,7 @@ class Tab2Header extends StatelessWidget {
   const Tab2Header({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SafeArea(
@@ -595,7 +595,7 @@ class Tab2ConversationBubble extends StatelessWidget {
   final Tab2ConversationBubbleColor? color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Color? backgroundColor;
     Color? foregroundColor;
 
@@ -637,7 +637,7 @@ class Tab2ConversationAvatar extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -676,7 +676,7 @@ class Tab2ConversationRow extends StatelessWidget {
   final String? text;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final bool isSelf = avatar == null;
     return SafeArea(
       child: Row(
@@ -743,7 +743,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
   const CupertinoDemoTab3({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
     navigationBar: CupertinoNavigationBar(trailing: trailingButtons),
     backgroundColor: CupertinoColors.systemBackground,
@@ -755,7 +755,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
               Navigator.of(context, rootNavigator: true).push(
                 CupertinoPageRoute<bool>(
                   fullscreenDialog: true,
-                  builder: (BuildContext context) => const Tab3Dialog(),
+                  builder: (final BuildContext context) => const Tab3Dialog(),
                 ),
               );
             },
@@ -795,7 +795,7 @@ class Tab3Dialog extends StatelessWidget {
   const Tab3Dialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         leading: CupertinoButton(

@@ -55,7 +55,7 @@ class CardCollectionState extends State<CardCollection> {
     }
     _cardModels = List<CardModel>.generate(
       _cardModels.length,
-      (int i) {
+      (final int i) {
         _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
         return _cardModels[i];
       },
@@ -65,7 +65,7 @@ class CardCollectionState extends State<CardCollection> {
   void _initVariableSizedCardModels() {
     _cardModels = List<CardModel>.generate(
       _cardHeights.length,
-      (int i) => CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i]),
+      (final int i) => CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i]),
     );
   }
 
@@ -73,7 +73,7 @@ class CardCollectionState extends State<CardCollection> {
     const int cardCount = 27;
     _cardModels = List<CardModel>.generate(
       cardCount,
-      (int i) => CardModel(i, kFixedCardHeight),
+      (final int i) => CardModel(i, kFixedCardHeight),
     );
   }
 
@@ -91,7 +91,7 @@ class CardCollectionState extends State<CardCollection> {
     _initCardModels();
   }
 
-  void dismissCard(CardModel card) {
+  void dismissCard(final CardModel card) {
     if (_cardModels.contains(card)) {
       setState(() {
         _cardModels.remove(card);
@@ -135,7 +135,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  String _dismissDirectionText(DismissDirection direction) {
+  String _dismissDirectionText(final DismissDirection direction) {
     final String s = direction.toString();
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
   }
@@ -166,36 +166,36 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _selectColor(MaterialColor? selection) {
+  void _selectColor(final MaterialColor? selection) {
     setState(() {
       _primaryColor = selection!;
     });
   }
 
-  void _changeDismissDirection(DismissDirection? newDismissDirection) {
+  void _changeDismissDirection(final DismissDirection? newDismissDirection) {
     setState(() {
       _dismissDirection = newDismissDirection!;
     });
   }
 
-  void _changeTextAlign(TextAlign? newTextAlign) {
+  void _changeTextAlign(final TextAlign? newTextAlign) {
     setState(() {
       _textAlign = newTextAlign!;
     });
   }
 
-  Widget buildDrawerCheckbox(String label, bool value, void Function() callback, { bool enabled = true }) {
+  Widget buildDrawerCheckbox(final String label, final bool value, final void Function() callback, { final bool enabled = true }) {
     return ListTile(
       onTap: enabled ? callback : null,
       title: Text(label),
       trailing: Checkbox(
         value: value,
-        onChanged: enabled ? (_) { callback(); } : null,
+        onChanged: enabled ? (final _) { callback(); } : null,
       ),
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor?> onChanged, { IconData? icon, bool enabled = true }) {
+  Widget buildDrawerColorRadioItem(final String label, final MaterialColor itemValue, final MaterialColor currentValue, final ValueChanged<MaterialColor?> onChanged, { final IconData? icon, final bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -208,7 +208,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection?> onChanged, { IconData? icon, bool enabled = true }) {
+  Widget buildDrawerDirectionRadioItem(final String label, final DismissDirection itemValue, final DismissDirection currentValue, final ValueChanged<DismissDirection?> onChanged, { final IconData? icon, final bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -221,7 +221,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign?> onChanged, { IconData? icon, bool enabled = true }) {
+  Widget buildFontRadioItem(final String label, final TextAlign itemValue, final TextAlign currentValue, final ValueChanged<TextAlign?> onChanged, { final IconData? icon, final bool enabled = true }) {
     return ListTile(
       leading: Icon(icon),
       title: Text(label),
@@ -234,7 +234,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
+  AppBar _buildAppBar(final BuildContext context) {
     return AppBar(
       actions: <Widget>[
         Text(_dismissDirectionText(_dismissDirection)),
@@ -248,12 +248,12 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget _buildCard(BuildContext context, int index) {
+  Widget _buildCard(final BuildContext context, final int index) {
     final CardModel cardModel = _cardModels[index];
     final Widget card = Dismissible(
       key: ObjectKey(cardModel),
       direction: _dismissDirection,
-      onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
+      onDismissed: (final DismissDirection direction) { dismissCard(cardModel); },
       child: Card(
         color: _primaryColor[cardModel.color],
         child: Container(
@@ -348,7 +348,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Shader _createShader(Rect bounds) {
+  Shader _createShader(final Rect bounds) {
     return const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
@@ -359,7 +359,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget cardCollection = ListView.builder(
       itemExtent: _fixedSizeCards ? kFixedCardHeight : null,
       itemCount: _cardModels.length,

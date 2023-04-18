@@ -22,7 +22,7 @@ class CalculatorState extends State<Calculator> {
 
   // Make `expression` the current expression and push the previous current
   // expression onto the stack.
-  void pushExpression(CalcExpression expression) {
+  void pushExpression(final CalcExpression expression) {
     _expressionStack.add(_expression);
     _expression = expression;
   }
@@ -37,12 +37,12 @@ class CalculatorState extends State<Calculator> {
   }
 
   /// Set `resultExpression` to the current expression and clear the stack.
-  void setResult(CalcExpression resultExpression) {
+  void setResult(final CalcExpression resultExpression) {
     _expressionStack.clear();
     _expression = resultExpression;
   }
 
-  void handleNumberTap(int n) {
+  void handleNumberTap(final int n) {
     final CalcExpression? expression = _expression.appendDigit(n);
     if (expression != null) {
       setState(() {
@@ -112,7 +112,7 @@ class CalculatorState extends State<Calculator> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).canvasColor,
@@ -143,7 +143,7 @@ class CalcDisplay extends StatelessWidget {
   final String? content;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Text(
         content!,
@@ -159,7 +159,7 @@ class KeyPad extends StatelessWidget {
   final CalculatorState? calcState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData themeData = ThemeData(
       primarySwatch: Colors.purple,
       brightness: Brightness.dark,
@@ -227,7 +227,7 @@ class KeyRow extends StatelessWidget {
   final List<Widget> keys;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Expanded(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -244,7 +244,7 @@ class CalcKey extends StatelessWidget {
   final GestureTapCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return Expanded(
       child: InkResponse(
@@ -265,7 +265,7 @@ class CalcKey extends StatelessWidget {
 }
 
 class NumberKey extends CalcKey {
-  NumberKey(int value, CalculatorState? calcState, {Key? key})
+  NumberKey(final int value, final CalculatorState? calcState, {final Key? key})
     : super('$value', () {
         calcState!.handleNumberTap(value);
       }, key: key);

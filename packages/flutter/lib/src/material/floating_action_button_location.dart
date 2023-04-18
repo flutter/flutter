@@ -436,7 +436,7 @@ abstract class FloatingActionButtonLocation {
   /// except the [FloatingActionButton]. The [Scaffold] uses the [Offset]
   /// returned from this method to position the [FloatingActionButton] and
   /// complete its layout.
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry);
+  Offset getOffset(final ScaffoldPrelayoutGeometry scaffoldGeometry);
 
   @override
   String toString() => objectRuntimeType(this, 'FloatingActionButtonLocation');
@@ -484,20 +484,20 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
   /// [Scaffold]'s layout.
   ///
   /// Used by [getOffset] to compute its x-coordinate.
-  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment);
+  double getOffsetX(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment);
 
   /// Obtains the y-offset to place the [FloatingActionButton] based on the
   /// [Scaffold]'s layout.
   ///
   /// Used by [getOffset] to compute its y-coordinate.
-  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment);
+  double getOffsetY(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment);
 
   /// A function returning whether this [StandardFabLocation] is optimized for
   /// mini [FloatingActionButton]s.
   bool isMini () => false;
 
   @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+  Offset getOffset(final ScaffoldPrelayoutGeometry scaffoldGeometry) {
     final double adjustment = isMini() ? kMiniButtonOffsetAdjustment : 0.0;
     return Offset(
       getOffsetX(scaffoldGeometry, adjustment),
@@ -506,14 +506,14 @@ abstract class StandardFabLocation extends FloatingActionButtonLocation {
   }
 
   /// Calculates x-offset for left-aligned [FloatingActionButtonLocation]s.
-  static double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  static double _leftOffsetX(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     return kFloatingActionButtonMargin
         + scaffoldGeometry.minInsets.left
         - adjustment;
   }
 
   /// Calculates x-offset for right-aligned [FloatingActionButtonLocation]s.
-  static double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  static double _rightOffsetX(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     return scaffoldGeometry.scaffoldSize.width
         - kFloatingActionButtonMargin
         - scaffoldGeometry.minInsets.right
@@ -537,7 +537,7 @@ mixin FabTopOffsetY on StandardFabLocation {
   /// Calculates y-offset for [FloatingActionButtonLocation]s floating over
   /// the transition between the [Scaffold.appBar] and the [Scaffold.body].
   @override
-  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetY(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     if (scaffoldGeometry.contentTop > scaffoldGeometry.minViewPadding.top) {
       final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
       return scaffoldGeometry.contentTop - fabHalfHeight;
@@ -552,7 +552,7 @@ mixin FabFloatOffsetY on StandardFabLocation {
   /// Calculates y-offset for [FloatingActionButtonLocation]s floating at
   /// the bottom of the screen.
   @override
-  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetY(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double bottomContentHeight = scaffoldGeometry.scaffoldSize.height - contentBottom;
     final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
@@ -580,7 +580,7 @@ mixin FabDockedOffsetY on StandardFabLocation {
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
   /// action button lines up with the top of the bottom navigation bar.
   @override
-  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetY(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double contentMargin = scaffoldGeometry.scaffoldSize.height - contentBottom;
     final double bottomViewPadding = scaffoldGeometry.minViewPadding.bottom;
@@ -625,7 +625,7 @@ mixin FabContainedOffsetY on StandardFabLocation {
   /// [Scaffold.bottomNavigationBar] so that the center of the floating
   /// action button lines up with the center of the bottom navigation bar.
   @override
-  double getOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetY(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     final double contentBottom = scaffoldGeometry.contentBottom;
     final double contentMargin = scaffoldGeometry.scaffoldSize.height - contentBottom;
     final double bottomViewPadding = scaffoldGeometry.minViewPadding.bottom;
@@ -655,7 +655,7 @@ mixin FabContainedOffsetY on StandardFabLocation {
 mixin FabStartOffsetX on StandardFabLocation {
   /// Calculates x-offset for start-aligned [FloatingActionButtonLocation]s.
   @override
-  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetX(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         return StandardFabLocation._rightOffsetX(scaffoldGeometry, adjustment);
@@ -669,7 +669,7 @@ mixin FabStartOffsetX on StandardFabLocation {
 mixin FabCenterOffsetX on StandardFabLocation {
   /// Calculates x-offset for center-aligned [FloatingActionButtonLocation]s.
   @override
-  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetX(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
   }
 }
@@ -678,7 +678,7 @@ mixin FabCenterOffsetX on StandardFabLocation {
 mixin FabEndOffsetX on StandardFabLocation {
   /// Calculates x-offset for end-aligned [FloatingActionButtonLocation]s.
   @override
-  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetX(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     switch (scaffoldGeometry.textDirection) {
       case TextDirection.rtl:
         return StandardFabLocation._leftOffsetX(scaffoldGeometry, adjustment);
@@ -888,7 +888,7 @@ abstract class FloatingActionButtonAnimator {
   /// [progress] is the current progress of the transition animation.
   /// When [progress] is 0.0, the returned [Offset] should be equal to [begin].
   /// when [progress] is 1.0, the returned [Offset] should be equal to [end].
-  Offset getOffset({ required Offset begin, required Offset end, required double progress });
+  Offset getOffset({ required final Offset begin, required final Offset end, required final double progress });
 
   /// Animates the scale of the [FloatingActionButton].
   ///
@@ -907,7 +907,7 @@ abstract class FloatingActionButtonAnimator {
   ///     );
   ///   }
   /// ```
-  Animation<double> getScaleAnimation({ required Animation<double> parent });
+  Animation<double> getScaleAnimation({ required final Animation<double> parent });
 
   /// Animates the rotation of [Scaffold.floatingActionButton].
   ///
@@ -925,7 +925,7 @@ abstract class FloatingActionButtonAnimator {
   ///   return Tween<double>(begin: 0.0, end: 1.0).animate(parent);
   /// }
   /// ```
-  Animation<double> getRotationAnimation({ required Animation<double> parent });
+  Animation<double> getRotationAnimation({ required final Animation<double> parent });
 
   /// Gets the progress value to restart a motion animation from when the animation is interrupted.
   ///
@@ -939,7 +939,7 @@ abstract class FloatingActionButtonAnimator {
   ///
   /// A sensible default is usually 0.0, which is the same as restarting
   /// the animation from the beginning, regardless of the original state of the animation.
-  double getAnimationRestart(double previousValue) => 0.0;
+  double getAnimationRestart(final double previousValue) => 0.0;
 
   @override
   String toString() => objectRuntimeType(this, 'FloatingActionButtonAnimator');
@@ -949,7 +949,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   const _ScalingFabMotionAnimator();
 
   @override
-  Offset getOffset({ required Offset begin, required Offset end, required double progress }) {
+  Offset getOffset({ required final Offset begin, required final Offset end, required final double progress }) {
     if (progress < 0.5) {
       return begin;
     } else {
@@ -958,7 +958,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   }
 
   @override
-  Animation<double> getScaleAnimation({ required Animation<double> parent }) {
+  Animation<double> getScaleAnimation({ required final Animation<double> parent }) {
     // Animate the scale down from 1 to 0 in the first half of the animation
     // then from 0 back to 1 in the second half.
     const Curve curve = Interval(0.5, 1.0, curve: Curves.ease);
@@ -980,7 +980,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   static final Animatable<double> _thresholdCenterTween = CurveTween(curve: const Threshold(0.5));
 
   @override
-  Animation<double> getRotationAnimation({ required Animation<double> parent }) {
+  Animation<double> getRotationAnimation({ required final Animation<double> parent }) {
     // This rotation will turn on the way in, but not on the way out.
     return _AnimationSwap<double>(
       parent.drive(_rotationTween),
@@ -994,7 +994,7 @@ class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {
   // If the animation was finishing, we'll treat it as if we were starting at that point in reverse.
   // This avoids a size jump during the animation.
   @override
-  double getAnimationRestart(double previousValue) => math.min(1.0 - previousValue, previousValue);
+  double getAnimationRestart(final double previousValue) => math.min(1.0 - previousValue, previousValue);
 }
 
 /// An animation that swaps from one animation to the next when the [parent] passes [swapThreshold].
@@ -1006,7 +1006,7 @@ class _AnimationSwap<T> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [_AnimationSwap] itself
   /// to combine multiple animations.
-  _AnimationSwap(Animation<T> first, Animation<T> next, this.parent, this.swapThreshold) : super(first: first, next: next);
+  _AnimationSwap(final Animation<T> first, final Animation<T> next, this.parent, this.swapThreshold) : super(first: first, next: next);
 
   final Animation<double> parent;
   final double swapThreshold;

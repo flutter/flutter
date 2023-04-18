@@ -205,7 +205,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     return LogicalKeyboardKey(keyCode | LogicalKeyboardKey.androidPlane);
   }
 
-  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+  bool _isLeftRightModifierPressed(final KeyboardSide side, final int anyMask, final int leftMask, final int rightMask) {
     if (metaState & anyMask == 0) {
       return false;
     }
@@ -222,7 +222,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
+  bool isModifierPressed(final ModifierKey key, { final KeyboardSide side = KeyboardSide.any }) {
     switch (key) {
       case ModifierKey.controlModifier:
         return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
@@ -246,8 +246,8 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
+  KeyboardSide? getModifierSide(final ModifierKey key) {
+    KeyboardSide? findSide(final int anyMask, final int leftMask, final int rightMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = metaState & combinedMask;
       if (combined == leftMask) {
@@ -285,7 +285,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<int>('flags', flags));
     properties.add(DiagnosticsProperty<int>('codePoint', codePoint));
@@ -296,7 +296,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

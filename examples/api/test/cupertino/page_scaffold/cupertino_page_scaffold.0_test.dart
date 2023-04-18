@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/page_scaffold/cupertino_page_scaff
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can increment counter', (WidgetTester tester) async {
+  testWidgets('Can increment counter', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PageScaffoldApp(),
     );

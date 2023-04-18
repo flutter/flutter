@@ -74,7 +74,7 @@ flutter:
     final Depfile dependencies = depfileService.parse(depfile);
 
     expect(
-      dependencies.inputs.firstWhereOrNull((File file) => file.path == '/bar/LICENSE'),
+      dependencies.inputs.firstWhereOrNull((final File file) => file.path == '/bar/LICENSE'),
       isNotNull,
     );
   }, overrides: <Type, Generator>{

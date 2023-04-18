@@ -11,13 +11,13 @@ void main() {
   late Widget textBuilderUnderTest;
 
   Widget builderForValueListenable(
-    ValueListenable<String?> valueListenable,
+    final ValueListenable<String?> valueListenable,
   ) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: ValueListenableBuilder<String?>(
         valueListenable: valueListenable,
-        builder: (BuildContext context, String? value, Widget? child) {
+        builder: (final BuildContext context, final String? value, final Widget? child) {
           if (value == null) {
             return const Placeholder();
           }
@@ -32,13 +32,13 @@ void main() {
     textBuilderUnderTest = builderForValueListenable(valueListenable);
   });
 
-  testWidgets('Null value is ok', (WidgetTester tester) async {
+  testWidgets('Null value is ok', (final WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     expect(find.byType(Placeholder), findsOneWidget);
   });
 
-  testWidgets('Widget builds with initial value', (WidgetTester tester) async {
+  testWidgets('Widget builds with initial value', (final WidgetTester tester) async {
     valueListenable = SpyStringValueNotifier('Bachman');
 
     await tester.pumpWidget(builderForValueListenable(valueListenable));
@@ -46,7 +46,7 @@ void main() {
     expect(find.text('Bachman'), findsOneWidget);
   });
 
-  testWidgets('Widget updates when value changes', (WidgetTester tester) async {
+  testWidgets('Widget updates when value changes', (final WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
@@ -59,7 +59,7 @@ void main() {
     expect(find.text('Dinesh'), findsOneWidget);
   });
 
-  testWidgets('Can change listenable', (WidgetTester tester) async {
+  testWidgets('Can change listenable', (final WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
@@ -75,7 +75,7 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgets('Stops listening to old listenable after changing listenable', (WidgetTester tester) async {
+  testWidgets('Stops listening to old listenable after changing listenable', (final WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';
@@ -98,7 +98,7 @@ void main() {
     expect(find.text('Hendricks'), findsOneWidget);
   });
 
-  testWidgets('Self-cleans when removed', (WidgetTester tester) async {
+  testWidgets('Self-cleans when removed', (final WidgetTester tester) async {
     await tester.pumpWidget(textBuilderUnderTest);
 
     valueListenable.value = 'Gilfoyle';

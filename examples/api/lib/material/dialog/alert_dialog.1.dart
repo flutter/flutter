@@ -12,7 +12,7 @@ class AlertDialogExampleApp extends StatelessWidget {
   const AlertDialogExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
@@ -29,11 +29,11 @@ class DialogExample extends StatelessWidget {
   const DialogExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextButton(
       onPressed: () => showDialog<String>(
         context: context,
-        builder: (BuildContext context) => AlertDialog(
+        builder: (final BuildContext context) => AlertDialog(
           title: const Text('AlertDialog Title'),
           content: const Text('AlertDialog description'),
           actions: <Widget>[

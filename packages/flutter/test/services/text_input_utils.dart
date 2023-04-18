@@ -22,13 +22,13 @@ class FakeTextChannel implements MethodChannel {
   MethodCodec get codec => const JSONMethodCodec();
 
   @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<List<T>> invokeListMethod<T>(final String method, [final dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<Map<K, V>> invokeMapMethod<K, V>(final String method, [final dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(final String method, [final dynamic arguments]) async {
     final MethodCall call = MethodCall(method, arguments);
     outgoingCalls.add(call);
     return await outgoing(call) as T;
@@ -38,9 +38,9 @@ class FakeTextChannel implements MethodChannel {
   String get name => 'flutter/textinput';
 
   @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
+  void setMethodCallHandler(final Future<void> Function(MethodCall call)? handler) => incoming = handler;
 
-  void validateOutgoingMethodCalls(List<MethodCall> calls) {
+  void validateOutgoingMethodCalls(final List<MethodCall> calls) {
     expect(outgoingCalls.length, calls.length);
     final StringBuffer output = StringBuffer();
     bool hasError = false;
@@ -66,7 +66,7 @@ class FakeTextChannel implements MethodChannel {
 }
 
 class FakeScribbleElement implements ScribbleClient {
-  FakeScribbleElement({required String elementIdentifier, Rect bounds = Rect.zero})
+  FakeScribbleElement({required final String elementIdentifier, final Rect bounds = Rect.zero})
       : _elementIdentifier = elementIdentifier,
         _bounds = bounds;
 
@@ -81,12 +81,12 @@ class FakeScribbleElement implements ScribbleClient {
   String get elementIdentifier => _elementIdentifier;
 
   @override
-  bool isInScribbleRect(Rect rect) {
+  bool isInScribbleRect(final Rect rect) {
     return _bounds.overlaps(rect);
   }
 
   @override
-  void onScribbleFocus(Offset offset) {
+  void onScribbleFocus(final Offset offset) {
     latestMethodCall = 'onScribbleFocus';
   }
 }

@@ -41,7 +41,7 @@ class _InternalNoTransientCallbacksCondition implements WaitCondition {
   /// instance from the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory _InternalNoTransientCallbacksCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalNoTransientCallbacksCondition.deserialize(final SerializableWaitCondition condition) {
     if (condition.conditionName != 'NoTransientCallbacksCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
     }
@@ -69,7 +69,7 @@ class _InternalNoPendingFrameCondition implements WaitCondition {
   /// from the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory _InternalNoPendingFrameCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalNoPendingFrameCondition.deserialize(final SerializableWaitCondition condition) {
     if (condition.conditionName != 'NoPendingFrameCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
     }
@@ -97,7 +97,7 @@ class _InternalFirstFrameRasterizedCondition implements WaitCondition {
   /// from the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory _InternalFirstFrameRasterizedCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalFirstFrameRasterizedCondition.deserialize(final SerializableWaitCondition condition) {
     if (condition.conditionName != 'FirstFrameRasterizedCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
     }
@@ -123,7 +123,7 @@ class _InternalNoPendingPlatformMessagesCondition implements WaitCondition {
   /// from the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory _InternalNoPendingPlatformMessagesCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalNoPendingPlatformMessagesCondition.deserialize(final SerializableWaitCondition condition) {
     if (condition.conditionName != 'NoPendingPlatformMessagesCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
     }
@@ -158,7 +158,7 @@ class _InternalCombinedCondition implements WaitCondition {
   /// the given [SerializableWaitCondition] instance.
   ///
   /// The [condition] argument must not be null.
-  factory _InternalCombinedCondition.deserialize(SerializableWaitCondition condition) {
+  factory _InternalCombinedCondition.deserialize(final SerializableWaitCondition condition) {
     if (condition.conditionName != 'CombinedCondition') {
       throw SerializationException('Error occurred during deserializing from the given condition: ${condition.serialize()}');
     }
@@ -172,7 +172,7 @@ class _InternalCombinedCondition implements WaitCondition {
 
   @override
   bool get condition {
-    return conditions.every((WaitCondition condition) => condition.condition);
+    return conditions.every((final WaitCondition condition) => condition.condition);
   }
 
   @override
@@ -189,7 +189,7 @@ class _InternalCombinedCondition implements WaitCondition {
 /// Parses a [WaitCondition] or its subclass from the given serializable [waitCondition].
 ///
 /// The [waitCondition] argument must not be null.
-WaitCondition deserializeCondition(SerializableWaitCondition waitCondition) {
+WaitCondition deserializeCondition(final SerializableWaitCondition waitCondition) {
   final String conditionName = waitCondition.conditionName;
   switch (conditionName) {
     case 'NoTransientCallbacksCondition':

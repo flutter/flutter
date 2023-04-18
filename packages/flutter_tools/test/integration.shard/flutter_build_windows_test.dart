@@ -118,7 +118,7 @@ void main() {
   }, skip: !io.Platform.isWindows); // [intended] Windows integration build.
 }
 
-String _getFileVersion(File file) {
+String _getFileVersion(final File file) {
   // FileVersionInfo's FileVersion property excludes the private part,
   // so this recreates the file version using the individual parts.
   final ProcessResult result = Process.runSync(
@@ -138,7 +138,7 @@ String _getFileVersion(File file) {
   return output.trim();
 }
 
-String _getProductVersion(File file) {
+String _getProductVersion(final File file) {
   final ProcessResult result = Process.runSync(
     'powershell.exe -command "[System.Diagnostics.FileVersionInfo]::GetVersionInfo(\\"${file.path}\\").ProductVersion"',
     <String>[]

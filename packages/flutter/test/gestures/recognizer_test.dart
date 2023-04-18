@@ -73,7 +73,7 @@ void main() {
   });
 
   group('PrimaryPointerGestureRecognizer', () {
-    testGesture('cleans up state after winning arena', (GestureTester tester) {
+    testGesture('cleans up state after winning arena', (final GestureTester tester) {
       final List<String> resolutions = <String>[];
       final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       final TestPrimaryPointerGestureRecognizer<PointerUpEvent> accepting = TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
@@ -104,7 +104,7 @@ void main() {
       expect(resolutions, <String>['accepted']);
     });
 
-    testGesture('cleans up state after losing arena', (GestureTester tester) {
+    testGesture('cleans up state after losing arena', (final GestureTester tester) {
       final List<String> resolutions = <String>[];
       final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       final TestPrimaryPointerGestureRecognizer<PointerMoveEvent> rejecting = TestPrimaryPointerGestureRecognizer<PointerMoveEvent>(
@@ -142,7 +142,7 @@ void main() {
       expect(resolutions, <String>['rejected']);
     });
 
-    testGesture('works properly when recycled', (GestureTester tester) {
+    testGesture('works properly when recycled', (final GestureTester tester) {
       final List<String> resolutions = <String>[];
       final IndefiniteGestureRecognizer indefinite = IndefiniteGestureRecognizer();
       final TestPrimaryPointerGestureRecognizer<PointerUpEvent> accepting = TestPrimaryPointerGestureRecognizer<PointerUpEvent>(
@@ -184,28 +184,28 @@ class TestGestureRecognizer extends GestureRecognizer {
   String get debugDescription => 'debugDescription content';
 
   @override
-  void addPointer(PointerDownEvent event) { }
+  void addPointer(final PointerDownEvent event) { }
 
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(final int pointer) { }
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(final int pointer) { }
 }
 
 /// Gesture recognizer that adds itself to the gesture arena but never
 /// resolves itself.
 class IndefiniteGestureRecognizer extends GestureRecognizer {
   @override
-  void addAllowedPointer(PointerDownEvent event) {
+  void addAllowedPointer(final PointerDownEvent event) {
     GestureBinding.instance.gestureArena.add(event.pointer, this);
   }
 
   @override
-  void acceptGesture(int pointer) { }
+  void acceptGesture(final int pointer) { }
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(final int pointer) { }
 
   @override
   String get debugDescription => 'Unresolving';
@@ -227,7 +227,7 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
   final VoidCallback? onRejectGesture;
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(final int pointer) {
     super.acceptGesture(pointer);
     if (onAcceptGesture != null) {
       onAcceptGesture!();
@@ -235,7 +235,7 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(final int pointer) {
     super.rejectGesture(pointer);
     if (onRejectGesture != null) {
       onRejectGesture!();
@@ -243,7 +243,7 @@ class TestPrimaryPointerGestureRecognizer<T extends PointerEvent> extends Primar
   }
 
   @override
-  void handlePrimaryPointer(PointerEvent event) {
+  void handlePrimaryPointer(final PointerEvent event) {
     if (event is T) {
       resolve(resolution);
     }

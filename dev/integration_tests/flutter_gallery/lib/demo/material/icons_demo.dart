@@ -49,7 +49,7 @@ class IconsDemoState extends State<IconsDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Icons'),
@@ -83,7 +83,7 @@ class _IconsDemoCard extends StatelessWidget {
   final VoidCallback handleIconButtonPress;
   final IconData icon;
 
-  Widget _buildIconButton(double iconSize, IconData icon, bool enabled) {
+  Widget _buildIconButton(final double iconSize, final IconData icon, final bool enabled) {
     return IconButton(
       icon: Icon(icon),
       iconSize: iconSize,
@@ -92,14 +92,14 @@ class _IconsDemoCard extends StatelessWidget {
     );
   }
 
-  Widget _centeredText(String label) =>
+  Widget _centeredText(final String label) =>
     Padding(
       // Match the default padding of IconButton.
       padding: const EdgeInsets.all(8.0),
       child: Text(label, textAlign: TextAlign.center),
     );
 
-  TableRow _buildIconRow(double size) {
+  TableRow _buildIconRow(final double size) {
     return TableRow(
       children: <Widget> [
         _centeredText('${size.floor()} $icon'),
@@ -110,7 +110,7 @@ class _IconsDemoCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle textStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
     return Card(

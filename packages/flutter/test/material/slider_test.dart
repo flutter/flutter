@@ -24,24 +24,24 @@ class LoggingThumbShape extends SliderComponentShape {
   final List<Offset> log;
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+  Size getPreferredSize(final bool isEnabled, final bool isDiscrete) {
     return const Size(10.0, 10.0);
   }
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    required Animation<double> activationAnimation,
-    required Animation<double> enableAnimation,
-    required bool isDiscrete,
-    required TextPainter labelPainter,
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required TextDirection textDirection,
-    required double value,
-    required double textScaleFactor,
-    required Size sizeWithOverflow,
+    final PaintingContext context,
+    final Offset thumbCenter, {
+    required final Animation<double> activationAnimation,
+    required final Animation<double> enableAnimation,
+    required final bool isDiscrete,
+    required final TextPainter labelPainter,
+    required final RenderBox parentBox,
+    required final SliderThemeData sliderTheme,
+    required final TextDirection textDirection,
+    required final double value,
+    required final double textScaleFactor,
+    required final Size sizeWithOverflow,
   }) {
     log.add(thumbCenter);
     final Paint thumbPaint = Paint()..color = Colors.red;
@@ -51,20 +51,20 @@ class LoggingThumbShape extends SliderComponentShape {
 
 class TallSliderTickMarkShape extends SliderTickMarkShape {
   @override
-  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
+  Size getPreferredSize({required final SliderThemeData sliderTheme, required final bool isEnabled}) {
     return const Size(10.0, 200.0);
   }
 
   @override
   void paint(
-    PaintingContext context,
-    Offset offset, {
-    required Offset thumbCenter,
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required Animation<double> enableAnimation,
-    required bool isEnabled,
-    required TextDirection textDirection,
+    final PaintingContext context,
+    final Offset offset, {
+    required final Offset thumbCenter,
+    required final RenderBox parentBox,
+    required final SliderThemeData sliderTheme,
+    required final Animation<double> enableAnimation,
+    required final bool isEnabled,
+    required final TextDirection textDirection,
   }) {
     final Paint paint = Paint()..color = Colors.red;
     context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, 10.0, 20.0), paint);
@@ -83,7 +83,7 @@ class _StateDependentMouseCursor extends MaterialStateMouseCursor {
   final MouseCursor dragged;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabled;
     }
@@ -101,7 +101,7 @@ class _StateDependentMouseCursor extends MaterialStateMouseCursor {
 }
 
 void main() {
-  testWidgets('The initial value should respect the discrete value', (WidgetTester tester) async {
+  testWidgets('The initial value should respect the discrete value', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.20;
     final List<Offset> log = <Offset>[];
@@ -111,7 +111,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
               return Material(
                 child: Center(
@@ -121,7 +121,7 @@ void main() {
                       key: sliderKey,
                       value: value,
                       divisions: 4,
-                      onChanged: (double newValue) {
+                      onChanged: (final double newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -141,7 +141,7 @@ void main() {
     expect(log[0], const Offset(212.0, 300.0));
   });
 
-  testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider can move when tapped (LTR)', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     double? startValue;
@@ -152,21 +152,21 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Slider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
                     },
-                    onChangeStart: (double value) {
+                    onChangeStart: (final double value) {
                       startValue = value;
                     },
-                    onChangeEnd: (double value) {
+                    onChangeEnd: (final double value) {
                       endValue = value;
                     },
                   ),
@@ -200,7 +200,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider can move when tapped (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider can move when tapped (RTL)', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -209,13 +209,13 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Slider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -245,7 +245,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
+  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     late double startValue;
@@ -259,23 +259,23 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Slider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() {
                         updates++;
                         value = newValue;
                       });
                     },
-                    onChangeStart: (double value) {
+                    onChangeStart: (final double value) {
                       startValueUpdates++;
                       startValue = value;
                     },
-                    onChangeEnd: (double value) {
+                    onChangeEnd: (final double value) {
                       endValueUpdates++;
                       endValue = value;
                     },
@@ -302,7 +302,7 @@ void main() {
     expect(endValueUpdates, equals(2));
   });
 
-  testWidgets('Value indicator shows for a bit after being tapped', (WidgetTester tester) async {
+  testWidgets('Value indicator shows for a bit after being tapped', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -311,14 +311,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Slider(
                     key: sliderKey,
                     value: value,
                     divisions: 4,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -352,7 +352,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Discrete Slider repaints and animates when dragged', (WidgetTester tester) async {
+  testWidgets('Discrete Slider repaints and animates when dragged', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     final List<Offset> log = <Offset>[];
@@ -362,7 +362,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
               return Material(
                 child: Center(
@@ -372,7 +372,7 @@ void main() {
                       key: sliderKey,
                       value: value,
                       divisions: 4,
-                      onChanged: (double newValue) {
+                      onChanged: (final double newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -420,7 +420,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (WidgetTester tester) async {
+  testWidgets("Slider doesn't send duplicate change events if tapped on the same value", (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     int updates = 0;
@@ -430,13 +430,13 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Slider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() {
                         updates++;
                         value = newValue;
@@ -461,7 +461,7 @@ void main() {
     expect(updates, equals(1));
   });
 
-  testWidgets('discrete Slider repaints when dragged', (WidgetTester tester) async {
+  testWidgets('discrete Slider repaints when dragged', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     final List<Offset> log = <Offset>[];
@@ -471,7 +471,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(thumbShape: loggingThumb);
               return Material(
                 child: Center(
@@ -481,7 +481,7 @@ void main() {
                       key: sliderKey,
                       value: value,
                       divisions: 4,
-                      onChanged: (double newValue) {
+                      onChanged: (final double newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -529,7 +529,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Slider take on discrete values', (WidgetTester tester) async {
+  testWidgets('Slider take on discrete values', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -538,7 +538,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: SizedBox(
@@ -548,7 +548,7 @@ void main() {
                       max: 100.0,
                       divisions: 10,
                       value: value,
-                      onChanged: (double newValue) {
+                      onChanged: (final double newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -581,7 +581,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider can be given zero values', (WidgetTester tester) async {
+  testWidgets('Slider can be given zero values', (final WidgetTester tester) async {
     final List<double> log = <double>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -590,7 +590,7 @@ void main() {
           child: Material(
             child: Slider(
               value: 0.0,
-              onChanged: (double newValue) {
+              onChanged: (final double newValue) {
                 log.add(newValue);
               },
             ),
@@ -611,7 +611,7 @@ void main() {
             child: Slider(
               value: 0.0,
               max: 0.0,
-              onChanged: (double newValue) {
+              onChanged: (final double newValue) {
                 log.add(newValue);
               },
             ),
@@ -625,7 +625,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Slider can tap in vertical scroller', (WidgetTester tester) async {
+  testWidgets('Slider can tap in vertical scroller', (final WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -636,7 +636,7 @@ void main() {
               children: <Widget>[
                 Slider(
                   value: value,
-                  onChanged: (double newValue) {
+                  onChanged: (final double newValue) {
                     value = newValue;
                   },
                 ),
@@ -654,7 +654,7 @@ void main() {
     expect(value, equals(0.5));
   });
 
-  testWidgets('Slider drags immediately (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider drags immediately (LTR)', (final WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -664,7 +664,7 @@ void main() {
             child: Center(
               child: Slider(
                 value: value,
-                onChanged: (double newValue) {
+                onChanged: (final double newValue) {
                   value = newValue;
                 },
               ),
@@ -686,7 +686,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Slider drags immediately (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider drags immediately (RTL)', (final WidgetTester tester) async {
     double value = 0.0;
     await tester.pumpWidget(
       MaterialApp(
@@ -696,7 +696,7 @@ void main() {
             child: Center(
               child: Slider(
                 value: value,
-                onChanged: (double newValue) {
+                onChanged: (final double newValue) {
                   value = newValue;
                 },
               ),
@@ -718,7 +718,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Slider onChangeStart and onChangeEnd fire once', (WidgetTester tester) async {
+  testWidgets('Slider onChangeStart and onChangeEnd fire once', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28115
 
     int startFired = 0;
@@ -730,14 +730,14 @@ void main() {
           child: Material(
             child: Center(
               child: GestureDetector(
-                onHorizontalDragUpdate: (_) { },
+                onHorizontalDragUpdate: (final _) { },
                 child: Slider(
                   value: 0.0,
-                  onChanged: (double newValue) { },
-                  onChangeStart: (double value) {
+                  onChanged: (final double newValue) { },
+                  onChangeStart: (final double value) {
                     startFired += 1;
                   },
-                  onChangeEnd: (double value) {
+                  onChangeEnd: (final double value) {
                     endFired += 1;
                   },
                 ),
@@ -758,7 +758,7 @@ void main() {
     expect(endFired, equals(1));
   });
 
-  testWidgets('Slider sizing', (WidgetTester tester) async {
+  testWidgets('Slider sizing', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Directionality(
@@ -817,22 +817,22 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 24.0, 48.0));
   });
 
-  testWidgets('Slider respects textScaleFactor', (WidgetTester tester) async {
+  testWidgets('Slider respects textScaleFactor', (final WidgetTester tester) async {
     debugDisableShadows = false;
     try {
       final Key sliderKey = UniqueKey();
       double value = 0.0;
 
       Widget buildSlider({
-        required double textScaleFactor,
-        bool isDiscrete = true,
-        ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
+        required final double textScaleFactor,
+        final bool isDiscrete = true,
+        final ShowValueIndicator show = ShowValueIndicator.onlyForDiscrete,
       }) {
         return MaterialApp(
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return MediaQuery(
                   data: MediaQueryData(textScaleFactor: textScaleFactor),
                   child: Material(
@@ -850,7 +850,7 @@ void main() {
                             divisions: isDiscrete ? 10 : null,
                             label: '${value.round()}',
                             value: value,
-                            onChanged: (double newValue) {
+                            onChanged: (final double newValue) {
                               setState(() {
                                 value = newValue;
                               });
@@ -971,9 +971,9 @@ void main() {
     }
   });
 
-  testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
+  testWidgets('Tick marks are skipped when they are too dense', (final WidgetTester tester) async {
     Widget buildSlider({
-      required int divisions,
+      required final int divisions,
     }) {
       return MaterialApp(
         home: Directionality(
@@ -984,7 +984,7 @@ void main() {
                 max: 100.0,
                 divisions: divisions,
                 value: 0.25,
-                onChanged: (double newValue) { },
+                onChanged: (final double newValue) { },
               ),
             ),
           ),
@@ -1018,17 +1018,17 @@ void main() {
     expect(material, paintsExactlyCountTimes(#drawCircle, 1));
   });
 
-  testWidgets('Slider has correct animations when reparented', (WidgetTester tester) async {
+  testWidgets('Slider has correct animations when reparented', (final WidgetTester tester) async {
     final Key sliderKey = GlobalKey(debugLabel: 'A');
     double value = 0.0;
 
-    Widget buildSlider(int parents) {
-      Widget createParents(int parents, StateSetter setState) {
+    Widget buildSlider(final int parents) {
+      Widget createParents(final int parents, final StateSetter setState) {
         Widget slider = Slider(
           key: sliderKey,
           value: value,
           divisions: 4,
-          onChanged: (double newValue) {
+          onChanged: (final double newValue) {
             setState(() {
               value = newValue;
             });
@@ -1045,7 +1045,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: createParents(parents, setState),
               );
@@ -1055,7 +1055,7 @@ void main() {
       );
     }
 
-    Future<void> testReparenting(bool reparent) async {
+    Future<void> testReparenting(final bool reparent) async {
       final MaterialInkController material = Material.of(tester.element(find.byType(Slider)));
       final Offset center = tester.getCenter(find.byType(Slider));
       // Move to 0.0.
@@ -1147,7 +1147,7 @@ void main() {
     await testReparenting(true);
   });
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1156,7 +1156,7 @@ void main() {
         child: Material(
           child: Slider(
             value: 0.5,
-            onChanged: (double v) { },
+            onChanged: (final double v) { },
           ),
         ),
       ),
@@ -1309,7 +1309,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux }));
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1322,7 +1322,7 @@ void main() {
               child: Slider(
                 value: 100.0,
                 max: 200.0,
-                onChanged: (double v) { },
+                onChanged: (final double v) { },
               ),
             ),
           ),
@@ -1420,7 +1420,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1429,7 +1429,7 @@ void main() {
         child: Material(
           child: Slider(
             value: 0.5,
-            onChanged: (double v) { },
+            onChanged: (final double v) { },
           ),
         ),
       ),
@@ -1589,7 +1589,7 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
-  testWidgets('Slider semantics with custom formatter', (WidgetTester tester) async {
+  testWidgets('Slider semantics with custom formatter', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1600,8 +1600,8 @@ void main() {
             value: 40.0,
             max: 200.0,
             divisions: 10,
-            semanticFormatterCallback: (double value) => value.round().toString(),
-            onChanged: (double v) { },
+            semanticFormatterCallback: (final double value) => value.round().toString(),
+            onChanged: (final double v) { },
           ),
         ),
       ),
@@ -1648,7 +1648,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101868
-  testWidgets('Slider.label info should not write to semantic node', (WidgetTester tester) async {
+  testWidgets('Slider.label info should not write to semantic node', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -1659,8 +1659,8 @@ void main() {
             value: 40.0,
             max: 200.0,
             divisions: 10,
-            semanticFormatterCallback: (double value) => value.round().toString(),
-            onChanged: (double v) { },
+            semanticFormatterCallback: (final double value) => value.round().toString(),
+            onChanged: (final double v) { },
             label: 'Bingo',
           ),
         ),
@@ -1707,21 +1707,21 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Slider is focusable and has correct focus color', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final ThemeData theme = ThemeData(useMaterial3: true);
     double value = 0.5;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         theme: theme,
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -1755,18 +1755,18 @@ void main() {
     );
   });
 
-  testWidgets('Slider has correct focus color from overlayColor property', (WidgetTester tester) async {
+  testWidgets('Slider has correct focus color from overlayColor property', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
-                overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                overlayColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.focused)) {
                     return Colors.purple[500]!;
                   }
@@ -1774,7 +1774,7 @@ void main() {
                   return Colors.transparent;
                 }),
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -1808,20 +1808,20 @@ void main() {
     );
   });
 
-  testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('Slider can be hovered and has correct hover color', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     final ThemeData theme = ThemeData(useMaterial3: true);
     double value = 0.5;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         theme: theme,
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -1864,17 +1864,17 @@ void main() {
     );
   });
 
-  testWidgets('Slider has correct hovered color from overlayColor property', (WidgetTester tester) async {
+  testWidgets('Slider has correct hovered color from overlayColor property', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
-                overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                overlayColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.hovered)) {
                     return Colors.cyan[500]!;
                   }
@@ -1882,7 +1882,7 @@ void main() {
                   return Colors.transparent;
                 }),
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -1925,23 +1925,23 @@ void main() {
     );
   });
 
-  testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+  testWidgets('Slider is draggable and has correct dragged color', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     final ThemeData theme = ThemeData(useMaterial3: true);
     final Key sliderKey = UniqueKey();
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         theme: theme,
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 key: sliderKey,
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -1986,20 +1986,20 @@ void main() {
     );
   });
 
-  testWidgets('Slider has correct dragged color from overlayColor property', (WidgetTester tester) async {
+  testWidgets('Slider has correct dragged color from overlayColor property', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     final Key sliderKey = UniqueKey();
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 key: sliderKey,
-                overlayColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+                overlayColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.dragged)) {
                     return Colors.lime[500]!;
                   }
@@ -2007,7 +2007,7 @@ void main() {
                   return Colors.transparent;
                 }),
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -2052,24 +2052,24 @@ void main() {
     );
   });
 
-  testWidgets('OverlayColor property is correctly applied when activeColor is also provided', (WidgetTester tester) async {
+  testWidgets('OverlayColor property is correctly applied when activeColor is also provided', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     const Color activeColor = Color(0xffff0000);
     const Color overlayColor = Color(0xff0000ff);
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 activeColor: activeColor,
                 overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -2109,17 +2109,17 @@ void main() {
     );
   });
 
-  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
-                onChanged: (double newValue) {
+                onChanged: (final double newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -2150,17 +2150,17 @@ void main() {
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - LTR', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
-                onChanged: (double newValue) {
+                onChanged: (final double newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -2191,19 +2191,19 @@ void main() {
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Directionality(
                 textDirection: TextDirection.rtl,
                 child: Slider(
                   value: value,
-                  onChanged: (double newValue) {
+                  onChanged: (final double newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -2235,19 +2235,19 @@ void main() {
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android,  TargetPlatform.fuchsia, TargetPlatform.linux, TargetPlatform.windows }));
 
-  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (WidgetTester tester) async {
+  testWidgets('Slider can be incremented and decremented by keyboard shortcuts - RTL', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     double value = 0.5;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Directionality(
                 textDirection: TextDirection.rtl,
                 child: Slider(
                   value: value,
-                  onChanged: (double newValue) {
+                  onChanged: (final double newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -2279,7 +2279,7 @@ void main() {
     expect(value, 0.5);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('In directional nav, Slider can be navigated out of by using up and down arrows', (WidgetTester tester) async {
+  testWidgets('In directional nav, Slider can be navigated out of by using up and down arrows', (final WidgetTester tester) async {
     const Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{
       SingleActivator(LogicalKeyboardKey.arrowLeft): DirectionalFocusIntent(TraversalDirection.left),
       SingleActivator(LogicalKeyboardKey.arrowRight): DirectionalFocusIntent(TraversalDirection.right),
@@ -2296,14 +2296,14 @@ void main() {
           shortcuts: shortcuts,
           child: Material(
             child: Center(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
                 return MediaQuery(
                   data: const MediaQueryData(navigationMode: NavigationMode.directional),
                   child: Column(
                     children: <Widget>[
                       Slider(
                         value: topSliderValue,
-                        onChanged: (double newValue) {
+                        onChanged: (final double newValue) {
                           setState(() {
                             topSliderValue = newValue;
                           });
@@ -2312,7 +2312,7 @@ void main() {
                       ),
                       Slider(
                         value: bottomSliderValue,
-                        onChanged: (double newValue) {
+                        onChanged: (final double newValue) {
                           setState(() {
                             bottomSliderValue = newValue;
                           });
@@ -2375,7 +2375,7 @@ void main() {
     expect(bottomSliderValue, 0.5, reason: 'unfocused bottom Slider unaffected by third arrowRight');
   });
 
-  testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (WidgetTester tester) async {
+  testWidgets('Slider gains keyboard focus when it gains semantics focus on Windows', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final FocusNode focusNode = FocusNode();
@@ -2384,7 +2384,7 @@ void main() {
         home: Material(
           child: Slider(
             value: 0.5,
-            onChanged: (double _) {},
+            onChanged: (final double _) {},
             focusNode: focusNode,
           ),
         ),
@@ -2442,15 +2442,15 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.windows }));
 
-  testWidgets('Value indicator appears when it should', (WidgetTester tester) async {
+  testWidgets('Value indicator appears when it should', (final WidgetTester tester) async {
     final ThemeData baseTheme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
     SliderThemeData theme = baseTheme.sliderTheme;
     double value = 0.45;
-    Widget buildApp({ required SliderThemeData sliderTheme, int? divisions, bool enabled = true }) {
-      final ValueChanged<double>? onChanged = enabled ? (double d) => value = d : null;
+    Widget buildApp({ required final SliderThemeData sliderTheme, final int? divisions, final bool enabled = true }) {
+      final ValueChanged<double>? onChanged = enabled ? (final double d) => value = d : null;
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -2475,10 +2475,10 @@ void main() {
     }
 
     Future<void> expectValueIndicator({
-      required bool isVisible,
-      required SliderThemeData theme,
-      int? divisions,
-      bool enabled = true,
+      required final bool isVisible,
+      required final SliderThemeData theme,
+      final int? divisions,
+      final bool enabled = true,
     }) async {
       // Discrete enabled widget.
       await tester.pumpWidget(buildApp(sliderTheme: theme, divisions: divisions, enabled: enabled));
@@ -2526,7 +2526,7 @@ void main() {
     await expectValueIndicator(isVisible: false, theme: theme, enabled: false);
   });
 
-  testWidgets("Slider doesn't start any animations after dispose", (WidgetTester tester) async {
+  testWidgets("Slider doesn't start any animations after dispose", (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     await tester.pumpWidget(
@@ -2534,14 +2534,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Slider(
                     key: sliderKey,
                     value: value,
                     divisions: 4,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -2566,14 +2566,14 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+  testWidgets('Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     const Color fillColor = Color(0xf55f5f5f);
     double value = 0.0;
 
     Widget buildApp({
-      int? divisions,
-      bool enabled = true,
+      final int? divisions,
+      final bool enabled = true,
     }) {
       return MaterialApp(
         home: Scaffold(
@@ -2581,7 +2581,7 @@ void main() {
             // The builder is used to pass the context from the MaterialApp widget
             // to the [Navigator]. This context is required in order for the
             // Navigator to work.
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Column(
                 children: <Widget>[
                   Slider(
@@ -2590,7 +2590,7 @@ void main() {
                     divisions: divisions,
                     label: '${value.round()}',
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       value = newValue;
                     },
                   ),
@@ -2599,7 +2599,7 @@ void main() {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
+                          builder: (final BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
                               onPressed: () { Navigator.of(context).pop(); },
@@ -2662,19 +2662,19 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Slider.adaptive', (WidgetTester tester) async {
+  testWidgets('Slider.adaptive', (final WidgetTester tester) async {
     double value = 0.5;
 
-    Widget buildFrame(TargetPlatform platform) {
+    Widget buildFrame(final TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Material(
               child: Center(
                 child: Slider.adaptive(
                   value: value,
-                  onChanged: (double newValue) {
+                  onChanged: (final double newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -2717,7 +2717,7 @@ void main() {
     }
   });
 
-  testWidgets('Slider respects height from theme', (WidgetTester tester) async {
+  testWidgets('Slider respects height from theme', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     await tester.pumpWidget(
@@ -2725,7 +2725,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
               return Material(
                 child: Center(
@@ -2736,7 +2736,7 @@ void main() {
                         key: sliderKey,
                         value: value,
                         divisions: 4,
-                        onChanged: (double newValue) {
+                        onChanged: (final double newValue) {
                           setState(() {
                             value = newValue;
                           });
@@ -2756,7 +2756,7 @@ void main() {
     expect(renderObject.size.height, 200);
   });
 
-  testWidgets('Slider changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('Slider changes mouse cursor when hovered', (final WidgetTester tester) async {
     // Test Slider() constructor
     await tester.pumpWidget(
       MaterialApp(
@@ -2769,7 +2769,7 @@ void main() {
                 child: Slider(
                   mouseCursor: SystemMouseCursors.text,
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (final double newValue) { },
                 ),
               ),
             ),
@@ -2797,7 +2797,7 @@ void main() {
                 child: Slider.adaptive(
                   mouseCursor: SystemMouseCursors.text,
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (final double newValue) { },
                 ),
               ),
             ),
@@ -2819,7 +2819,7 @@ void main() {
                 cursor: SystemMouseCursors.forbidden,
                 child: Slider(
                   value: 0.5,
-                  onChanged: (double newValue) { },
+                  onChanged: (final double newValue) { },
                 ),
               ),
             ),
@@ -2831,12 +2831,12 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
   });
 
-  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+  testWidgets('Slider MaterialStateMouseCursor resolves correctly', (final WidgetTester tester) async {
     const MouseCursor disabledCursor = SystemMouseCursors.basic;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
 
-    Widget buildFrame({ required bool enabled }) {
+    Widget buildFrame({ required final bool enabled }) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
@@ -2851,7 +2851,7 @@ void main() {
                     dragged: draggedCursor,
                   ),
                   value: 0.5,
-                  onChanged: enabled ? (double newValue) { } : null,
+                  onChanged: enabled ? (final double newValue) { } : null,
                 ),
               ),
             ),
@@ -2881,7 +2881,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
-  testWidgets('Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Slider implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const Slider(
@@ -2897,8 +2897,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       'value: 50.0',
@@ -2914,7 +2914,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Slider track paints correctly when the shape is rectangular', (WidgetTester tester) async {
+  testWidgets('Slider track paints correctly when the shape is rectangular', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -2949,10 +2949,10 @@ void main() {
     );
   });
 
-  testWidgets('SliderTheme change should trigger re-layout', (WidgetTester tester) async {
+  testWidgets('SliderTheme change should trigger re-layout', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/118955
     double sliderValue = 0.0;
-    Widget buildFrame(ThemeMode themeMode) {
+    Widget buildFrame(final ThemeMode themeMode) {
       return MaterialApp(
         themeMode: themeMode,
         theme: ThemeData(brightness: Brightness.light, useMaterial3: true),
@@ -2967,7 +2967,7 @@ void main() {
                 child: Slider(
                   value: sliderValue,
                   label: 'label',
-                  onChanged: (double value) => sliderValue = value,
+                  onChanged: (final double value) => sliderValue = value,
                 ),
               ),
             ),
@@ -2994,7 +2994,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Slider can be painted in a narrower constraint', (WidgetTester tester) async {
+  testWidgets('Slider can be painted in a narrower constraint', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Directionality(
@@ -3030,9 +3030,9 @@ void main() {
     );
   });
 
-  testWidgets('Update the divisions and value at the same time for Slider', (WidgetTester tester) async {
+  testWidgets('Update the divisions and value at the same time for Slider', (final WidgetTester tester) async {
     // Regress test for https://github.com/flutter/flutter/issues/65943
-    Widget buildFrame(double maxValue) {
+    Widget buildFrame(final double maxValue) {
       return MaterialApp(
         home: Material(
           child: Center(
@@ -3040,7 +3040,7 @@ void main() {
               value: 5,
               max: maxValue,
               divisions: maxValue.toInt(),
-              onChanged: (double newValue) {},
+              onChanged: (final double newValue) {},
             ),
           ),
         ),
@@ -3057,7 +3057,7 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late RRect activeTrackRRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+    expect(renderObject, paints..something((final Symbol method, final List<dynamic> arguments) {
       if (method != #drawRRect) {
         return false;
       }
@@ -3071,7 +3071,7 @@ void main() {
     expect(nearEqual(activeTrackRRect.right, (800.0 - 24.0 - 24.0) * (5 / 15) + 24.0, 0.01), true);
   });
 
-  testWidgets('Slider paints thumbColor', (WidgetTester tester) async {
+  testWidgets('Slider paints thumbColor', (final WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
     final Widget sliderAdaptive = MaterialApp(
@@ -3079,7 +3079,7 @@ void main() {
       home: Material(
         child: Slider(
           value: 0,
-          onChanged: (double newValue) {},
+          onChanged: (final double newValue) {},
           thumbColor: color,
         ),
       ),
@@ -3094,7 +3094,7 @@ void main() {
   });
 
   testWidgets('Slider.adaptive paints thumbColor on Android',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
     final Widget sliderAdaptive = MaterialApp(
@@ -3102,7 +3102,7 @@ void main() {
       home: Material(
         child: Slider.adaptive(
           value: 0,
-          onChanged: (double newValue) {},
+          onChanged: (final double newValue) {},
           thumbColor: color,
         ),
       ),
@@ -3117,13 +3117,13 @@ void main() {
   });
 
   testWidgets('If thumbColor is null, it defaults to CupertinoColors.white',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final Widget sliderAdaptive = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Material(
         child: Slider.adaptive(
           value: 0,
-          onChanged: (double newValue) {},
+          onChanged: (final double newValue) {},
         ),
       ),
     );
@@ -3146,7 +3146,7 @@ void main() {
   });
 
   testWidgets('Slider.adaptive passes thumbColor to CupertinoSlider',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const Color color = Color(0xffffc107);
 
     final Widget sliderAdaptive = MaterialApp(
@@ -3154,7 +3154,7 @@ void main() {
       home: Material(
         child: Slider.adaptive(
           value: 0,
-          onChanged: (double newValue) {},
+          onChanged: (final double newValue) {},
           thumbColor: color,
         ),
       ),
@@ -3172,7 +3172,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/103566
-  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+  testWidgets('Drag gesture uses provided gesture settings', (final WidgetTester tester) async {
     double value = 0.5;
     bool dragStarted = false;
     final Key sliderKey = UniqueKey();
@@ -3182,12 +3182,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: GestureDetector(
                     behavior: HitTestBehavior.deferToChild,
-                    onHorizontalDragStart: (DragStartDetails details) {
+                    onHorizontalDragStart: (final DragStartDetails details) {
                       dragStarted = true;
                     },
                     child: MediaQuery(
@@ -3195,7 +3195,7 @@ void main() {
                       child: Slider(
                         value: value,
                         key: sliderKey,
-                        onChanged: (double newValue) {
+                        onChanged: (final double newValue) {
                           setState(() {
                             value = newValue;
                           });
@@ -3236,12 +3236,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: GestureDetector(
                     behavior: HitTestBehavior.deferToChild,
-                    onHorizontalDragStart: (DragStartDetails details) {
+                    onHorizontalDragStart: (final DragStartDetails details) {
                       dragStarted = true;
                     },
                     child: MediaQuery(
@@ -3249,12 +3249,12 @@ void main() {
                       child: Slider(
                         value: value,
                         key: sliderKey,
-                        onChanged: (double newValue) {
+                        onChanged: (final double newValue) {
                           setState(() {
                             value = newValue;
                           });
                         },
-                        onChangeEnd: (double endValue) {
+                        onChangeEnd: (final double endValue) {
                           sliderEnd = true;
                         },
                       ),
@@ -3278,20 +3278,20 @@ void main() {
     expect(dragStarted, false);
   });
 
-  testWidgets('Overlay appear only when hovered on the thumb on desktop', (WidgetTester tester) async {
+  testWidgets('Overlay appear only when hovered on the thumb on desktop', (final WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -3341,22 +3341,22 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Overlay remains when Slider is in focus on desktop', (WidgetTester tester) async {
+  testWidgets('Overlay remains when Slider is in focus on desktop', (final WidgetTester tester) async {
     double value = 0.5;
     const Color overlayColor = Color(0xffff0000);
     final FocusNode focusNode = FocusNode();
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 focusNode: focusNode,
                 overlayColor: const MaterialStatePropertyAll<Color?>(overlayColor),
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -3413,11 +3413,11 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Value indicator remains when Slider is in focus on desktop', (WidgetTester tester) async {
+  testWidgets('Value indicator remains when Slider is in focus on desktop', (final WidgetTester tester) async {
     double value = 0.5;
     final FocusNode focusNode = FocusNode();
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         theme: ThemeData(
           sliderTheme: const SliderThemeData(
@@ -3426,14 +3426,14 @@ void main() {
         ),
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Slider(
                 value: value,
                 focusNode: focusNode,
                 divisions: 5,
                 label: value.toStringAsFixed(1),
                 onChanged: enabled
-                  ? (double newValue) {
+                  ? (final double newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -3482,7 +3482,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('Event on Slider should perform no-op if already unmounted', (WidgetTester tester) async {
+  testWidgets('Event on Slider should perform no-op if already unmounted', (final WidgetTester tester) async {
     // Test covering crashing found in Google internal issue b/192329942.
     double value = 0.0;
     final ValueNotifier<bool> shouldShowSliderListenable =
@@ -3493,16 +3493,16 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: ValueListenableBuilder<bool>(
                     valueListenable: shouldShowSliderListenable,
-                    builder: (BuildContext context, bool shouldShowSlider, _) {
+                    builder: (final BuildContext context, final bool shouldShowSlider, final _) {
                       return shouldShowSlider
                           ? Slider(
                               value: value,
-                              onChanged: (double newValue) {
+                              onChanged: (final double newValue) {
                                 setState(() {
                                   value = newValue;
                                 });
@@ -3541,19 +3541,19 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgets('Slider can be hovered and has correct hover color', (WidgetTester tester) async {
+    testWidgets('Slider can be hovered and has correct hover color', (final WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final ThemeData theme = ThemeData();
       double value = 0.5;
-      Widget buildApp({bool enabled = true}) {
+      Widget buildApp({final bool enabled = true}) {
         return MaterialApp(
           home: Material(
             child: Center(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
                 return Slider(
                   value: value,
                   onChanged: enabled
-                    ? (double newValue) {
+                    ? (final double newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -3596,20 +3596,20 @@ void main() {
       );
     });
 
-    testWidgets('Slider is focusable and has correct focus color', (WidgetTester tester) async {
+    testWidgets('Slider is focusable and has correct focus color', (final WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Slider');
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final ThemeData theme = ThemeData();
       double value = 0.5;
-      Widget buildApp({bool enabled = true}) {
+      Widget buildApp({final bool enabled = true}) {
         return MaterialApp(
           home: Material(
             child: Center(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
                 return Slider(
                   value: value,
                   onChanged: enabled
-                    ? (double newValue) {
+                    ? (final double newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -3643,22 +3643,22 @@ void main() {
       );
     });
 
-    testWidgets('Slider is draggable and has correct dragged color', (WidgetTester tester) async {
+    testWidgets('Slider is draggable and has correct dragged color', (final WidgetTester tester) async {
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       double value = 0.5;
       final ThemeData theme = ThemeData();
       final Key sliderKey = UniqueKey();
 
-      Widget buildApp({bool enabled = true}) {
+      Widget buildApp({final bool enabled = true}) {
         return MaterialApp(
           home: Material(
             child: Center(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
                 return Slider(
                   value: value,
                   key: sliderKey,
                   onChanged: enabled
-                    ? (double newValue) {
+                    ? (final double newValue) {
                         setState(() {
                           value = newValue;
                         });

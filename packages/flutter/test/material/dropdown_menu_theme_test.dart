@@ -30,19 +30,19 @@ void main() {
     expect(identical(DropdownMenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default DropdownMenuThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DropdownMenuThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DropdownMenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
+  testWidgets('With no other configuration, defaults are used', (final WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -99,7 +99,7 @@ void main() {
     expect(material.textStyle?.color, themeData.colorScheme.onSurface);
   });
 
-  testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (WidgetTester tester) async {
+  testWidgets('ThemeData.dropdownMenuTheme overrides defaults', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       dropdownMenuTheme: DropdownMenuThemeData(
         textStyle: TextStyle(
@@ -178,7 +178,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('DropdownMenuTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('DropdownMenuTheme overrides ThemeData and defaults', (final WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,
@@ -281,7 +281,7 @@ void main() {
     expect(material.textStyle?.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('Widget parameters overrides DropdownMenuTheme, ThemeData and defaults', (final WidgetTester tester) async {
     final DropdownMenuThemeData global = DropdownMenuThemeData(
       textStyle: TextStyle(
         color: Colors.orange,

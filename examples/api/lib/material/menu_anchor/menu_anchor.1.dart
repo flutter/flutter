@@ -44,7 +44,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
 
   Color get backgroundColor => _backgroundColor;
   Color _backgroundColor = Colors.red;
-  set backgroundColor(Color value) {
+  set backgroundColor(final Color value) {
     if (_backgroundColor != value) {
       setState(() {
         _backgroundColor = value;
@@ -54,7 +54,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
 
   bool get showingMessage => _showingMessage;
   bool _showingMessage = false;
-  set showingMessage(bool value) {
+  set showingMessage(final bool value) {
     if (_showingMessage != value) {
       setState(() {
         _showingMessage = value;
@@ -88,7 +88,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(50),
       child: GestureDetector(
@@ -160,7 +160,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
     );
   }
 
-  void _activate(MenuEntry selection) {
+  void _activate(final MenuEntry selection) {
     setState(() {
       _lastSelection = selection;
     });
@@ -185,7 +185,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
     }
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(final TapDownDetails details) {
     if (!HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlLeft) &&
         !HardwareKeyboard.instance.logicalKeysPressed.contains(LogicalKeyboardKey.controlRight)) {
       return;
@@ -200,7 +200,7 @@ class ContextMenuApp extends StatelessWidget {
   static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: MyContextMenu(message: kMessage)),
     );

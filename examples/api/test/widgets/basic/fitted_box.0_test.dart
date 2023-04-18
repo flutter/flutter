@@ -13,7 +13,7 @@ void main() {
     HttpOverrides.global = null;
   });
 
-  testWidgets('FittedBox scales the image to fill the parent container', (WidgetTester tester) async {
+  testWidgets('FittedBox scales the image to fill the parent container', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.FittedBoxApp(),
     );

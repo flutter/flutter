@@ -220,11 +220,11 @@ void main() {
 
 class TestContext extends Context {
   TestContext(
-    List<String> arguments,
-    Map<String, String> environment, {
+    final List<String> arguments,
+    final Map<String, String> environment, {
     required this.fileSystem,
-    required List<FakeCommand> commands,
-    File? scriptOutputStreamFile,
+    required final List<FakeCommand> commands,
+    final File? scriptOutputStreamFile,
   })  : processManager = FakeProcessManager.list(commands),
         super(arguments: arguments, environment: environment, scriptOutputStreamFile: scriptOutputStreamFile);
 
@@ -235,22 +235,22 @@ class TestContext extends Context {
   String stderr = '';
 
   @override
-  bool existsDir(String path) {
+  bool existsDir(final String path) {
     return fileSystem.directory(path).existsSync();
   }
 
   @override
-  bool existsFile(String path) {
+  bool existsFile(final String path) {
     return fileSystem.file(path).existsSync();
   }
 
   @override
   ProcessResult runSync(
-    String bin,
-    List<String> args, {
-    bool verbose = false,
-    bool allowFail = false,
-    String? workingDirectory,
+    final String bin,
+    final List<String> args, {
+    final bool verbose = false,
+    final bool allowFail = false,
+    final String? workingDirectory,
   }) {
     return processManager.runSync(
       <dynamic>[bin, ...args],
@@ -260,17 +260,17 @@ class TestContext extends Context {
   }
 
   @override
-  void echoError(String message) {
+  void echoError(final String message) {
     stderr += '$message\n';
   }
 
   @override
-  void echo(String message) {
+  void echo(final String message) {
     stdout += message;
   }
 
   @override
-  Never exitApp(int code) {
+  Never exitApp(final int code) {
     // This is an exception for the benefit of unit tests.
     // The real implementation calls `exit(code)`.
     throw Exception('App exited with code $code');

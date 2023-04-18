@@ -12,7 +12,7 @@ class ScrollbarApp extends StatelessWidget {
   const ScrollbarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Scrollbar Sample')),
@@ -35,8 +35,8 @@ class _DesktopExampleState extends State<DesktopExample> {
   final ScrollController controller = ScrollController();
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+  Widget build(final BuildContext context) {
+    return LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
       return Row(
         children: <Widget>[
           SizedBox(
@@ -51,7 +51,7 @@ class _DesktopExampleState extends State<DesktopExample> {
                 child: ListView.builder(
                   controller: controller,
                   itemCount: 100,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return SizedBox(
                       height: 50,
                       child: Padding(
@@ -76,7 +76,7 @@ class _DesktopExampleState extends State<DesktopExample> {
                   child: ListView.builder(
                     primary: true,
                     itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
+                    itemBuilder: (final BuildContext context, final int index) {
                       return SizedBox(
                         height: 50,
                         child: Padding(

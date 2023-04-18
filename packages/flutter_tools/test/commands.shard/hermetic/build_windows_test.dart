@@ -73,8 +73,8 @@ void main() {
   // Returns the command matching the build_windows call to generate CMake
   // files.
   FakeCommand cmakeGenerationCommand({
-    void Function()? onRun,
-    String generator = _defaultGenerator,
+    final void Function()? onRun,
+    final String generator = _defaultGenerator,
   }) {
     return FakeCommand(
       command: <String>[
@@ -91,10 +91,10 @@ void main() {
   }
 
   // Returns the command matching the build_windows call to build.
-  FakeCommand buildCommand(String buildMode, {
-    bool verbose = false,
-    void Function()? onRun,
-    String stdout = '',
+  FakeCommand buildCommand(final String buildMode, {
+    final bool verbose = false,
+    final void Function()? onRun,
+    final String stdout = '',
   }) {
     return FakeCommand(
       command: <String>[
@@ -894,7 +894,7 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
 
     fileSystem.file(r'build\windows\runner\Release\app.so')
       ..createSync(recursive: true)
-      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+      ..writeAsBytesSync(List<int>.generate(10000, (final int index) => 0));
 
     processManager = FakeProcessManager.list(<FakeCommand>[
       cmakeGenerationCommand(),

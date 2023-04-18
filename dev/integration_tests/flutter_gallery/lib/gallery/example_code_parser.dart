@@ -9,14 +9,14 @@ const String _kEndTag = '// END';
 
 Map<String?, String>? _exampleCode;
 
-Future<String?> getExampleCode(String? tag, AssetBundle bundle) async {
+Future<String?> getExampleCode(final String? tag, final AssetBundle bundle) async {
   if (_exampleCode == null) {
     await _parseExampleCode(bundle);
   }
   return _exampleCode![tag];
 }
 
-Future<void> _parseExampleCode(AssetBundle bundle) async {
+Future<void> _parseExampleCode(final AssetBundle bundle) async {
   final String code = await bundle.loadString('lib/gallery/example_code.dart');
   _exampleCode = <String?, String>{};
 

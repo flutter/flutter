@@ -20,7 +20,7 @@ class _M3Typography {
 }
 ''';
 
-  String _textTheme(String name, String baseline) {
+  String _textTheme(final String name, final String baseline) {
     final StringBuffer theme = StringBuffer('static const TextTheme $name = TextTheme(\n');
     theme.writeln('    displayLarge: ${_textStyleDef('md.sys.typescale.display-large', '$name displayLarge 2021', baseline)},');
     theme.writeln('    displayMedium: ${_textStyleDef('md.sys.typescale.display-medium', '$name displayMedium 2021', baseline)},');
@@ -41,7 +41,7 @@ class _M3Typography {
     return theme.toString();
   }
 
-  String _textStyleDef(String tokenName, String debugLabel, String baseline) {
+  String _textStyleDef(final String tokenName, final String debugLabel, final String baseline) {
     final StringBuffer style = StringBuffer("TextStyle(debugLabel: '$debugLabel'");
     style.write(', inherit: false');
     style.write(', fontSize: ${_fontSize(tokenName)}');
@@ -54,20 +54,20 @@ class _M3Typography {
     return style.toString();
   }
 
-  String _fontSize(String textStyleTokenName) {
+  String _fontSize(final String textStyleTokenName) {
     return tokens['$textStyleTokenName.size']!.toString();
   }
 
-  String _fontWeight(String textStyleTokenName) {
+  String _fontWeight(final String textStyleTokenName) {
     final String weightValue = tokens[tokens['$textStyleTokenName.weight']!]!.toString();
     return 'FontWeight.w$weightValue';
   }
 
-  String _fontSpacing(String textStyleTokenName) {
+  String _fontSpacing(final String textStyleTokenName) {
     return tokens['$textStyleTokenName.tracking']!.toString();
   }
 
-  String _fontHeight(String textStyleTokenName) {
+  String _fontHeight(final String textStyleTokenName) {
     final double size = tokens['$textStyleTokenName.size']! as double;
     final double lineHeight = tokens['$textStyleTokenName.line-height']! as double;
     return (lineHeight / size).toStringAsFixed(2);

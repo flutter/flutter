@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/dropdown/dropdown_button.style.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Select an item from DropdownButton', (WidgetTester tester) async {
+  testWidgets('Select an item from DropdownButton', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

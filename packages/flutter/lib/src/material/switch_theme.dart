@@ -91,14 +91,14 @@ class SwitchThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SwitchThemeData copyWith({
-    MaterialStateProperty<Color?>? thumbColor,
-    MaterialStateProperty<Color?>? trackColor,
-    MaterialStateProperty<Color?>? trackOutlineColor,
-    MaterialTapTargetSize? materialTapTargetSize,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    MaterialStateProperty<Color?>? overlayColor,
-    double? splashRadius,
-    MaterialStateProperty<Icon?>? thumbIcon,
+    final MaterialStateProperty<Color?>? thumbColor,
+    final MaterialStateProperty<Color?>? trackColor,
+    final MaterialStateProperty<Color?>? trackOutlineColor,
+    final MaterialTapTargetSize? materialTapTargetSize,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final MaterialStateProperty<Color?>? overlayColor,
+    final double? splashRadius,
+    final MaterialStateProperty<Icon?>? thumbIcon,
   }) {
     return SwitchThemeData(
       thumbColor: thumbColor ?? this.thumbColor,
@@ -115,7 +115,7 @@ class SwitchThemeData with Diagnosticable {
   /// Linearly interpolate between two [SwitchThemeData]s.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static SwitchThemeData lerp(SwitchThemeData? a, SwitchThemeData? b, double t) {
+  static SwitchThemeData lerp(final SwitchThemeData? a, final SwitchThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -144,7 +144,7 @@ class SwitchThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -163,7 +163,7 @@ class SwitchThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('thumbColor', thumbColor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('trackColor', trackColor, defaultValue: null));
@@ -208,11 +208,11 @@ class SwitchTheme extends InheritedWidget {
   /// ```dart
   /// SwitchThemeData theme = SwitchTheme.of(context);
   /// ```
-  static SwitchThemeData of(BuildContext context) {
+  static SwitchThemeData of(final BuildContext context) {
     final SwitchTheme? switchTheme = context.dependOnInheritedWidgetOfExactType<SwitchTheme>();
     return switchTheme?.data ?? Theme.of(context).switchTheme;
   }
 
   @override
-  bool updateShouldNotify(SwitchTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final SwitchTheme oldWidget) => data != oldWidget.data;
 }

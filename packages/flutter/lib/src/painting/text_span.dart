@@ -72,7 +72,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     this.children,
     super.style,
     this.recognizer,
-    MouseCursor? mouseCursor,
+    final MouseCursor? mouseCursor,
     this.onEnter,
     this.onExit,
     this.semanticsLabel,
@@ -251,7 +251,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   bool get validForMouseTracker => true;
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     if (event is PointerDownEvent) {
       recognizer?.addPointer(event);
     }
@@ -266,9 +266,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// objects.
   @override
   void build(
-    ui.ParagraphBuilder builder, {
-    double textScaleFactor = 1.0,
-    List<PlaceholderDimensions>? dimensions,
+    final ui.ParagraphBuilder builder, {
+    final double textScaleFactor = 1.0,
+    final List<PlaceholderDimensions>? dimensions,
   }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
@@ -309,7 +309,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// When `visitor` returns true, the walk will continue. When `visitor`
   /// returns false, then the walk will end.
   @override
-  bool visitChildren(InlineSpanVisitor visitor) {
+  bool visitChildren(final InlineSpanVisitor visitor) {
     if (text != null) {
       if (!visitor(this)) {
         return false;
@@ -327,7 +327,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   /// Returns the text span that contains the given position in the text.
   @override
-  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+  InlineSpan? getSpanForPositionVisitor(final TextPosition position, final Accumulator offset) {
     if (text == null) {
       return null;
     }
@@ -345,9 +345,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   void computeToPlainText(
-    StringBuffer buffer, {
-    bool includeSemanticsLabels = true,
-    bool includePlaceholders = true,
+    final StringBuffer buffer, {
+    final bool includeSemanticsLabels = true,
+    final bool includePlaceholders = true,
   }) {
     assert(debugAssertIsValid());
     if (semanticsLabel != null && includeSemanticsLabels) {
@@ -367,9 +367,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   void computeSemanticsInformation(
-    List<InlineSpanSemanticsInformation> collector, {
-    ui.Locale? inheritedLocale,
-    bool inheritedSpellOut = false,
+    final List<InlineSpanSemanticsInformation> collector, {
+    final ui.Locale? inheritedLocale,
+    final bool inheritedSpellOut = false,
   }) {
     assert(debugAssertIsValid());
     final ui.Locale? effectiveLocale = locale ?? inheritedLocale;
@@ -405,7 +405,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  int? codeUnitAtVisitor(int index, Accumulator offset) {
+  int? codeUnitAtVisitor(final int index, final Accumulator offset) {
     final String? text = this.text;
     if (text == null) {
       return null;
@@ -425,7 +425,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   ///
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
+  void describeSemantics(final Accumulator offset, final List<int> semanticsOffsets, final List<dynamic> semanticsElements) {
     if (
       recognizer != null &&
       (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
@@ -460,7 +460,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  RenderComparison compareTo(InlineSpan other) {
+  RenderComparison compareTo(final InlineSpan other) {
     if (identical(this, other)) {
       return RenderComparison.identical;
     }
@@ -500,7 +500,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -536,7 +536,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   String toStringShort() => objectRuntimeType(this, 'TextSpan');
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
     properties.add(
@@ -576,7 +576,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (children == null) {
       return const <DiagnosticsNode>[];
     }
-    return children!.map<DiagnosticsNode>((InlineSpan child) {
+    return children!.map<DiagnosticsNode>((final InlineSpan child) {
       return child.toDiagnosticsNode();
     }).toList();
   }

@@ -47,7 +47,7 @@ void main() {
       );
       expect(asset.wasBuiltOnce(), true);
       expect(
-        asset.inputFiles.map((File f) {
+        asset.inputFiles.map((final File f) {
           return f.path;
         }),
         <String>[
@@ -76,7 +76,7 @@ void main() {
       );
       expect(asset.wasBuiltOnce(), true);
       expect(
-        asset.inputFiles.map((File f) {
+        asset.inputFiles.map((final File f) {
           return f.path;
         }),
         <String>[],
@@ -143,6 +143,6 @@ name: my_package
   });
 }
 
-Future<String> getValueAsString(String key, AssetBundle asset) async {
+Future<String> getValueAsString(final String key, final AssetBundle asset) async {
   return String.fromCharCodes(await asset.entries[key]!.contentsAsBytes());
 }

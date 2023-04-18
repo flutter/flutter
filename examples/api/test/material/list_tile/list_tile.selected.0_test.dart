@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/list_tile/list_tile.selected.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTile item can be selected', (WidgetTester tester) async {
+  testWidgets('ListTile item can be selected', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListTileApp(),
     );

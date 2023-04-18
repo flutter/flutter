@@ -141,7 +141,7 @@ class CupertinoButton extends StatefulWidget {
   State<CupertinoButton> createState() => _CupertinoButtonState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled'));
   }
@@ -171,7 +171,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   @override
-  void didUpdateWidget(CupertinoButton old) {
+  void didUpdateWidget(final CupertinoButton old) {
     super.didUpdateWidget(old);
     _setTween();
   }
@@ -188,14 +188,14 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   bool _buttonHeldDown = false;
 
-  void _handleTapDown(TapDownDetails event) {
+  void _handleTapDown(final TapDownDetails event) {
     if (!_buttonHeldDown) {
       _buttonHeldDown = true;
       _animate();
     }
   }
 
-  void _handleTapUp(TapUpDetails event) {
+  void _handleTapUp(final TapUpDetails event) {
     if (_buttonHeldDown) {
       _buttonHeldDown = false;
       _animate();
@@ -217,7 +217,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final TickerFuture ticker = _buttonHeldDown
         ? _animationController.animateTo(1.0, duration: kFadeOutDuration, curve: Curves.easeInOutCubicEmphasized)
         : _animationController.animateTo(0.0, duration: kFadeInDuration, curve: Curves.easeOutCubic);
-    ticker.then<void>((void value) {
+    ticker.then<void>((final void value) {
       if (mounted && wasHeldDown != _buttonHeldDown) {
         _animate();
       }
@@ -225,7 +225,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final bool enabled = widget.enabled;
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     final Color primaryColor = themeData.primaryColor;

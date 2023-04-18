@@ -10,7 +10,7 @@ class AnimatedImagePage extends StatelessWidget {
   final ValueChanged<int>? onFrame;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Animated Image'),
@@ -18,7 +18,7 @@ class AnimatedImagePage extends StatelessWidget {
       body: Image.asset(
         'animated_images/animated_flutter_lgtm.gif',
         package: 'flutter_gallery_assets',
-        frameBuilder: (BuildContext context, Widget child, int? frame, bool syncCall) {
+        frameBuilder: (final BuildContext context, final Widget child, final int? frame, final bool syncCall) {
           if (onFrame != null && frame != null) {
             onFrame?.call(frame);
           }

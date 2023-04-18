@@ -12,7 +12,7 @@ class MouseCursorExampleApp extends StatelessWidget {
   const MouseCursorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MouseCursor Code Sample')),
@@ -26,7 +26,7 @@ class MouseCursorExample extends StatelessWidget {
   const MouseCursorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: MouseRegion(
         cursor: SystemMouseCursors.text,

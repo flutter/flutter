@@ -12,7 +12,7 @@ class MaterialStateExampleApp extends StatelessWidget {
   const MaterialStateExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration Sample')),
@@ -26,13 +26,13 @@ class MaterialStateExample extends StatelessWidget {
   const MaterialStateExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     return Theme(
       data: themeData.copyWith(
         inputDecorationTheme: themeData.inputDecorationTheme.copyWith(
           prefixIconColor: MaterialStateColor.resolveWith(
-            (Set<MaterialState> states) {
+            (final Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return Colors.green;
               }

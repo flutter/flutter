@@ -12,7 +12,7 @@ class DecoratedBoxTransitionExampleApp extends StatelessWidget {
   const DecoratedBoxTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: DecoratedBoxTransitionExample(),
     );
@@ -65,7 +65,7 @@ class _DecoratedBoxTransitionExampleState extends State<DecoratedBoxTransitionEx
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.white,
       child: Center(

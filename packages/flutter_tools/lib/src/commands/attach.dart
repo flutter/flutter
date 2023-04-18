@@ -62,16 +62,16 @@ import '../vmservice.dart';
 /// also be provided.
 class AttachCommand extends FlutterCommand {
   AttachCommand({
-    bool verboseHelp = false,
-    HotRunnerFactory? hotRunnerFactory,
-    required Artifacts? artifacts,
-    required Stdio stdio,
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required Platform platform,
-    required ProcessInfo processInfo,
-    required FileSystem fileSystem,
+    final bool verboseHelp = false,
+    final HotRunnerFactory? hotRunnerFactory,
+    required final Artifacts? artifacts,
+    required final Stdio stdio,
+    required final Logger logger,
+    required final Terminal terminal,
+    required final Signals signals,
+    required final Platform platform,
+    required final ProcessInfo processInfo,
+    required final FileSystem fileSystem,
   }): _artifacts = artifacts,
       _hotRunnerFactory = hotRunnerFactory ?? HotRunnerFactory(),
       _stdio = stdio,
@@ -277,7 +277,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
     return FlutterCommandResult.success();
   }
 
-  Future<void> _attachToDevice(Device device) async {
+  Future<void> _attachToDevice(final Device device) async {
     final FlutterProject flutterProject = FlutterProject.current();
 
     final Daemon? daemon = boolArg('machine')
@@ -432,8 +432,8 @@ known, it can be explicitly provided to attach via the command-line, e.g.
         try {
           app = await daemon.appDomain.launch(
             runner,
-            ({Completer<DebugConnectionInfo>? connectionInfoCompleter,
-              Completer<void>? appStartedCompleter}) {
+            ({final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+              final Completer<void>? appStartedCompleter}) {
               return runner.attach(
                 connectionInfoCompleter: connectionInfoCompleter,
                 appStartedCompleter: appStartedCompleter,
@@ -505,10 +505,10 @@ known, it can be explicitly provided to attach via the command-line, e.g.
   }
 
   Future<ResidentRunner> createResidentRunner({
-    required Stream<Uri> vmServiceUris,
-    required Device device,
-    required FlutterProject flutterProject,
-    required bool usesIpv6,
+    required final Stream<Uri> vmServiceUris,
+    required final Device device,
+    required final FlutterProject flutterProject,
+    required final bool usesIpv6,
   }) async {
     final BuildInfo buildInfo = await getBuildInfo();
 
@@ -551,7 +551,7 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
   Future<void> _validateArguments() async { }
 
-  bool _isIOSDevice(Device device) {
+  bool _isIOSDevice(final Device device) {
     return (device is IOSDevice) ||
         (device is IOSSimulator) ||
         (device is MacOSDesignedForIPadDevice);
@@ -560,18 +560,18 @@ known, it can be explicitly provided to attach via the command-line, e.g.
 
 class HotRunnerFactory {
   HotRunner build(
-    List<FlutterDevice> devices, {
-    required String target,
-    required DebuggingOptions debuggingOptions,
-    bool benchmarkMode = false,
-    File? applicationBinary,
-    bool hostIsIde = false,
-    String? projectRootPath,
-    String? packagesFilePath,
-    String? dillOutputPath,
-    bool stayResident = true,
-    bool ipv6 = false,
-    FlutterProject? flutterProject,
+    final List<FlutterDevice> devices, {
+    required final String target,
+    required final DebuggingOptions debuggingOptions,
+    final bool benchmarkMode = false,
+    final File? applicationBinary,
+    final bool hostIsIde = false,
+    final String? projectRootPath,
+    final String? packagesFilePath,
+    final String? dillOutputPath,
+    final bool stayResident = true,
+    final bool ipv6 = false,
+    final FlutterProject? flutterProject,
   }) => HotRunner(
     devices,
     target: target,

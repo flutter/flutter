@@ -217,7 +217,7 @@ class FakeTerminal extends Fake implements Terminal {
   @override
   bool usesTerminalUi = false;
 
-  void addPrompt(List<String> characters, String selected) {
+  void addPrompt(final List<String> characters, final String selected) {
     _characters = characters;
     _selected = selected;
   }
@@ -226,7 +226,7 @@ class FakeTerminal extends Fake implements Terminal {
   late String _selected;
 
   @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters, {Logger? logger, String? prompt, int? defaultChoiceIndex, bool displayAcceptedCharacters = true}) async {
+  Future<String> promptForCharInput(final List<String> acceptedCharacters, {final Logger? logger, final String? prompt, final int? defaultChoiceIndex, final bool displayAcceptedCharacters = true}) async {
     expect(acceptedCharacters, _characters);
     return _selected;
   }

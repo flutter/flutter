@@ -62,7 +62,7 @@ enum KeyboardLockMode {
 
   /// Returns the [KeyboardLockMode] constant from the logical key, or
   /// null, if not found.
-  static KeyboardLockMode? findLockByLogicalKey(LogicalKeyboardKey logicalKey) => _knownLockModes[logicalKey.keyId];
+  static KeyboardLockMode? findLockByLogicalKey(final LogicalKeyboardKey logicalKey) => _knownLockModes[logicalKey.keyId];
 }
 
 /// Defines the interface for keyboard key events.
@@ -189,7 +189,7 @@ abstract class KeyEvent with Diagnosticable {
   final bool synthesized;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<PhysicalKeyboardKey>('physicalKey', physicalKey));
     properties.add(DiagnosticsProperty<LogicalKeyboardKey>('logicalKey', logicalKey));
@@ -407,7 +407,7 @@ class HardwareKeyboard {
   /// Returns the logical key that corresponds to the given pressed physical key.
   ///
   /// Returns null if the physical key is not currently pressed.
-  LogicalKeyboardKey? lookUpLayout(PhysicalKeyboardKey physicalKey) => _pressedKeys[physicalKey];
+  LogicalKeyboardKey? lookUpLayout(final PhysicalKeyboardKey physicalKey) => _pressedKeys[physicalKey];
 
   final Set<KeyboardLockMode> _lockModes = <KeyboardLockMode>{};
   /// The set of [KeyboardLockMode] that are enabled.
@@ -420,7 +420,7 @@ class HardwareKeyboard {
   /// of the event.
   Set<KeyboardLockMode> get lockModesEnabled => _lockModes;
 
-  void _assertEventIsRegular(KeyEvent event) {
+  void _assertEventIsRegular(final KeyEvent event) {
     assert(() {
       const String common = 'If this occurs in real application, please report this '
         'bug to Flutter. If this occurs in unit tests, please ensure that '
@@ -467,7 +467,7 @@ class HardwareKeyboard {
   /// See also:
   ///
   ///  * [removeHandler], which removes the handler.
-  void addHandler(KeyEventCallback handler) {
+  void addHandler(final KeyEventCallback handler) {
     if (_duringDispatch) {
       _modifiedHandlers ??= <KeyEventCallback>[..._handlers];
       _modifiedHandlers!.add(handler);
@@ -485,7 +485,7 @@ class HardwareKeyboard {
   ///
   /// If used during event dispatching, the removal will not take effect
   /// until after the event has been dispatched.
-  void removeHandler(KeyEventCallback handler) {
+  void removeHandler(final KeyEventCallback handler) {
     if (_duringDispatch) {
       _modifiedHandlers ??= <KeyEventCallback>[..._handlers];
       _modifiedHandlers!.remove(handler);
@@ -494,7 +494,7 @@ class HardwareKeyboard {
     }
   }
 
-  bool _dispatchKeyEvent(KeyEvent event) {
+  bool _dispatchKeyEvent(final KeyEvent event) {
     // This dispatching could have used the same algorithm as [ChangeNotifier],
     // but since 1) it shouldn't be necessary to support reentrantly
     // dispatching, 2) there shouldn't be many handlers (most apps should use
@@ -533,7 +533,7 @@ class HardwareKeyboard {
 
   /// Process a new [KeyEvent] by recording the state changes and dispatching
   /// to handlers.
-  bool handleKeyEvent(KeyEvent event) {
+  bool handleKeyEvent(final KeyEvent event) {
     _assertEventIsRegular(event);
     final PhysicalKeyboardKey physicalKey = event.physicalKey;
     final LogicalKeyboardKey logicalKey = event.logicalKey;
@@ -856,7 +856,7 @@ class KeyEventManager {
   /// Dispatch a key data to global and leaf listeners.
   ///
   /// This method is the handler to the global `onKeyData` API.
-  bool handleKeyData(ui.KeyData data) {
+  bool handleKeyData(final ui.KeyData data) {
     _transitMode ??= KeyDataTransitMode.keyDataThenRawKeyData;
     switch (_transitMode!) {
       case KeyDataTransitMode.rawKeyData:
@@ -892,7 +892,7 @@ class KeyEventManager {
     }
   }
 
-  bool _dispatchKeyMessage(List<KeyEvent> keyEvents, RawKeyEvent? rawEvent) {
+  bool _dispatchKeyMessage(final List<KeyEvent> keyEvents, final RawKeyEvent? rawEvent) {
     if (keyMessageHandler != null) {
       final KeyMessage message = KeyMessage(keyEvents, rawEvent);
       try {
@@ -922,7 +922,7 @@ class KeyEventManager {
   /// This method is the handler to [SystemChannels.keyEvent], processing
   /// the JSON form of the native key message and returns the responds for the
   /// channel.
-  Future<Map<String, dynamic>> handleRawKeyMessage(dynamic message) async {
+  Future<Map<String, dynamic>> handleRawKeyMessage(final dynamic message) async {
     if (_transitMode == null) {
       _transitMode = KeyDataTransitMode.rawKeyData;
       // Convert raw events using a listener so that conversion only occurs if
@@ -973,7 +973,7 @@ class KeyEventManager {
   //
   // This is only called when `_transitMode` is `rawKeyEvent` and if the raw
   // event should be dispatched.
-  void _convertRawEventAndStore(RawKeyEvent rawEvent) {
+  void _convertRawEventAndStore(final RawKeyEvent rawEvent) {
     final PhysicalKeyboardKey physicalKey = rawEvent.physicalKey;
     final LogicalKeyboardKey logicalKey = rawEvent.logicalKey;
     final Set<PhysicalKeyboardKey> physicalKeysPressed = _hardwareKeyboard.physicalKeysPressed;
@@ -1060,7 +1060,7 @@ class KeyEventManager {
     }());
   }
 
-  static KeyEvent _eventFromData(ui.KeyData keyData) {
+  static KeyEvent _eventFromData(final ui.KeyData keyData) {
     final PhysicalKeyboardKey physicalKey =
         PhysicalKeyboardKey.findKeyByCode(keyData.physical) ??
             PhysicalKeyboardKey(keyData.physical);

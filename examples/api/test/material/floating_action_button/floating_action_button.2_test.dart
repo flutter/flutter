@@ -8,8 +8,8 @@ import 'package:flutter_api_samples/material/floating_action_button/floating_act
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('FloatingActionButton - Material 3', (WidgetTester tester) async {
-    RawMaterialButton getRawMaterialButtonWidget(Finder finder) {
+  testWidgets('FloatingActionButton - Material 3', (final WidgetTester tester) async {
+    RawMaterialButton getRawMaterialButtonWidget(final Finder finder) {
       return tester.widget<RawMaterialButton>(finder);
     }
     await tester.pumpWidget(

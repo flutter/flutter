@@ -12,7 +12,7 @@ class FloatingActionButtonExampleApp extends StatelessWidget {
   const FloatingActionButtonExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FabExample(),
     );
@@ -23,7 +23,7 @@ class FabExample extends StatelessWidget {
   const FabExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('FloatingActionButton Sample'),

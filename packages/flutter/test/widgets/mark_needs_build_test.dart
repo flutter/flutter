@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('setState can be called from build, initState, didChangeDependencies, and didUpdateWidget', (WidgetTester tester) async {
+  testWidgets('setState can be called from build, initState, didChangeDependencies, and didUpdateWidget', (final WidgetTester tester) async {
     // Initial build.
     await tester.pumpWidget(
       const Directionality(
@@ -93,7 +93,7 @@ class _TestWidgetState extends State<TestWidget> {
   }
 
   @override
-  void didUpdateWidget(TestWidget oldWidget) {
+  void didUpdateWidget(final TestWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     setState(() {
       calledDuringDidUpdateWidget++;
@@ -101,7 +101,7 @@ class _TestWidgetState extends State<TestWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     setState(() {
       calledDuringBuild++;
     });

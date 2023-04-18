@@ -35,13 +35,13 @@ void main() {
     expect(recognizer.debugLastPendingEventTimestamp, null);
   });
 
-  testGesture('do not crash on up event for a pending pointer after winning arena for another pointer', (GestureTester tester) {
+  testGesture('do not crash on up event for a pending pointer after winning arena for another pointer', (final GestureTester tester) {
     // Regression test for https://github.com/flutter/flutter/issues/75061.
 
     final VerticalDragGestureRecognizer v = VerticalDragGestureRecognizer()
-      ..onStart = (_) { };
+      ..onStart = (final _) { };
     final HorizontalDragGestureRecognizer h = HorizontalDragGestureRecognizer()
-      ..onStart = (_) { };
+      ..onStart = (final _) { };
 
     const PointerDownEvent down90 = PointerDownEvent(
       pointer: 90,
@@ -80,13 +80,13 @@ void main() {
     late HorizontalDragGestureRecognizer secondaryRecognizer;
     setUp(() {
       primaryRecognizer = HorizontalDragGestureRecognizer(
-          allowedButtonsFilter: (int buttons) => kPrimaryButton == buttons)
-        ..onStart = (DragStartDetails details) {
+          allowedButtonsFilter: (final int buttons) => kPrimaryButton == buttons)
+        ..onStart = (final DragStartDetails details) {
           recognized.add('onStartPrimary');
         };
       secondaryRecognizer = HorizontalDragGestureRecognizer(
-          allowedButtonsFilter: (int buttons) => kSecondaryButton == buttons)
-        ..onStart = (DragStartDetails details) {
+          allowedButtonsFilter: (final int buttons) => kSecondaryButton == buttons)
+        ..onStart = (final DragStartDetails details) {
           recognized.add('onStartSecondary');
         };
     });
@@ -97,7 +97,7 @@ void main() {
       secondaryRecognizer.dispose();
     });
 
-    testGesture('Primary button works', (GestureTester tester) {
+    testGesture('Primary button works', (final GestureTester tester) {
       const PointerDownEvent down1 = PointerDownEvent(
         pointer: 6,
         position: Offset(10.0, 10.0),
@@ -110,7 +110,7 @@ void main() {
       expect(recognized, <String>['onStartPrimary']);
     });
 
-    testGesture('Secondary button works', (GestureTester tester) {
+    testGesture('Secondary button works', (final GestureTester tester) {
       const PointerDownEvent down1 = PointerDownEvent(
         pointer: 6,
         position: Offset(10.0, 10.0),
@@ -128,5 +128,5 @@ void main() {
 
 class MockHitTestTarget implements HitTestTarget {
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) { }
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) { }
 }

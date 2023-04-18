@@ -20,10 +20,10 @@ import 'linux_workflow.dart';
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends DesktopDevice {
   LinuxDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
         super(
           'linux',
@@ -52,14 +52,14 @@ class LinuxDevice extends DesktopDevice {
   }();
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) {
+  bool isSupportedForProject(final FlutterProject flutterProject) {
     return flutterProject.linux.existsSync();
   }
 
   @override
   Future<void> buildForDevice({
-    String? mainPath,
-    required BuildInfo buildInfo,
+    final String? mainPath,
+    required final BuildInfo buildInfo,
   }) async {
     await buildLinux(
       FlutterProject.current().linux,
@@ -70,19 +70,19 @@ class LinuxDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(covariant LinuxApp package, BuildInfo buildInfo) {
+  String executablePathForDevice(covariant final LinuxApp package, final BuildInfo buildInfo) {
     return package.executable(buildInfo.mode);
   }
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {
   LinuxDevices({
-    required Platform platform,
-    required FeatureFlags featureFlags,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
+    required final Platform platform,
+    required final FeatureFlags featureFlags,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final FileSystem fileSystem,
+    required final ProcessManager processManager,
+    required final Logger logger,
   }) : _platform = platform,
        _linuxWorkflow = LinuxWorkflow(
           platform: platform,
@@ -108,7 +108,7 @@ class LinuxDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _linuxWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({ final Duration? timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

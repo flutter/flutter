@@ -12,7 +12,7 @@ class AutocompleteExampleApp extends StatelessWidget {
   const AutocompleteExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -43,7 +43,7 @@ class User {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -63,13 +63,13 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  static String _displayStringForOption(User option) => option.name;
+  static String _displayStringForOption(final User option) => option.name;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RawAutocomplete<User>(
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        return _userOptions.where((User option) {
+      optionsBuilder: (final TextEditingValue textEditingValue) {
+        return _userOptions.where((final User option) {
           // Search based on User.toString, which includes both name and
           // email, even though the display string is just the name.
           return option.toString().contains(textEditingValue.text.toLowerCase());
@@ -77,20 +77,20 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
       },
       displayStringForOption: _displayStringForOption,
       fieldViewBuilder: (
-        BuildContext context,
-        TextEditingController textEditingController,
-        FocusNode focusNode,
-        VoidCallback onFieldSubmitted,
+        final BuildContext context,
+        final TextEditingController textEditingController,
+        final FocusNode focusNode,
+        final VoidCallback onFieldSubmitted,
       ) {
         return TextFormField(
           controller: textEditingController,
           focusNode: focusNode,
-          onFieldSubmitted: (String value) {
+          onFieldSubmitted: (final String value) {
             onFieldSubmitted();
           },
         );
       },
-      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<User> onSelected, Iterable<User> options) {
+      optionsViewBuilder: (final BuildContext context, final AutocompleteOnSelected<User> onSelected, final Iterable<User> options) {
         return Align(
           alignment: Alignment.topLeft,
           child: Material(
@@ -100,7 +100,7 @@ class AutocompleteCustomTypeExample extends StatelessWidget {
               child: ListView.builder(
                 padding: const EdgeInsets.all(8.0),
                 itemCount: options.length,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   final User option = options.elementAt(index);
                   return GestureDetector(
                     onTap: () {

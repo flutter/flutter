@@ -8,8 +8,8 @@ import '../features.dart';
 
 class WebWorkflow extends Workflow {
   const WebWorkflow({
-    required Platform platform,
-    required FeatureFlags featureFlags,
+    required final Platform platform,
+    required final FeatureFlags featureFlags,
   }) : _platform = platform,
        _featureFlags = featureFlags;
 

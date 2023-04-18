@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/bottom_tab_bar/cupertino_tab_bar.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can switch between tabs', (WidgetTester tester) async {
+  testWidgets('Can switch between tabs', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoTabBarApp(),
     );

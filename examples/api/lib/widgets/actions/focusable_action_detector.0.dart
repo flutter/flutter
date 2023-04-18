@@ -13,7 +13,7 @@ class FocusableActionDetectorExampleApp extends StatelessWidget {
   const FocusableActionDetectorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FocusableActionDetectorExample(),
     );
@@ -48,7 +48,7 @@ class _FadButtonState extends State<FadButton> {
     super.initState();
     _actionMap = <Type, Action<Intent>>{
       ActivateIntent: CallbackAction<Intent>(
-        onInvoke: (Intent intent) => _toggleState(),
+        onInvoke: (final Intent intent) => _toggleState(),
       ),
     };
   }
@@ -70,20 +70,20 @@ class _FadButtonState extends State<FadButton> {
     });
   }
 
-  void _handleFocusHighlight(bool value) {
+  void _handleFocusHighlight(final bool value) {
     setState(() {
       _focused = value;
     });
   }
 
-  void _handleHoveHighlight(bool value) {
+  void _handleHoveHighlight(final bool value) {
     setState(() {
       _hovering = value;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: _toggleState,
       child: FocusableActionDetector(
@@ -120,7 +120,7 @@ class FocusableActionDetectorExample extends StatefulWidget {
 
 class _FocusableActionDetectorExampleState extends State<FocusableActionDetectorExample> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('FocusableActionDetector Example'),

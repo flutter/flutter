@@ -20,7 +20,7 @@ class TestSpecs {
     return endTime - startTime;
   }
 
-  set endTime(int value) {
+  set endTime(final int value) {
     _endTime = value;
   }
 
@@ -46,7 +46,7 @@ class TestFileReporterResults {
   });
 
   /// Intended to parse the output file of `dart test --file-reporter json:file_name
-  factory TestFileReporterResults.fromFile(File metrics) {
+  factory TestFileReporterResults.fromFile(final File metrics) {
     if (!metrics.existsSync()) {
       throw Exception('${metrics.path} does not exist');
     }
@@ -80,19 +80,19 @@ class TestFileReporterResults {
   final List<String> errors;
 
 
-  static void addTestSpec(Map<String, Object?> suite, int time, Map<int, TestSpecs> allTestSpecs) {
+  static void addTestSpec(final Map<String, Object?> suite, final int time, final Map<int, TestSpecs> allTestSpecs) {
     allTestSpecs[suite['id']! as int] = TestSpecs(
       path: suite['path']! as String,
       startTime: time,
     );
   }
 
-  static void addMetricDone(int suiteID, int time, Map<int, TestSpecs> allTestSpecs) {
+  static void addMetricDone(final int suiteID, final int time, final Map<int, TestSpecs> allTestSpecs) {
     final TestSpecs testSpec = allTestSpecs[suiteID]!;
     testSpec.endTime = time;
   }
 
-  static bool isMetricDone(Map<String, Object?> entry, Map<int, TestSpecs> allTestSpecs) {
+  static bool isMetricDone(final Map<String, Object?> entry, final Map<int, TestSpecs> allTestSpecs) {
     if (entry.containsKey('group') && entry['type']! as String == 'group') {
       final Map<String, Object?> group = entry['group']! as Map<String, Object?>;
       return allTestSpecs.containsKey(group['suiteID']! as int);

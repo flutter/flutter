@@ -12,7 +12,7 @@ class ActionsExampleApp extends StatelessWidget {
   const ActionsExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Actions Sample')),
@@ -37,7 +37,7 @@ class Model {
     return data.value;
   }
 
-  void setValue(int newValue) {
+  void setValue(final int newValue) {
     isDirty.value = data.value != newValue;
     data.value = newValue;
   }
@@ -57,7 +57,7 @@ class ModifyAction extends Action<ModifyIntent> {
   final Model model;
 
   @override
-  void invoke(covariant ModifyIntent intent) {
+  void invoke(covariant final ModifyIntent intent) {
     model.setValue(intent.value);
   }
 }
@@ -74,7 +74,7 @@ class SaveAction extends Action<SaveIntent> {
   final Model model;
 
   @override
-  int invoke(covariant SaveIntent intent) => model.save();
+  int invoke(covariant final SaveIntent intent) => model.save();
 }
 
 class SaveButton extends StatefulWidget {
@@ -90,10 +90,10 @@ class _SaveButtonState extends State<SaveButton> {
   int savedValue = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: widget.valueNotifier,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return TextButton.icon(
           icon: const Icon(Icons.save),
           label: Text('$savedValue'),
@@ -125,14 +125,14 @@ class _ActionsExampleState extends State<ActionsExample> {
   int count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
         ModifyIntent: ModifyAction(model),
         SaveIntent: SaveAction(model),
       },
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
@@ -148,7 +148,7 @@ class _ActionsExampleState extends State<ActionsExample> {
                   ),
                   AnimatedBuilder(
                       animation: model.data,
-                      builder: (BuildContext context, Widget? child) {
+                      builder: (final BuildContext context, final Widget? child) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('${model.data.value}', style: Theme.of(context).textTheme.headlineMedium),

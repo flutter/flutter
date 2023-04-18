@@ -9,10 +9,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Traversal Order of SliverList', (WidgetTester tester) async {
+  testWidgets('Traversal Order of SliverList', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Row(
@@ -182,10 +182,10 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Traversal Order of SliverFixedExtentList', (WidgetTester tester) async {
+  testWidgets('Traversal Order of SliverFixedExtentList', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Row(
@@ -321,10 +321,10 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Traversal Order of SliverGrid', (WidgetTester tester) async {
+  testWidgets('Traversal Order of SliverGrid', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Text('Item $i'),
@@ -449,10 +449,10 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Traversal Order of List of individual slivers', (WidgetTester tester) async {
+  testWidgets('Traversal Order of List of individual slivers', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (final int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
           height: 200.0,
@@ -585,10 +585,10 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Traversal Order of in a SingleChildScrollView', (WidgetTester tester) async {
+  testWidgets('Traversal Order of in a SingleChildScrollView', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Row(
@@ -671,7 +671,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Traversal Order with center child', (WidgetTester tester) async {
+  testWidgets('Traversal Order with center child', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(Semantics(
@@ -681,11 +681,11 @@ void main() {
         child: MediaQuery(
           data: const MediaQueryData(),
           child: Scrollable(
-            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+            viewportBuilder: (final BuildContext context, final ViewportOffset offset) {
               return Viewport(
                 offset: offset,
                 center: const ValueKey<int>(0),
-                slivers: List<Widget>.generate(30, (int i) {
+                slivers: List<Widget>.generate(30, (final int i) {
                   final int item = i - 15;
                   return SliverToBoxAdapter(
                     key: ValueKey<int>(item),

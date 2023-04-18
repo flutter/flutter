@@ -12,7 +12,7 @@ class ColorFilteredExampleApp extends StatelessWidget {
   const ColorFilteredExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ColorFiltered Sample')),
@@ -26,7 +26,7 @@ class ColorFilteredExample extends StatelessWidget {
   const ColorFilteredExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[

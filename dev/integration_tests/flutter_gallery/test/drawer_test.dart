@@ -13,7 +13,7 @@ void main() {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   }
 
-  testWidgets('Flutter Gallery drawer item test', (WidgetTester tester) async {
+  testWidgets('Flutter Gallery drawer item test', (final WidgetTester tester) async {
     bool hasFeedback = false;
 
     await tester.pumpWidget(
@@ -56,7 +56,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<ThemeMode>'),
+        of: find.byWidgetPredicate((final Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<ThemeMode>'),
         matching: find.text('System Default')
     ));
     await tester.pumpAndSettle();
@@ -77,7 +77,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryVisualDensityValue>'),
+        of: find.byWidgetPredicate((final Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryVisualDensityValue>'),
         matching: find.text('System Default')
     ));
     await tester.pumpAndSettle();
@@ -111,7 +111,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(1));
     await tester.pumpAndSettle();
     await tester.tap(find.descendant(
-        of: find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryTextScaleValue>'),
+        of: find.byWidgetPredicate((final Widget widget) => widget.runtimeType.toString() == 'PopupMenuItem<GalleryTextScaleValue>'),
         matching: find.text('System Default')
     ));
     await tester.pumpAndSettle();

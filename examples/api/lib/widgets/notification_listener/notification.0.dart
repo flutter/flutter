@@ -12,7 +12,7 @@ class NotificationExampleApp extends StatelessWidget {
   const NotificationExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: NotificationExample(),
     );
@@ -35,13 +35,13 @@ class NotificationExample extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: _tabs.length,
       child: Scaffold(
         // Listens to the scroll events and returns the current position.
         body: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scrollNotification) {
+          onNotification: (final ScrollNotification scrollNotification) {
             if (scrollNotification is ScrollStartNotification) {
               debugPrint('Scrolling has started');
             } else if (scrollNotification is ScrollEndNotification) {
@@ -51,14 +51,14 @@ class NotificationExample extends StatelessWidget {
             return true;
           },
           child: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverAppBar(
                   title: const Text('Notification Sample'),
                   pinned: true,
                   floating: true,
                   bottom: TabBar(
-                    tabs: _tabs.map((String name) => Tab(text: name)).toList(),
+                    tabs: _tabs.map((final String name) => Tab(text: name)).toList(),
                   ),
                 ),
               ];
@@ -67,13 +67,13 @@ class NotificationExample extends StatelessWidget {
               children: <Widget>[
                 ListView.builder(
                   itemCount: _months.length,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return ListTile(title: Text(_months[index]));
                   },
                 ),
                 ListView.builder(
                   itemCount: _days.length,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return ListTile(title: Text(_days[index]));
                   },
                 ),

@@ -12,7 +12,7 @@ class ListTileApp extends StatelessWidget {
   const ListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const LisTileExample(),
@@ -24,7 +24,7 @@ class LisTileExample extends StatelessWidget {
   const LisTileExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile Sample')),
       body: ListView(

@@ -43013,16 +43013,16 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalMaterialLocalizations.delegate].
 GlobalMaterialLocalizations? getMaterialTranslation(
-  Locale locale,
-  intl.DateFormat fullYearFormat,
-  intl.DateFormat compactDateFormat,
-  intl.DateFormat shortDateFormat,
-  intl.DateFormat mediumDateFormat,
-  intl.DateFormat longDateFormat,
-  intl.DateFormat yearMonthFormat,
-  intl.DateFormat shortMonthDayFormat,
-  intl.NumberFormat decimalFormat,
-  intl.NumberFormat twoDigitZeroPaddedFormat,
+  final Locale locale,
+  final intl.DateFormat fullYearFormat,
+  final intl.DateFormat compactDateFormat,
+  final intl.DateFormat shortDateFormat,
+  final intl.DateFormat mediumDateFormat,
+  final intl.DateFormat longDateFormat,
+  final intl.DateFormat yearMonthFormat,
+  final intl.DateFormat shortMonthDayFormat,
+  final intl.NumberFormat decimalFormat,
+  final intl.NumberFormat twoDigitZeroPaddedFormat,
 ) {
   switch (locale.languageCode) {
     case 'af':

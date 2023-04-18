@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/list_tile/custom_list_item.0.dart' 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Custom list item uses Expanded widgets for the layout', (WidgetTester tester) async {
+  testWidgets('Custom list item uses Expanded widgets for the layout', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CustomListItemApp(),
     );

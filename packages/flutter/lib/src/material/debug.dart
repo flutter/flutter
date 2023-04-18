@@ -31,7 +31,7 @@ import 'scaffold.dart' show Scaffold, ScaffoldMessenger;
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasMaterial(BuildContext context) {
+bool debugCheckHasMaterial(final BuildContext context) {
   assert(() {
     if (LookupBoundary.findAncestorWidgetOfExactType<Material>(context) == null) {
       final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Material>(context);
@@ -87,7 +87,7 @@ bool debugCheckHasMaterial(BuildContext context) {
 /// always also calls [Localizations.of] or [Localizations.localeOf].
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasMaterialLocalizations(BuildContext context) {
+bool debugCheckHasMaterialLocalizations(final BuildContext context) {
   assert(() {
     if (Localizations.of<MaterialLocalizations>(context, MaterialLocalizations) == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -133,7 +133,7 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasScaffold(BuildContext context) {
+bool debugCheckHasScaffold(final BuildContext context) {
   assert(() {
     if (context.widget is! Scaffold && context.findAncestorWidgetOfExactType<Scaffold>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -170,7 +170,7 @@ bool debugCheckHasScaffold(BuildContext context) {
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasScaffoldMessenger(BuildContext context) {
+bool debugCheckHasScaffoldMessenger(final BuildContext context) {
   assert(() {
     if (context.findAncestorWidgetOfExactType<ScaffoldMessenger>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[

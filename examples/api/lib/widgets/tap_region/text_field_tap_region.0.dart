@@ -13,7 +13,7 @@ class TapRegionApp extends StatelessWidget {
   const TapRegionApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('TextFieldTapRegion Example')),
@@ -34,7 +34,7 @@ class _TextFieldTapRegionExampleState extends State<TextFieldTapRegionExample> {
   int value = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView(
       children: <Widget>[
         Center(
@@ -46,7 +46,7 @@ class _TextFieldTapRegionExampleState extends State<TextFieldTapRegionExample> {
               child: IntegerSpinnerField(
                 value: value,
                 autofocus: true,
-                onChanged: (int newValue) {
+                onChanged: (final int newValue) {
                   if (value == newValue) {
                     // Avoid unnecessary redraws.
                     return;
@@ -82,19 +82,19 @@ class IntegerSpinnerField extends StatelessWidget {
   final ValueChanged<int>? onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SpinnerField<int>(
       value: value,
       onChanged: onChanged,
       autofocus: autofocus,
-      fromString: (String stringValue) => int.tryParse(stringValue) ?? value,
-      increment: (int i) => i + delta,
-      decrement: (int i) => i - delta,
+      fromString: (final String stringValue) => int.tryParse(stringValue) ?? value,
+      increment: (final int i) => i + delta,
+      decrement: (final int i) => i - delta,
       // Add a text formatter that only allows integer values and a leading
       // minus sign.
       inputFormatters: <TextInputFormatter>[
         TextInputFormatter.withFunction(
-          (TextEditingValue oldValue, TextEditingValue newValue) {
+          (final TextEditingValue oldValue, final TextEditingValue newValue) {
             String newString;
             if (newValue.text.startsWith('-')) {
               newString = '-${newValue.text.replaceAll(RegExp(r'\D'), '')}';
@@ -126,12 +126,12 @@ class SpinnerField<T> extends StatefulWidget {
     required this.value,
     required this.fromString,
     this.autofocus = false,
-    String Function(T value)? asString,
+    final String Function(T value)? asString,
     this.increment,
     this.decrement,
     this.onChanged,
     this.inputFormatters = const <TextInputFormatter>[],
-  }) : asString = asString ?? ((T value) => value.toString());
+  }) : asString = asString ?? ((final T value) => value.toString());
 
   final T value;
   final T Function(T value)? increment;
@@ -162,7 +162,7 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
   }
 
   @override
-  void didUpdateWidget(covariant SpinnerField<T> oldWidget) {
+  void didUpdateWidget(covariant final SpinnerField<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.asString != widget.asString || oldWidget.value != widget.value) {
       final String newText = widget.asString(widget.value);
@@ -170,7 +170,7 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
     }
   }
 
-  void _updateText(String text, {bool collapsed = true}) {
+  void _updateText(final String text, {final bool collapsed = true}) {
     if (text != controller.text) {
       controller.value = TextEditingValue(
         text: text,
@@ -181,7 +181,7 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
     }
   }
 
-  void _spin(T Function(T value)? spinFunction) {
+  void _spin(final T Function(T value)? spinFunction) {
     if (spinFunction == null) {
       return;
     }
@@ -199,7 +199,7 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         const SingleActivator(LogicalKeyboardKey.arrowUp): _increment,
@@ -214,7 +214,7 @@ class _SpinnerFieldState<T> extends State<SpinnerField<T>> {
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
-              onChanged: (String value) => widget.onChanged?.call(widget.fromString(value)),
+              onChanged: (final String value) => widget.onChanged?.call(widget.fromString(value)),
               controller: controller,
               textAlign: TextAlign.center,
             ),

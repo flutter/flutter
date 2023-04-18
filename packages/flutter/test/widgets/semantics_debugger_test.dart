@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SemanticsDebugger will schedule a frame', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger will schedule a frame', (final WidgetTester tester) async {
     await tester.pumpWidget(
       SemanticsDebugger(
         child: Container(),
@@ -17,7 +17,7 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isTrue);
   });
 
-  testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger smoke test', (final WidgetTester tester) async {
 
     // This is a smoketest to verify that adding a debugger doesn't crash.
     await tester.pumpWidget(
@@ -61,7 +61,7 @@ void main() {
     expect(true, isTrue); // expect that we reach here without crashing
   });
 
-  testWidgets('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger reparents subtree', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -147,7 +147,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SemanticsDebugger interaction test', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -185,7 +185,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('SemanticsDebugger interaction test - negative', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test - negative', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -225,7 +225,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('SemanticsDebugger scroll test', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger scroll test', (final WidgetTester tester) async {
     final Key childKey = UniqueKey();
 
     await tester.pumpWidget(
@@ -268,7 +268,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
   });
 
-  testWidgets('SemanticsDebugger long press', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger long press', (final WidgetTester tester) async {
     bool didLongPress = false;
 
     await tester.pumpWidget(
@@ -290,7 +290,7 @@ void main() {
     expect(didLongPress, isTrue);
   });
 
-  testWidgets('SemanticsDebugger slider', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger slider', (final WidgetTester tester) async {
     double value = 0.75;
 
     await tester.pumpWidget(
@@ -306,7 +306,7 @@ void main() {
                   child: Center(
                     child: Slider(
                       value: value,
-                      onChanged: (double newValue) {
+                      onChanged: (final double newValue) {
                         value = newValue;
                       },
                     ),
@@ -337,7 +337,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger checkbox', (final WidgetTester tester) async {
     final Key keyTop = UniqueKey();
     final Key keyBottom = UniqueKey();
 
@@ -353,7 +353,7 @@ void main() {
                 Checkbox(
                   key: keyTop,
                   value: valueTop,
-                  onChanged: (bool? newValue) {
+                  onChanged: (final bool? newValue) {
                     valueTop = newValue;
                   },
                 ),
@@ -378,7 +378,7 @@ void main() {
     expect(valueTop, isFalse);
   });
 
-  testWidgets('SemanticsDebugger checkbox message', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger checkbox message', (final WidgetTester tester) async {
     final Key checkbox = UniqueKey();
     final Key checkboxUnchecked = UniqueKey();
     final Key checkboxDisabled = UniqueKey();
@@ -398,7 +398,7 @@ void main() {
                   key: checkbox,
                   child: Checkbox(
                     value: true,
-                    onChanged: (bool? _) { },
+                    onChanged: (final bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -406,7 +406,7 @@ void main() {
                   key: checkboxUnchecked,
                   child: Checkbox(
                     value: false,
-                    onChanged: (bool? _) { },
+                    onChanged: (final bool? _) { },
                   ),
                 ),
                 Semantics(
@@ -450,7 +450,7 @@ void main() {
     );
   });
 
-  testWidgets('SemanticsDebugger ignores duplicated label and tooltip for Android', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger ignores duplicated label and tooltip for Android', (final WidgetTester tester) async {
     final Key child = UniqueKey();
     final Key debugger = UniqueKey();
     final bool isPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
@@ -477,7 +477,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger textfield', (final WidgetTester tester) async {
     final UniqueKey textField = UniqueKey();
     final UniqueKey debugger = UniqueKey();
 
@@ -504,7 +504,7 @@ void main() {
     );
   });
 
-  testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger label style is used in the painter.', (final WidgetTester tester) async {
     final UniqueKey debugger = UniqueKey();
     const TextStyle labelStyle = TextStyle(color: Colors.amber);
     await tester.pumpWidget(
@@ -527,9 +527,9 @@ void main() {
 }
 
 String _getMessageShownInSemanticsDebugger({
-  required Key widgetKey,
-  required Key debuggerKey,
-  required WidgetTester tester,
+  required final Key widgetKey,
+  required final Key debuggerKey,
+  required final WidgetTester tester,
 }) {
   final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
   // ignore: avoid_dynamic_calls
@@ -537,8 +537,8 @@ String _getMessageShownInSemanticsDebugger({
 }
 
 dynamic _getSemanticsDebuggerPainter({
-  required Key debuggerKey,
-  required WidgetTester tester,
+  required final Key debuggerKey,
+  required final WidgetTester tester,
 }) {
   final CustomPaint customPaint = tester.widgetList(find.descendant(
     of: find.byKey(debuggerKey),

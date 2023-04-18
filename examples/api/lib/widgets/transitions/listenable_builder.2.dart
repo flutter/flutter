@@ -31,7 +31,7 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   final CounterModel _counter = CounterModel();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ListenableBuilder Example')),
@@ -51,7 +51,7 @@ class CounterBody extends StatelessWidget {
   final CounterModel counterNotifier;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -63,7 +63,7 @@ class CounterBody extends StatelessWidget {
           // rebuilt.
           ListenableBuilder(
             listenable: counterNotifier,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return Text('${counterNotifier.count}');
             },
           ),

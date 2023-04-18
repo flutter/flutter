@@ -61,7 +61,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     super.dispose();
   }
 
-  void changeDemoStyle(TabsDemoStyle style) {
+  void changeDemoStyle(final TabsDemoStyle style) {
     setState(() {
       _demoStyle = style;
     });
@@ -123,7 +123,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color iconColor = Theme.of(context).colorScheme.secondary;
     return Scaffold(
       appBar: AppBar(
@@ -142,7 +142,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           PopupMenuButton<TabsDemoStyle>(
             tooltip: 'Popup Menu',
             onSelected: changeDemoStyle,
-            itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
+            itemBuilder: (final BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
               const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsAndText,
                 child: Text('Icons and text'),
@@ -162,7 +162,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           controller: _controller,
           isScrollable: true,
           indicator: getIndicator(),
-          tabs: _allPages.map<Tab>((_Page page) {
+          tabs: _allPages.map<Tab>((final _Page page) {
             switch (_demoStyle) {
               case TabsDemoStyle.iconsAndText:
                 return Tab(text: page.text, icon: Icon(page.icon));
@@ -176,7 +176,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       ),
       body: TabBarView(
         controller: _controller,
-        children: _allPages.map<Widget>((_Page page) {
+        children: _allPages.map<Widget>((final _Page page) {
           return SafeArea(
             top: false,
             bottom: false,

@@ -28,7 +28,7 @@ abstract class Context {
   ///
   /// The default implementation reads from STDIN. This can be overridden in UI
   /// implementations that capture user interaction differently.
-  Future<bool> prompt(String message) async {
+  Future<bool> prompt(final String message) async {
     stdio.write('${message.trim()} (y/n) ');
     final String response = stdio.readLineSync().trim();
     final String firstChar = response[0].toUpperCase();
@@ -48,7 +48,7 @@ abstract class Context {
   /// This can be overridden by frontends that may not persist the state to
   /// disk, and/or may need to call additional update hooks each time the state
   /// is updated.
-  void updateState(pb.ConductorState state, [List<String> logs = const <String>[]]) {
+  void updateState(final pb.ConductorState state, [final List<String> logs = const <String>[]]) {
     writeStateToFile(stateFile, state, logs);
   }
 }

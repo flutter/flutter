@@ -68,10 +68,10 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
 
   @override
   void resolveStreamForKey(
-    ImageConfiguration configuration,
-    ImageStream stream,
-    T key,
-    ImageErrorListener handleError,
+    final ImageConfiguration configuration,
+    final ImageStream stream,
+    final T key,
+    final ImageErrorListener handleError,
   ) {
     // Something managed to complete the stream, or it's already in the image
     // cache. Notify the wrapped provider and expect it to behave by not
@@ -95,7 +95,7 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
     // Try to get to end of the frame callbacks of the next frame, and then
     // check again.
     if (Scrollable.recommendDeferredLoadingForContext(context.context!)) {
-      SchedulerBinding.instance.scheduleFrameCallback((_) {
+      SchedulerBinding.instance.scheduleFrameCallback((final _) {
         scheduleMicrotask(() => resolveStreamForKey(configuration, stream, key, handleError));
       });
       return;
@@ -106,14 +106,14 @@ class ScrollAwareImageProvider<T extends Object> extends ImageProvider<T> {
   }
 
   @override
-  ImageStreamCompleter load(T key, DecoderCallback decode) => imageProvider.load(key, decode);
+  ImageStreamCompleter load(final T key, final DecoderCallback decode) => imageProvider.load(key, decode);
 
   @override
-  ImageStreamCompleter loadBuffer(T key, DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
+  ImageStreamCompleter loadBuffer(final T key, final DecoderBufferCallback decode) => imageProvider.loadBuffer(key, decode);
 
   @override
-  ImageStreamCompleter loadImage(T key, ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
+  ImageStreamCompleter loadImage(final T key, final ImageDecoderCallback decode) => imageProvider.loadImage(key, decode);
 
   @override
-  Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
+  Future<T> obtainKey(final ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 }

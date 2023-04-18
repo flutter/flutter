@@ -8,11 +8,11 @@ class HeavyGridViewPage extends StatelessWidget {
   const HeavyGridViewPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GridView.builder(
       itemCount: 1000,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-      itemBuilder: (BuildContext context, int index) => HeavyWidget(index),
+      itemBuilder: (final BuildContext context, final int index) => HeavyWidget(index),
     ).build(context);
   }
 }
@@ -24,7 +24,7 @@ class HeavyWidget extends StatelessWidget {
   final List<int> _weight = List<int>.filled(1000000, 0);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       width: 200,
       height: 200,

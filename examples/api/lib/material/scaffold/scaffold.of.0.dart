@@ -13,7 +13,7 @@ class OfExampleApp extends StatelessWidget {
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -31,13 +31,13 @@ class MyScaffoldBody extends StatelessWidget {
   const MyScaffoldBody({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: ElevatedButton(
         child: const Text('SHOW BOTTOM SHEET'),
         onPressed: () {
           Scaffold.of(context).showBottomSheet<void>(
-            (BuildContext context) {
+            (final BuildContext context) {
               return Container(
                 alignment: Alignment.center,
                 height: 200,

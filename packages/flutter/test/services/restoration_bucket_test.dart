@@ -184,7 +184,7 @@ void main() {
     expect(
       () => manager.doSerialization(),
       throwsA(isFlutterError.having(
-        (FlutterError error) => error.message,
+        (final FlutterError error) => error.message,
         'message',
         equals(
           'Multiple owners claimed child RestorationBuckets with the same IDs.\n'

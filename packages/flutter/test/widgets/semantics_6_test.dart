@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('can change semantics in a branch blocked by BlockSemantics', (WidgetTester tester) async {
+  testWidgets('can change semantics in a branch blocked by BlockSemantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -47,7 +47,7 @@ void main() {
   });
 }
 
-Widget buildWidget({ required String blockedText, bool blocking = true }) {
+Widget buildWidget({ required final String blockedText, final bool blocking = true }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Stack(

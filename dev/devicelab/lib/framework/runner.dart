@@ -25,24 +25,24 @@ import 'utils.dart';
 ///
 /// If the task fails all reruns, it will be recorded as failed.
 Future<void> runTasks(
-  List<String> taskNames, {
-  bool exitOnFirstTestFailure = false,
+  final List<String> taskNames, {
+  final bool exitOnFirstTestFailure = false,
   // terminateStrayDartProcesses defaults to false so that tests don't have to specify it.
   // It is set based on the --terminate-stray-dart-processes command line argument in
   // normal execution, and that flag defaults to true.
-  bool terminateStrayDartProcesses = false,
-  bool silent = false,
-  String? deviceId,
-  String? gitBranch,
-  String? localEngine,
-  String? localEngineSrcPath,
-  String? luciBuilder,
-  String? resultsPath,
-  List<String>? taskArgs,
-  bool useEmulator = false,
-  @visibleForTesting Map<String, String>? isolateParams,
-  @visibleForTesting Function(String) print = print,
-  @visibleForTesting List<String>? logs,
+  final bool terminateStrayDartProcesses = false,
+  final bool silent = false,
+  final String? deviceId,
+  final String? gitBranch,
+  final String? localEngine,
+  final String? localEngineSrcPath,
+  final String? luciBuilder,
+  final String? resultsPath,
+  final List<String>? taskArgs,
+  final bool useEmulator = false,
+  @visibleForTesting final Map<String, String>? isolateParams,
+  @visibleForTesting final Function(String) print = print,
+  @visibleForTesting final List<String>? logs,
 }) async {
   for (final String taskName in taskNames) {
     TaskResult result = TaskResult.success(null);
@@ -96,18 +96,18 @@ Future<void> runTasks(
 ///
 /// This separates reruns in separate sections.
 Future<TaskResult> rerunTask(
-  String taskName, {
-  String? deviceId,
-  String? localEngine,
-  String? localEngineSrcPath,
-  bool terminateStrayDartProcesses = false,
-  bool silent = false,
-  List<String>? taskArgs,
-  String? resultsPath,
-  String? gitBranch,
-  String? luciBuilder,
-  bool useEmulator = false,
-  @visibleForTesting Map<String, String>? isolateParams,
+  final String taskName, {
+  final String? deviceId,
+  final String? localEngine,
+  final String? localEngineSrcPath,
+  final bool terminateStrayDartProcesses = false,
+  final bool silent = false,
+  final List<String>? taskArgs,
+  final String? resultsPath,
+  final String? gitBranch,
+  final String? luciBuilder,
+  final bool useEmulator = false,
+  @visibleForTesting final Map<String, String>? isolateParams,
 }) async {
   section('Running task "$taskName"');
   final TaskResult result = await runTask(
@@ -149,15 +149,15 @@ Future<TaskResult> rerunTask(
 ///
 /// [taskArgs] are passed to the task executable for additional configuration.
 Future<TaskResult> runTask(
-  String taskName, {
-  bool terminateStrayDartProcesses = false,
-  bool silent = false,
-  String? localEngine,
-  String? localWebSdk,
-  String? localEngineSrcPath,
-  String? deviceId,
+  final String taskName, {
+  final bool terminateStrayDartProcesses = false,
+  final bool silent = false,
+  final String? localEngine,
+  final String? localWebSdk,
+  final String? localEngineSrcPath,
+  final String? deviceId,
   List<String>? taskArgs,
-  bool useEmulator = false,
+  final bool useEmulator = false,
   @visibleForTesting Map<String, String>? isolateParams,
 }) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
@@ -204,7 +204,7 @@ Future<TaskResult> runTask(
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
-      .listen((String line) {
+      .listen((final String line) {
     if (!uri.isCompleted) {
       final Uri? serviceUri = parseServiceUri(line, prefix: RegExp('The Dart VM service is listening on '));
       if (serviceUri != null) {
@@ -219,7 +219,7 @@ Future<TaskResult> runTask(
   final StreamSubscription<String> stderrSub = runner.stderr
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
-      .listen((String line) {
+      .listen((final String line) {
     stderr.writeln('[${DateTime.now()}] [STDERR] $line');
   });
 
@@ -250,7 +250,7 @@ Future<TaskResult> runTask(
   }
 }
 
-Future<ConnectionResult> _connectToRunnerIsolate(Uri vmServiceUri) async {
+Future<ConnectionResult> _connectToRunnerIsolate(final Uri vmServiceUri) async {
   final List<String> pathSegments = <String>[
     // Add authentication code.
     if (vmServiceUri.pathSegments.isNotEmpty) vmServiceUri.pathSegments[0],
@@ -294,12 +294,12 @@ class ConnectionResult {
 }
 
 /// The cocoon client sends an invalid VM service response, we need to intercept it.
-Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
+Future<VmService> vmServiceConnectUri(final String wsUri, {final Log? log}) async {
   final WebSocket socket = await WebSocket.connect(wsUri);
   final StreamController<dynamic> controller = StreamController<dynamic>();
   final Completer<dynamic> streamClosedCompleter = Completer<dynamic>();
   socket.listen(
-    (dynamic data) {
+    (final dynamic data) {
       final Map<String, dynamic> rawData = json.decode(data as String) as Map<String, dynamic> ;
       if (rawData['result'] == 'ready') {
         rawData['result'] = <String, dynamic>{'response': 'ready'};
@@ -308,13 +308,13 @@ Future<VmService> vmServiceConnectUri(String wsUri, {Log? log}) async {
         controller.add(data);
       }
     },
-    onError: (Object err, StackTrace stackTrace) => controller.addError(err, stackTrace),
+    onError: (final Object err, final StackTrace stackTrace) => controller.addError(err, stackTrace),
     onDone: () => streamClosedCompleter.complete(),
   );
 
   return VmService(
     controller.stream,
-    (String message) => socket.add(message),
+    (final String message) => socket.add(message),
     log: log,
     disposeHandler: () => socket.close(),
     streamClosed: streamClosedCompleter.future,

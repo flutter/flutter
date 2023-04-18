@@ -82,5 +82,5 @@ class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   final Size preferredSize;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }

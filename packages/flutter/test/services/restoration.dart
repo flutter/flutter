@@ -23,13 +23,13 @@ class MockRestorationManager extends TestRestorationManager {
   }
 
   @override
-  void scheduleSerializationFor(RestorationBucket bucket) {
+  void scheduleSerializationFor(final RestorationBucket bucket) {
     _updateScheduled = true;
     _buckets.add(bucket);
   }
 
   @override
-  bool unscheduleSerializationFor(RestorationBucket bucket) {
+  bool unscheduleSerializationFor(final RestorationBucket bucket) {
     _updateScheduled = true;
     return _buckets.remove(bucket);
   }
@@ -43,7 +43,7 @@ class MockRestorationManager extends TestRestorationManager {
   }
 
   @override
-  void restoreFrom(TestRestorationData data) {
+  void restoreFrom(final TestRestorationData data) {
     // Ignore in mock.
   }
 
@@ -55,10 +55,10 @@ class MockRestorationManager extends TestRestorationManager {
     return _rootBucket;
   }
   late Future<RestorationBucket?> _rootBucket;
-  set rootBucket(Future<RestorationBucket?> value) {
+  set rootBucket(final Future<RestorationBucket?> value) {
     _rootBucket = value;
     _isRestoring = true;
-    ServicesBinding.instance.addPostFrameCallback((Duration _) {
+    ServicesBinding.instance.addPostFrameCallback((final Duration _) {
       _isRestoring = false;
     });
     notifyListeners();
@@ -69,7 +69,7 @@ class MockRestorationManager extends TestRestorationManager {
   bool _isRestoring = false;
 
   @override
-  Future<void> sendToEngine(Uint8List encodedData) {
+  Future<void> sendToEngine(final Uint8List encodedData) {
     throw UnimplementedError('unimplemented in mock');
   }
 

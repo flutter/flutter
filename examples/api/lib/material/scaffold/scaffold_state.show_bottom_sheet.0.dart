@@ -12,7 +12,7 @@ class ShowBottomSheetExampleApp extends StatelessWidget {
   const ShowBottomSheetExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldState Sample')),
@@ -26,13 +26,13 @@ class ShowBottomSheetExample extends StatelessWidget {
   const ShowBottomSheetExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: ElevatedButton(
         child: const Text('showBottomSheet'),
         onPressed: () {
           Scaffold.of(context).showBottomSheet<void>(
-            (BuildContext context) {
+            (final BuildContext context) {
               return Container(
                 height: 200,
                 color: Colors.amber,

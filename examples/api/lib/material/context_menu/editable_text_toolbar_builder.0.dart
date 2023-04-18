@@ -43,7 +43,7 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -55,13 +55,13 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
               const SizedBox(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                contextMenuBuilder: (final BuildContext context, final EditableTextState editableTextState) {
                   return AdaptiveTextSelectionToolbar(
                     anchors: editableTextState.contextMenuAnchors,
                     // Build the default buttons, but make them look custom.
                     // In a real project you may want to build different
                     // buttons depending on the platform.
-                    children: editableTextState.contextMenuButtonItems.map((ContextMenuButtonItem buttonItem) {
+                    children: editableTextState.contextMenuButtonItems.map((final ContextMenuButtonItem buttonItem) {
                       return CupertinoButton(
                         borderRadius: null,
                         color: const Color(0xffaaaa00),

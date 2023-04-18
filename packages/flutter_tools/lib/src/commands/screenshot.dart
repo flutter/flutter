@@ -74,7 +74,7 @@ class ScreenshotCommand extends FlutterCommand {
 
   Device? device;
 
-  Future<void> _validateOptions(String? screenshotType, String? vmServiceUrl) async {
+  Future<void> _validateOptions(final String? screenshotType, final String? vmServiceUrl) async {
     switch (screenshotType) {
       case _kDeviceType:
         if (vmServiceUrl != null) {
@@ -98,7 +98,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand(final String? commandPath) async {
     await _validateOptions(stringArg(_kType), stringArg(_kVmServiceUrl));
     return super.verifyThenRunCommand(commandPath);
   }
@@ -197,7 +197,7 @@ class ScreenshotCommand extends FlutterCommand {
     return true;
   }
 
-  static void checkOutput(File outputFile, FileSystem fs) {
+  static void checkOutput(final File outputFile, final FileSystem fs) {
     if (!fs.file(outputFile.path).existsSync()) {
       throwToolExit(
           'File was not created, ensure path is valid\n'
@@ -207,7 +207,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   @visibleForTesting
-  static void ensureOutputIsNotJsonRpcError(File outputFile) {
+  static void ensureOutputIsNotJsonRpcError(final File outputFile) {
     if (outputFile.lengthSync() >= 1000) {
       return;
     }
@@ -219,7 +219,7 @@ class ScreenshotCommand extends FlutterCommand {
     }
   }
 
-  void _showOutputFileInfo(File outputFile) {
+  void _showOutputFileInfo(final File outputFile) {
     final int sizeKB = (outputFile.lengthSync()) ~/ 1024;
     globals.printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }

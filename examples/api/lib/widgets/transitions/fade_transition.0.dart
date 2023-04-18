@@ -12,7 +12,7 @@ class FadeTransitionExampleApp extends StatelessWidget {
   const FadeTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FadeTransitionExample(),
     );
@@ -45,7 +45,7 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample> with Tick
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.white,
       child: FadeTransition(

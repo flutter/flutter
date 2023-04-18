@@ -357,7 +357,7 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class FakeEmulator extends Emulator {
-  const FakeEmulator(String id, this.name, this.manufacturer)
+  const FakeEmulator(final String id, this.name, this.manufacturer)
     : super(id, true);
 
   @override
@@ -373,7 +373,7 @@ class FakeEmulator extends Emulator {
   PlatformType get platformType => PlatformType.android;
 
   @override
-  Future<void> launch({bool coldBoot = false}) {
+  Future<void> launch({final bool coldBoot = false}) {
     throw UnimplementedError('Not implemented in Mock');
   }
 }

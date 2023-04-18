@@ -19,7 +19,7 @@ void main() {
 
   testWidgets(
   'buildTextSpanWithSpellCheckSuggestions ignores composing region when composing region out of range',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const TextEditingValue value = TextEditingValue(text: text);
     const bool composingRegionOutOfRange = true;
@@ -48,7 +48,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions, isolated misspelled word with separate composing region example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const TextEditingValue value = TextEditingValue(
         text: text, composing: TextRange(start: 14, end: 17));
@@ -79,7 +79,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions, composing region and misspelled words overlap example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Right worng worng right';
     const TextEditingValue value = TextEditingValue(
         text: text, composing: TextRange(start: 12, end: 17));
@@ -113,7 +113,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions, consecutive misspelled words example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Right worng worng right';
     const TextEditingValue value = TextEditingValue(text: text);
     const bool composingRegionOutOfRange = true;
@@ -146,7 +146,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text shorter than actual text example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, wrold!';
     const TextEditingValue value = TextEditingValue(text: text);
@@ -176,7 +176,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text longer with more misspelled words than actual text example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, wrold Hey feirnd!';
     const TextEditingValue value = TextEditingValue(text: text);
@@ -208,7 +208,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results text mismatched example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, wrild! Hey';
     const TextEditingValue value = TextEditingValue(text: text);
@@ -235,7 +235,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted forward example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, there wrold! Hey';
     const String resultsText = 'Hello, wrold! Hey';
     const TextEditingValue value = TextEditingValue(text: text);
@@ -265,7 +265,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wrold! Hey';
     const String resultsText = 'Hello, great wrold! Hey';
     const TextEditingValue value = TextEditingValue(text: text);
@@ -295,7 +295,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions corrects results when they lag, results shifted backwards and forwards example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wrold! And Hye!';
     const String resultsText = 'Hello, great wrold! Hye!';
     const TextEditingValue value = TextEditingValue(text: text);
@@ -328,7 +328,7 @@ void main() {
 
   testWidgets(
     'buildTextSpanWithSpellCheckSuggestions discards result when additions are made to misspelled word example',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const String text = 'Hello, wroldd!';
     const String resultsText = 'Hello, wrold!';
     const TextEditingValue value = TextEditingValue(text: text);

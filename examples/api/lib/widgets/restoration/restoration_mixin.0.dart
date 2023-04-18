@@ -12,7 +12,7 @@ class RestorationExampleApp extends StatelessWidget {
   const RestorationExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       restorationScopeId: 'app',
       title: 'Restorable Counter',
@@ -45,7 +45,7 @@ class _RestorableCounterState extends State<RestorableCounter> with RestorationM
   String? get restorationId => widget.restorationId;
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     // All restorable properties must be registered with the mixin. After
     // registration, the counter either has its old value restored or is
     // initialized to its default value.
@@ -67,7 +67,7 @@ class _RestorableCounterState extends State<RestorableCounter> with RestorationM
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Restorable Counter'),

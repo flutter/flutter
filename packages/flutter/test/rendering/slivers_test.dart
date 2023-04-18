@@ -264,7 +264,7 @@ void main() {
     expect(result.path.first.target, equals(c));
   });
 
-  Offset getPaintOrigin(RenderObject render) {
+  Offset getPaintOrigin(final RenderObject render) {
     final Vector3 transformed3 = render.getTransformTo(null).perspectiveTransform(Vector3(0.0, 0.0, 0.0));
     return Offset(transformed3.x, transformed3.y);
   }
@@ -865,7 +865,7 @@ void main() {
         crossAxisOffset: 0.0,
         mainAxisPosition: 0.0,
         crossAxisPosition: 0.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (final SliverHitTestResult result, { required final double mainAxisPosition, required final double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return true;
@@ -883,7 +883,7 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (final SliverHitTestResult result, { required final double mainAxisPosition, required final double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -901,7 +901,7 @@ void main() {
         crossAxisOffset: -6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (final SliverHitTestResult result, { required final double mainAxisPosition, required final double crossAxisPosition }) {
           mainAxisPositions.add(mainAxisPosition);
           crossAxisPositions.add(crossAxisPosition);
           return false;
@@ -927,7 +927,7 @@ void main() {
         crossAxisOffset: 6.0,
         mainAxisPosition: 10.0,
         crossAxisPosition: 20.0,
-        hitTest: (SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+        hitTest: (final SliverHitTestResult result, { required final double mainAxisPosition, required final double crossAxisPosition }) {
           recordedMainAxisPosition = mainAxisPosition;
           recordedCrossAxisPosition = crossAxisPosition;
           result.add(entry);
@@ -1023,11 +1023,11 @@ void main() {
 
 class _DummyHitTestTarget implements HitTestTarget {
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     // Nothing to do.
   }
 }
 
 class MyHitTestResult extends HitTestResult {
-  void publicPushTransform(Matrix4 transform) => pushTransform(transform);
+  void publicPushTransform(final Matrix4 transform) => pushTransform(transform);
 }

@@ -162,12 +162,12 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   ///
   /// The given callback parameter must return a non-null color in the default
   /// state.
-  static MaterialStateColor resolveWith(MaterialPropertyResolver<Color> callback) => _MaterialStateColor(callback);
+  static MaterialStateColor resolveWith(final MaterialPropertyResolver<Color> callback) => _MaterialStateColor(callback);
 
   /// Returns a [Color] that's to be used when a Material component is in the
   /// specified state.
   @override
-  Color resolve(Set<MaterialState> states);
+  Color resolve(final Set<MaterialState> states);
 }
 
 /// A [MaterialStateColor] created from a [MaterialPropertyResolver<Color>]
@@ -186,7 +186,7 @@ class _MaterialStateColor extends MaterialStateColor {
   static const Set<MaterialState> _defaultStates = <MaterialState>{};
 
   @override
-  Color resolve(Set<MaterialState> states) => _resolve(states);
+  Color resolve(final Set<MaterialState> states) => _resolve(states);
 }
 
 /// Defines a [MouseCursor] whose value depends on a set of [MaterialState]s which
@@ -225,7 +225,7 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
 
   @protected
   @override
-  MouseCursorSession createSession(int device) {
+  MouseCursorSession createSession(final int device) {
     return resolve(<MaterialState>{}).createSession(device);
   }
 
@@ -234,7 +234,7 @@ abstract class MaterialStateMouseCursor extends MouseCursor implements MaterialS
   ///
   /// This method should never return null.
   @override
-  MouseCursor resolve(Set<MaterialState> states);
+  MouseCursor resolve(final Set<MaterialState> states);
 
   /// A mouse cursor for clickable material widgets, which resolves differently
   /// when the widget is disabled.
@@ -275,7 +275,7 @@ class _EnabledAndDisabledMouseCursor extends MaterialStateMouseCursor {
   final String name;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
@@ -315,7 +315,7 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   /// in the specified state. Return null to defer to the default value of the
   /// widget or theme.
   @override
-  BorderSide? resolve(Set<MaterialState> states);
+  BorderSide? resolve(final Set<MaterialState> states);
 
   /// Creates a [MaterialStateBorderSide] from a
   /// [MaterialPropertyResolver<BorderSide?>] callback function.
@@ -354,7 +354,7 @@ abstract class MaterialStateBorderSide extends BorderSide implements MaterialSta
   ///   }),
   /// ),
   /// ```
-  static MaterialStateBorderSide resolveWith(MaterialPropertyResolver<BorderSide?> callback) =>
+  static MaterialStateBorderSide resolveWith(final MaterialPropertyResolver<BorderSide?> callback) =>
       _MaterialStateBorderSide(callback);
 }
 
@@ -371,7 +371,7 @@ class _MaterialStateBorderSide extends MaterialStateBorderSide {
   final MaterialPropertyResolver<BorderSide?> _resolve;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
+  BorderSide? resolve(final Set<MaterialState> states) {
     return _resolve(states);
   }
 }
@@ -406,7 +406,7 @@ abstract class MaterialStateOutlinedBorder extends OutlinedBorder implements Mat
   /// in the specified state. Return null to defer to the default value of the
   /// widget or theme.
   @override
-  OutlinedBorder? resolve(Set<MaterialState> states);
+  OutlinedBorder? resolve(final Set<MaterialState> states);
 }
 
 /// Defines a [TextStyle] that is also a [MaterialStateProperty].
@@ -447,13 +447,13 @@ abstract class MaterialStateTextStyle extends TextStyle implements MaterialState
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateTextStyle resolveWith(MaterialPropertyResolver<TextStyle> callback) =>
+  static MaterialStateTextStyle resolveWith(final MaterialPropertyResolver<TextStyle> callback) =>
       _MaterialStateTextStyle(callback);
 
   /// Returns a [TextStyle] that's to be used when a Material component is in the
   /// specified state.
   @override
-  TextStyle resolve(Set<MaterialState> states);
+  TextStyle resolve(final Set<MaterialState> states);
 }
 
 /// A [MaterialStateTextStyle] created from a [MaterialPropertyResolver<TextStyle>]
@@ -469,7 +469,7 @@ class _MaterialStateTextStyle extends MaterialStateTextStyle {
   final MaterialPropertyResolver<TextStyle> _resolve;
 
   @override
-  TextStyle resolve(Set<MaterialState> states) => _resolve(states);
+  TextStyle resolve(final Set<MaterialState> states) => _resolve(states);
 }
 
 /// Defines a [OutlineInputBorder] that is also a [MaterialStateProperty].
@@ -510,13 +510,13 @@ abstract class MaterialStateOutlineInputBorder extends OutlineInputBorder implem
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateOutlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+  static MaterialStateOutlineInputBorder resolveWith(final MaterialPropertyResolver<InputBorder> callback) =>
       _MaterialStateOutlineInputBorder(callback);
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
   @override
-  InputBorder resolve(Set<MaterialState> states);
+  InputBorder resolve(final Set<MaterialState> states);
 }
 
 /// A [MaterialStateOutlineInputBorder] created from a [MaterialPropertyResolver<OutlineInputBorder>]
@@ -532,7 +532,7 @@ class _MaterialStateOutlineInputBorder extends MaterialStateOutlineInputBorder {
   final MaterialPropertyResolver<InputBorder> _resolve;
 
   @override
-  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+  InputBorder resolve(final Set<MaterialState> states) => _resolve(states);
 }
 
 /// Defines a [UnderlineInputBorder] that is also a [MaterialStateProperty].
@@ -573,13 +573,13 @@ abstract class MaterialStateUnderlineInputBorder extends UnderlineInputBorder im
   ///
   /// The given callback parameter must return a non-null text style in the default
   /// state.
-  static MaterialStateUnderlineInputBorder resolveWith(MaterialPropertyResolver<InputBorder> callback) =>
+  static MaterialStateUnderlineInputBorder resolveWith(final MaterialPropertyResolver<InputBorder> callback) =>
       _MaterialStateUnderlineInputBorder(callback);
 
   /// Returns a [InputBorder] that's to be used when a Material component is in the
   /// specified state.
   @override
-  InputBorder resolve(Set<MaterialState> states);
+  InputBorder resolve(final Set<MaterialState> states);
 }
 
 /// A [MaterialStateUnderlineInputBorder] created from a [MaterialPropertyResolver<UnderlineInputBorder>]
@@ -595,7 +595,7 @@ class _MaterialStateUnderlineInputBorder extends MaterialStateUnderlineInputBord
   final MaterialPropertyResolver<InputBorder> _resolve;
 
   @override
-  InputBorder resolve(Set<MaterialState> states) => _resolve(states);
+  InputBorder resolve(final Set<MaterialState> states) => _resolve(states);
 }
 
 /// Interface for classes that [resolve] to a value of type `T` based
@@ -637,7 +637,7 @@ abstract class MaterialStateProperty<T> {
   /// Widgets like [TextButton] and [ElevatedButton] apply this method to their
   /// current [MaterialState]s to compute colors and other visual parameters
   /// at build time.
-  T resolve(Set<MaterialState> states);
+  T resolve(final Set<MaterialState> states);
 
   /// Resolves the value for the given set of states if `value` is a
   /// [MaterialStateProperty], otherwise returns the value itself.
@@ -645,7 +645,7 @@ abstract class MaterialStateProperty<T> {
   /// This is useful for widgets that have parameters which can optionally be a
   /// [MaterialStateProperty]. For example, [InkWell.mouseCursor] can be a
   /// [MouseCursor] or a [MaterialStateProperty<MouseCursor>].
-  static T resolveAs<T>(T value, Set<MaterialState> states) {
+  static T resolveAs<T>(final T value, final Set<MaterialState> states) {
     if (value is MaterialStateProperty<T>) {
       final MaterialStateProperty<T> property = value;
       return property.resolve(states);
@@ -655,7 +655,7 @@ abstract class MaterialStateProperty<T> {
 
   /// Convenience method for creating a [MaterialStateProperty] from a
   /// [MaterialPropertyResolver] function alone.
-  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStatePropertyWith<T>(callback);
+  static MaterialStateProperty<T> resolveWith<T>(final MaterialPropertyResolver<T> callback) => _MaterialStatePropertyWith<T>(callback);
 
   /// Convenience method for creating a [MaterialStateProperty] that resolves
   /// to a single value for all states.
@@ -665,14 +665,14 @@ abstract class MaterialStateProperty<T> {
   // TODO(darrenaustin): Deprecate this when we have the ability to create
   // a dart fix that will replace this with MaterialStatePropertyAll:
   // https://github.com/dart-lang/sdk/issues/49056.
-  static MaterialStateProperty<T> all<T>(T value) => MaterialStatePropertyAll<T>(value);
+  static MaterialStateProperty<T> all<T>(final T value) => MaterialStatePropertyAll<T>(value);
 
   /// Linearly interpolate between two [MaterialStateProperty]s.
   static MaterialStateProperty<T?>? lerp<T>(
-    MaterialStateProperty<T>? a,
-    MaterialStateProperty<T>? b,
-    double t,
-    T? Function(T?, T?, double) lerpFunction,
+    final MaterialStateProperty<T>? a,
+    final MaterialStateProperty<T>? b,
+    final double t,
+    final T? Function(T?, T?, double) lerpFunction,
   ) {
     // Avoid creating a _LerpProperties object for a common case.
     if (a == null && b == null) {
@@ -691,7 +691,7 @@ class _LerpProperties<T> implements MaterialStateProperty<T?> {
   final T? Function(T?, T?, double) lerpFunction;
 
   @override
-  T? resolve(Set<MaterialState> states) {
+  T? resolve(final Set<MaterialState> states) {
     final T? resolvedA = a?.resolve(states);
     final T? resolvedB = b?.resolve(states);
     return lerpFunction(resolvedA, resolvedB, t);
@@ -704,7 +704,7 @@ class _MaterialStatePropertyWith<T> implements MaterialStateProperty<T> {
   final MaterialPropertyResolver<T> _resolve;
 
   @override
-  T resolve(Set<MaterialState> states) => _resolve(states);
+  T resolve(final Set<MaterialState> states) => _resolve(states);
 }
 
 /// Convenience class for creating a [MaterialStateProperty] that
@@ -719,7 +719,7 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
   final T value;
 
   @override
-  T resolve(Set<MaterialState> states) => value;
+  T resolve(final Set<MaterialState> states) => value;
 
   @override
   String toString() {
@@ -742,11 +742,11 @@ class MaterialStatePropertyAll<T> implements MaterialStateProperty<T> {
 /// changed with [update]; it should not be modified directly.
 class MaterialStatesController extends ValueNotifier<Set<MaterialState>> {
   /// Creates a MaterialStatesController.
-  MaterialStatesController([Set<MaterialState>? value]) : super(<MaterialState>{...?value});
+  MaterialStatesController([final Set<MaterialState>? value]) : super(<MaterialState>{...?value});
 
   /// Adds [state] to [value] if [add] is true, and removes it otherwise,
   /// and notifies listeners if [value] has changed.
-  void update(MaterialState state, bool add) {
+  void update(final MaterialState state, final bool add) {
     final bool valueChanged = add ? value.add(state) : value.remove(state);
     if (valueChanged) {
       notifyListeners();

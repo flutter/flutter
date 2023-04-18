@@ -13,7 +13,7 @@ class Pair<T> {
   final T second;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is Pair<T> && other.first == first && other.second == second;
   }
 
@@ -37,7 +37,7 @@ abstract class Swapper extends RenderObjectWidget {
   SwapperElement createElement();
 
   @override
-  RenderObject createRenderObject(BuildContext context) => RenderSwapper();
+  RenderObject createRenderObject(final BuildContext context) => RenderSwapper();
 }
 
 class SwapperWithProperOverrides extends Swapper {
@@ -79,7 +79,7 @@ abstract class SwapperElement extends RenderObjectElement {
   RenderSwapper get renderObject => super.renderObject as RenderSwapper;
 
   @override
-  void visitChildren(ElementVisitor visitor) {
+  void visitChildren(final ElementVisitor visitor) {
     if (stable != null) {
       visitor(stable!);
     }
@@ -89,38 +89,38 @@ abstract class SwapperElement extends RenderObjectElement {
   }
 
   @override
-  void update(Swapper newWidget) {
+  void update(final Swapper newWidget) {
     super.update(newWidget);
     _updateChildren(newWidget);
   }
 
   @override
-  void mount(Element? parent, Object? newSlot) {
+  void mount(final Element? parent, final Object? newSlot) {
     super.mount(parent, newSlot);
     _updateChildren(widget);
   }
 
-  void _updateChildren(Swapper widget) {
+  void _updateChildren(final Swapper widget) {
     stable = updateChild(stable, widget.stable, 'stable');
     swapper = updateChild(swapper, widget.swapper, swapperIsOnTop);
     swapperIsOnTop = !swapperIsOnTop;
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void insertRenderObjectChild(covariant final RenderObject child, covariant final Object? slot) { }
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+  void moveRenderObjectChild(covariant final RenderObject child, covariant final Object? oldSlot, covariant final Object? newSlot) { }
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void removeRenderObjectChild(covariant final RenderObject child, covariant final Object? slot) { }
 }
 
 class SwapperElementWithProperOverrides extends SwapperElement {
   SwapperElementWithProperOverrides(super.widget);
 
   @override
-  void insertRenderObjectChild(RenderBox child, Object? slot) {
+  void insertRenderObjectChild(final RenderBox child, final Object? slot) {
     insertSlots.add(slot);
     if (slot == 'stable') {
       renderObject.stable = child;
@@ -130,14 +130,14 @@ class SwapperElementWithProperOverrides extends SwapperElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, bool oldIsOnTop, bool newIsOnTop) {
+  void moveRenderObjectChild(final RenderBox child, final bool oldIsOnTop, final bool newIsOnTop) {
     moveSlots.add(Pair<bool>(oldIsOnTop, newIsOnTop));
     assert(oldIsOnTop == !newIsOnTop);
     renderObject.setSwapper(child, newIsOnTop);
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, Object? slot) {
+  void removeRenderObjectChild(final RenderBox child, final Object? slot) {
     removeSlots.add(slot);
     if (slot == 'stable') {
       renderObject.stable = null;
@@ -154,7 +154,7 @@ class SwapperElementWithNoOverrides extends SwapperElement {
 class RenderSwapper extends RenderBox {
   RenderBox? _stable;
   RenderBox? get stable => _stable;
-  set stable(RenderBox? child) {
+  set stable(final RenderBox? child) {
     if (child == _stable) {
       return;
     }
@@ -170,7 +170,7 @@ class RenderSwapper extends RenderBox {
   bool? _swapperIsOnTop;
   RenderBox? _swapper;
   RenderBox? get swapper => _swapper;
-  void setSwapper(RenderBox? child, bool isOnTop) {
+  void setSwapper(final RenderBox? child, final bool isOnTop) {
     if (isOnTop != _swapperIsOnTop) {
       _swapperIsOnTop = isOnTop;
       markNeedsLayout();
@@ -188,7 +188,7 @@ class RenderSwapper extends RenderBox {
   }
 
   @override
-  void visitChildren(RenderObjectVisitor visitor) {
+  void visitChildren(final RenderObjectVisitor visitor) {
     if (_stable != null) {
       visitor(_stable!);
     }
@@ -198,19 +198,19 @@ class RenderSwapper extends RenderBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
-    visitChildren((RenderObject child) => child.attach(owner));
+    visitChildren((final RenderObject child) => child.attach(owner));
   }
 
   @override
   void detach() {
     super.detach();
-    visitChildren((RenderObject child) => child.detach());
+    visitChildren((final RenderObject child) => child.detach());
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return constraints.biggest;
   }
 
@@ -238,8 +238,8 @@ class RenderSwapper extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    visitChildren((RenderObject child) {
+  void paint(final PaintingContext context, final Offset offset) {
+    visitChildren((final RenderObject child) {
       final BoxParentData childParentData = child.parentData! as BoxParentData;
       context.paintChild(child, offset + childParentData.offset);
     });
@@ -247,14 +247,14 @@ class RenderSwapper extends RenderBox {
 
   @override
   void redepthChildren() {
-    visitChildren((RenderObject child) => redepthChild(child));
+    visitChildren((final RenderObject child) => redepthChild(child));
   }
 }
 
-BoxParentData parentDataFor(RenderObject renderObject) => renderObject.parentData! as BoxParentData;
+BoxParentData parentDataFor(final RenderObject renderObject) => renderObject.parentData! as BoxParentData;
 
 void main() {
-  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (WidgetTester tester) async {
+  testWidgets('RenderObjectElement *RenderObjectChild methods get called with correct arguments', (final WidgetTester tester) async {
     const Key redKey = ValueKey<String>('red');
     const Key blueKey = ValueKey<String>('blue');
     Widget widget() {

@@ -24,11 +24,11 @@ Future<void> main() async {
   daemon.stdout
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .listen((String line) => print('<== $line'));
+    .listen((final String line) => print('<== $line'));
   daemon.stderr.listen(stderr.add);
 
   stdout.write('> ');
-  stdin.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+  stdin.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((final String line) {
     final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {
@@ -84,7 +84,7 @@ Future<void> main() async {
   });
 
   // Print in the callback can't fail.
-  unawaited(daemon.exitCode.then<int>((int code) {
+  unawaited(daemon.exitCode.then<int>((final int code) {
     print('daemon exiting ($code)');
     exit(code);
   }));
@@ -92,7 +92,7 @@ Future<void> main() async {
 
 int id = 0;
 
-void _send(Map<String, dynamic> map) {
+void _send(final Map<String, dynamic> map) {
   map['id'] = id++;
   final String str = '[${json.encode(map)}]';
   daemon.stdin.writeln(str);

@@ -19,14 +19,14 @@ import '../src/fakes.dart';
 
 /// Matches a doctor validation result.
 Matcher _matchDoctorValidation({
-  required ValidationType validationType,
-  required String statusInfo,
-  required Object messages
+  required final ValidationType validationType,
+  required final String statusInfo,
+  required final Object messages
 }) {
   return const TypeMatcher<ValidationResult>()
-      .having((ValidationResult result) => result.type, 'type', validationType)
-      .having((ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
-      .having((ValidationResult result) => result.messages, 'messages', messages);
+      .having((final ValidationResult result) => result.type, 'type', validationType)
+      .having((final ValidationResult result) => result.statusInfo, 'statusInfo', statusInfo)
+      .having((final ValidationResult result) => result.messages, 'messages', messages);
 }
 
 void main() {
@@ -492,7 +492,7 @@ void main() {
       validationType: ValidationType.partial,
       statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
       messages: everyElement(isA<ValidationMessage>().having(
-        (ValidationMessage message) => message.message,
+        (final ValidationMessage message) => message.message,
         'message',
         isNot(contains('Warning: `flutter` on your path resolves to')),
       )),
@@ -533,7 +533,7 @@ void main() {
       validationType: ValidationType.partial,
       statusInfo: 'Channel beta, 1.0.0, on $osName, locale en_US.UTF-8',
       messages: everyElement(isA<ValidationMessage>().having(
-        (ValidationMessage message) => message.message,
+        (final ValidationMessage message) => message.message,
         'message',
         isNot(contains('Warning: `flutter` on your path resolves to')),
       )),
@@ -601,7 +601,7 @@ void main() {
       validationType: ValidationType.success,
       statusInfo: 'Channel beta, 1.0.0, on Linux, locale en_US.UTF-8',
       messages: isNot(contains(isA<ValidationMessage>().having(
-        (ValidationMessage message) => message.message,
+        (final ValidationMessage message) => message.message,
         'message',
         contains('Consider adding /sdk/flutter/bin to the front of your path'),
       ))),
@@ -627,7 +627,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   Map<String, File>? whichLookup;
 
   @override
-  File? which(String execName) => whichLookup![execName];
+  File? which(final String execName) => whichLookup![execName];
 
   @override
   final String name;

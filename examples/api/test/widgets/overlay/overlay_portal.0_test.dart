@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const String tooltipText = 'tooltip';
-  testWidgets('Tooltip is shown on press', (WidgetTester tester) async {
+  testWidgets('Tooltip is shown on press', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.OverlayPortalExampleApp());
     expect(find.text(tooltipText), findsNothing);
 
@@ -21,7 +21,7 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
   });
 
-  testWidgets('Tooltip is shown at the right location', (WidgetTester tester) async {
+  testWidgets('Tooltip is shown at the right location', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.OverlayPortalExampleApp());
     await tester.tap(find.byType(example.ClickableTooltipWidget));
     await tester.pump();
@@ -33,7 +33,7 @@ void main() {
     );
   });
 
-  testWidgets('Tooltip is shown with the right font size', (WidgetTester tester) async {
+  testWidgets('Tooltip is shown with the right font size', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.OverlayPortalExampleApp());
     await tester.tap(find.byType(example.ClickableTooltipWidget));
     await tester.pump();

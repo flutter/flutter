@@ -14,25 +14,25 @@ class TestCustomPainter extends CustomPainter {
   final String name;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     log.add(name);
   }
 
   @override
-  bool shouldRepaint(TestCustomPainter oldPainter) {
+  bool shouldRepaint(final TestCustomPainter oldPainter) {
     return name != oldPainter.name
         || log != oldPainter.log;
   }
 }
 
 void main() {
-  testWidgets('Do we paint when coming back from a navigation', (WidgetTester tester) async {
+  testWidgets('Do we paint when coming back from a navigation', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     log.add('0');
     await tester.pumpWidget(
       MaterialApp(
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => RepaintBoundary(
+          '/': (final BuildContext context) => RepaintBoundary(
             child: RepaintBoundary(
               child: FlipWidget(
                 left: CustomPaint(
@@ -50,7 +50,7 @@ void main() {
               ),
             ),
           ),
-          '/second': (BuildContext context) => Container(),
+          '/second': (final BuildContext context) => Container(),
         },
       ),
     );

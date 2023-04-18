@@ -56,13 +56,13 @@ class ClampedSimulation extends Simulation {
   final double dxMax;
 
   @override
-  double x(double time) => clampDouble(simulation.x(time), xMin, xMax);
+  double x(final double time) => clampDouble(simulation.x(time), xMin, xMax);
 
   @override
-  double dx(double time) => clampDouble(simulation.dx(time), dxMin, dxMax);
+  double dx(final double time) => clampDouble(simulation.dx(time), dxMin, dxMax);
 
   @override
-  bool isDone(double time) => simulation.isDone(time);
+  bool isDone(final double time) => simulation.isDone(time);
 
   @override
   String toString() => '${objectRuntimeType(this, 'ClampedSimulation')}(simulation: $simulation, x: ${xMin.toStringAsFixed(1)}..${xMax.toStringAsFixed(1)}, dx: ${dxMin.toStringAsFixed(1)}..${dxMax.toStringAsFixed(1)})';

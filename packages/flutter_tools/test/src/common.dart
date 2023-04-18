@@ -19,7 +19,7 @@ import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_
 
 export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
 
-void tryToDelete(FileSystemEntity fileEntity) {
+void tryToDelete(final FileSystemEntity fileEntity) {
   // This should not be necessary, but it turns out that
   // on Windows it's common for deletions to fail due to
   // bogus (we think) "access denied" errors.
@@ -73,12 +73,12 @@ String getFlutterRoot() {
 }
 
 /// Capture console print events into a string buffer.
-Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
+Future<StringBuffer> capturedConsolePrint(final Future<void> Function() body) async {
   final StringBuffer buffer = StringBuffer();
   await runZoned<Future<void>>(() async {
     // Service the event loop.
     await body();
-  }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+  }, zoneSpecification: ZoneSpecification(print: (final Zone self, final ZoneDelegate parent, final Zone zone, final String line) {
     buffer.writeln(line);
   }));
   return buffer;
@@ -88,13 +88,13 @@ Future<StringBuffer> capturedConsolePrint(Future<void> Function() body) async {
 final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
 
 /// Matcher for functions that throw [ToolExit].
-Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
+Matcher throwsToolExit({ final int? exitCode, final Pattern? message }) {
   Matcher matcher = _isToolExit;
   if (exitCode != null) {
-    matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
+    matcher = allOf(matcher, (final ToolExit e) => e.exitCode == exitCode);
   }
   if (message != null) {
-    matcher = allOf(matcher, (ToolExit e) => e.message?.contains(message) ?? false);
+    matcher = allOf(matcher, (final ToolExit e) => e.message?.contains(message) ?? false);
   }
   return throwsA(matcher);
 }
@@ -103,10 +103,10 @@ Matcher throwsToolExit({ int? exitCode, Pattern? message }) {
 final TypeMatcher<ToolExit> _isToolExit = isA<ToolExit>();
 
 /// Matcher for functions that throw [UsageException].
-Matcher throwsUsageException({Pattern? message }) {
+Matcher throwsUsageException({final Pattern? message }) {
   Matcher matcher = _isUsageException;
   if (message != null) {
-    matcher = allOf(matcher, (UsageException e) => e.message.contains(message));
+    matcher = allOf(matcher, (final UsageException e) => e.message.contains(message));
   }
   return throwsA(matcher);
 }
@@ -115,10 +115,10 @@ Matcher throwsUsageException({Pattern? message }) {
 final TypeMatcher<UsageException> _isUsageException = isA<UsageException>();
 
 /// Matcher for functions that throw [ProcessException].
-Matcher throwsProcessException({ Pattern? message }) {
+Matcher throwsProcessException({ final Pattern? message }) {
   Matcher matcher = _isProcessException;
   if (message != null) {
-    matcher = allOf(matcher, (ProcessException e) => e.message.contains(message));
+    matcher = allOf(matcher, (final ProcessException e) => e.message.contains(message));
   }
   return throwsA(matcher);
 }
@@ -126,7 +126,7 @@ Matcher throwsProcessException({ Pattern? message }) {
 /// Matcher for [ProcessException]s.
 final TypeMatcher<ProcessException> _isProcessException = isA<ProcessException>();
 
-Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+Future<void> expectToolExitLater(final Future<dynamic> future, final Matcher messageMatcher) async {
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');
@@ -138,7 +138,7 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
-Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
+Future<void> expectReturnsNormallyLater(final Future<dynamic> future) async {
   try {
     await future;
   // Catch all exceptions to give a better test failure message.
@@ -147,9 +147,9 @@ Future<void> expectReturnsNormallyLater(Future<dynamic> future) async {
   }
 }
 
-Matcher containsIgnoringWhitespace(String toSearch) {
+Matcher containsIgnoringWhitespace(final String toSearch) {
   return predicate(
-    (String source) {
+    (final String source) {
       return collapseWhitespace(source).contains(collapseWhitespace(toSearch));
     },
     'contains "$toSearch" ignoring whitespace.',
@@ -160,12 +160,12 @@ Matcher containsIgnoringWhitespace(String toSearch) {
 /// system temporary directory are deleted after each test by calling
 /// `LocalFileSystem.dispose()`.
 @isTest
-void test(String description, FutureOr<void> Function() body, {
-  String? testOn,
-  dynamic skip,
-  List<String>? tags,
-  Map<String, dynamic>? onPlatform,
-  int? retry,
+void test(final String description, final FutureOr<void> Function() body, {
+  final String? testOn,
+  final dynamic skip,
+  final List<String>? tags,
+  final Map<String, dynamic>? onPlatform,
+  final int? retry,
 }) {
   test_package.test(
     description,
@@ -196,12 +196,12 @@ void test(String description, FutureOr<void> Function() body, {
 ///
 /// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
-void testWithoutContext(String description, FutureOr<void> Function() body, {
-  String? testOn,
-  dynamic skip,
-  List<String>? tags,
-  Map<String, dynamic>? onPlatform,
-  int? retry,
+void testWithoutContext(final String description, final FutureOr<void> Function() body, {
+  final String? testOn,
+  final dynamic skip,
+  final List<String>? tags,
+  final Map<String, dynamic>? onPlatform,
+  final int? retry,
 }) {
   return test(
     description, () async {
@@ -242,11 +242,11 @@ class _NoContext implements AppContext {
 
   @override
   Future<V> run<V>({
-    required FutureOr<V> Function() body,
-    String? name,
-    Map<Type, Generator>? overrides,
-    Map<Type, Generator>? fallbacks,
-    ZoneSpecification? zoneSpecification,
+    required final FutureOr<V> Function() body,
+    final String? name,
+    final Map<Type, Generator>? overrides,
+    final Map<Type, Generator>? fallbacks,
+    final ZoneSpecification? zoneSpecification,
   }) async {
     return body();
   }
@@ -275,18 +275,18 @@ class FileExceptionHandler {
 
   /// Add an exception that will be thrown whenever the file system attached to this
   /// handler performs the [operation] on the [entity].
-  void addError(FileSystemEntity entity, FileSystemOp operation, FileSystemException exception) {
+  void addError(final FileSystemEntity entity, final FileSystemOp operation, final FileSystemException exception) {
     final String path = entity.path;
     _contextErrors[path] ??= <FileSystemOp, FileSystemException>{};
     _contextErrors[path]![operation] = exception;
   }
 
-  void addTempError(FileSystemOp operation, FileSystemException exception) {
+  void addTempError(final FileSystemOp operation, final FileSystemException exception) {
     _tempErrors[operation] = exception;
   }
 
   /// Tear-off this method and pass it to the memory filesystem `opHandle` parameter.
-  void opHandle(String path, FileSystemOp operation) {
+  void opHandle(final String path, final FileSystemOp operation) {
     if (path.startsWith('.tmp_') || _tempDirectoryEnd.firstMatch(path) != null) {
       final FileSystemException? exception = _tempErrors[operation];
       if (exception != null) {

@@ -560,9 +560,9 @@ OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
 
 /// A broken SDK installation.
 Directory createBrokenSdkDirectory({
-  bool withAndroidN = false,
-  bool withSdkManager = true,
-  required FileSystem fileSystem,
+  final bool withAndroidN = false,
+  final bool withSdkManager = true,
+  required final FileSystem fileSystem,
 }) {
   final Directory dir = fileSystem.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
   _createSdkFile(dir, 'licenses/dummy');
@@ -578,7 +578,7 @@ Directory createBrokenSdkDirectory({
   return dir;
 }
 
-void _createSdkFile(Directory dir, String filePath, { String? contents }) {
+void _createSdkFile(final Directory dir, final String filePath, { final String? contents }) {
   final File file = dir.childFile(filePath);
   file.createSync(recursive: true);
   if (contents != null) {
@@ -587,18 +587,18 @@ void _createSdkFile(Directory dir, String filePath, { String? contents }) {
 }
 
 Directory createSdkDirectory({
-  bool withAndroidN = false,
-  bool withSdkManager = true,
-  bool withPlatformTools = true,
-  bool withBuildTools = true,
-  required FileSystem fileSystem,
-  String buildProp = _buildProp,
+  final bool withAndroidN = false,
+  final bool withSdkManager = true,
+  final bool withPlatformTools = true,
+  final bool withBuildTools = true,
+  required final FileSystem fileSystem,
+  final String buildProp = _buildProp,
 }) {
   final Directory dir = fileSystem.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
   final String exe = globals.platform.isWindows ? '.exe' : '';
   final String bat = globals.platform.isWindows ? '.bat' : '';
 
-  void createDir(Directory dir, String path) {
+  void createDir(final Directory dir, final String path) {
     final Directory directory = dir.fileSystem.directory(dir.fileSystem.path.join(dir.path, path));
     directory.createSync(recursive: true);
   }
@@ -649,7 +649,7 @@ class FakeAndroidStudioWithoutJdk extends Fake implements AndroidStudio {
 
 class FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemUtils {
   @override
-  File? which(String execName) {
+  File? which(final String execName) {
     if (execName == 'java') {
       return globals.fs.file('/fake/which/java/path');
     }
@@ -659,7 +659,7 @@ class FakeOperatingSystemUtilsWithJava extends Fake implements OperatingSystemUt
 
 class FakeOperatingSystemUtilsWithoutJava extends Fake implements OperatingSystemUtils {
   @override
-  File? which(String execName) {
+  File? which(final String execName) {
     return null;
   }
 }

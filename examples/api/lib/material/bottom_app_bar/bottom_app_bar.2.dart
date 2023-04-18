@@ -29,7 +29,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
 
   static final List<Widget> items = List<Widget>.generate(
     colors.length,
-    (int index) => Container(color: colors[index], height: 150.0),
+    (final int index) => Container(color: colors[index], height: 150.0),
   ).reversed.toList();
 
   late ScrollController _controller;
@@ -61,13 +61,13 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
     }
   }
 
-  void _onShowFabChanged(bool value) {
+  void _onShowFabChanged(final bool value) {
     setState(() {
       _showFab = value;
     });
   }
 
-  void _onElevatedChanged(bool value) {
+  void _onElevatedChanged(final bool value) {
     setState(() {
       _isElevated = value;
     });
@@ -97,7 +97,7 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -149,7 +149,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   final bool isVisible;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       height: isVisible ? 80.0 : 0,

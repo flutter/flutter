@@ -50,14 +50,14 @@ abstract class _ActionButton extends StatelessWidget {
   final ButtonStyle? style;
 
   /// This returns the appropriate tooltip text for this action button.
-  String _getTooltip(BuildContext context);
+  String _getTooltip(final BuildContext context);
 
   /// This is the default function that is called when [onPressed] is set
   /// to null.
-  void _onPressedCallback(BuildContext context);
+  void _onPressedCallback(final BuildContext context);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return IconButton(
       icon: icon,
@@ -91,7 +91,7 @@ class _ActionIcon extends StatelessWidget {
   final _AndroidSemanticsLabelCallback getAndroidSemanticsLabel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ActionIconThemeData? actionIconTheme = ActionIconTheme.of(context);
     final WidgetBuilder? iconBuilder = iconBuilderCallback(actionIconTheme);
     if (iconBuilder != null) {
@@ -135,12 +135,12 @@ class BackButtonIcon extends StatelessWidget {
   const BackButtonIcon({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _ActionIcon(
-      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+      iconBuilderCallback: (final ActionIconThemeData? actionIconTheme) {
         return actionIconTheme?.backButtonIconBuilder;
       },
-      getIcon: (BuildContext context) {
+      getIcon: (final BuildContext context) {
         if (kIsWeb) {
           // Always use 'Icons.arrow_back' as a back_button icon in web.
           return Icons.arrow_back;
@@ -156,7 +156,7 @@ class BackButtonIcon extends StatelessWidget {
             return Icons.arrow_back_ios;
         }
       },
-      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+      getAndroidSemanticsLabel: (final MaterialLocalizations materialLocalization) {
         return materialLocalization.backButtonTooltip;
       },
     );
@@ -208,10 +208,10 @@ class BackButton extends _ActionButton {
   }) : super(icon: const BackButtonIcon());
 
   @override
-  void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
+  void _onPressedCallback(final BuildContext context) => Navigator.maybePop(context);
 
   @override
-  String _getTooltip(BuildContext context) {
+  String _getTooltip(final BuildContext context) {
     return MaterialLocalizations.of(context).backButtonTooltip;
   }
 }
@@ -234,13 +234,13 @@ class CloseButtonIcon extends StatelessWidget {
   const CloseButtonIcon({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _ActionIcon(
-      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+      iconBuilderCallback: (final ActionIconThemeData? actionIconTheme) {
         return actionIconTheme?.closeButtonIconBuilder;
       },
-      getIcon: (BuildContext context) => Icons.close,
-      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+      getIcon: (final BuildContext context) => Icons.close,
+      getAndroidSemanticsLabel: (final MaterialLocalizations materialLocalization) {
         return materialLocalization.closeButtonTooltip;
       },
     );
@@ -277,10 +277,10 @@ class CloseButton extends _ActionButton {
       : super(icon: const CloseButtonIcon());
 
   @override
-  void _onPressedCallback(BuildContext context) => Navigator.maybePop(context);
+  void _onPressedCallback(final BuildContext context) => Navigator.maybePop(context);
 
   @override
-  String _getTooltip(BuildContext context) {
+  String _getTooltip(final BuildContext context) {
     return MaterialLocalizations.of(context).closeButtonTooltip;
   }
 }
@@ -305,13 +305,13 @@ class DrawerButtonIcon extends StatelessWidget {
   const DrawerButtonIcon({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _ActionIcon(
-      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+      iconBuilderCallback: (final ActionIconThemeData? actionIconTheme) {
         return actionIconTheme?.drawerButtonIconBuilder;
       },
-      getIcon: (BuildContext context) => Icons.menu,
-      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+      getIcon: (final BuildContext context) => Icons.menu,
+      getAndroidSemanticsLabel: (final MaterialLocalizations materialLocalization) {
         return materialLocalization.openAppDrawerTooltip;
       },
     );
@@ -342,10 +342,10 @@ class DrawerButton extends _ActionButton {
   }) : super(icon: const DrawerButtonIcon());
 
   @override
-  void _onPressedCallback(BuildContext context) => Scaffold.of(context).openDrawer();
+  void _onPressedCallback(final BuildContext context) => Scaffold.of(context).openDrawer();
 
   @override
-  String _getTooltip(BuildContext context) {
+  String _getTooltip(final BuildContext context) {
     return MaterialLocalizations.of(context).openAppDrawerTooltip;
   }
 }
@@ -370,13 +370,13 @@ class EndDrawerButtonIcon extends StatelessWidget {
   const EndDrawerButtonIcon({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _ActionIcon(
-      iconBuilderCallback: (ActionIconThemeData? actionIconTheme) {
+      iconBuilderCallback: (final ActionIconThemeData? actionIconTheme) {
         return actionIconTheme?.endDrawerButtonIconBuilder;
       },
-      getIcon: (BuildContext context) => Icons.menu,
-      getAndroidSemanticsLabel: (MaterialLocalizations materialLocalization) {
+      getIcon: (final BuildContext context) => Icons.menu,
+      getAndroidSemanticsLabel: (final MaterialLocalizations materialLocalization) {
         return materialLocalization.openAppDrawerTooltip;
       },
     );
@@ -407,10 +407,10 @@ class EndDrawerButton extends _ActionButton {
   }) : super(icon: const EndDrawerButtonIcon());
 
   @override
-  void _onPressedCallback(BuildContext context) => Scaffold.of(context).openEndDrawer();
+  void _onPressedCallback(final BuildContext context) => Scaffold.of(context).openEndDrawer();
 
   @override
-  String _getTooltip(BuildContext context) {
+  String _getTooltip(final BuildContext context) {
     return MaterialLocalizations.of(context).openAppDrawerTooltip;
   }
 }

@@ -66,14 +66,14 @@ abstract class Listenable {
   /// will lead to memory leaks or exceptions.
   ///
   /// The list may contain nulls; they are ignored.
-  factory Listenable.merge(List<Listenable?> listenables) = _MergingListenable;
+  factory Listenable.merge(final List<Listenable?> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
-  void addListener(VoidCallback listener);
+  void addListener(final VoidCallback listener);
 
   /// Remove a previously registered closure from the list of closures that the
   /// object notifies.
-  void removeListener(VoidCallback listener);
+  void removeListener(final VoidCallback listener);
 }
 
 /// An interface for subclasses of [Listenable] that expose a [value].
@@ -173,7 +173,7 @@ mixin class ChangeNotifier implements Listenable {
   // This is static and not an instance method because too many people try to
   // implement ChangeNotifier instead of extending it (and so it is too breaking
   // to add a method, especially for debug).
-  static bool debugAssertNotDisposed(ChangeNotifier notifier) {
+  static bool debugAssertNotDisposed(final ChangeNotifier notifier) {
     assert(() {
       if (notifier._debugDisposed) {
         throw FlutterError(
@@ -234,7 +234,7 @@ mixin class ChangeNotifier implements Listenable {
   ///  * [removeListener], which removes a previously registered closure from
   ///    the list of closures that are notified when the object changes.
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     assert(ChangeNotifier.debugAssertNotDisposed(this));
     if (kFlutterMemoryAllocationsEnabled && !_creationDispatched) {
       MemoryAllocations.instance.dispatchObjectCreated(
@@ -259,7 +259,7 @@ mixin class ChangeNotifier implements Listenable {
     _listeners[_count++] = listener;
   }
 
-  void _removeAt(int index) {
+  void _removeAt(final int index) {
     // The list holding the listeners is not growable for performances reasons.
     // We still want to shrink this list if a lot of listeners have been added
     // and then removed outside a notifyListeners iteration.
@@ -305,7 +305,7 @@ mixin class ChangeNotifier implements Listenable {
   ///  * [addListener], which registers a closure to be called when the object
   ///    changes.
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     // This method is allowed to be called on disposed instances for usability
     // reasons. Due to how our frame scheduling logic between render objects and
     // overlays, it is common that the owner of this instance would be disposed a
@@ -464,14 +464,14 @@ class _MergingListenable extends Listenable {
   final List<Listenable?> _children;
 
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     for (final Listenable? child in _children) {
       child?.addListener(listener);
     }
   }
 
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     for (final Listenable? child in _children) {
       child?.removeListener(listener);
     }
@@ -522,7 +522,7 @@ class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   @override
   T get value => _value;
   T _value;
-  set value(T newValue) {
+  set value(final T newValue) {
     if (_value == newValue) {
       return;
     }

@@ -18,19 +18,19 @@ void main() {
     expect(identical(DrawerThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Custom debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DrawerThemeData(
       backgroundColor: Color(0x00000099),
@@ -43,8 +43,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -58,7 +58,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final bool useMaterial3 = ThemeData().useMaterial3;
     await tester.pumpWidget(
@@ -86,7 +86,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (WidgetTester tester) async {
+  testWidgets('Default values are used when no Drawer or DrawerThemeData properties are specified in end drawer', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final bool useMaterial3 = ThemeData().useMaterial3;
     await tester.pumpWidget(
@@ -114,7 +114,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, 304.0);
   });
 
-  testWidgets('DrawerThemeData values are used when no Drawer properties are specified', (WidgetTester tester) async {
+  testWidgets('DrawerThemeData values are used when no Drawer properties are specified', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -155,7 +155,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('Drawer values take priority over DrawerThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('Drawer values take priority over DrawerThemeData values when both properties are specified', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -202,7 +202,7 @@ void main() {
     expect(_drawerRenderBox(tester).size.width, width);
   });
 
-  testWidgets('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('DrawerTheme values take priority over ThemeData.drawerTheme values when both properties are specified', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color scrimColor = Color(0x00000002);
     const double elevation = 7.0;
@@ -255,7 +255,7 @@ void main() {
   });
 }
 
-Material _drawerMaterial(WidgetTester tester) {
+Material _drawerMaterial(final WidgetTester tester) {
   return tester.firstWidget<Material>(
     find.descendant(
       of: find.byType(Drawer),
@@ -266,12 +266,12 @@ Material _drawerMaterial(WidgetTester tester) {
 
 // The scrim is a Container within a Semantics node labeled "Dismiss",
 // within a DrawerController.
-Container _scrim(WidgetTester tester) {
+Container _scrim(final WidgetTester tester) {
   return tester.widget<Container>(
     find.descendant(
       of: find.descendant(
         of: find.byType(DrawerController),
-        matching: find.byWidgetPredicate((Widget widget) {
+        matching: find.byWidgetPredicate((final Widget widget) {
           return widget is Semantics
               && widget.properties.label == 'Dismiss';
         }),
@@ -282,6 +282,6 @@ Container _scrim(WidgetTester tester) {
 }
 
 // The RenderBox representing the Drawer.
-RenderBox _drawerRenderBox(WidgetTester tester) {
+RenderBox _drawerRenderBox(final WidgetTester tester) {
   return tester.renderObject(find.byType(Drawer));
 }

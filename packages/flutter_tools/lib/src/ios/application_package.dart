@@ -12,13 +12,13 @@ import '../xcode_project.dart';
 import 'plist_parser.dart';
 
 /// Tests whether a [Directory] is an iOS bundle directory.
-bool _isBundleDirectory(Directory dir) => dir.path.endsWith('.app');
+bool _isBundleDirectory(final Directory dir) => dir.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {
-  IOSApp({required String projectBundleId}) : super(id: projectBundleId);
+  IOSApp({required final String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new IOSApp from an existing app bundle or IPA.
-  static IOSApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
+  static IOSApp? fromPrebuiltApp(final FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = globals.fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
       globals.printError(
@@ -75,7 +75,7 @@ abstract class IOSApp extends ApplicationPackage {
     );
   }
 
-  static Future<IOSApp?> fromIosProject(IosProject project, BuildInfo? buildInfo) async {
+  static Future<IOSApp?> fromIosProject(final IosProject project, final BuildInfo? buildInfo) async {
     if (!globals.platform.isMacOS) {
       return null;
     }
@@ -108,11 +108,11 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId, String? hostAppBundleName)
+  BuildableIOSApp(this.project, final String projectBundleId, final String? hostAppBundleName)
     : _hostAppBundleName = hostAppBundleName,
       super(projectBundleId: projectBundleId);
 
-  static Future<BuildableIOSApp?> fromProject(IosProject project, BuildInfo? buildInfo) async {
+  static Future<BuildableIOSApp?> fromProject(final IosProject project, final BuildInfo? buildInfo) async {
     final String? hostAppBundleName = await project.hostAppBundleName(buildInfo);
     final String? projectBundleId = await project.productBundleIdentifier(buildInfo);
     if (projectBundleId != null) {
@@ -172,15 +172,15 @@ class BuildableIOSApp extends IOSApp {
   String get ipaOutputPath =>
       globals.fs.path.join(getIosBuildDirectory(), 'ipa');
 
-  String _buildAppPath(String type) {
+  String _buildAppPath(final String type) {
     return globals.fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
 
-  String _projectImageAssetDirName(String asset)
+  String _projectImageAssetDirName(final String asset)
     => globals.fs.path.join('ios', 'Runner', 'Assets.xcassets', asset);
 
   // Template asset's Contents.json file is in flutter_tools, but the actual
-  String _templateImageAssetDirNameForContentsJson(String asset)
+  String _templateImageAssetDirNameForContentsJson(final String asset)
     => globals.fs.path.join(
       Cache.flutterRoot!,
       'packages',
@@ -190,12 +190,12 @@ class BuildableIOSApp extends IOSApp {
     );
 
   // Template asset's images are in flutter_template_images package.
-  Future<String> _templateImageAssetDirNameForImages(String asset) async {
+  Future<String> _templateImageAssetDirNameForImages(final String asset) async {
     final Directory imageTemplate = await templateImageDirectory(null, globals.fs, globals.logger);
     return globals.fs.path.join(imageTemplate.path, _templateImageAssetDirNameSuffix(asset));
   }
 
-  String _templateImageAssetDirNameSuffix(String asset) => globals.fs.path.join(
+  String _templateImageAssetDirNameSuffix(final String asset) => globals.fs.path.join(
     'app_shared',
     'ios.tmpl',
     'Runner',

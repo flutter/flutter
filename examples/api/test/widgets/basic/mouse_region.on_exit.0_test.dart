@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/basic/mouse_region.on_exit.0.dart' a
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MouseRegion detects mouse hover', (WidgetTester tester) async {
+  testWidgets('MouseRegion detects mouse hover', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.MouseRegionApp()),
     );

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/action_chip/action_chip.0.dart' as 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ActionChip updates avatar when tapped', (WidgetTester tester) async {
+  testWidgets('ActionChip updates avatar when tapped', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ChipApp(),
     );

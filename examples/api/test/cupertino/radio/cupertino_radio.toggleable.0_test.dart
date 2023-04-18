@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/radio/cupertino_radio.toggleable.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Has 2 CupertinoRadio widgets that can be toggled off', (WidgetTester tester) async {
+  testWidgets('Has 2 CupertinoRadio widgets that can be toggled off', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoRadioApp(),
     );

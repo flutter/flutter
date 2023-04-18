@@ -25,7 +25,7 @@ class _DragHandler extends Drag {
   final GestureDragEndCallback onEnd;
 
   @override
-  void update(DragUpdateDetails details) {
+  void update(final DragUpdateDetails details) {
     onUpdate(details);
   }
 
@@ -35,7 +35,7 @@ class _DragHandler extends Drag {
   }
 
   @override
-  void end(DragEndDetails details) {
+  void end(final DragEndDetails details) {
     onEnd(details);
   }
 }
@@ -45,14 +45,14 @@ class _IgnoreDrag extends Drag {
 
 class _PointDemoPainter extends CustomPainter {
   _PointDemoPainter({
-    Animation<double>? repaint,
+    final Animation<double>? repaint,
     required this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialPointArcTween arc;
   final Animation<double>? _repaint;
 
-  void drawPoint(Canvas canvas, Offset point, Color color) {
+  void drawPoint(final Canvas canvas, final Offset point, final Color color) {
     final Paint paint = Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
@@ -65,7 +65,7 @@ class _PointDemoPainter extends CustomPainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint();
 
     if (arc.center != null) {
@@ -93,13 +93,13 @@ class _PointDemoPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset position) {
+  bool hitTest(final Offset position) {
     return (arc.begin! - position).distanceSquared < _kTargetSlop
         || (arc.end! - position).distanceSquared < _kTargetSlop;
   }
 
   @override
-  bool shouldRepaint(_PointDemoPainter oldPainter) => arc != oldPainter.arc;
+  bool shouldRepaint(final _PointDemoPainter oldPainter) => arc != oldPainter.arc;
 }
 
 class _PointDemo extends StatefulWidget {
@@ -132,7 +132,7 @@ class _PointDemoState extends State<_PointDemo> {
     super.dispose();
   }
 
-  Drag _handleOnStart(Offset position) {
+  Drag _handleOnStart(final Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
     if (_dragTarget != null) {
       return _IgnoreDrag();
@@ -154,7 +154,7 @@ class _PointDemoState extends State<_PointDemo> {
     return _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     switch (_dragTarget!) {
       case _DragTarget.start:
         setState(() {
@@ -172,12 +172,12 @@ class _PointDemoState extends State<_PointDemo> {
     widget.controller.value = 0.0;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     _dragTarget = null;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     if (_screenSize == null || _screenSize != screenSize) {
       _screenSize = screenSize;
@@ -191,7 +191,7 @@ class _PointDemoState extends State<_PointDemo> {
       gestures: <Type, GestureRecognizerFactory>{
         ImmediateMultiDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
           () => ImmediateMultiDragGestureRecognizer(),
-          (ImmediateMultiDragGestureRecognizer instance) {
+          (final ImmediateMultiDragGestureRecognizer instance) {
             instance.onStart = _handleOnStart;
           },
         ),
@@ -224,14 +224,14 @@ class _PointDemoState extends State<_PointDemo> {
 
 class _RectangleDemoPainter extends CustomPainter {
   _RectangleDemoPainter({
-    required Animation<double> repaint,
+    required final Animation<double> repaint,
     required this.arc,
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialRectArcTween arc;
   final Animation<double> _repaint;
 
-  void drawPoint(Canvas canvas, Offset p, Color color) {
+  void drawPoint(final Canvas canvas, final Offset p, final Color color) {
     final Paint paint = Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
@@ -243,7 +243,7 @@ class _RectangleDemoPainter extends CustomPainter {
     canvas.drawCircle(p, _kPointRadius + 1.0, paint);
   }
 
-  void drawRect(Canvas canvas, Rect rect, Color color) {
+  void drawRect(final Canvas canvas, final Rect rect, final Color color) {
     final Paint paint = Paint()
       ..color = color.withOpacity(0.25)
       ..strokeWidth = 4.0
@@ -253,20 +253,20 @@ class _RectangleDemoPainter extends CustomPainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     drawRect(canvas, arc.begin!, Colors.green);
     drawRect(canvas, arc.end!, Colors.red);
     drawRect(canvas, arc.lerp(_repaint.value), Colors.blue);
   }
 
   @override
-  bool hitTest(Offset position) {
+  bool hitTest(final Offset position) {
     return (arc.begin!.center - position).distanceSquared < _kTargetSlop
         || (arc.end!.center - position).distanceSquared < _kTargetSlop;
   }
 
   @override
-  bool shouldRepaint(_RectangleDemoPainter oldPainter) => arc != oldPainter.arc;
+  bool shouldRepaint(final _RectangleDemoPainter oldPainter) => arc != oldPainter.arc;
 }
 
 class _RectangleDemo extends StatefulWidget {
@@ -293,7 +293,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     super.dispose();
   }
 
-  Drag _handleOnStart(Offset position) {
+  Drag _handleOnStart(final Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
     if (_dragTarget != null) {
       return _IgnoreDrag();
@@ -314,7 +314,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     return _DragHandler(_handleDragUpdate, _handleDragCancel, _handleDragEnd);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     switch (_dragTarget!) {
       case _DragTarget.start:
         setState(() {
@@ -332,12 +332,12 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     widget.controller.value = 0.0;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     _dragTarget = null;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     if (_screenSize == null || _screenSize != screenSize) {
       _screenSize = screenSize;
@@ -357,7 +357,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
       gestures: <Type, GestureRecognizerFactory>{
         ImmediateMultiDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
           () => ImmediateMultiDragGestureRecognizer(),
-          (ImmediateMultiDragGestureRecognizer instance) {
+          (final ImmediateMultiDragGestureRecognizer instance) {
             instance.onStart = _handleOnStart;
           },
         ),
@@ -391,7 +391,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 typedef _DemoBuilder = Widget Function(_ArcDemo demo);
 
 class _ArcDemo {
-  _ArcDemo(this.title, this.builder, TickerProvider vsync)
+  _ArcDemo(this.title, this.builder, final TickerProvider vsync)
     : controller = AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
       key = GlobalKey(debugLabel: title);
 
@@ -410,13 +410,13 @@ class AnimationDemo extends StatefulWidget {
 
 class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateMixin {
   late final List<_ArcDemo> _allDemos = <_ArcDemo>[
-    _ArcDemo('POINT', (_ArcDemo demo) {
+    _ArcDemo('POINT', (final _ArcDemo demo) {
       return _PointDemo(
         key: demo.key,
         controller: demo.controller,
       );
     }, this),
-    _ArcDemo('RECTANGLE', (_ArcDemo demo) {
+    _ArcDemo('RECTANGLE', (final _ArcDemo demo) {
       return _RectangleDemo(
         key: demo.key,
         controller: demo.controller,
@@ -424,7 +424,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
     }, this),
   ];
 
-  Future<void> _play(_ArcDemo demo) async {
+  Future<void> _play(final _ArcDemo demo) async {
     await demo.controller.forward();
     if (demo.key.currentState != null && demo.key.currentState!.mounted) {
       demo.controller.reverse();
@@ -432,18 +432,18 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: _allDemos.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Animation'),
           bottom: TabBar(
-            tabs: _allDemos.map<Tab>((_ArcDemo demo) => Tab(text: demo.title)).toList(),
+            tabs: _allDemos.map<Tab>((final _ArcDemo demo) => Tab(text: demo.title)).toList(),
           ),
         ),
         floatingActionButton: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return FloatingActionButton(
               child: const Icon(Icons.refresh),
               onPressed: () {
@@ -453,7 +453,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
           },
         ),
         body: TabBarView(
-          children: _allDemos.map<Widget>((_ArcDemo demo) => demo.builder(demo)).toList(),
+          children: _allDemos.map<Widget>((final _ArcDemo demo) => demo.builder(demo)).toList(),
         ),
       ),
     );

@@ -741,15 +741,15 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///
   /// All the colors must not be null.
   const CupertinoDynamicColor({
-    String? debugLabel,
-    required Color color,
-    required Color darkColor,
-    required Color highContrastColor,
-    required Color darkHighContrastColor,
-    required Color elevatedColor,
-    required Color darkElevatedColor,
-    required Color highContrastElevatedColor,
-    required Color darkHighContrastElevatedColor,
+    final String? debugLabel,
+    required final Color color,
+    required final Color darkColor,
+    required final Color highContrastColor,
+    required final Color darkHighContrastColor,
+    required final Color elevatedColor,
+    required final Color darkElevatedColor,
+    required final Color highContrastElevatedColor,
+    required final Color darkHighContrastElevatedColor,
   }) : this._(
          color,
          color,
@@ -771,11 +771,11 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///
   /// All the colors must not be null.
   const CupertinoDynamicColor.withBrightnessAndContrast({
-    String? debugLabel,
-    required Color color,
-    required Color darkColor,
-    required Color highContrastColor,
-    required Color darkHighContrastColor,
+    final String? debugLabel,
+    required final Color color,
+    required final Color darkColor,
+    required final Color highContrastColor,
+    required final Color darkHighContrastColor,
   }) : this(
     debugLabel: debugLabel,
     color: color,
@@ -794,9 +794,9 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///
   /// All the colors must not be null.
   const CupertinoDynamicColor.withBrightness({
-    String? debugLabel,
-    required Color color,
-    required Color darkColor,
+    final String? debugLabel,
+    required final Color color,
+    required final Color darkColor,
   }) : this(
     debugLabel: debugLabel,
     color: color,
@@ -939,7 +939,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///
   ///  * [maybeResolve], which is similar to this function, but will allow a
   ///    null `resolvable` color.
-  static Color resolve(Color resolvable, BuildContext context) {
+  static Color resolve(final Color resolvable, final BuildContext context) {
     return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context)
       : resolvable;
@@ -958,7 +958,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   ///
   ///  * [resolve], which is similar to this function, but returns a
   ///    non-nullable value, and does not allow a null `resolvable` color.
-  static Color? maybeResolve(Color? resolvable, BuildContext context) {
+  static Color? maybeResolve(final Color? resolvable, final BuildContext context) {
     if (resolvable == null) {
       return null;
     }
@@ -1017,7 +1017,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   /// default value of that trait will be used ([Brightness.light] platform
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
   /// level).
-  CupertinoDynamicColor resolveFrom(BuildContext context) {
+  CupertinoDynamicColor resolveFrom(final BuildContext context) {
     Brightness brightness = Brightness.light;
     if (_isPlatformBrightnessDependent) {
       brightness = CupertinoTheme.maybeBrightnessOf(context) ?? Brightness.light;
@@ -1070,7 +1070,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -1103,8 +1103,8 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   );
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    String toString(String name, Color color) {
+  String toString({ final DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+    String toString(final String name, final Color color) {
       final String marker = color == _effectiveColor ? '*' : '';
       return '$marker$name = $color$marker';
     }
@@ -1123,7 +1123,7 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     if (_debugLabel != null) {
       properties.add(MessageProperty('debugLabel', _debugLabel!));
@@ -1161,12 +1161,12 @@ class CupertinoDynamicColor extends Color with Diagnosticable {
 ///
 /// The [showName], [style], and [level] arguments must not be null.
 DiagnosticsProperty<Color> createCupertinoColorProperty(
-  String name,
-  Color? value, {
-  bool showName = true,
-  Object? defaultValue = kNoDefaultValue,
-  DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
-  DiagnosticLevel level = DiagnosticLevel.info,
+  final String name,
+  final Color? value, {
+  final bool showName = true,
+  final Object? defaultValue = kNoDefaultValue,
+  final DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+  final DiagnosticLevel level = DiagnosticLevel.info,
 }) {
   if (value is CupertinoDynamicColor) {
     return DiagnosticsProperty<CupertinoDynamicColor>(

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Implicit Semantics merge behavior', (WidgetTester tester) async {
+  testWidgets('Implicit Semantics merge behavior', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -172,7 +172,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Do not merge with conflicts', (WidgetTester tester) async {
+  testWidgets('Do not merge with conflicts', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

@@ -16,17 +16,17 @@ class ExampleDragTarget extends StatefulWidget {
 class ExampleDragTargetState extends State<ExampleDragTarget> {
   Color _color = Colors.grey;
 
-  void _handleAccept(Color data) {
+  void _handleAccept(final Color data) {
     setState(() {
       _color = data;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DragTarget<Color>(
       onAccept: _handleAccept,
-      builder: (BuildContext context, List<Color?> data, List<dynamic> rejectedData) {
+      builder: (final BuildContext context, final List<Color?> data, final List<dynamic> rejectedData) {
         return Container(
           height: 100.0,
           margin: const EdgeInsets.all(10.0),
@@ -58,7 +58,7 @@ class DotState extends State<Dot> {
   int taps = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: widget.tappable ? () { setState(() { taps += 1; }); } : null,
       child: Container(
@@ -94,7 +94,7 @@ class ExampleDragSource extends StatelessWidget {
   static const double kFingerSize = 50.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     double size = kDotSize;
     if (heavy) {
       size *= kHeavyMultiplier;
@@ -159,7 +159,7 @@ class DashOutlineCirclePainter extends CustomPainter {
   static const double startOffset = 1.0; // radians
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final double radius = size.shortestSide / 2.0;
     final Paint paint = Paint()
       ..color = const Color(0xFF000000)
@@ -174,7 +174,7 @@ class DashOutlineCirclePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(DashOutlineCirclePainter oldDelegate) => false;
+  bool shouldRepaint(final DashOutlineCirclePainter oldDelegate) => false;
 }
 
 class MovableBall extends StatelessWidget {
@@ -188,7 +188,7 @@ class MovableBall extends StatelessWidget {
   static const double kBallSize = 50.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget ball = DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.bodyMedium!,
       textAlign: TextAlign.center,
@@ -217,8 +217,8 @@ class MovableBall extends StatelessWidget {
       );
     } else {
       return DragTarget<bool>(
-        onAccept: (bool data) { callback(position); },
-        builder: (BuildContext context, List<bool?> accepted, List<dynamic> rejected) {
+        onAccept: (final bool data) { callback(position); },
+        builder: (final BuildContext context, final List<bool?> accepted, final List<dynamic> rejected) {
           return dashedBall;
         },
       );
@@ -236,12 +236,12 @@ class DragAndDropApp extends StatefulWidget {
 class DragAndDropAppState extends State<DragAndDropApp> {
   int position = 1;
 
-  void moveBall(int newPosition) {
+  void moveBall(final int newPosition) {
     setState(() { position = newPosition; });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Drag and Drop Flutter Demo'),

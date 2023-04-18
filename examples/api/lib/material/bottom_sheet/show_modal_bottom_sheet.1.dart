@@ -12,7 +12,7 @@ class BottomSheetApp extends StatelessWidget {
   const BottomSheetApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         colorSchemeSeed: const Color(0xff6750a4),
@@ -30,14 +30,14 @@ class BottomSheetExample extends StatelessWidget {
   const BottomSheetExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: ElevatedButton(
         child: const Text('showModalBottomSheet'),
         onPressed: () {
           showModalBottomSheet<void>(
             context: context,
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return SizedBox(
                 height: 200,
                 child: Center(

@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestAutomatedTestWidgetsFlutterBinding binding = TestAutomatedTestWidgetsFlutterBinding();
 
-  testWidgets('Locale is available when Localizations widget stops deferring frames', (WidgetTester tester) async {
+  testWidgets('Locale is available when Localizations widget stops deferring frames', (final WidgetTester tester) async {
     final FakeLocalizationsDelegate delegate = FakeLocalizationsDelegate();
     await tester.pumpWidget(Localizations(
       locale: const Locale('fo'),
@@ -37,18 +37,18 @@ void main() {
     expect(find.text('loaded'), findsOneWidget);
   });
 
-  testWidgets('Localizations.localeOf throws when no localizations exist', (WidgetTester tester) async {
+  testWidgets('Localizations.localeOf throws when no localizations exist', (final WidgetTester tester) async {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
 
     expect(() => Localizations.localeOf(contextKey.currentContext!), throwsA(isAssertionError.having(
-          (AssertionError e) => e.message,
+          (final AssertionError e) => e.message,
       'message',
       contains('does not include a Localizations ancestor'),
     )));
   });
 
-  testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (WidgetTester tester) async {
+  testWidgets('Localizations.maybeLocaleOf returns null when no localizations exist', (final WidgetTester tester) async {
     final GlobalKey contextKey = GlobalKey(debugLabel: 'Test Key');
     await tester.pumpWidget(Container(key: contextKey));
 
@@ -60,13 +60,13 @@ class FakeLocalizationsDelegate extends LocalizationsDelegate<String> {
   final Completer<String> completer = Completer<String>();
 
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(final Locale locale) => true;
 
   @override
-  Future<String> load(Locale locale) => completer.future;
+  Future<String> load(final Locale locale) => completer.future;
 
   @override
-  bool shouldReload(LocalizationsDelegate<String> old) => false;
+  bool shouldReload(final LocalizationsDelegate<String> old) => false;
 }
 
 class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutterBinding {
@@ -82,11 +82,11 @@ class TestAutomatedTestWidgetsFlutterBinding extends AutomatedTestWidgetsFlutter
 
 class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(final Locale locale) => true;
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+  Future<WidgetsLocalizations> load(final Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
   @override
-  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+  bool shouldReload(final WidgetsLocalizationsDelegate old) => false;
 }

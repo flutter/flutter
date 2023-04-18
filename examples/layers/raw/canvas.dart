@@ -12,7 +12,7 @@ import 'dart:ui' as ui;
 // The FlutterView into which this example will draw; set in the main method.
 late final ui.FlutterView view;
 
-ui.Picture paint(ui.Rect paintBounds) {
+ui.Picture paint(final ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to
   // feed in the canvas. The PictureRecorder will eventually produce a Picture,
   // which is an immutable record of those commands.
@@ -103,7 +103,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   return recorder.endRecording();
 }
 
-ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+ui.Scene composite(final ui.Picture picture, final ui.Rect paintBounds) {
   final double devicePixelRatio = view.devicePixelRatio;
   final Float64List deviceTransform = Float64List(16)
     ..[0] = devicePixelRatio
@@ -117,7 +117,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   return sceneBuilder.build();
 }
 
-void beginFrame(Duration timeStamp) {
+void beginFrame(final Duration timeStamp) {
   final ui.Rect paintBounds = ui.Offset.zero & (view.physicalSize / view.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);

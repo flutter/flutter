@@ -103,7 +103,7 @@ class Theme extends StatelessWidget {
   ///   );
   /// }
   /// ```
-  static ThemeData of(BuildContext context) {
+  static ThemeData of(final BuildContext context) {
     final _InheritedTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     final MaterialLocalizations? localizations = Localizations.of<MaterialLocalizations>(context, MaterialLocalizations);
     final ScriptCategory category = localizations?.scriptCategory ?? ScriptCategory.englishLike;
@@ -114,7 +114,7 @@ class Theme extends StatelessWidget {
   // The inherited themes in widgets library can not infer their values from
   // Theme in material library. Wraps the child with these inherited themes to
   // overrides their values directly.
-  Widget _wrapsWidgetThemes(BuildContext context, Widget child) {
+  Widget _wrapsWidgetThemes(final BuildContext context, final Widget child) {
     final DefaultSelectionStyle selectionStyle = DefaultSelectionStyle.of(context);
     return IconTheme(
       data: data.iconTheme,
@@ -127,7 +127,7 @@ class Theme extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _InheritedTheme(
       theme: this,
       child: CupertinoTheme(
@@ -143,7 +143,7 @@ class Theme extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ThemeData>('data', data, showName: false));
   }
@@ -158,12 +158,12 @@ class _InheritedTheme extends InheritedTheme {
   final Theme theme;
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return Theme(data: theme.data, child: child);
   }
 
   @override
-  bool updateShouldNotify(_InheritedTheme old) => theme.data != old.theme.data;
+  bool updateShouldNotify(final _InheritedTheme old) => theme.data != old.theme.data;
 }
 
 /// An interpolation between two [ThemeData]s.
@@ -181,7 +181,7 @@ class ThemeDataTween extends Tween<ThemeData> {
   ThemeDataTween({ super.begin, super.end });
 
   @override
-  ThemeData lerp(double t) => ThemeData.lerp(begin!, end!, t);
+  ThemeData lerp(final double t) => ThemeData.lerp(begin!, end!, t);
 }
 
 /// Animated version of [Theme] which automatically transitions the colors,
@@ -228,12 +228,12 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   ThemeDataTween? _data;
 
   @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _data = visitor(_data, widget.data, (dynamic value) => ThemeDataTween(begin: value as ThemeData))! as ThemeDataTween;
+  void forEachTween(final TweenVisitor<dynamic> visitor) {
+    _data = visitor(_data, widget.data, (final dynamic value) => ThemeDataTween(begin: value as ThemeData))! as ThemeDataTween;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Theme(
       data: _data!.evaluate(animation),
       child: widget.child,
@@ -241,7 +241,7 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ThemeDataTween>('data', _data, showName: false, defaultValue: null));
   }

@@ -257,8 +257,8 @@ class FloatingActionButton extends StatelessWidget {
     this.extendedIconLabelSpacing,
     this.extendedPadding,
     this.extendedTextStyle,
-    Widget? icon,
-    required Widget label,
+    final Widget? icon,
+    required final Widget label,
     this.enableFeedback,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
@@ -499,7 +499,7 @@ class FloatingActionButton extends StatelessWidget {
   final Widget? _extendedLabel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
     final FloatingActionButtonThemeData defaults = theme.useMaterial3
@@ -628,7 +628,7 @@ class FloatingActionButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
@@ -660,7 +660,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   final MaterialStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(final Set<MaterialState> states) {
     return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states)
       ?? themeCursor?.resolve(states)
       ?? MaterialStateMouseCursor.clickable.resolve(states);
@@ -681,14 +681,14 @@ class _ChildOverflowBox extends SingleChildRenderObjectWidget {
   });
 
   @override
-  _RenderChildOverflowBox createRenderObject(BuildContext context) {
+  _RenderChildOverflowBox createRenderObject(final BuildContext context) {
     return _RenderChildOverflowBox(
       textDirection: Directionality.of(context),
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderChildOverflowBox renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderChildOverflowBox renderObject) {
     renderObject.textDirection = Directionality.of(context);
   }
 }
@@ -699,13 +699,13 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
   }) : super(alignment: Alignment.center);
 
   @override
-  double computeMinIntrinsicWidth(double height) => 0.0;
+  double computeMinIntrinsicWidth(final double height) => 0.0;
 
   @override
-  double computeMinIntrinsicHeight(double width) => 0.0;
+  double computeMinIntrinsicHeight(final double width) => 0.0;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     if (child != null) {
       final Size childSize = child!.getDryLayout(const BoxConstraints());
       return Size(
@@ -735,7 +735,7 @@ class _RenderChildOverflowBox extends RenderAligningShiftedBox {
 
 // Hand coded defaults based on Material Design 2.
 class _FABDefaultsM2 extends FloatingActionButtonThemeData {
-  _FABDefaultsM2(BuildContext context, this.type, this.hasChild)
+  _FABDefaultsM2(final BuildContext context, this.type, this.hasChild)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(

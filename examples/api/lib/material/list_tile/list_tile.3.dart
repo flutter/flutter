@@ -12,7 +12,7 @@ class ListTileApp extends StatelessWidget {
   const ListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const ListTileExample(),
@@ -32,7 +32,7 @@ class _ListTileExampleState extends State<ListTileExample> {
   bool _enabled = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile Sample')),
       body: Center(
@@ -47,7 +47,7 @@ class _ListTileExampleState extends State<ListTileExample> {
           },
           // This sets text color and icon color to red when list tile is disabled and
           // green when list tile is selected, otherwise sets it to black.
-          iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          iconColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
             if (states.contains(MaterialState.disabled)) {
               return Colors.red;
             }
@@ -58,7 +58,7 @@ class _ListTileExampleState extends State<ListTileExample> {
           }),
           // This sets text color and icon color to red when list tile is disabled and
           // green when list tile is selected, otherwise sets it to black.
-          textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+          textColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
             if (states.contains(MaterialState.disabled)) {
               return Colors.red;
             }
@@ -71,7 +71,7 @@ class _ListTileExampleState extends State<ListTileExample> {
           title: const Text('Headline'),
           subtitle: Text('Enabled: $_enabled, Selected: $_selected'),
           trailing: Switch(
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               // This is called when the user toggles the switch.
               setState(() {
                 _enabled = value!;

@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/menu_anchor/menu_anchor.0.dart' as 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can open menu', (WidgetTester tester) async {
+  testWidgets('Can open menu', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MenuApp(),
     );
@@ -47,7 +47,7 @@ void main() {
     expect(find.text('Last Selected: ${example.MenuEntry.showMessage.label}'), findsOneWidget);
   });
 
-  testWidgets('Shortcuts work', (WidgetTester tester) async {
+  testWidgets('Shortcuts work', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MenuApp(),
     );

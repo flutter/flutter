@@ -8,14 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Traversal order handles touching elements', (WidgetTester tester) async {
+  testWidgets('Traversal order handles touching elements', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
-          children: List<Widget>.generate(3, (int column) {
+          children: List<Widget>.generate(3, (final int column) {
             return Row(
-              children: List<Widget>.generate(3, (int row) {
+              children: List<Widget>.generate(3, (final int row) {
                 return Semantics(
                   child: SizedBox(
                     width: 50.0,

@@ -13,7 +13,7 @@ class SwitchApp extends StatelessWidget {
   const SwitchApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(useMaterial3: true).copyWith(
         // Use the ambient [CupetinoThemeData] to style all widgets which would
@@ -41,13 +41,13 @@ class _SwitchExampleState extends State<SwitchExample> {
   bool light = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Switch.adaptive(
           value: light,
-          onChanged: (bool value) {
+          onChanged: (final bool value) {
             setState(() {
               light = value;
             });
@@ -57,7 +57,7 @@ class _SwitchExampleState extends State<SwitchExample> {
           // Don't use the ambient [CupetinoThemeData] to style this switch.
           applyCupertinoTheme: false,
           value: light,
-          onChanged: (bool value) {
+          onChanged: (final bool value) {
             setState(() {
               light = value;
             });

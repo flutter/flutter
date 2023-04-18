@@ -624,7 +624,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final bool useDeleteButtonTooltip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return RawChip(
       avatar: avatar,
@@ -709,7 +709,7 @@ class RawChip extends StatefulWidget
     this.padding,
     this.visualDensity,
     this.labelPadding,
-    Widget? deleteIcon,
+    final Widget? deleteIcon,
     this.onDeleted,
     this.deleteIconColor,
     this.deleteButtonTooltipMessage,
@@ -941,7 +941,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     super.dispose();
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(final TapDownDetails details) {
     if (!canTap) {
       return;
     }
@@ -974,7 +974,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     widget.onPressed?.call();
   }
 
-  OutlinedBorder _getShape(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
+  OutlinedBorder _getShape(final ThemeData theme, final ChipThemeData chipTheme, final ChipThemeData chipDefaults) {
     final BorderSide? resolvedSide = MaterialStateProperty.resolveAs<BorderSide?>(widget.side, materialStates)
       ?? MaterialStateProperty.resolveAs<BorderSide?>(chipTheme.side, materialStates)
       ?? MaterialStateProperty.resolveAs<BorderSide?>(chipDefaults.side, materialStates);
@@ -987,7 +987,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
 
   /// Picks between three different colors, depending upon the state of two
   /// different animations.
-  Color? _getBackgroundColor(ThemeData theme, ChipThemeData chipTheme, ChipThemeData chipDefaults) {
+  Color? _getBackgroundColor(final ThemeData theme, final ChipThemeData chipTheme, final ChipThemeData chipDefaults) {
     if (theme.useMaterial3) {
       final ColorTween backgroundTween = ColorTween(
         begin: widget.disabledColor
@@ -1026,7 +1026,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 
   @override
-  void didUpdateWidget(RawChip oldWidget) {
+  void didUpdateWidget(final RawChip oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
@@ -1068,7 +1068,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
     }
   }
 
-  Widget? _wrapWithTooltip({String? tooltip, bool enabled = true, Widget? child}) {
+  Widget? _wrapWithTooltip({final String? tooltip, final bool enabled = true, final Widget? child}) {
     if (child == null || !enabled || tooltip == null) {
       return child;
     }
@@ -1079,10 +1079,10 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 
   Widget? _buildDeleteIcon(
-    BuildContext context,
-    ThemeData theme,
-    ChipThemeData chipTheme,
-    ChipThemeData chipDefaults,
+    final BuildContext context,
+    final ThemeData theme,
+    final ChipThemeData chipTheme,
+    final ChipThemeData chipDefaults,
   ) {
     if (!hasDeleteButton) {
       return null;
@@ -1116,7 +1116,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
@@ -1210,7 +1210,7 @@ class _RawChipState extends State<RawChip> with MaterialStateMixin, TickerProvid
         customBorder: resolvedShape,
         child: AnimatedBuilder(
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return Ink(
               decoration: ShapeDecoration(
                 shape: resolvedShape,
@@ -1307,21 +1307,21 @@ class _ChipRedirectingHitDetectionWidget extends SingleChildRenderObjectWidget {
   final BoxConstraints constraints;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderChipRedirectingHitDetection(constraints);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderChipRedirectingHitDetection renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderChipRedirectingHitDetection renderObject) {
     renderObject.additionalConstraints = constraints;
   }
 }
 
 class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
-  _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
+  _RenderChipRedirectingHitDetection(final BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(final BoxHitTestResult result, { required final Offset position }) {
     if (!size.contains(position)) {
       return false;
     }
@@ -1332,7 +1332,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(offset),
       position: position,
-      hitTest: (BoxHitTestResult result, Offset position) {
+      hitTest: (final BoxHitTestResult result, final Offset position) {
         assert(position == offset);
         return child!.hitTest(result, position: offset);
       },
@@ -1365,7 +1365,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
   Iterable<_ChipSlot> get slots => _ChipSlot.values;
 
   @override
-  Widget? childForSlot(_ChipSlot slot) {
+  Widget? childForSlot(final _ChipSlot slot) {
     switch (slot) {
       case _ChipSlot.label:
         return theme.label;
@@ -1377,7 +1377,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderChip renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderChip renderObject) {
     renderObject
       ..theme = theme
       ..textDirection = Directionality.of(context)
@@ -1391,7 +1391,7 @@ class _ChipRenderWidget extends RenderObjectWidget with SlottedMultiChildRenderO
   }
 
   @override
-  SlottedContainerRenderObjectMixin<_ChipSlot> createRenderObject(BuildContext context) {
+  SlottedContainerRenderObjectMixin<_ChipSlot> createRenderObject(final BuildContext context) {
     return _RenderChip(
       theme: theme,
       textDirection: Directionality.of(context),
@@ -1441,7 +1441,7 @@ class _ChipRenderTheme {
   final bool canTapBody;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -1478,8 +1478,8 @@ class _ChipRenderTheme {
 
 class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_ChipSlot> {
   _RenderChip({
-    required _ChipRenderTheme theme,
-    required TextDirection textDirection,
+    required final _ChipRenderTheme theme,
+    required final TextDirection textDirection,
     this.value,
     this.isEnabled,
     required this.checkmarkAnimation,
@@ -1511,7 +1511,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
   _ChipRenderTheme get theme => _theme;
   _ChipRenderTheme _theme;
-  set theme(_ChipRenderTheme value) {
+  set theme(final _ChipRenderTheme value) {
     if (_theme == value) {
       return;
     }
@@ -1521,7 +1521,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
 
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  set textDirection(final TextDirection? value) {
     if (_textDirection == value) {
       return;
     }
@@ -1548,26 +1548,26 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   @override
   bool get sizedByParent => false;
 
-  static double _minWidth(RenderBox? box, double height) {
+  static double _minWidth(final RenderBox? box, final double height) {
     return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
   }
 
-  static double _maxWidth(RenderBox? box, double height) {
+  static double _maxWidth(final RenderBox? box, final double height) {
     return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
   }
 
-  static double _minHeight(RenderBox? box, double width) {
+  static double _minHeight(final RenderBox? box, final double width) {
     return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
   }
 
-  static Size _boxSize(RenderBox? box) => box == null ? Size.zero : box.size;
+  static Size _boxSize(final RenderBox? box) => box == null ? Size.zero : box.size;
 
-  static Rect _boxRect(RenderBox? box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
+  static Rect _boxRect(final RenderBox? box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData! as BoxParentData;
+  static BoxParentData _boxParentData(final RenderBox box) => box.parentData! as BoxParentData;
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     // The overall padding isn't affected by missing avatar or delete icon
     // because we add the padding regardless to give extra padding for the label
     // when they're missing.
@@ -1580,7 +1580,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     final double overallPadding = theme.padding.horizontal +
         theme.labelPadding.horizontal;
     return overallPadding +
@@ -1590,7 +1590,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return math.max(
       _kChipHeight,
       theme.padding.vertical + theme.labelPadding.vertical + _minHeight(label, width),
@@ -1598,15 +1598,15 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) => computeMinIntrinsicHeight(width);
+  double computeMaxIntrinsicHeight(final double width) => computeMinIntrinsicHeight(width);
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(final TextBaseline baseline) {
     // The baseline of this widget is the baseline of the label.
     return label!.getDistanceToActualBaseline(baseline);
   }
 
-  Size _layoutLabel(BoxConstraints contentConstraints, double iconSizes, Size size, Size rawSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  Size _layoutLabel(final BoxConstraints contentConstraints, final double iconSizes, final Size size, final Size rawSize, [final ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
     if (contentConstraints.maxWidth.isFinite) {
@@ -1647,7 +1647,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     );
   }
 
-  Size _layoutAvatar(BoxConstraints contentConstraints, double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  Size _layoutAvatar(final BoxConstraints contentConstraints, final double contentSize, [final ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints avatarConstraints = BoxConstraints.tightFor(
       width: requestedSize,
@@ -1668,7 +1668,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return Size(avatarWidth, avatarHeight);
   }
 
-  Size _layoutDeleteIcon(BoxConstraints contentConstraints, double contentSize, [ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
+  Size _layoutDeleteIcon(final BoxConstraints contentConstraints, final double contentSize, [final ChildLayouter layoutChild = ChildLayoutHelper.layoutChild]) {
     final double requestedSize = math.max(0.0, contentSize);
     final BoxConstraints deleteIconConstraints = BoxConstraints.tightFor(
       width: requestedSize,
@@ -1686,7 +1686,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(final BoxHitTestResult result, { required final Offset position }) {
     if (!size.contains(position)) {
       return false;
     }
@@ -1706,7 +1706,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       return result.addWithRawTransform(
         transform: MatrixUtils.forceToPoint(center),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           assert(position == center);
           return hitTestChild.hitTest(result, position: center);
         },
@@ -1716,11 +1716,11 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _computeSizes(constraints, ChildLayoutHelper.dryLayoutChild).size;
   }
 
-  _ChipSizes _computeSizes(BoxConstraints constraints, ChildLayouter layoutChild) {
+  _ChipSizes _computeSizes(final BoxConstraints constraints, final ChildLayouter layoutChild) {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
     final Offset densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
@@ -1770,7 +1770,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     const double left = 0.0;
     final double right = sizes.overall.width;
 
-    Offset centerLayout(Size boxSize, double x) {
+    Offset centerLayout(final Size boxSize, final double x) {
       assert(sizes.content >= boxSize.height);
       switch (textDirection!) {
         case TextDirection.rtl:
@@ -1901,7 +1901,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     return enableTween.evaluate(enableAnimation)!;
   }
 
-  void _paintCheck(Canvas canvas, Offset origin, double size) {
+  void _paintCheck(final Canvas canvas, final Offset origin, final double size) {
     Color? paintColor;
     if (theme.checkmarkColor != null) {
       paintColor = theme.checkmarkColor;
@@ -1953,7 +1953,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     canvas.drawPath(path, paint);
   }
 
-  void _paintSelectionOverlay(PaintingContext context, Offset offset) {
+  void _paintSelectionOverlay(final PaintingContext context, final Offset offset) {
     if (isDrawingCheckmark) {
       if (theme.showAvatar) {
         final Rect avatarRect = _boxRect(avatar).shift(offset);
@@ -1971,8 +1971,8 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
-  void _paintAvatar(PaintingContext context, Offset offset) {
-    void paintWithOverlay(PaintingContext context, Offset offset) {
+  void _paintAvatar(final PaintingContext context, final Offset offset) {
+    void paintWithOverlay(final PaintingContext context, final Offset offset) {
       context.paintChild(avatar!, _boxParentData(avatar!).offset + offset);
       _paintSelectionOverlay(context, offset);
     }
@@ -1998,7 +1998,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
     }
   }
 
-  void _paintChild(PaintingContext context, Offset offset, RenderBox? child, bool? isEnabled) {
+  void _paintChild(final PaintingContext context, final Offset offset, final RenderBox? child, final bool? isEnabled) {
     if (child == null) {
       return;
     }
@@ -2007,7 +2007,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
       if (needsCompositing) {
         context.pushLayer(
           OpacityLayer(alpha: disabledColorAlpha),
-          (PaintingContext context, Offset offset) {
+          (final PaintingContext context, final Offset offset) {
             context.paintChild(child, _boxParentData(child).offset + offset);
           },
           offset,
@@ -2024,7 +2024,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     _paintAvatar(context, offset);
     if (deleteIconShowing) {
       _paintChild(context, offset, deleteIcon, isEnabled);
@@ -2037,7 +2037,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   static const bool _debugShowTapTargetOutlines = false;
 
   @override
-  void debugPaint(PaintingContext context, Offset offset) {
+  void debugPaint(final PaintingContext context, final Offset offset) {
     assert(!_debugShowTapTargetOutlines || () {
       // Draws a rect around the tap targets to help with visualizing where
       // they really are.
@@ -2057,7 +2057,7 @@ class _RenderChip extends RenderBox with SlottedContainerRenderObjectMixin<_Chip
   }
 
   @override
-  bool hitTestSelf(Offset position) => _deleteButtonRect.contains(position) || _pressRect.contains(position);
+  bool hitTestSelf(final Offset position) => _deleteButtonRect.contains(position) || _pressRect.contains(position);
 }
 
 class _ChipSizes {
@@ -2086,17 +2086,17 @@ class _UnconstrainedInkSplashFactory extends InteractiveInkFeatureFactory {
 
   @override
   InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Offset position,
-    required Color color,
-    required TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    VoidCallback? onRemoved,
+    required final MaterialInkController controller,
+    required final RenderBox referenceBox,
+    required final Offset position,
+    required final Color color,
+    required final TextDirection textDirection,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final double? radius,
+    final VoidCallback? onRemoved,
   }) {
     return parentFactory.create(
       controller: controller,
@@ -2114,11 +2114,11 @@ class _UnconstrainedInkSplashFactory extends InteractiveInkFeatureFactory {
 }
 
 bool _hitIsOnDeleteIcon({
-  required EdgeInsetsGeometry padding,
-  required Offset tapPosition,
-  required Size chipSize,
-  required Size deleteButtonSize,
-  required TextDirection textDirection,
+  required final EdgeInsetsGeometry padding,
+  required final Offset tapPosition,
+  required final Size chipSize,
+  required final Size deleteButtonSize,
+  required final TextDirection textDirection,
 }) {
   // The chipSize includes the padding, so we need to deflate the size and adjust the
   // tap position to account for the padding.

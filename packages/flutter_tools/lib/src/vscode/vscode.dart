@@ -18,7 +18,7 @@ const String extensionMarketplaceUrl =
   'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
 
 class VsCode {
-  VsCode._(this.directory, this.extensionDirectory, { this.version, this.edition, required FileSystem fileSystem}) {
+  VsCode._(this.directory, this.extensionDirectory, { this.version, this.edition, required final FileSystem fileSystem}) {
 
     if (!fileSystem.isDirectorySync(directory)) {
       _validationMessages.add(ValidationMessage.error('VS Code not found at $directory'));
@@ -44,7 +44,7 @@ class VsCode {
         .directory(extensionDirectory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
+        .where((final Directory d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
@@ -58,10 +58,10 @@ class VsCode {
   }
 
   factory VsCode.fromDirectory(
-    String installPath,
-    String extensionDirectory, {
-    String? edition,
-    required FileSystem fileSystem,
+    final String installPath,
+    final String extensionDirectory, {
+    final String? edition,
+    required final FileSystem fileSystem,
   }) {
     final String packageJsonPath =
         fileSystem.path.join(installPath, 'resources', 'app', 'package.json');
@@ -86,9 +86,9 @@ class VsCode {
   Iterable<ValidationMessage> get validationMessages => _validationMessages;
 
   static List<VsCode> allInstalled(
-    FileSystem fileSystem,
-    Platform platform,
-    ProcessManager processManager,
+    final FileSystem fileSystem,
+    final Platform platform,
+    final ProcessManager processManager,
   ) {
     if (platform.isMacOS) {
       return _installedMacOS(fileSystem, platform, processManager);
@@ -111,7 +111,7 @@ class VsCode {
   // macOS Extensions:
   //   $HOME/.vscode/extensions
   //   $HOME/.vscode-insiders/extensions
-  static List<VsCode> _installedMacOS(FileSystem fileSystem, Platform platform, ProcessManager processManager) {
+  static List<VsCode> _installedMacOS(final FileSystem fileSystem, final Platform platform, final ProcessManager processManager) {
     final String? homeDirPath = FileSystemUtils(fileSystem: fileSystem, platform: platform).homeDirPath;
 
     String vsCodeSpotlightResult = '';
@@ -188,8 +188,8 @@ class VsCode {
   //   $HOME/.vscode/extensions
   //   $HOME/.vscode-insiders/extensions
   static List<VsCode> _installedWindows(
-    FileSystem fileSystem,
-    Platform platform,
+    final FileSystem fileSystem,
+    final Platform platform,
   ) {
     final String? progFiles86 = platform.environment['programfiles(x86)'];
     final String? progFiles = platform.environment['programfiles'];
@@ -243,7 +243,7 @@ class VsCode {
   // Linux Extensions:
   //   $HOME/.vscode/extensions
   //   $HOME/.vscode-insiders/extensions
-  static List<VsCode> _installedLinux(FileSystem fileSystem, Platform platform) {
+  static List<VsCode> _installedLinux(final FileSystem fileSystem, final Platform platform) {
     return _findInstalled(<VsCodeInstallLocation>[
       const VsCodeInstallLocation('/usr/share/code', '.vscode'),
       const VsCodeInstallLocation('/snap/code/current', '.vscode'),
@@ -255,9 +255,9 @@ class VsCode {
   }
 
   static List<VsCode> _findInstalled(
-    Iterable<VsCodeInstallLocation> allLocations,
-    FileSystem fileSystem,
-    Platform platform,
+    final Iterable<VsCodeInstallLocation> allLocations,
+    final FileSystem fileSystem,
+    final Platform platform,
   ) {
     final List<VsCode> results = <VsCode>[];
 
@@ -285,7 +285,7 @@ class VsCode {
   String toString() =>
       'VS Code ($version)${_extensionVersion != null ? ', Flutter ($_extensionVersion)' : ''}';
 
-  static String? _getVersionFromPackageJson(String packageJsonPath, FileSystem fileSystem) {
+  static String? _getVersionFromPackageJson(final String packageJsonPath, final FileSystem fileSystem) {
     if (!fileSystem.isFileSync(packageJsonPath)) {
       return null;
     }
@@ -316,7 +316,7 @@ class VsCodeInstallLocation {
   final String? edition;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is VsCodeInstallLocation &&
         other.installPath == installPath &&
         other.extensionsFolder == extensionsFolder &&

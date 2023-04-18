@@ -34,7 +34,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   AnimationController buildFaderController() {
     final AnimationController controller =
         AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
-    controller.addStatusListener((AnimationStatus status) {
+    controller.addStatusListener((final AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
         setState(() {}); // Rebuild unselected destinations offstage.
       }
@@ -46,11 +46,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   void initState() {
     super.initState();
     navigatorKeys =
-        List<GlobalKey<NavigatorState>>.generate(allDestinations.length, (int index) => GlobalKey()).toList();
+        List<GlobalKey<NavigatorState>>.generate(allDestinations.length, (final int index) => GlobalKey()).toList();
     destinationFaders =
-        List<AnimationController>.generate(allDestinations.length, (int index) => buildFaderController()).toList();
+        List<AnimationController>.generate(allDestinations.length, (final int index) => buildFaderController()).toList();
     destinationFaders[selectedIndex].value = 1.0;
-    destinationViews = allDestinations.map((Destination destination) {
+    destinationViews = allDestinations.map((final Destination destination) {
       return FadeTransition(
         opacity: destinationFaders[destination.index].drive(CurveTween(curve: Curves.fastOutSlowIn)),
         child: DestinationView(
@@ -70,7 +70,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         final NavigatorState navigator = navigatorKeys[selectedIndex].currentState!;
@@ -85,7 +85,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
           top: false,
           child: Stack(
             fit: StackFit.expand,
-            children: allDestinations.map((Destination destination) {
+            children: allDestinations.map((final Destination destination) {
               final int index = destination.index;
               final Widget view = destinationViews[index];
               if (index == selectedIndex) {
@@ -103,12 +103,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: selectedIndex,
-          onDestinationSelected: (int index) {
+          onDestinationSelected: (final int index) {
             setState(() {
               selectedIndex = index;
             });
           },
-          destinations: allDestinations.map((Destination destination) {
+          destinations: allDestinations.map((final Destination destination) {
             return NavigationDestination(
               icon: Icon(destination.icon, color: destination.color),
               label: destination.title,
@@ -133,7 +133,7 @@ class RootPage extends StatelessWidget {
 
   final Destination destination;
 
-  Widget _buildDialog(BuildContext context) {
+  Widget _buildDialog(final BuildContext context) {
     return AlertDialog(
       title: Text('${destination.title} AlertDialog'),
       actions: <Widget>[
@@ -148,7 +148,7 @@ class RootPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextStyle headlineSmall = Theme.of(context).textTheme.headlineSmall!;
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       backgroundColor: destination.color,
@@ -200,13 +200,13 @@ class RootPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return ElevatedButton(
                   style: buttonStyle,
                   onPressed: () {
                     showBottomSheet(
                       context: context,
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return Container(
                           padding: const EdgeInsets.all(16),
                           width: double.infinity,
@@ -238,7 +238,7 @@ class ListPage extends StatelessWidget {
   final Destination destination;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const int itemCount = 50;
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       foregroundColor: destination.color,
@@ -254,7 +254,7 @@ class ListPage extends StatelessWidget {
       body: SizedBox.expand(
         child: ListView.builder(
           itemCount: itemCount,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               child: OutlinedButton(
@@ -301,7 +301,7 @@ class _TextPageState extends State<TextPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -347,13 +347,13 @@ class DestinationView extends StatefulWidget {
 
 class _DestinationViewState extends State<DestinationView> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Navigator(
       key: widget.navigatorKey,
-      onGenerateRoute: (RouteSettings settings) {
+      onGenerateRoute: (final RouteSettings settings) {
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             switch (settings.name) {
               case '/':
                 return RootPage(destination: widget.destination);

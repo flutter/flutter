@@ -10,7 +10,7 @@ class AdaptedListItem extends StatelessWidget {
   final String name;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       children: <Widget>[
         Container(
@@ -31,7 +31,7 @@ class AdaptedGridItem extends StatelessWidget {
   final String name;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Card(
       child: Column(
         children: <Widget>[
@@ -70,22 +70,22 @@ class AdaptiveContainer extends StatelessWidget {
   final List<String> names;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (MediaQuery.of(context).size.width < _kGridViewBreakpoint) {
       return ListView(
         itemExtent: _kListItemExtent,
-        children: names.map<Widget>((String name) => AdaptedListItem(name: name)).toList(),
+        children: names.map<Widget>((final String name) => AdaptedListItem(name: name)).toList(),
       );
     } else {
       return GridView.extent(
         maxCrossAxisExtent: _kMaxTileWidth,
-        children: names.map<Widget>((String name) => AdaptedGridItem(name: name)).toList(),
+        children: names.map<Widget>((final String name) => AdaptedGridItem(name: name)).toList(),
       );
     }
   }
 }
 
-List<String> _initNames() => List<String>.generate(30, (int i) => 'Item $i');
+List<String> _initNames() => List<String>.generate(30, (final int i) => 'Item $i');
 
 final List<String> _kNames = _initNames();
 

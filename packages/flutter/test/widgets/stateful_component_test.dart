@@ -9,11 +9,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('Stateful widget smoke test', (WidgetTester tester) async {
+  testWidgets('Stateful widget smoke test', (final WidgetTester tester) async {
 
-    void checkTree(BoxDecoration expectedDecoration) {
+    void checkTree(final BoxDecoration expectedDecoration) {
       final SingleChildRenderObjectElement element = tester.element(
-        find.byElementPredicate((Element element) => element is SingleChildRenderObjectElement),
+        find.byElementPredicate((final Element element) => element is SingleChildRenderObjectElement),
       );
       expect(element, isNotNull);
       expect(element.renderObject, isA<RenderDecoratedBox>());
@@ -55,7 +55,7 @@ void main() {
     checkTree(kBoxDecorationB);
   });
 
-  testWidgets("Don't rebuild subwidgets", (WidgetTester tester) async {
+  testWidgets("Don't rebuild subwidgets", (final WidgetTester tester) async {
     await tester.pumpWidget(
       const FlipWidget(
         key: Key('rebuild test'),

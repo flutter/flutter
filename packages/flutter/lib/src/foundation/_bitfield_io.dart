@@ -15,7 +15,7 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
       _bits = _allZeros;
 
   /// The dart:io implementation of [bitfield.Bitfield.filled].
-  BitField.filled(this._length, bool value)
+  BitField.filled(this._length, final bool value)
     : assert(_length <= _smiBits),
       _bits = value ? _allOnes : _allZeros;
 
@@ -27,14 +27,14 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
   static const int _allOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
 
   @override
-  bool operator [](T index) {
+  bool operator [](final T index) {
     final int intIndex = index.index as int;
     assert(intIndex < _length);
     return (_bits & 1 << intIndex) > 0;
   }
 
   @override
-  void operator []=(T index, bool value) {
+  void operator []=(final T index, final bool value) {
     final int intIndex = index.index as int;
     assert(intIndex < _length);
     if (value) {
@@ -45,7 +45,7 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
   }
 
   @override
-  void reset([ bool value = false ]) {
+  void reset([ final bool value = false ]) {
     _bits = value ? _allOnes : _allZeros;
   }
 }

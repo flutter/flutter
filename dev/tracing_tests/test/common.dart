@@ -36,20 +36,20 @@ Future<List<TimelineEvent>> fetchTimelineEvents() async {
   return timeline.traceEvents!;
 }
 
-Future<List<TimelineEvent>> fetchInterestingEvents(Set<String> interestingLabels) async {
-  return (await fetchTimelineEvents()).where((TimelineEvent event) {
+Future<List<TimelineEvent>> fetchInterestingEvents(final Set<String> interestingLabels) async {
+  return (await fetchTimelineEvents()).where((final TimelineEvent event) {
     return interestingLabels.contains(event.json!['name'])
         && event.json!['ph'] == 'B'; // "Begin" mark of events, vs E which is for the "End" mark of events.
   }).toList();
 }
 
-String eventToName(TimelineEvent event) => event.json!['name'] as String;
+String eventToName(final TimelineEvent event) => event.json!['name'] as String;
 
-Future<List<String>> fetchInterestingEventNames(Set<String> interestingLabels) async {
+Future<List<String>> fetchInterestingEventNames(final Set<String> interestingLabels) async {
   return (await fetchInterestingEvents(interestingLabels)).map<String>(eventToName).toList();
 }
 
-Future<void> runFrame(VoidCallback callback) {
+Future<void> runFrame(final VoidCallback callback) {
   final Future<void> result = SchedulerBinding.instance.endOfFrame; // schedules a frame
   callback();
   return result;
@@ -68,7 +68,7 @@ class ZoneIgnoringTestBinding extends WidgetsFlutterBinding {
   }
 
   @override
-  bool debugCheckZone(String entryPoint) { return true; }
+  bool debugCheckZone(final String entryPoint) { return true; }
 
   static ZoneIgnoringTestBinding get instance => BindingBase.checkInstance(_instance);
   static ZoneIgnoringTestBinding? _instance;

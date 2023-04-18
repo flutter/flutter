@@ -12,11 +12,11 @@ class TestDrag extends Drag { }
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testGesture('MultiDrag: moving before delay rejects', (GestureTester tester) {
+  testGesture('MultiDrag: moving before delay rejects', (final GestureTester tester) {
     final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
-    drag.onStart = (Offset position) {
+    drag.onStart = (final Offset position) {
       didStartDrag = true;
       return TestDrag();
     };
@@ -37,11 +37,11 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('MultiDrag: delay triggers', (GestureTester tester) {
+  testGesture('MultiDrag: delay triggers', (final GestureTester tester) {
     final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
-    drag.onStart = (Offset position) {
+    drag.onStart = (final Offset position) {
       didStartDrag = true;
       return TestDrag();
     };
@@ -62,13 +62,13 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('MultiDrag: can filter based on device kind', (GestureTester tester) {
+  testGesture('MultiDrag: can filter based on device kind', (final GestureTester tester) {
     final DelayedMultiDragGestureRecognizer drag = DelayedMultiDragGestureRecognizer(
       supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
     );
 
     bool didStartDrag = false;
-    drag.onStart = (Offset position) {
+    drag.onStart = (final Offset position) {
       didStartDrag = true;
       return TestDrag();
     };

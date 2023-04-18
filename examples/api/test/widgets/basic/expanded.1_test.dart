@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/basic/expanded.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Expanded widgets in a Row', (WidgetTester tester) async {
+  testWidgets('Expanded widgets in a Row', (final WidgetTester tester) async {
     const double rowWidth = 800.0;
     const double rowHeight = 100.0;
     const double containerOneWidth = (rowWidth - 50) * 2 / 3;

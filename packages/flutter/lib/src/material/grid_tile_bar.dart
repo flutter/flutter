@@ -57,7 +57,7 @@ class GridTileBar extends StatelessWidget {
   final Widget? trailing;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     BoxDecoration? decoration;
     if (backgroundColor != null) {
       decoration = BoxDecoration(color: backgroundColor);

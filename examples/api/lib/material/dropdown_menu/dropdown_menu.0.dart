@@ -24,7 +24,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
   IconLabel? selectedIcon;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<DropdownMenuEntry<ColorLabel>> colorEntries = <DropdownMenuEntry<ColorLabel>>[];
     for (final ColorLabel color in ColorLabel.values) {
       colorEntries.add(
@@ -56,7 +56,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                       controller: colorController,
                       label: const Text('Color'),
                       dropdownMenuEntries: colorEntries,
-                      onSelected: (ColorLabel? color) {
+                      onSelected: (final ColorLabel? color) {
                         setState(() {
                           selectedColor = color;
                         });
@@ -73,7 +73,7 @@ class _DropdownMenuExampleState extends State<DropdownMenuExample> {
                         filled: true,
                         contentPadding: EdgeInsets.symmetric(vertical: 5.0),
                       ),
-                      onSelected: (IconLabel? icon) {
+                      onSelected: (final IconLabel? icon) {
                         setState(() {
                           selectedIcon = icon;
                         });

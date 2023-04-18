@@ -12,7 +12,7 @@ class DatePickerApp extends StatelessWidget {
   const DatePickerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: DatePickerExample(),
@@ -34,10 +34,10 @@ class _DatePickerExampleState extends State<DatePickerExample> {
 
   // This function displays a CupertinoModalPopup with a reasonable fixed height
   // which hosts CupertinoDatePicker.
-  void _showDialog(Widget child) {
+  void _showDialog(final Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => Container(
+      builder: (final BuildContext context) => Container(
         height: 216,
         padding: const EdgeInsets.only(top: 6.0),
         // The Bottom margin is provided to align the popup above the system
@@ -57,7 +57,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoDatePicker Sample'),
@@ -84,7 +84,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         // This shows day of week alongside day of month
                         showDayOfWeek: true,
                         // This is called when the user changes the date.
-                        onDateTimeChanged: (DateTime newDate) {
+                        onDateTimeChanged: (final DateTime newDate) {
                           setState(() => date = newDate);
                         },
                       ),
@@ -112,7 +112,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         mode: CupertinoDatePickerMode.time,
                         use24hFormat: true,
                         // This is called when the user changes the time.
-                        onDateTimeChanged: (DateTime newTime) {
+                        onDateTimeChanged: (final DateTime newTime) {
                           setState(() => time = newTime);
                         },
                       ),
@@ -139,7 +139,7 @@ class _DatePickerExampleState extends State<DatePickerExample> {
                         initialDateTime: dateTime,
                         use24hFormat: true,
                         // This is called when the user changes the dateTime.
-                        onDateTimeChanged: (DateTime newDateTime) {
+                        onDateTimeChanged: (final DateTime newDateTime) {
                           setState(() => dateTime = newDateTime);
                         },
                       ),
@@ -171,7 +171,7 @@ class _DatePickerItem extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(

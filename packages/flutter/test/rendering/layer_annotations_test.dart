@@ -353,9 +353,9 @@ void main() {
     );
 
     void expectOneAnnotation({
-      required Offset globalPosition,
-      required int value,
-      required Offset localPosition,
+      required final Offset globalPosition,
+      required final int value,
+      required final Offset localPosition,
     }) {
       expect(
         root.findAllAnnotations<int>(globalPosition).entries.toList(),
@@ -771,7 +771,7 @@ void main() {
 ///
 /// It is a utility function that helps checking the opacity returned by
 /// [Layer.findAnnotations].
-Layer _withBackgroundAnnotation(int value, Layer layer) {
+Layer _withBackgroundAnnotation(final int value, final Layer layer) {
   return _Layers(
     ContainerLayer(),
     children: <Object>[
@@ -845,7 +845,7 @@ class _TestAnnotatedLayer extends Layer {
   final Size? size;
 
   @override
-  EngineLayer? addToScene(SceneBuilder builder) {
+  EngineLayer? addToScene(final SceneBuilder builder) {
     return null;
   }
 
@@ -854,9 +854,9 @@ class _TestAnnotatedLayer extends Layer {
   // [opaque]; otherwise it directly returns false.
   @override
   bool findAnnotations<S extends Object>(
-    AnnotationResult<S> result,
-    Offset localPosition, {
-    required bool onlyFirst,
+    final AnnotationResult<S> result,
+    final Offset localPosition, {
+    required final bool onlyFirst,
   }) {
     if (S != int) {
       return false;
@@ -871,19 +871,19 @@ class _TestAnnotatedLayer extends Layer {
   }
 }
 
-bool _almostEqual(double a, double b, double maxRelativeDiff) {
+bool _almostEqual(final double a, final double b, final double maxRelativeDiff) {
   assert(maxRelativeDiff >= 0);
   assert(maxRelativeDiff < 1);
   return (a - b).abs() <= a.abs() * maxRelativeDiff;
 }
 
 Matcher _equalToAnnotationResult<T>(
-  List<AnnotationEntry<int>> list, {
-  double maxCoordinateRelativeDiff = 0,
+  final List<AnnotationEntry<int>> list, {
+  final double maxCoordinateRelativeDiff = 0,
 }) {
   return pairwiseCompare<AnnotationEntry<int>, AnnotationEntry<int>>(
     list,
-    (AnnotationEntry<int> a, AnnotationEntry<int> b) {
+    (final AnnotationEntry<int> a, final AnnotationEntry<int> b) {
       return a.annotation == b.annotation
           && _almostEqual(a.localPosition.dx, b.localPosition.dx, maxCoordinateRelativeDiff)
           && _almostEqual(a.localPosition.dy, b.localPosition.dy, maxCoordinateRelativeDiff);

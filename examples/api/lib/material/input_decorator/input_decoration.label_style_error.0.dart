@@ -12,7 +12,7 @@ class LabelStyleErrorExampleApp extends StatelessWidget {
   const LabelStyleErrorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecorator Sample')),
@@ -28,7 +28,7 @@ class InputDecoratorExample extends StatelessWidget {
   const InputDecoratorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextFormField(
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
@@ -37,14 +37,14 @@ class InputDecoratorExample extends StatelessWidget {
         // by default, but the theme's error color if the input decorator
         // is in its error state.
         labelStyle: MaterialStateTextStyle.resolveWith(
-          (Set<MaterialState> states) {
+          (final Set<MaterialState> states) {
             final Color color =
                 states.contains(MaterialState.error) ? Theme.of(context).colorScheme.error : Colors.orange;
             return TextStyle(color: color, letterSpacing: 1.3);
           },
         ),
       ),
-      validator: (String? value) {
+      validator: (final String? value) {
         if (value == null || value == '') {
           return 'Enter name';
         }

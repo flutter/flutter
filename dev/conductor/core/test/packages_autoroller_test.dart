@@ -173,7 +173,7 @@ void main() {
         await rollFuture;
       },
       throwsA(isA<Exception>().having(
-        (Exception exc) => exc.toString(),
+        (final Exception exc) => exc.toString(),
         'message',
         isNot(contains(token)),
       )),
@@ -485,7 +485,7 @@ void main() {
           processManager: processManager,
         ),
         throwsA(isA<ArgumentError>().having(
-          (ArgumentError err) => err.message,
+          (final ArgumentError err) => err.message,
           'message',
           contains('Provided token path $tokenPath but no file exists at'),
         )),
@@ -504,7 +504,7 @@ void main() {
           processManager: processManager,
         ),
         throwsA(isA<ArgumentError>().having(
-          (ArgumentError err) => err.message,
+          (final ArgumentError err) => err.message,
           'message',
           contains('Tried to read a GitHub access token from file $tokenPath but it was empty'),
         )),

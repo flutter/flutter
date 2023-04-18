@@ -24,7 +24,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { required RenderBox? after }) {
+  void createChild(final int index, { required final RenderBox? after }) {
     if (index < 0 || index >= children.length) {
       return;
     }
@@ -37,17 +37,17 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  void removeChild(RenderBox child) {
+  void removeChild(final RenderBox child) {
     _renderObject.remove(child);
   }
 
   @override
   double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
+    final SliverConstraints constraints, {
+    final int? firstIndex,
+    final int? lastIndex,
+    final double? leadingScrollOffset,
+    final double? trailingScrollOffset,
   }) {
     assert(lastIndex! >= firstIndex!);
     return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
@@ -57,14 +57,14 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int get childCount => children.length;
 
   @override
-  void didAdoptChild(RenderBox child) {
+  void didAdoptChild(final RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
   @override
-  void setDidUnderflow(bool value) { }
+  void setDidUnderflow(final bool value) { }
 }
 
 class ViewportOffsetSpy extends ViewportOffset {
@@ -81,27 +81,27 @@ class ViewportOffsetSpy extends ViewportOffset {
   bool corrected = false;
 
   @override
-  bool applyViewportDimension(double viewportDimension) => true;
+  bool applyViewportDimension(final double viewportDimension) => true;
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+  bool applyContentDimensions(final double minScrollExtent, final double maxScrollExtent) => true;
 
   @override
-  void correctBy(double correction) {
+  void correctBy(final double correction) {
     _pixels += correction;
     corrected = true;
   }
 
   @override
-  void jumpTo(double pixels) {
+  void jumpTo(final double pixels) {
     // Do nothing, not required in test.
   }
 
   @override
   Future<void> animateTo(
-    double to, {
-    required Duration duration,
-    required Curve curve,
+    final double to, {
+    required final Duration duration,
+    required final Curve curve,
   }) async {
     // Do nothing, not required in test.
   }

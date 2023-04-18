@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       key: Key('mainapp'),
       title: 'Integration Test App',
@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
       TextEditingController(text: 'Text2');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title ?? ''),
@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 contentPadding: EdgeInsets.all(10.0),
                 labelText: 'Text Input Field 2:',
               ),
-              onFieldSubmitted: (String str) {
+              onFieldSubmitted: (final String str) {
                 print('event received');
                 setState(() => infoText = 'enter pressed');
               },

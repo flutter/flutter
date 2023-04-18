@@ -31,16 +31,16 @@ class StockConfiguration {
   final bool showSemanticsDebugger;
 
   StockConfiguration copyWith({
-    StockMode? stockMode,
-    BackupMode? backupMode,
-    bool? debugShowGrid,
-    bool? debugShowSizes,
-    bool? debugShowBaselines,
-    bool? debugShowLayers,
-    bool? debugShowPointers,
-    bool? debugShowRainbow,
-    bool? showPerformanceOverlay,
-    bool? showSemanticsDebugger,
+    final StockMode? stockMode,
+    final BackupMode? backupMode,
+    final bool? debugShowGrid,
+    final bool? debugShowSizes,
+    final bool? debugShowBaselines,
+    final bool? debugShowLayers,
+    final bool? debugShowPointers,
+    final bool? debugShowRainbow,
+    final bool? showPerformanceOverlay,
+    final bool? showSemanticsDebugger,
   }) {
     return StockConfiguration(
       stockMode: stockMode ?? this.stockMode,

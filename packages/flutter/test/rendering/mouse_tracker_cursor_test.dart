@@ -21,24 +21,24 @@ void main() {
 
   // Only one of `logCursors` and `cursorHandler` should be specified.
   void setUpMouseTracker({
-    required SimpleAnnotationFinder annotationFinder,
-    List<_CursorUpdateDetails>? logCursors,
-    MethodCallHandler? cursorHandler,
+    required final SimpleAnnotationFinder annotationFinder,
+    final List<_CursorUpdateDetails>? logCursors,
+    final MethodCallHandler? cursorHandler,
   }) {
     assert(logCursors == null || cursorHandler == null);
     methodCallHandler = logCursors != null
-      ? (MethodCall call) async {
+      ? (final MethodCall call) async {
         logCursors.add(_CursorUpdateDetails.wrap(call));
         return;
       }
       : cursorHandler;
 
-    binding.setHitTest((BoxHitTestResult result, Offset position) {
+    binding.setHitTest((final BoxHitTestResult result, final Offset position) {
       for (final HitTestTarget target in annotationFinder(position)) {
         result.addWithRawTransform(
           transform: Matrix4.identity(),
           position: position,
-          hitTest: (BoxHitTestResult result, Offset position) {
+          hitTest: (final BoxHitTestResult result, final Offset position) {
             result.add(HitTestEntry(target));
             return true;
           },
@@ -48,7 +48,7 @@ void main() {
     });
   }
 
-  void dispatchRemoveDevice([int device = 0]) {
+  void dispatchRemoveDevice([final int device = 0]) {
     RendererBinding.instance.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero, device: device),
     ]));
@@ -56,7 +56,7 @@ void main() {
 
   setUp(() {
     binding.postFrameCallbacks.clear();
-    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (MethodCall call) async {
+    binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.mouseCursor, (final MethodCall call) async {
       if (methodCallHandler != null) {
         return methodCallHandler!(call);
       }
@@ -72,8 +72,8 @@ void main() {
     const TestAnnotationTarget annotation = TestAnnotationTarget(cursor: SystemMouseCursors.grabbing);
 
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[annotation],
-      cursorHandler: (MethodCall call) async {
+      annotationFinder: (final Offset position) => <TestAnnotationTarget>[annotation],
+      cursorHandler: (final MethodCall call) async {
         return null;
       },
     );
@@ -90,7 +90,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (final Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
@@ -147,7 +147,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (final Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
@@ -205,7 +205,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (final Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
@@ -248,7 +248,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
     setUpMouseTracker(
-      annotationFinder: (Offset position) sync* { yield* annotations; },
+      annotationFinder: (final Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
 
@@ -276,7 +276,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     late List<TestAnnotationTarget> annotations;
     setUpMouseTracker(
-      annotationFinder: (Offset position) sync* { yield* annotations; },
+      annotationFinder: (final Offset position) sync* { yield* annotations; },
       logCursors: logCursors,
     );
 
@@ -304,7 +304,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (final Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
@@ -346,7 +346,7 @@ void main() {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     TestAnnotationTarget? annotation;
     setUpMouseTracker(
-      annotationFinder: (Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
+      annotationFinder: (final Offset position) => <TestAnnotationTarget>[if (annotation != null) annotation],
       logCursors: logCursors,
     );
 
@@ -376,7 +376,7 @@ void main() {
   test('Pointing devices display cursors separately', () {
     final List<_CursorUpdateDetails> logCursors = <_CursorUpdateDetails>[];
     setUpMouseTracker(
-      annotationFinder: (Offset position) sync* {
+      annotationFinder: (final Offset position) sync* {
         if (position.dx > 200) {
           yield const TestAnnotationTarget(cursor: SystemMouseCursors.forbidden);
         } else if (position.dx > 100) {
@@ -433,10 +433,10 @@ void main() {
 }
 
 ui.PointerData _pointerData(
-  PointerChange change,
-  Offset logicalPosition, {
-  int device = 0,
-  PointerDeviceKind kind = PointerDeviceKind.mouse,
+  final PointerChange change,
+  final Offset logicalPosition, {
+  final int device = 0,
+  final PointerDeviceKind kind = PointerDeviceKind.mouse,
 }) {
   final double devicePixelRatio = RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
   return ui.PointerData(
@@ -451,18 +451,18 @@ ui.PointerData _pointerData(
 class _CursorUpdateDetails extends MethodCall {
   const _CursorUpdateDetails(super.method, Map<String, dynamic> super.arguments);
 
-  _CursorUpdateDetails.wrap(MethodCall call)
+  _CursorUpdateDetails.wrap(final MethodCall call)
     : super(call.method, Map<String, dynamic>.from(call.arguments as Map<dynamic, dynamic>));
 
   _CursorUpdateDetails.activateSystemCursor({
-    required int device,
-    required String kind,
+    required final int device,
+    required final String kind,
   }) : this('activateSystemCursor', <String, dynamic>{'device': device, 'kind': kind});
   @override
   Map<String, dynamic> get arguments => super.arguments as Map<String, dynamic>;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(other, this)) {
       return true;
     }
@@ -473,7 +473,7 @@ class _CursorUpdateDetails extends MethodCall {
         && other.method == method
         && other.arguments.length == arguments.length
         && other.arguments.entries.every(
-          (MapEntry<String, dynamic> entry) =>
+          (final MapEntry<String, dynamic> entry) =>
             arguments.containsKey(entry.key) && arguments[entry.key] == entry.value,
         );
   }

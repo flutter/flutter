@@ -36,7 +36,7 @@ class SuggestionSpan {
   final List<String> suggestions;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -70,7 +70,7 @@ class SpellCheckResults {
   final List<SuggestionSpan> suggestionSpans;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
         return true;
     }
@@ -91,7 +91,7 @@ abstract class SpellCheckService {
   /// Returns a [Future] that resolves with a [List] of [SuggestionSpan]s for
   /// all misspelled words in the given [String] for the given [Locale].
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
-    Locale locale, String text
+    final Locale locale, final String text
   );
 }
 
@@ -129,7 +129,7 @@ class DefaultSpellCheckService implements SpellCheckService {
   /// Assumes that the lists provided as parameters are sorted by range start
   /// and that both list of [SuggestionSpan]s apply to the same text.
   static List<SuggestionSpan> mergeResults(
-      List<SuggestionSpan> oldResults, List<SuggestionSpan> newResults) {
+      final List<SuggestionSpan> oldResults, final List<SuggestionSpan> newResults) {
     final List<SuggestionSpan> mergedResults = <SuggestionSpan>[];
 
     SuggestionSpan oldSpan;
@@ -165,7 +165,7 @@ class DefaultSpellCheckService implements SpellCheckService {
 
   @override
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
-      Locale locale, String text) async {
+      final Locale locale, final String text) async {
 
     final List<dynamic> rawResults;
     final String languageTag = locale.toLanguageTag();

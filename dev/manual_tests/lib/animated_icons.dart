@@ -8,7 +8,7 @@ class AnimatedIconsTestApp extends StatelessWidget {
   const AnimatedIconsTestApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       title: 'Animated Icons Test',
       home: Scaffold(
@@ -22,9 +22,9 @@ class IconsList extends StatelessWidget {
   const IconsList({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView(
-      children: samples.map<IconSampleRow>((IconSample s) => IconSampleRow(s)).toList(),
+      children: samples.map<IconSampleRow>((final IconSample s) => IconSampleRow(s)).toList(),
     );
   }
 }
@@ -42,7 +42,7 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
   late final AnimationController progress = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListTile(
       leading: InkWell(
         onTap: () { progress.forward(from: 0.0); },
@@ -55,7 +55,7 @@ class IconSampleRowState extends State<IconSampleRow> with SingleTickerProviderS
       title: Text(widget.sample.description),
       subtitle: Slider(
         value: progress.value,
-        onChanged: (double v) { progress.animateTo(v, duration: Duration.zero); },
+        onChanged: (final double v) { progress.animateTo(v, duration: Duration.zero); },
       ),
     );
   }

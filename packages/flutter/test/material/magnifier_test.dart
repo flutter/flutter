@@ -15,7 +15,7 @@ void main() {
   final Offset basicOffset = Offset(Magnifier.kDefaultMagnifierSize.width / 2,
       Magnifier.kStandardVerticalFocalPointShift + Magnifier.kDefaultMagnifierSize.height);
 
-  Offset getMagnifierPosition(WidgetTester tester, [bool animated = false]) {
+  Offset getMagnifierPosition(final WidgetTester tester, [final bool animated = false]) {
     if (animated) {
       final AnimatedPositioned animatedPositioned =
           tester.firstWidget(find.byType(AnimatedPositioned));
@@ -27,13 +27,13 @@ void main() {
   }
 
   Future<void> showMagnifier(
-    BuildContext context,
-    WidgetTester tester,
-    ValueNotifier<MagnifierInfo> magnifierInfo,
+    final BuildContext context,
+    final WidgetTester tester,
+    final ValueNotifier<MagnifierInfo> magnifierInfo,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
         context: context,
-        builder: (_) => TextMagnifier(
+        builder: (final _) => TextMagnifier(
               magnifierInfo: magnifierInfo,
             ));
 
@@ -51,7 +51,7 @@ void main() {
 
   group('adaptiveMagnifierControllerBuilder', () {
     testWidgets('should return a TextEditingMagnifier on Android',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
       ));
@@ -68,7 +68,7 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
     testWidgets('should return a CupertinoMagnifier on iOS',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
       ));
@@ -85,7 +85,7 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('should return null on all platforms not Android, iOS',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Placeholder(),
       ));
@@ -112,7 +112,7 @@ void main() {
     group('position', () {
       testWidgets(
           'should be at gesture position if does not violate any positioning rules',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         final Key textField = UniqueKey();
 
         await tester.pumpWidget(const MaterialApp(
@@ -168,7 +168,7 @@ void main() {
 
       testWidgets(
           'should never move outside the right bounds of the editing line',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         const double gestureOutsideLine = 100;
 
         await tester.pumpWidget(const MaterialApp(
@@ -201,7 +201,7 @@ void main() {
 
       testWidgets(
           'should never move outside the left bounds of the editing line',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         const double gestureOutsideLine = 100;
 
         await tester.pumpWidget(const MaterialApp(
@@ -231,7 +231,7 @@ void main() {
             greaterThanOrEqualTo(reasonableTextField.left));
       });
 
-      testWidgets('should position vertically at the center of the line', (WidgetTester tester) async {
+      testWidgets('should position vertically at the center of the line', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
         ));
@@ -255,7 +255,7 @@ void main() {
       });
 
       testWidgets('should reposition vertically if mashed against the ceiling',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         final Rect topOfScreenTextFieldRect =
             Rect.fromPoints(Offset.zero, const Offset(200, 0));
 
@@ -284,14 +284,14 @@ void main() {
     });
 
     group('focal point', () {
-      Offset getMagnifierAdditionalFocalPoint(WidgetTester tester) {
+      Offset getMagnifierAdditionalFocalPoint(final WidgetTester tester) {
         final Magnifier magnifier = tester.firstWidget(find.byType(Magnifier));
         return magnifier.additionalFocalPointOffset;
       }
 
       testWidgets(
           'should shift focal point so that the lens sees nothing out of bounds',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
         ));
@@ -319,7 +319,7 @@ void main() {
 
       testWidgets(
           'focal point should shift if mashed against the top to always point to text',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         final Rect topOfScreenTextFieldRect =
             Rect.fromPoints(Offset.zero, const Offset(200, 0));
 
@@ -348,14 +348,14 @@ void main() {
     });
 
     group('animation state', () {
-      bool getIsAnimated(WidgetTester tester) {
+      bool getIsAnimated(final WidgetTester tester) {
         final AnimatedPositioned animatedPositioned =
             tester.firstWidget(find.byType(AnimatedPositioned));
         return animatedPositioned.duration.compareTo(Duration.zero) != 0;
       }
 
       testWidgets('should not be animated on the initial state',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
         ));
@@ -380,7 +380,7 @@ void main() {
       });
 
       testWidgets('should not be animated on horizontal shifts',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Placeholder(),
         ));
@@ -414,7 +414,7 @@ void main() {
       });
 
       testWidgets('should be animated on vertical shifts',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         const Offset verticalShift = Offset(0, 200);
 
         await tester.pumpWidget(const MaterialApp(
@@ -450,7 +450,7 @@ void main() {
       });
 
       testWidgets('should stop being animated when timer is up',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         const Offset verticalShift = Offset(0, 200);
 
         await tester.pumpWidget(const MaterialApp(

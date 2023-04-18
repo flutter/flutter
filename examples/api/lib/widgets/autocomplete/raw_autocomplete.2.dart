@@ -12,7 +12,7 @@ class AutocompleteExampleApp extends StatelessWidget {
   const AutocompleteExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -46,7 +46,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Form(
       key: _formKey,
       child: Column(
@@ -57,18 +57,18 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             hint: const Text('This is a regular DropdownButtonFormField'),
             elevation: 16,
             style: const TextStyle(color: Colors.deepPurple),
-            onChanged: (String? newValue) {
+            onChanged: (final String? newValue) {
               setState(() {
                 _dropdownValue = newValue;
               });
             },
-            items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
+            items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((final String value) {
               return DropdownMenuItem<String>(
                 value: value,
                 child: Text(value),
               );
             }).toList(),
-            validator: (String? value) {
+            validator: (final String? value) {
               if (value == null) {
                 return 'Must make a selection.';
               }
@@ -80,7 +80,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             decoration: const InputDecoration(
               hintText: 'This is a regular TextFormField',
             ),
-            validator: (String? value) {
+            validator: (final String? value) {
               if (value == null || value.isEmpty) {
                 return "Can't be empty.";
               }
@@ -88,21 +88,21 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
             },
           ),
           RawAutocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return _options.where((String option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return _options.where((final String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            onSelected: (String selection) {
+            onSelected: (final String selection) {
               setState(() {
                 _autocompleteSelection = selection;
               });
             },
             fieldViewBuilder: (
-              BuildContext context,
-              TextEditingController textEditingController,
-              FocusNode focusNode,
-              VoidCallback onFieldSubmitted,
+              final BuildContext context,
+              final TextEditingController textEditingController,
+              final FocusNode focusNode,
+              final VoidCallback onFieldSubmitted,
             ) {
               return TextFormField(
                 controller: textEditingController,
@@ -110,10 +110,10 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                   hintText: 'This is a RawAutocomplete!',
                 ),
                 focusNode: focusNode,
-                onFieldSubmitted: (String value) {
+                onFieldSubmitted: (final String value) {
                   onFieldSubmitted();
                 },
-                validator: (String? value) {
+                validator: (final String? value) {
                   if (!_options.contains(value)) {
                     return 'Nothing selected.';
                   }
@@ -122,9 +122,9 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
               );
             },
             optionsViewBuilder: (
-              BuildContext context,
-              AutocompleteOnSelected<String> onSelected,
-              Iterable<String> options,
+              final BuildContext context,
+              final AutocompleteOnSelected<String> onSelected,
+              final Iterable<String> options,
             ) {
               return Align(
                 alignment: Alignment.topLeft,
@@ -135,7 +135,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
                     child: ListView.builder(
                       padding: const EdgeInsets.all(8.0),
                       itemCount: options.length,
-                      itemBuilder: (BuildContext context, int index) {
+                      itemBuilder: (final BuildContext context, final int index) {
                         final String option = options.elementAt(index);
                         return GestureDetector(
                           onTap: () {
@@ -160,7 +160,7 @@ class AutocompleteFormExampleState extends State<AutocompleteFormExample> {
               }
               showDialog<void>(
                 context: context,
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return AlertDialog(
                     title: const Text('Successfully submitted'),
                     content: SingleChildScrollView(

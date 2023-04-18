@@ -18,8 +18,8 @@ import 'build.dart';
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand({
     required super.logger,
-    required OperatingSystemUtils operatingSystemUtils,
-    bool verboseHelp = false,
+    required final OperatingSystemUtils operatingSystemUtils,
+    final bool verboseHelp = false,
   }) : _operatingSystemUtils = operatingSystemUtils,
        super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);

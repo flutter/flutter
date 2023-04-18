@@ -225,7 +225,7 @@ void main() {
 
     expect(screenshotDevice.screenshots, isEmpty);
     bool caughtToolExit = false;
-    FakeAsync().run<void>((FakeAsync time) {
+    FakeAsync().run<void>((final FakeAsync time) {
       // Because the tool exit will be thrown asynchronously by a [Timer],
       // use [asyncGuard] to catch it
       asyncGuard<void>(
@@ -243,7 +243,7 @@ void main() {
             '300', // 5 minutes
           ],
         ),
-        onError: (Object error) {
+        onError: (final Object error) {
           expect(error, isA<ToolExit>());
           expect(
             (error as ToolExit).message,
@@ -258,7 +258,7 @@ void main() {
       expect(
         screenshotDevice.screenshots,
         contains(isA<File>().having(
-          (File file) => file.path,
+          (final File file) => file.path,
           'path',
           'drive_screenshots/drive_01.png',
         )),
@@ -317,7 +317,7 @@ void main() {
     expect(
       screenshotDevice.screenshots,
       contains(isA<File>().having(
-        (File file) => file.path,
+        (final File file) => file.path,
         'path',
         'drive_screenshots/drive_01.png',
       )),
@@ -503,15 +503,15 @@ void main() {
 class ThrowingScreenshotDevice extends ScreenshotDevice {
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-      String? mainPath,
-      String? route,
-      DebuggingOptions? debuggingOptions,
-      Map<String, dynamic>? platformArgs,
-      bool prebuiltApplication = false,
-      bool usesTerminalUi = true,
-      bool ipv6 = false,
-      String? userIdentifier,
+    final ApplicationPackage? package, {
+      final String? mainPath,
+      final String? route,
+      final DebuggingOptions? debuggingOptions,
+      final Map<String, dynamic>? platformArgs,
+      final bool prebuiltApplication = false,
+      final bool usesTerminalUi = true,
+      final bool ipv6 = false,
+      final String? userIdentifier,
     }) async {
     throwToolExit('cannot start app');
   }
@@ -548,19 +548,19 @@ class ScreenshotDevice extends Fake implements Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-      String? mainPath,
-      String? route,
-      DebuggingOptions? debuggingOptions,
-      Map<String, dynamic>? platformArgs,
-      bool prebuiltApplication = false,
-      bool usesTerminalUi = true,
-      bool ipv6 = false,
-      String? userIdentifier,
+    final ApplicationPackage? package, {
+      final String? mainPath,
+      final String? route,
+      final DebuggingOptions? debuggingOptions,
+      final Map<String, dynamic>? platformArgs,
+      final bool prebuiltApplication = false,
+      final bool usesTerminalUi = true,
+      final bool ipv6 = false,
+      final String? userIdentifier,
     }) async => LaunchResult.succeeded();
 
   @override
-  Future<void> takeScreenshot(File outputFile) async {
+  Future<void> takeScreenshot(final File outputFile) async {
     if (!_firstScreenshotCompleter.isCompleted) {
       _firstScreenshotCompleter.complete();
     }
@@ -571,15 +571,15 @@ class ScreenshotDevice extends Fake implements Device {
 class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
-    PubContext? context,
-    required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.all,
+    final PubContext? context,
+    required final FlutterProject project,
+    final bool upgrade = false,
+    final bool offline = false,
+    final bool generateSyntheticPackage = false,
+    final String? flutterRootOverride,
+    final bool checkUpToDate = false,
+    final bool shouldSkipThirdPartyGenerator = true,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
 }
 
@@ -590,7 +590,7 @@ class NeverEndingFlutterDriverFactory extends Fake implements FlutterDriverFacto
   final void Function() callback;
 
   @override
-  DriverService createDriverService(bool web) => NeverEndingDriverService(callback);
+  DriverService createDriverService(final bool web) => NeverEndingDriverService(callback);
 }
 
 /// A [DriverService] that will return a Future from [startTest] that will never complete.
@@ -602,22 +602,22 @@ class NeverEndingDriverService extends Fake implements DriverService {
 
   final void Function() callback;
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async { }
+  Future<void> reuseApplication(final Uri vmServiceUri, final Device device, final DebuggingOptions debuggingOptions, final bool ipv6) async { }
 
   @override
   Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    Map<String, String> environment,
-    PackageConfig packageConfig, {
-      bool? headless,
-      String? chromeBinary,
-      String? browserName,
-      bool? androidEmulator,
-      int? driverPort,
-      List<String>? webBrowserFlags,
-      List<String>? browserDimension,
-      String? profileMemory,
+    final String testFile,
+    final List<String> arguments,
+    final Map<String, String> environment,
+    final PackageConfig packageConfig, {
+      final bool? headless,
+      final String? chromeBinary,
+      final String? browserName,
+      final bool? androidEmulator,
+      final int? driverPort,
+      final List<String>? webBrowserFlags,
+      final List<String>? browserDimension,
+      final String? profileMemory,
     }) async {
       callback();
       // return a Future that will never complete.
@@ -627,27 +627,27 @@ class NeverEndingDriverService extends Fake implements DriverService {
 
 class FailingFakeFlutterDriverFactory extends Fake implements FlutterDriverFactory {
   @override
-  DriverService createDriverService(bool web) => FailingFakeDriverService();
+  DriverService createDriverService(final bool web) => FailingFakeDriverService();
 }
 
 class FailingFakeDriverService extends Fake implements DriverService {
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async { }
+  Future<void> reuseApplication(final Uri vmServiceUri, final Device device, final DebuggingOptions debuggingOptions, final bool ipv6) async { }
 
   @override
   Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    Map<String, String> environment,
-    PackageConfig packageConfig, {
-      bool? headless,
-      String? chromeBinary,
-      String? browserName,
-      bool? androidEmulator,
-      int? driverPort,
-      List<String>? webBrowserFlags,
-      List<String>? browserDimension,
-      String? profileMemory,
+    final String testFile,
+    final List<String> arguments,
+    final Map<String, String> environment,
+    final PackageConfig packageConfig, {
+      final bool? headless,
+      final String? chromeBinary,
+      final String? browserName,
+      final bool? androidEmulator,
+      final int? driverPort,
+      final List<String>? webBrowserFlags,
+      final List<String>? browserDimension,
+      final String? profileMemory,
     }) async => 1;
 }
 

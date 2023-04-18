@@ -6,10 +6,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Directionality', (WidgetTester tester) async {
+  testWidgets('Directionality', (final WidgetTester tester) async {
     final List<TextDirection> log = <TextDirection>[];
     final Widget inner = Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         log.add(Directionality.of(context));
         return const Placeholder();
       },
@@ -51,10 +51,10 @@ void main() {
     expect(log, <TextDirection>[TextDirection.ltr, TextDirection.rtl, TextDirection.ltr]);
   });
 
-  testWidgets('Directionality default', (WidgetTester tester) async {
+  testWidgets('Directionality default', (final WidgetTester tester) async {
     bool good = false;
     await tester.pumpWidget(Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         expect(Directionality.maybeOf(context), isNull);
         good = true;
         return const Placeholder();
@@ -63,7 +63,7 @@ void main() {
     expect(good, isTrue);
   });
 
-  testWidgets('Directionality.maybeOf', (WidgetTester tester) async {
+  testWidgets('Directionality.maybeOf', (final WidgetTester tester) async {
     final GlobalKey hasDirectionality = GlobalKey();
     final GlobalKey noDirectionality = GlobalKey();
     await tester.pumpWidget(
@@ -81,7 +81,7 @@ void main() {
     expect(Directionality.maybeOf(hasDirectionality.currentContext!), TextDirection.rtl);
   });
 
-  testWidgets('Directionality.of', (WidgetTester tester) async {
+  testWidgets('Directionality.of', (final WidgetTester tester) async {
     final GlobalKey hasDirectionality = GlobalKey();
     final GlobalKey noDirectionality = GlobalKey();
     await tester.pumpWidget(
@@ -96,7 +96,7 @@ void main() {
       ),
     );
     expect(() => Directionality.of(noDirectionality.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
+      (final AssertionError e) => e.message,
       'message',
       contains('No Directionality widget found.'),
     )));

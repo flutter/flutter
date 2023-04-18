@@ -78,13 +78,13 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
     this.package,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
+    final bool? ffiPlugin,
     this.defaultPackage,
-    required FileSystem fileSystem,
+    required final FileSystem fileSystem,
   })  : _fileSystem = fileSystem,
         ffiPlugin = ffiPlugin ?? false;
 
-  factory AndroidPlugin.fromYaml(String name, YamlMap yaml, String pluginPath, FileSystem fileSystem) {
+  factory AndroidPlugin.fromYaml(final String name, final YamlMap yaml, final String pluginPath, final FileSystem fileSystem) {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
@@ -109,7 +109,7 @@ class AndroidPlugin extends PluginPlatform implements NativeOrDartPlugin {
   @override
   bool hasDart() => dartPluginClass != null;
 
-  static bool validate(YamlMap yaml) {
+  static bool validate(final YamlMap yaml) {
     return (yaml['package'] is String && yaml[kPluginClass] is String) ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -238,13 +238,13 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
     required this.classPrefix,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
+    final bool? ffiPlugin,
     this.defaultPackage,
-    bool? sharedDarwinSource,
+    final bool? sharedDarwinSource,
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory IOSPlugin.fromYaml(String name, YamlMap yaml) {
+  factory IOSPlugin.fromYaml(final String name, final YamlMap yaml) {
     assert(validate(yaml)); // TODO(zanderso): https://github.com/flutter/flutter/issues/67241
     return IOSPlugin(
       name: name,
@@ -257,7 +257,7 @@ class IOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPlug
     );
   }
 
-  static bool validate(YamlMap yaml) {
+  static bool validate(final YamlMap yaml) {
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -315,13 +315,13 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
+    final bool? ffiPlugin,
     this.defaultPackage,
-    bool? sharedDarwinSource,
+    final bool? sharedDarwinSource,
   }) : ffiPlugin = ffiPlugin ?? false,
        sharedDarwinSource = sharedDarwinSource ?? false;
 
-  factory MacOSPlugin.fromYaml(String name, YamlMap yaml) {
+  factory MacOSPlugin.fromYaml(final String name, final YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
     String? pluginClass = yaml[kPluginClass] as String?;
@@ -338,7 +338,7 @@ class MacOSPlugin extends PluginPlatform implements NativeOrDartPlugin, DarwinPl
     );
   }
 
-  static bool validate(YamlMap yaml) {
+  static bool validate(final YamlMap yaml) {
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -391,13 +391,13 @@ class WindowsPlugin extends PluginPlatform
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
+    final bool? ffiPlugin,
     this.defaultPackage,
     this.variants = const <PluginPlatformVariant>{},
   })  : ffiPlugin = ffiPlugin ?? false,
         assert(pluginClass != null || dartPluginClass != null || defaultPackage != null);
 
-  factory WindowsPlugin.fromYaml(String name, YamlMap yaml) {
+  factory WindowsPlugin.fromYaml(final String name, final YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
     String? pluginClass = yaml[kPluginClass] as String?;
@@ -432,7 +432,7 @@ class WindowsPlugin extends PluginPlatform
     );
   }
 
-  static bool validate(YamlMap yaml) {
+  static bool validate(final YamlMap yaml) {
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -482,12 +482,12 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     required this.name,
     this.pluginClass,
     this.dartPluginClass,
-    bool? ffiPlugin,
+    final bool? ffiPlugin,
     this.defaultPackage,
   })  : ffiPlugin = ffiPlugin ?? false,
         assert(pluginClass != null || dartPluginClass != null || (ffiPlugin ?? false) || defaultPackage != null);
 
-  factory LinuxPlugin.fromYaml(String name, YamlMap yaml) {
+  factory LinuxPlugin.fromYaml(final String name, final YamlMap yaml) {
     assert(validate(yaml));
     // Treat 'none' as not present. See https://github.com/flutter/flutter/issues/57497.
     String? pluginClass = yaml[kPluginClass] as String?;
@@ -503,7 +503,7 @@ class LinuxPlugin extends PluginPlatform implements NativeOrDartPlugin {
     );
   }
 
-  static bool validate(YamlMap yaml) {
+  static bool validate(final YamlMap yaml) {
     return yaml[kPluginClass] is String ||
         yaml[kDartPluginClass] is String ||
         yaml[kFfiPlugin] == true ||
@@ -552,7 +552,7 @@ class WebPlugin extends PluginPlatform {
     required this.fileName,
   });
 
-  factory WebPlugin.fromYaml(String name, YamlMap yaml) {
+  factory WebPlugin.fromYaml(final String name, final YamlMap yaml) {
     if (yaml['pluginClass'] is! String) {
       throwToolExit('The plugin `$name` is missing the required field `pluginClass` in pubspec.yaml');
     }
@@ -590,9 +590,9 @@ class WebPlugin extends PluginPlatform {
 }
 
 final RegExp _internalCapitalLetterRegex = RegExp(r'(?=(?!^)[A-Z])');
-String _filenameForCppClass(String className) {
+String _filenameForCppClass(final String className) {
   return className.splitMapJoin(
     _internalCapitalLetterRegex,
-    onMatch: (_) => '_',
-    onNonMatch: (String n) => n.toLowerCase());
+    onMatch: (final _) => '_',
+    onNonMatch: (final String n) => n.toLowerCase());
 }

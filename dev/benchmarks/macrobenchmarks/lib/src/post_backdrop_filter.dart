@@ -30,7 +30,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget getConditionalBackdrop() {
       if (_includeBackdropFilter) {
         return Column(
@@ -63,7 +63,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                     child: Center(
                       child: AnimatedBuilder(
                           animation: animation,
-                          builder: (BuildContext c, Widget? w) {
+                          builder: (final BuildContext c, final Widget? w) {
                             final int val = (animation.value * 255).round();
                             return Container(
                                 width: 50,
@@ -83,7 +83,7 @@ class _PostBackdropFilterPageState extends State<PostBackdropFilterPage> with Ti
                       Checkbox(
                         key: const Key('bdf-checkbox'), // this key is used by the driver test
                         value: _includeBackdropFilter,
-                        onChanged: (bool? v) => setState(() { _includeBackdropFilter = v ?? false; }),
+                        onChanged: (final bool? v) => setState(() { _includeBackdropFilter = v ?? false; }),
                       ),
                       MaterialButton(
                         key: const Key('bdf-animate'), // this key is used by the driver test

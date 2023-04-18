@@ -92,17 +92,17 @@ class DefaultTextStyle extends InheritedTheme {
   /// See the source below for an example of how to do this (since that's
   /// essentially what this constructor does).
   static Widget merge({
-    Key? key,
-    TextStyle? style,
-    TextAlign? textAlign,
-    bool? softWrap,
-    TextOverflow? overflow,
-    int? maxLines,
-    TextWidthBasis? textWidthBasis,
-    required Widget child,
+    final Key? key,
+    final TextStyle? style,
+    final TextAlign? textAlign,
+    final bool? softWrap,
+    final TextOverflow? overflow,
+    final int? maxLines,
+    final TextWidthBasis? textWidthBasis,
+    required final Widget child,
   }) {
     return Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         final DefaultTextStyle parent = DefaultTextStyle.of(context);
         return DefaultTextStyle(
           key: key,
@@ -167,12 +167,12 @@ class DefaultTextStyle extends InheritedTheme {
   /// ```dart
   /// DefaultTextStyle style = DefaultTextStyle.of(context);
   /// ```
-  static DefaultTextStyle of(BuildContext context) {
+  static DefaultTextStyle of(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextStyle>() ?? const DefaultTextStyle.fallback();
   }
 
   @override
-  bool updateShouldNotify(DefaultTextStyle oldWidget) {
+  bool updateShouldNotify(final DefaultTextStyle oldWidget) {
     return style != oldWidget.style ||
         textAlign != oldWidget.textAlign ||
         softWrap != oldWidget.softWrap ||
@@ -183,7 +183,7 @@ class DefaultTextStyle extends InheritedTheme {
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return DefaultTextStyle(
       style: style,
       textAlign: textAlign,
@@ -197,7 +197,7 @@ class DefaultTextStyle extends InheritedTheme {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     style.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -213,7 +213,7 @@ class _NullWidget extends StatelessWidget {
   const _NullWidget();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     throw FlutterError(
       'A DefaultTextStyle constructed with DefaultTextStyle.fallback cannot be incorporated into the widget tree, '
       'it is meant only to provide a fallback value returned by DefaultTextStyle.of() '
@@ -264,7 +264,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   ///
   /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
   ///   but asserts if no [DefaultTextHeightBehavior] ancestor is found.
-  static TextHeightBehavior? maybeOf(BuildContext context) {
+  static TextHeightBehavior? maybeOf(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultTextHeightBehavior>()?.textHeightBehavior;
   }
 
@@ -287,7 +287,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   ///
   /// * [DefaultTextHeightBehavior.maybeOf], which is similar to this method,
   ///   but returns null if no [DefaultTextHeightBehavior] ancestor is found.
-  static TextHeightBehavior of(BuildContext context) {
+  static TextHeightBehavior of(final BuildContext context) {
     final TextHeightBehavior? behavior = maybeOf(context);
     assert(() {
       if (behavior == null) {
@@ -308,12 +308,12 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(DefaultTextHeightBehavior oldWidget) {
+  bool updateShouldNotify(final DefaultTextHeightBehavior oldWidget) {
     return textHeightBehavior != oldWidget.textHeightBehavior;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return DefaultTextHeightBehavior(
       textHeightBehavior: textHeightBehavior,
       child: child,
@@ -321,7 +321,7 @@ class DefaultTextHeightBehavior extends InheritedTheme {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.TextHeightBehavior>('textHeightBehavior', textHeightBehavior, defaultValue: null));
   }
@@ -585,7 +585,7 @@ class Text extends StatelessWidget {
   final Color? selectionColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle? effectiveTextStyle = style;
     if (style == null || style!.inherit) {
@@ -633,7 +633,7 @@ class Text extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('data', data, showName: false));
     if (textSpan != null) {

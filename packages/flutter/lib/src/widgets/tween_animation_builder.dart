@@ -182,19 +182,19 @@ class _TweenAnimationBuilderState<T extends Object?> extends AnimatedWidgetBaseS
   }
 
   @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
+  void forEachTween(final TweenVisitor<dynamic> visitor) {
     assert(
       widget.tween.end != null,
       'Tween provided to TweenAnimationBuilder must have non-null Tween.end value.',
     );
-    _currentTween = visitor(_currentTween, widget.tween.end, (dynamic value) {
+    _currentTween = visitor(_currentTween, widget.tween.end, (final dynamic value) {
       assert(false);
       throw StateError('Constructor will never be called because null is never provided as current tween.');
     }) as Tween<T>?;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.builder(context, _currentTween!.evaluate(animation), widget.child);
   }
 }

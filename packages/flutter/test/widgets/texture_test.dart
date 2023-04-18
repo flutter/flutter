@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Texture with freeze set to true', (WidgetTester tester) async {
+  testWidgets('Texture with freeze set to true', (final WidgetTester tester) async {
     await tester.pumpWidget(
         const Center(child: Texture(textureId: 1, freeze: true)),
     );
@@ -35,7 +35,7 @@ void main() {
     expect(textureLayer.freeze, true);
   });
 
-  testWidgets('Texture with default FilterQuality', (WidgetTester tester) async {
+  testWidgets('Texture with default FilterQuality', (final WidgetTester tester) async {
     await tester.pumpWidget(
         const Center(child: Texture(textureId: 1)),
     );
@@ -64,7 +64,7 @@ void main() {
   });
 
 
-  testWidgets('Texture with FilterQuality.none', (WidgetTester tester) async {
+  testWidgets('Texture with FilterQuality.none', (final WidgetTester tester) async {
     await tester.pumpWidget(
         const Center(child: Texture(textureId: 1, filterQuality: FilterQuality.none)),
     );
@@ -92,7 +92,7 @@ void main() {
     expect(textureLayer.filterQuality, FilterQuality.none);
   });
 
-  testWidgets('Texture with FilterQuality.low', (WidgetTester tester) async {
+  testWidgets('Texture with FilterQuality.low', (final WidgetTester tester) async {
     await tester.pumpWidget(
         const Center(child: Texture(textureId: 1)),
     );

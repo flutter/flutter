@@ -182,10 +182,10 @@ class BottomNavigationBar extends StatefulWidget {
     this.currentIndex = 0,
     this.elevation,
     this.type,
-    Color? fixedColor,
+    final Color? fixedColor,
     this.backgroundColor,
     this.iconSize = 24.0,
-    Color? selectedItemColor,
+    final Color? selectedItemColor,
     this.unselectedItemColor,
     this.selectedIconTheme,
     this.unselectedIconTheme,
@@ -201,7 +201,7 @@ class BottomNavigationBar extends StatefulWidget {
     this.useLegacyColorScheme = true,
   }) : assert(items.length >= 2),
        assert(
-        items.every((BottomNavigationBarItem item) => item.label != null),
+        items.every((final BottomNavigationBarItem item) => item.label != null),
         'Every item must have a non-null label',
        ),
        assert(0 <= currentIndex && currentIndex < items.length),
@@ -443,7 +443,7 @@ class _BottomNavigationTile extends StatelessWidget {
   final BottomNavigationBarLandscapeLayout layout;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // In order to use the flex container to grow the tile during animation, we
     // need to divide the changes in flex allotment into smaller pieces to
     // produce smooth animation. We do this by multiplying the flex value
@@ -597,7 +597,7 @@ class _Tile extends StatelessWidget {
   final Widget label;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (MediaQuery.orientationOf(context) == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.linear) {
       return Align(
         heightFactor: 1,
@@ -635,7 +635,7 @@ class _TileIcon extends StatelessWidget {
   final IconThemeData? unselectedIconTheme;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color? iconColor = colorTween.evaluate(animation);
     final IconThemeData defaultIconTheme = IconThemeData(
       color: iconColor,
@@ -678,7 +678,7 @@ class _Label extends StatelessWidget {
   final bool showUnselectedLabels;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final double? selectedFontSize = selectedLabelStyle.fontSize;
     final double? unselectedFontSize = unselectedLabelStyle.fontSize;
 
@@ -775,13 +775,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     }
     _circles.clear();
 
-    _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
+    _controllers = List<AnimationController>.generate(widget.items.length, (final int index) {
       return AnimationController(
         duration: kThemeAnimationDuration,
         vsync: this,
       )..addListener(_rebuild);
     });
-    _animations = List<CurvedAnimation>.generate(widget.items.length, (int index) {
+    _animations = List<CurvedAnimation>.generate(widget.items.length, (final int index) {
       return CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
@@ -841,9 +841,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     super.dispose();
   }
 
-  double _evaluateFlex(Animation<double> animation) => _flexTween.evaluate(animation);
+  double _evaluateFlex(final Animation<double> animation) => _flexTween.evaluate(animation);
 
-  void _pushCircle(int index) {
+  void _pushCircle(final int index) {
     if (widget.items[index].backgroundColor != null) {
       _circles.add(
         _Circle(
@@ -852,7 +852,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           color: widget.items[index].backgroundColor!,
           vsync: this,
         )..controller.addStatusListener(
-          (AnimationStatus status) {
+          (final AnimationStatus status) {
             switch (status) {
               case AnimationStatus.completed:
                 setState(() {
@@ -872,7 +872,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   @override
-  void didUpdateWidget(BottomNavigationBar oldWidget) {
+  void didUpdateWidget(final BottomNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // No animated segue if the length of the items list changes.
@@ -899,7 +899,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   // If the given [TextStyle] has a non-null `fontSize`, it should be used.
   // Otherwise, the [selectedFontSize] parameter should be used.
-  static TextStyle _effectiveTextStyle(TextStyle? textStyle, double fontSize) {
+  static TextStyle _effectiveTextStyle(TextStyle? textStyle, final double fontSize) {
     textStyle ??= const TextStyle();
     // Prefer the font size on textStyle if present.
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
@@ -908,13 +908,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // If [IconThemeData] is provided, it should be used.
   // Otherwise, the [IconThemeData]'s color should be selectedItemColor
   // or unselectedItemColor.
-  static IconThemeData _effectiveIconTheme(IconThemeData? iconTheme, Color? itemColor) {
+  static IconThemeData _effectiveIconTheme(final IconThemeData? iconTheme, final Color? itemColor) {
     // Prefer the iconTheme over itemColor if present.
     return iconTheme ?? IconThemeData(color: itemColor);
   }
 
 
-  List<Widget> _createTiles(BottomNavigationBarLandscapeLayout layout) {
+  List<Widget> _createTiles(final BottomNavigationBarLandscapeLayout layout) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     final ThemeData themeData = Theme.of(context);
@@ -1076,7 +1076,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
@@ -1149,7 +1149,7 @@ class _Bar extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget alignedChild = child;
     if (MediaQuery.orientationOf(context) == Orientation.landscape && layout == BottomNavigationBarLandscapeLayout.centered) {
       alignedChild = Align(
@@ -1175,7 +1175,7 @@ class _Circle {
     required this.state,
     required this.index,
     required this.color,
-    required TickerProvider vsync,
+    required final TickerProvider vsync,
   }) {
     controller = AnimationController(
       duration: kThemeAnimationDuration,
@@ -1195,10 +1195,10 @@ class _Circle {
   late CurvedAnimation animation;
 
   double get horizontalLeadingOffset {
-    double weightSum(Iterable<Animation<double>> animations) {
+    double weightSum(final Iterable<Animation<double>> animations) {
       // We're adding flex values instead of animation values to produce correct
       // ratios.
-      return animations.map<double>(state._evaluateFlex).fold<double>(0.0, (double sum, double value) => sum + value);
+      return animations.map<double>(state._evaluateFlex).fold<double>(0.0, (final double sum, final double value) => sum + value);
     }
 
     final double allWeights = weightSum(state._animations);
@@ -1228,14 +1228,14 @@ class _RadialPainter extends CustomPainter {
   // bounding rectangle's corners touches the edge of the circle. Drawing a
   // circle larger than this radius is not needed, since there is no perceivable
   // difference within the cropped rectangle.
-  static double _maxRadius(Offset center, Size size) {
+  static double _maxRadius(final Offset center, final Size size) {
     final double maxX = math.max(center.dx, size.width - center.dx);
     final double maxY = math.max(center.dy, size.height - center.dy);
     return math.sqrt(maxX * maxX + maxY * maxY);
   }
 
   @override
-  bool shouldRepaint(_RadialPainter oldPainter) {
+  bool shouldRepaint(final _RadialPainter oldPainter) {
     if (textDirection != oldPainter.textDirection) {
       return true;
     }
@@ -1254,7 +1254,7 @@ class _RadialPainter extends CustomPainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     for (final _Circle circle in circles) {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);

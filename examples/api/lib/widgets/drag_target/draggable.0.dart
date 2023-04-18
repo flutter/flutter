@@ -12,7 +12,7 @@ class DraggableExampleApp extends StatelessWidget {
   const DraggableExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Draggable Sample')),
@@ -33,7 +33,7 @@ class _DraggableExampleState extends State<DraggableExample> {
   int acceptedData = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
@@ -65,9 +65,9 @@ class _DraggableExampleState extends State<DraggableExample> {
         ),
         DragTarget<int>(
           builder: (
-            BuildContext context,
-            List<dynamic> accepted,
-            List<dynamic> rejected,
+            final BuildContext context,
+            final List<dynamic> accepted,
+            final List<dynamic> rejected,
           ) {
             return Container(
               height: 100.0,
@@ -78,7 +78,7 @@ class _DraggableExampleState extends State<DraggableExample> {
               ),
             );
           },
-          onAccept: (int data) {
+          onAccept: (final int data) {
             setState(() {
               acceptedData += data;
             });

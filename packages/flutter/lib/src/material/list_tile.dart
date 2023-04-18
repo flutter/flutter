@@ -688,7 +688,7 @@ class ListTile extends StatelessWidget {
   /// See also:
   ///
   ///  * [Divider], which you can use to obtain this effect manually.
-  static Iterable<Widget> divideTiles({ BuildContext? context, required Iterable<Widget> tiles, Color? color }) {
+  static Iterable<Widget> divideTiles({ final BuildContext? context, required Iterable<Widget> tiles, final Color? color }) {
     assert(color != null || context != null);
     tiles = tiles.toList();
 
@@ -696,7 +696,7 @@ class ListTile extends StatelessWidget {
       return tiles;
     }
 
-    Widget wrapTile(Widget tile) {
+    Widget wrapTile(final Widget tile) {
       return DecoratedBox(
         position: DecorationPosition.foreground,
         decoration: BoxDecoration(
@@ -714,11 +714,11 @@ class ListTile extends StatelessWidget {
     ];
   }
 
-  bool _isDenseLayout(ThemeData theme, ListTileThemeData tileTheme) {
+  bool _isDenseLayout(final ThemeData theme, final ListTileThemeData tileTheme) {
     return dense ?? tileTheme.dense ?? theme.listTileTheme.dense ?? false;
   }
 
-  Color _tileBackgroundColor(ThemeData theme, ListTileThemeData tileTheme, ListTileThemeData defaults) {
+  Color _tileBackgroundColor(final ThemeData theme, final ListTileThemeData tileTheme, final ListTileThemeData defaults) {
     final Color? color = selected
       ? selectedTileColor ?? tileTheme.selectedTileColor ?? theme.listTileTheme.selectedTileColor
       : tileColor ?? tileTheme.tileColor ?? theme.listTileTheme.tileColor;
@@ -726,7 +726,7 @@ class ListTile extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     final ListTileThemeData tileTheme = ListTileTheme.of(context);
@@ -742,7 +742,7 @@ class ListTile extends StatelessWidget {
       if (selected) MaterialState.selected,
     };
 
-    Color? resolveColor(Color? explicitColor, Color? selectedColor, Color? enabledColor, [Color? disabledColor]) {
+    Color? resolveColor(final Color? explicitColor, final Color? selectedColor, final Color? enabledColor, [final Color? disabledColor]) {
       return _IndividualOverrides(
         explicitColor: explicitColor,
         selectedColor: selectedColor,
@@ -894,7 +894,7 @@ class ListTile extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('leading', leading, defaultValue: null));
     properties.add(DiagnosticsProperty<Widget>('title', title, defaultValue: null));
@@ -945,7 +945,7 @@ class _IndividualOverrides extends MaterialStateProperty<Color?> {
   final Color? disabledColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (explicitColor is MaterialStateColor) {
       return MaterialStateProperty.resolveAs<Color?>(explicitColor, states);
     }
@@ -1004,7 +1004,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   Iterable<_ListTileSlot> get slots => _ListTileSlot.values;
 
   @override
-  Widget? childForSlot(_ListTileSlot slot) {
+  Widget? childForSlot(final _ListTileSlot slot) {
     switch (slot) {
       case _ListTileSlot.leading:
         return leading;
@@ -1018,7 +1018,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   }
 
   @override
-  _RenderListTile createRenderObject(BuildContext context) {
+  _RenderListTile createRenderObject(final BuildContext context) {
     return _RenderListTile(
       isThreeLine: isThreeLine,
       isDense: isDense,
@@ -1034,7 +1034,7 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderListTile renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderListTile renderObject) {
     renderObject
       ..isThreeLine = isThreeLine
       ..isDense = isDense
@@ -1051,16 +1051,16 @@ class _ListTile extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
 
 class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_ListTileSlot> {
   _RenderListTile({
-    required bool isDense,
-    required VisualDensity visualDensity,
-    required bool isThreeLine,
-    required TextDirection textDirection,
-    required TextBaseline titleBaselineType,
-    TextBaseline? subtitleBaselineType,
-    required double horizontalTitleGap,
-    required double minVerticalPadding,
-    required double minLeadingWidth,
-    required ListTileTitleAlignment titleAlignment,
+    required final bool isDense,
+    required final VisualDensity visualDensity,
+    required final bool isThreeLine,
+    required final TextDirection textDirection,
+    required final TextBaseline titleBaselineType,
+    final TextBaseline? subtitleBaselineType,
+    required final double horizontalTitleGap,
+    required final double minVerticalPadding,
+    required final double minLeadingWidth,
+    required final ListTileTitleAlignment titleAlignment,
   }) : _isDense = isDense,
        _visualDensity = visualDensity,
        _isThreeLine = isThreeLine,
@@ -1094,7 +1094,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   bool get isDense => _isDense;
   bool _isDense;
-  set isDense(bool value) {
+  set isDense(final bool value) {
     if (_isDense == value) {
       return;
     }
@@ -1104,7 +1104,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   VisualDensity get visualDensity => _visualDensity;
   VisualDensity _visualDensity;
-  set visualDensity(VisualDensity value) {
+  set visualDensity(final VisualDensity value) {
     if (_visualDensity == value) {
       return;
     }
@@ -1114,7 +1114,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   bool get isThreeLine => _isThreeLine;
   bool _isThreeLine;
-  set isThreeLine(bool value) {
+  set isThreeLine(final bool value) {
     if (_isThreeLine == value) {
       return;
     }
@@ -1124,7 +1124,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (_textDirection == value) {
       return;
     }
@@ -1134,7 +1134,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   TextBaseline get titleBaselineType => _titleBaselineType;
   TextBaseline _titleBaselineType;
-  set titleBaselineType(TextBaseline value) {
+  set titleBaselineType(final TextBaseline value) {
     if (_titleBaselineType == value) {
       return;
     }
@@ -1144,7 +1144,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   TextBaseline? get subtitleBaselineType => _subtitleBaselineType;
   TextBaseline? _subtitleBaselineType;
-  set subtitleBaselineType(TextBaseline? value) {
+  set subtitleBaselineType(final TextBaseline? value) {
     if (_subtitleBaselineType == value) {
       return;
     }
@@ -1156,7 +1156,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double _horizontalTitleGap;
   double get _effectiveHorizontalTitleGap => _horizontalTitleGap + visualDensity.horizontal * 2.0;
 
-  set horizontalTitleGap(double value) {
+  set horizontalTitleGap(final double value) {
     if (_horizontalTitleGap == value) {
       return;
     }
@@ -1167,7 +1167,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double get minVerticalPadding => _minVerticalPadding;
   double _minVerticalPadding;
 
-  set minVerticalPadding(double value) {
+  set minVerticalPadding(final double value) {
     if (_minVerticalPadding == value) {
       return;
     }
@@ -1178,7 +1178,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   double get minLeadingWidth => _minLeadingWidth;
   double _minLeadingWidth;
 
-  set minLeadingWidth(double value) {
+  set minLeadingWidth(final double value) {
     if (_minLeadingWidth == value) {
       return;
     }
@@ -1188,7 +1188,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 
   ListTileTitleAlignment get titleAlignment => _titleAlignment;
   ListTileTitleAlignment _titleAlignment;
-  set titleAlignment(ListTileTitleAlignment value) {
+  set titleAlignment(final ListTileTitleAlignment value) {
     if (_titleAlignment == value) {
       return;
     }
@@ -1199,16 +1199,16 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   @override
   bool get sizedByParent => false;
 
-  static double _minWidth(RenderBox? box, double height) {
+  static double _minWidth(final RenderBox? box, final double height) {
     return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
   }
 
-  static double _maxWidth(RenderBox? box, double height) {
+  static double _maxWidth(final RenderBox? box, final double height) {
     return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     final double leadingWidth = leading != null
       ? math.max(leading!.getMinIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
       : 0.0;
@@ -1218,7 +1218,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     final double leadingWidth = leading != null
       ? math.max(leading!.getMaxIntrinsicWidth(height), _minLeadingWidth) + _effectiveHorizontalTitleGap
       : 0.0;
@@ -1243,7 +1243,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return math.max(
       _defaultTileHeight,
       title!.getMinIntrinsicHeight(width) + (subtitle?.getMinIntrinsicHeight(width) ?? 0.0),
@@ -1251,22 +1251,22 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return computeMinIntrinsicHeight(width);
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(final TextBaseline baseline) {
     assert(title != null);
     final BoxParentData parentData = title!.parentData! as BoxParentData;
     return parentData.offset.dy + title!.getDistanceToActualBaseline(baseline)!;
   }
 
-  static double? _boxBaseline(RenderBox box, TextBaseline baseline) {
+  static double? _boxBaseline(final RenderBox box, final TextBaseline baseline) {
     return box.getDistanceToBaseline(baseline);
   }
 
-  static Size _layoutBox(RenderBox? box, BoxConstraints constraints) {
+  static Size _layoutBox(final RenderBox? box, final BoxConstraints constraints) {
     if (box == null) {
       return Size.zero;
     }
@@ -1274,13 +1274,13 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
     return box.size;
   }
 
-  static void _positionBox(RenderBox box, Offset offset) {
+  static void _positionBox(final RenderBox box, final Offset offset) {
     final BoxParentData parentData = box.parentData! as BoxParentData;
     parentData.offset = offset;
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(
       reason: 'Layout requires baseline metrics, which are only available after a full layout.',
     ));
@@ -1469,8 +1469,8 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    void doPaint(RenderBox? child) {
+  void paint(final PaintingContext context, final Offset offset) {
+    void doPaint(final RenderBox? child) {
       if (child != null) {
         final BoxParentData parentData = child.parentData! as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
@@ -1483,16 +1483,16 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
+        hitTest: (final BoxHitTestResult result, final Offset transformed) {
           assert(transformed == position - parentData.offset);
           return child.hitTest(result, position: transformed);
         },
@@ -1506,7 +1506,7 @@ class _RenderListTile extends RenderBox with SlottedContainerRenderObjectMixin<_
 }
 
 class _LisTileDefaultsM2 extends ListTileThemeData {
-  _LisTileDefaultsM2(this.context, ListTileStyle style)
+  _LisTileDefaultsM2(this.context, final ListTileStyle style)
     : super(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
         minLeadingWidth: 40,

@@ -15,7 +15,7 @@ class Wrapper extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }
 
 class StatefulWrapper extends StatefulWidget {
@@ -37,21 +37,21 @@ class StatefulWrapperState extends State<StatefulWrapper> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(final BuildContext context) => widget.child;
 }
 
 void main() {
-  testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Moving global key inside a LayoutBuilder', (final WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
-      LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
         return Wrapper(
           child: StatefulWrapper(key: key, child: Container(height: 100.0)),
         );
       }),
     );
     await tester.pumpWidget(
-      LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
         key.currentState!.trigger();
         return StatefulWrapper(key: key, child: Container(height: 100.0));
       }),
@@ -60,7 +60,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Moving global key inside a SliverLayoutBuilder', (final WidgetTester tester) async {
     final GlobalKey<StatefulWrapperState> key = GlobalKey<StatefulWrapperState>();
 
     await tester.pumpWidget(
@@ -69,7 +69,7 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return SliverToBoxAdapter(
                   child: Wrapper(child: StatefulWrapper(key: key, child: Container(height: 100.0))),
                 );
@@ -86,7 +86,7 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 key.currentState!.trigger();
                 return SliverToBoxAdapter(
                   child: StatefulWrapper(key: key, child: Container(height: 100.0)),

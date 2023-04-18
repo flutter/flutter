@@ -16,7 +16,7 @@ export 'events.dart' show PointerEvent;
 // TODO(tongmu): This patch is supposed to be done by embedders. Patching it
 // in framework is a workaround before [PointerEventConverter] is moved to embedders.
 // https://github.com/flutter/flutter/issues/30454
-int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
+int _synthesiseDownButtons(final int buttons, final PointerDeviceKind kind) {
   switch (kind) {
     case PointerDeviceKind.mouse:
     case PointerDeviceKind.trackpad:
@@ -45,10 +45,10 @@ abstract final class PointerEventConverter {
   /// [dart:ui.FlutterView.devicePixelRatio]) is used to convert the incoming data
   /// from physical coordinates to logical pixels. See the discussion at
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
-  static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) {
+  static Iterable<PointerEvent> expand(final Iterable<ui.PointerData> data, final double devicePixelRatio) {
     return data
-        .where((ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
-        .map<PointerEvent?>((ui.PointerData datum) {
+        .where((final ui.PointerData datum) => datum.signalKind != ui.PointerSignalKind.unknown)
+        .map<PointerEvent?>((final ui.PointerData datum) {
           final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
           final Offset delta = Offset(datum.physicalDeltaX, datum.physicalDeltaY) / devicePixelRatio;
           final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
@@ -284,5 +284,5 @@ abstract final class PointerEventConverter {
         }).whereType<PointerEvent>();
   }
 
-  static double _toLogicalPixels(double physicalPixels, double devicePixelRatio) => physicalPixels / devicePixelRatio;
+  static double _toLogicalPixels(final double physicalPixels, final double devicePixelRatio) => physicalPixels / devicePixelRatio;
 }

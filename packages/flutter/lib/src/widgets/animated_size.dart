@@ -87,7 +87,7 @@ class AnimatedSize extends StatefulWidget {
 class _AnimatedSizeState
     extends State<AnimatedSize> with SingleTickerProviderStateMixin {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _AnimatedSize(
       alignment: widget.alignment,
       curve: widget.curve,
@@ -122,7 +122,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  RenderAnimatedSize createRenderObject(BuildContext context) {
+  RenderAnimatedSize createRenderObject(final BuildContext context) {
     return RenderAnimatedSize(
       alignment: alignment,
       duration: duration,
@@ -135,7 +135,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderAnimatedSize renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderAnimatedSize renderObject) {
     renderObject
       ..alignment = alignment
       ..duration = duration
@@ -147,7 +147,7 @@ class _AnimatedSize extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));

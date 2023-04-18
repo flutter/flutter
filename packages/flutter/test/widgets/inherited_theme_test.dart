@@ -6,8 +6,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestRoute extends PageRouteBuilder<void> {
-  TestRoute(Widget child) : super(
-    pageBuilder: (BuildContext _, Animation<double> __, Animation<double> ___) => child,
+  TestRoute(final Widget child) : super(
+    pageBuilder: (final BuildContext _, final Animation<double> __, final Animation<double> ___) => child,
   );
 }
 
@@ -15,7 +15,7 @@ class IconTextBox extends StatelessWidget {
   const IconTextBox(this.text, { super.key });
   final String text;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       alignment: Alignment.center,
       child: Row(
@@ -26,7 +26,7 @@ class IconTextBox extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('InheritedTheme.captureAll()', (WidgetTester tester) async {
+  testWidgets('InheritedTheme.captureAll()', (final WidgetTester tester) async {
     const double fontSize = 32;
     const double iconSize = 48;
     const Color textColor = Color(0xFF00FF00);
@@ -37,7 +37,7 @@ void main() {
     Widget buildFrame() {
       return WidgetsApp(
         color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
+        onGenerateRoute: (final RouteSettings settings) {
           return TestRoute(
             // The outer DefaultTextStyle and IconTheme widgets must have
             // no effect on the test because InheritedTheme.captureAll()
@@ -54,7 +54,7 @@ void main() {
                   child: IconTheme(
                     data: const IconThemeData(size: iconSize, color: iconColor),
                     child: Builder(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onTap: () {
@@ -89,7 +89,7 @@ void main() {
       ).text.style!;
     }
 
-    TextStyle getTextStyle(String text) {
+    TextStyle getTextStyle(final String text) {
       return tester.widget<RichText>(
         find.descendant(
           of: find.text(text),
@@ -146,7 +146,7 @@ void main() {
     expect(getIconStyle().fontSize, iconSize);
   });
 
-  testWidgets('InheritedTheme.captureAll() multiple IconTheme ancestors', (WidgetTester tester) async {
+  testWidgets('InheritedTheme.captureAll() multiple IconTheme ancestors', (final WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/39087
 
     const Color outerColor = Color(0xFF0000FF);
@@ -158,7 +158,7 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
+        onGenerateRoute: (final RouteSettings settings) {
           return TestRoute(
             IconTheme(
               data: const IconThemeData(color: outerColor),
@@ -170,7 +170,7 @@ void main() {
                     children: <Widget>[
                       Icon(const IconData(0x41, fontFamily: 'Roboto'), key: icon1),
                       Builder(
-                        builder: (BuildContext context) {
+                        builder: (final BuildContext context) {
                           // The same IconThemes are visible from this context
                           // and the context that the widget returned by captureAll()
                           // is built in. So only the inner green IconTheme should
@@ -191,7 +191,7 @@ void main() {
       ),
     );
 
-    TextStyle getIconStyle(Key key) {
+    TextStyle getIconStyle(final Key key) {
       return tester.widget<RichText>(
         find.descendant(
           of: find.byKey(key),
@@ -206,7 +206,7 @@ void main() {
     expect(getIconStyle(icon2).fontSize, iconSize);
   });
 
-  testWidgets('InheritedTheme.captureAll() multiple DefaultTextStyle ancestors', (WidgetTester tester) async {
+  testWidgets('InheritedTheme.captureAll() multiple DefaultTextStyle ancestors', (final WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/39087
 
     const Color textColor = Color(0xFF00FF00);
@@ -214,7 +214,7 @@ void main() {
     await tester.pumpWidget(
       WidgetsApp(
         color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
+        onGenerateRoute: (final RouteSettings settings) {
           return TestRoute(
             DefaultTextStyle(
               style: const TextStyle(fontSize: 48),
@@ -224,7 +224,7 @@ void main() {
                   children: <Widget>[
                     const Text('Hello'),
                     Builder(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return InheritedTheme.captureAll(context, const Text('World'));
                       },
                     ),
@@ -237,7 +237,7 @@ void main() {
       ),
     );
 
-    TextStyle getTextStyle(String text) {
+    TextStyle getTextStyle(final String text) {
       return tester.widget<RichText>(
         find.descendant(
           of: find.text(text),

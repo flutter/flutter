@@ -10,7 +10,7 @@ class TestTextInputFormatter extends TextInputFormatter {
   const TestTextInputFormatter();
 
   @override
-  void noSuchMethod(Invocation invocation) {
+  void noSuchMethod(final Invocation invocation) {
     super.noSuchMethod(invocation);
   }
 }
@@ -34,7 +34,7 @@ void main() {
     late TextEditingValue calledNewValue;
 
     final TextInputFormatter formatterUnderTest = TextInputFormatter.withFunction(
-      (TextEditingValue oldValue, TextEditingValue newValue) {
+      (final TextEditingValue oldValue, final TextEditingValue newValue) {
         calledOldValue = oldValue;
         calledNewValue = newValue;
         return TextEditingValue.empty;
@@ -501,7 +501,7 @@ void main() {
   });
 
   test('FilteringTextInputFormatter should move the cursor to the right position', () {
-    TextEditingValue collapsedValue(String text, int offset) =>
+    TextEditingValue collapsedValue(final String text, final int offset) =>
         TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
@@ -563,7 +563,7 @@ void main() {
   });
 
   test('FilteringTextInputFormatter should move the cursor to the right position', () {
-    TextEditingValue collapsedValue(String text, int offset) =>
+    TextEditingValue collapsedValue(final String text, final int offset) =>
         TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),
@@ -594,7 +594,7 @@ void main() {
   });
 
   test('WhitelistingTextInputFormatter should move the cursor to the right position', () {
-    TextEditingValue collapsedValue(String text, int offset) =>
+    TextEditingValue collapsedValue(final String text, final int offset) =>
         TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: offset),

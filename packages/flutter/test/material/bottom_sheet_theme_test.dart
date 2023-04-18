@@ -36,19 +36,19 @@ void main() {
     expect(bottomSheetTheme.dragHandleSize, null);
   });
 
-  testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default BottomSheetThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('BottomSheetThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('BottomSheetThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomSheetThemeData(
       backgroundColor: Color(0xFFFFFFFF),
@@ -62,8 +62,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -78,12 +78,12 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no BottomSheetThemeData returns defaults', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: BottomSheet(
           onClosing: () {},
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Container();
           },
         ),
@@ -102,7 +102,7 @@ void main() {
     expect(material.clipBehavior, Clip.none);
   });
 
-  testWidgets('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
+  testWidgets('BottomSheet uses values from BottomSheetThemeData', (final WidgetTester tester) async {
     final BottomSheetThemeData bottomSheetTheme = _bottomSheetTheme();
 
     await tester.pumpWidget(MaterialApp(
@@ -110,7 +110,7 @@ void main() {
       home: Scaffold(
         body: BottomSheet(
           onClosing: () {},
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Container();
           },
         ),
@@ -129,7 +129,7 @@ void main() {
     expect(material.clipBehavior, bottomSheetTheme.clipBehavior);
   });
 
-  testWidgets('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('BottomSheet widget properties take priority over theme', (final WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color shadowColor = Colors.blue;
     const double elevation = 7.0;
@@ -148,7 +148,7 @@ void main() {
           shape: shape,
           clipBehavior: Clip.hardEdge,
           onClosing: () {},
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Container();
           },
         ),
@@ -168,7 +168,7 @@ void main() {
     expect(material.clipBehavior, clipBehavior);
   });
 
-  testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheet-specific parameters are used for modal bottom sheets', (final WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -199,7 +199,7 @@ void main() {
     expect(modalBarrier.color, modalBarrierColor);
   });
 
-  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (WidgetTester tester) async {
+  testWidgets('General bottom sheet parameters take priority over modal bottom sheet-specific parameters for persistent bottom sheets', (final WidgetTester tester) async {
     const double modalElevation = 5.0;
     const double persistentElevation = 7.0;
     const Color modalBackgroundColor = Colors.yellow;
@@ -225,7 +225,7 @@ void main() {
     expect(material.color, persistentBackgroundColor);
   });
 
-  testWidgets("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (WidgetTester tester) async {
+  testWidgets("Modal bottom sheet-specific parameters don't apply to persistent bottom sheets", (final WidgetTester tester) async {
     const double modalElevation = 5.0;
     const Color modalBackgroundColor = Colors.yellow;
     const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData(
@@ -247,7 +247,7 @@ void main() {
     expect(material.color, null);
   });
 
-  testWidgets('Modal bottom sheets respond to theme changes', (WidgetTester tester) async {
+  testWidgets('Modal bottom sheets respond to theme changes', (final WidgetTester tester) async {
     const double lightElevation = 5.0;
     const double darkElevation = 3.0;
     const Color lightBackgroundColor = Colors.green;
@@ -272,7 +272,7 @@ void main() {
       ),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Column(
               children: <Widget>[
                 RawMaterialButton(
@@ -280,7 +280,7 @@ void main() {
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return const Text('This is a modal bottom sheet.');
                       },
                     );
@@ -321,12 +321,12 @@ void main() {
   });
 }
 
-Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
+Widget bottomSheetWithElevations(final BottomSheetThemeData bottomSheetTheme) {
   return MaterialApp(
     theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
     home: Scaffold(
       body: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return Column(
               children: <Widget>[
                 RawMaterialButton(
@@ -334,7 +334,7 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                   onPressed: () {
                     showModalBottomSheet<void>(
                       context: context,
-                      builder: (BuildContext _) {
+                      builder: (final BuildContext _) {
                         return const Text(
                           'This is a modal bottom sheet.',
                         );
@@ -347,7 +347,7 @@ Widget bottomSheetWithElevations(BottomSheetThemeData bottomSheetTheme) {
                   onPressed: () {
                     showBottomSheet<void>(
                       context: context,
-                      builder: (BuildContext _) {
+                      builder: (final BuildContext _) {
                         return const Text(
                           'This is a persistent bottom sheet.',
                         );

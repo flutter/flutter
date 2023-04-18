@@ -5,9 +5,9 @@
 import 'package:package_config/package_config.dart';
 
 /// Generates the main.dart file.
-String generateMainDartFile(String appEntrypoint, {
-  required String pluginRegistrantEntrypoint,
-  LanguageVersion? languageVersion,
+String generateMainDartFile(final String appEntrypoint, {
+  required final String pluginRegistrantEntrypoint,
+  final LanguageVersion? languageVersion,
 }) {
   return <String>[
     if (languageVersion != null)

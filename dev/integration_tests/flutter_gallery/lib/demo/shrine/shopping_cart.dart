@@ -21,9 +21,9 @@ class ShoppingCartPage extends StatefulWidget {
 }
 
 class _ShoppingCartPageState extends State<ShoppingCartPage> {
-  List<Widget> _createShoppingCartRows(AppStateModel model) {
+  List<Widget> _createShoppingCartRows(final AppStateModel model) {
     return model.productsInCart.keys
-        .map((int id) => ShoppingCartRow(
+        .map((final int id) => ShoppingCartRow(
             product: model.getProductById(id),
             quantity: model.productsInCart[id],
             onPressed: () {
@@ -35,14 +35,14 @@ class _ShoppingCartPageState extends State<ShoppingCartPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData localTheme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: kShrinePink50,
       body: SafeArea(
         child: ScopedModelDescendant<AppStateModel>(
-          builder: (BuildContext context, Widget? child, AppStateModel model) {
+          builder: (final BuildContext context, final Widget? child, final AppStateModel model) {
             return Stack(
               children: <Widget>[
                 ListView(
@@ -108,7 +108,7 @@ class ShoppingCartSummary extends StatelessWidget {
   final AppStateModel? model;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextStyle smallAmountStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(color: kShrineBrown600);
     final TextStyle? largeAmountStyle = Theme.of(context).textTheme.headlineMedium;
     final NumberFormat formatter = NumberFormat.simpleCurrency(
@@ -193,7 +193,7 @@ class ShoppingCartRow extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 0,
       locale: Localizations.localeOf(context).toString(),

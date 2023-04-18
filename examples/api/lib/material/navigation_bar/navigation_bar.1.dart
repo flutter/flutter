@@ -12,7 +12,7 @@ class NavigationBarApp extends StatelessWidget {
   const NavigationBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(home: NavigationExample());
   }
 }
@@ -29,12 +29,12 @@ class _NavigationExampleState extends State<NavigationExample> {
   NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       bottomNavigationBar: NavigationBar(
         labelBehavior: labelBehavior,
         selectedIndex: currentPageIndex,
-        onDestinationSelected: (int index) {
+        onDestinationSelected: (final int index) {
           setState(() {
             currentPageIndex = index;
           });

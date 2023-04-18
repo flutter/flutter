@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../packages/flutter/test/image_data.dart';
 
 // Returns a mock HTTP client that responds with an image to all requests.
-FakeHttpClient createMockImageHttpClient(SecurityContext? _) {
+FakeHttpClient createMockImageHttpClient(final SecurityContext? _) {
   final FakeHttpClient client = FakeHttpClient();
   return client;
 }
@@ -26,7 +26,7 @@ class FakeHttpClient extends Fake implements HttpClient {
   final FakeHttpClientRequest request = FakeHttpClientRequest();
 
   @override
-  Future<HttpClientRequest> getUrl(Uri url) async {
+  Future<HttpClientRequest> getUrl(final Uri url) async {
     return request;
   }
 }
@@ -54,10 +54,10 @@ class FakeHttpClientResponse extends Fake implements HttpClientResponse {
   HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.notCompressed;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int>)? onData, {
-    void Function()? onDone,
-    Function? onError,
-    bool? cancelOnError,
+  StreamSubscription<List<int>> listen(final void Function(List<int>)? onData, {
+    final void Function()? onDone,
+    final Function? onError,
+    final bool? cancelOnError,
   }) {
     return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage])
       .listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);

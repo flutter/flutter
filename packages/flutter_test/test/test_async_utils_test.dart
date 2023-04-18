@@ -128,7 +128,7 @@ void main() {
     expect(await f1, isNull);
   }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
-  testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - expect() catches pending async work', (final WidgetTester tester) async {
     Future<Object?>? f1, f2;
     try {
       f1 = tester.pump();
@@ -170,7 +170,7 @@ void main() {
     await f2;
   }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
-  testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - expect() catches pending async work', (final WidgetTester tester) async {
     Future<Object?>? f1;
     try {
       f1 = tester.pump();
@@ -195,7 +195,7 @@ void main() {
     await f1;
   }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
-  testWidgets('TestAsyncUtils - expect() catches pending async work', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - expect() catches pending async work', (final WidgetTester tester) async {
     Future<Object?>? f1;
     try {
       f1 = tester.pump();
@@ -220,7 +220,7 @@ void main() {
     await f1;
   }, skip: kIsWeb); // [intended] depends on platform-specific stack traces.
 
-  testWidgets('TestAsyncUtils - guard body can throw', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - guard body can throw', (final WidgetTester tester) async {
     try {
       await _guardedThrower();
       expect(false, true); // _guardedThrower should throw and we shouldn't reach here

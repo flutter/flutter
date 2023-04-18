@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/slider/slider.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Slider shows secondary track', (WidgetTester tester) async {
+  testWidgets('Slider shows secondary track', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SliderApp(),
     );

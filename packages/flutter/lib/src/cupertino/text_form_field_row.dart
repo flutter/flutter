@@ -104,59 +104,59 @@ class CupertinoTextFormFieldRow extends FormField<String> {
     this.prefix,
     this.padding,
     this.controller,
-    String? initialValue,
-    FocusNode? focusNode,
-    BoxDecoration? decoration,
-    TextInputType? keyboardType,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-    TextInputAction? textInputAction,
-    TextStyle? style,
-    StrutStyle? strutStyle,
-    TextDirection? textDirection,
-    TextAlign textAlign = TextAlign.start,
-    TextAlignVertical? textAlignVertical,
-    bool autofocus = false,
-    bool readOnly = false,
+    final String? initialValue,
+    final FocusNode? focusNode,
+    final BoxDecoration? decoration,
+    final TextInputType? keyboardType,
+    final TextCapitalization textCapitalization = TextCapitalization.none,
+    final TextInputAction? textInputAction,
+    final TextStyle? style,
+    final StrutStyle? strutStyle,
+    final TextDirection? textDirection,
+    final TextAlign textAlign = TextAlign.start,
+    final TextAlignVertical? textAlignVertical,
+    final bool autofocus = false,
+    final bool readOnly = false,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-    ToolbarOptions? toolbarOptions,
-    bool? showCursor,
-    String obscuringCharacter = '•',
-    bool obscureText = false,
-    bool autocorrect = true,
-    SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType,
-    bool enableSuggestions = true,
-    int? maxLines = 1,
-    int? minLines,
-    bool expands = false,
-    int? maxLength,
-    ValueChanged<String>? onChanged,
-    GestureTapCallback? onTap,
-    VoidCallback? onEditingComplete,
-    ValueChanged<String>? onFieldSubmitted,
+    final ToolbarOptions? toolbarOptions,
+    final bool? showCursor,
+    final String obscuringCharacter = '•',
+    final bool obscureText = false,
+    final bool autocorrect = true,
+    final SmartDashesType? smartDashesType,
+    final SmartQuotesType? smartQuotesType,
+    final bool enableSuggestions = true,
+    final int? maxLines = 1,
+    final int? minLines,
+    final bool expands = false,
+    final int? maxLength,
+    final ValueChanged<String>? onChanged,
+    final GestureTapCallback? onTap,
+    final VoidCallback? onEditingComplete,
+    final ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
-    List<TextInputFormatter>? inputFormatters,
-    bool? enabled,
-    double cursorWidth = 2.0,
-    double? cursorHeight,
-    Color? cursorColor,
-    Brightness? keyboardAppearance,
-    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
-    bool enableInteractiveSelection = true,
-    TextSelectionControls? selectionControls,
-    ScrollPhysics? scrollPhysics,
-    Iterable<String>? autofillHints,
+    final List<TextInputFormatter>? inputFormatters,
+    final bool? enabled,
+    final double cursorWidth = 2.0,
+    final double? cursorHeight,
+    final Color? cursorColor,
+    final Brightness? keyboardAppearance,
+    final EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
+    final bool enableInteractiveSelection = true,
+    final TextSelectionControls? selectionControls,
+    final ScrollPhysics? scrollPhysics,
+    final Iterable<String>? autofillHints,
     AutovalidateMode super.autovalidateMode = AutovalidateMode.disabled,
-    String? placeholder,
-    TextStyle? placeholderStyle = const TextStyle(
+    final String? placeholder,
+    final TextStyle? placeholderStyle = const TextStyle(
       fontWeight: FontWeight.w400,
       color: CupertinoColors.placeholderText,
     ),
-    EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    final EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
   })  : assert(initialValue == null || controller == null),
         assert(obscuringCharacter.length == 1),
         assert(maxLines == null || maxLines > 0),
@@ -173,11 +173,11 @@ class CupertinoTextFormFieldRow extends FormField<String> {
         assert(maxLength == null || maxLength > 0),
         super(
           initialValue: controller?.text ?? initialValue ?? '',
-          builder: (FormFieldState<String> field) {
+          builder: (final FormFieldState<String> field) {
             final _CupertinoTextFormFieldRowState state =
                 field as _CupertinoTextFormFieldRowState;
 
-            void onChangedHandler(String value) {
+            void onChangedHandler(final String value) {
               field.didChange(value);
               if (onChanged != null) {
                 onChanged(value);
@@ -260,7 +260,7 @@ class CupertinoTextFormFieldRow extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+  static Widget _defaultContextMenuBuilder(final BuildContext context, final EditableTextState editableTextState) {
     return CupertinoAdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -290,7 +290,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   }
 
   @override
-  void didUpdateWidget(CupertinoTextFormFieldRow oldWidget) {
+  void didUpdateWidget(final CupertinoTextFormFieldRow oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_cupertinoTextFormFieldRow.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
@@ -317,7 +317,7 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
   }
 
   @override
-  void didChange(String? value) {
+  void didChange(final String? value) {
     super.didChange(value);
 
     if (value != null && _effectiveController!.text != value) {

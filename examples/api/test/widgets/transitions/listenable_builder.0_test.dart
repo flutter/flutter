@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/transitions/listenable_builder.0.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Changing focus changes border', (WidgetTester tester) async {
+  testWidgets('Changing focus changes border', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.ListenableBuilderExample());
 
     Finder findContainer() => find.descendant(of: find.byType(example.FocusListenerContainer), matching: find.byType(Container)).first;

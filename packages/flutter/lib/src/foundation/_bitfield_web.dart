@@ -18,25 +18,25 @@ class BitField<T extends dynamic> implements bitfield.BitField<T> {
   /// The dart:html implementation of [bitfield.Bitfield].
   // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
-  BitField(int length);
+  BitField(final int length);
 
   /// The dart:html implementation of [bitfield.Bitfield.filled].
   // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
-  BitField.filled(int length, bool value);
+  BitField.filled(final int length, final bool value);
 
   @override
-  bool operator [](T index) {
+  bool operator [](final T index) {
     throw UnsupportedError('Not supported when compiling to JavaScript');
   }
 
   @override
-  void operator []=(T index, bool value) {
+  void operator []=(final T index, final bool value) {
     throw UnsupportedError('Not supported when compiling to JavaScript');
   }
 
   @override
-  void reset([ bool value = false ]) {
+  void reset([ final bool value = false ]) {
     throw UnsupportedError('Not supported when compiling to JavaScript');
   }
 }

@@ -54,17 +54,17 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
   final bool enabled;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _ImageFilterRenderObject(imageFilter, enabled);
+  RenderObject createRenderObject(final BuildContext context) => _ImageFilterRenderObject(imageFilter, enabled);
 
   @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderObject renderObject) {
     (renderObject as _ImageFilterRenderObject)
       ..enabled = enabled
       ..imageFilter = imageFilter;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ImageFilter>('imageFilter', imageFilter));
   }
@@ -75,7 +75,7 @@ class _ImageFilterRenderObject extends RenderProxyBox {
 
   bool get enabled => _enabled;
   bool _enabled;
-  set enabled(bool value) {
+  set enabled(final bool value) {
     if (enabled == value) {
       return;
     }
@@ -89,7 +89,7 @@ class _ImageFilterRenderObject extends RenderProxyBox {
 
   ImageFilter get imageFilter => _imageFilter;
   ImageFilter _imageFilter;
-  set imageFilter(ImageFilter value) {
+  set imageFilter(final ImageFilter value) {
     if (value != _imageFilter) {
       _imageFilter = value;
       markNeedsCompositedLayerUpdate();
@@ -103,7 +103,7 @@ class _ImageFilterRenderObject extends RenderProxyBox {
   bool get isRepaintBoundary => alwaysNeedsCompositing;
 
   @override
-  OffsetLayer updateCompositedLayer({required covariant ImageFilterLayer? oldLayer}) {
+  OffsetLayer updateCompositedLayer({required covariant final ImageFilterLayer? oldLayer}) {
     final ImageFilterLayer layer = oldLayer ?? ImageFilterLayer();
     layer.imageFilter = imageFilter;
     return layer;

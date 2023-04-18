@@ -18,24 +18,24 @@ import 'constants.dart';
 /// the Android accessibility bridge, and not the semantics object created by
 /// the Flutter framework.
 Matcher hasAndroidSemantics({
-  String? text,
-  String? contentDescription,
-  String? className,
-  int? id,
-  Rect? rect,
-  Size? size,
-  List<AndroidSemanticsAction>? actions,
-  List<AndroidSemanticsAction>? ignoredActions,
-  List<AndroidSemanticsNode>? children,
-  bool? isChecked,
-  bool? isCheckable,
-  bool? isEditable,
-  bool? isEnabled,
-  bool? isFocusable,
-  bool? isFocused,
-  bool? isHeading,
-  bool? isPassword,
-  bool? isLongClickable,
+  final String? text,
+  final String? contentDescription,
+  final String? className,
+  final int? id,
+  final Rect? rect,
+  final Size? size,
+  final List<AndroidSemanticsAction>? actions,
+  final List<AndroidSemanticsAction>? ignoredActions,
+  final List<AndroidSemanticsNode>? children,
+  final bool? isChecked,
+  final bool? isCheckable,
+  final bool? isEditable,
+  final bool? isEnabled,
+  final bool? isFocusable,
+  final bool? isFocused,
+  final bool? isHeading,
+  final bool? isPassword,
+  final bool? isLongClickable,
 }) {
   return _AndroidSemanticsMatcher(
     text: text,
@@ -98,7 +98,7 @@ class _AndroidSemanticsMatcher extends Matcher {
   final bool? isLongClickable;
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     description.add('AndroidSemanticsNode');
     if (text != null) {
       description.add(' with text: $text');
@@ -149,7 +149,7 @@ class _AndroidSemanticsMatcher extends Matcher {
   }
 
   @override
-  bool matches(covariant AndroidSemanticsNode item, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final AndroidSemanticsNode item, final Map<dynamic, dynamic> matchState) {
     if (text != null && text != item.text) {
       return _failWithMessage('Expected text: $text', matchState);
     }
@@ -171,8 +171,8 @@ class _AndroidSemanticsMatcher extends Matcher {
     if (actions != null) {
       final List<AndroidSemanticsAction> itemActions = item.getActions();
       if (!unorderedEquals(actions!).matches(itemActions, matchState)) {
-        final List<String> actionsString = actions!.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
-        final List<String> itemActionsString = itemActions.map<String>((AndroidSemanticsAction action) => action.toString()).toList()..sort();
+        final List<String> actionsString = actions!.map<String>((final AndroidSemanticsAction action) => action.toString()).toList()..sort();
+        final List<String> itemActionsString = itemActions.map<String>((final AndroidSemanticsAction action) => action.toString()).toList()..sort();
         final Set<AndroidSemanticsAction> unexpected = itemActions.toSet().difference(actions!.toSet());
         final Set<String> unexpectedInString = itemActionsString.toSet().difference(actionsString.toSet());
         final Set<String> missingInString = actionsString.toSet().difference(itemActionsString.toSet());
@@ -214,8 +214,8 @@ class _AndroidSemanticsMatcher extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription,
-      Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(final dynamic item, final Description mismatchDescription,
+      final Map<dynamic, dynamic> matchState, final bool verbose) {
     final String? failure = matchState['failure'] as String?;
     if (failure == null) {
       return mismatchDescription.add('hasAndroidSemantics matcher does not complete successfully');
@@ -223,7 +223,7 @@ class _AndroidSemanticsMatcher extends Matcher {
     return mismatchDescription.add(failure);
   }
 
-  bool _failWithMessage(String value, Map<dynamic, dynamic> matchState) {
+  bool _failWithMessage(final String value, final Map<dynamic, dynamic> matchState) {
     matchState['failure'] = value;
     return false;
   }

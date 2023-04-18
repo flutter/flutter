@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TrackingScrollController saves offset', (WidgetTester tester) async {
+  testWidgets('TrackingScrollController saves offset', (final WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
     const double listItemHeight = 100.0;
 
@@ -14,12 +14,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: PageView.builder(
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return ListView(
               controller: controller,
               children: List<Widget>.generate(
                 10,
-                (int i) => SizedBox(
+                (final int i) => SizedBox(
                   height: listItemHeight,
                   child: Text('Page$index-Item$i'),
                 ),

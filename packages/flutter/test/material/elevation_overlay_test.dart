@@ -16,7 +16,7 @@ void main() {
     const Color baseColor = Color(0xff888888);
     const Color surfaceTintColor = Color(0xff44CCFF);
 
-    Color overlayWithOpacity(double opacity) {
+    Color overlayWithOpacity(final double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);
     }
 
@@ -46,7 +46,7 @@ void main() {
     const Color baseColor = Color(0xff888888);
     const Color surfaceTintColor = Color(0xff44CCFF);
 
-    Color overlayWithOpacity(double opacity) {
+    Color overlayWithOpacity(final double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);
     }
 
@@ -57,7 +57,7 @@ void main() {
     const Color baseColor = Color(0xff888888);
     const Color surfaceTintColor = Color(0xff44CCFF);
 
-    Color overlayWithOpacity(double opacity) {
+    Color overlayWithOpacity(final double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);
     }
 
@@ -69,7 +69,7 @@ void main() {
     const Color baseColor = Color(0xff888888);
     const Color surfaceTintColor = Color(0xff44CCFF);
 
-    Color overlayWithOpacity(double opacity) {
+    Color overlayWithOpacity(final double opacity) {
       return Color.alphaBlend(surfaceTintColor.withOpacity(opacity), baseColor);
     }
 

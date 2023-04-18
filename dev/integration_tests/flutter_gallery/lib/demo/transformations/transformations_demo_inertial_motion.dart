@@ -40,7 +40,7 @@ class InertialMotion {
   }
 
   // The position at a given time.
-  Offset _getPositionAt(Duration time) {
+  Offset _getPositionAt(final Duration time) {
     final double xf = _getPosition(
       r0: _initialPosition.dx,
       v0: _initialVelocity.pixelsPerSecond.dx / 1000,
@@ -58,7 +58,7 @@ class InertialMotion {
 
   // Solve the equation of motion to find the position at a given point in time
   // in one dimension.
-  double _getPosition({required double r0, required double v0, required int t, required double a}) {
+  double _getPosition({required final double r0, required final double v0, required int t, required final double a}) {
     // Stop movement when it would otherwise reverse direction.
     final double stopTime = (v0 / a).abs();
     if (t > stopTime) {

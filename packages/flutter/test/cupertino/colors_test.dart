@@ -17,7 +17,7 @@ class DependentWidget extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color resolved = CupertinoDynamicColor.resolve(color, context);
     return DecoratedBox(
       decoration: BoxDecoration(color: resolved),
@@ -204,7 +204,7 @@ void main() {
 
   testWidgets(
     'Dynamic colors that are not actually dynamic should not claim dependencies',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(const DependentWidget(color: notSoDynamicColor1));
 
       expect(tester.takeException(), null);
@@ -215,7 +215,7 @@ void main() {
   testWidgets(
     'Dynamic colors that are only dependent on vibrancy should not claim unnecessary dependencies, '
     'and its resolved color should change when its dependency changes',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(),
@@ -259,7 +259,7 @@ void main() {
   testWidgets(
     'Dynamic colors that are only dependent on accessibility contrast should not claim unnecessary dependencies, '
     'and its resolved color should change when its dependency changes',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(),
@@ -288,7 +288,7 @@ void main() {
   testWidgets(
     'Dynamic colors that are only dependent on elevation level should not claim unnecessary dependencies, '
     'and its resolved color should change when its dependency changes',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
@@ -314,7 +314,7 @@ void main() {
     },
   );
 
-  testWidgets('Dynamic color with all 3 dependencies works', (WidgetTester tester) async {
+  testWidgets('Dynamic color with all 3 dependencies works', (final WidgetTester tester) async {
     const Color dynamicRainbowColor1 = CupertinoDynamicColor(
       color: color0,
       darkColor: color1,
@@ -415,7 +415,7 @@ void main() {
     expect(find.byType(DependentWidget), paints..rect(color: color7));
   });
 
-  testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (WidgetTester tester) async {
+  testWidgets('CupertinoDynamicColor used in a CupertinoTheme', (final WidgetTester tester) async {
     late CupertinoDynamicColor color;
     await tester.pumpWidget(
       CupertinoApp(
@@ -424,7 +424,7 @@ void main() {
           primaryColor: dynamicColor,
         ),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
             return const Placeholder();
           },
@@ -442,7 +442,7 @@ void main() {
           primaryColor: dynamicColor,
         ),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
             return const Placeholder();
           },
@@ -461,7 +461,7 @@ void main() {
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.base,
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
                 return const Placeholder();
               },
@@ -483,7 +483,7 @@ void main() {
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
                 return const Placeholder();
               },
@@ -500,7 +500,7 @@ void main() {
     Color? color;
     setUp(() { color = null; });
 
-    testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
+    testWidgets('dynamic color works in cupertino override theme', (final WidgetTester tester) async {
       CupertinoDynamicColor typedColor() => color! as CupertinoDynamicColor;
 
       await tester.pumpWidget(
@@ -516,7 +516,7 @@ void main() {
             child: CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.base,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   color = CupertinoTheme.of(context).primaryColor;
                   return const Placeholder();
                 },
@@ -544,7 +544,7 @@ void main() {
             child: CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.elevated,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   color = CupertinoTheme.of(context).primaryColor;
                   return const Placeholder();
                 },
@@ -557,7 +557,7 @@ void main() {
       expect(typedColor().value, dynamicColor.darkHighContrastElevatedColor.value);
     });
 
-    testWidgets('dynamic color does not work in a material theme', (WidgetTester tester) async {
+    testWidgets('dynamic color does not work in a material theme', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           // This will create a MaterialBasedCupertinoThemeData with primaryColor set to `dynamicColor`.
@@ -567,7 +567,7 @@ void main() {
             child: CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.elevated,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   color = CupertinoTheme.of(context).primaryColor;
                   return const Placeholder();
                 },

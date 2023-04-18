@@ -22,7 +22,7 @@ void main() {
       onNeedVisualUpdate: () {
         onNeedVisualUpdateCallCount +=1;
       },
-      onSemanticsUpdate: (ui.SemanticsUpdate update) {}
+      onSemanticsUpdate: (final ui.SemanticsUpdate update) {}
     );
     owner.ensureSemantics();
     renderObject.attach(owner);
@@ -37,7 +37,7 @@ void main() {
   test('onSemanticsUpdate is called during flushSemantics.', () {
     int onSemanticsUpdateCallCount = 0;
     final PipelineOwner owner = PipelineOwner(
-      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+      onSemanticsUpdate: (final ui.SemanticsUpdate update) {
         onSemanticsUpdateCallCount += 1;
       },
     );
@@ -62,7 +62,7 @@ void main() {
   test('onSemanticsUpdate during sendSemanticsUpdate.', () {
     int onSemanticsUpdateCallCount = 0;
     final SemanticsOwner owner = SemanticsOwner(
-      onSemanticsUpdate: (ui.SemanticsUpdate update) {
+      onSemanticsUpdate: (final ui.SemanticsUpdate update) {
         onSemanticsUpdateCallCount += 1;
       },
     );
@@ -89,7 +89,7 @@ void main() {
   test('ensure errors processing render objects are well formatted', () {
     late FlutterErrorDetails errorDetails;
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       errorDetails = details;
     };
     final PipelineOwner owner = PipelineOwner();
@@ -158,37 +158,37 @@ void main() {
   });
 
   test('PaintingContext.pushClipRect reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<ClipRectLayer>((final PaintingContextCallback painter, final PaintingContext context, final Offset offset, final Layer? oldLayer) {
       return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer as ClipRectLayer?);
     });
   });
 
   test('PaintingContext.pushClipRRect reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipRRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<ClipRRectLayer>((final PaintingContextCallback painter, final PaintingContext context, final Offset offset, final Layer? oldLayer) {
       return context.pushClipRRect(true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter, oldLayer: oldLayer as ClipRRectLayer?);
     });
   });
 
   test('PaintingContext.pushClipPath reuses the layer', () {
-    _testPaintingContextLayerReuse<ClipPathLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<ClipPathLayer>((final PaintingContextCallback painter, final PaintingContext context, final Offset offset, final Layer? oldLayer) {
       return context.pushClipPath(true, offset, Rect.zero, Path(), painter, oldLayer: oldLayer as ClipPathLayer?);
     });
   });
 
   test('PaintingContext.pushColorFilter reuses the layer', () {
-    _testPaintingContextLayerReuse<ColorFilterLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<ColorFilterLayer>((final PaintingContextCallback painter, final PaintingContext context, final Offset offset, final Layer? oldLayer) {
       return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer as ColorFilterLayer?);
     });
   });
 
   test('PaintingContext.pushTransform reuses the layer', () {
-    _testPaintingContextLayerReuse<TransformLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<TransformLayer>((final PaintingContextCallback painter, final PaintingContext context, final Offset offset, final Layer? oldLayer) {
       return context.pushTransform(true, offset, Matrix4.identity(), painter, oldLayer: oldLayer as TransformLayer?);
     });
   });
 
   test('PaintingContext.pushOpacity reuses the layer', () {
-    _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer? oldLayer) {
+    _testPaintingContextLayerReuse<OpacityLayer>((final PaintingContextCallback painter, final PaintingContext context, final Offset offset, final Layer? oldLayer) {
       return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer?);
     });
   });
@@ -299,7 +299,7 @@ void main() {
     final ContainerLayer root = ContainerLayer();
     final PaintingContext context = PaintingContext(root, Rect.zero);
     bool calledBack = false;
-    final TestObservingRenderObject object = TestObservingRenderObject((Layer layer) {
+    final TestObservingRenderObject object = TestObservingRenderObject((final Layer layer) {
       expect(layer, root);
       calledBack = true;
     });
@@ -323,14 +323,14 @@ class TestObservingRenderObject extends RenderBox {
   bool get sizedByParent => true;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     context.addCompositionCallback(callback);
   }
 }
 // Tests the create-update cycle by pumping two frames. The first frame has no
 // prior layer and forces the painting context to create a new one. The second
 // frame reuses the layer painted on the first frame.
-void _testPaintingContextLayerReuse<L extends Layer>(_LayerTestPaintCallback painter) {
+void _testPaintingContextLayerReuse<L extends Layer>(final _LayerTestPaintCallback painter) {
   final _TestCustomLayerBox box = _TestCustomLayerBox(painter);
   layout(box, phase: EnginePhase.paint);
 
@@ -359,7 +359,7 @@ class _TestCustomLayerBox extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final Layer paintedLayer = painter(super.paint, context, offset, layer)!;
     paintedLayers.add(paintedLayer);
     layer = paintedLayer as ContainerLayer;
@@ -397,7 +397,7 @@ class TestRenderObject extends RenderObject {
   int describeSemanticsConfigurationCallCount = 0;
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     describeSemanticsConfigurationCallCount++;
@@ -421,7 +421,7 @@ class LeaderLayerRenderObject extends RenderObject {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (layerLink != null) {
       context.pushLayer(LeaderLayer(link: layerLink!), super.paint, offset);
     }

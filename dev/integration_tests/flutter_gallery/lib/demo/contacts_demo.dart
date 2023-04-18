@@ -12,7 +12,7 @@ class _ContactCategory extends StatelessWidget {
   final List<Widget>? children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -51,7 +51,7 @@ class _ContactItem extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     return MergeSemantics(
       child: Padding(
@@ -63,7 +63,7 @@ class _ContactItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  ...lines.sublist(0, lines.length - 1).map<Widget>((String line) => Text(line)),
+                  ...lines.sublist(0, lines.length - 1).map<Widget>((final String line) => Text(line)),
                   Text(lines.last, style: themeData.textTheme.bodySmall),
                 ],
               ),
@@ -101,7 +101,7 @@ class ContactsDemoState extends State<ContactsDemo> {
   AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Theme(
       data: ThemeData(
         brightness: Brightness.light,
@@ -127,12 +127,12 @@ class ContactsDemoState extends State<ContactsDemo> {
                   },
                 ),
                 PopupMenuButton<AppBarBehavior>(
-                  onSelected: (AppBarBehavior value) {
+                  onSelected: (final AppBarBehavior value) {
                     setState(() {
                       _appBarBehavior = value;
                     });
                   },
-                  itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
+                  itemBuilder: (final BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.normal,
                       child: Text('App bar scrolls away'),

@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/painting/axis_direction/axis_direction.0.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Example app has radio buttons to toggle AxisDirection', (WidgetTester tester) async {
+  testWidgets('Example app has radio buttons to toggle AxisDirection', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExampleApp(),
     );
@@ -22,7 +22,7 @@ void main() {
     expect(viewport.axisDirection, AxisDirection.down);
 
     await tester.tap(
-      find.byWidgetPredicate((Widget widget) {
+      find.byWidgetPredicate((final Widget widget) {
         return widget is Radio<AxisDirection> && widget.value == AxisDirection.up;
       })
     );

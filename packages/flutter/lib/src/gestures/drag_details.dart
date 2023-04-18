@@ -24,7 +24,7 @@ class DragDownDetails {
   /// The [globalPosition] argument must not be null.
   DragDownDetails({
     this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    final Offset? localPosition,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
@@ -70,7 +70,7 @@ class DragStartDetails {
   DragStartDetails({
     this.sourceTimeStamp,
     this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    final Offset? localPosition,
     this.kind,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -139,7 +139,7 @@ class DragUpdateDetails {
     this.delta = Offset.zero,
     this.primaryDelta,
     required this.globalPosition,
-    Offset? localPosition,
+    final Offset? localPosition,
   }) : assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)

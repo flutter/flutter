@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tracks picture layers accurately when painting is interleaved with a pushLayer', (WidgetTester tester) async {
+  testWidgets('Tracks picture layers accurately when painting is interleaved with a pushLayer', (final WidgetTester tester) async {
     // Creates a RenderObject that will paint into multiple picture layers.
     // Asserts that both layers get a handle, and that all layers get correctly
     // released.
@@ -40,10 +40,10 @@ void main() {
 
 class SimplePainter extends CustomPainter {
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     canvas.drawPaint(Paint());
   }
 
   @override
-  bool shouldRepaint(SimplePainter oldDelegate) => true;
+  bool shouldRepaint(final SimplePainter oldDelegate) => true;
 }

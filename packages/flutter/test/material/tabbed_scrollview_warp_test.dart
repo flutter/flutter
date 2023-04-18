@@ -17,10 +17,10 @@ class MySliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => 150.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) => const Placeholder(color: Colors.teal);
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) => const Placeholder(color: Colors.teal);
 
   @override
-  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(covariant final SliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
 class MyHomePage extends StatefulWidget {
@@ -47,17 +47,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         bottom: TabBar(
           controller: tabController,
-          tabs: List<Widget>.generate(tabCount, (int index) => Tab(text: 'Tab $index')).toList(),
+          tabs: List<Widget>.generate(tabCount, (final int index) => Tab(text: 'Tab $index')).toList(),
         ),
       ),
       body: TabBarView(
         controller: tabController,
-        children: List<Widget>.generate(tabCount, (int index) {
+        children: List<Widget>.generate(tabCount, (final int index) {
           return CustomScrollView(
             // The bug only occurs when this key is included
             key: ValueKey<String>('Page $index'),
@@ -74,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 }
 
 void main() {
-  testWidgets('Tabbed CustomScrollViews, warp from tab 1 to 3', (WidgetTester tester) async {
+  testWidgets('Tabbed CustomScrollViews, warp from tab 1 to 3', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: MyHomePage()));
 
     // should not crash.

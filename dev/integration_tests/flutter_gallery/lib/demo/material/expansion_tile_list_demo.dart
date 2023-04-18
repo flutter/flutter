@@ -12,7 +12,7 @@ class ExpansionTileListDemo extends StatelessWidget {
   static const String routeName = '/material/expansion-tile-list';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expand/collapse list control'),

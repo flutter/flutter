@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
-  testWidgets('Can pick a duration from CupertinoTimerPicker', (WidgetTester tester) async {
+  testWidgets('Can pick a duration from CupertinoTimerPicker', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TimerPickerApp(),
     );

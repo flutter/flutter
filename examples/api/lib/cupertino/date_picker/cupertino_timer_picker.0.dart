@@ -12,7 +12,7 @@ class TimerPickerApp extends StatelessWidget {
   const TimerPickerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: TimerPickerExample(),
@@ -32,10 +32,10 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
 
   // This shows a CupertinoModalPopup with a reasonable fixed height which hosts
   // a CupertinoTimerPicker.
-  void _showDialog(Widget child) {
+  void _showDialog(final Widget child) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => Container(
+      builder: (final BuildContext context) => Container(
         height: 216,
         padding: const EdgeInsets.only(top: 6.0),
         // The bottom margin is provided to align the popup above the system
@@ -55,7 +55,7 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoTimerPicker Sample'),
@@ -80,7 +80,7 @@ class _TimerPickerExampleState extends State<TimerPickerExample> {
                         initialTimerDuration: duration,
                         // This is called when the user changes the timer's
                         // duration.
-                        onTimerDurationChanged: (Duration newDuration) {
+                        onTimerDurationChanged: (final Duration newDuration) {
                           setState(() => duration = newDuration);
                         },
                       ),
@@ -112,7 +112,7 @@ class _TimerPickerItem extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DecoratedBox(
       decoration: const BoxDecoration(
         border: Border(

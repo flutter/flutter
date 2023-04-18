@@ -38,13 +38,13 @@ abstract class Simulation {
   Simulation({ this.tolerance = Tolerance.defaultTolerance });
 
   /// The position of the object in the simulation at the given time.
-  double x(double time);
+  double x(final double time);
 
   /// The velocity of the object in the simulation at the given time.
-  double dx(double time);
+  double dx(final double time);
 
   /// Whether the simulation is "done" at the given time.
-  bool isDone(double time);
+  bool isDone(final double time);
 
   /// How close to the actual end of the simulation a value at a particular time
   /// must be before [isDone] considers the simulation to be "done".

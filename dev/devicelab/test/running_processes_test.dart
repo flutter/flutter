@@ -89,38 +89,38 @@ class FakeProcessManager implements ProcessManager {
   final List<String> log = <String>[];
 
   @override
-  bool canRun(Object? a, { String? workingDirectory }) {
+  bool canRun(final Object? a, { final String? workingDirectory }) {
     log.add('canRun($a, $workingDirectory)');
     return true;
   }
 
   @override
-  bool killPid(int a, [ProcessSignal? b]) {
+  bool killPid(final int a, [final ProcessSignal? b]) {
     log.add('killPid($a, $b)');
     return true;
   }
 
   @override
-  Future<ProcessResult> run(List<Object> a, {
-    Map<String, String>? environment,
-    bool? includeParentEnvironment,
-    bool? runInShell,
-    Encoding? stderrEncoding,
-    Encoding? stdoutEncoding,
-    String? workingDirectory,
+  Future<ProcessResult> run(final List<Object> a, {
+    final Map<String, String>? environment,
+    final bool? includeParentEnvironment,
+    final bool? runInShell,
+    final Encoding? stderrEncoding,
+    final Encoding? stdoutEncoding,
+    final String? workingDirectory,
   }) async {
     log.add('run($a, $environment, $includeParentEnvironment, $runInShell, $stderrEncoding, $stdoutEncoding, $workingDirectory)');
     return ProcessResult(1, 0, 'stdout', 'stderr');
   }
 
   @override
-  ProcessResult runSync(List<Object> a, {
-    Map<String, String>? environment,
-    bool? includeParentEnvironment,
-    bool? runInShell,
-    Encoding? stderrEncoding,
-    Encoding? stdoutEncoding,
-    String? workingDirectory,
+  ProcessResult runSync(final List<Object> a, {
+    final Map<String, String>? environment,
+    final bool? includeParentEnvironment,
+    final bool? runInShell,
+    final Encoding? stderrEncoding,
+    final Encoding? stdoutEncoding,
+    final String? workingDirectory,
   }) {
     log.add('runSync($a, $environment, $includeParentEnvironment, $runInShell, $stderrEncoding, $stdoutEncoding, $workingDirectory)');
     return ProcessResult(1, 0, 'stdout', 'stderr');
@@ -128,12 +128,12 @@ class FakeProcessManager implements ProcessManager {
 
   @override
   Future<Process> start(
-    List<Object> a, {
-    Map<String, String>? environment,
-    bool? includeParentEnvironment,
-    ProcessStartMode? mode,
-    bool? runInShell,
-    String? workingDirectory,
+    final List<Object> a, {
+    final Map<String, String>? environment,
+    final bool? includeParentEnvironment,
+    final ProcessStartMode? mode,
+    final bool? runInShell,
+    final String? workingDirectory,
   }) {
     log.add('start($a, $environment, $includeParentEnvironment, $mode, $runInShell, $workingDirectory)');
     return Completer<Process>().future;

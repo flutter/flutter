@@ -13,7 +13,7 @@ void main() {
     const ShapeBorder defaultFABShape = CircleBorder();
     const EdgeInsets defaultFABPadding = EdgeInsets.zero;
 
-    testWidgets('theme: ThemeData.light(), enabled: true', (WidgetTester tester) async {
+    testWidgets('theme: ThemeData.light(), enabled: true', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),
@@ -40,7 +40,7 @@ void main() {
       expect(raw.materialTapTargetSize, MaterialTapTargetSize.padded);
     });
 
-    testWidgets('theme: ThemeData.light(), enabled: false', (WidgetTester tester) async {
+    testWidgets('theme: ThemeData.light(), enabled: false', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData.light(),

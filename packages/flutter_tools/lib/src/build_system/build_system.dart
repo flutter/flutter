@@ -138,13 +138,13 @@ abstract class Target {
   ///
   /// Returning `true` will cause [build] to be skipped. This is equivalent
   /// to a build that produces no outputs.
-  bool canSkip(Environment environment) => false;
+  bool canSkip(final Environment environment) => false;
 
   /// The action which performs this build step.
-  Future<void> build(Environment environment);
+  Future<void> build(final Environment environment);
 
   /// Create a [Node] with resolved inputs and outputs.
-  Node _toNode(Environment environment) {
+  Node _toNode(final Environment environment) {
     final ResolvedFiles inputsFiles = resolveInputs(environment);
     final ResolvedFiles outputFiles = resolveOutputs(environment);
     return Node(
@@ -160,15 +160,15 @@ abstract class Target {
   }
 
   /// Invoke to remove the stamp file if the [buildAction] threw an exception.
-  void clearStamp(Environment environment) {
+  void clearStamp(final Environment environment) {
     final File stamp = _findStampFile(environment);
     ErrorHandlingFileSystem.deleteIfExists(stamp);
   }
 
   void _writeStamp(
-    List<File> inputs,
-    List<File> outputs,
-    Environment environment,
+    final List<File> inputs,
+    final List<File> outputs,
+    final Environment environment,
   ) {
     final File stamp = _findStampFile(environment);
     final List<String> inputPaths = <String>[];
@@ -191,7 +191,7 @@ abstract class Target {
 
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
-  ResolvedFiles resolveInputs(Environment environment) {
+  ResolvedFiles resolveInputs(final Environment environment) {
     return _resolveConfiguration(inputs, depfiles, environment);
   }
 
@@ -199,14 +199,14 @@ abstract class Target {
   ///
   /// The [implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
-  ResolvedFiles resolveOutputs(Environment environment) {
+  ResolvedFiles resolveOutputs(final Environment environment) {
     return _resolveConfiguration(outputs, depfiles, environment, inputs: false);
   }
 
   /// Performs a fold across this target and its dependencies.
-  T fold<T>(T initialValue, T Function(T previousValue, Target target) combine) {
+  T fold<T>(final T initialValue, final T Function(T previousValue, Target target) combine) {
     final T dependencyResult = dependencies.fold(
-        initialValue, (T prev, Target t) => t.fold(prev, combine));
+        initialValue, (final T prev, final Target t) => t.fold(prev, combine));
     return combine(dependencyResult, this);
   }
 
@@ -215,7 +215,7 @@ abstract class Target {
   ///
   /// This requires constants from the [Environment] to resolve the paths of
   /// inputs and the output stamp.
-  Map<String, Object> toJson(Environment environment) {
+  Map<String, Object> toJson(final Environment environment) {
     return <String, Object>{
       'name': name,
       'dependencies': <String>[
@@ -232,16 +232,16 @@ abstract class Target {
   }
 
   /// Locate the stamp file for a particular target name and environment.
-  File _findStampFile(Environment environment) {
+  File _findStampFile(final Environment environment) {
     final String fileName = '$name.stamp';
     return environment.buildDir.childFile(fileName);
   }
 
   static ResolvedFiles _resolveConfiguration(
-    List<Source> config,
-    List<String> depfiles,
-    Environment environment, {
-    bool inputs = true,
+    final List<Source> config,
+    final List<String> depfiles,
+    final Environment environment, {
+    final bool inputs = true,
   }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (final Source source in config) {
@@ -266,7 +266,7 @@ class CompositeTarget extends Target {
   String get name => '_composite';
 
   @override
-  Future<void> build(Environment environment) async { }
+  Future<void> build(final Environment environment) async { }
 
   @override
   List<Source> get inputs => <Source>[];
@@ -324,21 +324,21 @@ class Environment {
   ///
   /// [engineVersion] should be set to null for local engine builds.
   factory Environment({
-    required Directory projectDir,
-    required Directory outputDir,
-    required Directory cacheDir,
-    required Directory flutterRootDir,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required Platform platform,
-    required Usage usage,
-    String? engineVersion,
-    required bool generateDartPluginRegistry,
-    Directory? buildDir,
-    Map<String, String> defines = const <String, String>{},
-    Map<String, String> inputs = const <String, String>{},
+    required final Directory projectDir,
+    required final Directory outputDir,
+    required final Directory cacheDir,
+    required final Directory flutterRootDir,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Artifacts artifacts,
+    required final ProcessManager processManager,
+    required final Platform platform,
+    required final Usage usage,
+    final String? engineVersion,
+    required final bool generateDartPluginRegistry,
+    final Directory? buildDir,
+    final Map<String, String> defines = const <String, String>{},
+    final Map<String, String> inputs = const <String, String>{},
   }) {
     // Compute a unique hash of this build's particular environment.
     // Sort the keys by key so that the result is stable. We always
@@ -385,22 +385,22 @@ class Environment {
   ///
   /// Any directories not provided will fallback to a [testDirectory]
   @visibleForTesting
-  factory Environment.test(Directory testDirectory, {
-    Directory? projectDir,
-    Directory? outputDir,
-    Directory? cacheDir,
-    Directory? flutterRootDir,
-    Directory? buildDir,
-    Map<String, String> defines = const <String, String>{},
-    Map<String, String> inputs = const <String, String>{},
-    String? engineVersion,
-    Platform? platform,
-    Usage? usage,
-    bool generateDartPluginRegistry = false,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
+  factory Environment.test(final Directory testDirectory, {
+    final Directory? projectDir,
+    final Directory? outputDir,
+    final Directory? cacheDir,
+    final Directory? flutterRootDir,
+    final Directory? buildDir,
+    final Map<String, String> defines = const <String, String>{},
+    final Map<String, String> inputs = const <String, String>{},
+    final String? engineVersion,
+    final Platform? platform,
+    final Usage? usage,
+    final bool generateDartPluginRegistry = false,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Artifacts artifacts,
+    required final ProcessManager processManager,
   }) {
     return Environment(
       projectDir: projectDir ?? testDirectory,
@@ -552,9 +552,9 @@ abstract class BuildSystem {
 
   /// Build [target] and all of its dependencies.
   Future<BuildResult> build(
-    Target target,
-    Environment environment, {
-    BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
+    final Target target,
+    final Environment environment, {
+    final BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
   });
 
   /// Perform an incremental build of [target] and all of its dependencies.
@@ -562,17 +562,17 @@ abstract class BuildSystem {
   /// If [previousBuild] is not provided, a new incremental build is
   /// initialized.
   Future<BuildResult> buildIncremental(
-    Target target,
-    Environment environment,
-    BuildResult? previousBuild,
+    final Target target,
+    final Environment environment,
+    final BuildResult? previousBuild,
   );
 }
 
 class FlutterBuildSystem extends BuildSystem {
   const FlutterBuildSystem({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required Logger logger,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    required final Logger logger,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _logger = logger;
@@ -583,9 +583,9 @@ class FlutterBuildSystem extends BuildSystem {
 
   @override
   Future<BuildResult> build(
-    Target target,
-    Environment environment, {
-    BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
+    final Target target,
+    final Environment environment, {
+    final BuildSystemConfig buildSystemConfig = const BuildSystemConfig(),
   }) async {
     environment.buildDir.createSync(recursive: true);
     environment.outputDir.createSync(recursive: true);
@@ -624,12 +624,12 @@ class FlutterBuildSystem extends BuildSystem {
     // We also remove files under .dart_tool, since these are intermediaries
     // and don't need to be tracked by external systems.
     {
-      buildInstance.inputFiles.removeWhere((String path, File file) {
+      buildInstance.inputFiles.removeWhere((final String path, final File file) {
         return path.contains('.flutter-plugins') ||
                        path.contains('xcconfig') ||
                      path.contains('.dart_tool');
       });
-      buildInstance.outputFiles.removeWhere((String path, File file) {
+      buildInstance.outputFiles.removeWhere((final String path, final File file) {
         return path.contains('.flutter-plugins') ||
                        path.contains('xcconfig') ||
                      path.contains('.dart_tool');
@@ -646,9 +646,9 @@ class FlutterBuildSystem extends BuildSystem {
       exceptions: buildInstance.exceptionMeasurements,
       performance: buildInstance.stepTimings,
       inputFiles: buildInstance.inputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
+          ..sort((final File a, final File b) => a.path.compareTo(b.path)),
       outputFiles: buildInstance.outputFiles.values.toList()
-          ..sort((File a, File b) => a.path.compareTo(b.path)),
+          ..sort((final File a, final File b) => a.path.compareTo(b.path)),
     );
   }
 
@@ -656,9 +656,9 @@ class FlutterBuildSystem extends BuildSystem {
 
   @override
   Future<BuildResult> buildIncremental(
-    Target target,
-    Environment environment,
-    BuildResult? previousBuild,
+    final Target target,
+    final Environment environment,
+    final BuildResult? previousBuild,
   ) async {
     environment.buildDir.createSync(recursive: true);
     environment.outputDir.createSync(recursive: true);
@@ -711,9 +711,9 @@ class FlutterBuildSystem extends BuildSystem {
   /// output to the same directory.
   @visibleForTesting
   void trackSharedBuildDirectory(
-    Environment environment,
-    FileSystem fileSystem,
-    Map<String, File> currentOutputs,
+    final Environment environment,
+    final FileSystem fileSystem,
+    final Map<String, File> currentOutputs,
   ) {
     final String currentBuildId = fileSystem.path.basename(environment.buildDir.path);
     final File lastBuildIdFile = environment.outputDir.childFile('.last_build_id');
@@ -761,7 +761,7 @@ class _BuildInstance {
     required this.buildSystemConfig,
     required this.logger,
     required this.fileSystem,
-    Platform? platform,
+    final Platform? platform,
   })
     : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
@@ -781,16 +781,16 @@ class _BuildInstance {
   // Exceptions caught during the build process.
   final Map<String, ExceptionMeasurement> exceptionMeasurements = <String, ExceptionMeasurement>{};
 
-  Future<bool> invokeTarget(Node node) async {
+  Future<bool> invokeTarget(final Node node) async {
     final List<bool> results = await Future.wait(node.dependencies.map(invokeTarget));
-    if (results.any((bool result) => !result)) {
+    if (results.any((final bool result) => !result)) {
       return false;
     }
     final AsyncMemoizer<bool> memoizer = pending[node.target.name] ??= AsyncMemoizer<bool>();
     return memoizer.runOnce(() => _invokeInternal(node));
   }
 
-  Future<bool> _invokeInternal(Node node) async {
+  Future<bool> _invokeInternal(final Node node) async {
     final PoolResource resource = await resourcePool.request();
     final Stopwatch stopwatch = Stopwatch()..start();
     bool succeeded = true;
@@ -926,8 +926,8 @@ class PerformanceMeasurement {
 /// Check if there are any dependency cycles in the target.
 ///
 /// Throws a [CycleException] if one is encountered.
-void checkCycles(Target initial) {
-  void checkInternal(Target target, Set<Target> visited, Set<Target> stack) {
+void checkCycles(final Target initial) {
+  void checkInternal(final Target target, final Set<Target> visited, final Set<Target> stack) {
     if (stack.contains(target)) {
       throw CycleException(stack..add(target));
     }
@@ -945,7 +945,7 @@ void checkCycles(Target initial) {
 }
 
 /// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
+void verifyOutputDirectories(final List<File> outputs, final Environment environment, final Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
   final List<File> missingOutputs = <File>[];
@@ -971,7 +971,7 @@ class Node {
     this.inputs,
     this.outputs,
     this.dependencies,
-    Environment environment,
+    final Environment environment,
     this.missingDepfile,
   ) {
     final File stamp = target._findStampFile(environment);
@@ -1047,7 +1047,7 @@ class Node {
   bool get dirty => _dirty;
   bool _dirty = false;
 
-  InvalidatedReason _invalidate(InvalidatedReasonKind kind) {
+  InvalidatedReason _invalidate(final InvalidatedReasonKind kind) {
     return invalidatedReasons[kind] ??= InvalidatedReason(kind);
   }
 
@@ -1055,10 +1055,10 @@ class Node {
   ///
   /// Returns whether this target can be skipped.
   bool computeChanges(
-    Environment environment,
-    FileStore fileStore,
-    FileSystem fileSystem,
-    Logger logger,
+    final Environment environment,
+    final FileStore fileStore,
+    final FileSystem fileSystem,
+    final Logger logger,
   ) {
     final Set<String> currentOutputPaths = <String>{
       for (final File file in outputs) file.path,
@@ -1124,10 +1124,10 @@ class Node {
     // always being rerun.
     if (missingInputs.isNotEmpty) {
       _dirty = true;
-      final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
+      final String missingMessage = missingInputs.map((final File file) => file.path).join(', ');
       logger.printTrace('invalidated build due to missing files: $missingMessage');
       final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputMissing);
-      reason.data.addAll(missingInputs.map((File file) => file.path));
+      reason.data.addAll(missingInputs.map((final File file) => file.path));
     }
 
     // If we have files to diff, compute them asynchronously and then
@@ -1136,7 +1136,7 @@ class Node {
       final List<File> dirty = fileStore.diffFileList(sourcesToDiff);
       if (dirty.isNotEmpty) {
         final InvalidatedReason reason = _invalidate(InvalidatedReasonKind.inputChanged);
-        reason.data.addAll(dirty.map((File file) => file.path));
+        reason.data.addAll(dirty.map((final File file) => file.path));
         _dirty = true;
       }
     }

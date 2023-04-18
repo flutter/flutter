@@ -8,15 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
-void verify(WidgetTester tester, List<Offset> answerKey) {
+void verify(final WidgetTester tester, final List<Offset> answerKey) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero),
+    (final RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   expect(testAnswers, equals(answerKey));
 }
 
 void main() {
-  testWidgets('Basic Wrap test (LTR)', (WidgetTester tester) async {
+  testWidgets('Basic Wrap test (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Wrap(
         textDirection: TextDirection.ltr,
@@ -131,7 +131,7 @@ void main() {
 
   });
 
-  testWidgets('Basic Wrap test (RTL)', (WidgetTester tester) async {
+  testWidgets('Basic Wrap test (RTL)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Wrap(
         textDirection: TextDirection.rtl,
@@ -249,12 +249,12 @@ void main() {
 
   });
 
-  testWidgets('Empty wrap', (WidgetTester tester) async {
+  testWidgets('Empty wrap', (final WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Wrap(alignment: WrapAlignment.center)));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(Size.zero));
   });
 
-  testWidgets('Wrap alignment (LTR)', (WidgetTester tester) async {
+  testWidgets('Wrap alignment (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       alignment: WrapAlignment.center,
       spacing: 5.0,
@@ -324,7 +324,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Wrap alignment (RTL)', (WidgetTester tester) async {
+  testWidgets('Wrap alignment (RTL)', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       alignment: WrapAlignment.center,
       spacing: 5.0,
@@ -394,7 +394,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Wrap runAlignment (DOWN)', (WidgetTester tester) async {
+  testWidgets('Wrap runAlignment (DOWN)', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       runAlignment: WrapAlignment.center,
       runSpacing: 5.0,
@@ -481,7 +481,7 @@ void main() {
 
   });
 
-  testWidgets('Wrap runAlignment (UP)', (WidgetTester tester) async {
+  testWidgets('Wrap runAlignment (UP)', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       runAlignment: WrapAlignment.center,
       runSpacing: 5.0,
@@ -572,7 +572,7 @@ void main() {
 
   });
 
-  testWidgets('Shrink-wrapping Wrap test', (WidgetTester tester) async {
+  testWidgets('Shrink-wrapping Wrap test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Align(
         alignment: Alignment.topLeft,
@@ -622,7 +622,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Wrap spacing test', (WidgetTester tester) async {
+  testWidgets('Wrap spacing test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Align(
         alignment: Alignment.topLeft,
@@ -647,7 +647,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Vertical Wrap test with spacing', (WidgetTester tester) async {
+  testWidgets('Vertical Wrap test with spacing', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Align(
         alignment: Alignment.topLeft,
@@ -706,7 +706,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Visual overflow generates a clip', (WidgetTester tester) async {
+  testWidgets('Visual overflow generates a clip', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -728,7 +728,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)), paints..clipRect());
   });
 
-  testWidgets('Hit test children in wrap', (WidgetTester tester) async {
+  testWidgets('Hit test children in wrap', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(Wrap(
@@ -764,14 +764,14 @@ void main() {
     expect(log, equals(<String>['hit']));
   });
 
-  testWidgets('RenderWrap toStringShallow control test', (WidgetTester tester) async {
+  testWidgets('RenderWrap toStringShallow control test', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(alignment: WrapAlignment.center));
 
     final RenderBox wrap = tester.renderObject(find.byType(Wrap));
     expect(wrap.toStringShallow(), hasOneLineDescription);
   });
 
-  testWidgets('RenderWrap toString control test', (WidgetTester tester) async {
+  testWidgets('RenderWrap toString control test', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       direction: Axis.vertical,
       runSpacing: 7.0,
@@ -789,7 +789,7 @@ void main() {
     expect(width, equals(2021));
   });
 
-  testWidgets('Wrap baseline control test', (WidgetTester tester) async {
+  testWidgets('Wrap baseline control test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Baseline(
@@ -817,7 +817,7 @@ void main() {
     );
   });
 
-  testWidgets('Spacing with slight overflow', (WidgetTester tester) async {
+  testWidgets('Spacing with slight overflow', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(
       textDirection: TextDirection.ltr,
       spacing: 10.0,
@@ -839,7 +839,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Object exactly matches container width', (WidgetTester tester) async {
+  testWidgets('Object exactly matches container width', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Column(
         children: <Widget>[
@@ -881,7 +881,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Wrap can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgets('Wrap can set and update clipBehavior', (final WidgetTester tester) async {
     await tester.pumpWidget(const Wrap(textDirection: TextDirection.ltr));
     final RenderWrap renderObject = tester.allRenderObjects.whereType<RenderWrap>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
@@ -890,7 +890,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('Horizontal wrap - IntrinsicsHeight', (WidgetTester tester) async {
+  testWidgets('Horizontal wrap - IntrinsicsHeight', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
       const Directionality(
@@ -922,7 +922,7 @@ void main() {
     expect(tester.getSize(find.byType(IntrinsicHeight)).height, 2 * 16 + 40);
   });
 
-  testWidgets('Vertical wrap - IntrinsicsWidth', (WidgetTester tester) async {
+  testWidgets('Vertical wrap - IntrinsicsWidth', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/48679.
     await tester.pumpWidget(
       const Directionality(

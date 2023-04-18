@@ -10,7 +10,7 @@ import 'package:flutter_api_samples/material/context_menu/editable_text_toolbar_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('showing and hiding the custom context menu in TextField with a specific selection', (WidgetTester tester) async {
+  testWidgets('showing and hiding the custom context menu in TextField with a specific selection', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.EditableTextToolbarBuilderExampleApp(),
     );

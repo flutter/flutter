@@ -50,12 +50,12 @@ class NetworkImage
   final Map<String, String>? headers;
 
   @override
-  Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
+  Future<NetworkImage> obtainKey(final image_provider.ImageConfiguration configuration) {
     return SynchronousFuture<NetworkImage>(this);
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter load(final image_provider.NetworkImage key, final image_provider.DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -72,7 +72,7 @@ class NetworkImage
   }
 
   @override
-  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(final image_provider.NetworkImage key, final image_provider.DecoderBufferCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -89,7 +89,7 @@ class NetworkImage
   }
 
   @override
-  ImageStreamCompleter loadImage(image_provider.NetworkImage key, image_provider.ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(final image_provider.NetworkImage key, final image_provider.ImageDecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -104,7 +104,7 @@ class NetworkImage
     );
   }
 
-  InformationCollector? _imageStreamInformationCollector(image_provider.NetworkImage key) {
+  InformationCollector? _imageStreamInformationCollector(final image_provider.NetworkImage key) {
     InformationCollector? collector;
     assert(() {
       collector = () => <DiagnosticsNode>[
@@ -120,11 +120,11 @@ class NetworkImage
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
   // directly in place of the typical `instantiateImageCodec` method.
   Future<ui.Codec> _loadAsync(
-    NetworkImage key,
-    image_provider.ImageDecoderCallback? decode,
-    image_provider.DecoderBufferCallback? decodeBufferDeprecated,
-    image_provider.DecoderCallback? decodeDeprecated,
-    StreamController<ImageChunkEvent> chunkEvents,
+    final NetworkImage key,
+    final image_provider.ImageDecoderCallback? decode,
+    final image_provider.DecoderBufferCallback? decodeBufferDeprecated,
+    final image_provider.DecoderCallback? decodeDeprecated,
+    final StreamController<ImageChunkEvent> chunkEvents,
   ) async {
     assert(key == this);
 
@@ -142,12 +142,12 @@ class NetworkImage
       request.open('GET', key.url, true);
       request.responseType = 'arraybuffer';
       if (containsNetworkImageHeaders) {
-        key.headers!.forEach((String header, String value) {
+        key.headers!.forEach((final String header, final String value) {
           request.setRequestHeader(header, value);
         });
       }
 
-      request.addEventListener('load', createDomEventListener((DomEvent e) {
+      request.addEventListener('load', createDomEventListener((final DomEvent e) {
         final int? status = request.status;
         final bool accepted = status! >= 200 && status < 300;
         final bool fileUri = status == 0; // file:// URIs have status of 0.
@@ -195,7 +195,7 @@ class NetworkImage
       // ignore: undefined_function, avoid_dynamic_calls
       return ui.webOnlyInstantiateImageCodecFromUrl(
         resolved,
-        chunkCallback: (int bytes, int total) {
+        chunkCallback: (final int bytes, final int total) {
           chunkEvents.add(ImageChunkEvent(
               cumulativeBytesLoaded: bytes, expectedTotalBytes: total));
         },
@@ -204,7 +204,7 @@ class NetworkImage
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

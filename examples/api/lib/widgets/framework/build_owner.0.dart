@@ -16,7 +16,7 @@ void main() {
     WidgetsApp(
       title: 'BuildOwner Sample',
       color: const Color(0xff000000),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return Scaffold(
           body: Center(
             child: Text(size.toString()),
@@ -27,7 +27,7 @@ void main() {
   );
 }
 
-Size measureWidget(Widget widget) {
+Size measureWidget(final Widget widget) {
   final PipelineOwner pipelineOwner = PipelineOwner();
   final MeasurementView rootView = pipelineOwner.rootNode = MeasurementView();
   final BuildOwner buildOwner = BuildOwner(focusManager: FocusManager());

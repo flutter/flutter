@@ -12,7 +12,7 @@ class WillPopScopeExampleApp extends StatelessWidget {
   const WillPopScopeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: WillPopScopeExample(),
     );
@@ -29,7 +29,7 @@ class WillPopScopeExample extends StatefulWidget {
 class _WillPopScopeExampleState extends State<WillPopScopeExample> {
   bool shouldPop = true;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         return shouldPop;
@@ -47,7 +47,7 @@ class _WillPopScopeExampleState extends State<WillPopScopeExample> {
                 onPressed: () {
                   Navigator.of(context).push<void>(
                     MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return const WillPopScopeExample();
                       },
                     ),

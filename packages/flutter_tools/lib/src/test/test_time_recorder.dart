@@ -12,18 +12,18 @@ class TestTimeRecorder {
       {this.stopwatchFactory = const StopwatchFactory()})
       : _phaseRecords = List<TestTimeRecord>.generate(
           TestTimePhases.values.length,
-          (_) => TestTimeRecord(stopwatchFactory),
+          (final _) => TestTimeRecord(stopwatchFactory),
         );
 
   final List<TestTimeRecord> _phaseRecords;
   final Logger logger;
   final StopwatchFactory stopwatchFactory;
 
-  Stopwatch start(TestTimePhases phase) {
+  Stopwatch start(final TestTimePhases phase) {
     return _phaseRecords[phase.index].start();
   }
 
-  void stop(TestTimePhases phase, Stopwatch stopwatch) {
+  void stop(final TestTimePhases phase, final Stopwatch stopwatch) {
     _phaseRecords[phase.index].stop(stopwatch);
   }
 
@@ -72,7 +72,7 @@ class TestTimeRecord {
     return stopwatch;
   }
 
-  void stop(Stopwatch stopwatch) {
+  void stop(final Stopwatch stopwatch) {
     _currentlyRunningCount--;
     if (_currentlyRunningCount == 0) {
       _wallClockRuntime.stop();

@@ -54,7 +54,7 @@ class SyntaxHighlighterStyle {
 }
 
 abstract class SyntaxHighlighter {
-  TextSpan format(String src);
+  TextSpan format(final String src);
 }
 
 class DartSyntaxHighlighter extends SyntaxHighlighter {
@@ -85,7 +85,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   late List<_HighlightSpan> _spans;
 
   @override
-  TextSpan format(String? src) {
+  TextSpan format(final String? src) {
     _src = src;
     _scanner = StringScanner(_src!);
 
@@ -311,7 +311,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
     }
   }
 
-  bool _firstLetterIsUpperCase(String str) {
+  bool _firstLetterIsUpperCase(final String str) {
     if (str.isNotEmpty) {
       final String first = str.substring(0, 1);
       return first == first.toUpperCase();
@@ -336,11 +336,11 @@ class _HighlightSpan {
   final int start;
   final int end;
 
-  String textForSpan(String src) {
+  String textForSpan(final String src) {
     return src.substring(start, end);
   }
 
-  TextStyle? textStyle(SyntaxHighlighterStyle? style) {
+  TextStyle? textStyle(final SyntaxHighlighterStyle? style) {
     if (type == _HighlightType.number) {
       return style!.numberStyle;
     } else if (type == _HighlightType.comment) {

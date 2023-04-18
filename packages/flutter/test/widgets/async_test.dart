@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget snapshotText(BuildContext context, AsyncSnapshot<String> snapshot) {
+  Widget snapshotText(final BuildContext context, final AsyncSnapshot<String> snapshot) {
     return Text(snapshot.toString(), textDirection: TextDirection.ltr);
   }
   group('AsyncSnapshot', () {
@@ -66,21 +66,21 @@ void main() {
     });
   });
   group('Async smoke tests', () {
-    testWidgets('FutureBuilder', (WidgetTester tester) async {
+    testWidgets('FutureBuilder', (final WidgetTester tester) async {
       await tester.pumpWidget(FutureBuilder<String>(
         future: Future<String>.value('hello'),
         builder: snapshotText,
       ));
       await eventFiring(tester);
     });
-    testWidgets('StreamBuilder', (WidgetTester tester) async {
+    testWidgets('StreamBuilder', (final WidgetTester tester) async {
       await tester.pumpWidget(StreamBuilder<String>(
         stream: Stream<String>.fromIterable(<String>['hello', 'world']),
         builder: snapshotText,
       ));
       await eventFiring(tester);
     });
-    testWidgets('StreamFold', (WidgetTester tester) async {
+    testWidgets('StreamFold', (final WidgetTester tester) async {
       await tester.pumpWidget(StringCollector(
         stream: Stream<String>.fromIterable(<String>['hello', 'world']),
       ));
@@ -88,11 +88,11 @@ void main() {
     });
   });
   group('FutureBuilder', () {
-    testWidgets('gives expected snapshot with SynchronousFuture', (WidgetTester tester) async {
+    testWidgets('gives expected snapshot with SynchronousFuture', (final WidgetTester tester) async {
       final SynchronousFuture<String> future = SynchronousFuture<String>('flutter');
       await tester.pumpWidget(FutureBuilder<String>(
         future: future,
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        builder: (final BuildContext context, final AsyncSnapshot<String> snapshot) {
           expect(snapshot.connectionState, ConnectionState.done);
           expect(snapshot.data, 'flutter');
           expect(snapshot.error, null);
@@ -102,7 +102,7 @@ void main() {
       ));
     });
 
-    testWidgets('gracefully handles transition from null future', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition from null future', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(FutureBuilder<String>(
         key: key, builder: snapshotText,
@@ -114,7 +114,7 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, null, null, null)'), findsOneWidget);
     });
-    testWidgets('gracefully handles transition to null future', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition to null future', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(FutureBuilder<String>(
@@ -129,7 +129,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.none, null, null, null)'), findsOneWidget);
     });
-    testWidgets('gracefully handles transition to other future', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition to other future', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final Completer<String> completerA = Completer<String>();
       final Completer<String> completerB = Completer<String>();
@@ -146,7 +146,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, B, null, null)'), findsOneWidget);
     });
-    testWidgets('tracks life-cycle of Future to success', (WidgetTester tester) async {
+    testWidgets('tracks life-cycle of Future to success', (final WidgetTester tester) async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(FutureBuilder<String>(
         future: completer.future, builder: snapshotText,
@@ -156,7 +156,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, hello, null, null)'), findsOneWidget);
     });
-    testWidgets('tracks life-cycle of Future to error', (WidgetTester tester) async {
+    testWidgets('tracks life-cycle of Future to error', (final WidgetTester tester) async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(FutureBuilder<String>(
         future: completer.future, builder: snapshotText,
@@ -166,7 +166,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, trace)'), findsOneWidget);
     });
-    testWidgets('runs the builder using given initial data', (WidgetTester tester) async {
+    testWidgets('runs the builder using given initial data', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(FutureBuilder<String>(
         key: key,
@@ -175,7 +175,7 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.none, I, null, null)'), findsOneWidget);
     });
-    testWidgets('ignores initialData when reconfiguring', (WidgetTester tester) async {
+    testWidgets('ignores initialData when reconfiguring', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(FutureBuilder<String>(
         key: key,
@@ -192,7 +192,7 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, I, null, null)'), findsOneWidget);
     });
-    testWidgets('debugRethrowError rethrows caught error', (WidgetTester tester) async {
+    testWidgets('debugRethrowError rethrows caught error', (final WidgetTester tester) async {
       FutureBuilder.debugRethrowError = true;
       final Completer<void> caughtError = Completer<void>();
       await runZonedGuarded(() async {
@@ -202,7 +202,7 @@ void main() {
           builder: snapshotText,
         ), const Duration(seconds: 1));
         completer.completeError('bad');
-      }, (Object error, StackTrace stack) {
+      }, (final Object error, final StackTrace stack) {
         expectSync(error, equals('bad'));
         caughtError.complete();
       });
@@ -212,7 +212,7 @@ void main() {
     });
   });
   group('StreamBuilder', () {
-    testWidgets('gracefully handles transition from null stream', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition from null stream', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(StreamBuilder<String>(
         key: key, builder: snapshotText,
@@ -224,7 +224,7 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, null, null, null)'), findsOneWidget);
     });
-    testWidgets('gracefully handles transition to null stream', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition to null stream', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final StreamController<String> controller = StreamController<String>();
       await tester.pumpWidget(StreamBuilder<String>(
@@ -236,7 +236,7 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.none, null, null, null)'), findsOneWidget);
     });
-    testWidgets('gracefully handles transition to other stream', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition to other stream', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final StreamController<String> controllerA = StreamController<String>();
       final StreamController<String> controllerB = StreamController<String>();
@@ -252,7 +252,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.active, B, null, null)'), findsOneWidget);
     });
-    testWidgets('tracks events and errors of stream until completion', (WidgetTester tester) async {
+    testWidgets('tracks events and errors of stream until completion', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final StreamController<String> controller = StreamController<String>();
       await tester.pumpWidget(StreamBuilder<String>(
@@ -272,7 +272,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, 4, null, null)'), findsOneWidget);
     });
-    testWidgets('runs the builder using given initial data', (WidgetTester tester) async {
+    testWidgets('runs the builder using given initial data', (final WidgetTester tester) async {
       final StreamController<String> controller = StreamController<String>();
       await tester.pumpWidget(StreamBuilder<String>(
         stream: controller.stream,
@@ -281,7 +281,7 @@ void main() {
       ));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.waiting, I, null, null)'), findsOneWidget);
     });
-    testWidgets('ignores initialData when reconfiguring', (WidgetTester tester) async {
+    testWidgets('ignores initialData when reconfiguring', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(StreamBuilder<String>(
         key: key,
@@ -300,7 +300,7 @@ void main() {
     });
   });
   group('FutureBuilder and StreamBuilder behave identically on Stream from Future', () {
-    testWidgets('when completing with data', (WidgetTester tester) async {
+    testWidgets('when completing with data', (final WidgetTester tester) async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(Column(children: <Widget>[
         FutureBuilder<String>(future: completer.future, builder: snapshotText),
@@ -311,7 +311,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, hello, null, null)'), findsNWidgets(2));
     });
-    testWidgets('when completing with error and with empty stack trace', (WidgetTester tester) async {
+    testWidgets('when completing with error and with empty stack trace', (final WidgetTester tester) async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(Column(children: <Widget>[
         FutureBuilder<String>(future: completer.future, builder: snapshotText),
@@ -322,7 +322,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, )'), findsNWidgets(2));
     });
-    testWidgets('when completing with error and with stack trace', (WidgetTester tester) async {
+    testWidgets('when completing with error and with stack trace', (final WidgetTester tester) async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(Column(children: <Widget>[
         FutureBuilder<String>(future: completer.future, builder: snapshotText),
@@ -333,21 +333,21 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot<String>(ConnectionState.done, null, bad, trace)'), findsNWidgets(2));
     });
-    testWidgets('when Future is null', (WidgetTester tester) async {
+    testWidgets('when Future is null', (final WidgetTester tester) async {
       await tester.pumpWidget(Column(children: <Widget>[
         FutureBuilder<String>(builder: snapshotText),
         StreamBuilder<String>(builder: snapshotText),
       ]));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.none, null, null, null)'), findsNWidgets(2));
     });
-    testWidgets('when initialData is used with null Future and Stream', (WidgetTester tester) async {
+    testWidgets('when initialData is used with null Future and Stream', (final WidgetTester tester) async {
       await tester.pumpWidget(Column(children: <Widget>[
         FutureBuilder<String>(builder: snapshotText, initialData: 'I'),
         StreamBuilder<String>(builder: snapshotText, initialData: 'I'),
       ]));
       expect(find.text('AsyncSnapshot<String>(ConnectionState.none, I, null, null)'), findsNWidgets(2));
     });
-    testWidgets('when using initialData and completing with data', (WidgetTester tester) async {
+    testWidgets('when using initialData and completing with data', (final WidgetTester tester) async {
       final Completer<String> completer = Completer<String>();
       await tester.pumpWidget(Column(children: <Widget>[
         FutureBuilder<String>(future: completer.future, builder: snapshotText, initialData: 'I'),
@@ -360,7 +360,7 @@ void main() {
     });
   });
   group('StreamBuilderBase', () {
-    testWidgets('gracefully handles transition from null stream', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition from null stream', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(StringCollector(key: key));
       expect(find.text(''), findsOneWidget);
@@ -368,7 +368,7 @@ void main() {
       await tester.pumpWidget(StringCollector(key: key, stream: controller.stream));
       expect(find.text('conn'), findsOneWidget);
     });
-    testWidgets('gracefully handles transition to null stream', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition to null stream', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final StreamController<String> controller = StreamController<String>();
       await tester.pumpWidget(StringCollector(key: key, stream: controller.stream));
@@ -376,7 +376,7 @@ void main() {
       await tester.pumpWidget(StringCollector(key: key));
       expect(find.text('conn, disc'), findsOneWidget);
     });
-    testWidgets('gracefully handles transition to other stream', (WidgetTester tester) async {
+    testWidgets('gracefully handles transition to other stream', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final StreamController<String> controllerA = StreamController<String>();
       final StreamController<String> controllerB = StreamController<String>();
@@ -387,7 +387,7 @@ void main() {
       await eventFiring(tester);
       expect(find.text('conn, disc, conn, data:B'), findsOneWidget);
     });
-    testWidgets('tracks events and errors until completion', (WidgetTester tester) async {
+    testWidgets('tracks events and errors until completion', (final WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final StreamController<String> controller = StreamController<String>();
       await tester.pumpWidget(StringCollector(key: key, stream: controller.stream));
@@ -401,7 +401,7 @@ void main() {
   });
 }
 
-Future<void> eventFiring(WidgetTester tester) async {
+Future<void> eventFiring(final WidgetTester tester) async {
   await tester.pump(Duration.zero);
 }
 
@@ -412,20 +412,20 @@ class StringCollector extends StreamBuilderBase<String, List<String>> {
   List<String> initial() => <String>[];
 
   @override
-  List<String> afterConnected(List<String> current) => current..add('conn');
+  List<String> afterConnected(final List<String> current) => current..add('conn');
 
   @override
-  List<String> afterData(List<String> current, String data) => current..add('data:$data');
+  List<String> afterData(final List<String> current, final String data) => current..add('data:$data');
 
   @override
-  List<String> afterError(List<String> current, dynamic error, StackTrace stackTrace) => current..add('error:$error stackTrace:$stackTrace');
+  List<String> afterError(final List<String> current, final dynamic error, final StackTrace stackTrace) => current..add('error:$error stackTrace:$stackTrace');
 
   @override
-  List<String> afterDone(List<String> current) => current..add('done');
+  List<String> afterDone(final List<String> current) => current..add('done');
 
   @override
-  List<String> afterDisconnected(List<String> current) => current..add('disc');
+  List<String> afterDisconnected(final List<String> current) => current..add('disc');
 
   @override
-  Widget build(BuildContext context, List<String> currentSummary) => Text(currentSummary.join(', '), textDirection: TextDirection.ltr);
+  Widget build(final BuildContext context, final List<String> currentSummary) => Text(currentSummary.join(', '), textDirection: TextDirection.ltr);
 }

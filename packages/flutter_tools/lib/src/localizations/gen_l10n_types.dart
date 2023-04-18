@@ -227,7 +227,7 @@ class OptionalParameter {
 // }
 //
 class Placeholder {
-  Placeholder(this.resourceId, this.name, Map<String, Object?> attributes)
+  Placeholder(this.resourceId, this.name, final Map<String, Object?> attributes)
     : example = _stringAttribute(resourceId, name, attributes, 'example'),
       type = _stringAttribute(resourceId, name, attributes, 'type'),
       format = _stringAttribute(resourceId, name, attributes, 'format'),
@@ -253,10 +253,10 @@ class Placeholder {
   bool get hasValidDateFormat => _validDateFormats.contains(format);
 
   static String? _stringAttribute(
-    String resourceId,
-    String name,
-    Map<String, Object?> attributes,
-    String attributeName,
+    final String resourceId,
+    final String name,
+    final Map<String, Object?> attributes,
+    final String attributeName,
   ) {
     final Object? value = attributes[attributeName];
     if (value == null) {
@@ -272,10 +272,10 @@ class Placeholder {
   }
 
   static bool? _boolAttribute(
-      String resourceId,
-      String name,
-      Map<String, Object?> attributes,
-      String attributeName,
+      final String resourceId,
+      final String name,
+      final Map<String, Object?> attributes,
+      final String attributeName,
       ) {
     final Object? value = attributes[attributeName];
     if (value == null) {
@@ -291,9 +291,9 @@ class Placeholder {
   }
 
   static List<OptionalParameter> _optionalParameters(
-    String resourceId,
-    String name,
-    Map<String, Object?> attributes
+    final String resourceId,
+    final String name,
+    final Map<String, Object?> attributes
   ) {
     final Object? value = attributes['optionalParameters'];
     if (value == null) {
@@ -307,7 +307,7 @@ class Placeholder {
       );
     }
     final Map<String, Object?> optionalParameterMap = value;
-    return optionalParameterMap.keys.map<OptionalParameter>((String parameterName) {
+    return optionalParameterMap.keys.map<OptionalParameter>((final String parameterName) {
       return OptionalParameter(parameterName, optionalParameterMap[parameterName]!);
     }).toList();
   }
@@ -330,10 +330,10 @@ class Placeholder {
 // The docs for the Placeholder explain how placeholder entries are defined.
 class Message {
   Message(
-    AppResourceBundle templateBundle,
-    AppResourceBundleCollection allBundles,
+    final AppResourceBundle templateBundle,
+    final AppResourceBundleCollection allBundles,
     this.resourceId,
-    bool isResourceAttributeRequired,
+    final bool isResourceAttributeRequired,
     {
       this.useEscaping = false,
       this.logger,
@@ -380,9 +380,9 @@ class Message {
   final Logger? logger;
   bool hadErrors = false;
 
-  bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
+  bool get placeholdersRequireFormatting => placeholders.values.any((final Placeholder p) => p.requiresFormatting);
 
-  static String _value(Map<String, Object?> bundle, String resourceId) {
+  static String _value(final Map<String, Object?> bundle, final String resourceId) {
     final Object? value = bundle[resourceId];
     if (value == null) {
       throw L10nException('A value for resource "$resourceId" was not found.');
@@ -394,9 +394,9 @@ class Message {
   }
 
   static Map<String, Object?>? _attributes(
-    Map<String, Object?> bundle,
-    String resourceId,
-    bool isResourceAttributeRequired,
+    final Map<String, Object?> bundle,
+    final String resourceId,
+    final bool isResourceAttributeRequired,
   ) {
     final Object? attributes = bundle['@$resourceId'];
     if (isResourceAttributeRequired) {
@@ -419,9 +419,9 @@ class Message {
   }
 
   static String? _description(
-    Map<String, Object?> bundle,
-    String resourceId,
-    bool isResourceAttributeRequired,
+    final Map<String, Object?> bundle,
+    final String resourceId,
+    final bool isResourceAttributeRequired,
   ) {
     final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
     if (resourceAttributes == null) {
@@ -441,9 +441,9 @@ class Message {
   }
 
   static Map<String, Placeholder> _placeholders(
-    Map<String, Object?> bundle,
-    String resourceId,
-    bool isResourceAttributeRequired,
+    final Map<String, Object?> bundle,
+    final String resourceId,
+    final bool isResourceAttributeRequired,
   ) {
     final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
     if (resourceAttributes == null) {
@@ -460,7 +460,7 @@ class Message {
       );
     }
     return Map<String, Placeholder>.fromEntries(
-      allPlaceholdersMap.keys.map((String placeholderName) {
+      allPlaceholdersMap.keys.map((final String placeholderName) {
         final Object? value = allPlaceholdersMap[placeholderName];
         if (value is! Map<String, Object?>) {
           throw L10nException(
@@ -476,11 +476,11 @@ class Message {
 
   // Using parsed translations, attempt to infer types of placeholders used by plurals and selects.
   // For undeclared placeholders, create a new placeholder.
-  void _inferPlaceholders(Map<LocaleInfo, String> filenames) {
+  void _inferPlaceholders(final Map<LocaleInfo, String> filenames) {
     // We keep the undeclared placeholders separate so that we can sort them alphabetically afterwards.
     final Map<String, Placeholder> undeclaredPlaceholders = <String, Placeholder>{};
     // Helper for getting placeholder by name.
-    Placeholder? getPlaceholder(String name) => placeholders[name] ?? undeclaredPlaceholders[name];
+    Placeholder? getPlaceholder(final String name) => placeholders[name] ?? undeclaredPlaceholders[name];
     for (final LocaleInfo locale in parsedMessages.keys) {
       if (parsedMessages[locale] == null) {
         continue;
@@ -507,7 +507,7 @@ class Message {
     placeholders.addEntries(
       undeclaredPlaceholders.entries
         .toList()
-        ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
+        ..sort((final MapEntry<String, Placeholder> p1, final MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
     );
 
     for (final Placeholder placeholder in placeholders.values) {
@@ -534,7 +534,7 @@ class Message {
 
 // Represents the contents of one ARB file.
 class AppResourceBundle {
-  factory AppResourceBundle(File file) {
+  factory AppResourceBundle(final File file) {
     // Assuming that the caller has verified that the file exists and is readable.
     Map<String, Object?> resources;
     try {
@@ -595,7 +595,7 @@ class AppResourceBundle {
       );
     }
 
-    final Iterable<String> ids = resources.keys.where((String key) => !key.startsWith('@'));
+    final Iterable<String> ids = resources.keys.where((final String key) => !key.startsWith('@'));
     return AppResourceBundle._(file, LocaleInfo.fromString(localeString), resources, ids);
   }
 
@@ -607,7 +607,7 @@ class AppResourceBundle {
   final Map<String, Object?> resources;
   final Iterable<String> resourceIds;
 
-  String? translationFor(String resourceId) => resources[resourceId] as String?;
+  String? translationFor(final String resourceId) => resources[resourceId] as String?;
 
   @override
   String toString() {
@@ -617,7 +617,7 @@ class AppResourceBundle {
 
 // Represents all of the ARB files in [directory] as [AppResourceBundle]s.
 class AppResourceBundleCollection {
-  factory AppResourceBundleCollection(Directory directory) {
+  factory AppResourceBundleCollection(final Directory directory) {
     // Assuming that the caller has verified that the directory is readable.
 
     final RegExp filenameRE = RegExp(r'(\w+)\.arb$');
@@ -639,8 +639,8 @@ class AppResourceBundleCollection {
       }
     }
 
-    languageToLocales.forEach((String language, List<LocaleInfo> listOfCorrespondingLocales) {
-      final List<String> localeStrings = listOfCorrespondingLocales.map((LocaleInfo locale) {
+    languageToLocales.forEach((final String language, final List<LocaleInfo> listOfCorrespondingLocales) {
+      final List<String> localeStrings = listOfCorrespondingLocales.map((final LocaleInfo locale) {
         return locale.toString();
       }).toList();
       if (!localeStrings.contains(language)) {
@@ -666,10 +666,10 @@ class AppResourceBundleCollection {
 
   Iterable<LocaleInfo> get locales => _localeToBundle.keys;
   Iterable<AppResourceBundle> get bundles => _localeToBundle.values;
-  AppResourceBundle? bundleFor(LocaleInfo locale) => _localeToBundle[locale];
+  AppResourceBundle? bundleFor(final LocaleInfo locale) => _localeToBundle[locale];
 
   Iterable<String> get languages => _languageToLocales.keys;
-  Iterable<LocaleInfo> localesForLanguage(String language) => _languageToLocales[language] ?? <LocaleInfo>[];
+  Iterable<LocaleInfo> localesForLanguage(final String language) => _languageToLocales[language] ?? <LocaleInfo>[];
 
   @override
   String toString() {

@@ -24,7 +24,7 @@ import 'localizations.dart';
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasCupertinoLocalizations(BuildContext context) {
+bool debugCheckHasCupertinoLocalizations(final BuildContext context) {
   assert(() {
     if (Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations) == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[

@@ -27,7 +27,7 @@ import '../../src/test_flutter_command_runner.dart';
 void main() {
   Cache.disableLocking();
 
-  Future<BuildAarCommand> runCommandIn(String target, { List<String>? arguments }) async {
+  Future<BuildAarCommand> runCommandIn(final String target, { final List<String>? arguments }) async {
     final BuildAarCommand command = BuildAarCommand(
       androidSdk: FakeAndroidSdk(),
       fileSystem: globals.fs,
@@ -303,8 +303,8 @@ void main() {
 }
 
 Future<BuildAarCommand> runBuildAarCommand(
-  String target, AndroidSdk? androidSdk, {
-  List<String>? arguments,
+  final String target, final AndroidSdk? androidSdk, {
+  final List<String>? arguments,
 }) async {
   final BuildAarCommand command = BuildAarCommand(
     androidSdk: androidSdk,
@@ -331,11 +331,11 @@ class FakeAndroidBuilder extends Fake implements AndroidBuilder {
 
   @override
   Future<void> buildAar({
-    required FlutterProject project,
-    required Set<AndroidBuildInfo> androidBuildInfo,
-    required String target,
-    String? outputDirectoryPath,
-    required String buildNumber,
+    required final FlutterProject project,
+    required final Set<AndroidBuildInfo> androidBuildInfo,
+    required final String target,
+    final String? outputDirectoryPath,
+    required final String buildNumber,
   }) async {
     this.project = project;
     this.androidBuildInfo = androidBuildInfo;

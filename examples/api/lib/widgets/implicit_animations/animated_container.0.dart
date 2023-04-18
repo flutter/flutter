@@ -12,7 +12,7 @@ class AnimatedContainerExampleApp extends StatelessWidget {
   const AnimatedContainerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedContainer Sample')),
@@ -33,7 +33,7 @@ class _AnimatedContainerExampleState extends State<AnimatedContainerExample> {
   bool selected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         setState(() {

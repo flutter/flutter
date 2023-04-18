@@ -21,12 +21,12 @@ class Leaf extends StatefulWidget {
 class _LeafState extends State<Leaf> {
   bool _keepAlive = false;
 
-  void setKeepAlive(bool value) {
+  void setKeepAlive(final bool value) {
     setState(() { _keepAlive = value; });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return KeepAlive(
       keepAlive: _keepAlive,
       child: widget.child,
@@ -34,10 +34,10 @@ class _LeafState extends State<Leaf> {
   }
 }
 
-List<Widget> generateList(Widget child) {
+List<Widget> generateList(final Widget child) {
   return List<Widget>.generate(
     100,
-    (int index) => Leaf(
+    (final int index) => Leaf(
       key: GlobalObjectKey<_LeafState>(index),
       child: child,
     ),
@@ -46,7 +46,7 @@ List<Widget> generateList(Widget child) {
 }
 
 void main() {
-  testWidgets('KeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+  testWidgets('KeepAlive with ListView with itemExtent', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -94,7 +94,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgets('KeepAlive with ListView without itemExtent', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -141,7 +141,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive with GridView', (WidgetTester tester) async {
+  testWidgets('KeepAlive with GridView', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -190,7 +190,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('KeepAlive render tree description', (WidgetTester tester) async {
+  testWidgets('KeepAlive render tree description', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

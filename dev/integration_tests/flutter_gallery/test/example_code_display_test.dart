@@ -12,7 +12,7 @@ void main() {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   }
 
-  testWidgets('Flutter gallery button example code displays', (WidgetTester tester) async {
+  testWidgets('Flutter gallery button example code displays', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/6147
 
     await tester.pumpWidget(const GalleryApp(testMode: true));

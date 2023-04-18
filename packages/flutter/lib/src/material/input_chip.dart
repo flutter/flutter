@@ -193,7 +193,7 @@ class InputChip extends StatelessWidget
   final bool useDeleteButtonTooltip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
       ? _InputChipDefaultsM3(context, isEnabled, selected)

@@ -12,7 +12,7 @@ class GestureDetectorExampleApp extends StatelessWidget {
   const GestureDetectorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: GestureDetectorExample(),
     );
@@ -30,7 +30,7 @@ class _GestureDetectorExampleState extends State<GestureDetectorExample> {
   Color _color = Colors.white;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       color: _color,
       height: 200.0,

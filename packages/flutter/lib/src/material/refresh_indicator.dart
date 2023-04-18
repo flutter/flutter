@@ -306,7 +306,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   @override
-  void didUpdateWidget(covariant RefreshIndicator oldWidget) {
+  void didUpdateWidget(covariant final RefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.color != widget.color) {
       final ThemeData theme = Theme.of(context);
@@ -328,7 +328,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     super.dispose();
   }
 
-  bool _shouldStart(ScrollNotification notification) {
+  bool _shouldStart(final ScrollNotification notification) {
     // If the notification.dragDetails is null, this scroll is not triggered by
     // user dragging. It may be a result of ScrollController.jumpTo or ballistic scroll.
     // In this case, we don't want to trigger the refresh indicator.
@@ -340,7 +340,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       && _start(notification.metrics.axisDirection);
   }
 
-  bool _handleScrollNotification(ScrollNotification notification) {
+  bool _handleScrollNotification(final ScrollNotification notification) {
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
@@ -410,7 +410,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return false;
   }
 
-  bool _handleIndicatorNotification(OverscrollIndicatorNotification notification) {
+  bool _handleIndicatorNotification(final OverscrollIndicatorNotification notification) {
     if (notification.depth != 0 || !notification.leading) {
       return false;
     }
@@ -421,7 +421,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return false;
   }
 
-  bool _start(AxisDirection direction) {
+  bool _start(final AxisDirection direction) {
     assert(_mode == null);
     assert(_isIndicatorAtTop == null);
     assert(_dragOffset == null);
@@ -441,7 +441,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return true;
   }
 
-  void _checkDragOffset(double containerExtent) {
+  void _checkDragOffset(final double containerExtent) {
     assert(_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed);
     double newValue = _dragOffset! / (containerExtent * _kDragContainerExtentPercentage);
     if (_mode == _RefreshIndicatorMode.armed) {
@@ -454,7 +454,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   // Stop showing the refresh indicator.
-  Future<void> _dismiss(_RefreshIndicatorMode newMode) async {
+  Future<void> _dismiss(final _RefreshIndicatorMode newMode) async {
     await Future<void>.value();
     // This can only be called from _show() when refreshing and
     // _handleScrollNotification in response to a ScrollEndNotification or
@@ -491,7 +491,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _mode = _RefreshIndicatorMode.snap;
     _positionController
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
-      .then<void>((void value) {
+      .then<void>((final void value) {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
           setState(() {
             // Show the indeterminate progress indicator.
@@ -525,7 +525,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   /// When initiated in this manner, the refresh indicator is independent of any
   /// actual scroll view. It defaults to showing the indicator at the top. To
   /// show it at the bottom, set `atTop` to false.
-  Future<void> show({ bool atTop = true }) {
+  Future<void> show({ final bool atTop = true }) {
     if (_mode != _RefreshIndicatorMode.refresh &&
         _mode != _RefreshIndicatorMode.snap) {
       if (_mode == null) {
@@ -537,7 +537,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final Widget child = NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
@@ -582,7 +582,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                 scale: _scaleFactor,
                 child: AnimatedBuilder(
                   animation: _positionController,
-                  builder: (BuildContext context, Widget? child) {
+                  builder: (final BuildContext context, final Widget? child) {
                     final Widget materialIndicator = RefreshProgressIndicator(
                       semanticsLabel: widget.semanticsLabel ?? MaterialLocalizations.of(context).refreshIndicatorSemanticLabel,
                       semanticsValue: widget.semanticsValue,

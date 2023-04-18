@@ -7,13 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('TimeOfDay.format', () {
-    testWidgets('respects alwaysUse24HourFormat option', (WidgetTester tester) async {
-      Future<String> pumpTest(bool alwaysUse24HourFormat) async {
+    testWidgets('respects alwaysUse24HourFormat option', (final WidgetTester tester) async {
+      Future<String> pumpTest(final bool alwaysUse24HourFormat) async {
         late String formattedValue;
         await tester.pumpWidget(MaterialApp(
           home: MediaQuery(
             data: MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-            child: Builder(builder: (BuildContext context) {
+            child: Builder(builder: (final BuildContext context) {
               formattedValue = const TimeOfDay(hour: 7, minute: 0).format(context);
               return Container();
             }),
@@ -27,7 +27,7 @@ void main() {
     });
   });
 
-  testWidgets('hourOfPeriod returns correct value', (WidgetTester tester) async {
+  testWidgets('hourOfPeriod returns correct value', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/59158.
     expect(const TimeOfDay(minute: 0, hour:  0).hourOfPeriod, 12);
     expect(const TimeOfDay(minute: 0, hour:  1).hourOfPeriod,  1);
@@ -56,11 +56,11 @@ void main() {
   });
 
   group('RestorableTimeOfDay tests', () {
-    testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
+    testWidgets('value is not accessible when not registered', (final WidgetTester tester) async {
       expect(() => RestorableTimeOfDay(const TimeOfDay(hour: 20, minute: 4)).value, throwsAssertionError);
     });
 
-    testWidgets('work when not in restoration scope', (WidgetTester tester) async {
+    testWidgets('work when not in restoration scope', (final WidgetTester tester) async {
       await tester.pumpWidget(const _RestorableWidget());
 
       final _RestorableWidgetState state = tester.state(find.byType(_RestorableWidget));
@@ -77,7 +77,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 2, minute: 2));
     });
 
-    testWidgets('restart and restore', (WidgetTester tester) async {
+    testWidgets('restart and restore', (final WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),
@@ -105,7 +105,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 2, minute: 2));
     });
 
-    testWidgets('restore to older state', (WidgetTester tester) async {
+    testWidgets('restore to older state', (final WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),
@@ -136,7 +136,7 @@ void main() {
       expect(state.timeOfDay.value, const TimeOfDay(hour: 10, minute: 5));
     });
 
-    testWidgets('call notifiers when value changes', (WidgetTester tester) async {
+    testWidgets('call notifiers when value changes', (final WidgetTester tester) async {
       await tester.pumpWidget(const RootRestorationScope(
         restorationId: 'root-child',
         child: _RestorableWidget(),
@@ -178,16 +178,16 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final RestorableTimeOfDay timeOfDay = RestorableTimeOfDay(const TimeOfDay(hour: 10, minute: 5));
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(timeOfDay, 'time_of_day');
   }
 
-  void setProperties(VoidCallback callback) {
+  void setProperties(final VoidCallback callback) {
     setState(callback);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const SizedBox();
   }
 

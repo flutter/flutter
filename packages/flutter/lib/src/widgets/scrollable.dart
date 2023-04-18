@@ -284,7 +284,7 @@ class Scrollable extends StatefulWidget {
   ScrollableState createState() => ScrollableState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(DiagnosticsProperty<ScrollPhysics>('physics', physics));
@@ -314,7 +314,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// * [Scrollable.of], which is similar to this method, but asserts
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState? maybeOf(BuildContext context, { Axis? axis }) {
+  static ScrollableState? maybeOf(BuildContext context, { final Axis? axis }) {
     // This is the context that will need to establish the dependency.
     final BuildContext originalContext = context;
     InheritedElement? element = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>();
@@ -356,7 +356,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// * [Scrollable.maybeOf], which is similar to this method, but returns null
   ///   if no [Scrollable] ancestor is found.
-  static ScrollableState of(BuildContext context, { Axis? axis }) {
+  static ScrollableState of(final BuildContext context, { final Axis? axis }) {
     final ScrollableState? scrollableState = maybeOf(context, axis: axis);
     assert(() {
       if (scrollableState == null) {
@@ -403,7 +403,7 @@ class Scrollable extends StatefulWidget {
   ///
   /// If there is no [Scrollable] in the widget tree above the [context], this
   /// method returns false.
-  static bool recommendDeferredLoadingForContext(BuildContext context, { Axis? axis }) {
+  static bool recommendDeferredLoadingForContext(BuildContext context, { final Axis? axis }) {
     _ScrollableScope? widget = context.getInheritedWidgetOfExactType<_ScrollableScope>();
     while (widget != null) {
       if (axis == null || axisDirectionToAxis(widget.scrollable.axisDirection) == axis) {
@@ -419,10 +419,10 @@ class Scrollable extends StatefulWidget {
   /// given context visible.
   static Future<void> ensureVisible(
     BuildContext context, {
-    double alignment = 0.0,
-    Duration duration = Duration.zero,
-    Curve curve = Curves.ease,
-    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
+    final double alignment = 0.0,
+    final Duration duration = Duration.zero,
+    final Curve curve = Curves.ease,
+    final ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
@@ -455,7 +455,7 @@ class Scrollable extends StatefulWidget {
     if (futures.length == 1) {
       return futures.single;
     }
-    return Future.wait<void>(futures).then<void>((List<void> _) => null);
+    return Future.wait<void>(futures).then<void>((final List<void> _) => null);
   }
 }
 
@@ -472,7 +472,7 @@ class _ScrollableScope extends InheritedWidget {
   final ScrollPosition position;
 
   @override
-  bool updateShouldNotify(_ScrollableScope old) {
+  bool updateShouldNotify(final _ScrollableScope old) {
     return position != old.position;
   }
 }
@@ -568,7 +568,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(_persistedScrollOffset, 'offset');
     assert(_position != null);
     if (_persistedScrollOffset.value != null) {
@@ -577,7 +577,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
-  void saveOffset(double offset) {
+  void saveOffset(final double offset) {
     assert(debugIsSerializableForRestoration(offset));
     _persistedScrollOffset.value = offset;
     // [saveOffset] is called after a scrolling ends and it is usually not
@@ -600,7 +600,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     super.didChangeDependencies();
   }
 
-  bool _shouldUpdatePosition(Scrollable oldWidget) {
+  bool _shouldUpdatePosition(final Scrollable oldWidget) {
     ScrollPhysics? newPhysics = widget.physics ?? widget.scrollBehavior?.getScrollPhysics(context);
     ScrollPhysics? oldPhysics = oldWidget.physics ?? oldWidget.scrollBehavior?.getScrollPhysics(context);
     do {
@@ -615,7 +615,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
-  void didUpdateWidget(Scrollable oldWidget) {
+  void didUpdateWidget(final Scrollable oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.controller != oldWidget.controller) {
@@ -665,7 +665,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   @protected
-  void setSemanticsActions(Set<SemanticsAction> actions) {
+  void setSemanticsActions(final Set<SemanticsAction> actions) {
     if (_gestureDetectorKey.currentState != null) {
       _gestureDetectorKey.currentState!.replaceSemanticsActions(actions);
     }
@@ -685,7 +685,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   @protected
-  void setCanDrag(bool value) {
+  void setCanDrag(final bool value) {
     if (value == _lastCanDrag && (!value || widget.axis == _lastAxisDirection)) {
       return;
     }
@@ -701,7 +701,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
               () => VerticalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
-              (VerticalDragGestureRecognizer instance) {
+              (final VerticalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
                   ..onStart = _handleDragStart
@@ -722,7 +722,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
               () => HorizontalDragGestureRecognizer(supportedDevices: _configuration.dragDevices),
-              (HorizontalDragGestureRecognizer instance) {
+              (final HorizontalDragGestureRecognizer instance) {
                 instance
                   ..onDown = _handleDragDown
                   ..onStart = _handleDragStart
@@ -750,7 +750,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   @override
   @protected
-  void setIgnorePointer(bool value) {
+  void setIgnorePointer(final bool value) {
     if (_shouldIgnorePointer == value) {
       return;
     }
@@ -766,13 +766,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   Drag? _drag;
   ScrollHoldController? _hold;
 
-  void _handleDragDown(DragDownDetails details) {
+  void _handleDragDown(final DragDownDetails details) {
     assert(_drag == null);
     assert(_hold == null);
     _hold = position.hold(_disposeHold);
   }
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart(final DragStartDetails details) {
     // It's possible for _hold to become null between _handleDragDown and
     // _handleDragStart, for example if some user code calls jumpTo or otherwise
     // triggers a new activity to begin.
@@ -782,13 +782,13 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     assert(_hold == null);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
     _drag?.update(details);
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
     _drag?.end(details);
@@ -823,7 +823,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
 
   // Returns the offset that should result from applying [event] to the current
   // position, taking min/max scroll extent into account.
-  double _targetScrollOffsetForPointerScroll(double delta) {
+  double _targetScrollOffsetForPointerScroll(final double delta) {
     return math.min(
       math.max(position.pixels + delta, position.minScrollExtent),
       position.maxScrollExtent,
@@ -833,7 +833,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // Returns the delta that should result from applying [event] with axis,
   // direction, and any modifiers specified by the ScrollBehavior taken into
   // account.
-  double _pointerSignalEventDelta(PointerScrollEvent event) {
+  double _pointerSignalEventDelta(final PointerScrollEvent event) {
     late double delta;
     final Set<LogicalKeyboardKey> pressed = HardwareKeyboard.instance.logicalKeysPressed;
     final bool flipAxes = pressed.any(_configuration.pointerAxisModifiers.contains) &&
@@ -862,7 +862,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return delta;
   }
 
-  void _receivedPointerSignal(PointerSignalEvent event) {
+  void _receivedPointerSignal(final PointerSignalEvent event) {
     if (event is PointerScrollEvent && _position != null) {
       if (_physics != null && !_physics!.shouldAcceptUserOffset(position)) {
         return;
@@ -879,7 +879,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
-  void _handlePointerScroll(PointerEvent event) {
+  void _handlePointerScroll(final PointerEvent event) {
     assert(event is PointerScrollEvent);
     final double delta = _pointerSignalEventDelta(event as PointerScrollEvent);
     final double targetScrollOffset = _targetScrollOffsetForPointerScroll(delta);
@@ -888,7 +888,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     }
   }
 
-  bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
+  bool _handleScrollMetricsNotification(final ScrollMetricsNotification notification) {
     if (notification.depth == 0) {
       final RenderObject? scrollSemanticsRenderObject = _scrollSemanticsKey.currentContext?.findRenderObject();
       if (scrollSemanticsRenderObject != null) {
@@ -898,7 +898,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
     return false;
   }
 
-  Widget _buildChrome(BuildContext context, Widget child) {
+  Widget _buildChrome(final BuildContext context, final Widget child) {
     final ScrollableDetails details = ScrollableDetails(
       direction: widget.axisDirection,
       controller: _effectiveScrollController,
@@ -915,7 +915,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   // DESCRIPTION
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(_position != null);
     // _ScrollableScope must be placed above the BuildContext returned by notificationContext
     // so that we can get this ScrollableState by doing the following:
@@ -978,7 +978,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin, R
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
     properties.add(DiagnosticsProperty<ScrollPhysics>('effective physics', _physics));
@@ -1019,7 +1019,7 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
   }
 
   @override
-  void didUpdateWidget(_ScrollableSelectionHandler oldWidget) {
+  void didUpdateWidget(final _ScrollableSelectionHandler oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.position != widget.position) {
       _selectionDelegate.position = widget.position;
@@ -1033,7 +1033,7 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SelectionContainer(
       registrar: widget.registrar,
       delegate: _selectionDelegate,
@@ -1052,7 +1052,7 @@ class _ScrollableSelectionHandlerState extends State<_ScrollableSelectionHandler
 class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   _ScrollableSelectionContainerDelegate({
     required this.state,
-    required ScrollPosition position
+    required final ScrollPosition position
   }) : _position = position,
        _autoScroller = EdgeDraggingAutoScroller(state, velocityScalar: _kDefaultSelectToScrollVelocityScalar) {
     _position.addListener(_scheduleLayoutChange);
@@ -1075,7 +1075,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
 
   ScrollPosition get position => _position;
   ScrollPosition _position;
-  set position(ScrollPosition other) {
+  set position(final ScrollPosition other) {
     if (other == _position) {
       return;
     }
@@ -1091,7 +1091,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       return;
     }
     _scheduledLayoutChange = true;
-    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((final Duration timeStamp) {
       if (!_scheduledLayoutChange) {
         return;
       }
@@ -1122,13 +1122,13 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   @override
   void didChangeSelectables() {
     final Set<Selectable> selectableSet = selectables.toSet();
-    _selectableStartEdgeUpdateRecords.removeWhere((Selectable key, double value) => !selectableSet.contains(key));
-    _selectableEndEdgeUpdateRecords.removeWhere((Selectable key, double value) => !selectableSet.contains(key));
+    _selectableStartEdgeUpdateRecords.removeWhere((final Selectable key, final double value) => !selectableSet.contains(key));
+    _selectableEndEdgeUpdateRecords.removeWhere((final Selectable key, final double value) => !selectableSet.contains(key));
     super.didChangeSelectables();
   }
 
   @override
-  SelectionResult handleClearSelection(ClearSelectionEvent event) {
+  SelectionResult handleClearSelection(final ClearSelectionEvent event) {
     _selectableStartEdgeUpdateRecords.clear();
     _selectableEndEdgeUpdateRecords.clear();
     _currentDragStartRelatedToOrigin = null;
@@ -1171,7 +1171,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     return result;
   }
 
-  Offset _inferPositionRelatedToOrigin(Offset globalPosition) {
+  Offset _inferPositionRelatedToOrigin(final Offset globalPosition) {
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
     if (!_selectionStartsInScrollable) {
@@ -1197,7 +1197,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   /// selection is triggered by none drag events. The
   /// [_currentDragStartRelatedToOrigin] and [_currentDragEndRelatedToOrigin]
   /// are essential to handle future [SelectionEdgeUpdateEvent]s.
-  void _updateDragLocationsFromGeometries({bool forceUpdateStart = true, bool forceUpdateEnd = true}) {
+  void _updateDragLocationsFromGeometries({final bool forceUpdateStart = true, final bool forceUpdateEnd = true}) {
     final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Matrix4 transform = box.getTransformTo(null);
@@ -1226,7 +1226,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   @override
-  SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
+  SelectionResult handleSelectAll(final SelectAllSelectionEvent event) {
     assert(!_selectionStartsInScrollable);
     final SelectionResult result = super.handleSelectAll(event);
     assert((currentSelectionStartIndex == -1) == (currentSelectionEndIndex == -1));
@@ -1237,7 +1237,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   @override
-  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+  SelectionResult handleSelectWord(final SelectWordSelectionEvent event) {
     _selectionStartsInScrollable = _globalPositionInScrollable(event.globalPosition);
     final SelectionResult result = super.handleSelectWord(event);
     _updateDragLocationsFromGeometries();
@@ -1245,7 +1245,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   @override
-  SelectionResult handleGranularlyExtendSelection(GranularlyExtendSelectionEvent event) {
+  SelectionResult handleGranularlyExtendSelection(final GranularlyExtendSelectionEvent event) {
     final SelectionResult result = super.handleGranularlyExtendSelection(event);
     // The selection geometry may not have the accurate offset for the edges
     // that are outside of the viewport whose transform may not be valid. Only
@@ -1261,7 +1261,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   @override
-  SelectionResult handleDirectionallyExtendSelection(DirectionallyExtendSelectionEvent event) {
+  SelectionResult handleDirectionallyExtendSelection(final DirectionallyExtendSelectionEvent event) {
     final SelectionResult result = super.handleDirectionallyExtendSelection(event);
     // The selection geometry may not have the accurate offset for the edges
     // that are outside of the viewport whose transform may not be valid. Only
@@ -1276,7 +1276,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     return result;
   }
 
-  void _jumpToEdge(bool isExtent) {
+  void _jumpToEdge(final bool isExtent) {
     final Selectable selectable;
     final double? lineHeight;
     final SelectionPoint? edge;
@@ -1354,19 +1354,19 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     }
   }
 
-  bool _globalPositionInScrollable(Offset globalPosition) {
+  bool _globalPositionInScrollable(final Offset globalPosition) {
     final RenderBox box = state.context.findRenderObject()! as RenderBox;
     final Offset localPosition = box.globalToLocal(globalPosition);
     final Rect rect = Rect.fromLTWH(0, 0, box.size.width, box.size.height);
     return rect.contains(localPosition);
   }
 
-  Rect _dragTargetFromEvent(SelectionEdgeUpdateEvent event) {
+  Rect _dragTargetFromEvent(final SelectionEdgeUpdateEvent event) {
     return Rect.fromCenter(center: event.globalPosition, width: _kDefaultDragTargetSize, height: _kDefaultDragTargetSize);
   }
 
   @override
-  SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
+  SelectionResult dispatchSelectionEventToChild(final Selectable selectable, final SelectionEvent event) {
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
@@ -1391,7 +1391,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   @override
-  void ensureChildUpdated(Selectable selectable) {
+  void ensureChildUpdated(final Selectable selectable) {
     final double newRecord = state.position.pixels;
     final double? previousStartRecord = _selectableStartEdgeUpdateRecords[selectable];
     if (_currentDragStartRelatedToOrigin != null &&
@@ -1421,7 +1421,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 }
 
-Offset _getDeltaToScrollOrigin(ScrollableState scrollableState) {
+Offset _getDeltaToScrollOrigin(final ScrollableState scrollableState) {
   switch (scrollableState.axisDirection) {
     case AxisDirection.down:
       return Offset(0, scrollableState.position.pixels);
@@ -1462,7 +1462,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   final int? semanticChildCount;
 
   @override
-  _RenderScrollSemantics createRenderObject(BuildContext context) {
+  _RenderScrollSemantics createRenderObject(final BuildContext context) {
     return _RenderScrollSemantics(
       position: position,
       allowImplicitScrolling: allowImplicitScrolling,
@@ -1471,7 +1471,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderScrollSemantics renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderScrollSemantics renderObject) {
     renderObject
       ..allowImplicitScrolling = allowImplicitScrolling
       ..position = position
@@ -1481,10 +1481,10 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
 
 class _RenderScrollSemantics extends RenderProxyBox {
   _RenderScrollSemantics({
-    required ScrollPosition position,
-    required bool allowImplicitScrolling,
-    required int? semanticChildCount,
-    RenderBox? child,
+    required final ScrollPosition position,
+    required final bool allowImplicitScrolling,
+    required final int? semanticChildCount,
+    final RenderBox? child,
   }) : _position = position,
        _allowImplicitScrolling = allowImplicitScrolling,
        _semanticChildCount = semanticChildCount,
@@ -1495,7 +1495,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   /// Whether this render object is excluded from the semantic tree.
   ScrollPosition get position => _position;
   ScrollPosition _position;
-  set position(ScrollPosition value) {
+  set position(final ScrollPosition value) {
     if (value == _position) {
       return;
     }
@@ -1508,7 +1508,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   /// Whether this node can be scrolled implicitly.
   bool get allowImplicitScrolling => _allowImplicitScrolling;
   bool _allowImplicitScrolling;
-  set allowImplicitScrolling(bool value) {
+  set allowImplicitScrolling(final bool value) {
     if (value == _allowImplicitScrolling) {
       return;
     }
@@ -1518,7 +1518,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
 
   int? get semanticChildCount => _semanticChildCount;
   int? _semanticChildCount;
-  set semanticChildCount(int? value) {
+  set semanticChildCount(final int? value) {
     if (value == semanticChildCount) {
       return;
     }
@@ -1527,7 +1527,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     if (position.haveDimensions) {
@@ -1543,7 +1543,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
   SemanticsNode? _innerNode;
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+  void assembleSemanticsNode(final SemanticsNode node, final SemanticsConfiguration config, final Iterable<SemanticsNode> children) {
     if (children.isEmpty || !children.first.isTagged(RenderViewport.useTwoPaneSemantics)) {
       _innerNode = null;
       super.assembleSemanticsNode(node, config, children);
@@ -1588,12 +1588,12 @@ class _RestorableScrollOffset extends RestorableValue<double?> {
   double? createDefaultValue() => null;
 
   @override
-  void didUpdateValue(double? oldValue) {
+  void didUpdateValue(final double? oldValue) {
     notifyListeners();
   }
 
   @override
-  double fromPrimitives(Object? data) {
+  double fromPrimitives(final Object? data) {
     return data! as double;
   }
 

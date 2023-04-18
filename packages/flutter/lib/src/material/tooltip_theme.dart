@@ -112,19 +112,19 @@ class TooltipThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TooltipThemeData copyWith({
-    double? height,
-    EdgeInsetsGeometry? padding,
-    EdgeInsetsGeometry? margin,
-    double? verticalOffset,
-    bool? preferBelow,
-    bool? excludeFromSemantics,
-    Decoration? decoration,
-    TextStyle? textStyle,
-    TextAlign? textAlign,
-    Duration? waitDuration,
-    Duration? showDuration,
-    TooltipTriggerMode? triggerMode,
-    bool? enableFeedback,
+    final double? height,
+    final EdgeInsetsGeometry? padding,
+    final EdgeInsetsGeometry? margin,
+    final double? verticalOffset,
+    final bool? preferBelow,
+    final bool? excludeFromSemantics,
+    final Decoration? decoration,
+    final TextStyle? textStyle,
+    final TextAlign? textAlign,
+    final Duration? waitDuration,
+    final Duration? showDuration,
+    final TooltipTriggerMode? triggerMode,
+    final bool? enableFeedback,
   }) {
     return TooltipThemeData(
       height: height ?? this.height,
@@ -148,7 +148,7 @@ class TooltipThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TooltipThemeData? lerp(TooltipThemeData? a, TooltipThemeData? b, double t) {
+  static TooltipThemeData? lerp(final TooltipThemeData? a, final TooltipThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -183,7 +183,7 @@ class TooltipThemeData with Diagnosticable {
   );
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -207,7 +207,7 @@ class TooltipThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
@@ -282,18 +282,18 @@ class TooltipTheme extends InheritedTheme {
   /// ```dart
   /// TooltipThemeData theme = TooltipTheme.of(context);
   /// ```
-  static TooltipThemeData of(BuildContext context) {
+  static TooltipThemeData of(final BuildContext context) {
     final TooltipTheme? tooltipTheme = context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
     return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return TooltipTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final TooltipTheme oldWidget) => data != oldWidget.data;
 }
 
 /// The method of interaction that will trigger a tooltip.

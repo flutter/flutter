@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('DefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
+  testWidgets('DefaultTextStyle changes propagate to Text', (final WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextStyle s1 = TextStyle(
       fontSize: 10.0,
@@ -43,7 +43,7 @@ void main() {
     expect(text.maxLines, 3);
   });
 
-  testWidgets('AnimatedDefaultTextStyle changes propagate to Text', (WidgetTester tester) async {
+  testWidgets('AnimatedDefaultTextStyle changes propagate to Text', (final WidgetTester tester) async {
     const Text textWidget = Text('Hello', textDirection: TextDirection.ltr);
     const TextStyle s1 = TextStyle(
       fontSize: 10.0,

@@ -102,11 +102,11 @@ class _TestScrollingWidgetState extends State<_TestScrollingWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
       controller: scrollController,
       itemCount: 10000,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return Text(lipsum[index % lipsum.length]);
       },
     );

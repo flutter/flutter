@@ -15,11 +15,11 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBi
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override
-  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+  void postEvent(final String eventKind, final Map<String, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
   }
 
-  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
+  List<Map<String, dynamic>> getEventsDispatched(final String eventKind) {
     return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
   }
 }
@@ -27,7 +27,7 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding, ServicesBi
 class TestStrategy {
   int allowedPriority = 10000;
 
-  bool shouldRunTaskWithPriority({ required int priority, required SchedulerBinding scheduler }) {
+  bool shouldRunTaskWithPriority({ required final int priority, required final SchedulerBinding scheduler }) {
     return priority >= allowedPriority;
   }
 }
@@ -45,7 +45,7 @@ void main() {
     final List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];
     final List<int> executedTasks = <int>[];
 
-    void scheduleAddingTask(int x) {
+    void scheduleAddingTask(final int x) {
       scheduler.scheduleTask(() { executedTasks.add(x); }, Priority.idle + x);
     }
 
@@ -122,7 +122,7 @@ void main() {
         scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
       },
       zoneSpecification: ZoneSpecification(
-        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() f) {
+        createTimer: (final Zone self, final ZoneDelegate parent, final Zone zone, final Duration duration, final void Function() f) {
           // Don't actually run the tasks, just record that it was scheduled.
           timerQueueTasks.add(f);
           return DummyTimer();
@@ -172,10 +172,10 @@ void main() {
 
   test('TimingsCallback exceptions are caught', () {
     FlutterErrorDetails? errorCaught;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       errorCaught = details;
     };
-    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+    SchedulerBinding.instance.addTimingsCallback((final List<FrameTiming> timings) {
       throw Exception('Test');
     });
     SchedulerBinding.instance.platformDispatcher.onReportTimings!(<FrameTiming>[]);
@@ -189,7 +189,7 @@ void main() {
     late Duration lastTimeStamp;
     late Duration lastSystemTimeStamp;
 
-    void frameCallback(Duration timeStamp) {
+    void frameCallback(final Duration timeStamp) {
       expect(timeStamp, scheduler.currentFrameTimeStamp);
       lastTimeStamp = scheduler.currentFrameTimeStamp;
       lastSystemTimeStamp = scheduler.currentSystemFrameTimeStamp;
@@ -223,7 +223,7 @@ void main() {
     expect(scheduler.schedulerPhase, SchedulerPhase.idle);
     final List<VoidCallback> timers = <VoidCallback>[];
     final ZoneSpecification timerInterceptor = ZoneSpecification(
-      createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() callback) {
+      createTimer: (final Zone self, final ZoneDelegate parent, final Zone zone, final Duration duration, final void Function() callback) {
         timers.add(callback);
         return DummyTimer();
       },

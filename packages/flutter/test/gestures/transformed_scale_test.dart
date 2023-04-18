@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('gets local coordinates', (WidgetTester tester) async {
+  testWidgets('gets local coordinates', (final WidgetTester tester) async {
     final List<ScaleStartDetails> startDetails = <ScaleStartDetails>[];
     final List<ScaleUpdateDetails> updateDetails = <ScaleUpdateDetails>[];
 
@@ -14,10 +14,10 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: GestureDetector(
-          onScaleStart: (ScaleStartDetails details) {
+          onScaleStart: (final ScaleStartDetails details) {
             startDetails.add(details);
           },
-          onScaleUpdate: (ScaleUpdateDetails details) {
+          onScaleUpdate: (final ScaleUpdateDetails details) {
             updateDetails.add(details);
           },
           child: Container(

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/progress_indicator/circular_progres
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Finds CircularProgressIndicator', (WidgetTester tester) async {
+  testWidgets('Finds CircularProgressIndicator', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ProgressIndicatorApp(),
     );

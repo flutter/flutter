@@ -22,7 +22,7 @@ class FeedbackTester {
   int get clickSoundCount => _clickSoundCount;
   int _clickSoundCount = 0;
 
-  Future<void> _handler(MethodCall methodCall) async {
+  Future<void> _handler(final MethodCall methodCall) async {
     if (methodCall.method == 'HapticFeedback.vibrate') {
       _hapticCount++;
     }

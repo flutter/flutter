@@ -40,10 +40,10 @@ void main() {
 class SampleApp extends StatelessWidget {
   const SampleApp({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return WidgetsApp(
       color: const Color(0xffffffff),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return const PlaceholderExample();
       },
     );
@@ -59,7 +59,7 @@ class PlaceholderExample extends StatelessWidget {
   const PlaceholderExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Since this is an example, add plenty of comments, explaining things that
     // both a newcomer and an experienced user might want to know.
     //

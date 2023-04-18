@@ -36,7 +36,7 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue,
       body: ListView(
@@ -58,7 +58,7 @@ class _RasterCacheUseMemoryState extends State<RasterCacheUseMemory>
             ),
           ),
           ShaderMask(
-            shaderCallback: (Rect bounds) {
+            shaderCallback: (final Rect bounds) {
               return const RadialGradient(
                 center: Alignment.topLeft,
                 radius: 1.0,

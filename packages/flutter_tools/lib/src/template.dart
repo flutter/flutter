@@ -38,11 +38,11 @@ const List<String> kReservedKotlinKeywords = <String>['when', 'in', 'is'];
 /// Files in the destination will contain none of the '.tmpl', '.copy.tmpl',
 /// 'img.tmpl', or '-<language>.tmpl' extensions.
 class Template {
-  factory Template(Directory templateSource, Directory? imageSourceDir, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required TemplateRenderer templateRenderer,
-    Set<Uri>? templateManifest,
+  factory Template(final Directory templateSource, final Directory? imageSourceDir, {
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final TemplateRenderer templateRenderer,
+    final Set<Uri>? templateManifest,
   }) {
     return Template._(
       <Directory>[templateSource],
@@ -55,11 +55,11 @@ class Template {
   }
 
   Template._(
-    List<Directory> templateSources, this.imageSourceDirectories, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required TemplateRenderer templateRenderer,
-    required Set<Uri>? templateManifest,
+    final List<Directory> templateSources, this.imageSourceDirectories, {
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final TemplateRenderer templateRenderer,
+    required final Set<Uri>? templateManifest,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _templateRenderer = templateRenderer,
@@ -93,11 +93,11 @@ class Template {
     }
   }
 
-  static Future<Template> fromName(String name, {
-    required FileSystem fileSystem,
-    required Set<Uri>? templateManifest,
-    required Logger logger,
-    required TemplateRenderer templateRenderer,
+  static Future<Template> fromName(final String name, {
+    required final FileSystem fileSystem,
+    required final Set<Uri>? templateManifest,
+    required final Logger logger,
+    required final TemplateRenderer templateRenderer,
   }) async {
     // All named templates are placed in the 'templates' directory
     final Directory templateDir = _templateDirectoryInPackage(name, fileSystem);
@@ -112,11 +112,11 @@ class Template {
     );
   }
 
-  static Future<Template> merged(List<String> names, Directory directory, {
-    required FileSystem fileSystem,
-    required Set<Uri> templateManifest,
-    required Logger logger,
-    required TemplateRenderer templateRenderer,
+  static Future<Template> merged(final List<String> names, final Directory directory, {
+    required final FileSystem fileSystem,
+    required final Set<Uri> templateManifest,
+    required final Logger logger,
+    required final TemplateRenderer templateRenderer,
   }) async {
     // All named templates are placed in the 'templates' directory
     return Template._(
@@ -154,10 +154,10 @@ class Template {
   ///
   /// May throw a [ToolExit] if the directory is not writable.
   int render(
-    Directory destination,
-    Map<String, Object?> context, {
-    bool overwriteExisting = true,
-    bool printStatusWhenWriting = true,
+    final Directory destination,
+    final Map<String, Object?> context, {
+    final bool overwriteExisting = true,
+    final bool printStatusWhenWriting = true,
   }) {
     try {
       destination.createSync(recursive: true);
@@ -245,7 +245,7 @@ class Template {
       return finalDestinationPath;
     }
 
-    _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
+    _templateFilePaths.forEach((final String relativeDestinationPath, final String absoluteSourcePath) {
       final bool withRootModule = context['withRootModule'] as bool? ?? false;
       if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
@@ -307,8 +307,8 @@ class Template {
                 .join(imageSourceDir.path, relativeDestinationPath.replaceAll(imageTemplateExtension, ''))),
         ];
 
-        if (potentials.any((File file) => file.existsSync())) {
-          final File imageSourceFile = potentials.firstWhere((File file) => file.existsSync());
+        if (potentials.any((final File file) => file.existsSync())) {
+          final File imageSourceFile = potentials.firstWhere((final File file) => file.existsSync());
 
           imageSourceFile.copySync(finalDestinationFile.path);
         } else {
@@ -344,7 +344,7 @@ class Template {
   }
 }
 
-Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
+Directory _templateDirectoryInPackage(final String name, final FileSystem fileSystem) {
   final String templatesDir = fileSystem.path.join(Cache.flutterRoot!,
       'packages', 'flutter_tools', 'templates');
   return fileSystem.directory(fileSystem.path.join(templatesDir, name));
@@ -353,7 +353,7 @@ Directory _templateDirectoryInPackage(String name, FileSystem fileSystem) {
 /// Returns the directory containing the 'name' template directory in
 /// flutter_template_images, to resolve image placeholder against.
 /// if 'name' is null, return the parent template directory.
-Future<Directory> templateImageDirectory(String? name, FileSystem fileSystem, Logger logger) async {
+Future<Directory> templateImageDirectory(final String? name, final FileSystem fileSystem, final Logger logger) async {
   final String toolPackagePath = fileSystem.path.join(
       Cache.flutterRoot!, 'packages', 'flutter_tools');
   final String packageFilePath = fileSystem.path.join(toolPackagePath, '.dart_tool', 'package_config.json');
@@ -368,10 +368,10 @@ Future<Directory> templateImageDirectory(String? name, FileSystem fileSystem, Lo
   return name == null ? templateDirectory : templateDirectory.childDirectory(name);
 }
 
-String _escapeKotlinKeywords(String androidIdentifier) {
+String _escapeKotlinKeywords(final String androidIdentifier) {
   final List<String> segments = androidIdentifier.split('.');
   final List<String> correctedSegments = segments.map(
-    (String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
+    (final String segment) => kReservedKotlinKeywords.contains(segment) ? '`$segment`' : segment
   ).toList();
   return correctedSegments.join('.');
 }

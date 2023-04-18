@@ -12,7 +12,7 @@ class InputDecorationExampleApp extends StatelessWidget {
   const InputDecorationExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration Sample')),
@@ -26,7 +26,7 @@ class InputDecorationExample extends StatelessWidget {
   const InputDecorationExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextFormField(
       initialValue: 'abc',
       decoration: const InputDecoration(

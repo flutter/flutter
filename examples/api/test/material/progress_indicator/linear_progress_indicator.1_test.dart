@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/progress_indicator/linear_progress_
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Finds LinearProgressIndicator', (WidgetTester tester) async {
+  testWidgets('Finds LinearProgressIndicator', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ProgressIndicatorApp(),
     );

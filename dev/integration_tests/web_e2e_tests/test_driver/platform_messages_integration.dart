@@ -16,7 +16,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('platform message for Clipboard.setData reply with future',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -33,12 +33,12 @@ void main() {
   }, skip: true); // https://github.com/flutter/flutter/issues/54296
 
   testWidgets('Should create and dispose view embedder',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     int viewInstanceCount = 0;
 
     platformViewsRegistry.getNextPlatformViewId();
     // ignore: undefined_prefixed_name, avoid_dynamic_calls
-    ui.platformViewRegistry.registerViewFactory('MyView', (int viewId) {
+    ui.platformViewRegistry.registerViewFactory('MyView', (final int viewId) {
       viewInstanceCount += 1;
       return html.DivElement();
     });

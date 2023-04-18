@@ -99,7 +99,7 @@ class SharedAppData extends StatefulWidget {
   ///
   /// The type parameter `K` is the type of the keyword and `V`
   /// is the type of the value.
-  static V getValue<K extends Object, V>(BuildContext context, K key, SharedAppDataInitCallback<V> init) {
+  static V getValue<K extends Object, V>(final BuildContext context, final K key, final SharedAppDataInitCallback<V> init) {
     final _SharedAppModel? model = InheritedModel.inheritFrom<_SharedAppModel>(context, aspect: key);
     assert(_debugHasSharedAppData(model, context, 'getValue'));
     return model!.sharedAppDataState.getValue<K, V>(key, init);
@@ -120,13 +120,13 @@ class SharedAppData extends StatefulWidget {
   ///
   /// The type parameter `K` is the type of the value's keyword and `V`
   /// is the type of the value.
-  static void setValue<K extends Object, V>(BuildContext context, K key, V value) {
+  static void setValue<K extends Object, V>(final BuildContext context, final K key, final V value) {
     final _SharedAppModel? model = context.getInheritedWidgetOfExactType<_SharedAppModel>();
     assert(_debugHasSharedAppData(model, context, 'setValue'));
     model!.sharedAppDataState.setValue<K, V>(key, value);
   }
 
-  static bool _debugHasSharedAppData(_SharedAppModel? model, BuildContext context, String methodName) {
+  static bool _debugHasSharedAppData(final _SharedAppModel? model, final BuildContext context, final String methodName) {
     assert(() {
       if (model == null) {
         throw FlutterError.fromParts(
@@ -154,16 +154,16 @@ class _SharedAppDataState extends State<SharedAppData> {
   late Map<Object, Object?> data = <Object, Object?>{};
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _SharedAppModel(sharedAppDataState: this, child: widget.child);
   }
 
-  V getValue<K extends Object, V>(K key, SharedAppDataInitCallback<V> init) {
+  V getValue<K extends Object, V>(final K key, final SharedAppDataInitCallback<V> init) {
     data[key] ??= init();
     return data[key] as V;
   }
 
-  void setValue<K extends Object, V>(K key, V value) {
+  void setValue<K extends Object, V>(final K key, final V value) {
     if (data[key] != value) {
       setState(() {
         data = Map<Object, Object?>.of(data);
@@ -183,12 +183,12 @@ class _SharedAppModel extends InheritedModel<Object> {
   final Map<Object, Object?> data;
 
   @override
-  bool updateShouldNotify(_SharedAppModel old) {
+  bool updateShouldNotify(final _SharedAppModel old) {
     return data != old.data;
   }
 
   @override
-  bool updateShouldNotifyDependent(_SharedAppModel old, Set<Object> keys) {
+  bool updateShouldNotifyDependent(final _SharedAppModel old, final Set<Object> keys) {
     for (final Object key in keys) {
       if (data[key] != old.data[key]) {
         return true;

@@ -8,7 +8,7 @@
 /// floating point numbers.
 //
 // See also: //dev/benchmarks/microbenchmarks/lib/foundation/clamp.dart
-double clampDouble(double x, double min, double max) {
+double clampDouble(final double x, final double min, final double max) {
   assert(min <= max && !max.isNaN && !min.isNaN);
   if (x < min) {
     return min;

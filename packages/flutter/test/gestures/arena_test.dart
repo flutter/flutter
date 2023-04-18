@@ -11,14 +11,14 @@ class TestGestureArenaMember extends GestureArenaMember {
   bool acceptRan = false;
 
   @override
-  void acceptGesture(int key) {
+  void acceptGesture(final int key) {
     expect(key, equals(primaryKey));
     acceptRan = true;
   }
   bool rejectRan = false;
 
   @override
-  void rejectGesture(int key) {
+  void rejectGesture(final int key) {
     expect(key, equals(primaryKey));
     rejectRan = true;
   }

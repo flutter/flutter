@@ -17,7 +17,7 @@ Future<void> endOfAnimation() async {
   } while (SchedulerBinding.instance.hasScheduledFrame);
 }
 
-Rect boundsFor(WidgetController controller, Finder item) {
+Rect boundsFor(final WidgetController controller, final Finder item) {
   final RenderBox box = controller.renderObject<RenderBox>(item);
   return box.localToGlobal(Offset.zero) & box.size;
 }

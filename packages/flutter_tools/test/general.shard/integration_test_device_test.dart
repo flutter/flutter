@@ -116,7 +116,7 @@ void main() {
       testDevice.start('entrypointPath'),
       throwsA(
         isA<TestDeviceException>().having(
-          (Exception e) => e.toString(),
+          (final Exception e) => e.toString(),
           'description',
           contains('No application found for TargetPlatform.android_arm'),
         ),
@@ -131,16 +131,16 @@ void main() {
     expect(testDevice.finished, doesNotComplete);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
-      Logger? logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
+      final Logger? logger,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -151,16 +151,16 @@ void main() {
     expect(testDevice.finished, completes);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
-      Logger? logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
+      final Logger? logger,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -182,15 +182,15 @@ void main() {
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -212,15 +212,15 @@ void main() {
 
     expect(() => testDevice.start('entrypointPath'), throwsA(isA<TestDeviceException>()));
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
     }) async => fakeVmServiceHost.vmService,
   });
 
@@ -230,16 +230,16 @@ void main() {
     expect(await channel.stream.isEmpty, true);
   }, overrides: <Type, Generator>{
     ApplicationPackageFactory: () => FakeApplicationPackageFactory(),
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
-      Logger? logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
+      final Logger? logger,
     }) async => fakeVmServiceHost.vmService,
   });
 }
@@ -247,9 +247,9 @@ void main() {
 class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFactory {
   @override
   Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform, {
-    BuildInfo? buildInfo,
-    File? applicationBinary,
+    final TargetPlatform platform, {
+    final BuildInfo? buildInfo,
+    final File? applicationBinary,
   }) async => FakeApplicationPackage();
 }
 

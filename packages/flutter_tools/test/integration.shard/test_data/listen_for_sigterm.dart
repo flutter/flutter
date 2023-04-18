@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 Future<void> main() async {
   final Stdout stdout = Stdio().stdout;
   final Stream<ProcessSignal> interruptStream = ProcessSignal.sigterm.watch();
-  interruptStream.listen((_) {
+  interruptStream.listen((final _) {
     // The test should assert that this was logged
     stdout.writeln('Successfully received SIGTERM!');
     exit(0);

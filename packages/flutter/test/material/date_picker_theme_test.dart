@@ -42,7 +42,7 @@ void main() {
     rangeSelectionOverlayColor: MaterialStatePropertyAll<Color>(Color(0xffffff3f)),
   );
 
-  Material findDialogMaterial(WidgetTester tester) {
+  Material findDialogMaterial(final WidgetTester tester) {
     return tester.widget<Material>(
       find.descendant(
         of: find.byType(Dialog),
@@ -51,7 +51,7 @@ void main() {
     );
   }
 
-  Material findHeaderMaterial(WidgetTester tester, String text) {
+  Material findHeaderMaterial(final WidgetTester tester, final String text) {
     return tester.widget<Material>(
       find.ancestor(
         of: find.text(text),
@@ -60,7 +60,7 @@ void main() {
     );
   }
 
-  BoxDecoration? findTextDecoration(WidgetTester tester, String date) {
+  BoxDecoration? findTextDecoration(final WidgetTester tester, final String date) {
     final Container container = tester.widget<Container>(
       find.ancestor(
         of: find.text(date),
@@ -116,7 +116,7 @@ void main() {
     expect(theme.rangeSelectionOverlayColor, null);
   });
 
-  testWidgets('DatePickerTheme.defaults M3 defaults', (WidgetTester tester) async {
+  testWidgets('DatePickerTheme.defaults M3 defaults', (final WidgetTester tester) async {
     late final DatePickerThemeData m3; // M3 Defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -126,7 +126,7 @@ void main() {
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             m3 = DatePickerTheme.defaults(context);
             theme = Theme.of(context);
             colorScheme = theme.colorScheme;
@@ -186,7 +186,7 @@ void main() {
   });
 
 
-  testWidgets('DatePickerTheme.defaults M2 defaults', (WidgetTester tester) async {
+  testWidgets('DatePickerTheme.defaults M2 defaults', (final WidgetTester tester) async {
     late final DatePickerThemeData m2; // M2 defaults
     late final ThemeData theme;
     late final ColorScheme colorScheme;
@@ -196,7 +196,7 @@ void main() {
       MaterialApp(
         theme: ThemeData.light(useMaterial3: false),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             m2 = DatePickerTheme.defaults(context);
             theme = Theme.of(context);
             colorScheme = theme.colorScheme;
@@ -249,26 +249,26 @@ void main() {
     expect(m2.rangePickerHeaderHelpStyle, textTheme.labelSmall);
   });
 
-  testWidgets('Default DatePickerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DatePickerThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DatePickerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('DatePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('DatePickerThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     datePickerTheme.debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -307,7 +307,7 @@ void main() {
     ]);
   });
 
-  testWidgets('DatePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+  testWidgets('DatePickerDialog uses ThemeData datePicker theme', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true).copyWith(
@@ -387,7 +387,7 @@ void main() {
   });
 
 
-  testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (WidgetTester tester) async {
+  testWidgets('DateRangePickerDialog uses ThemeData datePicker theme', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true).copyWith(

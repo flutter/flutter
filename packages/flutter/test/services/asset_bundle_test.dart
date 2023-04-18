@@ -13,7 +13,7 @@ class TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
 
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(final String key) async {
     loadCallCount[key] = (loadCallCount[key] ?? 0) + 1;
     if (key == 'AssetManifest.json') {
       return ByteData.view(Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
@@ -71,13 +71,13 @@ void main() {
       expect(firstLoadStringResult, '1');
       expect(secondLoadStringResult, '1');
 
-      final String firstLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.value('one'));
-      final String secondLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.value('two'));
+      final String firstLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (final String value) => Future<String>.value('one'));
+      final String secondLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (final String value) => Future<String>.value('two'));
       expect(firstLoadStructuredDataResult, 'one');
       expect(secondLoadStructuredDataResult, 'one');
 
-      final String firstLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('one'));
-      final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('two'));
+      final String firstLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (final ByteData value) => Future<String>.value('one'));
+      final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (final ByteData value) => Future<String>.value('two'));
       expect(firstLoadStructuredBinaryDataResult, 'one');
       expect(secondLoadStructuredBinaryDataResult, 'one');
     });
@@ -90,14 +90,14 @@ void main() {
       final String secondLoadStringResult = await bundle.loadString('counter');
       expect(secondLoadStringResult, '2');
 
-      await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.value('one'));
+      await bundle.loadStructuredData('AssetManifest.json', (final String value) => Future<String>.value('one'));
       bundle.clear();
-      final String secondLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.value('two'));
+      final String secondLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (final String value) => Future<String>.value('two'));
       expect(secondLoadStructuredDataResult, 'two');
 
-      await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('one'));
+      await bundle.loadStructuredBinaryData('AssetManifest.bin', (final ByteData value) => Future<String>.value('one'));
       bundle.clear();
-      final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('two'));
+      final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (final ByteData value) => Future<String>.value('two'));
       expect(secondLoadStructuredBinaryDataResult, 'two');
     });
 
@@ -109,29 +109,29 @@ void main() {
       final String secondLoadStringResult = await bundle.loadString('counter');
       expect(secondLoadStringResult, '2');
 
-      await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.value('one'));
+      await bundle.loadStructuredData('AssetManifest.json', (final String value) => Future<String>.value('one'));
       bundle.evict('AssetManifest.json');
-      final String secondLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (String value) => Future<String>.value('two'));
+      final String secondLoadStructuredDataResult = await bundle.loadStructuredData('AssetManifest.json', (final String value) => Future<String>.value('two'));
       expect(secondLoadStructuredDataResult, 'two');
 
-      await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('one'));
+      await bundle.loadStructuredBinaryData('AssetManifest.bin', (final ByteData value) => Future<String>.value('one'));
       bundle.evict('AssetManifest.bin');
-      final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData value) => Future<String>.value('two'));
+      final String secondLoadStructuredBinaryDataResult = await bundle.loadStructuredBinaryData('AssetManifest.bin', (final ByteData value) => Future<String>.value('two'));
       expect(secondLoadStructuredBinaryDataResult, 'two');
     });
 
     test('for a given key, subsequent loadStructuredData calls are synchronous after the first call resolves', () async {
       final TestAssetBundle bundle = TestAssetBundle();
-      await bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(1));
-      final Future<int> data = bundle.loadStructuredData('one', (String data) => SynchronousFuture<int>(2));
+      await bundle.loadStructuredData('one', (final String data) => SynchronousFuture<int>(1));
+      final Future<int> data = bundle.loadStructuredData('one', (final String data) => SynchronousFuture<int>(2));
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
     });
 
     test('for a given key, subsequent loadStructuredBinaryData calls are synchronous after the first call resolves', () async {
       final TestAssetBundle bundle = TestAssetBundle();
-      await bundle.loadStructuredBinaryData('one', (ByteData data) => 1);
-      final Future<int> data = bundle.loadStructuredBinaryData('one', (ByteData data) => 2);
+      await bundle.loadStructuredBinaryData('one', (final ByteData data) => 1);
+      final Future<int> data = bundle.loadStructuredBinaryData('one', (final ByteData data) => 2);
       expect(data, isA<SynchronousFuture<int>>());
       expect(await data, 1);
     });
@@ -191,7 +191,7 @@ void main() {
   test('loadStructuredBinaryData correctly loads ByteData', () async {
     final TestAssetBundle bundle = TestAssetBundle();
     final Map<Object?, Object?> assetManifest =
-      await bundle.loadStructuredBinaryData('AssetManifest.bin', (ByteData data) => const StandardMessageCodec().decodeMessage(data) as Map<Object?, Object?>);
+      await bundle.loadStructuredBinaryData('AssetManifest.bin', (final ByteData data) => const StandardMessageCodec().decodeMessage(data) as Map<Object?, Object?>);
     expect(assetManifest.keys.toList(), equals(<String>['one']));
     expect(assetManifest['one'], <Object>[]);
   });

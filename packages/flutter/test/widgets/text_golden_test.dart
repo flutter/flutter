@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Centered text', (WidgetTester tester) async {
+  testWidgets('Centered text', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -63,7 +63,7 @@ void main() {
   });
 
 
-  testWidgets('Text Foreground', (WidgetTester tester) async {
+  testWidgets('Text Foreground', (final WidgetTester tester) async {
     const Color black = Color(0xFF000000);
     const Color red = Color(0xFFFF0000);
     const Color blue = Color(0xFF0000FF);
@@ -141,7 +141,7 @@ void main() {
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
   // tested version is not completely correct.
-  testWidgets('Text Background', (WidgetTester tester) async {
+  testWidgets('Text Background', (final WidgetTester tester) async {
     const Color red = Colors.red;
     const Color blue = Colors.blue;
     const Color translucentGreen = Color(0x5000F000);
@@ -188,7 +188,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Fade', (WidgetTester tester) async {
+  testWidgets('Text Fade', (final WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -224,7 +224,7 @@ void main() {
     );
   });
 
-  testWidgets('Default Strut text', (WidgetTester tester) async {
+  testWidgets('Default Strut text', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -249,7 +249,7 @@ void main() {
     );
   });
 
-  testWidgets('Strut text 1', (WidgetTester tester) async {
+  testWidgets('Strut text 1', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -276,7 +276,7 @@ void main() {
     );
   });
 
-  testWidgets('Strut text 2', (WidgetTester tester) async {
+  testWidgets('Strut text 2', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -304,7 +304,7 @@ void main() {
     );
   });
 
-  testWidgets('Strut text rich', (WidgetTester tester) async {
+  testWidgets('Strut text rich', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -355,7 +355,7 @@ void main() {
     );
   });
 
-  testWidgets('Strut text font fallback', (WidgetTester tester) async {
+  testWidgets('Strut text font fallback', (final WidgetTester tester) async {
     // Font Fallback
     await tester.pumpWidget(
       Center(
@@ -390,7 +390,7 @@ void main() {
     );
   });
 
-  testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
+  testWidgets('Strut text rich forceStrutHeight', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -441,7 +441,7 @@ void main() {
     );
   });
 
-  testWidgets('Decoration thickness', (WidgetTester tester) async {
+  testWidgets('Decoration thickness', (final WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
       <TextDecoration>[
         TextDecoration.underline,
@@ -479,7 +479,7 @@ void main() {
     );
   });
 
-  testWidgets('Decoration thickness', (WidgetTester tester) async {
+  testWidgets('Decoration thickness', (final WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
       <TextDecoration>[
         TextDecoration.underline,
@@ -518,7 +518,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Inline widget', (WidgetTester tester) async {
+  testWidgets('Text Inline widget', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -612,7 +612,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Inline widget textfield', (WidgetTester tester) async {
+  testWidgets('Text Inline widget textfield', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
@@ -658,7 +658,7 @@ void main() {
   });
 
   // This tests if multiple Text.rich widgets are able to inline nest within each other.
-  testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
+  testWidgets('Text Inline widget nesting', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: MaterialApp(
@@ -786,7 +786,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Inline widget baseline', (WidgetTester tester) async {
+  testWidgets('Text Inline widget baseline', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -893,7 +893,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Inline widget aboveBaseline', (WidgetTester tester) async {
+  testWidgets('Text Inline widget aboveBaseline', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -1000,7 +1000,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Inline widget belowBaseline', (WidgetTester tester) async {
+  testWidgets('Text Inline widget belowBaseline', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -1107,7 +1107,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Inline widget top', (WidgetTester tester) async {
+  testWidgets('Text Inline widget top', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -1214,7 +1214,7 @@ void main() {
     );
   });
 
-  testWidgets('Text Inline widget middle', (WidgetTester tester) async {
+  testWidgets('Text Inline widget middle', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -1321,7 +1321,7 @@ void main() {
     );
   });
 
-  testWidgets('Text TextHeightBehavior', (WidgetTester tester) async {
+  testWidgets('Text TextHeightBehavior', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(

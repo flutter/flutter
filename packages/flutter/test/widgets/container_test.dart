@@ -39,7 +39,7 @@ void main() {
       ),
     );
 
-    testWidgets('paints as expected', (WidgetTester tester) async {
+    testWidgets('paints as expected', (final WidgetTester tester) async {
       await tester.pumpWidget(Align(
         alignment: Alignment.topLeft,
         child: container,
@@ -56,7 +56,7 @@ void main() {
     });
 
     group('diagnostics', () {
-      testWidgets('has reasonable default diagnostics', (WidgetTester tester) async {
+      testWidgets('has reasonable default diagnostics', (final WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -68,7 +68,7 @@ void main() {
         expect(box, hasAGoodToStringDeep);
       });
 
-      testWidgets('has expected info diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected info diagnostics', (final WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -140,7 +140,7 @@ void main() {
         );
       });
 
-      testWidgets('has expected debug diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected debug diagnostics', (final WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -242,7 +242,7 @@ void main() {
         );
       });
 
-      testWidgets('has expected fine diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected fine diagnostics', (final WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -372,7 +372,7 @@ void main() {
         );
       });
 
-      testWidgets('has expected hidden diagnostics', (WidgetTester tester) async {
+      testWidgets('has expected hidden diagnostics', (final WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -526,7 +526,7 @@ void main() {
         );
       });
 
-      testWidgets('painting error has expected diagnostics', (WidgetTester tester) async {
+      testWidgets('painting error has expected diagnostics', (final WidgetTester tester) async {
         await tester.pumpWidget(Align(
           alignment: Alignment.topLeft,
           child: container,
@@ -557,7 +557,7 @@ void main() {
     });
   });
 
-  testWidgets('Can be placed in an infinite box', (WidgetTester tester) async {
+  testWidgets('Can be placed in an infinite box', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -566,7 +566,7 @@ void main() {
     );
   });
 
-  testWidgets('Container transformAlignment', (WidgetTester tester) async {
+  testWidgets('Container transformAlignment', (final WidgetTester tester) async {
     final Key key = UniqueKey();
 
     await tester.pumpWidget(
@@ -613,7 +613,7 @@ void main() {
     expect(tester.getBottomRight(finder), equals(const Offset(200, 200)));
   });
 
-  testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
+  testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
         decoration: const BoxDecoration(
@@ -628,7 +628,7 @@ void main() {
     );
   });
 
-  testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
+  testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (final WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
@@ -645,8 +645,8 @@ void main() {
     );
   });
 
-  testWidgets('getClipPath() works for lots of kinds of decorations', (WidgetTester tester) async {
-    Future<void> test(Decoration decoration) async {
+  testWidgets('getClipPath() works for lots of kinds of decorations', (final WidgetTester tester) async {
+    Future<void> test(final Decoration decoration) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -675,7 +675,7 @@ void main() {
     await test(const FlutterLogoDecoration());
   });
 
-  testWidgets('Container is hittable only when having decorations', (WidgetTester tester) async {
+  testWidgets('Container is hittable only when having decorations', (final WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(GestureDetector(
       onTap: () { tapped = true; },
@@ -729,7 +729,7 @@ void main() {
     expect(tapped, false);
   });
 
-  testWidgets('Container discards alignment when the child parameter is null and constraints is not Tight', (WidgetTester tester) async {
+  testWidgets('Container discards alignment when the child parameter is null and constraints is not Tight', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
         decoration: const BoxDecoration(
@@ -744,7 +744,7 @@ void main() {
     );
   });
 
-  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (WidgetTester tester) async {
+  testWidgets('using clipBehaviour and shadow, should not clip the shadow', (final WidgetTester tester) async {
     final Container container = Container(
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
@@ -791,5 +791,5 @@ class _MockCanvas extends Fake implements Canvas {
   }
 
   @override
-  void drawRect(Rect rect, Paint paint) { }
+  void drawRect(final Rect rect, final Paint paint) { }
 }

@@ -44,19 +44,19 @@ void main() {
     expect(style.enableFeedback, null);
   });
 
-  testWidgets('Default ButtonStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ButtonStyle debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('ButtonStyle debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ButtonStyle debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonStyle(
       textStyle: MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10.0)),
@@ -80,8 +80,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[
@@ -106,7 +106,7 @@ void main() {
     ]);
   });
 
-  testWidgets('ButtonStyle copyWith, merge', (WidgetTester tester) async {
+  testWidgets('ButtonStyle copyWith, merge', (final WidgetTester tester) async {
     const MaterialStateProperty<TextStyle> textStyle = MaterialStatePropertyAll<TextStyle>(TextStyle(fontSize: 10));
     const MaterialStateProperty<Color> backgroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const MaterialStateProperty<Color> foregroundColor = MaterialStatePropertyAll<Color>(Color(0xfffffff2));

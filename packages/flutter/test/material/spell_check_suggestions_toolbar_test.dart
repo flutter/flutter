@@ -15,7 +15,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   /// Builds test button items for each of the suggestions provided.
-  List<ContextMenuButtonItem> buildSuggestionButtons(List<String> suggestions) {
+  List<ContextMenuButtonItem> buildSuggestionButtons(final List<String> suggestions) {
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     for (final String suggestion in suggestions) {
@@ -42,11 +42,11 @@ void main() {
     return find.descendant(
       of: find.byType(MaterialApp),
       matching: find.byWidgetPredicate(
-        (Widget w) => '${w.runtimeType}' == '_SpellCheckSuggestionsToolbarContainer'),
+        (final Widget w) => '${w.runtimeType}' == '_SpellCheckSuggestionsToolbarContainer'),
     );
   }
 
-  testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
+  testWidgets('positions toolbar below anchor when it fits above bottom view padding', (final WidgetTester tester) async {
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
     const double expectedToolbarY =
         _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - CupertinoTextSelectionToolbar.kToolbarScreenPadding;
@@ -66,7 +66,7 @@ void main() {
     expect(toolbarY, equals(expectedToolbarY));
   });
 
-  testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
+  testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (final WidgetTester tester) async {
     // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor with padding accounted for.
     const double expectedToolbarY =
         _kAnchor + (2 * SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow) - CupertinoTextSelectionToolbar.kToolbarScreenPadding - _kTestToolbarOverlap;

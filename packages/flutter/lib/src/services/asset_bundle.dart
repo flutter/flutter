@@ -62,13 +62,13 @@ abstract class AssetBundle {
   /// used with APIs that accept [Uint8List] objects, such as
   /// [decodeImageFromList], as well as any API that accepts a [List<int>], such
   /// as [File.writeAsBytes] or [Utf8Codec.decode] (accessible via [utf8]).
-  Future<ByteData> load(String key);
+  Future<ByteData> load(final String key);
 
   /// Retrieve a binary resource from the asset bundle as an immutable
   /// buffer.
   ///
   /// Throws an exception if the asset is not found.
-  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+  Future<ui.ImmutableBuffer> loadBuffer(final String key) async {
     final ByteData data = await load(key);
     return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
   }
@@ -86,7 +86,7 @@ abstract class AssetBundle {
   /// [Utf8Codec] will be used for decoding the string. If the string is
   /// larger than 50 KB, the decoding process is delegated to an
   /// isolate to avoid jank on the main thread.
-  Future<String> loadString(String key, { bool cache = true }) async {
+  Future<String> loadString(final String key, { final bool cache = true }) async {
     final ByteData data = await load(key);
     // 50 KB of data should take 2-3 ms to parse on a Moto G4, and about 400 μs
     // on a Pixel 4.
@@ -98,7 +98,7 @@ abstract class AssetBundle {
     return compute(_utf8decode, data, debugLabel: 'UTF8 decode for "$key"');
   }
 
-  static String _utf8decode(ByteData data) {
+  static String _utf8decode(final ByteData data) {
     return utf8.decode(data.buffer.asUint8List());
   }
 
@@ -107,14 +107,14 @@ abstract class AssetBundle {
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser);
+  Future<T> loadStructuredData<T>(final String key, final Future<T> Function(String value) parser);
 
   /// Retrieve [ByteData] from the asset bundle, parse it with the given function,
   /// and return that function's result.
   ///
   /// Implementations may cache the result, so a particular key should only be
   /// used with one parser for the lifetime of the asset bundle.
-  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredBinaryData<T>(final String key, final FutureOr<T> Function(ByteData data) parser) async {
     final ByteData data = await load(key);
     return parser(data);
   }
@@ -122,7 +122,7 @@ abstract class AssetBundle {
   /// If this is a caching asset bundle, and the given key describes a cached
   /// asset, then evict the asset from the cache so that the next time it is
   /// loaded, the cache will be reread from the asset bundle.
-  void evict(String key) { }
+  void evict(final String key) { }
 
   /// If this is a caching asset bundle, clear all cached data.
   void clear() { }
@@ -138,17 +138,17 @@ abstract class AssetBundle {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates a network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl)
+  NetworkAssetBundle(final Uri baseUrl)
     : _baseUrl = baseUrl,
       _httpClient = HttpClient();
 
   final Uri _baseUrl;
   final HttpClient _httpClient;
 
-  Uri _urlFromKey(String key) => _baseUrl.resolve(key);
+  Uri _urlFromKey(final String key) => _baseUrl.resolve(key);
 
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(final String key) async {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok) {
@@ -167,7 +167,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
+  Future<T> loadStructuredData<T>(final String key, final Future<T> Function(String value) parser) async {
     return parser(await loadString(key));
   }
 
@@ -177,7 +177,7 @@ class NetworkAssetBundle extends AssetBundle {
   /// The result is not cached. The parser is run each time the resource is
   /// fetched.
   @override
-  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) async {
+  Future<T> loadStructuredBinaryData<T>(final String key, final FutureOr<T> Function(ByteData data) parser) async {
     return parser(await load(key));
   }
 
@@ -203,7 +203,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   final Map<String, Future<dynamic>> _structuredBinaryDataCache = <String, Future<dynamic>>{};
 
   @override
-  Future<String> loadString(String key, { bool cache = true }) {
+  Future<String> loadString(final String key, { final bool cache = true }) {
     if (cache) {
       return _stringCache.putIfAbsent(key, () => super.loadString(key));
     }
@@ -221,13 +221,13 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) {
+  Future<T> loadStructuredData<T>(final String key, final Future<T> Function(String value) parser) {
     if (_structuredDataCache.containsKey(key)) {
       return _structuredDataCache[key]! as Future<T>;
     }
     Completer<T>? completer;
     Future<T>? result;
-    loadString(key, cache: false).then<T>(parser).then<void>((T value) {
+    loadString(key, cache: false).then<T>(parser).then<void>((final T value) {
       result = SynchronousFuture<T>(value);
       _structuredDataCache[key] = result!;
       if (completer != null) {
@@ -259,7 +259,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   /// subsequent calls will be a [SynchronousFuture], which resolves its
   /// callback synchronously.
   @override
-  Future<T> loadStructuredBinaryData<T>(String key, FutureOr<T> Function(ByteData data) parser) {
+  Future<T> loadStructuredBinaryData<T>(final String key, final FutureOr<T> Function(ByteData data) parser) {
     if (_structuredBinaryDataCache.containsKey(key)) {
       return _structuredBinaryDataCache[key]! as Future<T>;
     }
@@ -271,7 +271,7 @@ abstract class CachingAssetBundle extends AssetBundle {
 
     load(key)
       .then<T>(parser)
-      .then<void>((T value) {
+      .then<void>((final T value) {
         result = SynchronousFuture<T>(value);
         _structuredBinaryDataCache[key] = result!;
         if (completer != null) {
@@ -280,7 +280,7 @@ abstract class CachingAssetBundle extends AssetBundle {
           // was given the future of the completer.
           completer.complete(value);
         }
-      }, onError: (Object error, StackTrace stack) {
+      }, onError: (final Object error, final StackTrace stack) {
         completer!.completeError(error, stack);
       });
 
@@ -298,7 +298,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   }
 
   @override
-  void evict(String key) {
+  void evict(final String key) {
     _stringCache.remove(key);
     _structuredDataCache.remove(key);
     _structuredBinaryDataCache.remove(key);
@@ -312,7 +312,7 @@ abstract class CachingAssetBundle extends AssetBundle {
   }
 
   @override
-  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+  Future<ui.ImmutableBuffer> loadBuffer(final String key) async {
     final ByteData data = await load(key);
     return ui.ImmutableBuffer.fromUint8List(data.buffer.asUint8List());
   }
@@ -321,9 +321,9 @@ abstract class CachingAssetBundle extends AssetBundle {
 /// An [AssetBundle] that loads resources using platform messages.
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
-  Future<ByteData> load(String key) {
+  Future<ByteData> load(final String key) {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
-    final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData())?.then((ByteData? asset) {
+    final Future<ByteData>? future = ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData())?.then((final ByteData? asset) {
       if (asset == null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           _errorSummaryWithKey(key),
@@ -342,7 +342,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  Future<ui.ImmutableBuffer> loadBuffer(String key) async {
+  Future<ui.ImmutableBuffer> loadBuffer(final String key) async {
     if (kIsWeb) {
       final ByteData bytes = await load(key);
       return ui.ImmutableBuffer.fromUint8List(bytes.buffer.asUint8List());
@@ -378,7 +378,7 @@ AssetBundle _initRootBundle() {
   return PlatformAssetBundle();
 }
 
-ErrorSummary _errorSummaryWithKey(String key) {
+ErrorSummary _errorSummaryWithKey(final String key) {
   return ErrorSummary('Unable to load asset: "$key".');
 }
 

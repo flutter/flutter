@@ -73,7 +73,7 @@ void main() {
     test('NoTransientCallbacksCondition deserialize error', () {
       expect(
           () => NoTransientCallbacks.deserialize(<String, String>{'conditionName': 'Unknown'}),
-          throwsA(predicate<SerializationException>((SerializationException e) =>
+          throwsA(predicate<SerializationException>((final SerializationException e) =>
               e.message == 'Error occurred during deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}')));
     });
   });
@@ -97,7 +97,7 @@ void main() {
     test('NoPendingFrameCondition deserialize error', () {
       expect(
           () => NoPendingFrame.deserialize(<String, String>{'conditionName': 'Unknown'}),
-          throwsA(predicate<SerializationException>((SerializationException e) =>
+          throwsA(predicate<SerializationException>((final SerializationException e) =>
               e.message == 'Error occurred during deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}')));
     });
   });
@@ -121,7 +121,7 @@ void main() {
     test('FirstFrameRasterizedCondition deserialize error', () {
       expect(
           () => FirstFrameRasterized.deserialize(<String, String>{'conditionName': 'Unknown'}),
-          throwsA(predicate<SerializationException>((SerializationException e) =>
+          throwsA(predicate<SerializationException>((final SerializationException e) =>
               e.message == 'Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: {conditionName: Unknown}')));
     });
 
@@ -194,7 +194,7 @@ void main() {
     test('CombinedCondition deserialize error', () {
       expect(
           () => CombinedCondition.deserialize(<String, String>{'conditionName': 'Unknown'}),
-          throwsA(predicate<SerializationException>((SerializationException e) =>
+          throwsA(predicate<SerializationException>((final SerializationException e) =>
               e.message == 'Error occurred during deserializing the CombinedCondition JSON string: {conditionName: Unknown}')));
     });
 
@@ -207,7 +207,7 @@ void main() {
                     '[{"conditionName":"UnknownCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
             });
           },
-          throwsA(predicate<SerializationException>((SerializationException e) =>
+          throwsA(predicate<SerializationException>((final SerializationException e) =>
               e.message == 'Unsupported wait condition UnknownCondition in the JSON string {conditionName: UnknownCondition}')));
     });
   });

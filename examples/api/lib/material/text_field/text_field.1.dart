@@ -12,7 +12,7 @@ class TextFieldExampleApp extends StatelessWidget {
   const TextFieldExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: TextFieldExample(),
     );
@@ -42,15 +42,15 @@ class _TextFieldExampleState extends State<TextFieldExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: TextField(
           controller: _controller,
-          onSubmitted: (String value) async {
+          onSubmitted: (final String value) async {
             await showDialog<void>(
               context: context,
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return AlertDialog(
                   title: const Text('Thanks!'),
                   content: Text('You typed "$value", which has length ${value.characters.length}.'),

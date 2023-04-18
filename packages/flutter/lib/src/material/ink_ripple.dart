@@ -18,7 +18,7 @@ const Duration _kCancelDuration = Duration(milliseconds: 75);
 // The fade out begins 225ms after the _fadeOutController starts. See confirm().
 const double _kFadeOutIntervalStart = 225.0 / 375.0;
 
-RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
+RectCallback? _getClipCallback(final RenderBox referenceBox, final bool containedInkWell, final RectCallback? rectCallback) {
   if (rectCallback != null) {
     assert(containedInkWell);
     return rectCallback;
@@ -29,7 +29,7 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
+double _getTargetRadius(final RenderBox referenceBox, final bool containedInkWell, final RectCallback? rectCallback, final Offset position) {
   final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
   final double d1 = size.bottomRight(Offset.zero).distance;
   final double d2 = (size.topRight(Offset.zero) - size.bottomLeft(Offset.zero)).distance;
@@ -41,17 +41,17 @@ class _InkRippleFactory extends InteractiveInkFeatureFactory {
 
   @override
   InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Offset position,
-    required Color color,
-    required TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    VoidCallback? onRemoved,
+    required final MaterialInkController controller,
+    required final RenderBox referenceBox,
+    required final Offset position,
+    required final Color color,
+    required final TextDirection textDirection,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final double? radius,
+    final VoidCallback? onRemoved,
   }) {
     return InkRipple(
       controller: controller,
@@ -108,16 +108,16 @@ class InkRipple extends InteractiveInkFeature {
   ///
   /// When the ripple is removed, [onRemoved] will be called.
   InkRipple({
-    required MaterialInkController controller,
+    required final MaterialInkController controller,
     required super.referenceBox,
-    required Offset position,
-    required Color color,
-    required TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
+    required final Offset position,
+    required final Color color,
+    required final TextDirection textDirection,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
     super.customBorder,
-    double? radius,
+    final double? radius,
     super.onRemoved,
   }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
@@ -208,7 +208,7 @@ class InkRipple extends InteractiveInkFeature {
     }
   }
 
-  void _handleAlphaStatusChanged(AnimationStatus status) {
+  void _handleAlphaStatusChanged(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       dispose();
     }
@@ -223,7 +223,7 @@ class InkRipple extends InteractiveInkFeature {
   }
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {
+  void paintFeature(final Canvas canvas, final Matrix4 transform) {
     final int alpha = _fadeInController.isAnimating ? _fadeIn.value : _fadeOut.value;
     final Paint paint = Paint()..color = color.withAlpha(alpha);
     Rect? rect;

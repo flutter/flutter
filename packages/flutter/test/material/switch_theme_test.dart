@@ -42,19 +42,19 @@ void main() {
     expect(theme.data.thumbIcon, null);
   });
 
-  testWidgets('Default SwitchThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SwitchThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('SwitchThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('SwitchThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SwitchThemeData(
       thumbColor: MaterialStatePropertyAll<Color>(Color(0xfffffff0)),
@@ -68,8 +68,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description[0], 'thumbColor: MaterialStatePropertyAll(Color(0xfffffff0))');
@@ -82,7 +82,7 @@ void main() {
     expect(description[7], 'thumbIcon: MaterialStatePropertyAll(Icon(IconData(U+0007B)))');
   });
 
-  testWidgets('Switch is themeable', (WidgetTester tester) async {
+  testWidgets('Switch is themeable', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color defaultThumbColor = Color(0xfffffff0);
@@ -101,19 +101,19 @@ void main() {
 
     final ThemeData themeData = ThemeData(
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        thumbColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return selectedThumbColor;
           }
           return defaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        trackColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return selectedTrackColor;
           }
           return defaultTrackColor;
         }),
-        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        trackOutlineColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return selectedTrackOutlineColor;
           }
@@ -121,7 +121,7 @@ void main() {
         }),
         mouseCursor: const MaterialStatePropertyAll<MouseCursor>(mouseCursor),
         materialTapTargetSize: materialTapTargetSize,
-        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        overlayColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return focusOverlayColor;
           }
@@ -131,7 +131,7 @@ void main() {
           return null;
         }),
         splashRadius: splashRadius,
-        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        thumbIcon: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return icon1;
           }
@@ -140,14 +140,14 @@ void main() {
       ),
     );
     final bool material3 = themeData.useMaterial3;
-    Widget buildSwitch({bool selected = false, bool autofocus = false}) {
+    Widget buildSwitch({final bool selected = false, final bool autofocus = false}) {
       return MaterialApp(
         theme: themeData,
         home: Scaffold(
           body: Switch(
             dragStartBehavior: DragStartBehavior.down,
             value: selected,
-            onChanged: (bool value) {},
+            onChanged: (final bool value) {},
             autofocus: autofocus,
           ),
         ),
@@ -210,7 +210,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusOverlayColor, radius: splashRadius));
   });
 
-  testWidgets('Switch properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Switch properties are taken over the theme values', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -239,19 +239,19 @@ void main() {
 
     final ThemeData themeData = ThemeData(
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        thumbColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return themeSelectedThumbColor;
           }
           return themeDefaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        trackColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return themeSelectedTrackColor;
           }
           return themeDefaultTrackColor;
         }),
-        trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        trackOutlineColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return themeSelectedOutlineColor;
           }
@@ -259,7 +259,7 @@ void main() {
         }),
         mouseCursor: const MaterialStatePropertyAll<MouseCursor>(themeMouseCursor),
         materialTapTargetSize: themeMaterialTapTargetSize,
-        overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        overlayColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return themeFocusOverlayColor;
           }
@@ -269,7 +269,7 @@ void main() {
           return null;
         }),
         splashRadius: themeSplashRadius,
-        thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        thumbIcon: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return null;
           }
@@ -279,27 +279,27 @@ void main() {
     );
     final bool material3 = themeData.useMaterial3;
 
-    Widget buildSwitch({bool selected = false, bool autofocus = false}) {
+    Widget buildSwitch({final bool selected = false, final bool autofocus = false}) {
       return MaterialApp(
         theme: themeData,
         home: Scaffold(
           body: Switch(
             value: selected,
-            onChanged: (bool value) {},
+            onChanged: (final bool value) {},
             autofocus: autofocus,
-            thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            thumbColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedThumbColor;
               }
               return defaultThumbColor;
             }),
-            trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            trackColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedTrackColor;
               }
               return defaultTrackColor;
             }),
-            trackOutlineColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            trackOutlineColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedOutlineColor;
               }
@@ -310,7 +310,7 @@ void main() {
             focusColor: focusColor,
             hoverColor: hoverColor,
             splashRadius: splashRadius,
-            thumbIcon: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            thumbIcon: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return const Icon(Icons.add);
               }
@@ -373,7 +373,7 @@ void main() {
     expect(_getSwitchMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Switch active and inactive properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Switch active and inactive properties are taken over the theme values', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const Color themeDefaultThumbColor = Color(0xfffffff0);
@@ -388,13 +388,13 @@ void main() {
 
     final ThemeData themeData = ThemeData(
       switchTheme: SwitchThemeData(
-        thumbColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        thumbColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return themeSelectedThumbColor;
           }
           return themeDefaultThumbColor;
         }),
-        trackColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        trackColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return themeSelectedTrackColor;
           }
@@ -404,13 +404,13 @@ void main() {
     );
     final bool material3 = themeData.useMaterial3;
 
-    Widget buildSwitch({bool selected = false, bool autofocus = false}) {
+    Widget buildSwitch({final bool selected = false, final bool autofocus = false}) {
       return MaterialApp(
         theme: themeData,
         home: Scaffold(
           body: Switch(
             value: selected,
-            onChanged: (bool value) {},
+            onChanged: (final bool value) {},
             autofocus: autofocus,
             activeColor: selectedThumbColor,
             inactiveThumbColor: defaultThumbColor,
@@ -457,11 +457,11 @@ void main() {
     );
   });
 
-  testWidgets('Switch theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Switch theme overlay color resolves in active/pressed states', (final WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         if (states.contains(MaterialState.selected)) {
           return activePressedOverlayColor;
@@ -479,13 +479,13 @@ void main() {
     );
     final bool material3 = themeData.useMaterial3;
 
-    Widget buildSwitch({required bool active}) {
+    Widget buildSwitch({required final bool active}) {
       return MaterialApp(
         theme: themeData,
         home: Scaffold(
           body: Switch(
             value: active,
-            onChanged: (_) { },
+            onChanged: (final _) { },
           ),
         ),
       );
@@ -530,7 +530,7 @@ void main() {
     );
   });
 
-  testWidgets('Local SwitchTheme can override global SwitchTheme', (WidgetTester tester) async {
+  testWidgets('Local SwitchTheme can override global SwitchTheme', (final WidgetTester tester) async {
     const Color globalThemeThumbColor = Color(0xfffffff1);
     const Color globalThemeTrackColor = Color(0xfffffff2);
     const Color globalThemeOutlineColor = Color(0xfffffff3);
@@ -546,7 +546,7 @@ void main() {
       ),
     );
     final bool material3 = themeData.useMaterial3;
-    Widget buildSwitch({bool selected = false, bool autofocus = false}) {
+    Widget buildSwitch({final bool selected = false, final bool autofocus = false}) {
       return MaterialApp(
         theme: themeData,
         home: Scaffold(
@@ -558,7 +558,7 @@ void main() {
             ),
             child: Switch(
               value: selected,
-              onChanged: (bool value) {},
+              onChanged: (final bool value) {},
               autofocus: autofocus,
             ),
           ),
@@ -586,13 +586,13 @@ void main() {
   });
 }
 
-Future<void> _pointGestureToSwitch(WidgetTester tester) async {
+Future<void> _pointGestureToSwitch(final WidgetTester tester) async {
   final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
   await gesture.addPointer();
   addTearDown(gesture.removePointer);
   await gesture.moveTo(tester.getCenter(find.byType(Switch)));
 }
 
-MaterialInkController? _getSwitchMaterial(WidgetTester tester) {
+MaterialInkController? _getSwitchMaterial(final WidgetTester tester) {
   return Material.of(tester.element(find.byType(Switch)));
 }

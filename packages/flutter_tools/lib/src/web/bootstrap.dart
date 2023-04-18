@@ -14,8 +14,8 @@ import 'package:package_config/package_config.dart';
 /// and is responsible for bootstrapping the RequireJS modules and attaching
 /// the hot reload hooks.
 String generateBootstrapScript({
-  required String requireUrl,
-  required String mapperUrl,
+  required final String requireUrl,
+  required final String mapperUrl,
 }) {
   return '''
 "use strict";
@@ -152,10 +152,10 @@ document.head.appendChild(requireEl);
 /// `foo__bar__baz`. Rather than attempt to guess, we assume the first property of
 /// this object is the module.
 String generateMainModule({
-  required String entrypoint,
-  required bool nullAssertions,
-  required bool nativeNullAssertions,
-  String bootstrapModule = 'main_module.bootstrap',
+  required final String entrypoint,
+  required final bool nullAssertions,
+  required final bool nativeNullAssertions,
+  final String bootstrapModule = 'main_module.bootstrap',
 }) {
   // The typo below in "EXTENTION" is load-bearing, package:build depends on it.
   return '''
@@ -204,10 +204,10 @@ define("$bootstrapModule", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) 
 ///
 /// This hard-codes the device pixel ratio to 3.0 and a 2400 x 1800 window size.
 String generateTestEntrypoint({
-  required String relativeTestPath,
-  required String absolutePath,
-  required String? testConfigPath,
-  required LanguageVersion languageVersion,
+  required final String relativeTestPath,
+  required final String absolutePath,
+  required final String? testConfigPath,
+  required final LanguageVersion languageVersion,
 }) {
   return '''
   // @dart = ${languageVersion.major}.${languageVersion.minor}
@@ -268,7 +268,7 @@ String generateTestEntrypoint({
 
 /// Generate the unit test bootstrap file.
 String generateTestBootstrapFileContents(
-    String mainUri, String requireUrl, String mapperUrl) {
+    final String mainUri, final String requireUrl, final String mapperUrl) {
   return '''
 (function() {
   if (typeof document != 'undefined') {

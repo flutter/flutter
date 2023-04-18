@@ -147,7 +147,7 @@ class MaterialPointArcTween extends Tween<Offset> {
   double? _endAngle;
 
   @override
-  set begin(Offset? value) {
+  set begin(final Offset? value) {
     if (value != begin) {
       super.begin = value;
       _dirty = true;
@@ -155,7 +155,7 @@ class MaterialPointArcTween extends Tween<Offset> {
   }
 
   @override
-  set end(Offset? value) {
+  set end(final Offset? value) {
     if (value != end) {
       super.end = value;
       _dirty = true;
@@ -163,7 +163,7 @@ class MaterialPointArcTween extends Tween<Offset> {
   }
 
   @override
-  Offset lerp(double t) {
+  Offset lerp(final double t) {
     if (_dirty) {
       _initialize();
     }
@@ -211,7 +211,7 @@ const List<_Diagonal> _allDiagonals = <_Diagonal>[
 typedef _KeyFunc<T> = double Function(T input);
 
 // Select the element for which the key function returns the maximum value.
-T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
+T _maxBy<T>(final Iterable<T> input, final _KeyFunc<T> keyFunc) {
   late T maxValue;
   double? maxKey;
   for (final T value in input) {
@@ -260,7 +260,7 @@ class MaterialRectArcTween extends RectTween {
     assert(begin != null);
     assert(end != null);
     final Offset centersVector = end!.center - begin!.center;
-    final _Diagonal diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
+    final _Diagonal diagonal = _maxBy<_Diagonal>(_allDiagonals, (final _Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = MaterialPointArcTween(
       begin: _cornerFor(begin!, diagonal.beginId),
       end: _cornerFor(end!, diagonal.beginId),
@@ -272,13 +272,13 @@ class MaterialRectArcTween extends RectTween {
     _dirty = false;
   }
 
-  double _diagonalSupport(Offset centersVector, _Diagonal diagonal) {
+  double _diagonalSupport(final Offset centersVector, final _Diagonal diagonal) {
     final Offset delta = _cornerFor(begin!, diagonal.endId) - _cornerFor(begin!, diagonal.beginId);
     final double length = delta.distance;
     return centersVector.dx * delta.dx / length + centersVector.dy * delta.dy / length;
   }
 
-  Offset _cornerFor(Rect rect, _CornerId id) {
+  Offset _cornerFor(final Rect rect, final _CornerId id) {
     switch (id) {
       case _CornerId.topLeft: return rect.topLeft;
       case _CornerId.topRight: return rect.topRight;
@@ -314,7 +314,7 @@ class MaterialRectArcTween extends RectTween {
   late MaterialPointArcTween _endArc;
 
   @override
-  set begin(Rect? value) {
+  set begin(final Rect? value) {
     if (value != begin) {
       super.begin = value;
       _dirty = true;
@@ -322,7 +322,7 @@ class MaterialRectArcTween extends RectTween {
   }
 
   @override
-  set end(Rect? value) {
+  set end(final Rect? value) {
     if (value != end) {
       super.end = value;
       _dirty = true;
@@ -330,7 +330,7 @@ class MaterialRectArcTween extends RectTween {
   }
 
   @override
-  Rect lerp(double t) {
+  Rect lerp(final double t) {
     if (_dirty) {
       _initialize();
     }
@@ -402,7 +402,7 @@ class MaterialRectCenterArcTween extends RectTween {
   late MaterialPointArcTween _centerArc;
 
   @override
-  set begin(Rect? value) {
+  set begin(final Rect? value) {
     if (value != begin) {
       super.begin = value;
       _dirty = true;
@@ -410,7 +410,7 @@ class MaterialRectCenterArcTween extends RectTween {
   }
 
   @override
-  set end(Rect? value) {
+  set end(final Rect? value) {
     if (value != end) {
       super.end = value;
       _dirty = true;
@@ -418,7 +418,7 @@ class MaterialRectCenterArcTween extends RectTween {
   }
 
   @override
-  Rect lerp(double t) {
+  Rect lerp(final double t) {
     if (_dirty) {
       _initialize();
     }

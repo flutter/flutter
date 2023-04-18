@@ -9,12 +9,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics can merge sibling group', (WidgetTester tester) async {
+  testWidgets('Semantics can merge sibling group', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
     const SemanticsTag third = SemanticsTag('3');
-    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+    ChildSemanticsConfigurationsResult delegate(final List<SemanticsConfiguration> configs) {
       expect(configs.length, 3);
       final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
       final List<SemanticsConfiguration> sibling = <SemanticsConfiguration>[];
@@ -74,12 +74,12 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics can drop semantics config', (WidgetTester tester) async {
+  testWidgets('Semantics can drop semantics config', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
     const SemanticsTag third = SemanticsTag('3');
-    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+    ChildSemanticsConfigurationsResult delegate(final List<SemanticsConfiguration> configs) {
       final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
       // Merge first and third
       for (final SemanticsConfiguration config in configs) {
@@ -132,11 +132,11 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics throws when mark the same config twice case 1', (WidgetTester tester) async {
+  testWidgets('Semantics throws when mark the same config twice case 1', (final WidgetTester tester) async {
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
     const SemanticsTag third = SemanticsTag('3');
-    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+    ChildSemanticsConfigurationsResult delegate(final List<SemanticsConfiguration> configs) {
       final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
@@ -178,11 +178,11 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('Semantics throws when mark the same config twice case 2', (WidgetTester tester) async {
+  testWidgets('Semantics throws when mark the same config twice case 2', (final WidgetTester tester) async {
     const SemanticsTag first = SemanticsTag('1');
     const SemanticsTag second = SemanticsTag('2');
     const SemanticsTag third = SemanticsTag('3');
-    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+    ChildSemanticsConfigurationsResult delegate(final List<SemanticsConfiguration> configs) {
       final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
       // Marks the same one twice.
       builder.markAsMergeUp(configs.first);
@@ -224,11 +224,11 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('RenderObject with semantics child delegate will mark correct boundary dirty', (WidgetTester tester) async {
+  testWidgets('RenderObject with semantics child delegate will mark correct boundary dirty', (final WidgetTester tester) async {
     final UniqueKey inner = UniqueKey();
     final UniqueKey boundaryParent = UniqueKey();
     final UniqueKey grandBoundaryParent = UniqueKey();
-    ChildSemanticsConfigurationsResult delegate(List<SemanticsConfiguration> configs) {
+    ChildSemanticsConfigurationsResult delegate(final List<SemanticsConfiguration> configs) {
       final ChildSemanticsConfigurationsResultBuilder builder = ChildSemanticsConfigurationsResultBuilder();
       configs.forEach(builder.markAsMergeUp);
       return builder.build();
@@ -304,7 +304,7 @@ void main() {
 class MarkSemanticsDirtySpy extends SingleChildRenderObjectWidget {
   const MarkSemanticsDirtySpy({super.key, super.child});
   @override
-  RenderMarkSemanticsDirtySpy createRenderObject(BuildContext context) => RenderMarkSemanticsDirtySpy();
+  RenderMarkSemanticsDirtySpy createRenderObject(final BuildContext context) => RenderMarkSemanticsDirtySpy();
 }
 
 class RenderMarkSemanticsDirtySpy extends RenderProxyBox {
@@ -312,15 +312,15 @@ class RenderMarkSemanticsDirtySpy extends RenderProxyBox {
   bool hasRebuildSemantics = false;
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     config.isSemanticBoundary = true;
   }
 
   @override
   void assembleSemanticsNode(
-    SemanticsNode node,
-    SemanticsConfiguration config,
-    Iterable<SemanticsNode> children,
+    final SemanticsNode node,
+    final SemanticsConfiguration config,
+    final Iterable<SemanticsNode> children,
   ) {
     hasRebuildSemantics = true;
   }
@@ -331,24 +331,24 @@ class TestConfigDelegate extends SingleChildRenderObjectWidget {
   final ChildSemanticsConfigurationsDelegate delegate;
 
   @override
-  RenderTestConfigDelegate createRenderObject(BuildContext context) => RenderTestConfigDelegate(
+  RenderTestConfigDelegate createRenderObject(final BuildContext context) => RenderTestConfigDelegate(
     delegate: delegate,
   );
 
   @override
-  void updateRenderObject(BuildContext context, RenderTestConfigDelegate renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderTestConfigDelegate renderObject) {
     renderObject.delegate = delegate;
   }
 }
 
 class RenderTestConfigDelegate extends RenderProxyBox {
   RenderTestConfigDelegate({
-    ChildSemanticsConfigurationsDelegate? delegate,
+    final ChildSemanticsConfigurationsDelegate? delegate,
   }) : _delegate = delegate;
 
   ChildSemanticsConfigurationsDelegate? get delegate => _delegate;
   ChildSemanticsConfigurationsDelegate? _delegate;
-  set delegate(ChildSemanticsConfigurationsDelegate? value) {
+  set delegate(final ChildSemanticsConfigurationsDelegate? value) {
     if (value != _delegate) {
       markNeedsSemanticsUpdate();
     }
@@ -356,7 +356,7 @@ class RenderTestConfigDelegate extends RenderProxyBox {
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     config.childConfigurationsDelegate = _delegate;
   }
 }

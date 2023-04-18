@@ -12,7 +12,7 @@ class OnDeletedExampleApp extends StatelessWidget {
   const OnDeletedExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('DeletableChipAttributes.onDeleted Sample')),
@@ -46,7 +46,7 @@ class CastListState extends State<CastList> {
   ];
 
   Iterable<Widget> get actorWidgets {
-    return _cast.map((Actor actor) {
+    return _cast.map((final Actor actor) {
       return Padding(
         padding: const EdgeInsets.all(4.0),
         child: Chip(
@@ -54,7 +54,7 @@ class CastListState extends State<CastList> {
           label: Text(actor.name),
           onDeleted: () {
             setState(() {
-              _cast.removeWhere((Actor entry) {
+              _cast.removeWhere((final Actor entry) {
                 return entry.name == actor.name;
               });
             });
@@ -65,7 +65,7 @@ class CastListState extends State<CastList> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Wrap(
       children: actorWidgets.toList(),
     );
@@ -81,7 +81,7 @@ class OnDeletedExample extends StatefulWidget {
 
 class _OnDeletedExampleState extends State<OnDeletedExample> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CastList();
   }
 }

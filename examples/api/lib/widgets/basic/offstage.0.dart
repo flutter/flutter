@@ -12,7 +12,7 @@ class OffstageApp extends StatelessWidget {
   const OffstageApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Offstage Sample')),
@@ -41,7 +41,7 @@ class _OffstageExampleState extends State<OffstageExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[

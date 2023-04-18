@@ -12,7 +12,7 @@ class SliverFillRemainingExampleApp extends StatelessWidget {
   const SliverFillRemainingExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverFillRemaining Sample')),
@@ -26,13 +26,13 @@ class SliverFillRemainingExample extends StatelessWidget {
   const SliverFillRemainingExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomScrollView(
       slivers: <Widget>[
         SliverFixedExtentList(
           itemExtent: 100.0,
           delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+            (final BuildContext context, final int index) {
               return Container(
                 color: index.isEven ? Colors.amber[200] : Colors.blue[200],
               );

@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void verifyPaintPosition(GlobalKey key, Offset ideal) {
+void verifyPaintPosition(final GlobalKey key, final Offset ideal) {
   final RenderObject target = key.currentContext!.findRenderObject()!;
   expect(target.parent, isA<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
@@ -17,7 +17,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal) {
 }
 
 void main() {
-  testWidgets('Sliver protocol', (WidgetTester tester) async {
+  testWidgets('Sliver protocol', (final WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
       Directionality(
@@ -70,7 +70,7 @@ class RenderBigSliver extends RenderSliver {
 class BigSliver extends LeafRenderObjectWidget {
   const BigSliver({ super.key });
   @override
-  RenderBigSliver createRenderObject(BuildContext context) {
+  RenderBigSliver createRenderObject(final BuildContext context) {
     return RenderBigSliver();
   }
 }
@@ -107,7 +107,7 @@ class RenderOverlappingSliver extends RenderSliver {
 class OverlappingSliver extends LeafRenderObjectWidget {
   const OverlappingSliver({ super.key });
   @override
-  RenderOverlappingSliver createRenderObject(BuildContext context) {
+  RenderOverlappingSliver createRenderObject(final BuildContext context) {
     return RenderOverlappingSliver();
   }
 }

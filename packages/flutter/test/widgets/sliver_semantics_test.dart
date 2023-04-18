@@ -19,13 +19,13 @@ void main() {
 }
 
 void _tests() {
-  testWidgets('excludeFromScrollable works correctly', (WidgetTester tester) async {
+  testWidgets('excludeFromScrollable works correctly', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const double appBarExpandedHeight = 200.0;
 
     final ScrollController scrollController = ScrollController();
-    final List<Widget> listChildren = List<Widget>.generate(30, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(30, (final int i) {
       return SizedBox(
         height: appBarExpandedHeight,
         child: Text('Item $i'),
@@ -281,7 +281,7 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgets('Offscreen sliver are hidden in semantics tree', (WidgetTester tester) async {
+  testWidgets('Offscreen sliver are hidden in semantics tree', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     const double containerHeight = 200.0;
@@ -289,7 +289,7 @@ void _tests() {
     final ScrollController scrollController = ScrollController(
       initialScrollOffset: containerHeight * 1.5,
     );
-    final List<Widget> slivers = List<Widget>.generate(30, (int i) {
+    final List<Widget> slivers = List<Widget>.generate(30, (final int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
           height: containerHeight,
@@ -373,10 +373,10 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgets('SemanticsNodes of Slivers are in paint order', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes of Slivers are in paint order', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> slivers = List<Widget>.generate(5, (int i) {
+    final List<Widget> slivers = List<Widget>.generate(5, (final int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
           height: 20.0,
@@ -453,10 +453,10 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgets('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(10, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Text('Item $i', textDirection: TextDirection.ltr),
@@ -564,11 +564,11 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgets('Slivers fully covered by another overlapping sliver are hidden', (WidgetTester tester) async {
+  testWidgets('Slivers fully covered by another overlapping sliver are hidden', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
-    final List<Widget> slivers = List<Widget>.generate(10, (int i) {
+    final List<Widget> slivers = List<Widget>.generate(10, (final int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
           height: 200.0,
@@ -675,10 +675,10 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgets('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded (reverse)', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes of a sliver fully covered by another overlapping sliver are excluded (reverse)', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final List<Widget> listChildren = List<Widget>.generate(10, (int i) {
+    final List<Widget> listChildren = List<Widget>.generate(10, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Text('Item $i', textDirection: TextDirection.ltr),
@@ -789,11 +789,11 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgets('Slivers fully covered by another overlapping sliver are hidden (reverse)', (WidgetTester tester) async {
+  testWidgets('Slivers fully covered by another overlapping sliver are hidden (reverse)', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
-    final List<Widget> slivers = List<Widget>.generate(10, (int i) {
+    final List<Widget> slivers = List<Widget>.generate(10, (final int i) {
       return SliverToBoxAdapter(
         child: SizedBox(
           height: 200.0,
@@ -903,18 +903,18 @@ void _tests() {
     semantics.dispose();
   });
 
-  testWidgets('Slivers fully covered by another overlapping sliver are hidden (with center sliver)', (WidgetTester tester) async {
+  testWidgets('Slivers fully covered by another overlapping sliver are hidden (with center sliver)', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final ScrollController controller = ScrollController(initialScrollOffset: 280.0);
     final GlobalKey forwardAppBarKey = GlobalKey(debugLabel: 'forward app bar');
-    final List<Widget> forwardChildren = List<Widget>.generate(10, (int i) {
+    final List<Widget> forwardChildren = List<Widget>.generate(10, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Text('Forward Item $i', textDirection: TextDirection.ltr),
       );
     });
-    final List<Widget> backwardChildren = List<Widget>.generate(10, (int i) {
+    final List<Widget> backwardChildren = List<Widget>.generate(10, (final int i) {
       return SizedBox(
         height: 200.0,
         child: Text('Backward Item $i', textDirection: TextDirection.ltr),
@@ -934,7 +934,7 @@ void _tests() {
             data: const MediaQueryData(),
             child: Scrollable(
               controller: controller,
-              viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              viewportBuilder: (final BuildContext context, final ViewportOffset offset) {
                 return Viewport(
                   offset: offset,
                   center: forwardAppBarKey,

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('gets local coordinates', (WidgetTester tester) async {
+  testWidgets('gets local coordinates', (final WidgetTester tester) async {
     int longPressCount = 0;
     int longPressUpCount = 0;
     final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
@@ -21,13 +21,13 @@ void main() {
               onLongPress: () {
                 longPressCount++;
               },
-              onLongPressEnd: (LongPressEndDetails details) {
+              onLongPressEnd: (final LongPressEndDetails details) {
                 endDetails.add(details);
               },
-              onLongPressMoveUpdate: (LongPressMoveUpdateDetails details) {
+              onLongPressMoveUpdate: (final LongPressMoveUpdateDetails details) {
                 moveDetails.add(details);
               },
-              onLongPressStart: (LongPressStartDetails details) {
+              onLongPressStart: (final LongPressStartDetails details) {
                 startDetails.add(details);
               },
               onLongPressUp: () {
@@ -53,7 +53,7 @@ void main() {
     expect(endDetails.single.globalPosition, const Offset(400, 300));
   });
 
-  testWidgets('scaled up', (WidgetTester tester) async {
+  testWidgets('scaled up', (final WidgetTester tester) async {
     int longPressCount = 0;
     int longPressUpCount = 0;
     final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
@@ -69,13 +69,13 @@ void main() {
                 onLongPress: () {
                   longPressCount++;
                 },
-                onLongPressEnd: (LongPressEndDetails details) {
+                onLongPressEnd: (final LongPressEndDetails details) {
                   endDetails.add(details);
                 },
-                onLongPressMoveUpdate: (LongPressMoveUpdateDetails details) {
+                onLongPressMoveUpdate: (final LongPressMoveUpdateDetails details) {
                   moveDetails.add(details);
                 },
-                onLongPressStart: (LongPressStartDetails details) {
+                onLongPressStart: (final LongPressStartDetails details) {
                   startDetails.add(details);
                 },
                 onLongPressUp: () {
@@ -128,7 +128,7 @@ void main() {
     expect(moveDetails.single.localOffsetFromOrigin, const Offset(0, 100.0 / 2.0));
   });
 
-  testWidgets('scaled down', (WidgetTester tester) async {
+  testWidgets('scaled down', (final WidgetTester tester) async {
     int longPressCount = 0;
     int longPressUpCount = 0;
     final List<LongPressEndDetails> endDetails = <LongPressEndDetails>[];
@@ -144,13 +144,13 @@ void main() {
                 onLongPress: () {
                   longPressCount++;
                 },
-                onLongPressEnd: (LongPressEndDetails details) {
+                onLongPressEnd: (final LongPressEndDetails details) {
                   endDetails.add(details);
                 },
-                onLongPressMoveUpdate: (LongPressMoveUpdateDetails details) {
+                onLongPressMoveUpdate: (final LongPressMoveUpdateDetails details) {
                   moveDetails.add(details);
                 },
-                onLongPressStart: (LongPressStartDetails details) {
+                onLongPressStart: (final LongPressStartDetails details) {
                   startDetails.add(details);
                 },
                 onLongPressUp: () {

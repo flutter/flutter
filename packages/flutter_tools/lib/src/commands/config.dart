@@ -12,7 +12,7 @@ import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand({ bool verboseHelp = false }) {
+  ConfigCommand({ final bool verboseHelp = false }) {
     argParser.addFlag('analytics',
       help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
     argParser.addFlag('clear-ios-signing-cert',
@@ -75,7 +75,7 @@ class ConfigCommand extends FlutterCommand {
       }
     }
     String values = globals.config.keys
-        .map<String>((String key) {
+        .map<String>((final String key) {
           String configFooter = '';
           if (featuresByName.containsKey(key)) {
             final FeatureChannelSetting setting = featuresByName[key]!.getSettingForChannel(channel);
@@ -207,7 +207,7 @@ class ConfigCommand extends FlutterCommand {
     globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, String keyValue) {
+  void _updateConfig(final String keyName, final String keyValue) {
     if (keyValue.isEmpty) {
       globals.config.removeValue(keyName);
       globals.printStatus('Removing "$keyName" value.');

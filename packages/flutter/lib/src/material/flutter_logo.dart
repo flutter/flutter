@@ -58,7 +58,7 @@ class FlutterLogo extends StatelessWidget {
   final Curve curve;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     final double? iconSize = size ?? iconTheme.size;
     return AnimatedContainer(

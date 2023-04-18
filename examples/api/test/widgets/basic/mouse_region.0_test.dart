@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/basic/mouse_region.0.dart' as exampl
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MouseRegion detects mouse entries, exists, and location', (WidgetTester tester) async {
+  testWidgets('MouseRegion detects mouse entries, exists, and location', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.MouseRegionApp()),
     );

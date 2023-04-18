@@ -23,7 +23,7 @@ Future<List<double>> runBuildBenchmark() async {
   int iterations = 0;
   final List<double> values = <double>[];
 
-  await benchmarkWidgets((WidgetTester tester) async {
+  await benchmarkWidgets((final WidgetTester tester) async {
     stocks.main();
     await tester.pump(); // Start startup animation
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation

@@ -21,15 +21,15 @@ abstract class MockStreamHandler {
   /// Create a new inline [MockStreamHandler] with the given [onListen] and
   /// [onCancel] handlers.
   factory MockStreamHandler.inline({
-    required MockStreamHandlerOnListenCallback onListen,
-    MockStreamHandlerOnCancelCallback? onCancel,
+    required final MockStreamHandlerOnListenCallback onListen,
+    final MockStreamHandlerOnCancelCallback? onCancel,
   }) => _InlineMockStreamHandler(onListen: onListen, onCancel: onCancel);
 
   /// Handler for the listen event.
-  void onListen(Object? arguments, MockStreamHandlerEventSink events);
+  void onListen(final Object? arguments, final MockStreamHandlerEventSink events);
 
   /// Handler for the cancel event.
-  void onCancel(Object? arguments);
+  void onCancel(final Object? arguments);
 }
 
 /// Typedef for the inline onListen callback.
@@ -40,8 +40,8 @@ typedef MockStreamHandlerOnCancelCallback = void Function(Object? arguments);
 
 class _InlineMockStreamHandler extends MockStreamHandler {
   _InlineMockStreamHandler({
-    required MockStreamHandlerOnListenCallback onListen,
-    MockStreamHandlerOnCancelCallback? onCancel,
+    required final MockStreamHandlerOnListenCallback onListen,
+    final MockStreamHandlerOnCancelCallback? onCancel,
   })  : _onListenInline = onListen,
         _onCancelInline = onCancel;
 
@@ -49,10 +49,10 @@ class _InlineMockStreamHandler extends MockStreamHandler {
   final MockStreamHandlerOnCancelCallback? _onCancelInline;
 
   @override
-  void onListen(Object? arguments, MockStreamHandlerEventSink events) => _onListenInline(arguments, events);
+  void onListen(final Object? arguments, final MockStreamHandlerEventSink events) => _onListenInline(arguments, events);
 
   @override
-  void onCancel(Object? arguments) => _onCancelInline?.call(arguments);
+  void onCancel(final Object? arguments) => _onCancelInline?.call(arguments);
 }
 
 /// A mock event sink for a [MockStreamHandler] that mimics the native
@@ -60,18 +60,18 @@ class _InlineMockStreamHandler extends MockStreamHandler {
 /// API.
 class MockStreamHandlerEventSink {
   /// Create a new [MockStreamHandlerEventSink] with the given [sink].
-  MockStreamHandlerEventSink(EventSink<Object?> sink) : _sink = sink;
+  MockStreamHandlerEventSink(final EventSink<Object?> sink) : _sink = sink;
 
   final EventSink<Object?> _sink;
 
   /// Send a success event.
-  void success(Object? event) => _sink.add(event);
+  void success(final Object? event) => _sink.add(event);
 
   /// Send an error event.
   void error({
-    required String code,
-    String? message,
-    Object? details,
+    required final String code,
+    final String? message,
+    final Object? details,
   }) => _sink.addError(PlatformException(code: code, message: message, details: details));
 
   /// Send an end of stream event.

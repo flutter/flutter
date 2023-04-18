@@ -17,8 +17,8 @@ class ShowLicenses extends StatelessWidget {
   const ShowLicenses({super.key});
 
   Widget _buildTestResultWidget(
-    BuildContext context,
-    AsyncSnapshot<List<LicenseEntry>> snapshot,
+    final BuildContext context,
+    final AsyncSnapshot<List<LicenseEntry>> snapshot,
   ) {
     final List<LicenseEntry> entries = snapshot.data  ?? <LicenseEntry>[];
     String flutterPackage = '';
@@ -29,13 +29,13 @@ class ShowLicenses extends StatelessWidget {
       if (entry.packages.contains('flutter')) {
         flutterPackage = 'flutter';
         flutterParagraphs.addAll(
-          entry.paragraphs.map<String>((LicenseParagraph para) => para.text),
+          entry.paragraphs.map<String>((final LicenseParagraph para) => para.text),
         );
       }
       if (entry.packages.contains('engine')) {
         enginePackage = 'engine';
         engineParagraphs.addAll(
-          entry.paragraphs.map<String>((LicenseParagraph para) => para.text),
+          entry.paragraphs.map<String>((final LicenseParagraph para) => para.text),
         );
       }
     }
@@ -57,7 +57,7 @@ class ShowLicenses extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: FutureBuilder<List<LicenseEntry>>(

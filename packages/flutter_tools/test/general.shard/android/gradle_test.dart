@@ -214,7 +214,7 @@ void main() {
       localEngineArtifacts = Artifacts.test(localEngine: 'out/android_arm');
     });
 
-    void testUsingAndroidContext(String description, dynamic Function() testMethod) {
+    void testUsingAndroidContext(final String description, final dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localEngineArtifacts,
         Platform: () => FakePlatform(),
@@ -223,18 +223,18 @@ void main() {
       });
     }
 
-    String? propertyFor(String key, File file) {
+    String? propertyFor(final String key, final File file) {
       final Iterable<String> result = file.readAsLinesSync()
-          .where((String line) => line.startsWith('$key='))
-          .map((String line) => line.split('=')[1]);
+          .where((final String line) => line.startsWith('$key='))
+          .map((final String line) => line.split('=')[1]);
       return result.isEmpty ? null : result.first;
     }
 
     Future<void> checkBuildVersion({
-      required String manifest,
-      BuildInfo? buildInfo,
-      String? expectedBuildName,
-      String? expectedBuildNumber,
+      required final String manifest,
+      final BuildInfo? buildInfo,
+      final String? expectedBuildName,
+      final String? expectedBuildNumber,
     }) async {
       final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -466,7 +466,7 @@ flutter:
 
     testWithoutContext('throws on unsupported versions', () {
       expect(() => gradle_utils.getGradleVersionFor('3.6.0'),
-          throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
+          throwsA(predicate<Exception>((final Exception e) => e is ToolExit)));
     });
   });
 
@@ -711,7 +711,7 @@ flutter:
     final File templateSettingsDotGradle = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages', 'flutter_tools', 'templates', 'app', 'android.tmpl', 'settings.gradle'));
     final File legacySettingsDotGradleFiles = globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'packages','flutter_tools', 'gradle', 'settings.gradle.legacy_versions'));
     expect(
-      legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((String body) => body.trim()),
+      legacySettingsDotGradleFiles.readAsStringSync().split(';EOF').map<String>((final String body) => body.trim()),
       contains(templateSettingsDotGradle.readAsStringSync().trim()),
     );
     // TODO(zanderso): This is an integration test and should be moved to the integration shard.

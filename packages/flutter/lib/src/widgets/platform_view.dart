@@ -358,11 +358,11 @@ class HtmlElementView extends StatelessWidget {
   final PlatformViewCreatedCallback? onPlatformViewCreated;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return PlatformViewLink(
       viewType: viewType,
       onCreatePlatformView: _createHtmlElementView,
-      surfaceFactory: (BuildContext context, PlatformViewController controller) {
+      surfaceFactory: (final BuildContext context, final PlatformViewController controller) {
         return PlatformViewSurface(
           controller: controller,
           gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
@@ -373,9 +373,9 @@ class HtmlElementView extends StatelessWidget {
   }
 
   /// Creates the controller and kicks off its initialization.
-  _HtmlElementViewController _createHtmlElementView(PlatformViewCreationParams params) {
+  _HtmlElementViewController _createHtmlElementView(final PlatformViewCreationParams params) {
     final _HtmlElementViewController controller = _HtmlElementViewController(params.id, viewType);
-    controller._initialize().then((_) {
+    controller._initialize().then((final _) {
       params.onPlatformViewCreated(params.id);
       onPlatformViewCreated?.call(params.id);
     });
@@ -415,7 +415,7 @@ class _HtmlElementViewController extends PlatformViewController {
   }
 
   @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
+  Future<void> dispatchPointerEvent(final PointerEvent event) async {
     // We do not dispatch pointer events to HTML views because they may contain
     // cross-origin iframes, which only accept user-generated events.
   }
@@ -439,7 +439,7 @@ class _AndroidViewState extends State<AndroidView> {
     <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Focus(
       focusNode: _focusNode,
       onFocusChange: _onFocusChange,
@@ -477,7 +477,7 @@ class _AndroidViewState extends State<AndroidView> {
   }
 
   @override
-  void didUpdateWidget(AndroidView oldWidget) {
+  void didUpdateWidget(final AndroidView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
@@ -525,12 +525,12 @@ class _AndroidViewState extends State<AndroidView> {
     }
   }
 
-  void _onFocusChange(bool isFocused) {
+  void _onFocusChange(final bool isFocused) {
     if (!_controller.isCreated) {
       return;
     }
     if (!isFocused) {
-      _controller.clearFocus().catchError((dynamic e) {
+      _controller.clearFocus().catchError((final dynamic e) {
         if (e is MissingPluginException) {
           // We land the framework part of Android platform views keyboard
           // support before the engine part. There will be a commit range where
@@ -546,7 +546,7 @@ class _AndroidViewState extends State<AndroidView> {
     SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setPlatformViewClient',
       <String, dynamic>{'platformViewId': _id},
-    ).catchError((dynamic e) {
+    ).catchError((final dynamic e) {
       if (e is MissingPluginException) {
         // We land the framework part of Android platform views keyboard
         // support before the engine part. There will be a commit range where
@@ -572,14 +572,14 @@ class _UiKitViewState extends State<UiKitView> {
     <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final UiKitViewController? controller = _controller;
     if (controller == null) {
       return const SizedBox.expand();
     }
     return Focus(
       focusNode: focusNode,
-      onFocusChange: (bool isFocused) => _onFocusChange(isFocused, controller),
+      onFocusChange: (final bool isFocused) => _onFocusChange(isFocused, controller),
       child: _UiKitPlatformView(
         controller: _controller!,
         hitTestBehavior: widget.hitTestBehavior,
@@ -612,7 +612,7 @@ class _UiKitViewState extends State<UiKitView> {
   }
 
   @override
-  void didUpdateWidget(UiKitView oldWidget) {
+  void didUpdateWidget(final UiKitView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final TextDirection newLayoutDirection = _findLayoutDirection();
@@ -667,7 +667,7 @@ class _UiKitViewState extends State<UiKitView> {
     });
   }
 
-  void _onFocusChange(bool isFocused, UiKitViewController controller) {
+  void _onFocusChange(final bool isFocused, final UiKitViewController controller) {
     if (!isFocused) {
       // Unlike Android, we do not need to send "clearFocus" channel message
       // to the engine, because focusing on another view will automatically
@@ -695,7 +695,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  RenderObject createRenderObject(BuildContext context) =>
+  RenderObject createRenderObject(final BuildContext context) =>
       RenderAndroidView(
         viewController: controller,
         hitTestBehavior: hitTestBehavior,
@@ -704,7 +704,7 @@ class _AndroidPlatformView extends LeafRenderObjectWidget {
       );
 
   @override
-  void updateRenderObject(BuildContext context, RenderAndroidView renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderAndroidView renderObject) {
     renderObject.controller = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
@@ -724,7 +724,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return RenderUiKitView(
       viewController: controller,
       hitTestBehavior: hitTestBehavior,
@@ -733,7 +733,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderUiKitView renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderUiKitView renderObject) {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
@@ -836,8 +836,8 @@ class PlatformViewLink extends StatefulWidget {
   ///  * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
   const PlatformViewLink({
     super.key,
-    required PlatformViewSurfaceFactory surfaceFactory,
-    required CreatePlatformViewCallback onCreatePlatformView,
+    required final PlatformViewSurfaceFactory surfaceFactory,
+    required final CreatePlatformViewCallback onCreatePlatformView,
     required this.viewType,
     }) : _surfaceFactory = surfaceFactory,
          _onCreatePlatformView = onCreatePlatformView;
@@ -863,7 +863,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   FocusNode? _focusNode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final PlatformViewController? controller = _controller;
     if (controller == null) {
       return const SizedBox.expand();
@@ -871,7 +871,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     if (!_platformViewCreated) {
       // Depending on the implementation, the first non-empty size can be used
       // to size the platform view.
-      return _PlatformViewPlaceHolder(onLayout: (Size size, Offset position) {
+      return _PlatformViewPlaceHolder(onLayout: (final Size size, final Offset position) {
         if (controller.awaitingCreation && !size.isEmpty) {
           controller.create(size: size, position: position);
         }
@@ -893,7 +893,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   }
 
   @override
-  void didUpdateWidget(PlatformViewLink oldWidget) {
+  void didUpdateWidget(final PlatformViewLink oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.viewType != oldWidget.viewType) {
@@ -917,7 +917,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     );
   }
 
-  void _onPlatformViewCreated(int id) {
+  void _onPlatformViewCreated(final int id) {
     if (mounted) {
       setState(() {
         _platformViewCreated = true;
@@ -925,7 +925,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     }
   }
 
-  void _handleFrameworkFocusChanged(bool isFocused) {
+  void _handleFrameworkFocusChanged(final bool isFocused) {
     if (!isFocused) {
       _controller?.clearFocus();
     }
@@ -935,7 +935,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
     );
   }
 
-  void _handlePlatformFocusChanged(bool isFocused) {
+  void _handlePlatformFocusChanged(final bool isFocused) {
     if (isFocused) {
       _focusNode!.requestFocus();
     }
@@ -1036,12 +1036,12 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   final PlatformViewHitTestBehavior hitTestBehavior;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return PlatformViewRenderBox(controller: controller, gestureRecognizers: gestureRecognizers, hitTestBehavior: hitTestBehavior);
   }
 
   @override
-  void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
+  void updateRenderObject(final BuildContext context, final PlatformViewRenderBox renderObject) {
     renderObject
       ..controller = controller
       ..hitTestBehavior = hitTestBehavior
@@ -1110,7 +1110,7 @@ class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (widget.controller.requiresViewComposition) {
       return _PlatformLayerBasedAndroidViewSurface(
         controller: widget.controller,
@@ -1126,7 +1126,7 @@ class _AndroidViewSurfaceState extends State<AndroidViewSurface> {
     }
   }
 
-  void _onPlatformViewCreated(int _) {
+  void _onPlatformViewCreated(final int _) {
     // Trigger a re-build based on the current controller state.
     setState(() {});
   }
@@ -1141,7 +1141,7 @@ class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     final AndroidViewController viewController = controller as AndroidViewController;
     // Use GL texture based composition.
     // App should use GL texture unless they require to embed a SurfaceView.
@@ -1151,7 +1151,7 @@ class _TextureBasedAndroidViewSurface extends PlatformViewSurface {
       hitTestBehavior: hitTestBehavior,
     );
     viewController.pointTransformer =
-        (Offset position) => renderBox.globalToLocal(position);
+        (final Offset position) => renderBox.globalToLocal(position);
     return renderBox;
   }
 }
@@ -1164,12 +1164,12 @@ class _PlatformLayerBasedAndroidViewSurface extends PlatformViewSurface {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     final AndroidViewController viewController = controller as AndroidViewController;
     final PlatformViewRenderBox renderBox =
         super.createRenderObject(context) as PlatformViewRenderBox;
     viewController.pointTransformer =
-        (Offset position) => renderBox.globalToLocal(position);
+        (final Offset position) => renderBox.globalToLocal(position);
     return renderBox;
   }
 }
@@ -1193,7 +1193,7 @@ class _PlatformViewPlaceholderBox extends RenderConstrainedBox {
   void performLayout() {
     super.performLayout();
     // A call to `localToGlobal` requires waiting for a frame to render first.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((final _) {
       onLayout(size, localToGlobal(Offset.zero));
     });
   }
@@ -1211,12 +1211,12 @@ class _PlatformViewPlaceHolder extends SingleChildRenderObjectWidget {
   final _OnLayoutCallback onLayout;
 
   @override
-  _PlatformViewPlaceholderBox createRenderObject(BuildContext context) {
+  _PlatformViewPlaceholderBox createRenderObject(final BuildContext context) {
     return _PlatformViewPlaceholderBox(onLayout: onLayout);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _PlatformViewPlaceholderBox renderObject) {
+  void updateRenderObject(final BuildContext context, final _PlatformViewPlaceholderBox renderObject) {
     renderObject.onLayout = onLayout;
   }
 }
@@ -1225,7 +1225,7 @@ extension on PlatformViewController {
   /// Disposes the controller in a post-frame callback, to allow other widgets to
   /// remove their listeners before the controller is disposed.
   void disposePostFrame() {
-    SchedulerBinding.instance.addPostFrameCallback((_) {
+    SchedulerBinding.instance.addPostFrameCallback((final _) {
       dispose();
     });
   }

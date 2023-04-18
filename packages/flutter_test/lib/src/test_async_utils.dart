@@ -56,7 +56,7 @@ abstract final class TestAsyncUtils {
   /// this one before this one has finished will throw an exception.
   ///
   /// This method first calls [guardSync].
-  static Future<T> guard<T>(Future<T> Function() body) {
+  static Future<T> guard<T>(final Future<T> Function() body) {
     guardSync();
     final Zone zone = Zone.current.fork(
       zoneValues: <dynamic, dynamic>{
@@ -67,7 +67,7 @@ abstract final class TestAsyncUtils {
     _scopeStack.add(scope);
     final Future<T> result = scope.zone.run<Future<T>>(body);
     late T resultValue; // This is set when the body of work completes with a result value.
-    Future<T> completionHandler(dynamic error, StackTrace? stack) {
+    Future<T> completionHandler(final dynamic error, final StackTrace? stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
       bool leaked = false;
@@ -111,7 +111,7 @@ abstract final class TestAsyncUtils {
       return Future<T>.value(resultValue);
     }
     return result.then<T>(
-      (T value) {
+      (final T value) {
         resultValue = value;
         return completionHandler(null, null);
       },
@@ -295,11 +295,11 @@ abstract final class TestAsyncUtils {
     }
   }
 
-  static bool _stripAsynchronousSuspensions(String line) {
+  static bool _stripAsynchronousSuspensions(final String line) {
     return line != '<asynchronous suspension>';
   }
 
-  static _StackEntry? _findResponsibleMethod(StackTrace rawStack, String method, List<DiagnosticsNode> information) {
+  static _StackEntry? _findResponsibleMethod(final StackTrace rawStack, final String method, final List<DiagnosticsNode> information) {
     assert(method == 'guard' || method == 'guardSync');
     // Web/JavaScript stack traces use a different format.
     if (kIsWeb) {

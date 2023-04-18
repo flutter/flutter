@@ -214,7 +214,7 @@ void main() {
       await viewController.dispose();
       final ByteData message =
           SystemChannels.platform_views.codec.encodeMethodCall(const MethodCall('viewFocused', 0));
-      await binding.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (_) { });
+      await binding.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, message, (final _) { });
       expect(didFocus, isFalse);
     });
 
@@ -246,7 +246,7 @@ void main() {
     test('OnPlatformViewCreated callback', () async {
       viewsController.registerViewType('webview');
       final List<int> createdViews = <int>[];
-      void callback(int id) { createdViews.add(id); }
+      void callback(final int id) { createdViews.add(id); }
 
       final AndroidViewController controller1 = PlatformViewsService.initAndroidView(
         id: 0,

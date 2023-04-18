@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/date_picker/show_date_picker.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can show date picker', (WidgetTester tester) async {
+  testWidgets('Can show date picker', (final WidgetTester tester) async {
     const String datePickerTitle = 'Select date';
     const String initialDate = 'Sun, Jul 25';
 

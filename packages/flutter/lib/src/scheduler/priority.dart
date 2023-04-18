@@ -47,5 +47,5 @@ class Priority {
   /// A positive offset indicates a lower priority.
   ///
   /// The parameter [offset] is clamped to ±[kMaxOffset].
-  Priority operator -(int offset) => this + (-offset);
+  Priority operator -(final int offset) => this + (-offset);
 }

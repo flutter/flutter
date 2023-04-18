@@ -42,17 +42,17 @@ class TestInkSplashFactory extends InteractiveInkFeatureFactory {
 
   @override
   InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    Offset? position,
-    required Color color,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    VoidCallback? onRemoved,
-    required TextDirection textDirection,
+    required final MaterialInkController controller,
+    required final RenderBox referenceBox,
+    final Offset? position,
+    required final Color color,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final double? radius,
+    final VoidCallback? onRemoved,
+    required final TextDirection textDirection,
   }) {
     return TestInkSplash(
       controller: controller,
@@ -76,7 +76,7 @@ void main() {
     cancelCalled = false;
   });
 
-  testWidgets('Tapping should never cause a splash', (WidgetTester tester) async {
+  testWidgets('Tapping should never cause a splash', (final WidgetTester tester) async {
     final Key textField1 = UniqueKey();
     final Key textField2 = UniqueKey();
 
@@ -135,7 +135,7 @@ void main() {
     expect(cancelCalled, isFalse);
   });
 
-  testWidgets('Splash should never be created or canceled', (WidgetTester tester) async {
+  testWidgets('Splash should never be created or canceled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(

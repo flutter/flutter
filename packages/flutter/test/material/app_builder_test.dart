@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
+  testWidgets("builder doesn't get called if app doesn't change", (final WidgetTester tester) async {
     final List<String> log = <String>[];
     final Widget app = MaterialApp(
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
       home: const Placeholder(),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         log.add('build');
         expect(Theme.of(context).primaryColor, Colors.green);
         expect(Directionality.of(context), TextDirection.ltr);
@@ -37,7 +37,7 @@ void main() {
     expect(log, <String>['build']);
   });
 
-  testWidgets("builder doesn't get called if app doesn't change", (WidgetTester tester) async {
+  testWidgets("builder doesn't get called if app doesn't change", (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -45,14 +45,14 @@ void main() {
           primarySwatch: Colors.yellow,
         ),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             log.add('build');
             expect(Theme.of(context).primaryColor, Colors.yellow);
             expect(Directionality.of(context), TextDirection.rtl);
             return const Placeholder();
           },
         ),
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: child!,

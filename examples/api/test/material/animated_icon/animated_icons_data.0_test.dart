@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/animated_icon/animated_icons_data.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Show all the animated icons', (WidgetTester tester) async {
+  testWidgets('Show all the animated icons', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.AnimatedIconApp(),
     );

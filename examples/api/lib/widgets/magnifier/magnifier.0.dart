@@ -18,7 +18,7 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
   Offset dragGesturePosition = Offset.zero;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: Center(
@@ -30,7 +30,7 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
                 child: Stack(
                   children: <Widget>[
                     GestureDetector(
-                      onPanUpdate: (DragUpdateDetails details) => setState(
+                      onPanUpdate: (final DragUpdateDetails details) => setState(
                         () {
                           dragGesturePosition = details.localPosition;
                         },

@@ -12,7 +12,7 @@ class SwitchListTileApp extends StatelessWidget {
   const SwitchListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(appBar: AppBar(title: const Text('SwitchListTile Sample')), body: const SwitchListTileExample()),
@@ -33,13 +33,13 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
   bool switchValue3 = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Column(
         children: <Widget>[
           SwitchListTile(
             value: switchValue1,
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 switchValue1 = value!;
               });
@@ -50,7 +50,7 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
           const Divider(height: 0),
           SwitchListTile(
             value: switchValue2,
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 switchValue2 = value!;
               });
@@ -62,7 +62,7 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
           const Divider(height: 0),
           SwitchListTile(
             value: switchValue3,
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 switchValue3 = value!;
               });

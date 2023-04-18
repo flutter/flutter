@@ -71,7 +71,7 @@ bool debugPrintResamplingMargin = false;
 ///
 /// See [the gestures library](gestures/gestures-library.html) for a complete
 /// list.
-bool debugAssertAllGesturesVarsUnset(String reason) {
+bool debugAssertAllGesturesVarsUnset(final String reason) {
   assert(() {
     if (debugPrintHitTestResults ||
         debugPrintGestureArenaDiagnostics ||

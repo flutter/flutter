@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/switch_list_tile/switch_list_tile.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SwitchListTile can be toggled', (WidgetTester tester) async {
+  testWidgets('SwitchListTile can be toggled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SwitchListTileApp(),
     );

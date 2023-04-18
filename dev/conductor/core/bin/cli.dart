@@ -15,7 +15,7 @@ import 'package:process/process.dart';
 
 const String readmeUrl = 'https://github.com/flutter/flutter/tree/master/dev/conductor/README.md';
 
-Future<void> main(List<String> args) async {
+Future<void> main(final List<String> args) async {
   const FileSystem fileSystem = LocalFileSystem();
   const ProcessManager processManager = LocalProcessManager();
   const Platform platform = LocalPlatform();

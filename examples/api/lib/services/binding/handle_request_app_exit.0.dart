@@ -17,7 +17,7 @@ class ApplicationExitExample extends StatelessWidget {
   const ApplicationExitExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: Body()),
     );
@@ -75,7 +75,7 @@ class _BodyState extends State<Body> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: SizedBox(
         width: 300,

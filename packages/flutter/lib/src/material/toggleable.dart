@@ -216,7 +216,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   Offset? get downPosition => _downPosition;
   Offset? _downPosition;
 
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(final TapDownDetails details) {
     if (isInteractive) {
       setState(() {
         _downPosition = details.localPosition;
@@ -225,7 +225,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     }
   }
 
-  void _handleTap([Intent? _]) {
+  void _handleTap([final Intent? _]) {
     if (!isInteractive) {
       return;
     }
@@ -240,7 +240,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
   }
 
-  void _handleTapEnd([TapUpDetails? _]) {
+  void _handleTapEnd([final TapUpDetails? _]) {
     if (_downPosition != null) {
       setState(() { _downPosition = null; });
     }
@@ -248,7 +248,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   }
 
   bool _focused = false;
-  void _handleFocusHighlightChanged(bool focused) {
+  void _handleFocusHighlightChanged(final bool focused) {
     if (focused != _focused) {
       setState(() { _focused = focused; });
       if (focused) {
@@ -260,7 +260,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   }
 
   bool _hovering = false;
-  void _handleHoverChanged(bool hovering) {
+  void _handleHoverChanged(final bool hovering) {
     if (hovering != _hovering) {
       setState(() { _hovering = hovering; });
       if (hovering) {
@@ -301,12 +301,12 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// that uses this mixin. The returned [Widget] must be returned from the
   /// build method - potentially after wrapping it in other widgets.
   Widget buildToggleable({
-    FocusNode? focusNode,
-    Function(bool)? onFocusChange,
-    bool autofocus = false,
-    required MaterialStateProperty<MouseCursor> mouseCursor,
-    required Size size,
-    required CustomPainter painter,
+    final FocusNode? focusNode,
+    final Function(bool)? onFocusChange,
+    final bool autofocus = false,
+    required final MaterialStateProperty<MouseCursor> mouseCursor,
+    required final Size size,
+    required final CustomPainter painter,
   }) {
     return FocusableActionDetector(
       actions: _actionMap,
@@ -348,7 +348,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// Usually set to [ToggleableStateMixin.position].
   Animation<double> get position => _position!;
   Animation<double>? _position;
-  set position(Animation<double> value) {
+  set position(final Animation<double> value) {
     if (value == _position) {
       return;
     }
@@ -363,7 +363,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// Usually set to [ToggleableStateMixin.reaction].
   Animation<double> get reaction => _reaction!;
   Animation<double>? _reaction;
-  set reaction(Animation<double> value) {
+  set reaction(final Animation<double> value) {
     if (value == _reaction) {
       return;
     }
@@ -378,7 +378,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// Usually set to [ToggleableStateMixin.reactionFocusFade].
   Animation<double> get reactionFocusFade => _reactionFocusFade!;
   Animation<double>? _reactionFocusFade;
-  set reactionFocusFade(Animation<double> value) {
+  set reactionFocusFade(final Animation<double> value) {
     if (value == _reactionFocusFade) {
       return;
     }
@@ -393,7 +393,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// Usually set to [ToggleableStateMixin.reactionHoverFade].
   Animation<double> get reactionHoverFade => _reactionHoverFade!;
   Animation<double>? _reactionHoverFade;
-  set reactionHoverFade(Animation<double> value) {
+  set reactionHoverFade(final Animation<double> value) {
     if (value == _reactionHoverFade) {
       return;
     }
@@ -409,7 +409,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// For example, a checkbox should use this color when checked.
   Color get activeColor => _activeColor!;
   Color? _activeColor;
-  set activeColor(Color value) {
+  set activeColor(final Color value) {
     if (_activeColor == value) {
       return;
     }
@@ -423,7 +423,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// For example, a checkbox should use this color when unchecked.
   Color get inactiveColor => _inactiveColor!;
   Color? _inactiveColor;
-  set inactiveColor(Color value) {
+  set inactiveColor(final Color value) {
     if (_inactiveColor == value) {
       return;
     }
@@ -438,7 +438,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// that is displayed when the toggleable is inactive and tapped.
   Color get inactiveReactionColor => _inactiveReactionColor!;
   Color? _inactiveReactionColor;
-  set inactiveReactionColor(Color value) {
+  set inactiveReactionColor(final Color value) {
     if (value == _inactiveReactionColor) {
       return;
     }
@@ -453,7 +453,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// that is displayed when the toggleable is active and tapped.
   Color get reactionColor => _reactionColor!;
   Color? _reactionColor;
-  set reactionColor(Color value) {
+  set reactionColor(final Color value) {
     if (value == _reactionColor) {
       return;
     }
@@ -467,7 +467,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// when it is being hovered over.
   Color get hoverColor => _hoverColor!;
   Color? _hoverColor;
-  set hoverColor(Color value) {
+  set hoverColor(final Color value) {
     if (value == _hoverColor) {
       return;
     }
@@ -481,7 +481,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// when it has focus.
   Color get focusColor => _focusColor!;
   Color? _focusColor;
-  set focusColor(Color value) {
+  set focusColor(final Color value) {
     if (value == _focusColor) {
       return;
     }
@@ -492,7 +492,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// The splash radius for the radial reaction.
   double get splashRadius => _splashRadius!;
   double? _splashRadius;
-  set splashRadius(double value) {
+  set splashRadius(final double value) {
     if (value == _splashRadius) {
       return;
     }
@@ -507,7 +507,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// Usually set to [ToggleableStateMixin.downPosition].
   Offset? get downPosition => _downPosition;
   Offset? _downPosition;
-  set downPosition(Offset? value) {
+  set downPosition(final Offset? value) {
     if (value == _downPosition) {
       return;
     }
@@ -518,7 +518,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// True if this toggleable has the input focus.
   bool get isFocused => _isFocused!;
   bool? _isFocused;
-  set isFocused(bool? value) {
+  set isFocused(final bool? value) {
     if (value == _isFocused) {
       return;
     }
@@ -529,7 +529,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// True if this toggleable is being hovered over by a pointer.
   bool get isHovered => _isHovered!;
   bool? _isHovered;
-  set isHovered(bool? value) {
+  set isHovered(final bool? value) {
     if (value == _isHovered) {
       return;
     }
@@ -543,9 +543,9 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// origin is the center point of the reaction (usually distinct from the
   /// [downPosition] at which the user interacted with the control).
   void paintRadialReaction({
-    required Canvas canvas,
-    Offset offset = Offset.zero,
-    required Offset origin,
+    required final Canvas canvas,
+    final Offset offset = Offset.zero,
+    required final Offset origin,
   }) {
     if (!reaction.isDismissed || !reactionFocusFade.isDismissed || !reactionHoverFade.isDismissed) {
       final Paint reactionPaint = Paint()
@@ -582,16 +582,16 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant final CustomPainter oldDelegate) => true;
 
   @override
-  bool? hitTest(Offset position) => null;
+  bool? hitTest(final Offset position) => null;
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
 
   @override
-  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(covariant final CustomPainter oldDelegate) => false;
 
   @override
   String toString() => describeIdentity(this);

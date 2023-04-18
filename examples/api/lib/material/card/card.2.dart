@@ -14,7 +14,7 @@ class CardExamplesApp extends StatelessWidget {
   const CardExamplesApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
@@ -43,7 +43,7 @@ class ElevatedCardExample extends StatelessWidget {
   const ElevatedCardExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Center(
       child: Card(
         child: SizedBox(
@@ -66,7 +66,7 @@ class FilledCardExample extends StatelessWidget {
   const FilledCardExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Card(
         elevation: 0,
@@ -91,7 +91,7 @@ class OutlinedCardExample extends StatelessWidget {
   const OutlinedCardExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Card(
         elevation: 0,

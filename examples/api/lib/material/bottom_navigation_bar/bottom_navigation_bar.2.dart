@@ -12,7 +12,7 @@ class BottomNavigationBarExampleApp extends StatelessWidget {
   const BottomNavigationBarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: BottomNavigationBarExample(),
     );
@@ -33,21 +33,21 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
   Widget _listViewBody() {
     return ListView.separated(
         controller: _homeController,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Center(
             child: Text(
               'Item $index',
             ),
           );
         },
-        separatorBuilder: (BuildContext context, int index) => const Divider(
+        separatorBuilder: (final BuildContext context, final int index) => const Divider(
               thickness: 1,
             ),
         itemCount: 50);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('BottomNavigationBar Sample'),
@@ -66,7 +66,7 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
-        onTap: (int index) {
+        onTap: (final int index) {
           switch (index) {
             case 0:
               // only scroll to top when current index is selected.
@@ -90,10 +90,10 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
     );
   }
 
-  void showModal(BuildContext context) {
+  void showModal(final BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
+      builder: (final BuildContext context) => AlertDialog(
         content: const Text('Example Dialog'),
         actions: <TextButton>[
           TextButton(

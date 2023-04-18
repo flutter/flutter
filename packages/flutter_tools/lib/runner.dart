@@ -30,20 +30,20 @@ import 'src/runner/flutter_command_runner.dart';
 /// Runs the Flutter tool with support for the specified list of [commands].
 Future<int> run(
   List<String> args,
-  List<FlutterCommand> Function() commands, {
-    bool muteCommandLogging = false,
-    bool verbose = false,
-    bool verboseHelp = false,
+  final List<FlutterCommand> Function() commands, {
+    final bool muteCommandLogging = false,
+    final bool verbose = false,
+    final bool verboseHelp = false,
     bool? reportCrashes,
-    String? flutterVersion,
-    Map<Type, Generator>? overrides,
-    required ShutdownHooks shutdownHooks,
+    final String? flutterVersion,
+    final Map<Type, Generator>? overrides,
+    required final ShutdownHooks shutdownHooks,
   }) async {
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.of(args);
-    args.removeWhere((String option) => option == '-vv' || option == '-v' || option == '--verbose');
+    args.removeWhere((final String option) => option == '-vv' || option == '-v' || option == '--verbose');
   }
 
   return runInContext<int>(() async {
@@ -55,7 +55,7 @@ Future<int> run(
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
       systemLocale, intl.NumberFormat.localeExists,
-      onFailure: (String _) => 'en_US',
+      onFailure: (final String _) => 'en_US',
     );
 
     String getVersion() => flutterVersion ?? globals.flutterVersion.getVersionString(redactUnknownBranches: true);
@@ -113,7 +113,7 @@ Future<int> run(
         firstStackTrace = stackTrace;
         return _handleToolError(error, stackTrace, verbose, args, reportCrashes!, getVersion, shutdownHooks);
       }
-    }, onError: (Object error, StackTrace stackTrace) async { // ignore: deprecated_member_use
+    }, onError: (final Object error, final StackTrace stackTrace) async { // ignore: deprecated_member_use
       // If sending a crash report throws an error into the zone, we don't want
       // to re-try sending the crash report with *that* error. Rather, we want
       // to send the original error that triggered the crash report.
@@ -125,13 +125,13 @@ Future<int> run(
 }
 
 Future<int> _handleToolError(
-  Object error,
-  StackTrace? stackTrace,
-  bool verbose,
-  List<String> args,
-  bool reportCrashes,
-  String Function() getFlutterVersion,
-  ShutdownHooks shutdownHooks,
+  final Object error,
+  final StackTrace? stackTrace,
+  final bool verbose,
+  final List<String> args,
+  final bool reportCrashes,
+  final String Function() getFlutterVersion,
+  final ShutdownHooks shutdownHooks,
 ) async {
   if (error is UsageException) {
     globals.printError('${error.message}\n');
@@ -180,7 +180,7 @@ Future<int> _handleToolError(
         getFlutterVersion: getFlutterVersion,
         command: args.join(' '),
       );
-    }, onError: (dynamic error) {
+    }, onError: (final dynamic error) {
       globals.printError('Error sending crash report: $error');
     });
 
@@ -219,12 +219,12 @@ Future<int> _handleToolError(
   }
 }
 
-String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
+String _crashCommand(final List<String> args) => 'flutter ${args.join(' ')}';
 
-String _crashException(dynamic error) => '${error.runtimeType}: $error';
+String _crashException(final dynamic error) => '${error.runtimeType}: $error';
 
 /// Saves the crash report to a local file.
-Future<File> _createLocalCrashReport(CrashDetails details) async {
+Future<File> _createLocalCrashReport(final CrashDetails details) async {
   final StringBuffer buffer = StringBuffer();
 
   buffer.writeln('Flutter crash report.');
@@ -270,7 +270,7 @@ Future<File> _createLocalCrashReport(CrashDetails details) async {
   return crashFile;
 }
 
-Future<int> _exit(int code, {required ShutdownHooks shutdownHooks}) async {
+Future<int> _exit(final int code, {required final ShutdownHooks shutdownHooks}) async {
   // Need to get the boolean returned from `messenger.shouldDisplayLicenseTerms()`
   // before invoking the print welcome method because the print welcome method
   // will set `messenger.shouldDisplayLicenseTerms()` to false

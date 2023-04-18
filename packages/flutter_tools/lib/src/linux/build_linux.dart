@@ -27,13 +27,13 @@ final RegExp errorMatcher = RegExp(r'(?:(?:.*:\d+:\d+|clang):\s)?(fatal\s)?(?:er
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(
-  LinuxProject linuxProject,
-  BuildInfo buildInfo, {
+  final LinuxProject linuxProject,
+  final BuildInfo buildInfo, {
     String? target,
-    SizeAnalyzer? sizeAnalyzer,
-    bool needCrossBuild = false,
-    required TargetPlatform targetPlatform,
-    String targetSysroot = '/',
+    final SizeAnalyzer? sizeAnalyzer,
+    final bool needCrossBuild = false,
+    required final TargetPlatform targetPlatform,
+    final String targetSysroot = '/',
   }) async {
   target ??= 'lib/main.dart';
   if (!linuxProject.cmakeFile.existsSync()) {
@@ -110,8 +110,8 @@ Future<void> buildLinux(
   }
 }
 
-Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buildDir,
-    bool needCrossBuild, TargetPlatform targetPlatform, String targetSysroot) async {
+Future<void> _runCmake(final String buildModeName, final Directory sourceDir, final Directory buildDir,
+    final bool needCrossBuild, final TargetPlatform targetPlatform, final String targetSysroot) async {
   final Stopwatch sw = Stopwatch()..start();
 
   await buildDir.create(recursive: true);
@@ -153,7 +153,7 @@ Future<void> _runCmake(String buildModeName, Directory sourceDir, Directory buil
   globals.flutterUsage.sendTiming('build', 'cmake-linux', Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
-Future<void> _runBuild(Directory buildDir) async {
+Future<void> _runBuild(final Directory buildDir) async {
   final Stopwatch sw = Stopwatch()..start();
 
   int result;

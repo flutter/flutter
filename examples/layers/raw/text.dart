@@ -14,7 +14,7 @@ late final ui.FlutterView view;
 // A paragraph represents a rectangular region that contains some text.
 late ui.Paragraph paragraph;
 
-ui.Picture paint(ui.Rect paintBounds) {
+ui.Picture paint(final ui.Rect paintBounds) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder, paintBounds);
 
@@ -34,7 +34,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   return recorder.endRecording();
 }
 
-ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+ui.Scene composite(final ui.Picture picture, final ui.Rect paintBounds) {
   final double devicePixelRatio = view.devicePixelRatio;
   final Float64List deviceTransform = Float64List(16)
     ..[0] = devicePixelRatio
@@ -48,7 +48,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   return sceneBuilder.build();
 }
 
-void beginFrame(Duration timeStamp) {
+void beginFrame(final Duration timeStamp) {
   final ui.Rect paintBounds = ui.Offset.zero & (view.physicalSize / view.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);

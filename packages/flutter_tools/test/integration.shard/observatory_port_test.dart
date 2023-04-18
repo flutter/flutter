@@ -20,11 +20,11 @@ Future<int> getFreePort() async {
   return port;
 }
 
-Future<void> waitForVmServiceMessage(Process process, int port) async {
+Future<void> waitForVmServiceMessage(final Process process, final int port) async {
   final Completer<void> completer = Completer<void>();
   process.stdout
     .transform(utf8.decoder)
-    .listen((String line) {
+    .listen((final String line) {
       printOnFailure(line);
       if (line.contains('A Dart VM Service on Flutter test device is available at')) {
         if (line.contains('http://127.0.0.1:$port')) {

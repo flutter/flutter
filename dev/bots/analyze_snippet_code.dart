@@ -74,7 +74,7 @@ final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutt
 final String _defaultDartUiLocation = path.join(_flutterRoot, 'bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui');
 final String _flutter = path.join(_flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 
-Future<void> main(List<String> arguments) async {
+Future<void> main(final List<String> arguments) async {
   bool asserts = false;
   assert(() { asserts = true; return true; }());
   if (!asserts) {
@@ -198,7 +198,7 @@ class _Line {
   final String code;
   final bool generated;
 
-  String asLocation(String filename, int column) {
+  String asLocation(final String filename, final int column) {
     return '$filename:$line:${column + indent}';
   }
 
@@ -206,7 +206,7 @@ class _Line {
   String toString() => code;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -229,7 +229,7 @@ class _ErrorBase implements Comparable<Object> {
   final int? column;
 
   @override
-  int compareTo(Object other) {
+  int compareTo(final Object other) {
     if (other is _ErrorBase) {
       if (other.file != file) {
         if (other.file == null) {
@@ -280,7 +280,7 @@ class _SnippetCheckerException extends _ErrorBase implements Exception {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -300,9 +300,9 @@ class _SnippetCheckerException extends _ErrorBase implements Exception {
 @immutable
 class _AnalysisError extends _ErrorBase {
   const _AnalysisError(
-    String file,
-    int line,
-    int column,
+    final String file,
+    final int line,
+    final int column,
     this.message,
     this.errorCode,
     this.source,
@@ -318,7 +318,7 @@ class _AnalysisError extends _ErrorBase {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -361,9 +361,9 @@ class _SnippetChecker {
   /// repository is used (i.e. "<flutter repo>/bin/cache/pkg/sky_engine/lib/ui").
   _SnippetChecker(
     this._flutterPackage, {
-    String? tempDirectory,
+    final String? tempDirectory,
     this.verbose = false,
-    Directory? dartUiLocation,
+    final Directory? dartUiLocation,
   }) : _tempDirectory = _createTempDirectory(tempDirectory),
        _keepTmp = tempDirectory != null,
        _dartUiLocation = dartUiLocation;
@@ -448,8 +448,8 @@ class _SnippetChecker {
   /// contains the dart:ui code supplied by the engine.
   final Directory? _dartUiLocation;
 
-  static List<File> _listDartFiles(Directory directory, {bool recursive = false}) {
-    return directory.listSync(recursive: recursive, followLinks: false).whereType<File>().where((File file) => path.extension(file.path) == '.dart').toList();
+  static List<File> _listDartFiles(final Directory directory, {final bool recursive = false}) {
+    return directory.listSync(recursive: recursive, followLinks: false).whereType<File>().where((final File file) => path.extension(file.path) == '.dart').toList();
   }
 
   static const List<String> ignoresDirectives = <String>[
@@ -464,7 +464,7 @@ class _SnippetChecker {
 
   /// Computes the headers needed for each snippet file.
   List<_Line> get headersWithoutImports {
-    return _headersWithoutImports ??= ignoresDirectives.map<_Line>((String code) => _Line.generated(code: code)).toList();
+    return _headersWithoutImports ??= ignoresDirectives.map<_Line>((final String code) => _Line.generated(code: code)).toList();
   }
   List<_Line>? _headersWithoutImports;
 
@@ -482,7 +482,7 @@ class _SnippetChecker {
       "import 'package:flutter_test/flutter_test.dart';",
       for (final File file in _listDartFiles(Directory(_defaultFlutterPackage)))
         "import 'package:flutter/${path.basename(file.path)}';",
-    ].map<_Line>((String code) => _Line.generated(code: code)).toList();
+    ].map<_Line>((final String code) => _Line.generated(code: code)).toList();
   }
   List<_Line>? _headersWithImports;
 
@@ -507,7 +507,7 @@ class _SnippetChecker {
     return errors.isNotEmpty;
   }
 
-  static Directory _createTempDirectory(String? tempArg) {
+  static Directory _createTempDirectory(final String? tempArg) {
     if (tempArg != null) {
       final Directory tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(tempArg)));
       if (path.basename(tempArg) != tempArg) {
@@ -543,7 +543,7 @@ class _SnippetChecker {
 
   /// Creates a name for the snippets tool to use for the snippet ID from a
   /// filename and starting line number.
-  String _createNameFromSource(String prefix, String filename, int start) {
+  String _createNameFromSource(final String prefix, final String filename, final int start) {
     String snippetId = path.split(filename).join('.');
     snippetId = path.basenameWithoutExtension(snippetId);
     snippetId = '$prefix.$snippetId.$start';
@@ -553,8 +553,8 @@ class _SnippetChecker {
   /// Extracts the snippets from the Dart files in [files], writes them
   /// to disk, and adds them to the [snippetMap].
   Future<List<Object>> _extractSnippets(
-    List<File> files, {
-    required Map<String, _SnippetFile> snippetMap,
+    final List<File> files, {
+    required final Map<String, _SnippetFile> snippetMap,
   }) async {
     final List<Object> errors = <Object>[];
     _SnippetFile? lastExample;
@@ -684,7 +684,7 @@ class _SnippetChecker {
   /// a primitive heuristic to make snippet blocks into valid Dart code.
   ///
   /// `block` argument will get mutated, but is copied before this function returns.
-  _SnippetFile _processBlock(_Line startingLine, List<String> block, List<_Line> assumptions, List<_Line> ignoreAssumptionsOnly, String filename, _SnippetFile? lastExample) {
+  _SnippetFile _processBlock(final _Line startingLine, final List<String> block, final List<_Line> assumptions, final List<_Line> ignoreAssumptionsOnly, final String filename, final _SnippetFile? lastExample) {
     if (block.isEmpty) {
       throw _SnippetCheckerException('${startingLine.asLocation(filename, 0)}: Empty ```dart block in snippet code.');
     }
@@ -732,8 +732,8 @@ class _SnippetChecker {
         ...assumptions,
       ];
     }
-    final String firstCodeLine = block.firstWhere((String line) => !line.startsWith(_nonCodeRegExp)).trim();
-    final String lastCodeLine = block.lastWhere((String line) => !line.startsWith(_nonCodeRegExp)).trim();
+    final String firstCodeLine = block.firstWhere((final String line) => !line.startsWith(_nonCodeRegExp)).trim();
+    final String lastCodeLine = block.lastWhere((final String line) => !line.startsWith(_nonCodeRegExp)).trim();
     if (firstCodeLine.startsWith('import ')) {
       // probably an entire program
       if (importPreviousExample) {
@@ -767,7 +767,7 @@ class _SnippetChecker {
       );
     } else if (firstCodeLine.startsWith(_maybeGetterDeclarationRegExp) ||
                (firstCodeLine.startsWith(_maybeFunctionDeclarationRegExp) && lastCodeLine.startsWith(_trailingCloseBraceRegExp)) ||
-               block.any((String line) => line.startsWith(_topLevelDeclarationRegExp))) {
+               block.any((final String line) => line.startsWith(_topLevelDeclarationRegExp))) {
       // probably a top-level declaration
       return _SnippetFile.fromStrings(
         startingLine,
@@ -778,7 +778,7 @@ class _SnippetChecker {
         filename,
       );
     } else if (lastCodeLine.startsWith(_trailingSemicolonRegExp) ||
-               block.any((String line) => line.startsWith(_statementRegExp))) {
+               block.any((final String line) => line.startsWith(_statementRegExp))) {
       // probably a statement
       return _SnippetFile.fromStrings(
         startingLine,
@@ -873,17 +873,17 @@ class _SnippetChecker {
   }
 
   /// Writes out a snippet section to the disk and returns the file.
-  File _writeSnippetFile(_SnippetFile snippetFile) {
+  File _writeSnippetFile(final _SnippetFile snippetFile) {
     final String snippetFileId = _createNameFromSource('snippet', snippetFile.filename, snippetFile.indexLine);
     final File outputFile = File(path.join(_tempDirectory.path, '$snippetFileId.dart'))..createSync(recursive: true);
-    final String contents = snippetFile.code.map<String>((_Line line) => line.code).join('\n').trimRight();
+    final String contents = snippetFile.code.map<String>((final _Line line) => line.code).join('\n').trimRight();
     outputFile.writeAsStringSync('$contents\n');
     return outputFile;
   }
 
   /// Starts the analysis phase of checking the snippets by invoking the analyzer
   /// and parsing its output. Returns the errors, if any.
-  List<Object> _analyze(Map<String, _SnippetFile> snippets) {
+  List<Object> _analyze(final Map<String, _SnippetFile> snippets) {
     final List<String> analyzerOutput = _runAnalyzer();
     final List<Object> errors = <Object>[];
     final String kBullet = Platform.isWindows ? ' - ' : ' • ';
@@ -996,7 +996,7 @@ class _SnippetChecker {
     final List<String> stderr = result.stderr.toString().trim().split('\n');
     final List<String> stdout = result.stdout.toString().trim().split('\n');
     // Remove output from building the flutter tool.
-    stderr.removeWhere((String line) {
+    stderr.removeWhere((final String line) {
       return line.startsWith('Building flutter tool...')
           || line.startsWith('Waiting for another flutter command to release the startup lock...')
           || line.startsWith('Flutter assets will be downloaded from ');
@@ -1008,7 +1008,7 @@ class _SnippetChecker {
         stderr.removeLast();
       }
     }
-    if (stderr.isNotEmpty && stderr.any((String line) => line.isNotEmpty)) {
+    if (stderr.isNotEmpty && stderr.any((final String line) => line.isNotEmpty)) {
       throw _SnippetCheckerException('Cannot analyze dartdocs; unexpected error output:\n$stderr');
     }
     if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
@@ -1027,17 +1027,17 @@ class _SnippetFile {
   const _SnippetFile(this.code, this.generatorComment, this.filename, this.indexLine);
 
   factory _SnippetFile.fromLines(
-    List<_Line> code,
-    List<_Line> headers,
-    List<_Line> preamble,
-    String generatorComment,
-    String filename,
+    final List<_Line> code,
+    final List<_Line> headers,
+    final List<_Line> preamble,
+    final String generatorComment,
+    final String filename,
   ) {
     while (code.isNotEmpty && code.last.code.isEmpty) {
       code.removeLast();
     }
     assert(code.isNotEmpty);
-    final _Line firstLine = code.firstWhere((_Line line) => !line.generated);
+    final _Line firstLine = code.firstWhere((final _Line line) => !line.generated);
     return _SnippetFile(
       <_Line>[
         ...headers,
@@ -1056,13 +1056,13 @@ class _SnippetFile {
   }
 
   factory _SnippetFile.fromStrings(
-    _Line firstLine,
-    List<String> code,
-    List<_Line> headers,
-    List<_Line> preamble,
-    String generatorComment,
-    String filename, {
-    String? prefix, String? postfix,
+    final _Line firstLine,
+    final List<String> code,
+    final List<_Line> headers,
+    final List<_Line> preamble,
+    final String generatorComment,
+    final String filename, {
+    final String? prefix, final String? postfix,
   }) {
     final List<_Line> codeLines = <_Line>[
       if (prefix != null)
@@ -1082,10 +1082,10 @@ class _SnippetFile {
 }
 
 Future<void> _runInteractive({
-  required String? tempDirectory,
-  required Directory flutterPackage,
+  required final String? tempDirectory,
+  required final Directory flutterPackage,
   required String filePath,
-  required Directory? dartUiLocation,
+  required final Directory? dartUiLocation,
 }) async {
   filePath = path.isAbsolute(filePath) ? filePath : path.join(path.current, filePath);
   final File file = File(filePath);
@@ -1108,7 +1108,7 @@ Future<void> _runInteractive({
   final _SnippetChecker checker = _SnippetChecker(flutterPackage, tempDirectory: tempDirectory)
     .._createConfigurationFiles();
 
-  ProcessSignal.sigint.watch().listen((_) {
+  ProcessSignal.sigint.watch().listen((final _) {
     checker.cleanupTempDirectory();
     exit(0);
   });
@@ -1139,7 +1139,7 @@ Future<void> _runInteractive({
 
   stdin.lineMode = false;
   stdin.echoMode = false;
-  stdin.transform(utf8.decoder).listen((String input) async {
+  stdin.transform(utf8.decoder).listen((final String input) async {
     switch (input.trim()) {
       case 'q':
         checker.cleanupTempDirectory();
@@ -1150,7 +1150,7 @@ Future<void> _runInteractive({
         }
     }
   });
-  Watcher(file.absolute.path).events.listen((_) => rerun());
+  Watcher(file.absolute.path).events.listen((final _) => rerun());
 }
 
-String _stringify(Object object) => object.toString();
+String _stringify(final Object object) => object.toString();

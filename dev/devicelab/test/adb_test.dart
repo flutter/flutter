@@ -129,14 +129,14 @@ void main() {
   });
 }
 
-void expectLog(List<CommandArgs> log) {
+void expectLog(final List<CommandArgs> log) {
   expect(FakeDevice.commandLog, log);
 }
 
 CommandArgs cmd({
-  required String command,
-  List<String>? arguments,
-  Map<String, String>? environment,
+  required final String command,
+  final List<String>? arguments,
+  final Map<String, String>? environment,
 }) {
   return CommandArgs(
     command: command,
@@ -157,7 +157,7 @@ class CommandArgs {
   String toString() => 'CommandArgs(command: $command, arguments: $arguments, environment: $environment)';
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (other.runtimeType != CommandArgs) {
       return false;
     }
@@ -214,7 +214,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<String> shellEval(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
+  Future<String> shellEval(final String command, final List<String> arguments, { final Map<String, String>? environment, final bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,
@@ -224,7 +224,7 @@ class FakeDevice extends AndroidDevice {
   }
 
   @override
-  Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
+  Future<void> shellExec(final String command, final List<String> arguments, { final Map<String, String>? environment, final bool silent = false }) async {
     commandLog.add(CommandArgs(
       command: command,
       arguments: arguments,

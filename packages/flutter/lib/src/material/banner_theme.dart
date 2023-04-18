@@ -74,14 +74,14 @@ class MaterialBannerThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   MaterialBannerThemeData copyWith({
-    Color? backgroundColor,
-    Color? surfaceTintColor,
-    Color? shadowColor,
-    Color? dividerColor,
-    TextStyle? contentTextStyle,
-    double? elevation,
-    EdgeInsetsGeometry? padding,
-    EdgeInsetsGeometry? leadingPadding,
+    final Color? backgroundColor,
+    final Color? surfaceTintColor,
+    final Color? shadowColor,
+    final Color? dividerColor,
+    final TextStyle? contentTextStyle,
+    final double? elevation,
+    final EdgeInsetsGeometry? padding,
+    final EdgeInsetsGeometry? leadingPadding,
   }) {
     return MaterialBannerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -100,7 +100,7 @@ class MaterialBannerThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static MaterialBannerThemeData lerp(MaterialBannerThemeData? a, MaterialBannerThemeData? b, double t) {
+  static MaterialBannerThemeData lerp(final MaterialBannerThemeData? a, final MaterialBannerThemeData? b, final double t) {
     return MaterialBannerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       surfaceTintColor: Color.lerp(a?.surfaceTintColor, b?.surfaceTintColor, t),
@@ -126,7 +126,7 @@ class MaterialBannerThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -145,7 +145,7 @@ class MaterialBannerThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));
@@ -186,16 +186,16 @@ class MaterialBannerTheme extends InheritedTheme {
   /// ```dart
   /// MaterialBannerThemeData theme = MaterialBannerTheme.of(context);
   /// ```
-  static MaterialBannerThemeData of(BuildContext context) {
+  static MaterialBannerThemeData of(final BuildContext context) {
     final MaterialBannerTheme? bannerTheme = context.dependOnInheritedWidgetOfExactType<MaterialBannerTheme>();
     return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return MaterialBannerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(MaterialBannerTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final MaterialBannerTheme oldWidget) => data != oldWidget.data;
 }

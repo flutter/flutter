@@ -19,7 +19,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   Duration? frameTime;
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     super.handleEvent(event, entry);
     if (callback != null) {
       callback?.call(event);
@@ -33,7 +33,7 @@ class TestResampleEventFlutterBinding extends BindingBase with GestureBinding, S
   }
 
   @override
-  int addPostFrameCallback(FrameCallback callback) {
+  int addPostFrameCallback(final FrameCallback callback) {
     postFrameCallback = callback;
     return 0;
   }
@@ -52,9 +52,9 @@ class TestSamplingClock implements SamplingClock {
 
 typedef ResampleEventTest = void Function(FakeAsync async);
 
-void testResampleEvent(String description, ResampleEventTest callback) {
+void testResampleEvent(final String description, final ResampleEventTest callback) {
   test(description, () {
-    fakeAsync((FakeAsync async) {
+    fakeAsync((final FakeAsync async) {
       callback(async);
     }, initialTime: DateTime.utc(2015));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/87067
@@ -63,7 +63,7 @@ void testResampleEvent(String description, ResampleEventTest callback) {
 
 void main() {
   final TestResampleEventFlutterBinding binding = TestResampleEventFlutterBinding();
-  testResampleEvent('Pointer event resampling', (FakeAsync async) {
+  testResampleEvent('Pointer event resampling', (final FakeAsync async) {
     Duration currentTime() => Duration(milliseconds: clock.now().millisecondsSinceEpoch);
     final Duration epoch = currentTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(

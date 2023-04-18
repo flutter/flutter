@@ -182,7 +182,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   }
 
   @override
-  void didUpdateWidget(CupertinoCheckbox oldWidget) {
+  void didUpdateWidget(final CupertinoCheckbox oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
       _previousValue = oldWidget.value;
@@ -204,14 +204,14 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
   @override
   bool? get value => widget.value;
 
-  void onFocusChange(bool value) {
+  void onFocusChange(final bool value) {
     if (focused != value) {
       focused = value;
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color effectiveActiveColor = widget.activeColor
       ?? CupertinoColors.activeBlue;
     final Color? inactiveColor = widget.inactiveColor;
@@ -258,7 +258,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox> with TickerProvid
 class _CheckboxPainter extends ToggleablePainter {
   Color get checkColor => _checkColor!;
   Color? _checkColor;
-  set checkColor(Color value) {
+  set checkColor(final Color value) {
     if (_checkColor == value) {
       return;
     }
@@ -268,7 +268,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   bool? get value => _value;
   bool? _value;
-  set value(bool? value) {
+  set value(final bool? value) {
     if (_value == value) {
       return;
     }
@@ -278,7 +278,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   bool? get previousValue => _previousValue;
   bool? _previousValue;
-  set previousValue(bool? value) {
+  set previousValue(final bool? value) {
     if (_previousValue == value) {
       return;
     }
@@ -288,7 +288,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   OutlinedBorder get shape => _shape!;
   OutlinedBorder? _shape;
-  set shape(OutlinedBorder value) {
+  set shape(final OutlinedBorder value) {
     if (_shape == value) {
       return;
     }
@@ -298,7 +298,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   BorderSide? get side => _side;
   BorderSide? _side;
-  set side(BorderSide? value) {
+  set side(final BorderSide? value) {
     if (_side == value) {
       return;
     }
@@ -306,7 +306,7 @@ class _CheckboxPainter extends ToggleablePainter {
     notifyListeners();
   }
 
-  Rect _outerRectAt(Offset origin) {
+  Rect _outerRectAt(final Offset origin) {
     const double size = CupertinoCheckbox.width;
     final Rect rect = Rect.fromLTWH(origin.dx, origin.dy, size, size);
     return rect;
@@ -314,7 +314,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   // The checkbox's border color if value == false, or its fill color when
   // value == true or null.
-  Color _colorAt(bool value) {
+  Color _colorAt(final bool value) {
     return value && isActive ? activeColor : inactiveColor;
   }
 
@@ -327,7 +327,7 @@ class _CheckboxPainter extends ToggleablePainter {
       ..strokeCap = StrokeCap.round;
   }
 
-  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
+  void _drawBox(final Canvas canvas, final Rect outer, final Paint paint, final BorderSide? side, final bool fill) {
     if (fill) {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
@@ -336,7 +336,7 @@ class _CheckboxPainter extends ToggleablePainter {
     }
   }
 
-  void _drawCheck(Canvas canvas, Offset origin, Paint paint) {
+  void _drawCheck(final Canvas canvas, final Offset origin, final Paint paint) {
     final Path path = Path();
     // The ratios for the offsets below were found from looking at the checkbox
     // examples on in the HIG docs. The distance from the needed point to the
@@ -352,7 +352,7 @@ class _CheckboxPainter extends ToggleablePainter {
     canvas.drawPath(path, paint);
   }
 
-  void _drawDash(Canvas canvas, Offset origin, Paint paint) {
+  void _drawDash(final Canvas canvas, final Offset origin, final Paint paint) {
     // From measuring the checkbox example in the HIG docs, the dash was found
     // to be half the total width, centered in the middle.
     const Offset start = Offset(CupertinoCheckbox.width * 0.25, CupertinoCheckbox.width * 0.5);
@@ -361,7 +361,7 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint strokePaint = _createStrokePaint();
     final Offset origin = size / 2.0 - const Size.square(CupertinoCheckbox.width) / 2.0 as Offset;
 

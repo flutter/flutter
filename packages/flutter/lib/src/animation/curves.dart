@@ -35,7 +35,7 @@ abstract class ParametricCurve<T> {
   /// this function, as the above case is already handled in the default
   /// implementation of [transform], which delegates the remaining logic to
   /// [transformInternal].
-  T transform(double t) {
+  T transform(final double t) {
     assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
     return transformInternal(t);
   }
@@ -44,7 +44,7 @@ abstract class ParametricCurve<T> {
   ///
   /// The given parametric value `t` will be between 0.0 and 1.0, inclusive.
   @protected
-  T transformInternal(double t) {
+  T transformInternal(final double t) {
     throw UnimplementedError();
   }
 
@@ -87,7 +87,7 @@ abstract class Curve extends ParametricCurve<double> {
   /// implementation of [transform], which delegates the remaining logic to
   /// [transformInternal].
   @override
-  double transform(double t) {
+  double transform(final double t) {
     if (t == 0.0 || t == 1.0) {
       return t;
     }
@@ -116,7 +116,7 @@ class _Linear extends Curve {
   const _Linear._();
 
   @override
-  double transformInternal(double t) => t;
+  double transformInternal(final double t) => t;
 }
 
 /// A sawtooth curve that repeats a given number of times over the unit interval.
@@ -212,7 +212,7 @@ class Threshold extends Curve {
   final double threshold;
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     assert(threshold >= 0.0);
     assert(threshold <= 1.0);
     return t < threshold ? 0.0 : 1.0;
@@ -332,14 +332,14 @@ class Cubic extends Curve {
 
   static const double _cubicErrorBound = 0.001;
 
-  double _evaluateCubic(double a, double b, double m) {
+  double _evaluateCubic(final double a, final double b, final double m) {
     return 3 * a * (1 - m) * (1 - m) * m +
            3 * b * (1 - m) *           m * m +
                                        m * m * m;
   }
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     double start = 0.0;
     double end = 1.0;
     while (true) {
@@ -423,7 +423,7 @@ class ThreePointCubic extends Curve {
   final Offset b2;
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     final bool firstCurve = t < midpoint.dx;
     final double scaleX = firstCurve ? midpoint.dx : 1.0 - midpoint.dx;
     final double scaleY = firstCurve ? midpoint.dy : 1.0 - midpoint.dy;
@@ -497,9 +497,9 @@ abstract class Curve2D extends ParametricCurve<Offset> {
   ///
   ///  * Luiz Henrique de Figueire's Graphics Gem on [the algorithm](http://ariel.chronotext.org/dd/defigueiredo93adaptive.pdf).
   Iterable<Curve2DSample> generateSamples({
-    double start = 0.0,
-    double end = 1.0,
-    double tolerance = 1e-10,
+    final double start = 0.0,
+    final double end = 1.0,
+    final double tolerance = 1e-10,
   }) {
     // The sampling algorithm is:
     // 1. Evaluate the area of the triangle (a proxy for the "flatness" of the
@@ -515,7 +515,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     // We want to pick a random seed that will keep the result stable if
     // evaluated again, so we use the first non-generated control point.
     final math.Random rand = math.Random(samplingSeed);
-    bool isFlat(Offset p, Offset q, Offset r) {
+    bool isFlat(final Offset p, final Offset q, final Offset r) {
       // Calculates the area of the triangle given by the three points.
       final Offset pr = p - r;
       final Offset qr = q - r;
@@ -526,7 +526,7 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     final Curve2DSample first = Curve2DSample(start, transform(start));
     final Curve2DSample last = Curve2DSample(end, transform(end));
     final List<Curve2DSample> samples = <Curve2DSample>[first];
-    void sample(Curve2DSample p, Curve2DSample q, {bool forceSubdivide = false}) {
+    void sample(final Curve2DSample p, final Curve2DSample q, {final bool forceSubdivide = false}) {
       // Pick a random point somewhat near the center, which avoids aliasing
       // problems with periodic curves.
       final double t = p.t + (0.45 + 0.1 * rand.nextDouble()) * (q.t - p.t);
@@ -566,11 +566,11 @@ abstract class Curve2D extends ParametricCurve<Offset> {
   /// does not loop or curve back over itself). For curves that are not
   /// single-valued, it will return the parameter for only one of the values at
   /// the given `x` location.
-  double findInverse(double x) {
+  double findInverse(final double x) {
     double start = 0.0;
     double end = 1.0;
     late double mid;
-    double offsetToOrigin(double pos) => x - transform(pos).dx;
+    double offsetToOrigin(final double pos) => x - transform(pos).dx;
     // Use a binary search to find the inverse point within 1e-6, or 100
     // subdivisions, whichever comes first.
     const double errorLimit = 1e-6;
@@ -667,10 +667,10 @@ class CatmullRomSpline extends Curve2D {
   /// [transform] is called. If you would rather pre-compute the structures,
   /// use [CatmullRomSpline.precompute] instead.
   CatmullRomSpline(
-      List<Offset> controlPoints, {
-        double tension = 0.0,
-        Offset? startHandle,
-        Offset? endHandle,
+      final List<Offset> controlPoints, {
+        final double tension = 0.0,
+        final Offset? startHandle,
+        final Offset? endHandle,
       }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
@@ -685,10 +685,10 @@ class CatmullRomSpline extends Curve2D {
   /// The same as [CatmullRomSpline.new], except that the internal data
   /// structures are precomputed instead of being computed lazily.
   CatmullRomSpline.precompute(
-      List<Offset> controlPoints, {
-        double tension = 0.0,
-        Offset? startHandle,
-        Offset? endHandle,
+      final List<Offset> controlPoints, {
+        final double tension = 0.0,
+        final Offset? startHandle,
+        final Offset? endHandle,
       }) : assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
            assert(tension >= 0.0, 'tension $tension must not be negative.'),
            assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.'),
@@ -700,8 +700,8 @@ class CatmullRomSpline extends Curve2D {
 
 
   static List<List<Offset>> _computeSegments(
-    List<Offset> controlPoints,
-    double tension, {
+    final List<Offset> controlPoints,
+    final double tension, {
     Offset? startHandle,
     Offset? endHandle,
   }) {
@@ -775,7 +775,7 @@ class CatmullRomSpline extends Curve2D {
   }
 
   @override
-  Offset transformInternal(double t) {
+  Offset transformInternal(final double t) {
     _initializeIfNeeded();
     final double length = _cubicSegments.length.toDouble();
     final double position;
@@ -872,7 +872,7 @@ class CatmullRomCurve extends Curve {
         // all the time in transformInternal.
         _precomputedSamples = _computeSamples(controlPoints, tension);
 
-  static List<Curve2DSample> _computeSamples(List<Offset> controlPoints, double tension) {
+  static List<Curve2DSample> _computeSamples(final List<Offset> controlPoints, final double tension) {
     return CatmullRomSpline.precompute(
       // Force the first and last control points for the spline to be (0, 0)
       // and (1, 1), respectively.
@@ -943,8 +943,8 @@ class CatmullRomCurve extends Curve {
   /// modification to the curve will result in a valid curve.
   static bool validateControlPoints(
     List<Offset>? controlPoints, {
-    double tension = 0.0,
-    List<String>? reasons,
+    final double tension = 0.0,
+    final List<String>? reasons,
   }) {
     if (controlPoints == null) {
       assert(() {
@@ -1070,7 +1070,7 @@ class CatmullRomCurve extends Curve {
   }
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     // Linearly interpolate between the two closest samples generated when the
     // curve was created.
     if (_precomputedSamples.isEmpty) {
@@ -1131,7 +1131,7 @@ class FlippedCurve extends Curve {
   final Curve curve;
 
   @override
-  double transformInternal(double t) => 1.0 - curve.transform(1.0 - t);
+  double transformInternal(final double t) => 1.0 - curve.transform(1.0 - t);
 
   @override
   String toString() {
@@ -1182,7 +1182,7 @@ class _BounceInCurve extends Curve {
   const _BounceInCurve._();
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     return 1.0 - _bounce(1.0 - t);
   }
 }
@@ -1194,7 +1194,7 @@ class _BounceOutCurve extends Curve {
   const _BounceOutCurve._();
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     return _bounce(t);
   }
 }
@@ -1206,7 +1206,7 @@ class _BounceInOutCurve extends Curve {
   const _BounceInOutCurve._();
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     if (t < 0.5) {
       return (1.0 - _bounce(1.0 - t * 2.0)) * 0.5;
     } else {
@@ -1262,7 +1262,7 @@ class ElasticOutCurve extends Curve {
   final double period;
 
   @override
-  double transformInternal(double t) {
+  double transformInternal(final double t) {
     final double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.pi * 2.0) / period) + 1.0;
   }

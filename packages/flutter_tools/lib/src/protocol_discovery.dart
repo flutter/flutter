@@ -20,8 +20,8 @@ class ProtocolDiscovery {
     required this.throttleDuration,
     this.hostPort,
     this.devicePort,
-    required bool ipv6,
-    required Logger logger,
+    required final bool ipv6,
+    required final Logger logger,
   }) : _logger = logger,
        _ipv6 = ipv6 {
     _deviceLogSubscription = logReader.logLines.listen(
@@ -31,13 +31,13 @@ class ProtocolDiscovery {
   }
 
   factory ProtocolDiscovery.vmService(
-    DeviceLogReader logReader, {
-    DevicePortForwarder? portForwarder,
-    Duration? throttleDuration,
-    int? hostPort,
-    int? devicePort,
-    required bool ipv6,
-    required Logger logger,
+    final DeviceLogReader logReader, {
+    final DevicePortForwarder? portForwarder,
+    final Duration? throttleDuration,
+    final int? hostPort,
+    final int? devicePort,
+    required final bool ipv6,
+    required final Logger logger,
   }) {
     const String kVmServiceService = 'VM Service';
     return ProtocolDiscovery._(
@@ -104,11 +104,11 @@ class ProtocolDiscovery {
     _deviceLogSubscription = null;
   }
 
-  Match? _getPatternMatch(String line) {
+  Match? _getPatternMatch(final String line) {
     return globals.kVMServiceMessageRegExp.firstMatch(line);
   }
 
-  Uri? _getVmServiceUri(String line) {
+  Uri? _getVmServiceUri(final String line) {
     final Match? match = _getPatternMatch(line);
     if (match != null) {
       return Uri.parse(match[1]!);
@@ -116,7 +116,7 @@ class ProtocolDiscovery {
     return null;
   }
 
-  void _handleLine(String line) {
+  void _handleLine(final String line) {
     Uri? uri;
     try {
       uri = _getVmServiceUri(line);
@@ -133,7 +133,7 @@ class ProtocolDiscovery {
     _uriStreamController.add(uri);
   }
 
-  Future<Uri> _forwardPort(Uri deviceUri) async {
+  Future<Uri> _forwardPort(final Uri deviceUri) async {
     _logger.printTrace('$serviceName URL on device: $deviceUri');
     Uri hostUri = deviceUri;
 
@@ -186,7 +186,7 @@ class _BufferedStreamController<T> {
 
   /// Sends [event] if there is a listener attached to the broadcast stream.
   /// Otherwise, it enqueues [event] until a listener is attached.
-  void add(T event) {
+  void add(final T event) {
     if (_streamController.hasListener) {
       _streamController.add(event);
     } else {
@@ -195,7 +195,7 @@ class _BufferedStreamController<T> {
   }
 
   /// Sends or enqueues an error event.
-  void addError(Object error, [StackTrace? stackTrace]) {
+  void addError(final Object error, [final StackTrace? stackTrace]) {
     if (_streamController.hasListener) {
       _streamController.addError(error, stackTrace);
     } else {
@@ -215,7 +215,7 @@ class _BufferedStreamController<T> {
 /// and arrival times: `a (0ms), b (5ms), c (11ms), d (21ms)`.
 /// The events `a`, `c`, and `d` will be produced as a result.
 StreamTransformer<S, S> _throttle<S>({
-  required Duration waitDuration,
+  required final Duration waitDuration,
 }) {
 
   S latestLine;
@@ -225,7 +225,7 @@ StreamTransformer<S, S> _throttle<S>({
 
   return StreamTransformer<S, S>
     .fromHandlers(
-      handleData: (S value, EventSink<S> sink) {
+      handleData: (final S value, final EventSink<S> sink) {
         latestLine = value;
 
         final bool isFirstMessage = lastExecution == null;
@@ -248,7 +248,7 @@ StreamTransformer<S, S> _throttle<S>({
             lastExecution = DateTime.now().millisecondsSinceEpoch;
           });
       },
-      handleDone: (EventSink<S> sink) {
+      handleDone: (final EventSink<S> sink) {
         done = true;
         sink.close();
       }

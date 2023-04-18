@@ -29,7 +29,7 @@ class IconThemeData with Diagnosticable {
     this.grade,
     this.opticalSize,
     this.color,
-    double? opacity,
+    final double? opacity,
     this.shadows,
   }) : _opacity = opacity,
        assert(fill == null || (0.0 <= fill && fill <= 1.0)),
@@ -53,14 +53,14 @@ class IconThemeData with Diagnosticable {
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
   IconThemeData copyWith({
-    double? size,
-    double? fill,
-    double? weight,
-    double? grade,
-    double? opticalSize,
-    Color? color,
-    double? opacity,
-    List<Shadow>? shadows,
+    final double? size,
+    final double? fill,
+    final double? weight,
+    final double? grade,
+    final double? opticalSize,
+    final Color? color,
+    final double? opacity,
+    final List<Shadow>? shadows,
   }) {
     return IconThemeData(
       size: size ?? this.size,
@@ -77,7 +77,7 @@ class IconThemeData with Diagnosticable {
   /// Returns a new icon theme that matches this icon theme but with some values
   /// replaced by the non-null parameters of the given icon theme. If the given
   /// icon theme is null, returns this icon theme.
-  IconThemeData merge(IconThemeData? other) {
+  IconThemeData merge(final IconThemeData? other) {
     if (other == null) {
       return this;
     }
@@ -109,7 +109,7 @@ class IconThemeData with Diagnosticable {
   ///
   ///  * [CupertinoIconThemeData.resolve] an implementation that resolves
   ///    the color of [CupertinoIconThemeData] before returning.
-  IconThemeData resolve(BuildContext context) => this;
+  IconThemeData resolve(final BuildContext context) => this;
 
   /// Whether all the properties (except shadows) of this object are non-null.
   bool get isConcrete => size != null
@@ -166,7 +166,7 @@ class IconThemeData with Diagnosticable {
   /// Linearly interpolate between two icon theme data objects.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static IconThemeData lerp(IconThemeData? a, IconThemeData? b, double t) {
+  static IconThemeData lerp(final IconThemeData? a, final IconThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -183,7 +183,7 @@ class IconThemeData with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -211,7 +211,7 @@ class IconThemeData with Diagnosticable {
   );
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('size', size, defaultValue: null));
     properties.add(DoubleProperty('fill', fill, defaultValue: null));

@@ -41,7 +41,7 @@ class IntegrationTestTestDevice implements TestDevice {
   ///
   /// [entrypointPath] must be a path to an un-compiled source file.
   @override
-  Future<StreamChannel<String>> start(String entrypointPath) async {
+  Future<StreamChannel<String>> start(final String entrypointPath) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     _applicationPackage = await ApplicationPackageFactory.instance?.getPackageForPlatform(
       targetPlatform,
@@ -89,12 +89,12 @@ class IntegrationTestTestDevice implements TestDevice {
 
     await vmService.service.streamListen(vm_service.EventStreams.kExtension);
     final Stream<String> remoteMessages = vmService.service.onExtensionEvent
-        .where((vm_service.Event e) => e.extensionKind == kIntegrationTestExtension)
-        .map((vm_service.Event e) => e.extensionData!.data[kIntegrationTestData] as String);
+        .where((final vm_service.Event e) => e.extensionKind == kIntegrationTestExtension)
+        .map((final vm_service.Event e) => e.extensionData!.data[kIntegrationTestData] as String);
 
     final StreamChannelController<String> controller = StreamChannelController<String>();
 
-    controller.local.stream.listen((String event) {
+    controller.local.stream.listen((final String event) {
       vmService.service.callServiceExtension(
         kIntegrationTestMethod,
         isolateId: isolateRef.id,
@@ -105,8 +105,8 @@ class IntegrationTestTestDevice implements TestDevice {
     });
 
     remoteMessages.listen(
-      (String s) => controller.local.sink.add(s),
-      onError: (Object error, StackTrace stack) => controller.local.sink.addError(error, stack),
+      (final String s) => controller.local.sink.add(s),
+      onError: (final Object error, final StackTrace stack) => controller.local.sink.addError(error, stack),
     );
     unawaited(vmService.service.onDone.whenComplete(
       () => controller.local.sink.close(),

@@ -16,7 +16,7 @@ void main() {
    * because [matchesGoldenFile] does not use Skia Gold in its native package.
    */
 
-  testWidgets('correctly records frames using display', (WidgetTester tester) async {
+  testWidgets('correctly records frames using display', (final WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -52,7 +52,7 @@ void main() {
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.records.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('correctly wraps a row', (WidgetTester tester) async {
+  testWidgets('correctly wraps a row', (final WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     const Duration duration = Duration(seconds: 2);
@@ -70,7 +70,7 @@ void main() {
     await expectLater(find.byWidget(display), matchesGoldenFile('test.animation_sheet_builder.wraps.png'));
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('correctly records frames using collate', (WidgetTester tester) async {
+  testWidgets('correctly records frames using collate', (final WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(frameSize: _DecuplePixels.size);
 
     await tester.pumpFrames(
@@ -104,7 +104,7 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('use allLayers to record out-of-subtree contents', (WidgetTester tester) async {
+  testWidgets('use allLayers to record out-of-subtree contents', (final WidgetTester tester) async {
     final AnimationSheetBuilder builder = AnimationSheetBuilder(
       frameSize: const Size(8, 2),
       allLayers: true,
@@ -170,10 +170,10 @@ class _DecuplePixelsState extends State<_DecuplePixels> with SingleTickerProvide
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller.view,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return CustomPaint(
           painter: _PaintDecuplePixels(_controller.value),
         );
@@ -188,12 +188,12 @@ class _PaintDecuplePixels extends CustomPainter {
   final double value;
 
   @override
-  bool shouldRepaint(_PaintDecuplePixels oldDelegate) {
+  bool shouldRepaint(final _PaintDecuplePixels oldDelegate) {
     return oldDelegate.value != value;
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     canvas.save();
     final Rect rect = RectTween(
       begin: const Rect.fromLTWH(1, 1, 1, 1),

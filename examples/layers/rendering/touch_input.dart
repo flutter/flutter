@@ -20,18 +20,18 @@ List<Color> _kColors = <Color>[
 
 /// A simple model object for a dot that reacts to pointer pressure.
 class Dot {
-  Dot({ required Color color }) : _paint = Paint()..color = color;
+  Dot({ required final Color color }) : _paint = Paint()..color = color;
 
   final Paint _paint;
   Offset position = Offset.zero;
   double radius = 0.0;
 
-  void update(PointerEvent event) {
+  void update(final PointerEvent event) {
     position = event.position;
     radius = 5 + (95 * event.pressure);
   }
 
-  void paint(Canvas canvas, Offset offset) {
+  void paint(final Canvas canvas, final Offset offset) {
     canvas.drawCircle(position + offset, radius, _paint);
   }
 }
@@ -58,12 +58,12 @@ class RenderDots extends RenderBox {
 
   /// Makes this render object hittable so that it receives pointer events.
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 
   /// Processes pointer events by mutating state and invalidating its previous
   /// painting commands.
   @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
       final Color color = _kColors[event.pointer.remainder(_kColors.length)];
       _dots[event.pointer] = Dot(color: color)..update(event);
@@ -83,7 +83,7 @@ class RenderDots extends RenderBox {
 
   /// Issues new painting commands.
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final Canvas canvas = context.canvas;
     // The "size" property indicates the size of that this render box was
     // allotted during layout. Here we paint our bounds white. Notice that we're

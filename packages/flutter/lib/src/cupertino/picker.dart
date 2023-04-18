@@ -80,9 +80,9 @@ class CupertinoPicker extends StatefulWidget {
     this.squeeze = _kSqueeze,
     required this.itemExtent,
     required this.onSelectedItemChanged,
-    required List<Widget> children,
+    required final List<Widget> children,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
-    bool looping = false,
+    final bool looping = false,
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
        assert(itemExtent > 0),
@@ -119,8 +119,8 @@ class CupertinoPicker extends StatefulWidget {
     this.squeeze = _kSqueeze,
     required this.itemExtent,
     required this.onSelectedItemChanged,
-    required NullableIndexedWidgetBuilder itemBuilder,
-    int? childCount,
+    required final NullableIndexedWidgetBuilder itemBuilder,
+    final int? childCount,
     this.selectionOverlay = const CupertinoPickerDefaultSelectionOverlay(),
   }) : assert(diameterRatio > 0.0, RenderListWheelViewport.diameterRatioZeroMessage),
        assert(magnification > 0),
@@ -214,7 +214,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   @override
-  void didUpdateWidget(CupertinoPicker oldWidget) {
+  void didUpdateWidget(final CupertinoPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrollController != null && oldWidget.scrollController == null) {
       _controller = null;
@@ -230,7 +230,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
     super.dispose();
   }
 
-  void _handleSelectedItemChanged(int index) {
+  void _handleSelectedItemChanged(final int index) {
     // Only the haptic engine hardware on iOS devices would produce the
     // intended effects.
     final bool hasSuitableHapticHardware;
@@ -253,7 +253,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   /// Draws the selectionOverlay.
-  Widget _buildSelectionOverlay(Widget selectionOverlay) {
+  Widget _buildSelectionOverlay(final Widget selectionOverlay) {
     final double height = widget.itemExtent * widget.magnification;
 
     return IgnorePointer(
@@ -269,7 +269,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextStyle textStyle = CupertinoTheme.of(context).textTheme.pickerTextStyle;
     final Color? resolvedBackgroundColor = CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context);
 
@@ -367,7 +367,7 @@ class CupertinoPickerDefaultSelectionOverlay extends StatelessWidget {
   static const double _defaultSelectionOverlayRadius = 8;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const Radius radius = Radius.circular(_defaultSelectionOverlayRadius);
 
     return Container(
@@ -401,13 +401,13 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
   final FixedExtentScrollController scrollController;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     return _RenderCupertinoPickerSemantics(scrollController, Directionality.of(context));
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderCupertinoPickerSemantics renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderCupertinoPickerSemantics renderObject) {
     assert(debugCheckHasDirectionality(context));
     renderObject
       ..textDirection = Directionality.of(context)
@@ -416,16 +416,16 @@ class _CupertinoPickerSemantics extends SingleChildRenderObjectWidget {
 }
 
 class _RenderCupertinoPickerSemantics extends RenderProxyBox {
-  _RenderCupertinoPickerSemantics(FixedExtentScrollController controller, this._textDirection) {
+  _RenderCupertinoPickerSemantics(final FixedExtentScrollController controller, this._textDirection) {
     _updateController(null, controller);
   }
 
   FixedExtentScrollController get controller => _controller;
   late FixedExtentScrollController _controller;
-  set controller(FixedExtentScrollController value) => _updateController(_controller, value);
+  set controller(final FixedExtentScrollController value) => _updateController(_controller, value);
 
   // This method exists to allow controller to be non-null. It is only called with a null oldValue from constructor.
-  void _updateController(FixedExtentScrollController? oldValue, FixedExtentScrollController value) {
+  void _updateController(final FixedExtentScrollController? oldValue, final FixedExtentScrollController value) {
     if (value == oldValue) {
       return;
     }
@@ -440,7 +440,7 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (textDirection == value) {
       return;
     }
@@ -466,20 +466,20 @@ class _RenderCupertinoPickerSemantics extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
     config.textDirection = textDirection;
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+  void assembleSemanticsNode(final SemanticsNode node, final SemanticsConfiguration config, final Iterable<SemanticsNode> children) {
     if (children.isEmpty) {
       return super.assembleSemanticsNode(node, config, children);
     }
     final SemanticsNode scrollable = children.first;
     final Map<int, SemanticsNode> indexedChildren = <int, SemanticsNode>{};
-    scrollable.visitChildren((SemanticsNode child) {
+    scrollable.visitChildren((final SemanticsNode child) {
       assert(child.indexInParent != null);
       indexedChildren[child.indexInParent!] = child;
       return true;

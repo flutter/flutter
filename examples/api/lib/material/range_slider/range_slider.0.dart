@@ -12,7 +12,7 @@ class RangeSliderExampleApp extends StatelessWidget {
   const RangeSliderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('RangeSlider Sample')),
@@ -33,7 +33,7 @@ class _RangeSliderExampleState extends State<RangeSliderExample> {
   RangeValues _currentRangeValues = const RangeValues(40, 80);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RangeSlider(
       values: _currentRangeValues,
       max: 100,
@@ -42,7 +42,7 @@ class _RangeSliderExampleState extends State<RangeSliderExample> {
         _currentRangeValues.start.round().toString(),
         _currentRangeValues.end.round().toString(),
       ),
-      onChanged: (RangeValues values) {
+      onChanged: (final RangeValues values) {
         setState(() {
           _currentRangeValues = values;
         });

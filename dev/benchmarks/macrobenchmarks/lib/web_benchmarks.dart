@@ -98,7 +98,7 @@ Future<void> main() async {
   html.window.location.reload();
 }
 
-Future<void> _runBenchmark(String benchmarkName) async {
+Future<void> _runBenchmark(final String benchmarkName) async {
   final RecorderFactory? recorderFactory = benchmarks[benchmarkName];
 
   if (recorderFactory == null) {
@@ -126,7 +126,7 @@ Future<void> _runBenchmark(String benchmarkName) async {
       }
     },
     zoneSpecification: ZoneSpecification(
-      print: (Zone self, ZoneDelegate parent, Zone zone, String line) async {
+      print: (final Zone self, final ZoneDelegate parent, final Zone zone, final String line) async {
         if (_client.isInManualMode) {
           parent.print(zone, '[$benchmarkName] $line');
         } else {
@@ -134,10 +134,10 @@ Future<void> _runBenchmark(String benchmarkName) async {
         }
       },
       handleUncaughtError: (
-        Zone self,
-        ZoneDelegate parent,
-        Zone zone, Object error,
-        StackTrace stackTrace,
+        final Zone self,
+        final ZoneDelegate parent,
+        final Zone zone, final Object error,
+        final StackTrace stackTrace,
       ) async {
         if (_client.isInManualMode) {
           parent.print(zone, '[$benchmarkName] $error, $stackTrace');
@@ -150,7 +150,7 @@ Future<void> _runBenchmark(String benchmarkName) async {
   );
 }
 
-void _fallbackToManual(String error) {
+void _fallbackToManual(final String error) {
   html.document.body!.appendHtml('''
     <div id="manual-panel">
       <h3>$error</h3>
@@ -161,7 +161,7 @@ void _fallbackToManual(String error) {
       <ul style="position: absolute">
         ${
           benchmarks.keys
-            .map((String name) => '<li><button id="$name">$name</button></li>')
+            .map((final String name) => '<li><button id="$name">$name</button></li>')
             .join('\n')
         }
       </ul>
@@ -170,7 +170,7 @@ void _fallbackToManual(String error) {
 
   for (final String benchmarkName in benchmarks.keys) {
     final html.Element button = html.document.querySelector('#$benchmarkName')!;
-    button.addEventListener('click', (_) {
+    button.addEventListener('click', (final _) {
       final html.Element? manualPanel = html.document.querySelector('#manual-panel');
       manualPanel?.remove();
       _runBenchmark(benchmarkName);
@@ -179,12 +179,12 @@ void _fallbackToManual(String error) {
 }
 
 /// Visualizes results on the Web page for manual inspection.
-void _printResultsToScreen(Profile profile) {
+void _printResultsToScreen(final Profile profile) {
   html.document.body!.remove();
   html.document.body = html.BodyElement();
   html.document.body!.appendHtml('<h2>${profile.name}</h2>');
 
-  profile.scoreData.forEach((String scoreKey, Timeseries timeseries) {
+  profile.scoreData.forEach((final String scoreKey, final Timeseries timeseries) {
     html.document.body!.appendHtml('<h2>$scoreKey</h2>');
     html.document.body!.appendHtml('<pre>${timeseries.computeStats()}</pre>');
     html.document.body!.append(TimeseriesVisualization(timeseries).render());
@@ -209,8 +209,8 @@ class TimeseriesVisualization {
     // outliers can be huge they can dwarf all the useful values. So we
     // limit it to 1.5 x the biggest non-outlier.
     _maxValueChartRange = 1.5 * _stats.samples
-      .where((AnnotatedSample sample) => !sample.isOutlier)
-      .map<double>((AnnotatedSample sample) => sample.magnitude)
+      .where((final AnnotatedSample sample) => !sample.isOutlier)
+      .map<double>((final AnnotatedSample sample) => sample.magnitude)
       .fold<double>(0, math.max);
   }
 
@@ -228,12 +228,12 @@ class TimeseriesVisualization {
   /// Converts a sample value to vertical canvas coordinates.
   ///
   /// This does not work for horizontal coordinates.
-  double _normalized(double value) {
+  double _normalized(final double value) {
     return _kCanvasHeight * value / _maxValueChartRange;
   }
 
   /// A utility for drawing lines.
-  void drawLine(num x1, num y1, num x2, num y2) {
+  void drawLine(final num x1, final num y1, final num x2, final num y2) {
     _ctx.beginPath();
     _ctx.moveTo(x1, y1);
     _ctx.lineTo(x2, y2);
@@ -343,7 +343,7 @@ class LocalBenchmarkServerClient {
   /// This uses the chrome://tracing tracer, which is not available from within
   /// the page itself, and therefore must be controlled from outside using the
   /// DevTools Protocol.
-  Future<void> startPerformanceTracing(String benchmarkName) async {
+  Future<void> startPerformanceTracing(final String benchmarkName) async {
     _checkNotManualMode();
     await html.HttpRequest.request(
       '/start-performance-tracing?label=$benchmarkName',
@@ -364,7 +364,7 @@ class LocalBenchmarkServerClient {
 
   /// Sends the profile data collected by the benchmark to the local benchmark
   /// server.
-  Future<void> sendProfileData(Profile profile) async {
+  Future<void> sendProfileData(final Profile profile) async {
     _checkNotManualMode();
     final html.HttpRequest request = await html.HttpRequest.request(
       '/profile-data',
@@ -383,7 +383,7 @@ class LocalBenchmarkServerClient {
   /// Reports an error to the benchmark server.
   ///
   /// The server will halt the devicelab task and log the error.
-  Future<void> reportError(dynamic error, StackTrace stackTrace) async {
+  Future<void> reportError(final dynamic error, final StackTrace stackTrace) async {
     _checkNotManualMode();
     await html.HttpRequest.request(
       '/on-error',
@@ -397,7 +397,7 @@ class LocalBenchmarkServerClient {
   }
 
   /// Reports a message about the demo to the benchmark server.
-  Future<void> printToConsole(String report) async {
+  Future<void> printToConsole(final String report) async {
     _checkNotManualMode();
     await html.HttpRequest.request(
       '/print-to-console',
@@ -410,13 +410,13 @@ class LocalBenchmarkServerClient {
   /// This is the same as calling [html.HttpRequest.request] but it doesn't
   /// crash on 404, which we use to detect `flutter run`.
   Future<html.HttpRequest> _requestXhr(
-    String url, {
+    final String url, {
     String? method,
-    bool? withCredentials,
-    String? responseType,
-    String? mimeType,
-    Map<String, String>? requestHeaders,
-    dynamic sendData,
+    final bool? withCredentials,
+    final String? responseType,
+    final String? mimeType,
+    final Map<String, String>? requestHeaders,
+    final dynamic sendData,
   }) {
     final Completer<html.HttpRequest> completer = Completer<html.HttpRequest>();
     final html.HttpRequest xhr = html.HttpRequest();
@@ -437,12 +437,12 @@ class LocalBenchmarkServerClient {
     }
 
     if (requestHeaders != null) {
-      requestHeaders.forEach((String header, String value) {
+      requestHeaders.forEach((final String header, final String value) {
         xhr.setRequestHeader(header, value);
       });
     }
 
-    xhr.onLoad.listen((html.ProgressEvent e) {
+    xhr.onLoad.listen((final html.ProgressEvent e) {
       completer.complete(xhr);
     });
 

@@ -11,8 +11,8 @@ VisualStudioValidator? get visualStudioValidator => context.get<VisualStudioVali
 
 class VisualStudioValidator extends DoctorValidator {
   const VisualStudioValidator({
-    required VisualStudio visualStudio,
-    required UserMessages userMessages,
+    required final VisualStudio visualStudio,
+    required final UserMessages userMessages,
   }) : _visualStudio = visualStudio,
        _userMessages = userMessages,
        super('Visual Studio - develop for Windows');

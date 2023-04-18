@@ -14,7 +14,7 @@ import 'package:flutter/foundation.dart';
 /// the test_widgets [expect] function, this will fill the given
 /// FlutterErrorBuilder with the precise file and line number that called that
 /// function.
-int reportExpectCall(StackTrace stack, List<DiagnosticsNode> information) {
+int reportExpectCall(final StackTrace stack, final List<DiagnosticsNode> information) {
   final RegExp line0 = RegExp(r'^#0 +fail \(.+\)$');
   final RegExp line1 = RegExp(r'^#1 +_expect \(.+\)$');
   final RegExp line2 = RegExp(r'^#2 +expect \(.+\)$');

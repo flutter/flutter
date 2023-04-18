@@ -12,7 +12,7 @@ void main() {
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   }
 
-  testWidgets('Flutter Gallery app simple smoke test', (WidgetTester tester) async {
+  testWidgets('Flutter Gallery app simple smoke test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const GalleryApp(testMode: true) // builds the app and schedules a frame but doesn't trigger one
     );

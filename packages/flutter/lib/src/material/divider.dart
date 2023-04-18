@@ -141,7 +141,7 @@ class Divider extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
-  static BorderSide createBorderSide(BuildContext? context, { Color? color, double? width }) {
+  static BorderSide createBorderSide(final BuildContext? context, { final Color? color, final double? width }) {
     final DividerThemeData? dividerTheme = context != null ? DividerTheme.of(context) : null;
     final DividerThemeData? defaults = context != null
       ? Theme.of(context).useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context)
@@ -163,7 +163,7 @@ class Divider extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
     final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);
@@ -282,7 +282,7 @@ class VerticalDivider extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DividerThemeData dividerTheme = DividerTheme.of(context);
     final DividerThemeData defaults = theme.useMaterial3 ? _DividerDefaultsM3(context) : _DividerDefaultsM2(context);

@@ -13,9 +13,9 @@ import 'platform.dart';
 
 class BotDetector {
   BotDetector({
-    required HttpClientFactory httpClientFactory,
-    required Platform platform,
-    required PersistentToolState persistentToolState,
+    required final HttpClientFactory httpClientFactory,
+    required final Platform platform,
+    required final PersistentToolState persistentToolState,
   }) :
     _platform = platform,
     _azureDetector = AzureDetector(
@@ -89,7 +89,7 @@ class BotDetector {
 @visibleForTesting
 class AzureDetector {
   AzureDetector({
-    required HttpClientFactory httpClientFactory,
+    required final HttpClientFactory httpClientFactory,
   }) : _httpClientFactory = httpClientFactory;
 
   static const String _serviceUrl = 'http://169.254.169.254/metadata/instance';

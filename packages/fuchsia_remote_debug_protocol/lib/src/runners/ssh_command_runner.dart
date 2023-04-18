@@ -80,7 +80,7 @@ class SshCommandRunner {
   ///
   /// If the subprocess creating the SSH tunnel returns a nonzero exit status,
   /// then an [SshCommandError] is raised.
-  Future<List<String>> run(String command) async {
+  Future<List<String>> run(final String command) async {
     final List<String> args = <String>[
       'ssh',
       if (sshConfigPath != null)

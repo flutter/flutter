@@ -12,7 +12,7 @@ class CupertinoFormRowApp extends StatelessWidget {
   const CupertinoFormRowApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoFormRowExample(),
@@ -31,7 +31,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
   bool airplaneMode = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoFormSection Sample'),
@@ -49,7 +49,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
               ),
               child: CupertinoSwitch(
                 value: airplaneMode,
-                onChanged: (bool value) {
+                onChanged: (final bool value) {
                   setState(() {
                     airplaneMode = value;
                   });
@@ -121,7 +121,7 @@ class PrefixWidget extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       children: <Widget>[
         Container(

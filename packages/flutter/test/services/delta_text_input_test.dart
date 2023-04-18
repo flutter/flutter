@@ -17,7 +17,7 @@ void main() {
     late FakeTextChannel fakeTextChannel;
 
     setUp(() {
-      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      fakeTextChannel = FakeTextChannel((final MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
     });
 
@@ -60,7 +60,7 @@ void main() {
         await binding.defaultBinaryMessenger.handlePlatformMessage(
           'flutter/textinput',
           messageBytes,
-              (ByteData? _) {},
+              (final ByteData? _) {},
         );
 
         expect(client.latestMethodCall, 'updateEditingValueWithDeltas');
@@ -69,7 +69,7 @@ void main() {
 
     test('Invalid TextRange fails loudly when being converted to JSON - NonTextUpdate', () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         record.add(details);
       };
 
@@ -97,7 +97,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
@@ -108,7 +108,7 @@ void main() {
 
     test('Invalid TextRange fails loudly when being converted to JSON - Faulty deltaStart and deltaEnd', () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         record.add(details);
       };
 
@@ -136,7 +136,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
@@ -147,7 +147,7 @@ void main() {
 
     test('Invalid TextRange fails loudly when being converted to JSON - Faulty Selection', () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         record.add(details);
       };
 
@@ -175,7 +175,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
@@ -186,7 +186,7 @@ void main() {
 
     test('Invalid TextRange fails loudly when being converted to JSON - Faulty Composing Region', () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         record.add(details);
       };
 
@@ -214,7 +214,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
@@ -237,32 +237,32 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   AutofillScope? get currentAutofillScope => null;
 
   @override
-  void performAction(TextInputAction action) {
+  void performAction(final TextInputAction action) {
     latestMethodCall = 'performAction';
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic> data) {
+  void performPrivateCommand(final String action, final Map<String, dynamic> data) {
     latestMethodCall = 'performPrivateCommand';
   }
 
   @override
-  void insertContent(KeyboardInsertedContent content) {
+  void insertContent(final KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
   }
 
   @override
-  void updateEditingValue(TextEditingValue value) {
+  void updateEditingValue(final TextEditingValue value) {
     latestMethodCall = 'updateEditingValue';
   }
 
   @override
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas) {
+  void updateEditingValueWithDeltas(final List<TextEditingDelta> textEditingDeltas) {
     latestMethodCall = 'updateEditingValueWithDeltas';
   }
 
   @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) {
+  void updateFloatingCursor(final RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }
 
@@ -272,12 +272,12 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void showAutocorrectionPromptRect(int start, int end) {
+  void showAutocorrectionPromptRect(final int start, final int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
   @override
-  void insertTextPlaceholder(Size size) {
+  void insertTextPlaceholder(final Size size) {
     latestMethodCall = 'insertTextPlaceholder';
   }
 
@@ -292,14 +292,14 @@ class FakeDeltaTextInputClient implements DeltaTextInputClient {
   }
 
   @override
-  void performSelector(String selectorName) {
+  void performSelector(final String selectorName) {
     latestMethodCall = 'performSelector';
   }
 
   TextInputConfiguration get configuration => const TextInputConfiguration(enableDeltaModel: true);
 
   @override
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+  void didChangeInputControl(final TextInputControl? oldControl, final TextInputControl? newControl) {
     latestMethodCall = 'didChangeInputControl';
   }
 }

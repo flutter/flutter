@@ -12,7 +12,7 @@ class DismissibleExampleApp extends StatelessWidget {
   const DismissibleExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Dismissible Sample')),
@@ -30,20 +30,20 @@ class DismissibleExample extends StatefulWidget {
 }
 
 class _DismissibleExampleState extends State<DismissibleExample> {
-  List<int> items = List<int>.generate(100, (int index) => index);
+  List<int> items = List<int>.generate(100, (final int index) => index);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
       itemCount: items.length,
       padding: const EdgeInsets.symmetric(vertical: 16),
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return Dismissible(
           background: Container(
             color: Colors.green,
           ),
           key: ValueKey<int>(items[index]),
-          onDismissed: (DismissDirection direction) {
+          onDismissed: (final DismissDirection direction) {
             setState(() {
               items.removeAt(index);
             });

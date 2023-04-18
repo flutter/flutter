@@ -17,13 +17,13 @@ import 'common.dart';
 
 void main() {
   late ProcessResult processResult;
-  ProcessResult runSyncStub(String executable, List<String> args,
-          {Map<String, String>? environment,
-          bool includeParentEnvironment = true,
-          bool runInShell = false,
-          Encoding? stderrEncoding,
-          Encoding? stdoutEncoding,
-          String? workingDirectory}) =>
+  ProcessResult runSyncStub(final String executable, final List<String> args,
+          {final Map<String, String>? environment,
+          final bool includeParentEnvironment = true,
+          final bool runInShell = false,
+          final Encoding? stderrEncoding,
+          final Encoding? stdoutEncoding,
+          final String? workingDirectory}) =>
       processResult;
 
   // Expected test values.
@@ -38,7 +38,7 @@ void main() {
 
     setUp(() {
       fs = MemoryFileSystem();
-      mockClient = MockClient((Request request) async => Response('{}', 200));
+      mockClient = MockClient((final Request request) async => Response('{}', 200));
 
       final File serviceAccountFile = fs.file(serviceAccountTokenPath)..createSync();
       serviceAccountFile.writeAsStringSync(serviceAccountToken);
@@ -108,7 +108,7 @@ void main() {
       processResult = ProcessResult(1, 0, commitSha, '');
       const String uploadMetricsRequestWithSpaces =
           '{"CommitBranch":"master","CommitSha":"a4952838bf288a81d8ea11edfd4b4cd649fa94cc","BuilderName":"builder a b c","NewStatus":"Succeeded","ResultData":{},"BenchmarkScoreKeys":[],"TestFlaky":false}';
-      final MockClient client = MockClient((Request request) async {
+      final MockClient client = MockClient((final Request request) async {
         if (request.body == uploadMetricsRequestWithSpaces) {
           return Response('{}', 200);
         }
@@ -159,7 +159,7 @@ void main() {
 
     test('Verify retries for task result upload', () async {
       int requestCount = 0;
-      mockClient = MockClient((Request request) async {
+      mockClient = MockClient((final Request request) async {
         requestCount++;
         if (requestCount == 1) {
           return Response('{}', 500);
@@ -192,7 +192,7 @@ void main() {
     test('Verify timeout and retry for task result upload', () async {
       int requestCount = 0;
       const int timeoutValue = 2;
-      mockClient = MockClient((Request request) async {
+      mockClient = MockClient((final Request request) async {
         requestCount++;
         if (requestCount == 1) {
           await Future<void>.delayed(const Duration(seconds: timeoutValue + 2));
@@ -227,7 +227,7 @@ void main() {
     test('Verify timeout does not trigger for result upload', () async {
       int requestCount = 0;
       const int timeoutValue = 2;
-      mockClient = MockClient((Request request) async {
+      mockClient = MockClient((final Request request) async {
         requestCount++;
         if (requestCount == 1) {
           await Future<void>.delayed(const Duration(seconds: timeoutValue - 1));
@@ -261,7 +261,7 @@ void main() {
 
     test('Verify failure without retries for task result upload', () async {
       int requestCount = 0;
-      mockClient = MockClient((Request request) async {
+      mockClient = MockClient((final Request request) async {
         requestCount++;
         if (requestCount == 1) {
           return Response('{}', 500);
@@ -292,7 +292,7 @@ void main() {
     });
 
     test('throws client exception on non-200 responses', () async {
-      mockClient = MockClient((Request request) async => Response('', 500));
+      mockClient = MockClient((final Request request) async => Response('', 500));
 
       cocoon = Cocoon(
         serviceAccountTokenPath: serviceAccountTokenPath,
@@ -315,7 +315,7 @@ void main() {
 
     test('does not upload results on non-supported branches', () async {
       // Any network failure would cause the upload to fail
-      mockClient = MockClient((Request request) async => Response('', 500));
+      mockClient = MockClient((final Request request) async => Response('', 500));
 
       cocoon = Cocoon(
         serviceAccountTokenPath: serviceAccountTokenPath,
@@ -340,7 +340,7 @@ void main() {
 
     test('does not update for staging test', () async {
       // Any network failure would cause the upload to fail
-      mockClient = MockClient((Request request) async => Response('', 500));
+      mockClient = MockClient((final Request request) async => Response('', 500));
 
       cocoon = Cocoon(
         serviceAccountTokenPath: serviceAccountTokenPath,

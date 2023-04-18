@@ -20,7 +20,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
   bool _switchValue = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Switch'),
@@ -43,7 +43,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
                     children: <Widget>[
                       CupertinoSwitch(
                         value: _switchValue,
-                        onChanged: (bool value) {
+                        onChanged: (final bool value) {
                           setState(() {
                             _switchValue = value;
                           });

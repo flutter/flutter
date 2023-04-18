@@ -48,7 +48,7 @@ class OutlinedButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two outlined button themes.
-  static OutlinedButtonThemeData? lerp(OutlinedButtonThemeData? a, OutlinedButtonThemeData? b, double t) {
+  static OutlinedButtonThemeData? lerp(final OutlinedButtonThemeData? a, final OutlinedButtonThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -61,7 +61,7 @@ class OutlinedButtonThemeData with Diagnosticable {
   int get hashCode => style.hashCode;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -72,7 +72,7 @@ class OutlinedButtonThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
   }
@@ -112,16 +112,16 @@ class OutlinedButtonTheme extends InheritedTheme {
   /// ```dart
   /// OutlinedButtonThemeData theme = OutlinedButtonTheme.of(context);
   /// ```
-  static OutlinedButtonThemeData of(BuildContext context) {
+  static OutlinedButtonThemeData of(final BuildContext context) {
     final OutlinedButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<OutlinedButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).outlinedButtonTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return OutlinedButtonTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(OutlinedButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final OutlinedButtonTheme oldWidget) => data != oldWidget.data;
 }

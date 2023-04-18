@@ -87,7 +87,7 @@ class StackSizePage extends StatelessWidget {
   const StackSizePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Material(
       child: Column(
         children: <Widget>[
@@ -106,7 +106,7 @@ class ParentWidget extends StatelessWidget {
   const ParentWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final int myStackSize = getStackPointer();
     return ChildWidget(parentStackSize: myStackSize);
   }
@@ -117,7 +117,7 @@ class ChildWidget extends StatelessWidget {
   final int parentStackSize;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final int myStackSize = getStackPointer();
     // Captures the stack size difference between parent widget and child widget
     // during the rendering pipeline, i.e. one layer of stateless widget.

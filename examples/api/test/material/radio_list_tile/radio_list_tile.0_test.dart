@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/radio_list_tile/radio_list_tile.0.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can update RadioListTile group value', (WidgetTester tester) async {
+  testWidgets('Can update RadioListTile group value', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RadioListTileApp(),
     );

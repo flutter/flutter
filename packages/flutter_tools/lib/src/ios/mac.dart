@@ -40,10 +40,10 @@ import 'xcresult.dart';
 
 class IMobileDevice {
   IMobileDevice({
-    required Artifacts artifacts,
-    required Cache cache,
-    required ProcessManager processManager,
-    required Logger logger,
+    required final Artifacts artifacts,
+    required final Cache cache,
+    required final ProcessManager processManager,
+    required final Logger logger,
   }) : _idevicesyslogPath = artifacts.getHostArtifact(HostArtifact.idevicesyslog).path,
       _idevicescreenshotPath = artifacts.getHostArtifact(HostArtifact.idevicescreenshot).path,
       _dyLdLibEntry = cache.dyLdLibEntry,
@@ -51,7 +51,7 @@ class IMobileDevice {
       _processManager = processManager;
 
   /// Create an [IMobileDevice] for testing.
-  factory IMobileDevice.test({ required ProcessManager processManager }) {
+  factory IMobileDevice.test({ required final ProcessManager processManager }) {
     return IMobileDevice(
       artifacts: Artifacts.test(),
       cache: Cache.test(processManager: processManager),
@@ -69,7 +69,7 @@ class IMobileDevice {
   late final bool isInstalled = _processManager.canRun(_idevicescreenshotPath);
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger(String deviceID) {
+  Future<Process> startLogger(final String deviceID) {
     return _processUtils.start(
       <String>[
         _idevicesyslogPath,
@@ -84,9 +84,9 @@ class IMobileDevice {
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(
-    File outputFile,
-    String deviceID,
-    DeviceConnectionInterface interfaceType,
+    final File outputFile,
+    final String deviceID,
+    final DeviceConnectionInterface interfaceType,
   ) {
     return _processUtils.run(
       <String>[
@@ -106,15 +106,15 @@ class IMobileDevice {
 }
 
 Future<XcodeBuildResult> buildXcodeProject({
-  required BuildableIOSApp app,
-  required BuildInfo buildInfo,
-  String? targetOverride,
-  EnvironmentType environmentType = EnvironmentType.physical,
-  DarwinArch? activeArch,
-  bool codesign = true,
-  String? deviceID,
-  bool configOnly = false,
-  XcodeBuildAction buildAction = XcodeBuildAction.build,
+  required final BuildableIOSApp app,
+  required final BuildInfo buildInfo,
+  final String? targetOverride,
+  final EnvironmentType environmentType = EnvironmentType.physical,
+  final DarwinArch? activeArch,
+  final bool codesign = true,
+  final String? deviceID,
+  final bool configOnly = false,
+  final XcodeBuildAction buildAction = XcodeBuildAction.build,
 }) async {
   if (!upgradePbxProjWithFlutterAssets(app.project, globals.logger)) {
     return XcodeBuildResult(success: false);
@@ -492,7 +492,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 /// Extended attributes applied by Finder can cause code signing errors. Remove them.
 /// https://developer.apple.com/library/archive/qa/qa1940/_index.html
-Future<void> removeFinderExtendedAttributes(FileSystemEntity projectDirectory, ProcessUtils processUtils, Logger logger) async {
+Future<void> removeFinderExtendedAttributes(final FileSystemEntity projectDirectory, final ProcessUtils processUtils, final Logger logger) async {
   final bool success = await processUtils.exitsHappy(
     <String>[
       'xattr',
@@ -508,7 +508,7 @@ Future<void> removeFinderExtendedAttributes(FileSystemEntity projectDirectory, P
   }
 }
 
-Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOSApp app) async {
+Future<RunResult?> _runBuildWithRetries(final List<String> buildCommands, final BuildableIOSApp app) async {
   int buildRetryDelaySeconds = 1;
   int remainingTries = 8;
 
@@ -544,13 +544,13 @@ Future<RunResult?> _runBuildWithRetries(List<String> buildCommands, BuildableIOS
   return buildResult;
 }
 
-bool _isXcodeConcurrentBuildFailure(RunResult result) {
+bool _isXcodeConcurrentBuildFailure(final RunResult result) {
 return result.exitCode != 0 &&
     result.stdout.contains('database is locked') &&
     result.stdout.contains('there are two concurrent builds running');
 }
 
-Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsage, Logger logger) async {
+Future<void> diagnoseXcodeBuildFailure(final XcodeBuildResult result, final Usage flutterUsage, final Logger logger) async {
   final XcodeBuildExecution? xcodeBuildExecution = result.xcodeBuildExecution;
   if (xcodeBuildExecution != null
       && xcodeBuildExecution.environmentType == EnvironmentType.physical
@@ -577,7 +577,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result, Usage flutterUsa
 /// `clean`, `test`, `analyze`, and `install` are not supported.
 enum XcodeBuildAction { build, archive }
 
-String xcodeBuildActionToString(XcodeBuildAction action) {
+String xcodeBuildActionToString(final XcodeBuildAction action) {
     switch (action) {
       case XcodeBuildAction.build:
         return 'build';
@@ -644,7 +644,7 @@ bool _checkXcodeVersion() {
 }
 
 // TODO(jmagman): Refactor to IOSMigrator.
-bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
+bool upgradePbxProjWithFlutterAssets(final IosProject project, final Logger logger) {
   final File xcodeProjectFile = project.xcodeProjectInfoFile;
   assert(xcodeProjectFile.existsSync());
   final List<String> lines = xcodeProjectFile.readAsLinesSync();
@@ -667,7 +667,7 @@ bool upgradePbxProjWithFlutterAssets(IosProject project, Logger logger) {
   return true;
 }
 
-_XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue, required Logger logger}) {
+_XCResultIssueHandlingResult _handleXCResultIssue({required final XCResultIssue issue, required final Logger logger}) {
   // Issue summary from xcresult.
   final StringBuffer issueSummaryBuffer = StringBuffer();
   issueSummaryBuffer.write(issue.subType ?? 'Unknown');
@@ -700,7 +700,7 @@ _XCResultIssueHandlingResult _handleXCResultIssue({required XCResultIssue issue,
 }
 
 // Returns `true` if at least one issue is detected.
-bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcodeBuildExecution) {
+bool _handleIssues(final XCResult? xcResult, final Logger logger, final XcodeBuildExecution? xcodeBuildExecution) {
   bool requiresProvisioningProfile = false;
   bool hasProvisioningProfileIssue = false;
   bool issueDetected = false;
@@ -739,7 +739,7 @@ bool _handleIssues(XCResult? xcResult, Logger logger, XcodeBuildExecution? xcode
 }
 
 // Return 'true' a missing development team issue is detected.
-bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
+bool _missingDevelopmentTeam(final XcodeBuildExecution? xcodeBuildExecution) {
   // Make sure the user has specified one of:
   // * DEVELOPMENT_TEAM (automatic signing)
   // * PROVISIONING_PROFILE (manual signing)
@@ -751,7 +751,7 @@ bool _missingDevelopmentTeam(XcodeBuildExecution? xcodeBuildExecution) {
 // Detects and handles errors from stdout.
 //
 // As detecting issues in stdout is not usually accurate, this should be used as a fallback when other issue detecting methods failed.
-void _parseIssueInStdout(XcodeBuildExecution xcodeBuildExecution, Logger logger, XcodeBuildResult result) {
+void _parseIssueInStdout(final XcodeBuildExecution xcodeBuildExecution, final Logger logger, final XcodeBuildResult result) {
   final String? stderr = result.stderr;
   if (stderr != null && stderr.isNotEmpty) {
     logger.printStatus('Error output from Xcode build:\n↳');

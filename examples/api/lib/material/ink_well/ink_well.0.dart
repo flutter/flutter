@@ -12,7 +12,7 @@ class InkWellExampleApp extends StatelessWidget {
   const InkWellExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InkWell Sample')),
@@ -35,7 +35,7 @@ class _InkWellExampleState extends State<InkWellExample> {
   double sideLength = 50;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedContainer(
       height: sideLength,
       width: sideLength,

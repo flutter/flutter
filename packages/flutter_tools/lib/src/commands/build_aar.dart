@@ -18,9 +18,9 @@ import 'build.dart';
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({
     required super.logger,
-    required AndroidSdk? androidSdk,
-    required FileSystem fileSystem,
-    required bool verboseHelp,
+    required final AndroidSdk? androidSdk,
+    required final FileSystem fileSystem,
+    required final bool verboseHelp,
   }): _androidSdk = androidSdk,
       _fileSystem = fileSystem,
       super(verboseHelp: verboseHelp) {

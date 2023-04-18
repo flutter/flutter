@@ -17,8 +17,8 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   GtkCodeGenerator(
     super.keyData,
     super.logicalData,
-    String modifierBitMapping,
-    String lockBitMapping,
+    final String modifierBitMapping,
+    final String lockBitMapping,
     this._layoutGoals,
   ) : _modifierBitMapping = parseMapOfListOfString(modifierBitMapping),
       _lockBitMapping = parseMapOfListOfString(lockBitMapping);
@@ -39,7 +39,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   String get _gtkKeyvalCodeMap {
     final OutputLines<int> lines = OutputLines<int>('GTK keyval map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      zipStrict(entry.gtkValues, entry.gtkNames, (int value, String name) {
+      zipStrict(entry.gtkValues, entry.gtkNames, (final int value, final String name) {
         lines.add(value,
           '    {${toHex(value)}, ${toHex(entry.value, digits: 11)}},  // $name');
       });
@@ -48,13 +48,13 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   }
 
   static String constructMapFromModToKeys(
-      Map<String, List<String>> source,
-      PhysicalKeyData physicalData,
-      LogicalKeyData logicalData,
-      String debugFunctionName,
+      final Map<String, List<String>> source,
+      final PhysicalKeyData physicalData,
+      final LogicalKeyData logicalData,
+      final String debugFunctionName,
   ) {
     final StringBuffer result = StringBuffer();
-    source.forEach((String modifierBitName, List<String> keyNames) {
+    source.forEach((final String modifierBitName, final List<String> keyNames) {
       assert(keyNames.length == 2 || keyNames.length == 3);
       final String primaryPhysicalName = keyNames[0];
       final String primaryLogicalName = keyNames[1];
@@ -95,7 +95,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   final Map<String, bool> _layoutGoals;
   String get _layoutGoalsString {
     final OutputLines<int> lines = OutputLines<int>('GTK layout goals');
-    _layoutGoals.forEach((String name, bool mandatory) {
+    _layoutGoals.forEach((final String name, final bool mandatory) {
       final PhysicalKeyEntry physicalEntry = keyData.entryByName(name);
       final LogicalKeyEntry logicalEntry = logicalData.entryByName(name);
       final String line = 'LayoutGoal{'
@@ -128,7 +128,7 @@ class GtkCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'gtk_key_mapping_cc.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+  String outputPath(final String platform) => path.join(PlatformCodeGenerator.engineRoot,
       'shell', 'platform', 'linux', 'key_mapping.g.cc');
 
   @override

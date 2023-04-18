@@ -7,11 +7,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Nested TickerMode cannot turn tickers back on', (WidgetTester tester) async {
+  testWidgets('Nested TickerMode cannot turn tickers back on', (final WidgetTester tester) async {
     int outerTickCount = 0;
     int innerTickCount = 0;
 
-    Widget nestedTickerModes({required bool innerEnabled, required bool outerEnabled}) {
+    Widget nestedTickerModes({required final bool innerEnabled, required final bool outerEnabled}) {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: TickerMode(
@@ -99,8 +99,8 @@ void main() {
     expect(innerTickCount, 0);
   });
 
-  testWidgets('Changing TickerMode does not rebuild widgets with SingleTickerProviderStateMixin', (WidgetTester tester) async {
-    Widget widgetUnderTest({required bool tickerEnabled}) {
+  testWidgets('Changing TickerMode does not rebuild widgets with SingleTickerProviderStateMixin', (final WidgetTester tester) async {
+    Widget widgetUnderTest({required final bool tickerEnabled}) {
       return TickerMode(
         enabled: tickerEnabled,
         child: const _TickingWidget(),
@@ -121,8 +121,8 @@ void main() {
     expect(state().buildCount, 1);
   });
 
-  testWidgets('Changing TickerMode does not rebuild widgets with TickerProviderStateMixin', (WidgetTester tester) async {
-    Widget widgetUnderTest({required bool tickerEnabled}) {
+  testWidgets('Changing TickerMode does not rebuild widgets with TickerProviderStateMixin', (final WidgetTester tester) async {
+    Widget widgetUnderTest({required final bool tickerEnabled}) {
       return TickerMode(
         enabled: tickerEnabled,
         child: const _MultiTickingWidget(),
@@ -143,9 +143,9 @@ void main() {
     expect(state().buildCount, 1);
   });
 
-  testWidgets('Moving widgets with SingleTickerProviderStateMixin to a new TickerMode ancestor works', (WidgetTester tester) async {
+  testWidgets('Moving widgets with SingleTickerProviderStateMixin to a new TickerMode ancestor works', (final WidgetTester tester) async {
     final GlobalKey tickingWidgetKey = GlobalKey();
-    Widget widgetUnderTest({required LocalKey tickerModeKey, required bool tickerEnabled}) {
+    Widget widgetUnderTest({required final LocalKey tickerModeKey, required final bool tickerEnabled}) {
       return TickerMode(
         key: tickerModeKey,
         enabled: tickerEnabled,
@@ -164,9 +164,9 @@ void main() {
     expect(tickingState.ticker.isTicking, isFalse);
   });
 
-  testWidgets('Moving widgets with TickerProviderStateMixin to a new TickerMode ancestor works', (WidgetTester tester) async {
+  testWidgets('Moving widgets with TickerProviderStateMixin to a new TickerMode ancestor works', (final WidgetTester tester) async {
     final GlobalKey tickingWidgetKey = GlobalKey();
-    Widget widgetUnderTest({required LocalKey tickerModeKey, required bool tickerEnabled}) {
+    Widget widgetUnderTest({required final LocalKey tickerModeKey, required final bool tickerEnabled}) {
       return TickerMode(
         key: tickerModeKey,
         enabled: tickerEnabled,
@@ -185,10 +185,10 @@ void main() {
     expect(tickingState.ticker.isTicking, isFalse);
   });
 
-  testWidgets('Ticking widgets in old route do not rebuild when new route is pushed', (WidgetTester tester) async {
+  testWidgets('Ticking widgets in old route do not rebuild when new route is pushed', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       routes: <String, WidgetBuilder>{
-        '/foo' : (BuildContext context) => const Text('New route'),
+        '/foo' : (final BuildContext context) => const Text('New route'),
       },
       home: const Row(
         children: <Widget>[
@@ -238,13 +238,13 @@ class _TickingWidgetState extends State<_TickingWidget> with SingleTickerProvide
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((Duration _) {
+    ticker = createTicker((final Duration _) {
       widget.onTick?.call();
     })..start();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     buildCount += 1;
     return Container();
   }
@@ -270,12 +270,12 @@ class _MultiTickingWidgetState extends State<_MultiTickingWidget> with TickerPro
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((Duration _) {
+    ticker = createTicker((final Duration _) {
     })..start();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     buildCount += 1;
     return Container();
   }

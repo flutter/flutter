@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
-  Future<void> pumpContainer(WidgetTester tester, Widget child) async {
+  Future<void> pumpContainer(final WidgetTester tester, final Widget child) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -20,7 +20,7 @@ void main() {
     );
   }
 
-  testWidgets('updates its registrar and delegate based on the number of selectables', (WidgetTester tester) async {
+  testWidgets('updates its registrar and delegate based on the number of selectables', (final WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     await pumpContainer(
@@ -42,7 +42,7 @@ void main() {
     expect(delegate.selectables.length, 3);
   });
 
-  testWidgets('disabled container', (WidgetTester tester) async {
+  testWidgets('disabled container', (final WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     await pumpContainer(
@@ -65,7 +65,7 @@ void main() {
     expect(delegate.selectables.length, 0);
   });
 
-  testWidgets('Swapping out container delegate does not crash', (WidgetTester tester) async {
+  testWidgets('Swapping out container delegate does not crash', (final WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     final TestContainerDelegate childDelegate = TestContainerDelegate();
@@ -75,7 +75,7 @@ void main() {
         registrar: registrar,
         delegate: delegate,
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return SelectionContainer(
               registrar: SelectionContainer.maybeOf(context),
               delegate: childDelegate,
@@ -96,7 +96,7 @@ void main() {
         registrar: registrar,
         delegate: delegate,
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return SelectionContainer(
               registrar: SelectionContainer.maybeOf(context),
               delegate: newDelegate,
@@ -112,7 +112,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('selection container registers itself if there is a selectable child', (WidgetTester tester) async {
+  testWidgets('selection container registers itself if there is a selectable child', (final WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
     await pumpContainer(
@@ -154,7 +154,7 @@ void main() {
     expect(registrar.selectables.length, 0);
   });
 
-  testWidgets('selection container gets registrar from context if not provided', (WidgetTester tester) async {
+  testWidgets('selection container gets registrar from context if not provided', (final WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
 
@@ -179,12 +179,12 @@ void main() {
 
 class TestContainerDelegate extends MultiSelectableSelectionContainerDelegate {
   @override
-  SelectionResult dispatchSelectionEventToChild(Selectable selectable, SelectionEvent event) {
+  SelectionResult dispatchSelectionEventToChild(final Selectable selectable, final SelectionEvent event) {
     throw UnimplementedError();
   }
 
   @override
-  void ensureChildUpdated(Selectable selectable) {
+  void ensureChildUpdated(final Selectable selectable) {
     throw UnimplementedError();
   }
 }
@@ -193,8 +193,8 @@ class TestSelectionRegistrar extends SelectionRegistrar {
   final Set<Selectable> selectables = <Selectable>{};
 
   @override
-  void add(Selectable selectable) => selectables.add(selectable);
+  void add(final Selectable selectable) => selectables.add(selectable);
 
   @override
-  void remove(Selectable selectable) => selectables.remove(selectable);
+  void remove(final Selectable selectable) => selectables.remove(selectable);
 }

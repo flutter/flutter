@@ -38,7 +38,7 @@ class ViewConfiguration {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -66,9 +66,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// The [configuration] must not be null.
   RenderView({
-    RenderBox? child,
-    required ViewConfiguration configuration,
-    required ui.FlutterView view,
+    final RenderBox? child,
+    required final ViewConfiguration configuration,
+    required final ui.FlutterView view,
   }) : _configuration = configuration,
        _view = view {
     this.child = child;
@@ -86,7 +86,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// passed to the constructor.
   ///
   /// Always call [prepareInitialFrame] before changing the configuration.
-  set configuration(ViewConfiguration value) {
+  set configuration(final ViewConfiguration value) {
     if (configuration == value) {
       return;
     }
@@ -184,7 +184,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// which is to say, in logical pixels. This is not necessarily the same
   /// coordinate system as that expected by the root [Layer], which will
   /// normally be in physical (device) pixels.
-  bool hitTest(HitTestResult result, { required Offset position }) {
+  bool hitTest(final HitTestResult result, { required final Offset position }) {
     if (child != null) {
       child!.hitTest(BoxHitTestResult.wrap(result), position: position);
     }
@@ -198,7 +198,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   ///  * [Layer.findAllAnnotations], which is used by this method to find all
   ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
-  HitTestResult hitTestMouseTrackers(Offset position) {
+  HitTestResult hitTestMouseTrackers(final Offset position) {
     final BoxHitTestResult result = BoxHitTestResult();
     hitTest(result, position: position);
     return result;
@@ -208,14 +208,14 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   bool get isRepaintBoundary => true;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (child != null) {
       context.paintChild(child!, offset);
     }
   }
 
   @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  void applyPaintTransform(final RenderBox child, final Matrix4 transform) {
     assert(_rootTransform != null);
     transform.multiply(_rootTransform!);
     super.applyPaintTransform(child, transform);
@@ -254,7 +254,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// A [SemanticsUpdate] is produced by a [SemanticsOwner] during the
   /// [EnginePhase.flushSemantics] phase.
-  void updateSemantics(ui.SemanticsUpdate update) {
+  void updateSemantics(final ui.SemanticsUpdate update) {
     _view.updateSemantics(update);
   }
 
@@ -366,7 +366,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     // call to ${super.debugFillProperties(description)} is omitted because the
     // root superclasses don't include any interesting information for this
     // class

@@ -12,7 +12,7 @@ class AutofillGroupExampleApp extends StatelessWidget {
   const AutofillGroupExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AutofillGroup Sample')),
@@ -42,7 +42,7 @@ class _AutofillGroupExampleState extends State<AutofillGroupExample> {
   final TextEditingController phoneNumber = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView(
       children: <Widget>[
         const Text('Shipping address'),
@@ -65,7 +65,7 @@ class _AutofillGroupExampleState extends State<AutofillGroupExample> {
         const Text('Billing address'),
         Checkbox(
           value: isSameAddress,
-          onChanged: (bool? newValue) {
+          onChanged: (final bool? newValue) {
             if (newValue != null) {
               setState(() {
                 isSameAddress = newValue;

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('can press', (WidgetTester tester) async {
+  testWidgets('can press', (final WidgetTester tester) async {
     bool pressed = false;
     await tester.pumpWidget(
       CupertinoApp(
@@ -29,7 +29,7 @@ void main() {
     expect(pressed, true);
   });
 
-  testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
+  testWidgets('pressedOpacity defaults to 0.1', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(

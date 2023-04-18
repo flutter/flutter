@@ -23,7 +23,7 @@ class FakeCodec implements ui.Codec {
   /// Creates a FakeCodec from encoded image data.
   ///
   /// Only call this method outside of the test zone.
-  static Future<FakeCodec> fromData(Uint8List data) async {
+  static Future<FakeCodec> fromData(final Uint8List data) async {
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     final int frameCount = codec.frameCount;
     final List<ui.FrameInfo> frameInfos = <ui.FrameInfo>[];

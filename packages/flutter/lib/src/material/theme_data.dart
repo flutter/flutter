@@ -102,7 +102,7 @@ abstract class ThemeExtension<T extends ThemeExtension<T>> {
   /// Linearly interpolate with another [ThemeExtension] object.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  ThemeExtension<T> lerp(covariant ThemeExtension<T>? other, double t);
+  ThemeExtension<T> lerp(covariant final ThemeExtension<T>? other, final double t);
 }
 
 // Deriving these values is black magic. The spec claims that pressed buttons
@@ -309,11 +309,11 @@ class ThemeData with Diagnosticable {
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties (as well as primaryColorBrightness, and primarySwatch)
     // will gradually be phased out, see https://github.com/flutter/flutter/issues/91772.
-    Brightness? brightness,
+    final Brightness? brightness,
     Color? canvasColor,
     Color? cardColor,
     ColorScheme? colorScheme,
-    Color? colorSchemeSeed,
+    final Color? colorSchemeSeed,
     Color? dialogBackgroundColor,
     Color? disabledColor,
     Color? dividerColor,
@@ -332,16 +332,16 @@ class ThemeData with Diagnosticable {
     Color? splashColor,
     Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    String? package,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final String? package,
     IconThemeData? iconTheme,
     IconThemeData? primaryIconTheme,
     TextTheme? primaryTextTheme,
     TextTheme? textTheme,
     Typography? typography,
     // COMPONENT THEMES
-    ActionIconThemeData? actionIconTheme,
+    final ActionIconThemeData? actionIconTheme,
     AppBarTheme? appBarTheme,
     BadgeThemeData? badgeTheme,
     MaterialBannerThemeData? bannerTheme,
@@ -402,7 +402,7 @@ class ThemeData with Diagnosticable {
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    final AndroidOverscrollIndicator? androidOverscrollIndicator,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
@@ -820,12 +820,12 @@ class ThemeData with Diagnosticable {
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
-    bool? fixTextFieldOutlineLabel,
+    final bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
-    Brightness? primaryColorBrightness,
+    final Brightness? primaryColorBrightness,
     @Deprecated(
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
@@ -837,27 +837,27 @@ class ThemeData with Diagnosticable {
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v3.4.0-19.0.pre.',
     )
-    Color? toggleableActiveColor,
+    final Color? toggleableActiveColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    Color? selectedRowColor,
+    final Color? selectedRowColor,
     @Deprecated(
       'Use colorScheme.error instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-    Color? errorColor,
+    final Color? errorColor,
     @Deprecated(
       'Use colorScheme.background instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-    Color? backgroundColor,
+    final Color? backgroundColor,
     @Deprecated(
       'Use BottomAppBarTheme.color instead. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
-    Color? bottomAppBarColor,
+    final Color? bottomAppBarColor,
 
   }) : // DEPRECATED (newest deprecations at the bottom)
        // should not be `required`, use getter pattern to avoid breakages.
@@ -904,9 +904,9 @@ class ThemeData with Diagnosticable {
   /// See <https://material.io/design/color/> for
   /// more discussion on how to pick the right colors.
   factory ThemeData.from({
-    required ColorScheme colorScheme,
-    TextTheme? textTheme,
-    bool? useMaterial3,
+    required final ColorScheme colorScheme,
+    final TextTheme? textTheme,
+    final bool? useMaterial3,
   }) {
     final bool isDark = colorScheme.brightness == Brightness.dark;
 
@@ -938,7 +938,7 @@ class ThemeData with Diagnosticable {
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.light({bool? useMaterial3}) => ThemeData(
+  factory ThemeData.light({final bool? useMaterial3}) => ThemeData(
     brightness: Brightness.light,
     useMaterial3: useMaterial3,
   );
@@ -947,7 +947,7 @@ class ThemeData with Diagnosticable {
   ///
   /// This theme does not contain text geometry. Instead, it is expected that
   /// this theme is localized using text geometry using [ThemeData.localize].
-  factory ThemeData.dark({bool? useMaterial3}) => ThemeData(
+  factory ThemeData.dark({final bool? useMaterial3}) => ThemeData(
     brightness: Brightness.dark,
     useMaterial3: useMaterial3,
   );
@@ -961,7 +961,7 @@ class ThemeData with Diagnosticable {
   ///
   /// Most applications would use [Theme.of], which provides correct localized
   /// text geometry.
-  factory ThemeData.fallback({bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
+  factory ThemeData.fallback({final bool? useMaterial3}) => ThemeData.light(useMaterial3: useMaterial3);
 
   /// The overall theme brightness.
   ///
@@ -1635,137 +1635,137 @@ class ThemeData with Diagnosticable {
     // alphabetical by symbol name.
 
     // GENERAL CONFIGURATION
-    bool? applyElevationOverlayColor,
+    final bool? applyElevationOverlayColor,
     NoDefaultCupertinoThemeData? cupertinoOverrideTheme,
-    Iterable<ThemeExtension<dynamic>>? extensions,
-    InputDecorationTheme? inputDecorationTheme,
-    MaterialTapTargetSize? materialTapTargetSize,
-    PageTransitionsTheme? pageTransitionsTheme,
-    TargetPlatform? platform,
-    ScrollbarThemeData? scrollbarTheme,
-    InteractiveInkFeatureFactory? splashFactory,
-    bool? useMaterial3,
-    VisualDensity? visualDensity,
+    final Iterable<ThemeExtension<dynamic>>? extensions,
+    final InputDecorationTheme? inputDecorationTheme,
+    final MaterialTapTargetSize? materialTapTargetSize,
+    final PageTransitionsTheme? pageTransitionsTheme,
+    final TargetPlatform? platform,
+    final ScrollbarThemeData? scrollbarTheme,
+    final InteractiveInkFeatureFactory? splashFactory,
+    final bool? useMaterial3,
+    final VisualDensity? visualDensity,
     // COLOR
     // [colorScheme] is the preferred way to configure colors. The other color
     // properties will gradually be phased out, see
     // https://github.com/flutter/flutter/issues/91772.
-    Brightness? brightness,
-    Color? canvasColor,
-    Color? cardColor,
-    ColorScheme? colorScheme,
-    Color? dialogBackgroundColor,
-    Color? disabledColor,
-    Color? dividerColor,
-    Color? focusColor,
-    Color? highlightColor,
-    Color? hintColor,
-    Color? hoverColor,
-    Color? indicatorColor,
-    Color? primaryColor,
-    Color? primaryColorDark,
-    Color? primaryColorLight,
-    Color? scaffoldBackgroundColor,
-    Color? secondaryHeaderColor,
-    Color? shadowColor,
-    Color? splashColor,
-    Color? unselectedWidgetColor,
+    final Brightness? brightness,
+    final Color? canvasColor,
+    final Color? cardColor,
+    final ColorScheme? colorScheme,
+    final Color? dialogBackgroundColor,
+    final Color? disabledColor,
+    final Color? dividerColor,
+    final Color? focusColor,
+    final Color? highlightColor,
+    final Color? hintColor,
+    final Color? hoverColor,
+    final Color? indicatorColor,
+    final Color? primaryColor,
+    final Color? primaryColorDark,
+    final Color? primaryColorLight,
+    final Color? scaffoldBackgroundColor,
+    final Color? secondaryHeaderColor,
+    final Color? shadowColor,
+    final Color? splashColor,
+    final Color? unselectedWidgetColor,
     // TYPOGRAPHY & ICONOGRAPHY
-    IconThemeData? iconTheme,
-    IconThemeData? primaryIconTheme,
-    TextTheme? primaryTextTheme,
-    TextTheme? textTheme,
-    Typography? typography,
+    final IconThemeData? iconTheme,
+    final IconThemeData? primaryIconTheme,
+    final TextTheme? primaryTextTheme,
+    final TextTheme? textTheme,
+    final Typography? typography,
     // COMPONENT THEMES
-    ActionIconThemeData? actionIconTheme,
-    AppBarTheme? appBarTheme,
-    BadgeThemeData? badgeTheme,
-    MaterialBannerThemeData? bannerTheme,
-    BottomAppBarTheme? bottomAppBarTheme,
-    BottomNavigationBarThemeData? bottomNavigationBarTheme,
-    BottomSheetThemeData? bottomSheetTheme,
-    ButtonBarThemeData? buttonBarTheme,
-    ButtonThemeData? buttonTheme,
-    CardTheme? cardTheme,
-    CheckboxThemeData? checkboxTheme,
-    ChipThemeData? chipTheme,
-    DataTableThemeData? dataTableTheme,
-    DatePickerThemeData? datePickerTheme,
-    DialogTheme? dialogTheme,
-    DividerThemeData? dividerTheme,
-    DrawerThemeData? drawerTheme,
-    DropdownMenuThemeData? dropdownMenuTheme,
-    ElevatedButtonThemeData? elevatedButtonTheme,
-    ExpansionTileThemeData? expansionTileTheme,
-    FilledButtonThemeData? filledButtonTheme,
-    FloatingActionButtonThemeData? floatingActionButtonTheme,
-    IconButtonThemeData? iconButtonTheme,
-    ListTileThemeData? listTileTheme,
-    MenuBarThemeData? menuBarTheme,
-    MenuButtonThemeData? menuButtonTheme,
-    MenuThemeData? menuTheme,
-    NavigationBarThemeData? navigationBarTheme,
-    NavigationDrawerThemeData? navigationDrawerTheme,
-    NavigationRailThemeData? navigationRailTheme,
-    OutlinedButtonThemeData? outlinedButtonTheme,
-    PopupMenuThemeData? popupMenuTheme,
-    ProgressIndicatorThemeData? progressIndicatorTheme,
-    RadioThemeData? radioTheme,
-    SearchBarThemeData? searchBarTheme,
-    SearchViewThemeData? searchViewTheme,
-    SegmentedButtonThemeData? segmentedButtonTheme,
-    SliderThemeData? sliderTheme,
-    SnackBarThemeData? snackBarTheme,
-    SwitchThemeData? switchTheme,
-    TabBarTheme? tabBarTheme,
-    TextButtonThemeData? textButtonTheme,
-    TextSelectionThemeData? textSelectionTheme,
-    TimePickerThemeData? timePickerTheme,
-    ToggleButtonsThemeData? toggleButtonsTheme,
-    TooltipThemeData? tooltipTheme,
+    final ActionIconThemeData? actionIconTheme,
+    final AppBarTheme? appBarTheme,
+    final BadgeThemeData? badgeTheme,
+    final MaterialBannerThemeData? bannerTheme,
+    final BottomAppBarTheme? bottomAppBarTheme,
+    final BottomNavigationBarThemeData? bottomNavigationBarTheme,
+    final BottomSheetThemeData? bottomSheetTheme,
+    final ButtonBarThemeData? buttonBarTheme,
+    final ButtonThemeData? buttonTheme,
+    final CardTheme? cardTheme,
+    final CheckboxThemeData? checkboxTheme,
+    final ChipThemeData? chipTheme,
+    final DataTableThemeData? dataTableTheme,
+    final DatePickerThemeData? datePickerTheme,
+    final DialogTheme? dialogTheme,
+    final DividerThemeData? dividerTheme,
+    final DrawerThemeData? drawerTheme,
+    final DropdownMenuThemeData? dropdownMenuTheme,
+    final ElevatedButtonThemeData? elevatedButtonTheme,
+    final ExpansionTileThemeData? expansionTileTheme,
+    final FilledButtonThemeData? filledButtonTheme,
+    final FloatingActionButtonThemeData? floatingActionButtonTheme,
+    final IconButtonThemeData? iconButtonTheme,
+    final ListTileThemeData? listTileTheme,
+    final MenuBarThemeData? menuBarTheme,
+    final MenuButtonThemeData? menuButtonTheme,
+    final MenuThemeData? menuTheme,
+    final NavigationBarThemeData? navigationBarTheme,
+    final NavigationDrawerThemeData? navigationDrawerTheme,
+    final NavigationRailThemeData? navigationRailTheme,
+    final OutlinedButtonThemeData? outlinedButtonTheme,
+    final PopupMenuThemeData? popupMenuTheme,
+    final ProgressIndicatorThemeData? progressIndicatorTheme,
+    final RadioThemeData? radioTheme,
+    final SearchBarThemeData? searchBarTheme,
+    final SearchViewThemeData? searchViewTheme,
+    final SegmentedButtonThemeData? segmentedButtonTheme,
+    final SliderThemeData? sliderTheme,
+    final SnackBarThemeData? snackBarTheme,
+    final SwitchThemeData? switchTheme,
+    final TabBarTheme? tabBarTheme,
+    final TextButtonThemeData? textButtonTheme,
+    final TextSelectionThemeData? textSelectionTheme,
+    final TimePickerThemeData? timePickerTheme,
+    final ToggleButtonsThemeData? toggleButtonsTheme,
+    final TooltipThemeData? tooltipTheme,
     // DEPRECATED (newest deprecations at the bottom)
     @Deprecated(
       'This "fix" is now enabled by default. '
       'This feature was deprecated after v2.5.0-1.0.pre.',
     )
-    bool? fixTextFieldOutlineLabel,
+    final bool? fixTextFieldOutlineLabel,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
-    Brightness? primaryColorBrightness,
+    final Brightness? primaryColorBrightness,
     @Deprecated(
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    final AndroidOverscrollIndicator? androidOverscrollIndicator,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'For more information, consult the migration guide at '
       'https://flutter.dev/docs/release/breaking-changes/toggleable-active-color#migration-guide. '
       'This feature was deprecated after v3.4.0-19.0.pre.',
     )
-    Color? toggleableActiveColor,
+    final Color? toggleableActiveColor,
     @Deprecated(
       'No longer used by the framework, please remove any reference to it. '
       'This feature was deprecated after v3.1.0-0.0.pre.',
     )
-    Color? selectedRowColor,
+    final Color? selectedRowColor,
     @Deprecated(
       'Use colorScheme.error instead. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
-    Color? errorColor,
+    final Color? errorColor,
     @Deprecated(
       'Use colorScheme.background instead. '
       'This feature was deprecated after v2.6.0-11.0.pre.',
     )
-    Color? backgroundColor,
+    final Color? backgroundColor,
     @Deprecated(
       'Use BottomAppBarTheme.color instead. '
       'This feature was deprecated after v3.3.0-0.6.pre.',
     )
-    Color? bottomAppBarColor,
+    final Color? bottomAppBarColor,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -1881,7 +1881,7 @@ class ThemeData with Diagnosticable {
   /// to true, the returned theme's text styles inherit the geometric properties
   /// of [localTextGeometry]. The resulting text styles' [TextStyle.inherit] is
   /// set to those provided by [localTextGeometry].
-  static ThemeData localize(ThemeData baseTheme, TextTheme localTextGeometry) {
+  static ThemeData localize(final ThemeData baseTheme, final TextTheme localTextGeometry) {
     // WARNING: this method memoizes the result in a cache based on the
     // previously seen baseTheme and localTextGeometry. Memoization is safe
     // because all inputs and outputs of this function are deeply immutable, and
@@ -1911,7 +1911,7 @@ class ThemeData with Diagnosticable {
   ///
   /// This compares the luminosity of the given color to a threshold value that
   /// matches the Material Design specification.
-  static Brightness estimateBrightnessForColor(Color color) {
+  static Brightness estimateBrightnessForColor(final Color color) {
     final double relativeLuminance = color.computeLuminance();
 
     // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef>
@@ -1932,15 +1932,15 @@ class ThemeData with Diagnosticable {
   /// Includes all theme extensions in [a] and [b].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Map<Object, ThemeExtension<dynamic>> _lerpThemeExtensions(ThemeData a, ThemeData b, double t) {
+  static Map<Object, ThemeExtension<dynamic>> _lerpThemeExtensions(final ThemeData a, final ThemeData b, final double t) {
     // Lerp [a].
-    final Map<Object, ThemeExtension<dynamic>> newExtensions = a.extensions.map((Object id, ThemeExtension<dynamic> extensionA) {
+    final Map<Object, ThemeExtension<dynamic>> newExtensions = a.extensions.map((final Object id, final ThemeExtension<dynamic> extensionA) {
         final ThemeExtension<dynamic>? extensionB = b.extensions[id];
         return MapEntry<Object, ThemeExtension<dynamic>>(id, extensionA.lerp(extensionB, t));
       });
     // Add [b]-only extensions.
     newExtensions.addEntries(b.extensions.entries.where(
-      (MapEntry<Object, ThemeExtension<dynamic>> entry) =>
+      (final MapEntry<Object, ThemeExtension<dynamic>> entry) =>
           !a.extensions.containsKey(entry.key)));
 
     return newExtensions;
@@ -1948,7 +1948,7 @@ class ThemeData with Diagnosticable {
 
   /// Convert the [extensionsIterable] passed to [ThemeData.new] or [copyWith]
   /// to the stored [extensions] map, where each entry's key consists of the extension's type.
-  static Map<Object, ThemeExtension<dynamic>> _themeExtensionIterableToMap(Iterable<ThemeExtension<dynamic>> extensionsIterable) {
+  static Map<Object, ThemeExtension<dynamic>> _themeExtensionIterableToMap(final Iterable<ThemeExtension<dynamic>> extensionsIterable) {
     return Map<Object, ThemeExtension<dynamic>>.unmodifiable(<Object, ThemeExtension<dynamic>>{
       // Strangely, the cast is necessary for tests to run.
       for (final ThemeExtension<dynamic> extension in extensionsIterable) extension.type: extension as ThemeExtension<ThemeExtension<dynamic>>,
@@ -1960,7 +1960,7 @@ class ThemeData with Diagnosticable {
   /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ThemeData lerp(ThemeData a, ThemeData b, double t) {
+  static ThemeData lerp(final ThemeData a, final ThemeData b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -2068,7 +2068,7 @@ class ThemeData with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -2282,7 +2282,7 @@ class ThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final ThemeData defaultData = ThemeData.fallback();
     // For the sanity of the reader, make sure these properties are in the same
@@ -2422,7 +2422,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   ///
   /// The [materialTheme] parameter must not be null.
   MaterialBasedCupertinoThemeData({
-    required ThemeData materialTheme,
+    required final ThemeData materialTheme,
   }) : this._(
     materialTheme,
     (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()).noDefault(),
@@ -2471,13 +2471,13 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   /// [ThemeData.copyWith] on the Material [ThemeData] instead.
   @override
   MaterialBasedCupertinoThemeData copyWith({
-    Brightness? brightness,
-    Color? primaryColor,
-    Color? primaryContrastingColor,
-    CupertinoTextThemeData? textTheme,
-    Color? barBackgroundColor,
-    Color? scaffoldBackgroundColor,
-    bool? applyThemeToAll,
+    final Brightness? brightness,
+    final Color? primaryColor,
+    final Color? primaryContrastingColor,
+    final CupertinoTextThemeData? textTheme,
+    final Color? barBackgroundColor,
+    final Color? scaffoldBackgroundColor,
+    final bool? applyThemeToAll,
   }) {
     return MaterialBasedCupertinoThemeData._(
       _materialTheme,
@@ -2494,7 +2494,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   }
 
   @override
-  CupertinoThemeData resolveFrom(BuildContext context) {
+  CupertinoThemeData resolveFrom(final BuildContext context) {
     // Only the cupertino override theme part will be resolved.
     // If the color comes from the material theme it's not resolved.
     return MaterialBasedCupertinoThemeData._(
@@ -2517,7 +2517,7 @@ class _IdentityThemeDataCacheKey {
   int get hashCode => identityHashCode(baseTheme) ^ identityHashCode(localTextGeometry);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     // We are explicitly ignoring the possibility that the types might not
     // match in the interests of speed.
     return other is _IdentityThemeDataCacheKey
@@ -2549,7 +2549,7 @@ class _FifoCache<K, V> {
   /// if not, calls the given callback to obtain it first.
   ///
   /// The arguments must not be null.
-  V putIfAbsent(K key, V Function() loader) {
+  V putIfAbsent(final K key, final V Function() loader) {
     assert(key != null);
     final V? result = _cache[key];
     if (result != null) {
@@ -2670,7 +2670,7 @@ class VisualDensity with Diagnosticable {
   ///
   /// * [adaptivePlatformDensity] which returns a [VisualDensity] that is
   ///   adaptive based on [defaultTargetPlatform].
-  static VisualDensity defaultDensityForPlatform(TargetPlatform platform) {
+  static VisualDensity defaultDensityForPlatform(final TargetPlatform platform) {
     switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -2687,8 +2687,8 @@ class VisualDensity with Diagnosticable {
   /// Copy the current [VisualDensity] with the given values replacing the
   /// current values.
   VisualDensity copyWith({
-    double? horizontal,
-    double? vertical,
+    final double? horizontal,
+    final double? vertical,
   }) {
     return VisualDensity(
       horizontal: horizontal ?? this.horizontal,
@@ -2745,7 +2745,7 @@ class VisualDensity with Diagnosticable {
   }
 
   /// Linearly interpolate between two densities.
-  static VisualDensity lerp(VisualDensity a, VisualDensity b, double t) {
+  static VisualDensity lerp(final VisualDensity a, final VisualDensity b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -2760,7 +2760,7 @@ class VisualDensity with Diagnosticable {
   ///
   /// The resulting minWidth and minHeight values are clamped to not exceed the
   /// maxWidth and maxHeight values, respectively.
-  BoxConstraints effectiveConstraints(BoxConstraints constraints) {
+  BoxConstraints effectiveConstraints(final BoxConstraints constraints) {
     assert(constraints.debugAssertIsValid());
     return constraints.copyWith(
       minWidth: clampDouble(constraints.minWidth + baseSizeAdjustment.dx, 0.0, constraints.maxWidth),
@@ -2769,7 +2769,7 @@ class VisualDensity with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -2782,7 +2782,7 @@ class VisualDensity with Diagnosticable {
   int get hashCode => Object.hash(horizontal, vertical);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('horizontal', horizontal, defaultValue: 0.0));
     properties.add(DoubleProperty('vertical', vertical, defaultValue: 0.0));

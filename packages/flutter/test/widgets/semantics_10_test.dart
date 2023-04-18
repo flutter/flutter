@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
+  testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -35,9 +35,9 @@ void main() {
 }
 
 Widget buildTestWidgets({
-  required bool excludeSemantics,
-  required String label,
-  required bool isSemanticsBoundary,
+  required final bool excludeSemantics,
+  required final String label,
+  required final bool isSemanticsBoundary,
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -77,14 +77,14 @@ class TestWidget extends SingleChildRenderObjectWidget {
   final bool isSemanticBoundary;
 
   @override
-  RenderTest createRenderObject(BuildContext context) {
+  RenderTest createRenderObject(final BuildContext context) {
     return RenderTest()
       ..label = label
       ..isSemanticBoundary = isSemanticBoundary;
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderTest renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderTest renderObject) {
     renderObject
       ..label = label
       ..isSemanticBoundary = isSemanticBoundary;
@@ -93,7 +93,7 @@ class TestWidget extends SingleChildRenderObjectWidget {
 
 class RenderTest extends RenderProxyBox {
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     if (!_isSemanticBoundary) {
@@ -109,7 +109,7 @@ class RenderTest extends RenderProxyBox {
 
   String get label => _label;
   String _label = '<>';
-  set label(String value) {
+  set label(final String value) {
     if (value == _label) {
       return;
     }
@@ -120,7 +120,7 @@ class RenderTest extends RenderProxyBox {
 
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
-  set isSemanticBoundary(bool value) {
+  set isSemanticBoundary(final bool value) {
     if (_isSemanticBoundary == value) {
       return;
     }

@@ -55,7 +55,7 @@ class ColorItem extends StatelessWidget {
   String colorString() => "#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}";
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Semantics(
       container: true,
       child: Container(
@@ -90,7 +90,7 @@ class PaletteTabView extends StatelessWidget {
   static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.bodyMedium!.copyWith(color: Colors.black);
@@ -99,14 +99,14 @@ class PaletteTabView extends StatelessWidget {
         primary: true,
         itemExtent: kColorItemHeight,
         children: <Widget>[
-          ...primaryKeys.map<Widget>((int index) {
+          ...primaryKeys.map<Widget>((final int index) {
             return DefaultTextStyle(
               style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
               child: ColorItem(index: index, color: colors.primary![index]!),
             );
           }),
           if (colors.accent != null)
-            ...accentKeys.map<Widget>((int index) {
+            ...accentKeys.map<Widget>((final int index) {
               return DefaultTextStyle(
                 style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
                 child: ColorItem(index: index, color: colors.accent![index]!, prefix: 'A'),
@@ -124,7 +124,7 @@ class ColorsDemo extends StatelessWidget {
   static const String routeName = '/colors';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: allPalettes.length,
       child: Scaffold(
@@ -133,11 +133,11 @@ class ColorsDemo extends StatelessWidget {
           title: const Text('Colors'),
           bottom: TabBar(
             isScrollable: true,
-            tabs: allPalettes.map<Widget>((Palette swatch) => Tab(text: swatch.name)).toList(),
+            tabs: allPalettes.map<Widget>((final Palette swatch) => Tab(text: swatch.name)).toList(),
           ),
         ),
         body: TabBarView(
-          children: allPalettes.map<Widget>((Palette colors) {
+          children: allPalettes.map<Widget>((final Palette colors) {
             return PaletteTabView(colors: colors);
           }).toList(),
         ),

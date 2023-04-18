@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/routes/popup_route.0.dart' as exampl
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Dismiss dialog with tap on the scrim and escape key', (WidgetTester tester) async {
+  testWidgets('Dismiss dialog with tap on the scrim and escape key', (final WidgetTester tester) async {
     const String dialogText = 'Tap in the scrim or press escape key to dismiss.';
 
     await tester.pumpWidget(

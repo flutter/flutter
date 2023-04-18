@@ -41,13 +41,13 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
     _propertyToString('fontVariations', textStyle.fontVariations),
   ];
 
-  static String _propertyToString(String name, Object? property) => '$name: ${property ?? 'unspecified'}';
+  static String _propertyToString(final String name, final Object? property) => '$name: ${property ?? 'unspecified'}';
 
   @override
-  Description describe(Description description) => description.add('is a superset of $textStyle.');
+  Description describe(final Description description) => description.add('is a superset of $textStyle.');
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     final String description = item.toString();
     const String prefix = 'TextStyle(';
     const String suffix = ')';
@@ -72,7 +72,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(final dynamic item, final Description mismatchDescription, final Map<dynamic, dynamic> matchState, final bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
     final String? property = matchState['missingProperty'] as String?;
     if (property != null) {
@@ -87,7 +87,7 @@ class _DartUiTextStyleToStringMatcher extends Matcher {
   }
 }
 
-Matcher matchesToStringOf(TextStyle textStyle) => _DartUiTextStyleToStringMatcher(textStyle);
+Matcher matchesToStringOf(final TextStyle textStyle) => _DartUiTextStyleToStringMatcher(textStyle);
 
 void main() {
   test('TextStyle control test', () {

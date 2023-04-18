@@ -20,29 +20,29 @@ class _FakeEditableTextState with TextSelectionDelegate {
   TextSelection? selection;
 
   @override
-  void hideToolbar([bool hideHandles = true]) { }
+  void hideToolbar([final bool hideHandles = true]) { }
 
   @override
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause) {
+  void userUpdateTextEditingValue(final TextEditingValue value, final SelectionChangedCause cause) {
     selection = value.selection;
   }
 
   @override
-  void bringIntoView(TextPosition position) { }
+  void bringIntoView(final TextPosition position) { }
 
   @override
-  void cutSelection(SelectionChangedCause cause) { }
+  void cutSelection(final SelectionChangedCause cause) { }
 
   @override
-  Future<void> pasteText(SelectionChangedCause cause) {
+  Future<void> pasteText(final SelectionChangedCause cause) {
     return Future<void>.value();
   }
 
   @override
-  void selectAll(SelectionChangedCause cause) { }
+  void selectAll(final SelectionChangedCause cause) { }
 
   @override
-  void copySelection(SelectionChangedCause cause) { }
+  void copySelection(final SelectionChangedCause cause) { }
 }
 
 void main() {
@@ -141,7 +141,7 @@ void main() {
     layout(editable);
 
     bool visited = false;
-    editable.visitChildren((RenderObject child) {
+    editable.visitChildren((final RenderObject child) {
       visited = true;
       expect(editable.describeApproximatePaintClip(child), null);
     });
@@ -250,7 +250,7 @@ void main() {
     // Prepare for painting after layout.
     pumpFrame(phase: EnginePhase.compositingBits);
     expect(
-      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
       paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 500.0, 10.0)),
     );
   });
@@ -789,7 +789,7 @@ void main() {
     pumpFrame(phase: EnginePhase.compositingBits);
 
     expect(
-      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
       paints..rect(color: promptRectColor),
     );
 
@@ -800,7 +800,7 @@ void main() {
 
     expect(editable.promptRectColor, null);
     expect(
-      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
       isNot(paints..rect(color: promptRectColor)),
     );
   });
@@ -933,7 +933,7 @@ void main() {
       expect(
         editable.getRectForComposingRange(const TextRange(start: 0, end: 1)),
         // On web this evaluates to a zero-width Rect.
-        anyOf(isNull, (Rect rect) => rect.width == 0),
+        anyOf(isNull, (final Rect rect) => rect.width == 0),
       );
     });
 
@@ -1002,7 +1002,7 @@ void main() {
       pumpFrame(phase: EnginePhase.compositingBits);
 
       expect(
-        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..paragraph()
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678)),
@@ -1013,7 +1013,7 @@ void main() {
       editable.painter = _TestRenderEditablePainter();
 
       expect(
-        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
           ..paragraph(),
@@ -1023,7 +1023,7 @@ void main() {
       editable.painter = _TestRenderEditablePainter();
 
       expect(
-        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
           ..paragraph()
@@ -1078,7 +1078,7 @@ void main() {
       editable.painter = painter1;
       editable.foregroundPainter = painter2;
       expect(
-        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: painter1.color)
           ..paragraph()
@@ -1088,7 +1088,7 @@ void main() {
       editable.painter = painter2;
       editable.foregroundPainter = painter1;
       expect(
-        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: painter2.color)
           ..paragraph()
@@ -1110,7 +1110,7 @@ void main() {
       expect(painter.paintCount, 2);
 
       expect(
-        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
           ..paragraph()
@@ -1159,7 +1159,7 @@ void main() {
 
       pumpFrame(phase: EnginePhase.compositingBits);
       expect(
-        (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+        (final Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
         paints
           ..rect(rect: const Rect.fromLTRB(1, 1, 1, 1), color: const Color(0x12345678))
           ..paragraph(),
@@ -1775,7 +1775,7 @@ class _TestRenderEditable extends RenderEditable {
   int paintCount = 0;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     super.paint(context, offset);
     paintCount += 1;
   }
@@ -1790,13 +1790,13 @@ class _TestRenderEditablePainter extends RenderEditablePainter {
   int paintCount = 0;
 
   @override
-  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
+  void paint(final Canvas canvas, final Size size, final RenderEditable renderEditable) {
     paintCount += 1;
     canvas.drawRect(const Rect.fromLTRB(1, 1, 1, 1), Paint()..color = color);
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter? oldDelegate) => repaint;
+  bool shouldRepaint(final RenderEditablePainter? oldDelegate) => repaint;
 
   void markNeedsPaint() {
     notifyListeners();

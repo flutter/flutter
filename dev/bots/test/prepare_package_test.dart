@@ -20,7 +20,7 @@ void main() {
     // it can't find an executable.
     final ProcessRunner processRunner = ProcessRunner(subprocessOutput: false);
     expect(
-        expectAsync1((List<String> commandLine) async {
+        expectAsync1((final List<String> commandLine) async {
           return processRunner.runProcess(commandLine);
         })(<String>['this_executable_better_not_exist_2857632534321']),
         throwsA(isA<PreparePackageException>()));
@@ -28,7 +28,7 @@ void main() {
     await expectLater(
       () => processRunner.runProcess(<String>['this_executable_better_not_exist_2857632534321']),
       throwsA(isA<PreparePackageException>().having(
-        (PreparePackageException error) => error.message,
+        (final PreparePackageException error) => error.message,
         'message',
         contains('ProcessException: Failed to find "this_executable_better_not_exist_2857632534321" in the search path'),
       )),
@@ -67,7 +67,7 @@ void main() {
         final ProcessRunner processRunner = ProcessRunner(
             subprocessOutput: false, platform: platform, processManager: fakeProcessManager);
         expect(
-            expectAsync1((List<String> commandLine) async {
+            expectAsync1((final List<String> commandLine) async {
               return processRunner.runProcess(commandLine);
             })(<String>['echo', 'test']),
             throwsA(isA<PreparePackageException>()));
@@ -84,7 +84,7 @@ void main() {
       late String flutter;
       late String dart;
 
-      Future<Uint8List> fakeHttpReader(Uri url, {Map<String, String>? headers}) {
+      Future<Uint8List> fakeHttpReader(final Uri url, {final Map<String, String>? headers}) {
         return Future<Uint8List>.value(Uint8List(0));
       }
 
@@ -365,7 +365,7 @@ void main() {
         await expectLater(
           () => creator.createArchive(),
           throwsA(isA<PreparePackageException>().having(
-            (PreparePackageException exception) => exception.message,
+            (final PreparePackageException exception) => exception.message,
             'message',
             contains('The binary $binPath was not codesigned!'),
           )),
@@ -823,7 +823,7 @@ void main() {
   }
 }
 
-List<FakeCommand> convertResults(Map<String, List<ProcessResult>?> results) {
+List<FakeCommand> convertResults(final Map<String, List<ProcessResult>?> results) {
   final List<FakeCommand> commands = <FakeCommand>[];
   for (final String key in results.keys) {
     final List<ProcessResult>? candidates = results[key];

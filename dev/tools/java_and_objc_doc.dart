@@ -13,7 +13,7 @@ const String kDocRoot = 'dev/docs/doc';
 
 /// This script downloads an archive of Javadoc and objc doc for the engine from
 /// the artifact store and extracts them to the location used for Dartdoc.
-Future<void> main(List<String> args) async {
+Future<void> main(final List<String> args) async {
   final String engineVersion = File('bin/internal/engine.version').readAsStringSync().trim();
 
   final String javadocUrl = 'https://storage.googleapis.com/flutter_infra_release/flutter/$engineVersion/android-javadoc.zip';
@@ -26,7 +26,7 @@ Future<void> main(List<String> args) async {
 /// Fetches the zip archive at the specified url.
 ///
 /// Returns null if the archive fails to download after [maxTries] attempts.
-Future<Archive?> fetchArchive(String url, int maxTries) async {
+Future<Archive?> fetchArchive(final String url, final int maxTries) async {
   List<int>? responseBytes;
   for (int i = 0; i < maxTries; i++) {
     final http.Response response = await http.get(Uri.parse(url));
@@ -44,7 +44,7 @@ Future<Archive?> fetchArchive(String url, int maxTries) async {
   return responseBytes == null ? null : ZipDecoder().decodeBytes(responseBytes);
 }
 
-Future<void> generateDocs(String url, String docName, String checkFile) async {
+Future<void> generateDocs(final String url, final String docName, final String checkFile) async {
   const int maxTries = 5;
   final Archive? archive = await fetchArchive(url, maxTries);
   if (archive == null) {
@@ -79,9 +79,9 @@ Future<void> generateDocs(String url, String docName, String checkFile) async {
 }
 
 /// Copies the files in a directory recursively to a new location.
-void copyFolder(Directory source, Directory destination) {
+void copyFolder(final Directory source, final Directory destination) {
   source.listSync()
-  .forEach((FileSystemEntity entity) {
+  .forEach((final FileSystemEntity entity) {
     if (entity is Directory) {
       final Directory newDirectory = Directory(path.join(destination.absolute.path, path.basename(entity.path)));
       newDirectory.createSync();

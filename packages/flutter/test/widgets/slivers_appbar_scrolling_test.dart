@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void verifyPaintPosition(GlobalKey key, Offset ideal) {
+void verifyPaintPosition(final GlobalKey key, final Offset ideal) {
   final RenderObject target = key.currentContext!.findRenderObject()!;
   expect(target.parent, isA<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
@@ -15,7 +15,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal) {
 }
 
 void main() {
-  testWidgets('Sliver appbars - scrolling', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - scrolling', (final WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
       Directionality(
@@ -50,7 +50,7 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 50.0));
   });
 
-  testWidgets('Sliver appbars - scrolling off screen', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - scrolling off screen', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final TestDelegate delegate = TestDelegate();
     await tester.pumpWidget(
@@ -74,7 +74,7 @@ void main() {
     expect(rect, equals(const Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));
   });
 
-  testWidgets('Sliver appbars - scrolling - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - scrolling - overscroll gap is below header', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -106,7 +106,7 @@ void main() {
     expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
 
-  testWidgets('Sliver appbars const child delegate - scrolling - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgets('Sliver appbars const child delegate - scrolling - overscroll gap is below header', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -147,12 +147,12 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 200.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     return Container(height: maxExtent);
   }
 
   @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
+  bool shouldRebuild(final TestDelegate oldDelegate) => false;
 }
 
 
@@ -173,7 +173,7 @@ class RenderBigSliver extends RenderSliver {
 class BigSliver extends LeafRenderObjectWidget {
   const BigSliver({ super.key });
   @override
-  RenderBigSliver createRenderObject(BuildContext context) {
+  RenderBigSliver createRenderObject(final BuildContext context) {
     return RenderBigSliver();
   }
 }

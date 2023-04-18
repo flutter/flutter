@@ -10,13 +10,13 @@ import 'common.dart';
 
 /// Check if the pubspec.yaml file under the `projectDir` is valid for a plugin project.
 void validatePubspecForPlugin({
-  required String projectDir,
-  String? pluginClass,
-  bool ffiPlugin = false,
-  required List<String> expectedPlatforms,
-  List<String> unexpectedPlatforms = const <String>[],
-  String? androidIdentifier,
-  String? webFileName,
+  required final String projectDir,
+  final String? pluginClass,
+  final bool ffiPlugin = false,
+  required final List<String> expectedPlatforms,
+  final List<String> unexpectedPlatforms = const <String>[],
+  final String? androidIdentifier,
+  final String? webFileName,
 }) {
   assert(pluginClass != null || ffiPlugin);
   final FlutterManifest manifest =

@@ -12,7 +12,7 @@ class ReorderableApp extends StatelessWidget {
   const ReorderableApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ReorderableListView Sample')),
@@ -30,10 +30,10 @@ class ReorderableExample extends StatefulWidget {
 }
 
 class _ReorderableExampleState extends State<ReorderableExample> {
-  final List<int> _items = List<int>.generate(50, (int index) => index);
+  final List<int> _items = List<int>.generate(50, (final int index) => index);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
@@ -64,7 +64,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
             ),
           ),
       ],
-      onReorder: (int oldIndex, int newIndex) {
+      onReorder: (final int oldIndex, int newIndex) {
         setState(() {
           if (oldIndex < newIndex) {
             newIndex -= 1;

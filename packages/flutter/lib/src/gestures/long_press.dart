@@ -113,7 +113,7 @@ class LongPressDownDetails {
   /// global position.
   const LongPressDownDetails({
     this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    final Offset? localPosition,
     this.kind,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -140,7 +140,7 @@ class LongPressStartDetails {
   /// The [globalPosition] argument must not be null.
   const LongPressStartDetails({
     this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    final Offset? localPosition,
   }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer initially contacted the screen.
@@ -163,9 +163,9 @@ class LongPressMoveUpdateDetails {
   /// The [globalPosition] and [offsetFromOrigin] arguments must not be null.
   const LongPressMoveUpdateDetails({
     this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    final Offset? localPosition,
     this.offsetFromOrigin = Offset.zero,
-    Offset? localOffsetFromOrigin,
+    final Offset? localOffsetFromOrigin,
   }) : localPosition = localPosition ?? globalPosition,
        localOffsetFromOrigin = localOffsetFromOrigin ?? offsetFromOrigin;
 
@@ -199,7 +199,7 @@ class LongPressEndDetails {
   /// The [globalPosition] argument must not be null.
   const LongPressEndDetails({
     this.globalPosition = Offset.zero,
-    Offset? localPosition,
+    final Offset? localPosition,
     this.velocity = Velocity.zero,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -246,11 +246,11 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   LongPressGestureRecognizer({
-    Duration? duration,
+    final Duration? duration,
     super.postAcceptSlopTolerance = null,
     super.supportedDevices,
     super.debugOwner,
-    AllowedButtonsFilter? allowedButtonsFilter,
+    final AllowedButtonsFilter? allowedButtonsFilter,
   }) : super(
          deadline: duration ?? kLongPressTimeout,
          allowedButtonsFilter: allowedButtonsFilter ?? _defaultButtonAcceptBehavior,
@@ -263,7 +263,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   int? _initialButtons;
 
   // Accept the input if, and only if, a single button is pressed.
-  static bool _defaultButtonAcceptBehavior(int buttons) =>
+  static bool _defaultButtonAcceptBehavior(final int buttons) =>
       buttons == kPrimaryButton ||
       buttons == kSecondaryButton ||
       buttons == kTertiaryButton;
@@ -568,7 +568,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   VelocityTracker? _velocityTracker;
 
   @override
-  bool isPointerAllowed(PointerDownEvent event) {
+  bool isPointerAllowed(final PointerDownEvent event) {
     switch (event.buttons) {
       case kPrimaryButton:
         if (onLongPressDown == null &&
@@ -616,7 +616,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void handlePrimaryPointer(PointerEvent event) {
+  void handlePrimaryPointer(final PointerEvent event) {
     if (!event.synthesized) {
       if (event is PointerDownEvent) {
         _velocityTracker = VelocityTracker.withKind(event.kind);
@@ -654,7 +654,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _checkLongPressDown(PointerDownEvent event) {
+  void _checkLongPressDown(final PointerDownEvent event) {
     assert(_longPressOrigin != null);
     final LongPressDownDetails details = LongPressDownDetails(
       globalPosition: _longPressOrigin!.global,
@@ -740,7 +740,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _checkLongPressMoveUpdate(PointerEvent event) {
+  void _checkLongPressMoveUpdate(final PointerEvent event) {
     final LongPressMoveUpdateDetails details = LongPressMoveUpdateDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,
@@ -765,7 +765,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _checkLongPressEnd(PointerEvent event) {
+  void _checkLongPressEnd(final PointerEvent event) {
     final VelocityEstimate? estimate = _velocityTracker!.getVelocityEstimate();
     final Velocity velocity = estimate == null
         ? Velocity.zero
@@ -812,7 +812,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void resolve(GestureDisposition disposition) {
+  void resolve(final GestureDisposition disposition) {
     if (disposition == GestureDisposition.rejected) {
       if (_longPressAccepted) {
         // This can happen if the gesture has been canceled. For example when
@@ -826,7 +826,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(final int pointer) {
     // Winning the arena isn't important here since it may happen from a sweep.
     // Explicitly exceeding the deadline puts the gesture in accepted state.
   }

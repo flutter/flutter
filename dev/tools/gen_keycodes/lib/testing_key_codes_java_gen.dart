@@ -9,11 +9,11 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-String _toUpperSnake(String lowerCamel) {
+String _toUpperSnake(final String lowerCamel) {
   // Converts 'myTVFoo' to 'myTvFoo'.
   final String trueUpperCamel = lowerCamel.replaceAllMapped(
     RegExp(r'([A-Z]{3,})'),
-    (Match match) {
+    (final Match match) {
       final String matched = match.group(1)!;
       return matched.substring(0, 1)
            + matched.substring(1, matched.length - 2).toLowerCase()
@@ -22,7 +22,7 @@ String _toUpperSnake(String lowerCamel) {
   // Converts 'myTvFoo' to 'MY_TV_FOO'.
   return trueUpperCamel.replaceAllMapped(
     RegExp(r'([A-Z])'),
-    (Match match) => '_${match.group(1)!}').toUpperCase();
+    (final Match match) => '_${match.group(1)!}').toUpperCase();
 }
 
 /// Generates the common/testing/key_codes.h based on the information in the key

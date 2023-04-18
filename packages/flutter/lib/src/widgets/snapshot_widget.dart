@@ -48,7 +48,7 @@ class SnapshotController extends ChangeNotifier {
   ///
   /// By default, [allowSnapshotting] is `false` and cannot be `null`.
   SnapshotController({
-    bool allowSnapshotting = false,
+    final bool allowSnapshotting = false,
   }) : _allowSnapshotting = allowSnapshotting;
 
   /// Reset the snapshot held by any listening [SnapshotWidget].
@@ -61,7 +61,7 @@ class SnapshotController extends ChangeNotifier {
   /// Whether a snapshot of this child widget is painted in its place.
   bool get allowSnapshotting => _allowSnapshotting;
   bool _allowSnapshotting;
-  set allowSnapshotting(bool value) {
+  set allowSnapshotting(final bool value) {
     if (value == allowSnapshotting) {
       return;
     }
@@ -136,7 +136,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   final SnapshotPainter painter;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     debugCheckHasMediaQuery(context);
     return _RenderSnapshotWidget(
       controller: controller,
@@ -148,7 +148,7 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final RenderObject renderObject) {
     debugCheckHasMediaQuery(context);
     (renderObject as _RenderSnapshotWidget)
       ..controller = controller
@@ -164,11 +164,11 @@ class SnapshotWidget extends SingleChildRenderObjectWidget {
 class _RenderSnapshotWidget extends RenderProxyBox {
   // Create a new [_RenderSnapshotWidget].
   _RenderSnapshotWidget({
-    required double devicePixelRatio,
-    required SnapshotController controller,
-    required SnapshotMode mode,
-    required SnapshotPainter painter,
-    required bool autoresize,
+    required final double devicePixelRatio,
+    required final SnapshotController controller,
+    required final SnapshotMode mode,
+    required final SnapshotPainter painter,
+    required final bool autoresize,
   }) : _devicePixelRatio = devicePixelRatio,
        _controller = controller,
        _mode = mode,
@@ -178,7 +178,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   /// The device pixel ratio used to create the child image.
   double get devicePixelRatio => _devicePixelRatio;
   double _devicePixelRatio;
-  set devicePixelRatio(double value) {
+  set devicePixelRatio(final double value) {
     if (value == devicePixelRatio) {
       return;
     }
@@ -195,7 +195,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   /// The painter used to paint the child snapshot or child widgets.
   SnapshotPainter get painter => _painter;
   SnapshotPainter _painter;
-  set painter(SnapshotPainter value) {
+  set painter(final SnapshotPainter value) {
     if (value == painter) {
       return;
     }
@@ -215,7 +215,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   /// paint a snapshotted version of that child.
   SnapshotController get controller => _controller;
   SnapshotController _controller;
-  set controller(SnapshotController value) {
+  set controller(final SnapshotController value) {
     if (value == controller) {
       return;
     }
@@ -233,7 +233,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   /// How the snapshot widget will handle platform views in child layers.
   SnapshotMode get mode => _mode;
   SnapshotMode _mode;
-  set mode(SnapshotMode value) {
+  set mode(final SnapshotMode value) {
     if (value == _mode) {
       return;
     }
@@ -244,7 +244,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   /// Whether or not changes in render object size should automatically re-rasterize.
   bool get autoresize => _autoresize;
   bool _autoresize;
-  set autoresize(bool value) {
+  set autoresize(final bool value) {
     if (value == autoresize) {
       return;
     }
@@ -259,7 +259,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   bool _disableSnapshotAttempt = false;
 
   @override
-  void attach(covariant PipelineOwner owner) {
+  void attach(covariant final PipelineOwner owner) {
     controller.addListener(_onRasterValueChanged);
     painter.addListener(markNeedsPaint);
     super.attach(owner);
@@ -321,7 +321,7 @@ class _RenderSnapshotWidget extends RenderProxyBox {
   Size? _lastCachedSize;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (size.isEmpty) {
       _childRaster?.dispose();
       _childRaster = null;
@@ -410,7 +410,7 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// }
   /// ```
   /// {@end-tool}
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio);
+  void paintSnapshot(final PaintingContext context, final Offset offset, final Size size, final ui.Image image, final Size sourceSize, final double pixelRatio);
 
   /// Paint the child via [painter], applying any effects that would have been painted
   /// in [SnapshotPainter.paintSnapshot].
@@ -419,7 +419,7 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// is used and a child platform view prevents snapshotting.
   ///
   /// The [offset] and [size] are the location and dimensions of the render object.
-  void paint(PaintingContext context, Offset offset, Size size, PaintingContextCallback painter);
+  void paint(final PaintingContext context, final Offset offset, final Size size, final PaintingContextCallback painter);
 
   /// Called whenever a new instance of the snapshot widget delegate class is
   /// provided to the [SnapshotWidget] object, or any time that a new
@@ -445,14 +445,14 @@ abstract class SnapshotPainter extends ChangeNotifier  {
   /// be used to force the generation of a new image.
   ///
   /// The `oldPainter` argument will never be null.
-  bool shouldRepaint(covariant SnapshotPainter oldPainter);
+  bool shouldRepaint(covariant final SnapshotPainter oldPainter);
 }
 
 class _DefaultSnapshotPainter implements SnapshotPainter {
   const _DefaultSnapshotPainter();
 
   @override
-  void addListener(ui.VoidCallback listener) { }
+  void addListener(final ui.VoidCallback listener) { }
 
   @override
   void dispose() { }
@@ -464,12 +464,12 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
   void notifyListeners() { }
 
   @override
-  void paint(PaintingContext context, ui.Offset offset, ui.Size size, PaintingContextCallback painter) {
+  void paint(final PaintingContext context, final ui.Offset offset, final ui.Size size, final PaintingContextCallback painter) {
     painter(context, offset);
   }
 
   @override
-  void paintSnapshot(PaintingContext context, ui.Offset offset, ui.Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+  void paintSnapshot(final PaintingContext context, final ui.Offset offset, final ui.Size size, final ui.Image image, final Size sourceSize, final double pixelRatio) {
     final Rect src = Rect.fromLTWH(0, 0, sourceSize.width, sourceSize.height);
     final Rect dst = Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height);
     final Paint paint = Paint()
@@ -478,8 +478,8 @@ class _DefaultSnapshotPainter implements SnapshotPainter {
   }
 
   @override
-  void removeListener(ui.VoidCallback listener) { }
+  void removeListener(final ui.VoidCallback listener) { }
 
   @override
-  bool shouldRepaint(covariant _DefaultSnapshotPainter oldPainter) => false;
+  bool shouldRepaint(covariant final _DefaultSnapshotPainter oldPainter) => false;
 }

@@ -8,7 +8,7 @@ import 'package:integration_ui/overflow.dart' as app;
 
 void main() {
   group('Integration Test', () {
-    testWidgets('smoke test', (WidgetTester tester) async {
+    testWidgets('smoke test', (final WidgetTester tester) async {
         app.main();
         await tester.pumpAndSettle();
 

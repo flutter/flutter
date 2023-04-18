@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedAlign.debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign.debugFillProperties', (final WidgetTester tester) async {
     const AnimatedAlign box = AnimatedAlign(
       alignment: Alignment.topCenter,
       curve: Curves.ease,
@@ -15,7 +15,7 @@ void main() {
     expect(box, hasOneLineDescription);
   });
 
-  testWidgets('AnimatedAlign alignment visual-to-directional animation', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign alignment visual-to-directional animation', (final WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -57,7 +57,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 400.0));
   });
 
-  testWidgets('AnimatedAlign widthFactor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign widthFactor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -82,7 +82,7 @@ void main() {
     expect(box.size.width, equals(50.0));
   });
 
-  testWidgets('AnimatedAlign heightFactor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign heightFactor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -106,7 +106,7 @@ void main() {
     expect(box.size.height, equals( 50.0));
   });
 
-  testWidgets('AnimatedAlign null height factor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign null height factor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -130,7 +130,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 100)));
   });
 
-  testWidgets('AnimatedAlign null widthFactor', (WidgetTester tester) async {
+  testWidgets('AnimatedAlign null widthFactor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

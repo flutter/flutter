@@ -11,7 +11,7 @@ class SegmentedButtonTemplate extends TokenTemplate {
 
   final String tokenGroup;
 
-  String _layerOpacity(String layerToken) {
+  String _layerOpacity(final String layerToken) {
     if (tokens.containsKey(layerToken)) {
       final String? layerValue = tokens[layerToken] as String?;
       if (tokens.containsKey(layerValue)) {
@@ -24,7 +24,7 @@ class SegmentedButtonTemplate extends TokenTemplate {
     return '';
   }
 
-  String _stateColor(String componentToken, String type, String state) {
+  String _stateColor(final String componentToken, final String type, final String state) {
     final String baseColor = color('$componentToken.$type.$state.state-layer.color', '');
     if (baseColor.isEmpty) {
       return 'null';

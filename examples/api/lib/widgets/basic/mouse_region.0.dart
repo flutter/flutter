@@ -12,7 +12,7 @@ class MouseRegionApp extends StatelessWidget {
   const MouseRegionApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MouseRegion Sample')),
@@ -37,19 +37,19 @@ class _MouseRegionExampleState extends State<MouseRegionExample> {
   double x = 0.0;
   double y = 0.0;
 
-  void _incrementEnter(PointerEvent details) {
+  void _incrementEnter(final PointerEvent details) {
     setState(() {
       _enterCounter++;
     });
   }
 
-  void _incrementExit(PointerEvent details) {
+  void _incrementExit(final PointerEvent details) {
     setState(() {
       _exitCounter++;
     });
   }
 
-  void _updateLocation(PointerEvent details) {
+  void _updateLocation(final PointerEvent details) {
     setState(() {
       x = details.position.dx;
       y = details.position.dy;
@@ -57,7 +57,7 @@ class _MouseRegionExampleState extends State<MouseRegionExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ConstrainedBox(
       constraints: BoxConstraints.tight(const Size(300.0, 200.0)),
       child: MouseRegion(

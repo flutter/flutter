@@ -7,17 +7,17 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
-    Widget buildFrame(int itemCount) {
+    Widget buildFrame(final int itemCount) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.builder(
           dragStartBehavior: DragStartBehavior.down,
           itemExtent: 200.0,
           itemCount: itemCount,
-          itemBuilder: (BuildContext context, int index) => Text('item $index'),
+          itemBuilder: (final BuildContext context, final int index) => Text('item $index'),
         ),
       );
     }
@@ -35,16 +35,16 @@ void main() {
     expect(find.text('item 3'), findsOneWidget);
   });
 
-  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgets('ListView.builder() fixed itemExtent, scroll to end, append, scroll', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
-    Widget buildFrame(int itemCount) {
+    Widget buildFrame(final int itemCount) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.builder(
           dragStartBehavior: DragStartBehavior.down,
           itemCount: itemCount,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return SizedBox(
               height: 200.0,
               child: Text('item $index'),

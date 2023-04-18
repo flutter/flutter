@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       key: Key('mainapp'),
       title: 'Integration Test App For Platform Messages',
@@ -33,7 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   TextEditingController(text: 'Text1');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

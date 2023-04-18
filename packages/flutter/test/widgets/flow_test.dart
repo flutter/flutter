@@ -12,12 +12,12 @@ class TestFlowDelegate extends FlowDelegate {
   final Animation<double> startOffset;
 
   @override
-  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final int i, final BoxConstraints constraints) {
     return constraints.loosen();
   }
 
   @override
-  void paintChildren(FlowPaintingContext context) {
+  void paintChildren(final FlowPaintingContext context) {
     double dy = startOffset.value;
     for (int i = 0; i < context.childCount; ++i) {
       context.paintChild(i, transform: Matrix4.translationValues(0.0, dy, 0.0));
@@ -26,7 +26,7 @@ class TestFlowDelegate extends FlowDelegate {
   }
 
   @override
-  bool shouldRepaint(TestFlowDelegate oldDelegate) => startOffset == oldDelegate.startOffset;
+  bool shouldRepaint(final TestFlowDelegate oldDelegate) => startOffset == oldDelegate.startOffset;
 }
 
 class OpacityFlowDelegate extends FlowDelegate {
@@ -35,14 +35,14 @@ class OpacityFlowDelegate extends FlowDelegate {
   double opacity;
 
   @override
-  void paintChildren(FlowPaintingContext context) {
+  void paintChildren(final FlowPaintingContext context) {
     for (int i = 0; i < context.childCount; ++i) {
       context.paintChild(i, opacity: opacity);
     }
   }
 
   @override
-  bool shouldRepaint(OpacityFlowDelegate oldDelegate) => opacity != oldDelegate.opacity;
+  bool shouldRepaint(final OpacityFlowDelegate oldDelegate) => opacity != oldDelegate.opacity;
 }
 
 // OpacityFlowDelegate that paints one of its children twice
@@ -50,7 +50,7 @@ class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
   DuplicatePainterOpacityFlowDelegate(super.opacity);
 
   @override
-  void paintChildren(FlowPaintingContext context) {
+  void paintChildren(final FlowPaintingContext context) {
     for (int i = 0; i < context.childCount; ++i) {
       context.paintChild(i, opacity: opacity);
     }
@@ -61,13 +61,13 @@ class DuplicatePainterOpacityFlowDelegate extends OpacityFlowDelegate {
 }
 
 void main() {
-  testWidgets('Flow control test', (WidgetTester tester) async {
+  testWidgets('Flow control test', (final WidgetTester tester) async {
     final AnimationController startOffset = AnimationController.unbounded(
       vsync: tester,
     );
     final List<int> log = <int>[];
 
-    Widget buildBox(int i) {
+    Widget buildBox(final int i) {
       return GestureDetector(
         onTap: () {
           log.add(i);
@@ -115,7 +115,7 @@ void main() {
     expect(log, equals(<int>[0]));
   });
 
-  testWidgets('paintChild gets called twice', (WidgetTester tester) async {
+  testWidgets('paintChild gets called twice', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Flow(
         delegate: DuplicatePainterOpacityFlowDelegate(1.0),
@@ -137,7 +137,7 @@ void main() {
     ));
   });
 
-  testWidgets('Flow opacity layer', (WidgetTester tester) async {
+  testWidgets('Flow opacity layer', (final WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow(
@@ -157,7 +157,7 @@ void main() {
     expect(layer!.firstChild, isA<TransformLayer>());
   });
 
-  testWidgets('Flow can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgets('Flow can set and update clipBehavior', (final WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow(
@@ -186,7 +186,7 @@ void main() {
     }
   });
 
-  testWidgets('Flow.unwrapped can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgets('Flow.unwrapped can set and update clipBehavior', (final WidgetTester tester) async {
     const double opacity = 0.2;
     await tester.pumpWidget(
       Flow.unwrapped(

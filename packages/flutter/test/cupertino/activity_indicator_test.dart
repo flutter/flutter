@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Activity indicator animate property works', (WidgetTester tester) async {
+  testWidgets('Activity indicator animate property works', (final WidgetTester tester) async {
     await tester.pumpWidget(buildCupertinoActivityIndicator());
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
 
@@ -30,7 +30,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgets('Activity indicator dark mode', (WidgetTester tester) async {
+  testWidgets('Activity indicator dark mode', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -79,7 +79,7 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 0% in progress', (WidgetTester tester) async {
+  testWidgets('Activity indicator 0% in progress', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -101,7 +101,7 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 30% in progress', (WidgetTester tester) async {
+  testWidgets('Activity indicator 30% in progress', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -123,7 +123,7 @@ void main() {
     );
   });
 
-  testWidgets('Activity indicator 100% in progress', (WidgetTester tester) async {
+  testWidgets('Activity indicator 100% in progress', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -144,7 +144,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/41345.
-  testWidgets('has the correct corner radius', (WidgetTester tester) async {
+  testWidgets('has the correct corner radius', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoActivityIndicator(animating: false, radius: 100),
     );
@@ -160,7 +160,7 @@ void main() {
     );
   });
 
-  testWidgets('Can specify color', (WidgetTester tester) async {
+  testWidgets('Can specify color', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       Center(
@@ -187,7 +187,7 @@ void main() {
   });
 }
 
-Widget buildCupertinoActivityIndicator([bool? animating]) {
+Widget buildCupertinoActivityIndicator([final bool? animating]) {
   return MediaQuery(
     data: const MediaQueryData(),
     child: CupertinoActivityIndicator(

@@ -34,10 +34,10 @@ class SynchronousFuture<T> implements Future<T> {
   }
 
   @override
-  Future<T> catchError(Function onError, { bool Function(Object error)? test }) => Completer<T>().future;
+  Future<T> catchError(final Function onError, { final bool Function(Object error)? test }) => Completer<T>().future;
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(T value) onValue, { Function? onError }) {
+  Future<R> then<R>(final FutureOr<R> Function(T value) onValue, { final Function? onError }) {
     final FutureOr<R> result = onValue(_value);
     if (result is Future<R>) {
       return result;
@@ -46,16 +46,16 @@ class SynchronousFuture<T> implements Future<T> {
   }
 
   @override
-  Future<T> timeout(Duration timeLimit, { FutureOr<T> Function()? onTimeout }) {
+  Future<T> timeout(final Duration timeLimit, { final FutureOr<T> Function()? onTimeout }) {
     return Future<T>.value(_value).timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
-  Future<T> whenComplete(FutureOr<dynamic> Function() action) {
+  Future<T> whenComplete(final FutureOr<dynamic> Function() action) {
     try {
       final FutureOr<dynamic> result = action();
       if (result is Future) {
-        return result.then<T>((dynamic value) => _value);
+        return result.then<T>((final dynamic value) => _value);
       }
       return this;
     } catch (e, stack) {

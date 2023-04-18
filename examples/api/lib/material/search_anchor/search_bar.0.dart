@@ -19,7 +19,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
   bool isDark = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData themeData = ThemeData(useMaterial3: true, brightness: isDark ? Brightness.dark : Brightness.light);
 
     return MaterialApp(
@@ -29,12 +29,12 @@ class _SearchBarAppState extends State<SearchBarApp> {
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: SearchAnchor(
-            builder: (BuildContext context, SearchController controller) {
+            builder: (final BuildContext context, final SearchController controller) {
               return SearchBar(
                 controller: controller,
                 padding: const MaterialStatePropertyAll<EdgeInsets>(EdgeInsets.symmetric(horizontal: 16.0)),
                 onTap: () { controller.openView(); },
-                onChanged: (_) { controller.openView(); },
+                onChanged: (final _) { controller.openView(); },
                 leading: const Icon(Icons.search),
                 trailing: <Widget>[
                   Tooltip(
@@ -53,8 +53,8 @@ class _SearchBarAppState extends State<SearchBarApp> {
                 ],
               );
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
-              return List<ListTile>.generate(5, (int index) {
+            suggestionsBuilder: (final BuildContext context, final SearchController controller) {
+              return List<ListTile>.generate(5, (final int index) {
                 final String item = 'item $index';
                 return ListTile(
                   title: Text(item),

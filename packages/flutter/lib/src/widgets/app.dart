@@ -126,7 +126,7 @@ typedef LocaleResolutionCallback = Locale? Function(Locale? locale, Iterable<Loc
 /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
 /// when `de` is not supported and `zh` is listed before `fr` (German is closer to French
 /// than Chinese).
-Locale basicLocaleListResolution(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
+Locale basicLocaleListResolution(final List<Locale>? preferredLocales, final Iterable<Locale> supportedLocales) {
   // preferredLocales can be null when called before the platform has had a chance to
   // initialize the locales. Platforms without locale passing support will provide an empty list.
   // We default to the first supported locale in these cases.
@@ -1333,7 +1333,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didUpdateWidget(WidgetsApp oldWidget) {
+  void didUpdateWidget(final WidgetsApp oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateRouting(oldWidget: oldWidget);
   }
@@ -1355,7 +1355,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     _navigator = null;
   }
 
-  void _updateRouting({WidgetsApp? oldWidget}) {
+  void _updateRouting({final WidgetsApp? oldWidget}) {
     if (_usesRouterWithDelegates) {
       assert(!_usesNavigator && !_usesRouterWithConfig);
       _clearNavigatorResource();
@@ -1408,10 +1408,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   GlobalKey<NavigatorState>? _navigator;
 
-  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+  Route<dynamic>? _onGenerateRoute(final RouteSettings settings) {
     final String? name = settings.name;
     final WidgetBuilder? pageContentBuilder = name == Navigator.defaultRouteName && widget.home != null
-        ? (BuildContext context) => widget.home!
+        ? (final BuildContext context) => widget.home!
         : widget.routes![name];
 
     if (pageContentBuilder != null) {
@@ -1432,7 +1432,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return null;
   }
 
-  Route<dynamic> _onUnknownRoute(RouteSettings settings) {
+  Route<dynamic> _onUnknownRoute(final RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
         throw FlutterError(
@@ -1484,7 +1484,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  Future<bool> didPushRoute(String route) async {
+  Future<bool> didPushRoute(final String route) async {
     assert(mounted);
     // The route name provider should handle the push route if we uses a
     // router.
@@ -1505,7 +1505,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   /// This is the resolved locale, and is one of the supportedLocales.
   Locale? _locale;
 
-  Locale _resolveLocales(List<Locale>? preferredLocales, Iterable<Locale> supportedLocales) {
+  Locale _resolveLocales(final List<Locale>? preferredLocales, final Iterable<Locale> supportedLocales) {
     // Attempt to use localeListResolutionCallback.
     if (widget.localeListResolutionCallback != null) {
       final Locale? locale = widget.localeListResolutionCallback!(preferredLocales, widget.supportedLocales);
@@ -1528,7 +1528,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeLocales(List<Locale>? locales) {
+  void didChangeLocales(final List<Locale>? locales) {
     final Locale newLocale = _resolveLocales(locales, widget.supportedLocales);
     if (newLocale != _locale) {
       setState(() {
@@ -1552,10 +1552,10 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   // BUILDER
 
-  bool _debugCheckLocalizations(Locale appLocale) {
+  bool _debugCheckLocalizations(final Locale appLocale) {
     assert(() {
       final Set<Type> unsupportedTypes =
-        _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
+        _localizationsDelegates.map<Type>((final LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
       for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type)) {
           continue;
@@ -1605,7 +1605,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget? routing;
     if (_usesRouterWithDelegates) {
       routing = Router<Object>(
@@ -1628,7 +1628,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
           onGenerateRoute: _onGenerateRoute,
           onGenerateInitialRoutes: widget.onGenerateInitialRoutes == null
             ? Navigator.defaultGenerateInitialRoutes
-            : (NavigatorState navigator, String initialRouteName) {
+            : (final NavigatorState navigator, final String initialRouteName) {
               return widget.onGenerateInitialRoutes!(initialRouteName);
             },
           onUnknownRoute: _onUnknownRoute,
@@ -1646,7 +1646,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     Widget result;
     if (widget.builder != null) {
       result = Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return widget.builder!(context, routing);
         },
       );
@@ -1712,7 +1712,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         // This Builder exists to provide a context below the Localizations widget.
         // The onGenerateTitle callback can refer to Localizations via its context
         // parameter.
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           final String title = widget.onGenerateTitle!(context);
           return Title(
             title: title,

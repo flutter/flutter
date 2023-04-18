@@ -57,14 +57,14 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
   /// plain text representation when `includePlaceholders` is true.
   @override
-  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
+  void computeToPlainText(final StringBuffer buffer, {final bool includeSemanticsLabels = true, final bool includePlaceholders = true}) {
     if (includePlaceholders) {
       buffer.writeCharCode(placeholderCodeUnit);
     }
   }
 
   @override
-  void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
+  void computeSemanticsInformation(final List<InlineSpanSemanticsInformation> collector) {
     collector.add(InlineSpanSemanticsInformation.placeholder);
   }
 
@@ -75,7 +75,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// replacement character (0xFFFC) that is inserted to represent it.
   ///
   /// Null is added to `semanticsElements` for [PlaceholderSpan]s.
-  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
+  void describeSemantics(final Accumulator offset, final List<int> semanticsOffsets, final List<dynamic> semanticsElements) {
     semanticsOffsets.add(offset.value);
     semanticsOffsets.add(offset.value + 1);
     semanticsElements.add(null); // null indicates this is a placeholder.
@@ -83,7 +83,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
 
     properties.add(EnumProperty<ui.PlaceholderAlignment>('alignment', alignment, defaultValue: null));

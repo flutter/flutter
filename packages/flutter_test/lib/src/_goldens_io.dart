@@ -63,15 +63,15 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   /// directory in which [testFile] resides.
   ///
   /// The [testFile] URL must represent a file.
-  LocalFileComparator(Uri testFile, {path.Style? pathStyle})
+  LocalFileComparator(final Uri testFile, {final path.Style? pathStyle})
     : basedir = _getBasedir(testFile, pathStyle),
       _path = _getPath(pathStyle);
 
-  static path.Context _getPath(path.Style? style) {
+  static path.Context _getPath(final path.Style? style) {
     return path.Context(style: style ?? path.Style.platform);
   }
 
-  static Uri _getBasedir(Uri testFile, path.Style? pathStyle) {
+  static Uri _getBasedir(final Uri testFile, final path.Style? pathStyle) {
     final path.Context context = _getPath(pathStyle);
     final String testFilePath = context.fromUri(testFile);
     final String testDirectoryPath = context.dirname(testFilePath);
@@ -90,7 +90,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   final path.Context _path;
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+  Future<bool> compare(final Uint8List imageBytes, final Uri golden) async {
     final ComparisonResult result = await GoldenFileComparator.compareLists(
       imageBytes,
       await getGoldenBytes(golden),
@@ -104,7 +104,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   }
 
   @override
-  Future<void> update(Uri golden, Uint8List imageBytes) async {
+  Future<void> update(final Uri golden, final Uint8List imageBytes) async {
     final File goldenFile = _getGoldenFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
@@ -114,7 +114,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
   ///
   /// If the file cannot be found, an error will be thrown.
   @protected
-  Future<List<int>> getGoldenBytes(Uri golden) async {
+  Future<List<int>> getGoldenBytes(final Uri golden) async {
     final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
       fail(
@@ -125,7 +125,7 @@ class LocalFileComparator extends GoldenFileComparator with LocalComparisonOutpu
     return goldenBytes;
   }
 
-  File _getGoldenFile(Uri golden) => File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
+  File _getGoldenFile(final Uri golden) => File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
 }
 
 /// A mixin for use in golden file comparators that run locally and provide
@@ -135,10 +135,10 @@ mixin LocalComparisonOutput {
   ///
   /// Will throw an error if a null result is provided.
   Future<String> generateFailureOutput(
-    ComparisonResult result,
-    Uri golden,
-    Uri basedir, {
-    String key = '',
+    final ComparisonResult result,
+    final Uri golden,
+    final Uri basedir, {
+    final String key = '',
   }) async => TestAsyncUtils.guard<String>(() async {
     String additionalFeedback = '';
     if (result.diffs != null) {
@@ -159,7 +159,7 @@ mixin LocalComparisonOutput {
   });
 
   /// Returns the appropriate file for a given diff from a [ComparisonResult].
-  File getFailureFile(String failure, Uri golden, Uri basedir) {
+  File getFailureFile(final String failure, final Uri golden, final Uri basedir) {
     final String fileName = golden.pathSegments.last;
     final String testName = '${fileName.split(path.extension(fileName))[0]}_$failure.png';
     return File(path.join(
@@ -171,7 +171,7 @@ mixin LocalComparisonOutput {
 
 /// Returns a [ComparisonResult] to describe the pixel differential of the
 /// [test] and [master] image bytes provided.
-Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async {
+Future<ComparisonResult> compareLists(final List<int>? test, final List<int>? master) async {
   if (identical(test, master)) {
     return ComparisonResult(
       passed: true,
@@ -268,7 +268,7 @@ Future<ComparisonResult> compareLists(List<int>? test, List<int>? master) async 
 }
 
 /// Inverts [imageBytes], returning a new [ByteData] object.
-ByteData _invert(ByteData imageBytes) {
+ByteData _invert(final ByteData imageBytes) {
   final ByteData bytes = ByteData(imageBytes.lengthInBytes);
   // Invert the RGB data (but not A).
   for (int i = 0; i < imageBytes.lengthInBytes; i += 4) {
@@ -283,30 +283,30 @@ ByteData _invert(ByteData imageBytes) {
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
   @override
-  Future<bool> compare(double width, double height, Uri golden) {
+  Future<bool> compare(final double width, final double height, final Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 
   @override
-  Future<void> update(double width, double height, Uri golden) {
+  Future<void> update(final double width, final double height, final Uri golden) {
     throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }
 
 /// Reads the red value out of a 32 bit rgba pixel.
-int _readRed(int pixel) => (pixel >> 24) & 0xff;
+int _readRed(final int pixel) => (pixel >> 24) & 0xff;
 
 /// Reads the green value out of a 32 bit rgba pixel.
-int _readGreen(int pixel) => (pixel >> 16) & 0xff;
+int _readGreen(final int pixel) => (pixel >> 16) & 0xff;
 
 /// Reads the blue value out of a 32 bit rgba pixel.
-int _readBlue(int pixel) => (pixel >> 8) & 0xff;
+int _readBlue(final int pixel) => (pixel >> 8) & 0xff;
 
 /// Reads the alpha value out of a 32 bit rgba pixel.
-int _readAlpha(int pixel) => pixel & 0xff;
+int _readAlpha(final int pixel) => pixel & 0xff;
 
 /// Convenience wrapper around [decodeImageFromPixels].
-Future<Image> _createImage(ByteData bytes, int width, int height) {
+Future<Image> _createImage(final ByteData bytes, final int width, final int height) {
   final Completer<Image> completer = Completer<Image>();
   decodeImageFromPixels(
     bytes.buffer.asUint8List(),
@@ -319,13 +319,13 @@ Future<Image> _createImage(ByteData bytes, int width, int height) {
 }
 
 // Converts a 32 bit rgba pixel to a 32 bit abgr pixel
-int _toABGR(int rgba) =>
+int _toABGR(final int rgba) =>
     (_readAlpha(rgba) << 24) |
     (_readBlue(rgba) << 16) |
     (_readGreen(rgba) << 8) |
     _readRed(rgba);
 
 // Converts a 32 bit abgr pixel to a 32 bit rgba pixel
-int _toRGBA(int abgr) =>
+int _toRGBA(final int abgr) =>
   // This is just a mirror of the other conversion.
   _toABGR(abgr);

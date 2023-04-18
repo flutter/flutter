@@ -6,20 +6,20 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('setState() overbuild test', (WidgetTester tester) async {
+  testWidgets('setState() overbuild test', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     final Builder inner = Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         log.add('inner');
         return const Text('inner', textDirection: TextDirection.ltr);
       },
     );
     int value = 0;
     await tester.pumpWidget(Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         log.add('outer');
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             log.add('stateful');
             return GestureDetector(
               onTap: () {
@@ -28,7 +28,7 @@ void main() {
                 });
               },
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   log.add('middle $value');
                   return inner;
                 },

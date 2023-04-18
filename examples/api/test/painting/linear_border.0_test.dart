@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/painting/linear_border/linear_border.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Smoke Test', (WidgetTester tester) async {
+  testWidgets('Smoke Test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExampleApp(),
     );

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/basic/expanded.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Expanded widget in a Column', (WidgetTester tester) async {
+  testWidgets('Expanded widget in a Column', (final WidgetTester tester) async {
     const double totalHeight = 600;
     const double appBarHeight = 56.0;
     const double columnWidth = 100.0;

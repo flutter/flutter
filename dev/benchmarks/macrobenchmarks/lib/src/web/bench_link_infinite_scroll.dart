@@ -78,16 +78,16 @@ class _InfiniteScrollLinksState extends State<_InfiniteScrollLinks> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
       controller: scrollController,
       itemExtent: 100.0,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return SizedBox(
           height: 100.0,
           child: Link(
             uri: Uri.parse('https://www.google.com'),
-            builder: (BuildContext context, FollowLink? followLink) => ElevatedButton(
+            builder: (final BuildContext context, final FollowLink? followLink) => ElevatedButton(
               onPressed: followLink,
               child: const Text('Google'),
             ),

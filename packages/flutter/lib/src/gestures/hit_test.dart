@@ -20,19 +20,19 @@ abstract interface class HitTestable {
   ///
   /// If this given position hits this object, consider adding a [HitTestEntry]
   /// to the given hit test result.
-  void hitTest(HitTestResult result, Offset position);
+  void hitTest(final HitTestResult result, final Offset position);
 }
 
 /// An object that can dispatch events.
 abstract interface class HitTestDispatcher {
   /// Override this method to dispatch events.
-  void dispatchEvent(PointerEvent event, HitTestResult result);
+  void dispatchEvent(final PointerEvent event, final HitTestResult result);
 }
 
 /// An object that can handle events.
 abstract interface class HitTestTarget {
   /// Override this method to receive events.
-  void handleEvent(PointerEvent event, HitTestEntry<HitTestTarget> entry);
+  void handleEvent(final PointerEvent event, final HitTestEntry<HitTestTarget> entry);
 }
 
 /// Data collected during a hit test about a specific [HitTestTarget].
@@ -75,7 +75,7 @@ abstract class _TransformPart {
   // For example, if this transform part is a vector `v1`, whose corresponding
   // matrix is `m1 = Matrix4.translation(v1)`, then the result of
   // `_VectorTransformPart(v1).multiply(rhs)` should equal to `m1 * rhs`.
-  Matrix4 multiply(Matrix4 rhs);
+  Matrix4 multiply(final Matrix4 rhs);
 }
 
 class _MatrixTransformPart extends _TransformPart {
@@ -84,7 +84,7 @@ class _MatrixTransformPart extends _TransformPart {
   final Matrix4 matrix;
 
   @override
-  Matrix4 multiply(Matrix4 rhs) {
+  Matrix4 multiply(final Matrix4 rhs) {
     return matrix.multiplied(rhs);
   }
 }
@@ -95,7 +95,7 @@ class _OffsetTransformPart extends _TransformPart {
   final Offset offset;
 
   @override
-  Matrix4 multiply(Matrix4 rhs) {
+  Matrix4 multiply(final Matrix4 rhs) {
     return rhs.clone()..leftTranslate(offset.dx, offset.dy);
   }
 }
@@ -114,7 +114,7 @@ class HitTestResult {
   /// The [HitTestEntry]s added to the returned [HitTestResult] are also
   /// added to the wrapped `result` (both share the same underlying data
   /// structure to store [HitTestEntry]s).
-  HitTestResult.wrap(HitTestResult result)
+  HitTestResult.wrap(final HitTestResult result)
      : _path = result._path,
        _transforms = result._transforms,
        _localTransforms = result._localTransforms;
@@ -167,7 +167,7 @@ class HitTestResult {
   /// The new entry is added at the end of the path, which means entries should
   /// be added in order from most specific to least specific, typically during an
   /// upward walk of the tree being hit tested.
-  void add(HitTestEntry entry) {
+  void add(final HitTestEntry entry) {
     assert(entry._transform == null);
     entry._transform = _lastTransform;
     _path.add(entry);
@@ -202,7 +202,7 @@ class HitTestResult {
   ///  * [BoxHitTestResult.addWithPaintTransform], which is a public wrapper
   ///    around this function for hit testing on [RenderBox]s.
   @protected
-  void pushTransform(Matrix4 transform) {
+  void pushTransform(final Matrix4 transform) {
     assert(
       _debugVectorMoreOrLessEquals(transform.getRow(2), Vector4(0, 0, 1, 0)) &&
       _debugVectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
@@ -241,7 +241,7 @@ class HitTestResult {
   ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper
   ///    around this function for hit testing on [RenderSliver]s.
   @protected
-  void pushOffset(Offset offset) {
+  void pushOffset(final Offset offset) {
     _localTransforms.add(_OffsetTransformPart(offset));
   }
 
@@ -268,11 +268,11 @@ class HitTestResult {
     assert(_transforms.isNotEmpty);
   }
 
-  bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
+  bool _debugVectorMoreOrLessEquals(final Vector4 a, final Vector4 b, { final double epsilon = precisionErrorTolerance }) {
     bool result = true;
     assert(() {
       final Vector4 difference = a - b;
-      result = difference.storage.every((double component) => component.abs() < epsilon);
+      result = difference.storage.every((final double component) => component.abs() < epsilon);
       return true;
     }());
     return result;

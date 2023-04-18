@@ -18,7 +18,7 @@ class SpyFixedExtentScrollController extends FixedExtentScrollController {
 }
 
 void main() {
-  testWidgets('Picker respects theme styling', (WidgetTester tester) async {
+  testWidgets('Picker respects theme styling', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Align(
@@ -28,8 +28,8 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 50.0,
-              onSelectedItemChanged: (_) { },
-              children: List<Widget>.generate(3, (int index) {
+              onSelectedItemChanged: (final _) { },
+              children: List<Widget>.generate(3, (final int index) {
                 return SizedBox(
                   height: 50.0,
                   width: 300.0,
@@ -57,14 +57,14 @@ void main() {
 
   group('layout', () {
     // Regression test for https://github.com/flutter/flutter/issues/22999
-    testWidgets('CupertinoPicker.builder test', (WidgetTester tester) async {
-      Widget buildFrame(int childCount) {
+    testWidgets('CupertinoPicker.builder test', (final WidgetTester tester) async {
+      Widget buildFrame(final int childCount) {
         return Directionality(
           textDirection: TextDirection.ltr,
           child: CupertinoPicker.builder(
             itemExtent: 50.0,
-            onSelectedItemChanged: (_) { },
-            itemBuilder: (BuildContext context, int index) {
+            onSelectedItemChanged: (final _) { },
+            itemBuilder: (final BuildContext context, final int index) {
               return Text('$index');
             },
             childCount: childCount,
@@ -80,7 +80,7 @@ void main() {
       expect(tester.renderObject(find.text('1')).attached, true);
     });
 
-    testWidgets('selected item is in the middle', (WidgetTester tester) async {
+    testWidgets('selected item is in the middle', (final WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 1);
 
       await tester.pumpWidget(
@@ -94,8 +94,8 @@ void main() {
               child: CupertinoPicker(
                 scrollController: controller,
                 itemExtent: 50.0,
-                onSelectedItemChanged: (_) { },
-                children: List<Widget>.generate(3, (int index) {
+                onSelectedItemChanged: (final _) { },
+                children: List<Widget>.generate(3, (final int index) {
                   return SizedBox(
                     height: 50.0,
                     width: 300.0,
@@ -127,7 +127,7 @@ void main() {
     });
   });
 
-  testWidgets('picker dark mode', (WidgetTester tester) async {
+  testWidgets('picker dark mode', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -143,7 +143,7 @@ void main() {
               ),
               itemExtent: 15.0,
               children: const <Widget>[Text('1'), Text('1')],
-              onSelectedItemChanged: (int i) { },
+              onSelectedItemChanged: (final int i) { },
             ),
           ),
         ),
@@ -168,7 +168,7 @@ void main() {
               ),
               itemExtent: 15.0,
               children: const <Widget>[Text('1'), Text('1')],
-              onSelectedItemChanged: (int i) { },
+              onSelectedItemChanged: (final int i) { },
             ),
           ),
         ),
@@ -179,7 +179,7 @@ void main() {
     expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
   });
 
-  testWidgets('picker selectionOverlay', (WidgetTester tester) async {
+  testWidgets('picker selectionOverlay', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -190,7 +190,7 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
-              onSelectedItemChanged: (int i) {},
+              onSelectedItemChanged: (final int i) {},
               selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
               children: const <Widget>[Text('1'), Text('1')],
             ),
@@ -202,7 +202,7 @@ void main() {
     expect(find.byType(CupertinoPicker), paints..rrect(color: const Color(0x12345678)));
   });
 
-  testWidgets('CupertinoPicker.selectionOverlay is nullable', (WidgetTester tester) async {
+  testWidgets('CupertinoPicker.selectionOverlay is nullable', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
@@ -213,7 +213,7 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 15.0,
-              onSelectedItemChanged: (int i) {},
+              onSelectedItemChanged: (final int i) {},
               selectionOverlay: null,
               children: const <Widget>[Text('1'), Text('1')],
             ),
@@ -228,11 +228,11 @@ void main() {
   group('scroll', () {
     testWidgets(
       'scrolling calls onSelectedItemChanged and triggers haptic feedback',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
           systemCalls.add(methodCall);
           return null;
         });
@@ -242,8 +242,8 @@ void main() {
             textDirection: TextDirection.ltr,
             child: CupertinoPicker(
               itemExtent: 100.0,
-              onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: List<Widget>.generate(100, (int index) {
+              onSelectedItemChanged: (final int index) { selectedItems.add(index); },
+              children: List<Widget>.generate(100, (final int index) {
                 return Center(
                   child: SizedBox(
                     width: 400.0,
@@ -282,11 +282,11 @@ void main() {
 
     testWidgets(
       'do not trigger haptic effects on non-iOS devices',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final List<int> selectedItems = <int>[];
         final List<MethodCall> systemCalls = <MethodCall>[];
 
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
           systemCalls.add(methodCall);
           return null;
         });
@@ -296,8 +296,8 @@ void main() {
             textDirection: TextDirection.ltr,
             child: CupertinoPicker(
               itemExtent: 100.0,
-              onSelectedItemChanged: (int index) { selectedItems.add(index); },
-              children: List<Widget>.generate(100, (int index) {
+              onSelectedItemChanged: (final int index) { selectedItems.add(index); },
+              children: List<Widget>.generate(100, (final int index) {
                 return Center(
                   child: SizedBox(
                     width: 400.0,
@@ -314,10 +314,10 @@ void main() {
         expect(selectedItems, <int>[1]);
         expect(systemCalls, isEmpty);
       },
-      variant: TargetPlatformVariant(TargetPlatform.values.where((TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()),
+      variant: TargetPlatformVariant(TargetPlatform.values.where((final TargetPlatform platform) => platform != TargetPlatform.iOS).toSet()),
     );
 
-    testWidgets('a drag in between items settles back', (WidgetTester tester) async {
+    testWidgets('a drag in between items settles back', (final WidgetTester tester) async {
       final FixedExtentScrollController controller = FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
 
@@ -327,8 +327,8 @@ void main() {
           child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: List<Widget>.generate(100, (int index) {
+            onSelectedItemChanged: (final int index) { selectedItems.add(index); },
+            children: List<Widget>.generate(100, (final int index) {
               return Center(
                 child: SizedBox(
                   width: 400.0,
@@ -371,7 +371,7 @@ void main() {
       expect(selectedItems, <int>[9]);
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('a big fling that overscrolls springs back', (WidgetTester tester) async {
+    testWidgets('a big fling that overscrolls springs back', (final WidgetTester tester) async {
       final FixedExtentScrollController controller =
           FixedExtentScrollController(initialItem: 10);
       final List<int> selectedItems = <int>[];
@@ -382,8 +382,8 @@ void main() {
           child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (int index) { selectedItems.add(index); },
-            children: List<Widget>.generate(100, (int index) {
+            onSelectedItemChanged: (final int index) { selectedItems.add(index); },
+            children: List<Widget>.generate(100, (final int index) {
               return Center(
                 child: SizedBox(
                   width: 400.0,
@@ -433,8 +433,8 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
   });
 
-  testWidgets('Picker adapts to MaterialApp dark mode', (WidgetTester tester) async {
-    Widget buildCupertinoPicker(Brightness brightness) {
+  testWidgets('Picker adapts to MaterialApp dark mode', (final WidgetTester tester) async {
+    Widget buildCupertinoPicker(final Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: Align(
@@ -444,8 +444,8 @@ void main() {
             width: 300.0,
             child: CupertinoPicker(
               itemExtent: 50.0,
-              onSelectedItemChanged: (_) { },
-              children: List<Widget>.generate(3, (int index) {
+              onSelectedItemChanged: (final _) { },
+              children: List<Widget>.generate(3, (final int index) {
                 return SizedBox(
                   height: 50.0,
                   width: 300.0,
@@ -474,13 +474,13 @@ void main() {
   });
 
   group('CupertinoPickerDefaultSelectionOverlay', () {
-    testWidgets('should be using directional decoration', (WidgetTester tester) async {
+    testWidgets('should be using directional decoration', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           theme: const CupertinoThemeData(brightness: Brightness.light),
           home: CupertinoPicker(
             itemExtent: 15.0,
-            onSelectedItemChanged: (int i) {},
+            onSelectedItemChanged: (final int i) {},
             selectionOverlay: const CupertinoPickerDefaultSelectionOverlay(background: Color(0x12345678)),
             children: const <Widget>[Text('1'), Text('1')],
           ),
@@ -497,7 +497,7 @@ void main() {
     });
   });
 
-  testWidgets('Scroll controller is detached upon dispose', (WidgetTester tester) async {
+  testWidgets('Scroll controller is detached upon dispose', (final WidgetTester tester) async {
     final SpyFixedExtentScrollController controller = SpyFixedExtentScrollController();
     expect(controller.hasListeners, false);
     expect(controller.positions.length, 0);
@@ -509,8 +509,8 @@ void main() {
           child: CupertinoPicker(
             scrollController: controller,
             itemExtent: 50.0,
-            onSelectedItemChanged: (_) { },
-            children: List<Widget>.generate(3, (int index) {
+            onSelectedItemChanged: (final _) { },
+            children: List<Widget>.generate(3, (final int index) {
               return SizedBox(
                 width: 300.0,
                 child: Text(index.toString()),

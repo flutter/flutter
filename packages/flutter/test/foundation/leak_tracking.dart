@@ -25,12 +25,12 @@ typedef LeaksObtainer = void Function(Leaks foundLeaks);
 /// Pass [leaksObtainer] if you want to get leak information before
 /// the method failure.
 Future<void> withFlutterLeakTracking(
-  DartAsyncCallback callback, {
-  required WidgetTester? tester,
-  StackTraceCollectionConfig stackTraceCollectionConfig =
+  final DartAsyncCallback callback, {
+  required final WidgetTester? tester,
+  final StackTraceCollectionConfig stackTraceCollectionConfig =
       const StackTraceCollectionConfig(),
-  Duration? timeoutForFinalGarbageCollection,
-  LeaksObtainer? leaksObtainer,
+  final Duration? timeoutForFinalGarbageCollection,
+  final LeaksObtainer? leaksObtainer,
 }) async {
   // The method is copied (with improvements) from
   // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
@@ -44,15 +44,15 @@ Future<void> withFlutterLeakTracking(
     return;
   }
 
-  void flutterEventToLeakTracker(ObjectEvent event) {
+  void flutterEventToLeakTracker(final ObjectEvent event) {
     return dispatchObjectEvent(event.toMap());
   }
 
   return TestAsyncUtils.guard<void>(() async {
     MemoryAllocations.instance.addListener(flutterEventToLeakTracker);
     final AsyncCodeRunner asyncCodeRunner = tester == null
-        ? (DartAsyncCallback action) async => action()
-        : (DartAsyncCallback action) async => tester.runAsync(action);
+        ? (final DartAsyncCallback action) async => action()
+        : (final DartAsyncCallback action) async => tester.runAsync(action);
     try {
       final Leaks leaks = await withLeakTracking(
         callback,

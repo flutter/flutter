@@ -31,7 +31,7 @@ List<String> _allDemos = <String>[];
 
 /// Extracts event data from [events] recorded by timeline, validates it, turns
 /// it into a histogram, and saves to a JSON file.
-Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
+Future<void> saveDurationsHistogram(final List<Map<String, dynamic>> events, final String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
   Map<String, dynamic>? startEvent;
   int? frameStart;
@@ -64,7 +64,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     throw 'no "Start Transition" timeline events found';
   }
   final Map<String, int> unexpectedValueCounts = <String, int>{};
-  durations.forEach((String routeName, List<int> values) {
+  durations.forEach((final String routeName, final List<int> values) {
     if (values.length != 2) {
       unexpectedValueCounts[routeName] = values.length;
     }
@@ -74,7 +74,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     final StringBuffer error = StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
     // When run with --trace-startup, the VM stores trace events in an endless buffer instead of a ring buffer.
     error.write('You must add the --trace-startup parameter to run the test. \n\n');
-    unexpectedValueCounts.forEach((String routeName, int count) {
+    unexpectedValueCounts.forEach((final String routeName, final int count) {
       error.writeln(' - $routeName recorded $count values.');
     });
     error.writeln('\nFull event sequence:');
@@ -111,7 +111,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
+Future<void> runDemos(final List<String> demos, final FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
   String? currentDemoCategory;
 
@@ -162,7 +162,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   await driver.tap(find.byTooltip('Back'));
 }
 
-void main([List<String> args = const <String>[]]) {
+void main([final List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
   final bool hybrid = args.contains('--hybrid');
   group('flutter gallery transitions', () {

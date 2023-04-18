@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
+  testWidgets('Can set opacity for an Icon', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -27,7 +27,7 @@ void main() {
     expect(text.text.style!.color, const Color(0xFF666666).withOpacity(0.5));
   });
 
-  testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
+  testWidgets('Icon sizing - no theme, default size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -41,7 +41,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
-  testWidgets('Icon sizing - no theme, explicit size', (WidgetTester tester) async {
+  testWidgets('Icon sizing - no theme, explicit size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -58,7 +58,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(96.0)));
   });
 
-  testWidgets('Icon sizing - sized theme', (WidgetTester tester) async {
+  testWidgets('Icon sizing - sized theme', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -75,7 +75,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(36.0)));
   });
 
-  testWidgets('Icon sizing - sized theme, explicit size', (WidgetTester tester) async {
+  testWidgets('Icon sizing - sized theme, explicit size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -95,7 +95,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
-  testWidgets('Icon sizing - sizeless theme, default size', (WidgetTester tester) async {
+  testWidgets('Icon sizing - sizeless theme, default size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -113,7 +113,7 @@ void main() {
   });
 
 
-  testWidgets('Icon with custom font', (WidgetTester tester) async {
+  testWidgets('Icon with custom font', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -127,7 +127,7 @@ void main() {
     expect(richText.text.style!.fontFamily, equals('Roboto'));
   });
 
-  testWidgets('Icon with semantic label', (WidgetTester tester) async {
+  testWidgets('Icon with semantic label', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -147,7 +147,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Null icon with semantic label', (WidgetTester tester) async {
+  testWidgets('Null icon with semantic label', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -167,7 +167,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets("Changing semantic label from null doesn't rebuild tree ", (WidgetTester tester) async {
+  testWidgets("Changing semantic label from null doesn't rebuild tree ", (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -198,7 +198,7 @@ void main() {
     expect(richText2, same(richText1));
   });
 
-  testWidgets('IconData comparison', (WidgetTester tester) async {
+  testWidgets('IconData comparison', (final WidgetTester tester) async {
     expect(const IconData(123), const IconData(123));
     expect(const IconData(123), isNot(const IconData(123, matchTextDirection: true)));
     expect(const IconData(123), isNot(const IconData(123, fontFamily: 'f')));
@@ -211,7 +211,7 @@ void main() {
   });
 
 
-  testWidgets('Fill, weight, grade, and optical size variations are passed', (WidgetTester tester) async {
+  testWidgets('Fill, weight, grade, and optical size variations are passed', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -244,7 +244,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Fill, weight, grade, and optical size can be set at the theme-level', (WidgetTester tester) async {
+  testWidgets('Fill, weight, grade, and optical size can be set at the theme-level', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -269,7 +269,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Theme-level fill, weight, grade, and optical size can be overridden', (WidgetTester tester) async {
+  testWidgets('Theme-level fill, weight, grade, and optical size can be overridden', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

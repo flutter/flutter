@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('SafeArea', () {
-    testWidgets('SafeArea - basic', (WidgetTester tester) async {
+    testWidgets('SafeArea - basic', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -22,7 +22,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 580.0));
     });
 
-    testWidgets('SafeArea - with minimums', (WidgetTester tester) async {
+    testWidgets('SafeArea - with minimums', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -37,7 +37,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 570.0));
     });
 
-    testWidgets('SafeArea - nested', (WidgetTester tester) async {
+    testWidgets('SafeArea - nested', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MediaQuery(
           data: MediaQueryData(padding: EdgeInsets.all(20.0)),
@@ -54,7 +54,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(780.0, 580.0));
     });
 
-    testWidgets('SafeArea - changing', (WidgetTester tester) async {
+    testWidgets('SafeArea - changing', (final WidgetTester tester) async {
       const Widget child = SafeArea(
         bottom: false,
         child: SafeArea(
@@ -85,7 +85,7 @@ void main() {
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
     });
 
-    testWidgets('SafeArea - properties', (WidgetTester tester) async {
+    testWidgets('SafeArea - properties', (final WidgetTester tester) async {
       final SafeArea child = SafeArea(
         right: false,
         bottom: false,
@@ -94,14 +94,14 @@ void main() {
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       child.debugFillProperties(properties);
 
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
-      expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+      expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
+      expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
+      expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
+      expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
     });
 
     group('SafeArea maintains bottom viewPadding when specified for consumed bottom padding', () {
-      Widget boilerplate(Widget child) {
+      Widget boilerplate(final Widget child) {
         return Localizations(
           locale: const Locale('en', 'us'),
           delegates: const <LocalizationsDelegate<dynamic>>[
@@ -112,7 +112,7 @@ void main() {
         );
       }
 
-      testWidgets('SafeArea alone.', (WidgetTester tester) async {
+      testWidgets('SafeArea alone.', (final WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
@@ -147,7 +147,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgets('SafeArea alone - partial ViewInsets consume Padding', (WidgetTester tester) async {
+      testWidgets('SafeArea alone - partial ViewInsets consume Padding', (final WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Column(
@@ -180,7 +180,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgets('SafeArea with nested Scaffold', (WidgetTester tester) async {
+      testWidgets('SafeArea with nested Scaffold', (final WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
@@ -218,7 +218,7 @@ void main() {
         expect(initialPoint, finalPoint);
       });
 
-      testWidgets('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (WidgetTester tester) async {
+      testWidgets('SafeArea with nested Scaffold  - partial ViewInsets consume Padding', (final WidgetTester tester) async {
         final Widget child = boilerplate(const SafeArea(
           maintainBottomViewPadding: true,
           child: Scaffold(
@@ -257,7 +257,7 @@ void main() {
   });
 
   group('SliverSafeArea', () {
-    Widget buildWidget(EdgeInsets mediaPadding, Widget sliver) {
+    Widget buildWidget(final EdgeInsets mediaPadding, final Widget sliver) {
       return MediaQuery(
         data: MediaQueryData(padding: mediaPadding),
         child: Directionality(
@@ -274,9 +274,9 @@ void main() {
       );
     }
 
-    void verify(WidgetTester tester, List<Rect> expectedRects) {
+    void verify(final WidgetTester tester, final List<Rect> expectedRects) {
       final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>(
-        (RenderBox target) {
+        (final RenderBox target) {
           final Offset topLeft = target.localToGlobal(Offset.zero);
           final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
           return Rect.fromPoints(topLeft, bottomRight);
@@ -285,7 +285,7 @@ void main() {
       expect(testAnswers, equals(expectedRects));
     }
 
-    testWidgets('SliverSafeArea - basic', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - basic', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
@@ -302,7 +302,7 @@ void main() {
       ]);
     });
 
-    testWidgets('SliverSafeArea - basic', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - basic', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
@@ -320,7 +320,7 @@ void main() {
       ]);
     });
 
-    testWidgets('SliverSafeArea - nested', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - nested', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildWidget(
           const EdgeInsets.all(20.0),
@@ -340,7 +340,7 @@ void main() {
       ]);
     });
 
-    testWidgets('SliverSafeArea - changing', (WidgetTester tester) async {
+    testWidgets('SliverSafeArea - changing', (final WidgetTester tester) async {
       const Widget sliver = SliverSafeArea(
         bottom: false,
         sliver: SliverSafeArea(
@@ -379,7 +379,7 @@ void main() {
     });
   });
 
-  testWidgets('SliverSafeArea - properties', (WidgetTester tester) async {
+  testWidgets('SliverSafeArea - properties', (final WidgetTester tester) async {
     const SliverSafeArea child = SliverSafeArea(
       right: false,
       bottom: false,
@@ -388,9 +388,9 @@ void main() {
     final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
     child.debugFillProperties(properties);
 
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
-    expect(properties.properties.any((DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
+    expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid left padding'), true);
+    expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid right padding'), false);
+    expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid top padding'), true);
+    expect(properties.properties.any((final DiagnosticsNode n) => n is FlagProperty && n.toString() == 'avoid bottom padding'), false);
   });
 }

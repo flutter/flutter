@@ -318,28 +318,28 @@ class ButtonStyle with Diagnosticable {
   /// Returns a copy of this ButtonStyle with the given fields replaced with
   /// the new values.
   ButtonStyle copyWith({
-    MaterialStateProperty<TextStyle?>? textStyle,
-    MaterialStateProperty<Color?>? backgroundColor,
-    MaterialStateProperty<Color?>? foregroundColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    MaterialStateProperty<Color?>? shadowColor,
-    MaterialStateProperty<Color?>? surfaceTintColor,
-    MaterialStateProperty<double?>? elevation,
-    MaterialStateProperty<EdgeInsetsGeometry?>? padding,
-    MaterialStateProperty<Size?>? minimumSize,
-    MaterialStateProperty<Size?>? fixedSize,
-    MaterialStateProperty<Size?>? maximumSize,
-    MaterialStateProperty<Color?>? iconColor,
-    MaterialStateProperty<double?>? iconSize,
-    MaterialStateProperty<BorderSide?>? side,
-    MaterialStateProperty<OutlinedBorder?>? shape,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    VisualDensity? visualDensity,
-    MaterialTapTargetSize? tapTargetSize,
-    Duration? animationDuration,
-    bool? enableFeedback,
-    AlignmentGeometry? alignment,
-    InteractiveInkFeatureFactory? splashFactory,
+    final MaterialStateProperty<TextStyle?>? textStyle,
+    final MaterialStateProperty<Color?>? backgroundColor,
+    final MaterialStateProperty<Color?>? foregroundColor,
+    final MaterialStateProperty<Color?>? overlayColor,
+    final MaterialStateProperty<Color?>? shadowColor,
+    final MaterialStateProperty<Color?>? surfaceTintColor,
+    final MaterialStateProperty<double?>? elevation,
+    final MaterialStateProperty<EdgeInsetsGeometry?>? padding,
+    final MaterialStateProperty<Size?>? minimumSize,
+    final MaterialStateProperty<Size?>? fixedSize,
+    final MaterialStateProperty<Size?>? maximumSize,
+    final MaterialStateProperty<Color?>? iconColor,
+    final MaterialStateProperty<double?>? iconSize,
+    final MaterialStateProperty<BorderSide?>? side,
+    final MaterialStateProperty<OutlinedBorder?>? shape,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final VisualDensity? visualDensity,
+    final MaterialTapTargetSize? tapTargetSize,
+    final Duration? animationDuration,
+    final bool? enableFeedback,
+    final AlignmentGeometry? alignment,
+    final InteractiveInkFeatureFactory? splashFactory,
   }) {
     return ButtonStyle(
       textStyle: textStyle ?? this.textStyle,
@@ -372,7 +372,7 @@ class ButtonStyle with Diagnosticable {
   ///
   /// In other words, [style] is used to fill in unspecified (null) fields
   /// this ButtonStyle.
-  ButtonStyle merge(ButtonStyle? style) {
+  ButtonStyle merge(final ButtonStyle? style) {
     if (style == null) {
       return this;
     }
@@ -432,7 +432,7 @@ class ButtonStyle with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -465,7 +465,7 @@ class ButtonStyle with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<TextStyle?>>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
@@ -491,7 +491,7 @@ class ButtonStyle with Diagnosticable {
   }
 
   /// Linearly interpolate between two [ButtonStyle]s.
-  static ButtonStyle? lerp(ButtonStyle? a, ButtonStyle? b, double t) {
+  static ButtonStyle? lerp(final ButtonStyle? a, final ButtonStyle? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -522,7 +522,7 @@ class ButtonStyle with Diagnosticable {
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
+  static MaterialStateProperty<BorderSide?>? _lerpSides(final MaterialStateProperty<BorderSide?>? a, final MaterialStateProperty<BorderSide?>? b, final double t) {
     if (a == null && b == null) {
       return null;
     }
@@ -538,7 +538,7 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
   final double t;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
+  BorderSide? resolve(final Set<MaterialState> states) {
     final BorderSide? resolvedA = a?.resolve(states);
     final BorderSide? resolvedB = b?.resolve(states);
     if (resolvedA == null && resolvedB == null) {

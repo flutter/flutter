@@ -36,9 +36,9 @@ class TaskResult {
   }
 
   /// Constructs a successful result using JSON data stored in a file.
-  factory TaskResult.successFromFile(File file, {
-    List<String> benchmarkScoreKeys = const <String>[],
-    List<String> detailFiles = const <String>[],
+  factory TaskResult.successFromFile(final File file, {
+    final List<String> benchmarkScoreKeys = const <String>[],
+    final List<String> detailFiles = const <String>[],
   }) {
     return TaskResult.success(
       json.decode(file.readAsStringSync()) as Map<String, dynamic>?,
@@ -48,7 +48,7 @@ class TaskResult {
   }
 
   /// Constructs a [TaskResult] from JSON.
-  factory TaskResult.fromJson(Map<String, dynamic> json) {
+  factory TaskResult.fromJson(final Map<String, dynamic> json) {
     final bool success = json['success'] as bool;
     if (success) {
       final List<String> benchmarkScoreKeys = (json['benchmarkScoreKeys'] as List<dynamic>? ?? <String>[]).cast<String>();

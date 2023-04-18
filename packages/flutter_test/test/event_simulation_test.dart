@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<String> platforms = <String>['linux', 'macos', 'android', 'fuchsia'];
 
-void _verifyKeyEvent<T extends KeyEvent>(KeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
+void _verifyKeyEvent<T extends KeyEvent>(final KeyEvent event, final PhysicalKeyboardKey physical, final LogicalKeyboardKey logical, final String? character) {
   expect(event, isA<T>());
   expect(event.physicalKey, physical);
   expect(event.logicalKey, logical);
@@ -17,14 +17,14 @@ void _verifyKeyEvent<T extends KeyEvent>(KeyEvent event, PhysicalKeyboardKey phy
   expect(event.synthesized, false);
 }
 
-void _verifyRawKeyEvent<T extends RawKeyEvent>(RawKeyEvent event, PhysicalKeyboardKey physical, LogicalKeyboardKey logical, String? character) {
+void _verifyRawKeyEvent<T extends RawKeyEvent>(final RawKeyEvent event, final PhysicalKeyboardKey physical, final LogicalKeyboardKey logical, final String? character) {
   expect(event, isA<T>());
   expect(event.physicalKey, physical);
   expect(event.logicalKey, logical);
   expect(event.character, character);
 }
 
-Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
+Future<void> _shouldThrow<T extends Error>(final AsyncValueGetter<void> func) async {
   bool hasError = false;
   try {
     await func();
@@ -37,7 +37,7 @@ Future<void> _shouldThrow<T extends Error>(AsyncValueGetter<void> func) async {
 }
 
 void main() {
-  testWidgets('simulates keyboard events (RawEvent)', (WidgetTester tester) async {
+  testWidgets('simulates keyboard events (RawEvent)', (final WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     final List<RawKeyEvent> events = <RawKeyEvent>[];
@@ -85,7 +85,7 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
   });
 
-  testWidgets('simulates keyboard events (KeyData then RawKeyEvent)', (WidgetTester tester) async {
+  testWidgets('simulates keyboard events (KeyData then RawKeyEvent)', (final WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
     final List<KeyEvent> events = <KeyEvent>[];
@@ -248,7 +248,7 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
   });
 
-  testWidgets('simulates using the correct transit mode: rawKeyData', (WidgetTester tester) async {
+  testWidgets('simulates using the correct transit mode: rawKeyData', (final WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.rawKeyData;
 
     final List<Object> events = <Object>[];
@@ -257,11 +257,11 @@ void main() {
     await tester.pumpWidget(
       Focus(
         focusNode: focusNode,
-        onKey: (FocusNode node, RawKeyEvent event) {
+        onKey: (final FocusNode node, final RawKeyEvent event) {
           events.add(event);
           return KeyEventResult.ignored;
         },
-        onKeyEvent: (FocusNode node, KeyEvent event) {
+        onKeyEvent: (final FocusNode node, final KeyEvent event) {
           events.add(event);
           return KeyEventResult.ignored;
         },
@@ -304,7 +304,7 @@ void main() {
     debugKeyEventSimulatorTransitModeOverride = null;
   });
 
-  testWidgets('simulates using the correct transit mode: keyDataThenRawKeyData', (WidgetTester tester) async {
+  testWidgets('simulates using the correct transit mode: keyDataThenRawKeyData', (final WidgetTester tester) async {
     debugKeyEventSimulatorTransitModeOverride = KeyDataTransitMode.keyDataThenRawKeyData;
 
     final List<Object> events = <Object>[];
@@ -313,11 +313,11 @@ void main() {
     await tester.pumpWidget(
       Focus(
         focusNode: focusNode,
-        onKey: (FocusNode node, RawKeyEvent event) {
+        onKey: (final FocusNode node, final RawKeyEvent event) {
           events.add(event);
           return KeyEventResult.ignored;
         },
-        onKeyEvent: (FocusNode node, KeyEvent event) {
+        onKeyEvent: (final FocusNode node, final KeyEvent event) {
           events.add(event);
           return KeyEventResult.ignored;
         },

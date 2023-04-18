@@ -215,7 +215,7 @@ class TextInputType {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is TextInputType
         && other.index == index
         && other.signed == signed
@@ -468,8 +468,8 @@ class TextInputConfiguration {
     this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
-    SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType,
+    final SmartDashesType? smartDashesType,
+    final SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     this.enableInteractiveSelection = true,
     this.actionLabel,
@@ -626,22 +626,22 @@ class TextInputConfiguration {
   /// Creates a copy of this [TextInputConfiguration] with the given fields
   /// replaced with new values.
   TextInputConfiguration copyWith({
-    TextInputType? inputType,
-    bool? readOnly,
-    bool? obscureText,
-    bool? autocorrect,
-    SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType,
-    bool? enableSuggestions,
-    bool? enableInteractiveSelection,
-    String? actionLabel,
-    TextInputAction? inputAction,
-    Brightness? keyboardAppearance,
-    TextCapitalization? textCapitalization,
-    bool? enableIMEPersonalizedLearning,
-    List<String>? allowedMimeTypes,
-    AutofillConfiguration? autofillConfiguration,
-    bool? enableDeltaModel,
+    final TextInputType? inputType,
+    final bool? readOnly,
+    final bool? obscureText,
+    final bool? autocorrect,
+    final SmartDashesType? smartDashesType,
+    final SmartQuotesType? smartQuotesType,
+    final bool? enableSuggestions,
+    final bool? enableInteractiveSelection,
+    final String? actionLabel,
+    final TextInputAction? inputAction,
+    final Brightness? keyboardAppearance,
+    final TextCapitalization? textCapitalization,
+    final bool? enableIMEPersonalizedLearning,
+    final List<String>? allowedMimeTypes,
+    final AutofillConfiguration? autofillConfiguration,
+    final bool? enableDeltaModel,
   }) {
     return TextInputConfiguration(
       inputType: inputType ?? this.inputType,
@@ -711,7 +711,7 @@ class TextInputConfiguration {
   }
 }
 
-TextAffinity? _toTextAffinity(String? affinity) {
+TextAffinity? _toTextAffinity(final String? affinity) {
   switch (affinity) {
     case 'TextAffinity.downstream':
       return TextAffinity.downstream;
@@ -774,7 +774,7 @@ class TextEditingValue {
   });
 
   /// Creates an instance of this class from a JSON object.
-  factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+  factory TextEditingValue.fromJSON(final Map<String, dynamic> encoded) {
     final String text = encoded['text'] as String;
     final TextSelection selection = TextSelection(
       baseOffset: encoded['selectionBase'] as int? ?? -1,
@@ -838,9 +838,9 @@ class TextEditingValue {
 
   /// Creates a copy of this value but with the given fields replaced with the new values.
   TextEditingValue copyWith({
-    String? text,
-    TextSelection? selection,
-    TextRange? composing,
+    final String? text,
+    final TextSelection? selection,
+    final TextRange? composing,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
@@ -878,7 +878,7 @@ class TextEditingValue {
   ///
   /// This method does nothing if the given `replacementRange` is not
   /// [TextRange.isValid].
-  TextEditingValue replaced(TextRange replacementRange, String replacementString) {
+  TextEditingValue replaced(final TextRange replacementRange, final String replacementString) {
     if (!replacementRange.isValid) {
       return this;
     }
@@ -888,7 +888,7 @@ class TextEditingValue {
       return copyWith(text: newText);
     }
 
-    int adjustIndex(int originalIndex) {
+    int adjustIndex(final int originalIndex) {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= replacementRange.start && originalIndex < replacementRange.end ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
@@ -932,7 +932,7 @@ class TextEditingValue {
   String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -956,7 +956,7 @@ class TextEditingValue {
   // properties of [TextRange]s. [TextEditingValue] should perform this
   // wherever it is building other values (such as toJson) or is built in a
   // non-const way (such as fromJson).
-  static bool _textRangeIsValid(TextRange range, String text) {
+  static bool _textRangeIsValid(final TextRange range, final String text) {
     if (range.start == -1 && range.end == -1) {
       return true;
     }
@@ -1025,18 +1025,18 @@ mixin TextSelectionDelegate {
   /// * [EditableTextState.userUpdateTextEditingValue]: an implementation that
   ///   applies additional pre-processing to the specified [value], before
   ///   updating the text editing state.
-  void userUpdateTextEditingValue(TextEditingValue value, SelectionChangedCause cause);
+  void userUpdateTextEditingValue(final TextEditingValue value, final SelectionChangedCause cause);
 
   /// Hides the text selection toolbar.
   ///
   /// By default, hideHandles is true, and the toolbar is hidden along with its
   /// handles. If hideHandles is set to false, then the toolbar will be hidden
   /// but the handles will remain.
-  void hideToolbar([bool hideHandles = true]);
+  void hideToolbar([final bool hideHandles = true]);
 
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
-  void bringIntoView(TextPosition position);
+  void bringIntoView(final TextPosition position);
 
   /// Whether cut is enabled, must not be null.
   bool get cutEnabled => true;
@@ -1054,7 +1054,7 @@ mixin TextSelectionDelegate {
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
-  void cutSelection(SelectionChangedCause cause);
+  void cutSelection(final SelectionChangedCause cause);
 
   /// Paste text from [Clipboard].
   ///
@@ -1062,19 +1062,19 @@ mixin TextSelectionDelegate {
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the toolbar
   /// will be hidden and the current selection will be scrolled into view.
-  Future<void> pasteText(SelectionChangedCause cause);
+  Future<void> pasteText(final SelectionChangedCause cause);
 
   /// Set the current selection to contain the entire text value.
   ///
   /// If and only if [cause] is [SelectionChangedCause.toolbar], the selection
   /// will be scrolled into view.
-  void selectAll(SelectionChangedCause cause);
+  void selectAll(final SelectionChangedCause cause);
 
   /// Copy current selection to [Clipboard].
   ///
   /// If [cause] is [SelectionChangedCause.toolbar], the position of
   /// [bringIntoView] to selection will be called and hide toolbar.
-  void copySelection(SelectionChangedCause cause);
+  void copySelection(final SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].
@@ -1108,13 +1108,13 @@ mixin TextInputClient {
   ///
   /// The new [value] is treated as user input and thus may subject to input
   /// formatting.
-  void updateEditingValue(TextEditingValue value);
+  void updateEditingValue(final TextEditingValue value);
 
   /// Requests that this client perform the given action.
-  void performAction(TextInputAction action);
+  void performAction(final TextInputAction action);
 
   /// Notify client about new content insertion from Android keyboard.
-  void insertContent(KeyboardInsertedContent content) {}
+  void insertContent(final KeyboardInsertedContent content) {}
 
   /// Request from the input method that this client perform the given private
   /// command.
@@ -1129,16 +1129,16 @@ mixin TextInputClient {
   ///   * [sendAppPrivateCommand](https://developer.android.com/reference/android/view/inputmethod/InputMethodManager#sendAppPrivateCommand),
   ///     which is the Android documentation for sendAppPrivateCommand, used to
   ///     send a command to the input method.
-  void performPrivateCommand(String action, Map<String, dynamic> data);
+  void performPrivateCommand(final String action, final Map<String, dynamic> data);
 
   /// Updates the floating cursor position and state.
-  void updateFloatingCursor(RawFloatingCursorPoint point);
+  void updateFloatingCursor(final RawFloatingCursorPoint point);
 
   /// Requests that this client display a prompt rectangle for the given text range,
   /// to indicate the range of text that will be changed by a pending autocorrection.
   ///
   /// This method will only be called on iOS.
-  void showAutocorrectionPromptRect(int start, int end);
+  void showAutocorrectionPromptRect(final int start, final int end);
 
   /// Platform notified framework of closed connection.
   ///
@@ -1155,7 +1155,7 @@ mixin TextInputClient {
   ///
   ///  * [TextInputControl.hide], a method to hide the old input control.
   ///  * [TextInputControl.show], a method to show the new input control.
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {}
+  void didChangeInputControl(final TextInputControl? oldControl, final TextInputControl? newControl) {}
 
   /// Requests that the client show the editing toolbar, for example when the
   /// platform changes the selection through a non-flutter method such as
@@ -1168,7 +1168,7 @@ mixin TextInputClient {
   /// For example, this is called when responding to UIKit requesting
   /// a text placeholder be added at the current selection, such as when
   /// requesting additional writing space with iPadOS14 Scribble.
-  void insertTextPlaceholder(Size size) {}
+  void insertTextPlaceholder(final Size size) {}
 
   /// Requests that the client remove the text placeholder.
   void removeTextPlaceholder() {}
@@ -1176,7 +1176,7 @@ mixin TextInputClient {
   /// Performs the specified MacOS-specific selector from the
   /// `NSStandardKeyBindingResponding` protocol or user-specified selector
   /// from `DefaultKeyBinding.Dict`.
-  void performSelector(String selectorName) {}
+  void performSelector(final String selectorName) {}
 }
 
 /// An interface to receive focus from the engine.
@@ -1189,10 +1189,10 @@ abstract class ScribbleClient {
   /// Called by the engine when the [ScribbleClient] should receive focus.
   ///
   /// For example, this method is called during a UIIndirectScribbleInteraction.
-  void onScribbleFocus(Offset offset);
+  void onScribbleFocus(final Offset offset);
 
   /// Tests whether the [ScribbleClient] overlaps the given rectangle bounds.
-  bool isInScribbleRect(Rect rect);
+  bool isInScribbleRect(final Rect rect);
 
   /// The current bounds of the [ScribbleClient].
   Rect get bounds;
@@ -1223,7 +1223,7 @@ class SelectionRect {
   final TextDirection direction;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -1282,7 +1282,7 @@ mixin DeltaTextInputClient implements TextInputClient {
   /// }
   /// ```
   /// {@end-tool}
-  void updateEditingValueWithDeltas(List<TextEditingDelta> textEditingDeltas);
+  void updateEditingValueWithDeltas(final List<TextEditingDelta> textEditingDeltas);
 }
 
 /// An interface for interacting with a text input control.
@@ -1311,7 +1311,7 @@ class TextInputConnection {
   /// This call has no effect when asserts are disabled. Calling it from
   /// application code will likely break text input for the application.
   @visibleForTesting
-  static void debugResetId({int to = 1}) {
+  static void debugResetId({final int to = 1}) {
     assert(() {
       _nextId = to;
       return true;
@@ -1350,14 +1350,14 @@ class TextInputConnection {
 
   /// Requests that the text input control update itself according to the new
   /// [TextInputConfiguration].
-  void updateConfig(TextInputConfiguration configuration) {
+  void updateConfig(final TextInputConfiguration configuration) {
     assert(attached);
     TextInput._instance._updateConfig(configuration);
   }
 
   /// Requests that the text input control change its internal state to match
   /// the given state.
-  void setEditingState(TextEditingValue value) {
+  void setEditingState(final TextEditingValue value) {
     assert(attached);
     TextInput._instance._setEditingState(value);
   }
@@ -1371,7 +1371,7 @@ class TextInputConnection {
   ///
   /// 2. [transform]: a matrix that maps the local paint coordinate system
   ///                 to the [PipelineOwner.rootNode].
-  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+  void setEditableSizeAndTransform(final Size editableBoxSize, final Matrix4 transform) {
     if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
       _cachedSize = editableBoxSize;
       _cachedTransform = transform;
@@ -1387,7 +1387,7 @@ class TextInputConnection {
   ///
   /// This information is used for positioning the IME candidates menu on each
   /// platform.
-  void setComposingRect(Rect rect) {
+  void setComposingRect(final Rect rect) {
     if (rect == _cachedRect) {
       return;
     }
@@ -1398,7 +1398,7 @@ class TextInputConnection {
 
   /// Sends the coordinates of caret rect. This is used on macOS for positioning
   /// the accent selection menu.
-  void setCaretRect(Rect rect) {
+  void setCaretRect(final Rect rect) {
     if (rect == _cachedCaretRect) {
       return;
     }
@@ -1411,7 +1411,7 @@ class TextInputConnection {
   /// the platform's text input plugin.
   ///
   /// These are used by the engine during a UIDirectScribbleInteraction.
-  void setSelectionRects(List<SelectionRect> selectionRects) {
+  void setSelectionRects(final List<SelectionRect> selectionRects) {
     if (!listEquals(_cachedSelectionRects, selectionRects)) {
       _cachedSelectionRects = selectionRects;
       TextInput._instance._setSelectionRects(selectionRects);
@@ -1424,11 +1424,11 @@ class TextInputConnection {
   /// of the hidden native input's content. Hence, the content size will match
   /// to the size of the editable widget's content.
   void setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
+    required final String? fontFamily,
+    required final double? fontSize,
+    required final FontWeight? fontWeight,
+    required final TextDirection textDirection,
+    required final TextAlign textAlign,
   }) {
     assert(attached);
 
@@ -1461,7 +1461,7 @@ class TextInputConnection {
   }
 }
 
-TextInputAction _toTextInputAction(String action) {
+TextInputAction _toTextInputAction(final String action) {
   switch (action) {
     case 'TextInputAction.none':
       return TextInputAction.none;
@@ -1493,7 +1493,7 @@ TextInputAction _toTextInputAction(String action) {
   throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text input action: $action')]);
 }
 
-FloatingCursorDragState _toTextCursorAction(String state) {
+FloatingCursorDragState _toTextCursorAction(final String state) {
   switch (state) {
     case 'FloatingCursorDragState.start':
       return FloatingCursorDragState.Start;
@@ -1505,7 +1505,7 @@ FloatingCursorDragState _toTextCursorAction(String state) {
   throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Unknown text cursor action: $state')]);
 }
 
-RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
+RawFloatingCursorPoint _toTextPoint(final FloatingCursorDragState state, final Map<String, dynamic> encoded) {
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
   final Offset offset = state == FloatingCursorDragState.Update
@@ -1580,7 +1580,7 @@ class TextInput {
   /// will break the ability to input text. This has no effect if asserts are
   /// disabled.
   @visibleForTesting
-  static void setChannel(MethodChannel newChannel) {
+  static void setChannel(final MethodChannel newChannel) {
     assert(() {
       _instance._channel = newChannel..setMethodCallHandler(_instance._loudlyHandleTextInputInvocation);
       return true;
@@ -1589,13 +1589,13 @@ class TextInput {
 
   static final TextInput _instance = TextInput._();
 
-  static void _addInputControl(TextInputControl control) {
+  static void _addInputControl(final TextInputControl control) {
     if (control != _PlatformTextInputControl.instance) {
       _instance._inputControls.add(control);
     }
   }
 
-  static void _removeInputControl(TextInputControl control) {
+  static void _removeInputControl(final TextInputControl control) {
     if (control != _PlatformTextInputControl.instance) {
       _instance._inputControls.remove(control);
     }
@@ -1615,7 +1615,7 @@ class TextInput {
   ///  * [TextInputControl], an interface for implementing text input controls.
   ///  * [TextInput.restorePlatformInputControl], a method to restore the default
   ///    platform text input control.
-  static void setInputControl(TextInputControl? newControl) {
+  static void setInputControl(final TextInputControl? newControl) {
     final TextInputControl? oldControl = _instance._currentControl;
     if (newControl == oldControl) {
       return;
@@ -1688,7 +1688,7 @@ class TextInput {
   /// A client that no longer wishes to interact with the text input control
   /// should call [TextInputConnection.close] on the returned
   /// [TextInputConnection].
-  static TextInputConnection attach(TextInputClient client, TextInputConfiguration configuration) {
+  static TextInputConnection attach(final TextInputClient client, final TextInputConfiguration configuration) {
     final TextInputConnection connection = TextInputConnection._(client);
     _instance._attach(connection, configuration);
     return connection;
@@ -1697,14 +1697,14 @@ class TextInput {
   // This method actually notifies the embedding of the client. It is utilized
   // by [attach] and by [_handleTextInputInvocation] for the
   // `TextInputClient.requestExistingInputState` method.
-  void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
+  void _attach(final TextInputConnection connection, final TextInputConfiguration configuration) {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _currentConnection = connection;
     _currentConfiguration = configuration;
     _setClient(connection._client, configuration);
   }
 
-  static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
+  static bool _debugEnsureInputActionWorksOnPlatform(final TextInputAction inputAction) {
     assert(() {
       if (kIsWeb) {
         // TODO(flutterweb): what makes sense here?
@@ -1741,7 +1741,7 @@ class TextInput {
   /// Returns true if a scribble interaction is currently happening.
   bool get scribbleInProgress => _scribbleInProgress;
 
-  Future<dynamic> _loudlyHandleTextInputInvocation(MethodCall call) async {
+  Future<dynamic> _loudlyHandleTextInputInvocation(final MethodCall call) async {
     try {
       return await _handleTextInputInvocation(call);
     } catch (exception, stack) {
@@ -1758,22 +1758,22 @@ class TextInput {
     }
   }
 
-  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+  Future<dynamic> _handleTextInputInvocation(final MethodCall methodCall) async {
     final String method = methodCall.method;
     if (method == 'TextInputClient.focusElement') {
       final List<dynamic> args = methodCall.arguments as List<dynamic>;
       _scribbleClients[args[0]]?.onScribbleFocus(Offset((args[1] as num).toDouble(), (args[2] as num).toDouble()));
       return;
     } else if (method == 'TextInputClient.requestElementsInRect') {
-      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((num value) => value.toDouble()).toList();
-      return _scribbleClients.keys.where((String elementIdentifier) {
+      final List<double> args = (methodCall.arguments as List<dynamic>).cast<num>().map<double>((final num value) => value.toDouble()).toList();
+      return _scribbleClients.keys.where((final String elementIdentifier) {
         final Rect rect = Rect.fromLTWH(args[0], args[1], args[2], args[3]);
         if (!(_scribbleClients[elementIdentifier]?.isInScribbleRect(rect) ?? false)) {
           return false;
         }
         final Rect bounds = _scribbleClients[elementIdentifier]?.bounds ?? Rect.zero;
         return !(bounds == Rect.zero || bounds.hasNaN || bounds.isInfinite);
-      }).map((String elementIdentifier) {
+      }).map((final String elementIdentifier) {
         final Rect bounds = _scribbleClients[elementIdentifier]!.bounds;
         return <dynamic>[elementIdentifier, ...<dynamic>[bounds.left, bounds.top, bounds.width, bounds.height]];
       }).toList();
@@ -1912,7 +1912,7 @@ class TextInput {
     });
   }
 
-  void _setClient(TextInputClient client, TextInputConfiguration configuration) {
+  void _setClient(final TextInputClient client, final TextInputConfiguration configuration) {
     for (final TextInputControl control in _inputControls) {
       control.attach(client, configuration);
     }
@@ -1927,13 +1927,13 @@ class TextInput {
     _scheduleHide();
   }
 
-  void _updateConfig(TextInputConfiguration configuration) {
+  void _updateConfig(final TextInputConfiguration configuration) {
     for (final TextInputControl control in _inputControls) {
       control.updateConfig(configuration);
     }
   }
 
-  void _setEditingState(TextEditingValue value) {
+  void _setEditingState(final TextEditingValue value) {
     for (final TextInputControl control in _inputControls) {
       control.setEditingState(value);
     }
@@ -1951,36 +1951,36 @@ class TextInput {
     }
   }
 
-  void _setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+  void _setEditableSizeAndTransform(final Size editableBoxSize, final Matrix4 transform) {
     for (final TextInputControl control in _inputControls) {
       control.setEditableSizeAndTransform(editableBoxSize, transform);
     }
   }
 
-  void _setComposingTextRect(Rect rect) {
+  void _setComposingTextRect(final Rect rect) {
     for (final TextInputControl control in _inputControls) {
       control.setComposingRect(rect);
     }
   }
 
-  void _setCaretRect(Rect rect) {
+  void _setCaretRect(final Rect rect) {
     for (final TextInputControl control in _inputControls) {
       control.setCaretRect(rect);
     }
   }
 
-  void _setSelectionRects(List<SelectionRect> selectionRects) {
+  void _setSelectionRects(final List<SelectionRect> selectionRects) {
     for (final TextInputControl control in _inputControls) {
       control.setSelectionRects(selectionRects);
     }
   }
 
   void _setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
+    required final String? fontFamily,
+    required final double? fontSize,
+    required final FontWeight? fontWeight,
+    required final TextDirection textDirection,
+    required final TextAlign textAlign,
   }) {
     for (final TextInputControl control in _inputControls) {
       control.setStyle(
@@ -1999,7 +1999,7 @@ class TextInput {
     }
   }
 
-  void _updateEditingValue(TextEditingValue value, {TextInputControl? exclude}) {
+  void _updateEditingValue(final TextEditingValue value, {final TextInputControl? exclude}) {
     if (_currentConnection == null) {
       return;
     }
@@ -2016,7 +2016,7 @@ class TextInput {
   ///
   /// This method should be called by the text input control implementation to
   /// send editing value updates to the attached input client.
-  static void updateEditingValue(TextEditingValue value) {
+  static void updateEditingValue(final TextEditingValue value) {
     _instance._updateEditingValue(value, exclude: _instance._currentControl);
   }
 
@@ -2068,7 +2068,7 @@ class TextInput {
   /// * [EditableText.autofillHints] for autofill save troubleshooting tips.
   /// * [AutofillGroup.onDisposeAction], a configurable action that runs when a
   ///   topmost [AutofillGroup] is getting disposed.
-  static void finishAutofillContext({ bool shouldSave = true }) {
+  static void finishAutofillContext({ final bool shouldSave = true }) {
     for (final TextInputControl control in TextInput._instance._inputControls) {
       control.finishAutofillContext(shouldSave: shouldSave);
     }
@@ -2079,12 +2079,12 @@ class TextInput {
   ///
   /// For example, the registered [ScribbleClient] list is used to respond to
   /// UIIndirectScribbleInteraction on an iPad.
-  static void registerScribbleElement(String elementIdentifier, ScribbleClient scribbleClient) {
+  static void registerScribbleElement(final String elementIdentifier, final ScribbleClient scribbleClient) {
     TextInput._instance._scribbleClients[elementIdentifier] = scribbleClient;
   }
 
   /// Unregisters a [ScribbleClient] with [elementIdentifier].
-  static void unregisterScribbleElement(String elementIdentifier) {
+  static void unregisterScribbleElement(final String elementIdentifier) {
     TextInput._instance._scribbleClients.remove(elementIdentifier);
   }
 }
@@ -2122,13 +2122,13 @@ mixin TextInputControl {
   ///
   /// This method is called when a text input client is attached. The input
   /// control should update its configuration to match the client's configuration.
-  void attach(TextInputClient client, TextInputConfiguration configuration) {}
+  void attach(final TextInputClient client, final TextInputConfiguration configuration) {}
 
   /// Requests the text input control to detach from the given input client.
   ///
   /// This method is called when a text input client is detached. The input
   /// control should release any resources allocated for the client.
-  void detach(TextInputClient client) {}
+  void detach(final TextInputClient client) {}
 
   /// Requests that the text input control is shown.
   ///
@@ -2144,48 +2144,48 @@ mixin TextInputControl {
   ///
   /// This method is called when the configuration of the attached input client
   /// has changed.
-  void updateConfig(TextInputConfiguration configuration) {}
+  void updateConfig(final TextInputConfiguration configuration) {}
 
   /// Informs the text input control about editing state changes.
   ///
   /// This method is called when the editing state of the attached input client
   /// has changed.
-  void setEditingState(TextEditingValue value) {}
+  void setEditingState(final TextEditingValue value) {}
 
   /// Informs the text input control about client position changes.
   ///
   /// This method is called on when the input control should position itself in
   /// relation to the attached input client.
-  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {}
+  void setEditableSizeAndTransform(final Size editableBoxSize, final Matrix4 transform) {}
 
   /// Informs the text input control about composing area changes.
   ///
   /// This method is called when the attached input client's composing area
   /// changes.
-  void setComposingRect(Rect rect) {}
+  void setComposingRect(final Rect rect) {}
 
   /// Informs the text input control about caret area changes.
   ///
   /// This method is called when the attached input client's caret area
   /// changes.
-  void setCaretRect(Rect rect) {}
+  void setCaretRect(final Rect rect) {}
 
   /// Informs the text input control about selection area changes.
   ///
   /// This method is called when the attached input client's selection area
   /// changes.
-  void setSelectionRects(List<SelectionRect> selectionRects) {}
+  void setSelectionRects(final List<SelectionRect> selectionRects) {}
 
   /// Informs the text input control about text style changes.
   ///
   /// This method is called on the when the attached input client's text style
   /// changes.
   void setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
+    required final String? fontFamily,
+    required final double? fontSize,
+    required final FontWeight? fontWeight,
+    required final TextDirection textDirection,
+    required final TextAlign textAlign,
   }) {}
 
   /// Requests autofill from the text input control.
@@ -2198,7 +2198,7 @@ mixin TextInputControl {
   /// See also:
   ///
   ///  * [TextInput.finishAutofillContext]
-  void finishAutofillContext({bool shouldSave = true}) {}
+  void finishAutofillContext({final bool shouldSave = true}) {}
 }
 
 /// Provides access to the platform text input control.
@@ -2210,7 +2210,7 @@ class _PlatformTextInputControl with TextInputControl {
 
   MethodChannel get _channel => TextInput._instance._channel;
 
-  Map<String, dynamic> _configurationToJson(TextInputConfiguration configuration) {
+  Map<String, dynamic> _configurationToJson(final TextInputConfiguration configuration) {
     final Map<String, dynamic> json = configuration.toJson();
     if (TextInput._instance._currentControl != _PlatformTextInputControl.instance) {
       json['inputType'] = TextInputType.none.toJson();
@@ -2219,7 +2219,7 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void attach(TextInputClient client, TextInputConfiguration configuration) {
+  void attach(final TextInputClient client, final TextInputConfiguration configuration) {
     _channel.invokeMethod<void>(
       'TextInput.setClient',
       <Object>[
@@ -2230,12 +2230,12 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void detach(TextInputClient client) {
+  void detach(final TextInputClient client) {
     _channel.invokeMethod<void>('TextInput.clearClient');
   }
 
   @override
-  void updateConfig(TextInputConfiguration configuration) {
+  void updateConfig(final TextInputConfiguration configuration) {
     _channel.invokeMethod<void>(
       'TextInput.updateConfig',
       _configurationToJson(configuration),
@@ -2243,7 +2243,7 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void setEditingState(TextEditingValue value) {
+  void setEditingState(final TextEditingValue value) {
     _channel.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
@@ -2261,7 +2261,7 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+  void setEditableSizeAndTransform(final Size editableBoxSize, final Matrix4 transform) {
     _channel.invokeMethod<void>(
       'TextInput.setEditableSizeAndTransform',
       <String, dynamic>{
@@ -2273,7 +2273,7 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void setComposingRect(Rect rect) {
+  void setComposingRect(final Rect rect) {
     _channel.invokeMethod<void>(
       'TextInput.setMarkedTextRect',
       <String, dynamic>{
@@ -2286,7 +2286,7 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void setCaretRect(Rect rect) {
+  void setCaretRect(final Rect rect) {
     _channel.invokeMethod<void>(
       'TextInput.setCaretRect',
       <String, dynamic>{
@@ -2299,10 +2299,10 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void setSelectionRects(List<SelectionRect> selectionRects) {
+  void setSelectionRects(final List<SelectionRect> selectionRects) {
     _channel.invokeMethod<void>(
       'TextInput.setSelectionRects',
-      selectionRects.map((SelectionRect rect) {
+      selectionRects.map((final SelectionRect rect) {
         return <num>[
           rect.bounds.left,
           rect.bounds.top,
@@ -2318,11 +2318,11 @@ class _PlatformTextInputControl with TextInputControl {
 
   @override
   void setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
+    required final String? fontFamily,
+    required final double? fontSize,
+    required final FontWeight? fontWeight,
+    required final TextDirection textDirection,
+    required final TextAlign textAlign,
   }) {
     _channel.invokeMethod<void>(
       'TextInput.setStyle',
@@ -2342,7 +2342,7 @@ class _PlatformTextInputControl with TextInputControl {
   }
 
   @override
-  void finishAutofillContext({bool shouldSave = true}) {
+  void finishAutofillContext({final bool shouldSave = true}) {
     _channel.invokeMethod<void>(
       'TextInput.finishAutofillContext',
       shouldSave,

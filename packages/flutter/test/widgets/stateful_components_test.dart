@@ -22,7 +22,7 @@ class InnerWidgetState extends State<InnerWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }
@@ -38,13 +38,13 @@ class OuterContainer extends StatefulWidget {
 
 class OuterContainerState extends State<OuterContainer> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }
 
 void main() {
-  testWidgets('resync stateful widget', (WidgetTester tester) async {
+  testWidgets('resync stateful widget', (final WidgetTester tester) async {
     const Key innerKey = Key('inner');
     const Key outerKey = Key('outer');
 

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('position in the toolbar changes width', (WidgetTester tester) async {
+  testWidgets('position in the toolbar changes width', (final WidgetTester tester) async {
     late StateSetter setState;
     int index = 1;
     int total = 3;
@@ -18,7 +18,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
+              builder: (final BuildContext context, final StateSetter setter) {
                 setState = setter;
                 return TextSelectionToolbarTextButton(
                   padding: TextSelectionToolbarTextButton.getPadding(index, total),

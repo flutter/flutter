@@ -19,7 +19,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
   int _pressedCount = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Buttons'),

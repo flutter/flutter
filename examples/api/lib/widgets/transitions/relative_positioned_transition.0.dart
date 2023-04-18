@@ -12,7 +12,7 @@ class RelativePositionedTransitionExampleApp extends StatelessWidget {
   const RelativePositionedTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: RelativePositionedTransitionExample(),
     );
@@ -42,12 +42,12 @@ class _RelativePositionedTransitionExampleState extends State<RelativePositioned
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const double smallLogo = 100;
     const double bigLogo = 200;
 
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         final Size biggest = constraints.biggest;
         return Stack(
           children: <Widget>[

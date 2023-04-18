@@ -12,7 +12,7 @@ class ClipRRectApp extends StatelessWidget {
   const ClipRRectApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ClipRRect Sample')),
@@ -26,7 +26,7 @@ class ClipRRectExample extends StatelessWidget {
   const ClipRRectExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const TextStyle style = TextStyle(color: Colors.white);
 
     return Center(

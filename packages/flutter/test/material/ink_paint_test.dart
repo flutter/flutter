@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('The Ink widget expands when no dimensions are set', (WidgetTester tester) async {
+  testWidgets('The Ink widget expands when no dimensions are set', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
         child: Ink(),
@@ -19,7 +19,7 @@ void main() {
     expect(tester.getSize(find.byType(Ink)), const Size(800.0, 600.0));
   });
 
-  testWidgets('The Ink widget fits the specified size', (WidgetTester tester) async {
+  testWidgets('The Ink widget fits the specified size', (final WidgetTester tester) async {
     const double height = 150.0;
     const double width = 200.0;
     await tester.pumpWidget(
@@ -37,7 +37,7 @@ void main() {
     expect(tester.getSize(find.byType(Ink)), const Size(width, height));
   });
 
-  testWidgets('The Ink widget expands on a unspecified dimension', (WidgetTester tester) async {
+  testWidgets('The Ink widget expands on a unspecified dimension', (final WidgetTester tester) async {
     const double height = 150.0;
     await tester.pumpWidget(
       Material(
@@ -53,7 +53,7 @@ void main() {
     expect(tester.getSize(find.byType(Ink)), const Size(800, height));
   });
 
-  testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an ink splash', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -102,7 +102,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The InkWell widget renders an ink ripple', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an ink ripple', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
@@ -137,14 +137,14 @@ void main() {
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
 
-    bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
-    bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
+    bool offsetsAreClose(final Offset a, final Offset b) => (a - b).distance < 1.0;
+    bool radiiAreClose(final double a, final double b) => (a - b).abs() < 1.0;
 
-    PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius, int expectedAlpha) {
+    PaintPattern ripplePattern(final Offset expectedCenter, final double expectedRadius, final int expectedAlpha) {
       return paints
         ..translate(x: 0.0, y: 0.0)
         ..translate(x: tapDownOffset.dx, y: tapDownOffset.dy)
-        ..something((Symbol method, List<dynamic> arguments) {
+        ..something((final Symbol method, final List<dynamic> arguments) {
           if (method != #drawCircle) {
             return false;
           }
@@ -188,7 +188,7 @@ void main() {
     expect(box, ripplePattern(inkWellCenter - tapDownOffset, 105.0, 0));
   });
 
-  testWidgets('Does the Ink widget render anything', (WidgetTester tester) async {
+  testWidgets('Does the Ink widget render anything', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -271,13 +271,13 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(6.0));
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-    Future<void> buildTest(Intent intent) async {
+    Future<void> buildTest(final Intent intent) async {
       return tester.pumpWidget(
         Shortcuts(
           shortcuts: <ShortcutActivator, Intent>{
@@ -314,14 +314,14 @@ void main() {
     final Offset topLeft = tester.getTopLeft(find.byType(InkWell));
     final Offset inkWellCenter = tester.getCenter(find.byType(InkWell)) - topLeft;
 
-    bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
-    bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
+    bool offsetsAreClose(final Offset a, final Offset b) => (a - b).distance < 1.0;
+    bool radiiAreClose(final double a, final double b) => (a - b).abs() < 1.0;
 
-    PaintPattern ripplePattern(double expectedRadius, int expectedAlpha) {
+    PaintPattern ripplePattern(final double expectedRadius, final int expectedAlpha) {
       return paints
         ..translate(x: 0.0, y: 0.0)
         ..translate(x: topLeft.dx, y: topLeft.dy)
-        ..something((Symbol method, List<dynamic> arguments) {
+        ..something((final Symbol method, final List<dynamic> arguments) {
           if (method != #drawCircle) {
             return false;
           }
@@ -371,7 +371,7 @@ void main() {
     expect(box, ripplePattern(105.0, 0));
   });
 
-  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14391
     await tester.pumpWidget(
       Directionality(
@@ -404,7 +404,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
+  testWidgets('Cancel an InkRipple that was disposed when its animation ended', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
 
@@ -442,7 +442,7 @@ void main() {
     await gesture.up(); // generates a tap cancel
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell)))as RenderBox;
-    expect(box, paints..everything((Symbol method, List<dynamic> arguments) {
+    expect(box, paints..everything((final Symbol method, final List<dynamic> arguments) {
       if (method != #drawCircle) {
         return true;
       }
@@ -454,7 +454,7 @@ void main() {
     }));
   });
 
-  testWidgets('The InkWell widget on OverlayPortal does not throw', (WidgetTester tester) async {
+  testWidgets('The InkWell widget on OverlayPortal does not throw', (final WidgetTester tester) async {
     final OverlayPortalController controller = OverlayPortalController();
     controller.show();
     await tester.pumpWidget(
@@ -467,7 +467,7 @@ void main() {
               child: Overlay(
                 initialEntries: <OverlayEntry>[
                   OverlayEntry(
-                    builder: (BuildContext context) {
+                    builder: (final BuildContext context) {
                       return Center(
                         child: SizedBox.square(
                           dimension: 100,
@@ -478,7 +478,7 @@ void main() {
                             color: Colors.black,
                             child: OverlayPortal(
                               controller: controller,
-                              overlayChildBuilder: (BuildContext context) {
+                              overlayChildBuilder: (final BuildContext context) {
                                 return Positioned(
                                   right: 0,
                                   bottom: 0,
@@ -514,10 +514,10 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Custom rectCallback renders an ink splash from its center', (WidgetTester tester) async {
+  testWidgets('Custom rectCallback renders an ink splash from its center', (final WidgetTester tester) async {
     const Color splashColor = Color(0xff00ff00);
 
-    Widget buildWidget({InteractiveInkFeatureFactory? splashFactory}) {
+    Widget buildWidget({final InteractiveInkFeatureFactory? splashFactory}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Material(
@@ -569,9 +569,9 @@ void main() {
     );
   });
 
-  testWidgets('Ink with isVisible=false does not paint', (WidgetTester tester) async {
+  testWidgets('Ink with isVisible=false does not paint', (final WidgetTester tester) async {
     const Color testColor = Color(0xffff1234);
-    Widget inkWidget({required bool isVisible}) {
+    Widget inkWidget({required final bool isVisible}) {
       return Material(
         child: Visibility.maintain(
           visible: isVisible,
@@ -595,17 +595,17 @@ void main() {
 class _InkRippleFactory extends InteractiveInkFeatureFactory {
   @override
   InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Offset position,
-    required Color color,
-    required TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    VoidCallback? onRemoved,
+    required final MaterialInkController controller,
+    required final RenderBox referenceBox,
+    required final Offset position,
+    required final Color color,
+    required final TextDirection textDirection,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final double? radius,
+    final VoidCallback? onRemoved,
   }) {
     return InkRipple(
       controller: controller,

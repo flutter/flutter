@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/tooltip/tooltip.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tooltip is visible when hovering over text', (WidgetTester tester) async {
+  testWidgets('Tooltip is visible when hovering over text', (final WidgetTester tester) async {
     const String tooltipText = 'I am a Tooltip';
 
     await tester.pumpWidget(

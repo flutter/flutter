@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('reassemble with a className only marks subtrees from the first matching element as dirty', (WidgetTester tester) async {
+  testWidgets('reassemble with a className only marks subtrees from the first matching element as dirty', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Foo(Bar(Fizz(SizedBox())))
     );
@@ -70,7 +70,7 @@ class _FooState extends State<Foo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }
@@ -94,7 +94,7 @@ class _BarState extends State<Bar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }
@@ -117,7 +117,7 @@ class _FizzState extends State<Fizz> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }

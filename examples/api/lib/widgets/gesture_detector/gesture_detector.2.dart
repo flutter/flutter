@@ -18,7 +18,7 @@ class NestedGestureDetectorsApp extends StatelessWidget {
   const NestedGestureDetectorsApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Nested GestureDetectors')),
@@ -41,7 +41,7 @@ class _NestedGestureDetectorsExampleState extends State<NestedGestureDetectorsEx
   final Border highlightBorder = Border.all(color: Colors.red, width: 5);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         Expanded(
@@ -52,7 +52,7 @@ class _NestedGestureDetectorsExampleState extends State<NestedGestureDetectorsEx
                 _winner = _OnTapWinner.green;
               });
             },
-            onTapDown: (_) => debugPrint('Green onTapDown'),
+            onTapDown: (final _) => debugPrint('Green onTapDown'),
             onTapCancel: () => debugPrint('Green onTapCancel'),
             child: Container(
               alignment: Alignment.center,

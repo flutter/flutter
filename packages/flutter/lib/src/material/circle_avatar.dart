@@ -192,7 +192,7 @@ class CircleAvatar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
     final Color? effectiveForegroundColor = foregroundColor

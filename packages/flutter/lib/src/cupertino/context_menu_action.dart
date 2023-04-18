@@ -68,13 +68,13 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   final GlobalKey _globalKey = GlobalKey();
   bool _isPressed = false;
 
-  void onTapDown(TapDownDetails details) {
+  void onTapDown(final TapDownDetails details) {
     setState(() {
       _isPressed = true;
     });
   }
 
-  void onTapUp(TapUpDetails details) {
+  void onTapUp(final TapUpDetails details) {
     setState(() {
       _isPressed = false;
     });
@@ -103,7 +103,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MouseRegion(
       cursor: widget.onPressed != null && kIsWeb ? SystemMouseCursors.click : MouseCursor.defer,
       child: GestureDetector(

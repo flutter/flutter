@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('long press ListTile should enable edit mode',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListViewExampleApp(),
     );
@@ -27,7 +27,7 @@ void main() {
   });
 
   testWidgets('Pressing cross button should disable edit mode',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListViewExampleApp(),
     );
@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('tapping ListTile or checkBox should toggle ListTile state',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListViewExampleApp(),
     );

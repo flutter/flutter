@@ -35,7 +35,7 @@ final RegExp dartVersionPattern = RegExp(r'// *@dart *= *(\d+).(\d+)');
 
 final Version firstNullSafeDartVersion = Version(2, 12, 0);
 
-Future<double> findCostsForFile(File file) async {
+Future<double> findCostsForFile(final File file) async {
   if (path.extension(file.path) == '.py') {
     return pythonCost;
   }
@@ -79,7 +79,7 @@ Future<double> findCostsForFile(File file) async {
   return total;
 }
 
-bool isOptingOutOfNullSafety(String line) {
+bool isOptingOutOfNullSafety(final String line) {
   final RegExpMatch? match = dartVersionPattern.firstMatch(line);
   if (match == null) {
     return false;
@@ -88,7 +88,7 @@ bool isOptingOutOfNullSafety(String line) {
   return Version(int.parse(match.group(1)!), int.parse(match.group(2)!), 0) < firstNullSafeDartVersion;
 }
 
-bool packageIsNullSafe(File file) {
+bool packageIsNullSafe(final File file) {
   assert(path.basename(file.path) == 'pubspec.yaml');
   final Pubspec pubspec = Pubspec.parse(file.readAsStringSync());
   final VersionConstraint? constraint = pubspec.environment == null ? null : pubspec.environment!['sdk'];
@@ -99,7 +99,7 @@ bool packageIsNullSafe(File file) {
       Version(constraint.min!.major, constraint.min!.minor, 0) >= firstNullSafeDartVersion;
 }
 
-Future<int> findGlobalsForFile(File file) async {
+Future<int> findGlobalsForFile(final File file) async {
   if (path.extension(file.path) != '.dart') {
     return 0;
   }
@@ -151,7 +151,7 @@ Future<int> countDependencies() async {
     'update-packages',
     options: <String>['--transitive-closure'],
   )).split('\n');
-  final int count = lines.where((String line) => line.contains('->')).length;
+  final int count = lines.where((final String line) => line.contains('->')).length;
   if (count < 2) {
     throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
   }
@@ -163,7 +163,7 @@ Future<int> countConsumerDependencies() async {
     'update-packages',
     options: <String>['--transitive-closure', '--consumer-only'],
   )).split('\n');
-  final int count = lines.where((String line) => line.contains('->')).length;
+  final int count = lines.where((final String line) => line.contains('->')).length;
   if (count < 2) {
     throw Exception('"flutter update-packages --transitive-closure" returned bogus output:\n${lines.join("\n")}');
   }

@@ -16,7 +16,7 @@ import 'fuchsia_kernel_compiler.dart';
 import 'fuchsia_pm.dart';
 
 /// Returns [true] if the current platform supports Fuchsia targets.
-bool isFuchsiaSupportedPlatform(Platform platform) {
+bool isFuchsiaSupportedPlatform(final Platform platform) {
   return featureFlags.isFuchsiaEnabled && (platform.isLinux || platform.isMacOS);
 }
 
@@ -37,7 +37,7 @@ class FuchsiaSdk {
   /// Returns any attached devices is a newline-denominated String.
   ///
   /// Example output: abcd::abcd:abc:abcd:abcd%qemu scare-cable-skip-joy
-  Future<String?> listDevices({Duration? timeout}) async {
+  Future<String?> listDevices({final Duration? timeout}) async {
     final File? ffx = globals.fuchsiaArtifacts?.ffx;
     if (ffx == null || !ffx.existsSync()) {
       return null;
@@ -51,7 +51,7 @@ class FuchsiaSdk {
 
   /// Returns the fuchsia system logs for an attached device where
   /// [id] is the IP address of the device.
-  Stream<String>? syslogs(String id) {
+  Stream<String>? syslogs(final String id) {
     Process? process;
     try {
       final StreamController<String> controller = StreamController<String>(onCancel: () {
@@ -71,7 +71,7 @@ class FuchsiaSdk {
         id, // The device's IP.
         remoteCommand,
       ];
-      globals.processManager.start(cmd).then((Process newProcess) {
+      globals.processManager.start(cmd).then((final Process newProcess) {
         if (controller.isClosed) {
           return;
         }

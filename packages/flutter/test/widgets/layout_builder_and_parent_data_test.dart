@@ -27,7 +27,7 @@ class SizeChangerState extends State<SizeChanger> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -42,10 +42,10 @@ class SizeChangerState extends State<SizeChanger> {
 }
 
 void main() {
-  testWidgets('Applying parent data inside a LayoutBuilder', (WidgetTester tester) async {
+  testWidgets('Applying parent data inside a LayoutBuilder', (final WidgetTester tester) async {
     int frame = 1;
     await tester.pumpWidget(SizeChanger( // when this is triggered, the child LayoutBuilder will build again
-      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
         return Column(children: <Widget>[
           Expanded(
             flex: frame, // this is different after the next pump, so that the parentData has to be applied again

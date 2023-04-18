@@ -46,7 +46,7 @@ void main() {
       // Once the "topLevelFunction" output arrives, we can terminate the app.
       unawaited(
         dap.client.output
-            .firstWhere((String output) => output.startsWith('topLevelFunction'))
+            .firstWhere((final String output) => output.startsWith('topLevelFunction'))
             .whenComplete(() => dap.client.terminate()),
       );
 
@@ -80,7 +80,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.launch(
             cwd: project.dir.path,
@@ -97,7 +97,7 @@ void main() {
 
       // Ensure logs contain both the app.stop request and the result.
       final List<Event> logEvents = await logEventsFuture;
-      final List<String> logMessages = logEvents.map((Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
+      final List<String> logMessages = logEvents.map((final Event l) => (l.body! as Map<String, Object?>)['message']! as String).toList();
       expect(
         logMessages,
         containsAll(<Matcher>[
@@ -114,7 +114,7 @@ void main() {
       // Once the "topLevelFunction" output arrives, we can terminate the app.
       unawaited(
         dap.client.stdoutOutput
-            .firstWhere((String output) => output.startsWith('topLevelFunction'))
+            .firstWhere((final String output) => output.startsWith('topLevelFunction'))
             .whenComplete(() => dap.client.terminate()),
       );
 
@@ -189,7 +189,7 @@ void main() {
     });
 
     /// Helper that tests exception output in either debug or noDebug mode.
-    Future<void> testExceptionOutput({required bool noDebug}) async {
+    Future<void> testExceptionOutput({required final bool noDebug}) async {
         final BasicProjectThatThrows project = BasicProjectThatThrows();
         await project.setUpIn(tempDir);
 
@@ -198,8 +198,8 @@ void main() {
           // Terminate the app after we see the exception because otherwise
           // it will keep running and `collectAllOutput` won't end.
           dap.client.output
-              .firstWhere((String output) => output.contains(endOfErrorOutputMarker))
-              .then((_) => dap.client.terminate());
+              .firstWhere((final String output) => output.contains(endOfErrorOutputMarker))
+              .then((final _) => dap.client.terminate());
           return dap.client.launch(
             noDebug: noDebug,
             cwd: project.dir.path,
@@ -228,7 +228,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.launch(
             cwd: project.dir.path,
@@ -242,7 +242,7 @@ void main() {
       // notification and then topLevelFunction being printed again.
       final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
           // But skip any topLevelFunctions that come before the reload.
-          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .skipWhile((final String output) => output.startsWith('topLevelFunction'))
           .take(2)
           .toList();
 
@@ -266,7 +266,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.initialize(supportsProgressReporting: true),
         dap.client.launch(
               cwd: project.dir.path,
@@ -284,10 +284,10 @@ void main() {
       final List<Event> progressEvents = await progressEventsFuture;
       expect(progressEvents, hasLength(2));
 
-      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      final List<String> eventKinds = progressEvents.map((final Event event) => event.event).toList();
       expect(eventKinds, <String>['progressStart', 'progressEnd']);
 
-      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((final Event event) => event.body).cast<Map<String, Object?>>().toList();
       final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
       final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
       expect(start.progressId, isNotNull);
@@ -303,7 +303,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.launch(
             cwd: project.dir.path,
@@ -317,7 +317,7 @@ void main() {
       // notification and then topLevelFunction being printed again.
       final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
           // But skip any topLevelFunctions that come before the restart.
-          .skipWhile((String output) => output.startsWith('topLevelFunction'))
+          .skipWhile((final String output) => output.startsWith('topLevelFunction'))
           .take(2)
           .toList();
 
@@ -341,7 +341,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.initialize(supportsProgressReporting: true),
         dap.client.launch(
               cwd: project.dir.path,
@@ -359,10 +359,10 @@ void main() {
       final List<Event> progressEvents = await progressEventsFuture;
       expect(progressEvents, hasLength(2));
 
-      final List<String> eventKinds = progressEvents.map((Event event) => event.event).toList();
+      final List<String> eventKinds = progressEvents.map((final Event event) => event.event).toList();
       expect(eventKinds, <String>['progressStart', 'progressEnd']);
 
-      final List<Map<String, Object?>> eventBodies = progressEvents.map((Event event) => event.body).cast<Map<String, Object?>>().toList();
+      final List<Map<String, Object?>> eventBodies = progressEvents.map((final Event event) => event.body).cast<Map<String, Object?>>().toList();
       final ProgressStartEventBody start = ProgressStartEventBody.fromMap(eventBodies[0]);
       final ProgressEndEventBody end = ProgressEndEventBody.fromMap(eventBodies[1]);
       expect(start.progressId, isNotNull);
@@ -380,7 +380,7 @@ void main() {
       late int originalThreadId, newThreadId;
       await Future.wait(<Future<void>>[
         // Capture the thread ID of the stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => originalThreadId = event.threadId!),
+        dap.client.stoppedEvents.first.then((final StoppedEventBody event) => originalThreadId = event.threadId!),
         dap.client.start(
           exceptionPauseMode: 'All', // Ensure we stop on all exceptions
           launch: () => dap.client.launch(
@@ -394,7 +394,7 @@ void main() {
       // to pause.
       await Future.wait(<Future<void>>[
         // Capture the thread ID of the newly stopped thread.
-        dap.client.stoppedEvents.first.then((StoppedEventBody event) => newThreadId = event.threadId!),
+        dap.client.stoppedEvents.first.then((final StoppedEventBody event) => newThreadId = event.threadId!),
         dap.client.hotRestart(),
       ], eagerError: true);
 
@@ -414,12 +414,12 @@ void main() {
       // extension loads, as we'll need that to call it later.
       final Future<String> isolateIdForDebugPaint = dap.client
           .serviceExtensionAdded(debugPaintRpc)
-          .then((Map<String, Object?> body) => body['isolateId']! as String);
+          .then((final Map<String, Object?> body) => body['isolateId']! as String);
 
       // Launch the app and wait for it to print "topLevelFunction" so we know
       // it's up and running.
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.launch(
             cwd: project.dir.path,
@@ -519,7 +519,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.attach(
             cwd: project.dir.path,
@@ -531,7 +531,7 @@ void main() {
 
       // Capture the "Reloaded" output and events immediately after.
       final Future<List<String>> outputEventsFuture = dap.client.stdoutOutput
-          .skipWhile((String output) => !output.startsWith('Reloaded'))
+          .skipWhile((final String output) => !output.startsWith('Reloaded'))
           .take(4)
           .toList();
 
@@ -555,7 +555,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.attach(
             cwd: project.dir.path,
@@ -566,7 +566,7 @@ void main() {
       ], eagerError: true);
 
       // Set a breakpoint and expect to hit it.
-      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((StoppedEventBody e) => e.reason == 'breakpoint');
+      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((final StoppedEventBody e) => e.reason == 'breakpoint');
       await Future.wait(<Future<void>>[
         stoppedFuture,
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
@@ -578,7 +578,7 @@ void main() {
 
       // Launch the app and wait for it to print "topLevelFunction".
       await Future.wait(<Future<void>>[
-        dap.client.stdoutOutput.firstWhere((String output) => output.startsWith('topLevelFunction')),
+        dap.client.stdoutOutput.firstWhere((final String output) => output.startsWith('topLevelFunction')),
         dap.client.start(
           launch: () => dap.client.attach(
             cwd: project.dir.path,
@@ -589,7 +589,7 @@ void main() {
       ], eagerError: true);
 
       // Set a breakpoint and expect to hit it.
-      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((StoppedEventBody e) => e.reason == 'breakpoint');
+      final Future<StoppedEventBody> stoppedFuture = dap.client.stoppedEvents.firstWhere((final StoppedEventBody e) => e.reason == 'breakpoint');
       await Future.wait(<Future<void>>[
         stoppedFuture,
         dap.client.setBreakpoint(breakpointFilePath, breakpointLine),
@@ -598,11 +598,11 @@ void main() {
       // Detach and expected resume and correct output.
       await Future.wait(<Future<void>>[
         // We should print "Detached" instead of "Exited".
-        dap.client.outputEvents.firstWhere((OutputEventBody event) => event.output.contains('\nDetached')),
+        dap.client.outputEvents.firstWhere((final OutputEventBody event) => event.output.contains('\nDetached')),
         // We should still get terminatedEvent (this signals the DAP server terminating).
         dap.client.event('terminated'),
         // We should get output showing the app resumed.
-        testProcess.output.firstWhere((String output) => output.contains('topLevelFunction')),
+        testProcess.output.firstWhere((final String output) => output.contains('topLevelFunction')),
         // Trigger the detach.
         dap.client.terminate(),
       ]);
@@ -613,11 +613,11 @@ void main() {
 
 /// Extracts the output from a set of [OutputEventBody], removing any
 /// adjacent duplicates and combining into a single string.
-String _uniqueOutputLines(List<OutputEventBody> outputEvents) {
+String _uniqueOutputLines(final List<OutputEventBody> outputEvents) {
   String? lastItem;
   return outputEvents
-      .map((OutputEventBody e) => e.output)
-      .where((String output) {
+      .map((final OutputEventBody e) => e.output)
+      .where((final String output) {
         // Skip the item if it's the same as the previous one.
         final bool isDupe = output == lastItem;
         lastItem = output;

@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can call setState from didUpdateWidget', (WidgetTester tester) async {
+  testWidgets('Can call setState from didUpdateWidget', (final WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: WidgetUnderTest(text: 'hello'),
@@ -46,7 +46,7 @@ class _WidgetUnderTestState extends State<WidgetUnderTest> {
   int didUpdateWidgetCalled = 0;
 
   @override
-  void didUpdateWidget(WidgetUnderTest oldWidget) {
+  void didUpdateWidget(final WidgetUnderTest oldWidget) {
     super.didUpdateWidget(oldWidget);
     didUpdateWidgetCalled += 1;
     if (oldWidget.text != widget.text) {
@@ -58,13 +58,13 @@ class _WidgetUnderTestState extends State<WidgetUnderTest> {
   }
 
   @override
-  void setState(VoidCallback fn) {
+  void setState(final VoidCallback fn) {
     super.setState(fn);
     setStateCalled += 1;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Text(text);
   }
 }

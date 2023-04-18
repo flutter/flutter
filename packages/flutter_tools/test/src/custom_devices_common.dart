@@ -7,9 +7,9 @@ import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/custom_devices/custom_device_config.dart';
 
 void writeCustomDevicesConfigFile(
-  Directory dir, {
-  List<CustomDeviceConfig>? configs,
-  dynamic json
+  final Directory dir, {
+  final List<CustomDeviceConfig>? configs,
+  final dynamic json
 }) {
   dir.createSync(recursive: true);
 
@@ -17,7 +17,7 @@ void writeCustomDevicesConfigFile(
   file.writeAsStringSync(jsonEncode(
     <String, dynamic>{
       'custom-devices': configs != null ?
-        configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList() :
+        configs.map<dynamic>((final CustomDeviceConfig c) => c.toJson()).toList() :
         json,
     },
   ));

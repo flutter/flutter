@@ -26,7 +26,7 @@ Future<void> main() async {
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create project');
-    await runProjectTest((FlutterProject flutterProject) async {
+    await runProjectTest((final FlutterProject flutterProject) async {
       await inDirectory(path.join(flutterProject.rootPath, 'android'), () async {
         section('Insert gradle testing script');
         final File build = File(path.join(

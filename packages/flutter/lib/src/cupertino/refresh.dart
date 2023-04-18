@@ -32,7 +32,7 @@ class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   final bool hasLayoutExtent;
 
   @override
-  _RenderCupertinoSliverRefresh createRenderObject(BuildContext context) {
+  _RenderCupertinoSliverRefresh createRenderObject(final BuildContext context) {
     return _RenderCupertinoSliverRefresh(
       refreshIndicatorExtent: refreshIndicatorLayoutExtent,
       hasLayoutExtent: hasLayoutExtent,
@@ -40,7 +40,7 @@ class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderCupertinoSliverRefresh renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderCupertinoSliverRefresh renderObject) {
     renderObject
       ..refreshIndicatorLayoutExtent = refreshIndicatorLayoutExtent
       ..hasLayoutExtent = hasLayoutExtent;
@@ -56,9 +56,9 @@ class _CupertinoSliverRefresh extends SingleChildRenderObjectWidget {
 class _RenderCupertinoSliverRefresh extends RenderSliver
     with RenderObjectWithChildMixin<RenderBox> {
   _RenderCupertinoSliverRefresh({
-    required double refreshIndicatorExtent,
-    required bool hasLayoutExtent,
-    RenderBox? child,
+    required final double refreshIndicatorExtent,
+    required final bool hasLayoutExtent,
+    final RenderBox? child,
   }) : assert(refreshIndicatorExtent >= 0.0),
        _refreshIndicatorExtent = refreshIndicatorExtent,
        _hasLayoutExtent = hasLayoutExtent {
@@ -69,7 +69,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   // resting state when in the refreshing mode.
   double get refreshIndicatorLayoutExtent => _refreshIndicatorExtent;
   double _refreshIndicatorExtent;
-  set refreshIndicatorLayoutExtent(double value) {
+  set refreshIndicatorLayoutExtent(final double value) {
     assert(value >= 0.0);
     if (value == _refreshIndicatorExtent) {
       return;
@@ -83,7 +83,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   // [SliverGeometry.layoutExtent] space or not.
   bool get hasLayoutExtent => _hasLayoutExtent;
   bool _hasLayoutExtent;
-  set hasLayoutExtent(bool value) {
+  set hasLayoutExtent(final bool value) {
     if (value == _hasLayoutExtent) {
       return;
     }
@@ -162,7 +162,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   }
 
   @override
-  void paint(PaintingContext paintContext, Offset offset) {
+  void paint(final PaintingContext paintContext, final Offset offset) {
     if (constraints.overlap < 0.0 ||
         constraints.scrollOffset + child!.size.height > 0) {
       paintContext.paintChild(child!, offset);
@@ -172,7 +172,7 @@ class _RenderCupertinoSliverRefresh extends RenderSliver
   // Nothing special done here because this sliver always paints its child
   // exactly between paintOrigin and paintExtent.
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) { }
+  void applyPaintTransform(final RenderObject child, final Matrix4 transform) { }
 }
 
 /// The current state of the refresh control.
@@ -351,7 +351,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// Retrieve the current state of the CupertinoSliverRefreshControl. The same as the
   /// state that gets passed into the [builder] function. Used for testing.
   @visibleForTesting
-  static RefreshIndicatorMode state(BuildContext context) {
+  static RefreshIndicatorMode state(final BuildContext context) {
     final _CupertinoSliverRefreshControlState state = context.findAncestorStateOfType<_CupertinoSliverRefreshControlState>()!;
     return state.refreshState;
   }
@@ -364,11 +364,11 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// Once the refresh has completed, the activity indicator shrinks away as the
   /// space allocation animates back to closed.
   static Widget buildRefreshIndicator(
-    BuildContext context,
-    RefreshIndicatorMode refreshState,
-    double pulledExtent,
-    double refreshTriggerPullDistance,
-    double refreshIndicatorExtent,
+    final BuildContext context,
+    final RefreshIndicatorMode refreshState,
+    final double pulledExtent,
+    final double refreshTriggerPullDistance,
+    final double refreshIndicatorExtent,
   ) {
     final double percentageComplete = clampDouble(pulledExtent / refreshTriggerPullDistance, 0.0, 1.0);
 
@@ -394,7 +394,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
     );
   }
 
-  static Widget _buildIndicatorForRefreshState(RefreshIndicatorMode refreshState, double radius, double percentageComplete) {
+  static Widget _buildIndicatorForRefreshState(final RefreshIndicatorMode refreshState, final double radius, final double percentageComplete) {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:
         // While we're dragging, we draw individual ticks of the spinner while simultaneously
@@ -459,7 +459,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
       if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
         setState(() => hasSliverLayoutExtent = false);
       } else {
-        SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+        SchedulerBinding.instance.addPostFrameCallback((final Duration timestamp) {
           setState(() => hasSliverLayoutExtent = false);
         });
       }
@@ -485,7 +485,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
             // Call onRefresh after this frame finished since the function is
             // user supplied and we're always here in the middle of the sliver's
             // performLayout.
-            SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+            SchedulerBinding.instance.addPostFrameCallback((final Duration timestamp) {
               refreshTask = widget.onRefresh!()..whenComplete(() {
                 if (mounted) {
                   setState(() => refreshTask = null);
@@ -539,14 +539,14 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _CupertinoSliverRefresh(
       refreshIndicatorLayoutExtent: widget.refreshIndicatorExtent,
       hasLayoutExtent: hasSliverLayoutExtent,
       // A LayoutBuilder lets the sliver's layout changes be fed back out to
       // its owner to trigger state changes.
       child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (final BuildContext context, final BoxConstraints constraints) {
           latestIndicatorBoxExtent = constraints.maxHeight;
           refreshState = transitionNextState();
           if (widget.builder != null && latestIndicatorBoxExtent > 0) {

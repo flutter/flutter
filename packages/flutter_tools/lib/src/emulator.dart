@@ -22,11 +22,11 @@ EmulatorManager? get emulatorManager => context.get<EmulatorManager>();
 /// A class to get all available emulators.
 class EmulatorManager {
   EmulatorManager({
-    AndroidSdk? androidSdk,
-    required Logger logger,
-    required ProcessManager processManager,
-    required AndroidWorkflow androidWorkflow,
-    required FileSystem fileSystem,
+    final AndroidSdk? androidSdk,
+    required final Logger logger,
+    required final ProcessManager processManager,
+    required final AndroidWorkflow androidWorkflow,
+    required final FileSystem fileSystem,
   }) : _androidSdk = androidSdk,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager),
        _androidEmulators = AndroidEmulators(
@@ -52,10 +52,10 @@ class EmulatorManager {
   Future<List<Emulator>> getEmulatorsMatching(String searchText) async {
     final List<Emulator> emulators = await getAllAvailableEmulators();
     searchText = searchText.toLowerCase();
-    bool exactlyMatchesEmulatorId(Emulator emulator) =>
+    bool exactlyMatchesEmulatorId(final Emulator emulator) =>
         emulator.id.toLowerCase() == searchText ||
         emulator.name.toLowerCase() == searchText;
-    bool startsWithEmulatorId(Emulator emulator) =>
+    bool startsWithEmulatorId(final Emulator emulator) =>
         emulator.id.toLowerCase().startsWith(searchText) == true ||
         emulator.name.toLowerCase().startsWith(searchText) == true;
 
@@ -75,13 +75,13 @@ class EmulatorManager {
   }
 
   Iterable<EmulatorDiscovery> get _platformDiscoverers {
-    return _emulatorDiscoverers.where((EmulatorDiscovery discoverer) => discoverer.supportsPlatform);
+    return _emulatorDiscoverers.where((final EmulatorDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
   /// Return the list of all available emulators.
   Future<List<Emulator>> getAllAvailableEmulators() async {
     final List<Emulator> emulators = <Emulator>[];
-    await Future.forEach<EmulatorDiscovery>(_platformDiscoverers, (EmulatorDiscovery discoverer) async {
+    await Future.forEach<EmulatorDiscovery>(_platformDiscoverers, (final EmulatorDiscovery discoverer) async {
       emulators.addAll(await discoverer.emulators);
     });
     return emulators;
@@ -96,8 +96,8 @@ class EmulatorManager {
       // so we can keep adding suffixes until we miss.
       final List<Emulator> all = await getAllAvailableEmulators();
       final Set<String> takenNames = all
-          .map<String>((Emulator e) => e.id)
-          .where((String id) => id.startsWith(autoName))
+          .map<String>((final Emulator e) => e.id)
+          .where((final String id) => id.startsWith(autoName))
           .toSet();
       int suffix = 1;
       name = autoName;
@@ -133,14 +133,14 @@ class EmulatorManager {
     // to flutter users. Specifically:
     // - Removes lines that say "null" (!)
     // - Removes lines that tell the user to use '--force' to overwrite emulators
-    String? cleanError(String? error) {
+    String? cleanError(final String? error) {
       if (error == null || error.trim() == '') {
         return null;
       }
       return error
           .split('\n')
-          .where((String l) => l.trim() != 'null')
-          .where((String l) =>
+          .where((final String l) => l.trim() != 'null')
+          .where((final String l) =>
               l.trim() != 'Use --force if you want to replace it.')
           .join('\n')
           .trim();
@@ -167,7 +167,7 @@ class EmulatorManager {
     'pixel_xl',
   ];
 
-  Future<String?> _getPreferredAvailableDevice(String avdManagerPath) async {
+  Future<String?> _getPreferredAvailableDevice(final String avdManagerPath) async {
     final List<String> args = <String>[
       avdManagerPath,
       'list',
@@ -182,7 +182,7 @@ class EmulatorManager {
 
     final List<String> availableDevices = runResult.stdout
         .split('\n')
-        .where((String l) => preferredDevices.contains(l.trim()))
+        .where((final String l) => preferredDevices.contains(l.trim()))
         .toList();
 
     for (final String device in preferredDevices) {
@@ -195,7 +195,7 @@ class EmulatorManager {
 
   static final RegExp _androidApiVersion = RegExp(r';android-(\d+);');
 
-  Future<String?> _getPreferredSdkId(String avdManagerPath) async {
+  Future<String?> _getPreferredSdkId(final String avdManagerPath) async {
     // It seems that to get the available list of images, we need to send a
     // request to create without the image and it'll provide us a list :-(
     final List<String> args = <String>[
@@ -210,14 +210,14 @@ class EmulatorManager {
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr
         .split('\n')
-        .where((String l) => _androidApiVersion.hasMatch(l))
-        .where((String l) => l.contains('system-images'))
-        .where((String l) => l.contains('google_apis_playstore'))
+        .where((final String l) => _androidApiVersion.hasMatch(l))
+        .where((final String l) => l.contains('system-images'))
+        .where((final String l) => l.contains('google_apis_playstore'))
         .toList();
 
     final List<int> availableApiVersions = availableIDs
-        .map<String>((String id) => _androidApiVersion.firstMatch(id)!.group(1)!)
-        .map<int>((String apiVersion) => int.parse(apiVersion))
+        .map<String>((final String id) => _androidApiVersion.firstMatch(id)!.group(1)!)
+        .map<int>((final String apiVersion) => int.parse(apiVersion))
         .toList();
 
     // Get the highest Android API version or whats left
@@ -237,7 +237,7 @@ class EmulatorManager {
 
   /// Whether we're capable of listing any emulators given the current environment configuration.
   bool get canListAnything {
-    return _platformDiscoverers.any((EmulatorDiscovery discoverer) => discoverer.canListAnything);
+    return _platformDiscoverers.any((final EmulatorDiscovery discoverer) => discoverer.canListAnything);
   }
 }
 
@@ -269,7 +269,7 @@ abstract class Emulator {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -277,12 +277,12 @@ abstract class Emulator {
         && other.id == id;
   }
 
-  Future<void> launch({bool coldBoot});
+  Future<void> launch({final bool coldBoot});
 
   @override
   String toString() => name;
 
-  static List<String> descriptions(List<Emulator> emulators) {
+  static List<String> descriptions(final List<Emulator> emulators) {
     if (emulators.isEmpty) {
       return <String>[];
     }
@@ -299,26 +299,26 @@ abstract class Emulator {
     ];
 
     // Calculate column widths
-    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
-    List<int> widths = indices.map<int>((int i) => 0).toList();
+    final List<int> indices = List<int>.generate(table[0].length - 1, (final int i) => i);
+    List<int> widths = indices.map<int>((final int i) => 0).toList();
     for (final List<String> row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
+      widths = indices.map<int>((final int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
     final RegExp whiteSpaceAndDots = RegExp(r'[•\s]+$');
     return table
-        .map<String>((List<String> row) {
+        .map<String>((final List<String> row) {
           return indices
-            .map<String>((int i) => row[i].padRight(widths[i]))
+            .map<String>((final int i) => row[i].padRight(widths[i]))
             .followedBy(<String>[row.last])
             .join(' • ');
         })
-        .map<String>((String line) => line.replaceAll(whiteSpaceAndDots, ''))
+        .map<String>((final String line) => line.replaceAll(whiteSpaceAndDots, ''))
         .toList();
   }
 
-  static void printEmulators(List<Emulator> emulators, Logger logger) {
+  static void printEmulators(final List<Emulator> emulators, final Logger logger) {
     descriptions(emulators).forEach(logger.printStatus);
   }
 }

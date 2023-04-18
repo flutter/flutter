@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'test_widgets.dart';
 
-void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
+void checkTree(final WidgetTester tester, final List<BoxDecoration> expectedDecorations) {
   final MultiChildRenderObjectElement element = tester.element(find.byElementPredicate(
-    (Element element) => element is MultiChildRenderObjectElement,
+    (final Element element) => element is MultiChildRenderObjectElement,
   ));
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
@@ -32,7 +32,7 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 }
 
 void main() {
-  testWidgets('MultiChildRenderObjectElement control test', (WidgetTester tester) async {
+  testWidgets('MultiChildRenderObjectElement control test', (final WidgetTester tester) async {
 
     await tester.pumpWidget(
       const Stack(
@@ -117,7 +117,7 @@ void main() {
 
   });
 
-  testWidgets('MultiChildRenderObjectElement with stateless widgets', (WidgetTester tester) async {
+  testWidgets('MultiChildRenderObjectElement with stateless widgets', (final WidgetTester tester) async {
 
     await tester.pumpWidget(
       const Stack(
@@ -243,7 +243,7 @@ void main() {
     checkTree(tester, <BoxDecoration>[]);
   });
 
-  testWidgets('MultiChildRenderObjectElement with stateful widgets', (WidgetTester tester) async {
+  testWidgets('MultiChildRenderObjectElement with stateful widgets', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
@@ -353,5 +353,5 @@ class DummyWidget extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }

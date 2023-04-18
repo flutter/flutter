@@ -20,7 +20,7 @@ class ResizeApp extends StatefulWidget {
   static const MethodChannel platform =
     MethodChannel('samples.flutter.dev/resize');
 
-  static Future<void> resize(Size size) async {
+  static Future<void> resize(final Size size) async {
     await ResizeApp.platform.invokeMethod<void>(
       'resize',
       <String, dynamic>{
@@ -36,10 +36,10 @@ class ResizeApp extends StatefulWidget {
 
 class _ResizeAppState extends State<ResizeApp> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           final Size currentSize = MediaQuery.of(context).size;
           return Scaffold(
             floatingActionButton: FloatingActionButton.extended(

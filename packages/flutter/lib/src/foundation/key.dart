@@ -25,7 +25,7 @@ abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
   ///
   /// This is the simplest way to create keys.
-  const factory Key(String value) = ValueKey<String>;
+  const factory Key(final String value) = ValueKey<String>;
 
   /// Default constructor, used by subclasses.
   ///
@@ -88,7 +88,7 @@ class ValueKey<T> extends LocalKey {
   final T value;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

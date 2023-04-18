@@ -18,7 +18,7 @@ class AppBarApp extends StatelessWidget {
   const AppBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: const AppBarExample(),
@@ -30,7 +30,7 @@ class AppBarExample extends StatelessWidget {
   const AppBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
@@ -51,7 +51,7 @@ class AppBarExample extends StatelessWidget {
           //
           // This sets `notification.depth == 1` to listen to the scroll
           // notification from the nested `ListView.builder`.
-          notificationPredicate: (ScrollNotification notification) {
+          notificationPredicate: (final ScrollNotification notification) {
             return notification.depth == 1;
           },
           // The elevation value of the app bar when scroll view has
@@ -79,7 +79,7 @@ class AppBarExample extends StatelessWidget {
           children: <Widget>[
             ListView.builder(
               itemCount: 25,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[0]} $index'),
@@ -88,7 +88,7 @@ class AppBarExample extends StatelessWidget {
             ),
             ListView.builder(
               itemCount: 25,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[1]} $index'),
@@ -97,7 +97,7 @@ class AppBarExample extends StatelessWidget {
             ),
             ListView.builder(
               itemCount: 25,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 return ListTile(
                   tileColor: index.isOdd ? oddItemColor : evenItemColor,
                   title: Text('${titles[2]} $index'),

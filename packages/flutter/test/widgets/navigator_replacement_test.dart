@@ -8,12 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'observer_tester.dart';
 
 void main() {
-  testWidgets('Back during pushReplacement', (WidgetTester tester) async {
+  testWidgets('Back during pushReplacement', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: const Material(child: Text('home')),
       routes: <String, WidgetBuilder>{
-        '/a': (BuildContext context) => const Material(child: Text('a')),
-        '/b': (BuildContext context) => const Material(child: Text('b')),
+        '/a': (final BuildContext context) => const Material(child: Text('a')),
+        '/b': (final BuildContext context) => const Material(child: Text('b')),
       },
     ));
 
@@ -42,13 +42,13 @@ void main() {
   });
 
   group('pushAndRemoveUntil', () {
-    testWidgets('notifies appropriately', (WidgetTester tester) async {
+    testWidgets('notifies appropriately', (final WidgetTester tester) async {
       final TestObserver observer = TestObserver();
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
         routes: <String, WidgetBuilder>{
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Text('b')),
+          '/a': (final BuildContext context) => const Material(child: Text('a')),
+          '/b': (final BuildContext context) => const Material(child: Text('b')),
         },
         navigatorObservers: <NavigatorObserver>[observer],
       );
@@ -58,10 +58,10 @@ void main() {
       final NavigatorState navigator = tester.state(find.byType(Navigator));
       final List<String> log = <String>[];
       observer
-        ..onPushed = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        ..onPushed = (final Route<dynamic>? route, final Route<dynamic>? previousRoute) {
           log.add('${route!.settings.name} pushed, previous route: ${previousRoute!.settings.name}');
         }
-        ..onRemoved = (Route<dynamic>? route, Route<dynamic>? previousRoute) {
+        ..onRemoved = (final Route<dynamic>? route, final Route<dynamic>? previousRoute) {
           log.add('${route!.settings.name} removed, previous route: ${previousRoute?.settings.name}');
         };
 
@@ -74,7 +74,7 @@ void main() {
       expect(find.text('b', skipOffstage: false), findsNothing);
 
       // Remove all routes below
-      navigator.pushNamedAndRemoveUntil('/b', (Route<dynamic> route) => false);
+      navigator.pushNamedAndRemoveUntil('/b', (final Route<dynamic> route) => false);
       await tester.pumpAndSettle();
 
       expect(find.text('home', skipOffstage: false), findsNothing);
@@ -110,12 +110,12 @@ void main() {
       ]));
     });
 
-    testWidgets('triggers page transition animation for pushed route', (WidgetTester tester) async {
+    testWidgets('triggers page transition animation for pushed route', (final WidgetTester tester) async {
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
         routes: <String, WidgetBuilder>{
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Text('b')),
+          '/a': (final BuildContext context) => const Material(child: Text('a')),
+          '/b': (final BuildContext context) => const Material(child: Text('b')),
         },
       );
 
@@ -125,7 +125,7 @@ void main() {
       navigator.pushNamed('/a');
       await tester.pumpAndSettle();
 
-      navigator.pushNamedAndRemoveUntil('/b', (Route<dynamic> route) => false);
+      navigator.pushNamedAndRemoveUntil('/b', (final Route<dynamic> route) => false);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
@@ -139,17 +139,17 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Hero transition triggers when preceding route contains hero, and predicate route does not', (WidgetTester tester) async {
+    testWidgets('Hero transition triggers when preceding route contains hero, and predicate route does not', (final WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => const Material(child: Text('home')),
-          '/a': (BuildContext context) => const Material(child: Hero(
+          '/': (final BuildContext context) => const Material(child: Text('home')),
+          '/a': (final BuildContext context) => const Material(child: Hero(
             tag: kHeroTag,
             child: Text('a'),
           )),
-          '/b': (BuildContext context) => const Material(child: Padding(
+          '/b': (final BuildContext context) => const Material(child: Padding(
             padding: EdgeInsets.all(100.0),
             child: Hero(
               tag: kHeroTag,
@@ -184,7 +184,7 @@ void main() {
       expect(find.text('b'), isOnstage);
     });
 
-    testWidgets('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (WidgetTester tester) async {
+    testWidgets('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (final WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         theme: ThemeData(
@@ -196,12 +196,12 @@ void main() {
         ),
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => const Material(child: Hero(
+          '/': (final BuildContext context) => const Material(child: Hero(
             tag:kHeroTag,
             child: Text('home'),
           )),
-          '/a': (BuildContext context) => const Material(child: Text('a')),
-          '/b': (BuildContext context) => const Material(child: Padding(
+          '/a': (final BuildContext context) => const Material(child: Text('a')),
+          '/b': (final BuildContext context) => const Material(child: Padding(
             padding: EdgeInsets.all(100.0),
             child: Hero(
               tag: kHeroTag,

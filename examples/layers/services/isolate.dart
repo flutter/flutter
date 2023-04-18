@@ -16,7 +16,7 @@ typedef OnResultListener = void Function(String result);
 // The choice of JSON parsing here is meant as an example that might surface
 // in real-world applications.
 class Calculator {
-  Calculator({ required this.onProgressListener, required this.onResultListener, String? data })
+  Calculator({ required this.onProgressListener, required this.onResultListener, final String? data })
     : _data = _replicateJson(data, 10000);
 
   final OnProgressListener onProgressListener;
@@ -32,7 +32,7 @@ class Calculator {
   void run() {
     int i = 0;
     final JsonDecoder decoder = JsonDecoder(
-      (dynamic key, dynamic value) {
+      (final dynamic key, final dynamic value) {
         if (key is int && i++ % _NOTIFY_INTERVAL == 0) {
           onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
         }
@@ -49,7 +49,7 @@ class Calculator {
     }
   }
 
-  static String _replicateJson(String? data, int count) {
+  static String _replicateJson(final String? data, final int count) {
     final StringBuffer buffer = StringBuffer()..write('[');
     for (int i = 0; i < count; i++) {
       buffer.write(data);
@@ -131,12 +131,12 @@ class CalculationManager {
     // isolates do not have access to the root bundle. However, the loading
     // process is asynchronous, so the UI will not block while the file is
     // loaded.
-    rootBundle.loadString('services/data.json').then<void>((String data) {
+    rootBundle.loadString('services/data.json').then<void>((final String data) {
       if (isRunning) {
         final CalculationMessage message = CalculationMessage(data, _receivePort.sendPort);
         // Spawn an isolate to JSON-parse the file contents. The JSON parsing
         // is synchronous, so if done in the main isolate, the UI would block.
-        Isolate.spawn<CalculationMessage>(_calculate, message).then<void>((Isolate isolate) {
+        Isolate.spawn<CalculationMessage>(_calculate, message).then<void>((final Isolate isolate) {
           if (!isRunning) {
             isolate.kill(priority: Isolate.immediate);
           } else {
@@ -148,7 +148,7 @@ class CalculationManager {
     });
   }
 
-  void _handleMessage(dynamic message) {
+  void _handleMessage(final dynamic message) {
     if (message is List<double>) {
       _completed = message[0];
       _total = message[1];
@@ -171,10 +171,10 @@ class CalculationManager {
   //
   // Static and global variables are initialized anew in the spawned isolate,
   // in a separate memory space.
-  static void _calculate(CalculationMessage message) {
+  static void _calculate(final CalculationMessage message) {
     final SendPort sender = message.sendPort;
     final Calculator calculator = Calculator(
-      onProgressListener: (double completed, double total) {
+      onProgressListener: (final double completed, final double total) {
         sender.send(<double>[ completed, total ]);
       },
       onResultListener: sender.send,
@@ -222,7 +222,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -254,11 +254,11 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
     );
   }
 
-  void _handleProgressUpdate(double completed, double total) {
+  void _handleProgressUpdate(final double completed, final double total) {
     _updateState(' ', completed / total);
   }
 
-  void _handleResult(String result) {
+  void _handleResult(final String result) {
     _updateState(result, 0.0);
   }
 
@@ -271,7 +271,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
     _updateState(' ', 0.0);
   }
 
-  String _getStatus(CalculationState state) {
+  String _getStatus(final CalculationState state) {
     switch (state) {
       case CalculationState.loading:
         return 'Loading...';
@@ -282,7 +282,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
     }
   }
 
-  void _updateState(String result, double progress) {
+  void _updateState(final String result, final double progress) {
     setState(() {
       _result = result;
       _progress = progress;

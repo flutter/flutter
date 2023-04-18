@@ -10,7 +10,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('App build method exception should form valid FlutterErrorDetails',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
     final dynamic appError = tester.takeException();

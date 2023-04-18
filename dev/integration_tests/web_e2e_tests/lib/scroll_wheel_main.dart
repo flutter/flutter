@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Flutter Scroll Wheel Test',
       theme: ThemeData(
@@ -37,14 +37,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
       body: ListView.builder(
         itemCount: 1000,
-        itemBuilder: (BuildContext context, int index) => Padding(
+        itemBuilder: (final BuildContext context, final int index) => Padding(
           padding: const EdgeInsets.all(20),
           child: Container(
             height: 100,
@@ -79,8 +79,8 @@ abstract class DeltaMode {
   static const int kPage = 0x02;
 }
 
-void dispatchMouseWheelEvent(int mouseX, int mouseY,
-    int deltaMode, double deltaX, double deltaY) {
+void dispatchMouseWheelEvent(final int mouseX, final int mouseY,
+    final int deltaMode, final double deltaX, final double deltaY) {
   final html.EventTarget target = html.document.elementFromPoint(mouseX, mouseY)!;
 
   target.dispatchEvent(html.MouseEvent('mouseover',

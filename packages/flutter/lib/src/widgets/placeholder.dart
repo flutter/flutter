@@ -17,7 +17,7 @@ class _PlaceholderPainter extends CustomPainter {
   final double strokeWidth;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
@@ -31,13 +31,13 @@ class _PlaceholderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_PlaceholderPainter oldPainter) {
+  bool shouldRepaint(final _PlaceholderPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.strokeWidth != strokeWidth;
   }
 
   @override
-  bool hitTest(Offset position) => false;
+  bool hitTest(final Offset position) => false;
 }
 
 /// A widget that draws a box that represents where other widgets will one day
@@ -89,7 +89,7 @@ class Placeholder extends StatelessWidget {
   /// Defaults to null.
   final Widget? child;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LimitedBox(
       maxWidth: fallbackWidth,
       maxHeight: fallbackHeight,
@@ -105,7 +105,7 @@ class Placeholder extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: const Color(0xFF455A64)));
     properties.add(DoubleProperty('strokeWidth', strokeWidth, defaultValue: 2.0));

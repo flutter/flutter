@@ -62,7 +62,7 @@ Future<void> main() async {
   });
 }
 
-Future<void> _addPlugin(Directory projectDir) async {
+Future<void> _addPlugin(final Directory projectDir) async {
   section('Add plugins');
 
   final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
@@ -80,7 +80,7 @@ Future<void> _addPlugin(Directory projectDir) async {
   });
 }
 
-Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = false}) async {
+Future<void> _testBuildIosFramework(final Directory projectDir, { final bool isModule = false}) async {
   // This builds all build modes' frameworks by default
   section('Build iOS app');
 
@@ -496,7 +496,7 @@ Future<void> _testBuildIosFramework(Directory projectDir, { bool isModule = fals
 }
 
 
-Future<void> _testBuildMacOSFramework(Directory projectDir) async {
+Future<void> _testBuildMacOSFramework(final Directory projectDir) async {
   // This builds all build modes' frameworks by default
   section('Build macOS frameworks');
 
@@ -818,28 +818,28 @@ Future<void> _testBuildMacOSFramework(Directory projectDir) async {
   ));
 }
 
-Future<void> _checkDylib(String pathToLibrary) async {
+Future<void> _checkDylib(final String pathToLibrary) async {
   final String binaryFileType = await fileType(pathToLibrary);
   if (!binaryFileType.contains('dynamically linked')) {
     throw TaskResult.failure('$pathToLibrary is not a dylib, found: $binaryFileType');
   }
 }
 
-Future<void> _checkDsym(String pathToSymbolFile) async {
+Future<void> _checkDsym(final String pathToSymbolFile) async {
   final String binaryFileType = await fileType(pathToSymbolFile);
   if (!binaryFileType.contains('dSYM companion file')) {
     throw TaskResult.failure('$pathToSymbolFile is not a dSYM, found: $binaryFileType');
   }
 }
 
-Future<void> _checkStatic(String pathToLibrary) async {
+Future<void> _checkStatic(final String pathToLibrary) async {
   final String binaryFileType = await fileType(pathToLibrary);
   if (!binaryFileType.contains('current ar archive random library')) {
     throw TaskResult.failure('$pathToLibrary is not a static library, found: $binaryFileType');
   }
 }
 
-Future<String> _dylibSymbols(String pathToDylib) {
+Future<String> _dylibSymbols(final String pathToDylib) {
   return eval('nm', <String>[
     '-g',
     pathToDylib,
@@ -848,7 +848,7 @@ Future<String> _dylibSymbols(String pathToDylib) {
   ]);
 }
 
-Future<bool> _linksOnFlutter(String pathToBinary) async {
+Future<bool> _linksOnFlutter(final String pathToBinary) async {
   final String loadCommands = await eval('otool', <String>[
     '-l',
     '-arch',
@@ -858,7 +858,7 @@ Future<bool> _linksOnFlutter(String pathToBinary) async {
   return loadCommands.contains('Flutter.framework');
 }
 
-Future<bool> _linksOnFlutterMacOS(String pathToBinary) async {
+Future<bool> _linksOnFlutterMacOS(final String pathToBinary) async {
   final String loadCommands = await eval('otool', <String>[
     '-l',
     '-arch',

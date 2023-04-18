@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can tap a hyperlink', (WidgetTester tester) async {
+  testWidgets('Can tap a hyperlink', (final WidgetTester tester) async {
     bool didTapLeft = false;
     final TapGestureRecognizer tapLeft = TapGestureRecognizer()
       ..onTap = () {

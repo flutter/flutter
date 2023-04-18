@@ -12,7 +12,7 @@ class AnimatedPositionedExampleApp extends StatelessWidget {
   const AnimatedPositionedExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedPositioned Sample')),
@@ -35,7 +35,7 @@ class _AnimatedPositionedExampleState extends State<AnimatedPositionedExample> {
   bool selected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       width: 200,
       height: 350,

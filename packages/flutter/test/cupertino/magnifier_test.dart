@@ -18,13 +18,13 @@ void main() {
   // Make sure that your gesture in magnifierInfo is within the line in magnifierInfo,
   // or else the magnifier status will stay hidden and this will not complete.
   Future<void> showCupertinoMagnifier(
-    BuildContext context,
-    WidgetTester tester,
-    ValueNotifier<MagnifierInfo> magnifierInfo,
+    final BuildContext context,
+    final WidgetTester tester,
+    final ValueNotifier<MagnifierInfo> magnifierInfo,
   ) async {
     final Future<void> magnifierShown = magnifierController.show(
         context: context,
-        builder: (_) => CupertinoTextMagnifier(
+        builder: (final _) => CupertinoTextMagnifier(
               controller: magnifierController,
               magnifierInfo: magnifierInfo,
             ));
@@ -41,14 +41,14 @@ void main() {
 
   group('CupertinoTextEditingMagnifier', () {
     group('position', () {
-      Offset getMagnifierPosition(WidgetTester tester) {
+      Offset getMagnifierPosition(final WidgetTester tester) {
         final AnimatedPositioned animatedPositioned =
             tester.firstWidget(find.byType(AnimatedPositioned));
         return Offset(
             animatedPositioned.left ?? 0, animatedPositioned.top ?? 0);
       }
 
-      testWidgets('should be at gesture position if does not violate any positioning rules', (WidgetTester tester) async {
+      testWidgets('should be at gesture position if does not violate any positioning rules', (final WidgetTester tester) async {
         final Key fakeTextFieldKey = UniqueKey();
         final Key outerKey = UniqueKey();
 
@@ -98,7 +98,7 @@ void main() {
         );
       });
 
-      testWidgets('should never horizontally be outside of Screen Padding', (WidgetTester tester) async {
+      testWidgets('should never horizontally be outside of Screen Padding', (final WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -128,7 +128,7 @@ void main() {
             lessThan(MediaQuery.sizeOf(context).width));
       });
 
-      testWidgets('should have some vertical drag', (WidgetTester tester) async {
+      testWidgets('should have some vertical drag', (final WidgetTester tester) async {
         final double dragPositionBelowTextField = reasonableTextField.center.dy + 30;
 
         await tester.pumpWidget(
@@ -166,7 +166,7 @@ void main() {
     });
 
     group('status', () {
-      testWidgets('should hide if gesture is far below the text field', (WidgetTester tester) async {
+      testWidgets('should hide if gesture is far below the text field', (final WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),
@@ -206,7 +206,7 @@ void main() {
       });
 
       testWidgets('should re-show if gesture moves back up',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             color: Color.fromARGB(7, 0, 129, 90),

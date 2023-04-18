@@ -8,7 +8,7 @@ import 'dart:io';
 /// increasing code coverage percentage.
 ///
 /// Usage: `dart tool/unit_coverage lcov.info`
-void main(List<String> args) {
+void main(final List<String> args) {
   if (args.isEmpty || args.length > 1) {
     print('Usage: dart tool/unit_coverage lcov.info');
     return;
@@ -33,7 +33,7 @@ void main(List<String> args) {
       currentCoverage = null;
     }
   }
-  coverages.sort((Coverage left, Coverage right) {
+  coverages.sort((final Coverage left, final Coverage right) {
     final double leftPercent = left.testedLines / left.totalLines;
     final double rightPercent = right.testedLines / right.totalLines;
     return leftPercent.compareTo(rightPercent);

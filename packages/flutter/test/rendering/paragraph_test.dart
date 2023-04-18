@@ -30,9 +30,9 @@ class RenderParagraphWithEmptySelectionBoxList extends RenderParagraph {
 
   @override
   List<ui.TextBox> getBoxesForSelection(
-    TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    final TextSelection selection, {
+    final ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    final ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     if (selection == emptyListSelection) {
       return <ui.TextBox>[];
@@ -58,9 +58,9 @@ class RenderParagraphWithEmptyBoxListForWidgetSpan extends RenderParagraph {
 
   @override
   List<ui.TextBox> getBoxesForSelection(
-    TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    final TextSelection selection, {
+    final ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    final ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     if (text.getSpanForPosition(selection.base) is WidgetSpan) {
       return <ui.TextBox>[];
@@ -140,8 +140,8 @@ void main() {
       const TextSelection(baseOffset: 25, extentOffset: 50),
     );
 
-    expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
-    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
+    expect(boxes.any((final ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
+    expect(boxes.any((final ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61016
 
   test('getBoxesForSelection test with multiple TextSpans and lines', () {
@@ -260,9 +260,9 @@ void main() {
     );
 
     void relayoutWith({
-      int? maxLines,
-      required bool softWrap,
-      required TextOverflow overflow,
+      final int? maxLines,
+      required final bool softWrap,
+      required final TextOverflow overflow,
     }) {
       paragraph
         ..maxLines = maxLines
@@ -338,7 +338,7 @@ void main() {
       textDirection: TextDirection.ltr,
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
-    void layoutAt(int? maxLines) {
+    void layoutAt(final int? maxLines) {
       paragraph.maxLines = maxLines;
       pumpFrame();
     }
@@ -722,7 +722,7 @@ void main() {
     paragraph.assembleSemanticsNode(result, SemanticsConfiguration(), <SemanticsNode>[truncatedChild]);
     // It should only contain the semantics node of the TextSpan.
     expect(result.childrenCount, 1);
-    result.visitChildren((SemanticsNode node) {
+    result.visitChildren((final SemanticsNode node) {
       expect(node != truncatedChild, isTrue);
       return true;
     });
@@ -742,7 +742,7 @@ void main() {
     final SemanticsNode node = SemanticsNode();
     paragraph.assembleSemanticsNode(node, SemanticsConfiguration(), <SemanticsNode>[]);
     final List<SemanticsNode> children = <SemanticsNode>[];
-    node.visitChildren((SemanticsNode child) {
+    node.visitChildren((final SemanticsNode child) {
       children.add(child);
       return true;
     });
@@ -768,7 +768,7 @@ void main() {
   test('Asserts on unsupported gesture recognizer', () {
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(text: _kText, children: <InlineSpan>[
-        TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (int id) {}),
+        TextSpan(text: 'three', recognizer: MultiTapGestureRecognizer()..onTap = (final int id) {}),
       ]),
       textDirection: TextDirection.rtl,
     );
@@ -823,7 +823,7 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
   group('Selection', () {
-    void selectionParagraph(RenderParagraph paragraph, TextPosition start, TextPosition end) {
+    void selectionParagraph(final RenderParagraph paragraph, final TextPosition start, final TextPosition end) {
       for (final Selectable selectable in (paragraph.registrar! as TestSelectionRegistrar).selectables) {
         selectable.dispatchSelectionEvent(
           SelectionEdgeUpdateEvent.forStart(
@@ -1322,7 +1322,7 @@ void main() {
     paragraph.assembleSemanticsNode(nodeBefore, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(semanticsUpdateCount, 0);
     List<SemanticsNode> children = <SemanticsNode>[];
-    nodeBefore.visitChildren((SemanticsNode child) {
+    nodeBefore.visitChildren((final SemanticsNode child) {
       children.add(child);
       return true;
     });
@@ -1340,7 +1340,7 @@ void main() {
     paragraph.assembleSemanticsNode(nodeAfter, SemanticsConfiguration(), <SemanticsNode>[]);
     expect(semanticsUpdateCount, 1);
     children = <SemanticsNode>[];
-    nodeAfter.visitChildren((SemanticsNode child) {
+    nodeAfter.visitChildren((final SemanticsNode child) {
       children.add(child);
       return true;
     });
@@ -1355,13 +1355,13 @@ class MockCanvas extends Fake implements Canvas {
   Paint? drawnRectPaint;
 
   @override
-  void drawRect(Rect rect, Paint paint) {
+  void drawRect(final Rect rect, final Paint paint) {
     drawnRect = rect;
     drawnRectPaint = paint;
   }
 
   @override
-  void drawParagraph(ui.Paragraph paragraph, Offset offset) { }
+  void drawParagraph(final ui.Paragraph paragraph, final Offset offset) { }
 }
 
 class MockPaintingContext extends Fake implements PaintingContext {
@@ -1372,12 +1372,12 @@ class MockPaintingContext extends Fake implements PaintingContext {
 class TestSelectionRegistrar extends SelectionRegistrar {
   final List<Selectable> selectables = <Selectable>[];
   @override
-  void add(Selectable selectable) {
+  void add(final Selectable selectable) {
     selectables.add(selectable);
   }
 
   @override
-  void remove(Selectable selectable) {
+  void remove(final Selectable selectable) {
     expect(selectables.remove(selectable), isTrue);
   }
 

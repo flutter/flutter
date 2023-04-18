@@ -12,7 +12,7 @@ class CheckboxExampleApp extends StatelessWidget {
   const CheckboxExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Checkbox Sample')),
@@ -35,8 +35,8 @@ class _CheckboxExampleState extends State<CheckboxExample> {
   bool isChecked = false;
 
   @override
-  Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
+  Widget build(final BuildContext context) {
+    Color getColor(final Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
         MaterialState.hovered,
@@ -52,7 +52,7 @@ class _CheckboxExampleState extends State<CheckboxExample> {
       checkColor: Colors.white,
       fillColor: MaterialStateProperty.resolveWith(getColor),
       value: isChecked,
-      onChanged: (bool? value) {
+      onChanged: (final bool? value) {
         setState(() {
           isChecked = value!;
         });

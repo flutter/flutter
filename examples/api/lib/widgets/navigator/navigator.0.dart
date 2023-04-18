@@ -12,13 +12,13 @@ class NavigatorExampleApp extends StatelessWidget {
   const NavigatorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       // MaterialApp contains our top-level Navigator
       initialRoute: '/',
       routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) => const HomePage(),
-        '/signup': (BuildContext context) => const SignUpPage(),
+        '/': (final BuildContext context) => const HomePage(),
+        '/signup': (final BuildContext context) => const SignUpPage(),
       },
     );
   }
@@ -28,7 +28,7 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.headlineMedium!,
       child: Container(
@@ -44,7 +44,7 @@ class CollectPersonalInfoPage extends StatelessWidget {
   const CollectPersonalInfoPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.headlineMedium!,
       child: GestureDetector(
@@ -72,7 +72,7 @@ class ChooseCredentialsPage extends StatelessWidget {
   final VoidCallback onSignupComplete;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: onSignupComplete,
       child: DefaultTextStyle(
@@ -91,22 +91,22 @@ class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // SignUpPage builds its own Navigator which ends up being a nested
     // Navigator in our app.
     return Navigator(
       initialRoute: 'signup/personal_info',
-      onGenerateRoute: (RouteSettings settings) {
+      onGenerateRoute: (final RouteSettings settings) {
         WidgetBuilder builder;
         switch (settings.name) {
           case 'signup/personal_info':
             // Assume CollectPersonalInfoPage collects personal info and then
             // navigates to 'signup/choose_credentials'.
-            builder = (BuildContext context) => const CollectPersonalInfoPage();
+            builder = (final BuildContext context) => const CollectPersonalInfoPage();
           case 'signup/choose_credentials':
             // Assume ChooseCredentialsPage collects new credentials and then
             // invokes 'onSignupComplete()'.
-            builder = (BuildContext _) => ChooseCredentialsPage(
+            builder = (final BuildContext _) => ChooseCredentialsPage(
                   onSignupComplete: () {
                     // Referencing Navigator.of(context) from here refers to the
                     // top level Navigator because SignUpPage is above the

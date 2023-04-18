@@ -12,7 +12,7 @@ class ActionListenerExampleApp extends StatelessWidget {
   const ActionListenerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ActionListener Sample')),
@@ -48,7 +48,7 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -63,7 +63,7 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ActionListener(
-              listener: (Action<Intent> action) {
+              listener: (final Action<Intent> action) {
                 if (action.intentType == MyIntent) {
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                     content: Text('Action Listener Called'),
@@ -85,19 +85,19 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
 
 class MyAction extends Action<MyIntent> {
   @override
-  void addActionListener(ActionListenerCallback listener) {
+  void addActionListener(final ActionListenerCallback listener) {
     super.addActionListener(listener);
     debugPrint('Action Listener was added');
   }
 
   @override
-  void removeActionListener(ActionListenerCallback listener) {
+  void removeActionListener(final ActionListenerCallback listener) {
     super.removeActionListener(listener);
     debugPrint('Action Listener was removed');
   }
 
   @override
-  void invoke(covariant MyIntent intent) {
+  void invoke(covariant final MyIntent intent) {
     notifyActionListeners();
   }
 }

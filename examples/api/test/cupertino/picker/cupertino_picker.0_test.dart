@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
-  testWidgets('Change selected fruit using CupertinoPicker', (WidgetTester tester) async {
+  testWidgets('Change selected fruit using CupertinoPicker', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoPickerApp(),
     );

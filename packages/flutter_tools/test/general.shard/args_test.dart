@@ -109,7 +109,7 @@ void main() {
   });
 }
 
-void verifyCommandRunner(CommandRunner<Object?> runner) {
+void verifyCommandRunner(final CommandRunner<Object?> runner) {
   expect(runner.argParser, isNotNull, reason: '${runner.runtimeType} has no argParser');
   expect(runner.argParser.allowsAnything, isFalse, reason: '${runner.runtimeType} allows anything');
   expect(runner.argParser.allowTrailingOptions, isFalse, reason: '${runner.runtimeType} allows trailing options');
@@ -117,7 +117,7 @@ void verifyCommandRunner(CommandRunner<Object?> runner) {
   runner.commands.values.forEach(verifyCommand);
 }
 
-void verifyCommand(Command<Object?> runner) {
+void verifyCommand(final Command<Object?> runner) {
   expect(runner.argParser, isNotNull, reason: 'command ${runner.name} has no argParser');
   verifyOptions(runner.name, runner.argParser.options.values);
 
@@ -160,7 +160,7 @@ const String _needHelp = "Every option must have help explaining what it does, e
 
 const String _header = ' Comment: ';
 
-void verifyOptions(String? command, Iterable<Option> options) {
+void verifyOptions(final String? command, final Iterable<Option> options) {
   String target;
   if (command == null) {
     target = 'the global argument "';

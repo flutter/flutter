@@ -16,14 +16,14 @@ class RunningProcessInfo {
   final DateTime creationDate;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is RunningProcessInfo
         && other.pid == pid
         && other.commandLine == commandLine
         && other.creationDate == creationDate;
   }
 
-  Future<bool> terminate({required ProcessManager processManager}) async {
+  Future<bool> terminate({required final ProcessManager processManager}) async {
     // This returns true when the signal is sent, not when the process goes away.
     // See also https://github.com/dart-lang/sdk/issues/40759 (killPid should wait for process to be terminated).
     if (Platform.isWindows) {
@@ -50,8 +50,8 @@ class RunningProcessInfo {
 }
 
 Future<Set<RunningProcessInfo>> getRunningProcesses({
-  String? processName,
-  required ProcessManager processManager,
+  final String? processName,
+  required final ProcessManager processManager,
 }) {
   if (Platform.isWindows) {
     return windowsRunningProcesses(processName, processManager);
@@ -61,8 +61,8 @@ Future<Set<RunningProcessInfo>> getRunningProcesses({
 
 @visibleForTesting
 Future<Set<RunningProcessInfo>> windowsRunningProcesses(
-  String? processName,
-  ProcessManager processManager,
+  final String? processName,
+  final ProcessManager processManager,
 ) async {
   // PowerShell script to get the command line arguments and create time of a process.
   // See: https://docs.microsoft.com/en-us/windows/desktop/cimwin32prov/win32-process
@@ -91,7 +91,7 @@ Future<Set<RunningProcessInfo>> windowsRunningProcesses(
 /// --------- ------------          -----------
 ///      2904 3/11/2019 11:01:54 AM "C:\Program Files\Android\Android Studio\jre\bin\java.exe" -Xmx1536M -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Users\win1\.gradle\wrapper\dists\gradle-4.10.2-all\9fahxiiecdb76a5g3aw9oi8rv\gradle-4.10.2\lib\gradle-launcher-4.10.2.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 4.10.2
 @visibleForTesting
-Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
+Iterable<RunningProcessInfo> processPowershellOutput(final String output) sync* {
   const int processIdHeaderSize = 'ProcessId'.length;
   const int creationDateHeaderStart = processIdHeaderSize + 1;
   late int creationDateHeaderEnd;
@@ -147,8 +147,8 @@ Iterable<RunningProcessInfo> processPowershellOutput(String output) sync* {
 
 @visibleForTesting
 Future<Set<RunningProcessInfo>> posixRunningProcesses(
-  String? processName,
-  ProcessManager processManager,
+  final String? processName,
+  final ProcessManager processManager,
 ) async {
   // Cirrus is missing this in Linux for some reason.
   if (!processManager.canRun('ps')) {
@@ -178,8 +178,8 @@ Future<Set<RunningProcessInfo>> posixRunningProcesses(
 /// Sat Mar  9 20:13:00 2019        49 /usr/sbin/syslogd
 @visibleForTesting
 Iterable<RunningProcessInfo> processPsOutput(
-  String output,
-  String? processName,
+  final String output,
+  final String? processName,
 ) sync* {
   bool inTableBody = false;
   for (String line in output.split('\n')) {

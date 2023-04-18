@@ -7,8 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stocks/main.dart' as stocks;
 import 'package:stocks/stock_data.dart' as stock_data;
 
-Element? findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
-  void walker(Element child) {
+Element? findElementOfExactWidgetTypeGoingDown(final Element node, final Type targetType) {
+  void walker(final Element child) {
     if (child.widget.runtimeType == targetType) {
       throw child;
     }
@@ -22,9 +22,9 @@ Element? findElementOfExactWidgetTypeGoingDown(Element node, Type targetType) {
   return null;
 }
 
-Element? findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
+Element? findElementOfExactWidgetTypeGoingUp(final Element node, final Type targetType) {
   Element? result;
-  bool walker(Element ancestor) {
+  bool walker(final Element ancestor) {
     if (ancestor.widget.runtimeType == targetType) {
       result = ancestor;
       return false;
@@ -35,7 +35,7 @@ Element? findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
   return result;
 }
 
-void checkIconColor(WidgetTester tester, String label, Color color) {
+void checkIconColor(final WidgetTester tester, final String label, final Color color) {
   final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile)!;
   final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText)!;
   final RichText richText = asset.widget as RichText;
@@ -45,7 +45,7 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
 void main() {
   stock_data.StockData.actuallyFetchData = false;
 
-  testWidgets('Icon colors', (WidgetTester tester) async {
+  testWidgets('Icon colors', (final WidgetTester tester) async {
     stocks.main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame

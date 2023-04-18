@@ -5,15 +5,15 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 
-List<String> captureOutput(VoidCallback fn) {
+List<String> captureOutput(final VoidCallback fn) {
   final List<String> log = <String>[];
 
   runZoned<void>(fn, zoneSpecification: ZoneSpecification(
     print: (
-      Zone self,
-      ZoneDelegate parent,
-      Zone zone,
-      String line,
+      final Zone self,
+      final ZoneDelegate parent,
+      final Zone zone,
+      final String line,
     ) {
       log.add(line);
     },

@@ -1340,13 +1340,13 @@ Could not compile build file '…/example/android/build.gradle'.
   });
 }
 
-bool formatTestErrorMessage(String errorMessage, GradleHandledError error) {
+bool formatTestErrorMessage(final String errorMessage, final GradleHandledError error) {
   return errorMessage
     .split('\n')
-    .any((String line) => error.test(line));
+    .any((final String line) => error.test(line));
 }
 
-Platform fakePlatform(String name) {
+Platform fakePlatform(final String name) {
   return FakePlatform(
     environment: <String, String>{
       'HOME': '/',
@@ -1357,7 +1357,7 @@ Platform fakePlatform(String name) {
 
 class FakeGradleUtils extends Fake implements GradleUtils {
   @override
-  String getExecutable(FlutterProject project) {
+  String getExecutable(final FlutterProject project) {
     return 'gradlew';
   }
 }
@@ -1374,11 +1374,11 @@ class _TestPromptTerminal extends Fake implements AnsiTerminal {
 
   @override
   Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
+    final List<String> acceptedCharacters, {
+    required final Logger logger,
+    final String? prompt,
+    final int? defaultChoiceIndex,
+    final bool displayAcceptedCharacters = true,
   }) {
     return Future<String>.value(promptResult);
   }

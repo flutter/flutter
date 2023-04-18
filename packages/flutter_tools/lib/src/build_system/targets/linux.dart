@@ -48,7 +48,7 @@ class UnpackLinux extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -120,7 +120,7 @@ abstract class BundleLinuxAssets extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_linux_assets');
@@ -158,7 +158,7 @@ abstract class BundleLinuxAssets extends Target {
   }
 
   /// Return json encoded string that contains data about version for package_info
-  String getVersionInfo(Map<String, String> defines) {
+  String getVersionInfo(final Map<String, String> defines) {
     final Map<String, dynamic> versionInfo =
         jsonDecode(FlutterProject.current().getVersionInfo())
             as Map<String, dynamic>;
@@ -202,7 +202,7 @@ class LinuxAotBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final File outputFile = environment.buildDir.childFile('app.so');
     final Directory outputDirectory = environment.outputDir.childDirectory('lib');
     if (!outputDirectory.existsSync()) {

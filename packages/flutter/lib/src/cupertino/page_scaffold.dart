@@ -102,7 +102,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget paddedContent = widget.child;
 
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
@@ -214,5 +214,5 @@ abstract class ObstructingPreferredSizeWidget implements PreferredSizeWidget {
   /// size.
   ///
   /// If false, this widget partially obstructs.
-  bool shouldFullyObstruct(BuildContext context);
+  bool shouldFullyObstruct(final BuildContext context);
 }

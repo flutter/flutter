@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/services/system_chrome/system_chrome.set_sys
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AppBar.systemOverlayStyle can change system overlays styles.', (WidgetTester tester) async {
+  testWidgets('AppBar.systemOverlayStyle can change system overlays styles.', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SystemOverlayStyleApp(),
     );

@@ -78,7 +78,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   }
 
   void _update() {
-    SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((final Duration timeStamp) {
       // Semantic information are only available at the end of a frame and our
       // only chance to paint them on the screen is the next frame. To achieve
       // this, we call setState() in a post-frame callback.
@@ -94,7 +94,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   }
 
   Offset? _lastPointerDownLocation;
-  void _handlePointerDown(PointerDownEvent event) {
+  void _handlePointerDown(final PointerDownEvent event) {
     setState(() {
       _lastPointerDownLocation = event.position * View.of(context).devicePixelRatio;
     });
@@ -118,7 +118,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     });
   }
 
-  void _handlePanEnd(DragEndDetails details) {
+  void _handlePanEnd(final DragEndDetails details) {
     final double vx = details.velocity.pixelsPerSecond.dx;
     final double vy = details.velocity.pixelsPerSecond.dy;
     if (vx.abs() == vy.abs()) {
@@ -144,7 +144,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
     });
   }
 
-  void _performAction(Offset position, SemanticsAction action) {
+  void _performAction(final Offset position, final SemanticsAction action) {
     _pipelineOwner.semanticsOwner?.performActionAt(position, action);
   }
 
@@ -153,7 +153,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
   PipelineOwner get _pipelineOwner => WidgetsBinding.instance.pipelineOwner;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomPaint(
       foregroundPainter: _SemanticsDebuggerPainter(
         _pipelineOwner,
@@ -181,7 +181,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 }
 
 class _SemanticsClient extends ChangeNotifier {
-  _SemanticsClient(PipelineOwner pipelineOwner) {
+  _SemanticsClient(final PipelineOwner pipelineOwner) {
     _semanticsHandle = pipelineOwner.ensureSemantics(
       listener: _didUpdateSemantics,
     );
@@ -218,7 +218,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final SemanticsNode? rootNode = _rootSemanticsNode;
     canvas.save();
     canvas.scale(1.0 / devicePixelRatio, 1.0 / devicePixelRatio);
@@ -234,14 +234,14 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SemanticsDebuggerPainter oldDelegate) {
+  bool shouldRepaint(final _SemanticsDebuggerPainter oldDelegate) {
     return owner != oldDelegate.owner
         || generation != oldDelegate.generation
         || pointerPosition != oldDelegate.pointerPosition;
   }
 
   @visibleForTesting
-  String getMessage(SemanticsNode node) {
+  String getMessage(final SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     final List<String> annotations = <String>[];
 
@@ -321,7 +321,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     return message.trim();
   }
 
-  void _paintMessage(Canvas canvas, SemanticsNode node) {
+  void _paintMessage(final Canvas canvas, final SemanticsNode node) {
     final String message = getMessage(node);
     if (message.isEmpty) {
       return;
@@ -343,19 +343,19 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     canvas.restore();
   }
 
-  int _findDepth(SemanticsNode node) {
+  int _findDepth(final SemanticsNode node) {
     if (!node.hasChildren || node.mergeAllDescendantsIntoThisNode) {
       return 1;
     }
     int childrenDepth = 0;
-    node.visitChildren((SemanticsNode child) {
+    node.visitChildren((final SemanticsNode child) {
       childrenDepth = math.max(childrenDepth, _findDepth(child));
       return true;
     });
     return childrenDepth + 1;
   }
 
-  void _paint(Canvas canvas, SemanticsNode node, int rank) {
+  void _paint(final Canvas canvas, final SemanticsNode node, final int rank) {
     canvas.save();
     if (node.transform != null) {
       canvas.transform(node.transform!.storage);
@@ -384,7 +384,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     }
     if (!node.mergeAllDescendantsIntoThisNode) {
       final int childRank = rank - 1;
-      node.visitChildren((SemanticsNode child) {
+      node.visitChildren((final SemanticsNode child) {
         _paint(canvas, child, childRank);
         return true;
       });
@@ -400,7 +400,7 @@ class _IgnorePointerWithSemantics extends SingleChildRenderObjectWidget {
   });
 
   @override
-  _RenderIgnorePointerWithSemantics createRenderObject(BuildContext context) {
+  _RenderIgnorePointerWithSemantics createRenderObject(final BuildContext context) {
     return _RenderIgnorePointerWithSemantics();
   }
 }
@@ -409,5 +409,5 @@ class _RenderIgnorePointerWithSemantics extends RenderProxyBox {
   _RenderIgnorePointerWithSemantics();
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) => false;
+  bool hitTest(final BoxHitTestResult result, { required final Offset position }) => false;
 }

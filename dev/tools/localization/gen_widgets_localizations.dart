@@ -13,7 +13,7 @@ const List<String> _rtlLanguages = <String>[
   'ur', // Urdu
 ];
 
-String generateWidgetsHeader(String regenerateInstructions) {
+String generateWidgetsHeader(final String regenerateInstructions) {
   return '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -38,7 +38,7 @@ import '../widgets_localizations.dart';
 
 /// Returns the source of the constructor for a GlobalWidgetsLocalizations
 /// subclass.
-String generateWidgetsConstructor(LocaleInfo locale) {
+String generateWidgetsConstructor(final LocaleInfo locale) {
   final String localeName = locale.originalString;
   final String language = locale.languageCode.toLowerCase();
   final String textDirection = _rtlLanguages.contains(language) ? 'TextDirection.rtl' : 'TextDirection.ltr';
@@ -51,7 +51,7 @@ String generateWidgetsConstructor(LocaleInfo locale) {
 
 /// Returns the source of the constructor for a GlobalWidgetsLocalizations
 /// subclass.
-String generateWidgetsConstructorForCountrySubclass(LocaleInfo locale) {
+String generateWidgetsConstructorForCountrySubclass(final LocaleInfo locale) {
   final String localeName = locale.originalString;
   return '''
   /// Create an instance of the translation bundle for ${describeLocale(localeName)}.

@@ -98,7 +98,7 @@ class FlutterLogoDecoration extends Decoration {
   /// See also:
   ///
   ///  * [Decoration.lerp], which interpolates between arbitrary decorations.
-  static FlutterLogoDecoration? lerp(FlutterLogoDecoration? a, FlutterLogoDecoration? b, double t) {
+  static FlutterLogoDecoration? lerp(final FlutterLogoDecoration? a, final FlutterLogoDecoration? b, final double t) {
     assert(a == null || a.debugAssertIsValid());
     assert(b == null || b.debugAssertIsValid());
     if (identical(a, b)) {
@@ -138,7 +138,7 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  FlutterLogoDecoration? lerpFrom(Decoration? a, double t) {
+  FlutterLogoDecoration? lerpFrom(final Decoration? a, final double t) {
     assert(debugAssertIsValid());
     if (a == null || a is FlutterLogoDecoration) {
       assert(a == null || a.debugAssertIsValid());
@@ -148,7 +148,7 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  FlutterLogoDecoration? lerpTo(Decoration? b, double t) {
+  FlutterLogoDecoration? lerpTo(final Decoration? b, final double t) {
     assert(debugAssertIsValid());
     if (b == null || b is FlutterLogoDecoration) {
       assert(b == null || b.debugAssertIsValid());
@@ -159,21 +159,21 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   // TODO(ianh): better hit testing
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) => true;
+  bool hitTest(final Size size, final Offset position, { final TextDirection? textDirection }) => true;
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([ final VoidCallback? onChanged ]) {
     assert(debugAssertIsValid());
     return _FlutterLogoPainter(this);
   }
 
   @override
-  Path getClipPath(Rect rect, TextDirection textDirection) {
+  Path getClipPath(final Rect rect, final TextDirection textDirection) {
     return Path()..addRect(rect);
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     assert(debugAssertIsValid());
     if (identical(this, other)) {
       return true;
@@ -195,7 +195,7 @@ class FlutterLogoDecoration extends Decoration {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('textColor', textColor));
     properties.add(EnumProperty<FlutterLogoStyle>('style', style));
@@ -244,7 +244,7 @@ class _FlutterLogoPainter extends BoxPainter {
   // This class contains a lot of magic numbers. They were derived from the
   // values in the SVG files exported from the original artwork source.
 
-  void _paintLogo(Canvas canvas, Rect rect) {
+  void _paintLogo(final Canvas canvas, final Rect rect) {
     // Our points are in a coordinate space that's 166 pixels wide and 202 pixels high.
     // First, transform the rectangle so that our coordinate space is a square 202 pixels
     // to a side, with the top left at the origin.
@@ -321,7 +321,7 @@ class _FlutterLogoPainter extends BoxPainter {
   }
 
   @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+  void paint(final Canvas canvas, Offset offset, final ImageConfiguration configuration) {
     offset += _config.margin.topLeft;
     final Size canvasSize = _config.margin.deflateSize(configuration.size!);
     if (canvasSize.isEmpty) {

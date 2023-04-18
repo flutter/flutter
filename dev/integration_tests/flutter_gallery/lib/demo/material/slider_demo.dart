@@ -17,7 +17,7 @@ class SliderDemo extends StatefulWidget {
   State<SliderDemo> createState() => _SliderDemoState();
 }
 
-Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
+Path _downTriangle(final double size, final Offset thumbCenter, { final bool invert = false }) {
   final Path thumbPath = Path();
   final double height = math.sqrt(3.0) / 2.0;
   final double centerHeight = size * height / 3.0;
@@ -30,7 +30,7 @@ Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
   return thumbPath;
 }
 
-Path _rightTriangle(double size, Offset thumbCenter, { bool invert = false }) {
+Path _rightTriangle(final double size, final Offset thumbCenter, { final bool invert = false }) {
   final Path thumbPath = Path();
   final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
@@ -41,16 +41,16 @@ Path _rightTriangle(double size, Offset thumbCenter, { bool invert = false }) {
   return thumbPath;
 }
 
-Path _upTriangle(double size, Offset thumbCenter) => _downTriangle(size, thumbCenter, invert: true);
+Path _upTriangle(final double size, final Offset thumbCenter) => _downTriangle(size, thumbCenter, invert: true);
 
-Path _leftTriangle(double size, Offset thumbCenter) => _rightTriangle(size, thumbCenter, invert: true);
+Path _leftTriangle(final double size, final Offset thumbCenter) => _rightTriangle(size, thumbCenter, invert: true);
 
 class _CustomRangeThumbShape extends RangeSliderThumbShape {
   static const double _thumbSize = 4.0;
   static const double _disabledThumbSize = 3.0;
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+  Size getPreferredSize(final bool isEnabled, final bool isDiscrete) {
     return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
 
@@ -61,17 +61,17 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset center, {
-    required Animation<double> activationAnimation,
-    required Animation<double> enableAnimation,
-    bool isDiscrete = false,
-    bool isEnabled = false,
-    bool? isOnTop,
-    required SliderThemeData sliderTheme,
-    TextDirection? textDirection,
-    Thumb? thumb,
-    bool? isPressed,
+    final PaintingContext context,
+    final Offset center, {
+    required final Animation<double> activationAnimation,
+    required final Animation<double> enableAnimation,
+    final bool isDiscrete = false,
+    final bool isEnabled = false,
+    final bool? isOnTop,
+    required final SliderThemeData sliderTheme,
+    final TextDirection? textDirection,
+    final Thumb? thumb,
+    final bool? isPressed,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -112,7 +112,7 @@ class _CustomThumbShape extends SliderComponentShape {
   static const double _disabledThumbSize = 3.0;
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+  Size getPreferredSize(final bool isEnabled, final bool isDiscrete) {
     return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
 
@@ -123,18 +123,18 @@ class _CustomThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    Animation<double>? activationAnimation,
-    required Animation<double> enableAnimation,
-    bool? isDiscrete,
-    TextPainter? labelPainter,
-    RenderBox? parentBox,
-    required SliderThemeData sliderTheme,
-    TextDirection? textDirection,
-    double? value,
-    double? textScaleFactor,
-    Size? sizeWithOverflow,
+    final PaintingContext context,
+    final Offset thumbCenter, {
+    final Animation<double>? activationAnimation,
+    required final Animation<double> enableAnimation,
+    final bool? isDiscrete,
+    final TextPainter? labelPainter,
+    final RenderBox? parentBox,
+    required final SliderThemeData sliderTheme,
+    final TextDirection? textDirection,
+    final double? value,
+    final double? textScaleFactor,
+    final Size? sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
@@ -153,7 +153,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
   static const double _slideUpHeight = 40.0;
 
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+  Size getPreferredSize(final bool isEnabled, final bool isDiscrete) {
     return Size.fromRadius(isEnabled ? _indicatorSize : _disabledIndicatorSize);
   }
 
@@ -164,18 +164,18 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    required Animation<double> activationAnimation,
-    required Animation<double> enableAnimation,
-    bool? isDiscrete,
-    required TextPainter labelPainter,
-    RenderBox? parentBox,
-    required SliderThemeData sliderTheme,
-    TextDirection? textDirection,
-    double? value,
-    double? textScaleFactor,
-    Size? sizeWithOverflow,
+    final PaintingContext context,
+    final Offset thumbCenter, {
+    required final Animation<double> activationAnimation,
+    required final Animation<double> enableAnimation,
+    final bool? isDiscrete,
+    required final TextPainter labelPainter,
+    final RenderBox? parentBox,
+    required final SliderThemeData sliderTheme,
+    final TextDirection? textDirection,
+    final double? value,
+    final double? textScaleFactor,
+    final Size? sizeWithOverflow,
   }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(
@@ -207,7 +207,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 
 class _SliderDemoState extends State<SliderDemo> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
         tabName: 'SINGLE',
@@ -245,7 +245,7 @@ class _SlidersState extends State<_Sliders> {
   double _discreteCustomValue = 25.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
@@ -262,7 +262,7 @@ class _SlidersState extends State<_Sliders> {
                   height: 48,
                   child: TextField(
                     textAlign: TextAlign.center,
-                    onSubmitted: (String value) {
+                    onSubmitted: (final String value) {
                       final double? newValue = double.tryParse(value);
                       if (newValue != null && newValue != _continuousValue) {
                         setState(() {
@@ -281,7 +281,7 @@ class _SlidersState extends State<_Sliders> {
                 label: _continuousValue.toStringAsFixed(6),
                 value: _continuousValue,
                 max: 100.0,
-                onChanged: (double value) {
+                onChanged: (final double value) {
                   setState(() {
                     _continuousValue = value;
                   });
@@ -305,7 +305,7 @@ class _SlidersState extends State<_Sliders> {
                 max: 200.0,
                 divisions: 5,
                 label: '${_discreteValue.round()}',
-                onChanged: (double value) {
+                onChanged: (final double value) {
                   setState(() {
                     _discreteValue = value;
                   });
@@ -334,9 +334,9 @@ class _SlidersState extends State<_Sliders> {
                   value: _discreteCustomValue,
                   max: 200.0,
                   divisions: 5,
-                  semanticFormatterCallback: (double value) => value.round().toString(),
+                  semanticFormatterCallback: (final double value) => value.round().toString(),
                   label: '${_discreteCustomValue.round()}',
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     setState(() {
                       _discreteCustomValue = value;
                     });
@@ -365,7 +365,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
   RangeValues _discreteCustomValues = const RangeValues(40.0, 160.0);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
@@ -377,7 +377,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
               RangeSlider(
                 values: _continuousValues,
                 max: 100.0,
-                onChanged: (RangeValues values) {
+                onChanged: (final RangeValues values) {
                   setState(() {
                     _continuousValues = values;
                   });
@@ -401,7 +401,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
                 max: 200.0,
                 divisions: 5,
                 labels: RangeLabels('${_discreteValues.start.round()}', '${_discreteValues.end.round()}'),
-                onChanged: (RangeValues values) {
+                onChanged: (final RangeValues values) {
                   setState(() {
                     _discreteValues = values;
                   });
@@ -429,7 +429,7 @@ class _RangeSlidersState extends State<_RangeSliders> {
                   max: 200.0,
                   divisions: 5,
                   labels: RangeLabels('${_discreteCustomValues.start.round()}', '${_discreteCustomValues.end.round()}'),
-                  onChanged: (RangeValues values) {
+                  onChanged: (final RangeValues values) {
                     setState(() {
                       _discreteCustomValues = values;
                     });

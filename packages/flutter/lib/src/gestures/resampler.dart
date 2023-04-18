@@ -47,11 +47,11 @@ class PointerEventResampler {
   int _hasButtons = 0;
 
   PointerEvent _toHoverEvent(
-    PointerEvent event,
-    Offset position,
-    Offset delta,
-    Duration timeStamp,
-    int buttons,
+    final PointerEvent event,
+    final Offset position,
+    final Offset delta,
+    final Duration timeStamp,
+    final int buttons,
   ) {
     return PointerHoverEvent(
       timeStamp: timeStamp,
@@ -78,12 +78,12 @@ class PointerEventResampler {
   }
 
   PointerEvent _toMoveEvent(
-    PointerEvent event,
-    Offset position,
-    Offset delta,
-    int pointerIdentifier,
-    Duration timeStamp,
-    int buttons,
+    final PointerEvent event,
+    final Offset position,
+    final Offset delta,
+    final int pointerIdentifier,
+    final Duration timeStamp,
+    final int buttons,
   ) {
     return PointerMoveEvent(
       timeStamp: timeStamp,
@@ -112,13 +112,13 @@ class PointerEventResampler {
   }
 
   PointerEvent _toMoveOrHoverEvent(
-    PointerEvent event,
-    Offset position,
-    Offset delta,
-    int pointerIdentifier,
-    Duration timeStamp,
-    bool isDown,
-    int buttons,
+    final PointerEvent event,
+    final Offset position,
+    final Offset delta,
+    final int pointerIdentifier,
+    final Duration timeStamp,
+    final bool isDown,
+    final int buttons,
   ) {
     return isDown
         ? _toMoveEvent(
@@ -126,7 +126,7 @@ class PointerEventResampler {
         : _toHoverEvent(event, position, delta, timeStamp, buttons);
   }
 
-  Offset _positionAt(Duration sampleTime) {
+  Offset _positionAt(final Duration sampleTime) {
     // Use `next` position by default.
     double x = _next?.position.dx ?? 0.0;
     double y = _next?.position.dy ?? 0.0;
@@ -147,7 +147,7 @@ class PointerEventResampler {
     return Offset(x, y);
   }
 
-  void _processPointerEvents(Duration sampleTime) {
+  void _processPointerEvents(final Duration sampleTime) {
     final Iterator<PointerEvent> it = _queuedEvents.iterator;
     while (it.moveNext()) {
       final PointerEvent event = it.current;
@@ -171,9 +171,9 @@ class PointerEventResampler {
   }
 
   void _dequeueAndSampleNonHoverOrMovePointerEventsUntil(
-    Duration sampleTime,
-    Duration nextSampleTime,
-    HandleEventCallback callback,
+    final Duration sampleTime,
+    final Duration nextSampleTime,
+    final HandleEventCallback callback,
   ) {
     Duration endTime = sampleTime;
     // Scan queued events to determine end time.
@@ -263,8 +263,8 @@ class PointerEventResampler {
   }
 
   void _samplePointerPosition(
-    Duration sampleTime,
-    HandleEventCallback callback,
+    final Duration sampleTime,
+    final HandleEventCallback callback,
   ) {
     // Position at `sampleTime`.
     final Offset position = _positionAt(sampleTime);
@@ -280,7 +280,7 @@ class PointerEventResampler {
   }
 
   /// Enqueue pointer `event` for resampling.
-  void addEvent(PointerEvent event) {
+  void addEvent(final PointerEvent event) {
     _queuedEvents.add(event);
   }
 
@@ -296,9 +296,9 @@ class PointerEventResampler {
   /// up and removed events. This improves resampling of these events,
   /// which is important for fling animations.
   void sample(
-    Duration sampleTime,
-    Duration nextSampleTime,
-    HandleEventCallback callback,
+    final Duration sampleTime,
+    final Duration nextSampleTime,
+    final HandleEventCallback callback,
   ) {
     _processPointerEvents(sampleTime);
 
@@ -315,7 +315,7 @@ class PointerEventResampler {
   ///
   /// This will dispatch pending events by calling [callback] and reset
   /// internal state.
-  void stop(HandleEventCallback callback) {
+  void stop(final HandleEventCallback callback) {
     while (_queuedEvents.isNotEmpty) {
       callback(_queuedEvents.removeFirst());
     }

@@ -10,7 +10,7 @@ import 'gesture_tester.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testGesture('GestureArenaTeam rejection test', (GestureTester tester) {
+  testGesture('GestureArenaTeam rejection test', (final GestureTester tester) {
     final GestureArenaTeam team = GestureArenaTeam();
     final HorizontalDragGestureRecognizer horizontalDrag = HorizontalDragGestureRecognizer()..team = team;
     final VerticalDragGestureRecognizer verticalDrag = VerticalDragGestureRecognizer()..team = team;
@@ -22,11 +22,11 @@ void main() {
 
     final List<String> log = <String>[];
 
-    horizontalDrag.onStart = (DragStartDetails details) { log.add('horizontal-drag-start'); };
-    verticalDrag.onStart = (DragStartDetails details) { log.add('vertical-drag-start'); };
+    horizontalDrag.onStart = (final DragStartDetails details) { log.add('horizontal-drag-start'); };
+    verticalDrag.onStart = (final DragStartDetails details) { log.add('vertical-drag-start'); };
     tap.onTap = () { log.add('tap'); };
 
-    void test(Offset delta) {
+    void test(final Offset delta) {
       const Offset origin = Offset(10.0, 10.0);
       final TestPointer pointer = TestPointer(5);
       final PointerDownEvent down = pointer.down(origin);
@@ -55,7 +55,7 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('GestureArenaTeam captain', (GestureTester tester) {
+  testGesture('GestureArenaTeam captain', (final GestureTester tester) {
     final GestureArenaTeam team = GestureArenaTeam();
     final PassiveGestureRecognizer captain = PassiveGestureRecognizer()..team = team;
     final HorizontalDragGestureRecognizer horizontalDrag = HorizontalDragGestureRecognizer()..team = team;
@@ -67,11 +67,11 @@ void main() {
     final List<String> log = <String>[];
 
     captain.onGestureAccepted = () { log.add('captain accepted gesture'); };
-    horizontalDrag.onStart = (DragStartDetails details) { log.add('horizontal-drag-start'); };
-    verticalDrag.onStart = (DragStartDetails details) { log.add('vertical-drag-start'); };
+    horizontalDrag.onStart = (final DragStartDetails details) { log.add('horizontal-drag-start'); };
+    verticalDrag.onStart = (final DragStartDetails details) { log.add('vertical-drag-start'); };
     tap.onTap = () { log.add('tap'); };
 
-    void test(Offset delta) {
+    void test(final Offset delta) {
       const Offset origin = Offset(10.0, 10.0);
       final TestPointer pointer = TestPointer(5);
       final PointerDownEvent down = pointer.down(origin);
@@ -109,7 +109,7 @@ class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
   GestureAcceptedCallback? onGestureAccepted;
 
   @override
-  void addPointer(PointerDownEvent event) {
+  void addPointer(final PointerDownEvent event) {
     startTrackingPointer(event.pointer);
   }
 
@@ -117,22 +117,22 @@ class PassiveGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'passive';
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(final int pointer) {
     resolve(GestureDisposition.rejected);
   }
 
   @override
-  void handleEvent(PointerEvent event) {
+  void handleEvent(final PointerEvent event) {
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       stopTrackingPointer(event.pointer);
     }
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(final int pointer) {
     onGestureAccepted?.call();
   }
 
   @override
-  void rejectGesture(int pointer) { }
+  void rejectGesture(final int pointer) { }
 }

@@ -13,7 +13,7 @@ class ContextMenuApp extends StatelessWidget {
   const ContextMenuApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: ContextMenuExample(),
@@ -25,7 +25,7 @@ class ContextMenuExample extends StatelessWidget {
   const ContextMenuExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoContextMenu Sample'),

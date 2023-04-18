@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/refresh_indicator/refresh_indicator
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Trigger RefreshIndicator - Pull from top', (WidgetTester tester) async {
+  testWidgets('Trigger RefreshIndicator - Pull from top', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RefreshIndicatorExampleApp(),
     );
@@ -20,7 +20,7 @@ void main() {
     await tester.pumpAndSettle(); // Advance pending time
   });
 
-  testWidgets('Trigger RefreshIndicator - Button', (WidgetTester tester) async {
+  testWidgets('Trigger RefreshIndicator - Button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RefreshIndicatorExampleApp(),
     );

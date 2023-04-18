@@ -14,7 +14,7 @@ class IconButtonToggleApp extends StatelessWidget {
   const IconButtonToggleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         colorSchemeSeed: const Color(0xff6750a4),
@@ -42,7 +42,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
   bool outlinedSelected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[

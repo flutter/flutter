@@ -471,7 +471,7 @@ end
       section('Run platform unit tests');
 
       final String resultBundleTemp = Directory.systemTemp.createTempSync('flutter_module_test_ios_xcresult.').path;
-      await testWithNewIOSSimulator('TestAdd2AppSim', (String deviceId) async {
+      await testWithNewIOSSimulator('TestAdd2AppSim', (final String deviceId) async {
         simulatorDeviceId = deviceId;
         final String resultBundlePath = path.join(resultBundleTemp, 'result');
 
@@ -624,7 +624,7 @@ end
   });
 }
 
-Future<bool> _isAppAotBuild(Directory app) async {
+Future<bool> _isAppAotBuild(final Directory app) async {
   final String binary = path.join(
     app.path,
     'Frameworks',
@@ -643,7 +643,7 @@ Future<bool> _isAppAotBuild(Directory app) async {
   return symbolTable.contains('kDartIsolateSnapshotInstructions');
 }
 
-Future<void> _createFakeDartPlugin(String name, Directory parent) async {
+Future<void> _createFakeDartPlugin(final String name, final Directory parent) async {
   // Start from a standard plugin template.
   await inDirectory(parent, () async {
     await flutter(

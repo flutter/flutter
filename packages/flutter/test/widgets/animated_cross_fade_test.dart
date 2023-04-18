@@ -7,7 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedCrossFade test', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -61,7 +61,7 @@ void main() {
     expect(box.size.height, equals(150.0));
   });
 
-  testWidgets('AnimatedCrossFade test showSecond', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade test showSecond', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -88,7 +88,7 @@ void main() {
     expect(box.size.height, equals(200.0));
   });
 
-  testWidgets('AnimatedCrossFade alignment (VISUAL)', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade alignment (VISUAL)', (final WidgetTester tester) async {
     final Key firstKey = UniqueKey();
     final Key secondKey = UniqueKey();
 
@@ -146,7 +146,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
   });
 
-  testWidgets('AnimatedCrossFade alignment (LTR)', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade alignment (LTR)', (final WidgetTester tester) async {
     final Key firstKey = UniqueKey();
     final Key secondKey = UniqueKey();
 
@@ -204,7 +204,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(275.0, 175.0));
   });
 
-  testWidgets('AnimatedCrossFade alignment (RTL)', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade alignment (RTL)', (final WidgetTester tester) async {
     final Key firstKey = UniqueKey();
     final Key secondKey = UniqueKey();
 
@@ -262,7 +262,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(325.0, 175.0));
   });
 
-  Widget crossFadeWithWatcher({ bool towardsSecond = false }) {
+  Widget crossFadeWithWatcher({ final bool towardsSecond = false }) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AnimatedCrossFade(
@@ -274,7 +274,7 @@ void main() {
     );
   }
 
-  testWidgets('AnimatedCrossFade preserves widget state', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade preserves widget state', (final WidgetTester tester) async {
     await tester.pumpWidget(crossFadeWithWatcher());
 
     _TickerWatchingWidgetState findState() => tester.state(find.byType(_TickerWatchingWidget));
@@ -287,7 +287,7 @@ void main() {
     }
   });
 
-  testWidgets('AnimatedCrossFade switches off TickerMode and semantics on faded out widget', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade switches off TickerMode and semantics on faded out widget', (final WidgetTester tester) async {
     ExcludeSemantics findSemantics() {
       return tester.widget(find.descendant(
         of: find.byKey(const ValueKey<CrossFadeState>(CrossFadeState.showFirst)),
@@ -317,7 +317,7 @@ void main() {
     expect(findSemantics().excluding, true);
   });
 
-  testWidgets('AnimatedCrossFade.layoutBuilder', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade.layoutBuilder', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -339,7 +339,7 @@ void main() {
           secondChild: const Text('BBB', textDirection: TextDirection.ltr),
           crossFadeState: CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 50),
-          layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
+          layoutBuilder: (final Widget a, final Key aKey, final Widget b, final Key bKey) => a,
         ),
       ),
     );
@@ -353,7 +353,7 @@ void main() {
           secondChild: const Text('BBB', textDirection: TextDirection.ltr),
           crossFadeState: CrossFadeState.showSecond,
           duration: const Duration(milliseconds: 50),
-          layoutBuilder: (Widget a, Key aKey, Widget b, Key bKey) => a,
+          layoutBuilder: (final Widget a, final Key aKey, final Widget b, final Key bKey) => a,
         ),
       ),
     );
@@ -361,7 +361,7 @@ void main() {
     expect(find.text('AAA'), findsNothing);
   });
 
-  testWidgets('AnimatedCrossFade test focus', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade test focus', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -385,7 +385,7 @@ void main() {
     expect(hiddenNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('AnimatedCrossFade bottom child can have focus', (WidgetTester tester) async {
+  testWidgets('AnimatedCrossFade bottom child can have focus', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -411,10 +411,10 @@ void main() {
   });
 
   testWidgets('AnimatedCrossFade second child do not receive touch events',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     int numberOfTouchEventNoticed = 0;
 
-    Future<void> buildAnimatedFrame(CrossFadeState crossFadeState) {
+    Future<void> buildAnimatedFrame(final CrossFadeState crossFadeState) {
       return tester.pumpWidget(
         SizedBox(
           width: 300,
@@ -471,11 +471,11 @@ class _TickerWatchingWidgetState extends State<_TickerWatchingWidget> with Singl
   @override
   void initState() {
     super.initState();
-    ticker = createTicker((_) { })..start();
+    ticker = createTicker((final _) { })..start();
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 
   @override
   void dispose() {

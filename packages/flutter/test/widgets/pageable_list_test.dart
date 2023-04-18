@@ -7,10 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 Size pageSize = const Size(600.0, 300.0);
 const List<int> defaultPages = <int>[0, 1, 2, 3, 4, 5];
-final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((_) => GlobalKey()).toList();
+final List<GlobalKey> globalKeys = defaultPages.map<GlobalKey>((final _) => GlobalKey()).toList();
 int? currentPage;
 
-Widget buildPage(int page) {
+Widget buildPage(final int page) {
   return SizedBox(
     key: globalKeys[page],
     width: pageSize.width,
@@ -20,13 +20,13 @@ Widget buildPage(int page) {
 }
 
 Widget buildFrame({
-  bool reverse = false,
-  List<int> pages = defaultPages,
-  required TextDirection textDirection,
+  final bool reverse = false,
+  final List<int> pages = defaultPages,
+  required final TextDirection textDirection,
 }) {
   final PageView child = PageView(
     reverse: reverse,
-    onPageChanged: (int page) { currentPage = page; },
+    onPageChanged: (final int page) { currentPage = page; },
     children: pages.map<Widget>(buildPage).toList(),
   );
 
@@ -42,7 +42,7 @@ Widget buildFrame({
   );
 }
 
-Future<void> page(WidgetTester tester, Offset offset) {
+Future<void> page(final WidgetTester tester, final Offset offset) {
   return TestAsyncUtils.guard(() async {
     final String itemText = currentPage != null ? currentPage.toString() : '0';
     await tester.drag(find.text(itemText), offset);
@@ -50,16 +50,16 @@ Future<void> page(WidgetTester tester, Offset offset) {
   });
 }
 
-Future<void> pageLeft(WidgetTester tester) {
+Future<void> pageLeft(final WidgetTester tester) {
   return page(tester, Offset(-pageSize.width, 0.0));
 }
 
-Future<void> pageRight(WidgetTester tester) {
+Future<void> pageRight(final WidgetTester tester) {
   return page(tester, Offset(pageSize.width, 0.0));
 }
 
 void main() {
-  testWidgets('PageView default control', (WidgetTester tester) async {
+  testWidgets('PageView default control', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -70,7 +70,7 @@ void main() {
     );
   });
 
-  testWidgets('PageView control test (LTR)', (WidgetTester tester) async {
+  testWidgets('PageView control test (LTR)', (final WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr));
     expect(currentPage, isNull);
@@ -98,7 +98,7 @@ void main() {
     expect(currentPage, equals(0));
   });
 
-  testWidgets('PageView with reverse (LTR)', (WidgetTester tester) async {
+  testWidgets('PageView with reverse (LTR)', (final WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.ltr));
     await pageRight(tester);
@@ -132,7 +132,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgets('PageView control test (RTL)', (WidgetTester tester) async {
+  testWidgets('PageView control test (RTL)', (final WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
     await pageRight(tester);
@@ -166,7 +166,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgets('PageView with reverse (RTL)', (WidgetTester tester) async {
+  testWidgets('PageView with reverse (RTL)', (final WidgetTester tester) async {
     currentPage = null;
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl));
     expect(currentPage, isNull);

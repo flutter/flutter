@@ -71,7 +71,7 @@ class PlatformViewsService {
 
   static final PlatformViewsService _instance = PlatformViewsService._();
 
-  Future<void> _onMethodCall(MethodCall call) {
+  Future<void> _onMethodCall(final MethodCall call) {
     switch(call.method) {
       case 'viewFocused':
         final int id = call.arguments as int;
@@ -120,12 +120,12 @@ class PlatformViewsService {
   /// implementation when possible. In cases where that is not supported, it
   /// falls back to using Virtual Display.
   static AndroidViewController initAndroidView({
-    required int id,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-    VoidCallback? onFocus,
+    required final int id,
+    required final String viewType,
+    required final TextDirection layoutDirection,
+    final dynamic creationParams,
+    final MessageCodec<dynamic>? creationParamsCodec,
+    final VoidCallback? onFocus,
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -148,12 +148,12 @@ class PlatformViewsService {
   /// falls back to using Hybrid Composition, which is the mode used by
   /// [initExpensiveAndroidView].
   static SurfaceAndroidViewController initSurfaceAndroidView({
-    required int id,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-    VoidCallback? onFocus,
+    required final int id,
+    required final String viewType,
+    required final TextDirection layoutDirection,
+    final dynamic creationParams,
+    final MessageCodec<dynamic>? creationParamsCodec,
+    final VoidCallback? onFocus,
   }) {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -177,12 +177,12 @@ class PlatformViewsService {
   /// earlier, or on underpowered devices. In most situations, you should use
   /// [initAndroidView] or [initSurfaceAndroidView] instead.
   static ExpensiveAndroidViewController initExpensiveAndroidView({
-    required int id,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-    VoidCallback? onFocus,
+    required final int id,
+    required final String viewType,
+    required final TextDirection layoutDirection,
+    final dynamic creationParams,
+    final MessageCodec<dynamic>? creationParamsCodec,
+    final VoidCallback? onFocus,
   }) {
     final ExpensiveAndroidViewController controller = ExpensiveAndroidViewController._(
       viewId: id,
@@ -201,7 +201,7 @@ class PlatformViewsService {
     'No longer necessary to improve performance. '
     'This feature was deprecated after v2.11.0-0.1.pre.',
   )
-  static Future<void> synchronizeToNativeViewHierarchy(bool yes) async {}
+  static Future<void> synchronizeToNativeViewHierarchy(final bool yes) async {}
 
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
   /// This is work in progress, not yet ready to be used, and requires a custom engine build. Creates a controller for a new iOS UIView.
@@ -217,12 +217,12 @@ class PlatformViewsService {
   /// The `id, `viewType, and `layoutDirection` parameters must not be null.
   /// If `creationParams` is non null then `creationParamsCodec` must not be null.
   static Future<UiKitViewController> initUiKitView({
-    required int id,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
-    VoidCallback? onFocus,
+    required final int id,
+    required final String viewType,
+    required final TextDirection layoutDirection,
+    final dynamic creationParams,
+    final MessageCodec<dynamic>? creationParamsCodec,
+    final VoidCallback? onFocus,
   }) async {
     assert(creationParams == null || creationParamsCodec != null);
 
@@ -464,15 +464,15 @@ class AndroidMotionEvent {
   /// Used to identify this [MotionEvent](https://developer.android.com/reference/android/view/MotionEvent.html) uniquely in the Flutter Engine.
   final int motionEventId;
 
-  List<dynamic> _asList(int viewId) {
+  List<dynamic> _asList(final int viewId) {
     return <dynamic>[
       viewId,
       downTime,
       eventTime,
       action,
       pointerCount,
-      pointerProperties.map<List<int>>((AndroidPointerProperties p) => p._asList()).toList(),
-      pointerCoords.map<List<double>>((AndroidPointerCoords p) => p._asList()).toList(),
+      pointerProperties.map<List<int>>((final AndroidPointerProperties p) => p._asList()).toList(),
+      pointerCoords.map<List<double>>((final AndroidPointerCoords p) => p._asList()).toList(),
       metaState,
       buttonState,
       xPrecision,
@@ -512,7 +512,7 @@ class _AndroidMotionEventConverter {
 
   int? downTimeMillis;
 
-  void handlePointerDownEvent(PointerDownEvent event) {
+  void handlePointerDownEvent(final PointerDownEvent event) {
     if (pointerProperties.isEmpty) {
       downTimeMillis = event.timeStamp.inMilliseconds;
     }
@@ -524,7 +524,7 @@ class _AndroidMotionEventConverter {
     pointerProperties[event.pointer] = propertiesFor(event, androidPointerId);
   }
 
-  void updatePointerPositions(PointerEvent event) {
+  void updatePointerPositions(final PointerEvent event) {
     final Offset position = pointTransformer(event.position);
     pointerPositions[event.pointer] = AndroidPointerCoords(
       orientation: event.orientation,
@@ -539,7 +539,7 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  void _remove(int pointer) {
+  void _remove(final int pointer) {
     pointerPositions.remove(pointer);
     usedAndroidPointerIds.remove(pointerProperties[pointer]!.id);
     pointerProperties.remove(pointer);
@@ -548,18 +548,18 @@ class _AndroidMotionEventConverter {
     }
   }
 
-  void handlePointerUpEvent(PointerUpEvent event) {
+  void handlePointerUpEvent(final PointerUpEvent event) {
     _remove(event.pointer);
   }
 
-  void handlePointerCancelEvent(PointerCancelEvent event) {
+  void handlePointerCancelEvent(final PointerCancelEvent event) {
     // The pointer cancel event is handled like pointer up. Normally,
     // the difference is that pointer cancel doesn't perform any action,
     // but in this case neither up or cancel perform any action.
     _remove(event.pointer);
   }
 
-  AndroidMotionEvent? toAndroidMotionEvent(PointerEvent event) {
+  AndroidMotionEvent? toAndroidMotionEvent(final PointerEvent event) {
     final List<int> pointers = pointerPositions.keys.toList();
     final int pointerIdx = pointers.indexOf(event.pointer);
     final int numPointers = pointers.length;
@@ -601,10 +601,10 @@ class _AndroidMotionEventConverter {
       action: action,
       pointerCount: pointerPositions.length,
       pointerProperties: pointers
-          .map<AndroidPointerProperties>((int i) => pointerProperties[i]!)
+          .map<AndroidPointerProperties>((final int i) => pointerProperties[i]!)
           .toList(),
       pointerCoords: pointers
-          .map<AndroidPointerCoords>((int i) => pointerPositions[i]!)
+          .map<AndroidPointerCoords>((final int i) => pointerPositions[i]!)
           .toList(),
       metaState: 0,
       buttonState: 0,
@@ -618,7 +618,7 @@ class _AndroidMotionEventConverter {
     );
   }
 
-  AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
+  AndroidPointerProperties propertiesFor(final PointerEvent event, final int pointerId) {
     int toolType = AndroidPointerProperties.kToolTypeUnknown;
     switch (event.kind) {
       case PointerDeviceKind.touch:
@@ -636,7 +636,7 @@ class _AndroidMotionEventConverter {
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
-  bool isSinglePointerAction(PointerEvent event) =>
+  bool isSinglePointerAction(final PointerEvent event) =>
       event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
@@ -653,10 +653,10 @@ class _CreationParams {
 abstract class AndroidViewController extends PlatformViewController {
   AndroidViewController._({
     required this.viewId,
-    required String viewType,
-    required TextDirection layoutDirection,
-    dynamic creationParams,
-    MessageCodec<dynamic>? creationParamsCodec,
+    required final String viewType,
+    required final TextDirection layoutDirection,
+    final dynamic creationParams,
+    final MessageCodec<dynamic>? creationParamsCodec,
   })  : assert(creationParams == null || creationParamsCodec != null),
         _viewType = viewType,
         _layoutDirection = layoutDirection,
@@ -717,7 +717,7 @@ abstract class AndroidViewController extends PlatformViewController {
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks =
       <PlatformViewCreatedCallback>[];
 
-  static int _getAndroidDirection(TextDirection direction) {
+  static int _getAndroidDirection(final TextDirection direction) {
     switch (direction) {
       case TextDirection.ltr:
         return kAndroidLayoutDirectionLtr;
@@ -727,7 +727,7 @@ abstract class AndroidViewController extends PlatformViewController {
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.
-  static int pointerAction(int pointerId, int action) {
+  static int pointerAction(final int pointerId, final int action) {
     return ((pointerId << 8) & 0xff00) | (action & 0xff);
   }
 
@@ -741,16 +741,16 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// If [_createRequiresSize] is true, `size` is non-nullable, and the call
   /// should instead be deferred until the size is available.
-  Future<void> _sendCreateMessage({required covariant Size? size, Offset? position});
+  Future<void> _sendCreateMessage({required covariant final Size? size, final Offset? position});
 
   /// Sends the message to resize the platform view to [size].
-  Future<Size> _sendResizeMessage(Size size);
+  Future<Size> _sendResizeMessage(final Size size);
 
   @override
   bool get awaitingCreation => _state == _AndroidViewState.waitingForSize;
 
   @override
-  Future<void> create({Size? size, Offset? position}) async {
+  Future<void> create({final Size? size, final Offset? position}) async {
     assert(_state != _AndroidViewState.disposed, 'trying to create a disposed Android view');
     assert(_state == _AndroidViewState.waitingForSize, 'Android view is already sized. View id: $viewId');
 
@@ -782,7 +782,7 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// As a result, consumers are expected to clip the texture using [size], while using
   /// the return value to size the texture.
-  Future<Size> setSize(Size size) async {
+  Future<Size> setSize(final Size size) async {
     assert(_state != _AndroidViewState.disposed, 'Android view is disposed. View id: $viewId');
     if (_state == _AndroidViewState.waitingForSize) {
       // Either `create` hasn't been called, or it couldn't run due to missing
@@ -800,7 +800,7 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// On Android, this allows the Android native view to draw the a11y highlights in the same
   /// location on the screen as the platform view widget in the Flutter framework.
-  Future<void> setOffset(Offset off);
+  Future<void> setOffset(final Offset off);
 
   /// Returns the texture entry id that the Android view is rendering into.
   ///
@@ -824,7 +824,7 @@ abstract class AndroidViewController extends PlatformViewController {
   ///
   /// See [AndroidViewController.dispatchPointerEvent] for sending a
   /// [PointerEvent].
-  Future<void> sendMotionEvent(AndroidMotionEvent event) async {
+  Future<void> sendMotionEvent(final AndroidMotionEvent event) async {
     await SystemChannels.platform_views.invokeMethod<dynamic>(
       'touch',
       event._asList(viewId),
@@ -837,7 +837,7 @@ abstract class AndroidViewController extends PlatformViewController {
   /// This is required to convert a [PointerEvent] to an [AndroidMotionEvent].
   /// It is typically provided by using [RenderBox.globalToLocal].
   PointTransformer get pointTransformer => _motionEventConverter.pointTransformer;
-  set pointTransformer(PointTransformer transformer) {
+  set pointTransformer(final PointTransformer transformer) {
     _motionEventConverter.pointTransformer = transformer;
   }
 
@@ -846,13 +846,13 @@ abstract class AndroidViewController extends PlatformViewController {
 
   /// Adds a callback that will get invoke after the platform view has been
   /// created.
-  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+  void addOnPlatformViewCreatedListener(final PlatformViewCreatedCallback listener) {
     assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.add(listener);
   }
 
   /// Removes a callback added with [addOnPlatformViewCreatedListener].
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+  void removeOnPlatformViewCreatedListener(final PlatformViewCreatedCallback listener) {
     assert(_state != _AndroidViewState.disposed);
     _platformViewCreatedCallbacks.remove(listener);
   }
@@ -863,7 +863,7 @@ abstract class AndroidViewController extends PlatformViewController {
   List<PlatformViewCreatedCallback> get createdCallbacks => _platformViewCreatedCallbacks;
 
   /// Sets the layout direction for the Android view.
-  Future<void> setLayoutDirection(TextDirection layoutDirection) async {
+  Future<void> setLayoutDirection(final TextDirection layoutDirection) async {
     assert(
       _state != _AndroidViewState.disposed,
       'trying to set a layout direction for a disposed Android view. View id: $viewId',
@@ -900,7 +900,7 @@ abstract class AndroidViewController extends PlatformViewController {
   /// See documentation of [MotionEvent.obtain](https://developer.android.com/reference/android/view/MotionEvent.html#obtain(long,%20long,%20int,%20float,%20float,%20float,%20float,%20int,%20float,%20float,%20int,%20int))
   /// for description of the parameters.
   @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
+  Future<void> dispatchPointerEvent(final PointerEvent event) async {
     if (event is PointerHoverEvent) {
       return;
     }
@@ -970,7 +970,7 @@ class SurfaceAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<bool> _sendCreateMessage({required Size size, Offset? position}) async {
+  Future<bool> _sendCreateMessage({required final Size size, final Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     final dynamic response = await _AndroidViewControllerInternals.sendCreateMessage(
@@ -1009,12 +1009,12 @@ class SurfaceAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<Size> _sendResizeMessage(Size size) {
+  Future<Size> _sendResizeMessage(final Size size) {
     return _internals.setSize(size, viewId: viewId, viewState: _state);
   }
 
   @override
-  Future<void> setOffset(Offset off) {
+  Future<void> setOffset(final Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
 }
@@ -1036,7 +1036,7 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => false;
 
   @override
-  Future<void> _sendCreateMessage({required Size? size, Offset? position}) async {
+  Future<void> _sendCreateMessage({required final Size? size, final Offset? position}) async {
     await _AndroidViewControllerInternals.sendCreateMessage(
       viewId: viewId,
       viewType: _viewType,
@@ -1063,12 +1063,12 @@ class ExpensiveAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<Size> _sendResizeMessage(Size size) {
+  Future<Size> _sendResizeMessage(final Size size) {
     return _internals.setSize(size, viewId: viewId, viewState: _state);
   }
 
   @override
-  Future<void> setOffset(Offset off) {
+  Future<void> setOffset(final Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
 }
@@ -1094,7 +1094,7 @@ class TextureAndroidViewController extends AndroidViewController {
   bool get _createRequiresSize => true;
 
   @override
-  Future<void> _sendCreateMessage({required Size size, Offset? position}) async {
+  Future<void> _sendCreateMessage({required final Size size, final Offset? position}) async {
     assert(!size.isEmpty, 'trying to create $TextureAndroidViewController without setting a valid size.');
 
     _internals.textureId = await _AndroidViewControllerInternals.sendCreateMessage(
@@ -1124,12 +1124,12 @@ class TextureAndroidViewController extends AndroidViewController {
   }
 
   @override
-  Future<Size> _sendResizeMessage(Size size) {
+  Future<Size> _sendResizeMessage(final Size size) {
     return _internals.setSize(size, viewId: viewId, viewState: _state);
   }
 
   @override
-  Future<void> setOffset(Offset off) {
+  Future<void> setOffset(final Offset off) {
     return _internals.setOffset(off, viewId: viewId, viewState: _state);
   }
 }
@@ -1146,14 +1146,14 @@ abstract class _AndroidViewControllerInternals {
   // on the native side, the return type is different. Callers should cast
   // depending on the possible return types for their arguments.
   static Future<dynamic> sendCreateMessage({
-      required int viewId,
-      required String viewType,
-      required TextDirection layoutDirection,
-      required bool hybrid,
-      bool hybridFallback = false,
-      _CreationParams? creationParams,
-      Size? size,
-      Offset? position}) {
+      required final int viewId,
+      required final String viewType,
+      required final TextDirection layoutDirection,
+      required final bool hybrid,
+      final bool hybridFallback = false,
+      final _CreationParams? creationParams,
+      final Size? size,
+      final Offset? position}) {
     final Map<String, dynamic> args = <String, dynamic>{
       'id': viewId,
       'viewType': viewType,
@@ -1181,18 +1181,18 @@ abstract class _AndroidViewControllerInternals {
   bool get requiresViewComposition;
 
   Future<Size> setSize(
-    Size size, {
-    required int viewId,
-    required _AndroidViewState viewState,
+    final Size size, {
+    required final int viewId,
+    required final _AndroidViewState viewState,
   });
 
   Future<void> setOffset(
-    Offset offset, {
-    required int viewId,
-    required _AndroidViewState viewState,
+    final Offset offset, {
+    required final int viewId,
+    required final _AndroidViewState viewState,
   });
 
-  Future<void> sendDisposeMessage({required int viewId});
+  Future<void> sendDisposeMessage({required final int viewId});
 }
 
 // An AndroidViewController implementation for views whose contents are
@@ -1213,9 +1213,9 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
 
   @override
   Future<Size> setSize(
-    Size size, {
-    required int viewId,
-    required _AndroidViewState viewState,
+    final Size size, {
+    required final int viewId,
+    required final _AndroidViewState viewState,
   }) async {
     assert(viewState != _AndroidViewState.waitingForSize, 'Android view must have an initial size. View id: $viewId');
     assert(!size.isEmpty);
@@ -1236,9 +1236,9 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
 
   @override
   Future<void> setOffset(
-    Offset offset, {
-    required int viewId,
-    required _AndroidViewState viewState,
+    final Offset offset, {
+    required final int viewId,
+    required final _AndroidViewState viewState,
   }) async {
     if (offset == _offset) {
       return;
@@ -1264,7 +1264,7 @@ class _TextureAndroidViewControllerInternals extends _AndroidViewControllerInter
   }
 
   @override
-  Future<void> sendDisposeMessage({required int viewId}) {
+  Future<void> sendDisposeMessage({required final int viewId}) {
     return SystemChannels
         .platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
@@ -1288,24 +1288,24 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
 
   @override
   Future<Size> setSize(
-    Size size, {
-    required int viewId,
-    required _AndroidViewState viewState,
+    final Size size, {
+    required final int viewId,
+    required final _AndroidViewState viewState,
   }) {
     throw UnimplementedError('Not supported for hybrid composition.');
   }
 
   @override
   Future<void> setOffset(
-    Offset offset, {
-    required int viewId,
-    required _AndroidViewState viewState,
+    final Offset offset, {
+    required final int viewId,
+    required final _AndroidViewState viewState,
   }) {
     throw UnimplementedError('Not supported for hybrid composition.');
   }
 
   @override
-  Future<void> sendDisposeMessage({required int viewId}) {
+  Future<void> sendDisposeMessage({required final int viewId}) {
     return SystemChannels.platform_views.invokeMethod<void>('dispose', <String, dynamic>{
       'id': viewId,
       'hybrid': true,
@@ -1319,7 +1319,7 @@ class _HybridAndroidViewControllerInternals extends _AndroidViewControllerIntern
 class UiKitViewController {
   UiKitViewController._(
     this.id,
-    TextDirection layoutDirection,
+    final TextDirection layoutDirection,
   ) : _layoutDirection = layoutDirection;
 
 
@@ -1334,7 +1334,7 @@ class UiKitViewController {
   TextDirection _layoutDirection;
 
   /// Sets the layout direction for the iOS UIView.
-  Future<void> setLayoutDirection(TextDirection layoutDirection) async {
+  Future<void> setLayoutDirection(final TextDirection layoutDirection) async {
     assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
 
     if (layoutDirection == _layoutDirection) {
@@ -1405,7 +1405,7 @@ abstract class PlatformViewController {
   bool get awaitingCreation => false;
 
   /// Dispatches the `event` to the platform view.
-  Future<void> dispatchPointerEvent(PointerEvent event);
+  Future<void> dispatchPointerEvent(final PointerEvent event);
 
   /// Creates the platform view with the initial [size].
   ///
@@ -1416,7 +1416,7 @@ abstract class PlatformViewController {
   /// [position] is the view's initial position in logical pixels.
   /// [position] can be omitted if the concrete implementation doesn't require
   /// an initial position.
-  Future<void> create({Size? size, Offset? position}) async {}
+  Future<void> create({final Size? size, final Offset? position}) async {}
 
   /// Disposes the platform view.
   ///

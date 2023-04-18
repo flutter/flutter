@@ -12,7 +12,7 @@ class LabeledSwitchApp extends StatelessWidget {
   const LabeledSwitchApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -40,7 +40,7 @@ class LabeledSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return InkWell(
       onTap: () {
         onChanged(!value);
@@ -52,7 +52,7 @@ class LabeledSwitch extends StatelessWidget {
             Expanded(child: Text(label)),
             Switch(
               value: value,
-              onChanged: (bool newValue) {
+              onChanged: (final bool newValue) {
                 onChanged(newValue);
               },
             ),
@@ -74,12 +74,12 @@ class _LabeledSwitchExampleState extends State<LabeledSwitchExample> {
   bool _isSelected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LabeledSwitch(
       label: 'This is the label text',
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
       value: _isSelected,
-      onChanged: (bool newValue) {
+      onChanged: (final bool newValue) {
         setState(() {
           _isSelected = newValue;
         });

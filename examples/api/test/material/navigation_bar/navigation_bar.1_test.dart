@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Navigation bar updates label behavior when tapping buttons',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.NavigationBarApp(),
     );

@@ -34,7 +34,7 @@ class SpringDescription {
   SpringDescription.withDampingRatio({
     required this.mass,
     required this.stiffness,
-    double ratio = 1.0,
+    final double ratio = 1.0,
   }) : damping = ratio * 2.0 * math.sqrt(mass * stiffness);
 
   /// The mass of the spring (m). The units are arbitrary, but all springs
@@ -91,10 +91,10 @@ class SpringSimulation extends Simulation {
   /// arbitrary unit of length, and T is the time unit used for driving the
   /// [SpringSimulation].
   SpringSimulation(
-    SpringDescription spring,
-    double start,
-    double end,
-    double velocity, {
+    final SpringDescription spring,
+    final double start,
+    final double end,
+    final double velocity, {
     super.tolerance,
   }) : _endPosition = end,
        _solution = _SpringSolution(spring, start - end, velocity);
@@ -109,13 +109,13 @@ class SpringSimulation extends Simulation {
   SpringType get type => _solution.type;
 
   @override
-  double x(double time) => _endPosition + _solution.x(time);
+  double x(final double time) => _endPosition + _solution.x(time);
 
   @override
-  double dx(double time) => _solution.dx(time);
+  double dx(final double time) => _solution.dx(time);
 
   @override
-  bool isDone(double time) {
+  bool isDone(final double time) {
     return nearZero(_solution.x(time), tolerance.distance) &&
            nearZero(_solution.dx(time), tolerance.velocity);
   }
@@ -141,7 +141,7 @@ class ScrollSpringSimulation extends SpringSimulation {
   });
 
   @override
-  double x(double time) => isDone(time) ? _endPosition : super.x(time);
+  double x(final double time) => isDone(time) ? _endPosition : super.x(time);
 }
 
 
@@ -149,9 +149,9 @@ class ScrollSpringSimulation extends SpringSimulation {
 
 abstract class _SpringSolution {
   factory _SpringSolution(
-    SpringDescription spring,
-    double initialPosition,
-    double initialVelocity,
+    final SpringDescription spring,
+    final double initialPosition,
+    final double initialVelocity,
   ) {
     final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
     if (cmk == 0.0) {
@@ -163,16 +163,16 @@ abstract class _SpringSolution {
     return _UnderdampedSolution(spring, initialPosition, initialVelocity);
   }
 
-  double x(double time);
-  double dx(double time);
+  double x(final double time);
+  double dx(final double time);
   SpringType get type;
 }
 
 class _CriticalSolution implements _SpringSolution {
   factory _CriticalSolution(
-    SpringDescription spring,
-    double distance,
-    double velocity,
+    final SpringDescription spring,
+    final double distance,
+    final double velocity,
   ) {
     final double r = -spring.damping / (2.0 * spring.mass);
     final double c1 = distance;
@@ -180,7 +180,7 @@ class _CriticalSolution implements _SpringSolution {
     return _CriticalSolution.withArgs(r, c1, c2);
   }
 
-  _CriticalSolution.withArgs(double r, double c1, double c2)
+  _CriticalSolution.withArgs(final double r, final double c1, final double c2)
     : _r = r,
       _c1 = c1,
       _c2 = c2;
@@ -188,12 +188,12 @@ class _CriticalSolution implements _SpringSolution {
   final double _r, _c1, _c2;
 
   @override
-  double x(double time) {
+  double x(final double time) {
     return (_c1 + _c2 * time) * math.pow(math.e, _r * time);
   }
 
   @override
-  double dx(double time) {
+  double dx(final double time) {
     final double power = math.pow(math.e, _r * time) as double;
     return _r * (_c1 + _c2 * time) * power + _c2 * power;
   }
@@ -204,9 +204,9 @@ class _CriticalSolution implements _SpringSolution {
 
 class _OverdampedSolution implements _SpringSolution {
   factory _OverdampedSolution(
-    SpringDescription spring,
-    double distance,
-    double velocity,
+    final SpringDescription spring,
+    final double distance,
+    final double velocity,
   ) {
     final double cmk = spring.damping * spring.damping - 4 * spring.mass * spring.stiffness;
     final double r1 = (-spring.damping - math.sqrt(cmk)) / (2.0 * spring.mass);
@@ -216,7 +216,7 @@ class _OverdampedSolution implements _SpringSolution {
     return _OverdampedSolution.withArgs(r1, r2, c1, c2);
   }
 
-  _OverdampedSolution.withArgs(double r1, double r2, double c1, double c2)
+  _OverdampedSolution.withArgs(final double r1, final double r2, final double c1, final double c2)
     : _r1 = r1,
       _r2 = r2,
       _c1 = c1,
@@ -225,13 +225,13 @@ class _OverdampedSolution implements _SpringSolution {
   final double _r1, _r2, _c1, _c2;
 
   @override
-  double x(double time) {
+  double x(final double time) {
     return _c1 * math.pow(math.e, _r1 * time) +
            _c2 * math.pow(math.e, _r2 * time);
   }
 
   @override
-  double dx(double time) {
+  double dx(final double time) {
     return _c1 * _r1 * math.pow(math.e, _r1 * time) +
            _c2 * _r2 * math.pow(math.e, _r2 * time);
   }
@@ -242,9 +242,9 @@ class _OverdampedSolution implements _SpringSolution {
 
 class _UnderdampedSolution implements _SpringSolution {
   factory _UnderdampedSolution(
-    SpringDescription spring,
-    double distance,
-    double velocity,
+    final SpringDescription spring,
+    final double distance,
+    final double velocity,
   ) {
     final double w = math.sqrt(4.0 * spring.mass * spring.stiffness - spring.damping * spring.damping) /
         (2.0 * spring.mass);
@@ -254,7 +254,7 @@ class _UnderdampedSolution implements _SpringSolution {
     return _UnderdampedSolution.withArgs(w, r, c1, c2);
   }
 
-  _UnderdampedSolution.withArgs(double w, double r, double c1, double c2)
+  _UnderdampedSolution.withArgs(final double w, final double r, final double c1, final double c2)
     : _w = w,
       _r = r,
       _c1 = c1,
@@ -263,13 +263,13 @@ class _UnderdampedSolution implements _SpringSolution {
   final double _w, _r, _c1, _c2;
 
   @override
-  double x(double time) {
+  double x(final double time) {
     return (math.pow(math.e, _r * time) as double) *
            (_c1 * math.cos(_w * time) + _c2 * math.sin(_w * time));
   }
 
   @override
-  double dx(double time) {
+  double dx(final double time) {
     final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);

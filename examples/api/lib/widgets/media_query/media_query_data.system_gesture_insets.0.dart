@@ -12,7 +12,7 @@ class SystemGestureInsetsExampleApp extends StatelessWidget {
   const SystemGestureInsetsExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: SystemGestureInsetsExample(),
     );
@@ -30,7 +30,7 @@ class _SystemGestureInsetsExampleState extends State<SystemGestureInsetsExample>
   double _currentValue = 0.2;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final EdgeInsets systemGestureInsets = MediaQuery.of(context).systemGestureInsets;
     return Scaffold(
       appBar: AppBar(title: const Text('Pad Slider to avoid systemGestureInsets')),
@@ -42,7 +42,7 @@ class _SystemGestureInsetsExampleState extends State<SystemGestureInsetsExample>
         ),
         child: Slider(
           value: _currentValue,
-          onChanged: (double newValue) {
+          onChanged: (final double newValue) {
             setState(() {
               _currentValue = newValue;
             });

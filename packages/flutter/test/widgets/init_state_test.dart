@@ -17,18 +17,18 @@ class TestWidgetState extends State<TestWidget> {
   @override
   void initState() {
     super.initState();
-    context.visitAncestorElements((Element element) {
+    context.visitAncestorElements((final Element element) {
       ancestors.add(element.widget.runtimeType.toString());
       return true;
     });
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }
 
 void main() {
-  testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
+  testWidgets('initState() is called when we are in the tree', (final WidgetTester tester) async {
     await tester.pumpWidget(const Parent(child: TestWidget()));
     expect(ancestors, containsAllInOrder(<String>['Parent', 'View', 'RenderObjectToWidgetAdapter<RenderBox>']));
   });
@@ -40,5 +40,5 @@ class Parent extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }

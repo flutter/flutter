@@ -24,7 +24,7 @@ class PlatformViewApp extends StatefulWidget {
 
 class PlatformViewAppState extends State<PlatformViewApp> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(),
       title: 'Advanced Layout',
@@ -43,13 +43,13 @@ class PlatformViewLayout extends StatelessWidget {
   const PlatformViewLayout({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Platform View Scrolling Layout')),
       body: ListView.builder(
         key: const Key('platform-views-scroll'), // This key is used by the driver test.
         itemCount: 200,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Padding(
             padding: const EdgeInsets.all(5.0),
             child: Material(
@@ -73,7 +73,7 @@ class DummyPlatformView extends StatelessWidget {
   const DummyPlatformView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
@@ -124,7 +124,7 @@ class _RotationContainerState extends State<RotationContainer>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RotationTransition(
       turns: Tween<double>(begin: 0.0, end: 1.0).animate(_rotationController),
       child: Container(

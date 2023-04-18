@@ -35,7 +35,7 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       // The automatically applied scrollbars on desktop can cause a crash for
       // demos where many scrollables are all attached to the same
@@ -62,21 +62,21 @@ class _ShrineAppState extends State<ShrineApp> with SingleTickerProviderStateMix
   }
 }
 
-Route<dynamic>? _getRoute(RouteSettings settings) {
+Route<dynamic>? _getRoute(final RouteSettings settings) {
   if (settings.name != '/login') {
     return null;
   }
 
   return MaterialPageRoute<void>(
     settings: settings,
-    builder: (BuildContext context) => const LoginPage(),
+    builder: (final BuildContext context) => const LoginPage(),
     fullscreenDialog: true,
   );
 }
 
 final ThemeData _kShrineTheme = _buildShrineTheme();
 
-IconThemeData _customIconTheme(IconThemeData original) {
+IconThemeData _customIconTheme(final IconThemeData original) {
   return original.copyWith(color: kShrineBrown900);
 }
 
@@ -95,7 +95,7 @@ ThemeData _buildShrineTheme() {
   );
 }
 
-TextTheme _buildShrineTextTheme(TextTheme base) {
+TextTheme _buildShrineTextTheme(final TextTheme base) {
   return base.copyWith(
     headlineSmall: base.headlineSmall!.copyWith(fontWeight: FontWeight.w500),
     titleLarge: base.titleLarge!.copyWith(fontSize: 18.0),

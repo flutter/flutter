@@ -12,11 +12,11 @@ class GestureTester {
 
   final FakeAsync async;
 
-  void closeArena(int pointer) {
+  void closeArena(final int pointer) {
     GestureBinding.instance.gestureArena.close(pointer);
   }
 
-  void route(PointerEvent event) {
+  void route(final PointerEvent event) {
     GestureBinding.instance.pointerRouter.route(event);
     async.flushMicrotasks();
   }
@@ -25,9 +25,9 @@ class GestureTester {
 typedef GestureTest = void Function(GestureTester tester);
 
 @isTest
-void testGesture(String description, GestureTest callback) {
+void testGesture(final String description, final GestureTest callback) {
   test(description, () {
-    FakeAsync().run((FakeAsync async) {
+    FakeAsync().run((final FakeAsync async) {
       callback(GestureTester._(async));
     });
   });

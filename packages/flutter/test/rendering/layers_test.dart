@@ -245,7 +245,7 @@ void main() {
   });
 
   test('LeaderLayer.applyTransform can be called after retained rendering', () {
-    void expectTransform(RenderObject leader) {
+    void expectTransform(final RenderObject leader) {
       final LeaderLayer leaderLayer = leader.debugLayer! as LeaderLayer;
       final Matrix4 expected = Matrix4.identity()
         ..translate(leaderLayer.offset.dx, leaderLayer.offset.dy);
@@ -324,7 +324,7 @@ void main() {
     );
   });
 
-  void checkNeedsAddToScene(Layer layer, void Function() mutateCallback) {
+  void checkNeedsAddToScene(final Layer layer, final void Function() mutateCallback) {
     layer.debugMarkClean();
     layer.updateSubtreeNeedsAddToScene();
     expect(layer.debugSubtreeNeedsAddToScene, false);
@@ -333,12 +333,12 @@ void main() {
     expect(layer.debugSubtreeNeedsAddToScene, true);
   }
 
-  List<String> getDebugInfo(Layer layer) {
+  List<String> getDebugInfo(final Layer layer) {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     layer.debugFillProperties(builder);
     return builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString()).toList();
   }
 
   test('ClipRectLayer prints clipBehavior in debug info', () {
@@ -757,7 +757,7 @@ void main() {
 
     final List<VoidCallback> cancellationCallbacks = <VoidCallback>[];
 
-    cancellationCallbacks.add(root.addCompositionCallback((_) {}));
+    cancellationCallbacks.add(root.addCompositionCallback((final _) {}));
     expect(root.subtreeHasCompositionCallbacks, true);
 
     final ContainerLayer a1 = ContainerLayer();
@@ -771,7 +771,7 @@ void main() {
     expect(a1.subtreeHasCompositionCallbacks, false);
     expect(a2.subtreeHasCompositionCallbacks, false);
     expect(b1.subtreeHasCompositionCallbacks, false);
-    cancellationCallbacks.add(b1.addCompositionCallback((_) {}));
+    cancellationCallbacks.add(b1.addCompositionCallback((final _) {}));
 
     expect(root.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -809,7 +809,7 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a2.subtreeHasCompositionCallbacks, false);
 
-    b1.addCompositionCallback((_) { });
+    b1.addCompositionCallback((final _) { });
 
     expect(b1.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -835,7 +835,7 @@ void main() {
     a1.append(b1);
 
     // Add and immediately remove the callback.
-    b1.addCompositionCallback((Layer layer) {
+    b1.addCompositionCallback((final Layer layer) {
       fail('Should not have called back');
     })();
 
@@ -854,7 +854,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((Layer layer) {
+    b1.addCompositionCallback((final Layer layer) {
       expect(layer, b1);
       compositedB1 = true;
     });
@@ -891,7 +891,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((Layer layer) {
+    b1.addCompositionCallback((final Layer layer) {
       expect(layer, b1);
       compositedB1 = true;
     });
@@ -915,7 +915,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((Layer layer) {
+    b1.addCompositionCallback((final Layer layer) {
       expect(layer, b1);
       expect(() => layer.remove(), throwsAssertionError);
       expect(() => layer.dispose(), throwsAssertionError);
@@ -948,7 +948,7 @@ void main() {
 
     bool compositedB1 = false;
 
-    b1.addCompositionCallback((Layer layer) {
+    b1.addCompositionCallback((final Layer layer) {
       expect(layer, b1);
       compositedB1 = true;
     });
@@ -967,8 +967,8 @@ void main() {
     expect(root.subtreeHasCompositionCallbacks, false);
     expect(a1.subtreeHasCompositionCallbacks, false);
 
-    final VoidCallback remover1 = a1.addCompositionCallback((_) { });
-    final VoidCallback remover2 = a1.addCompositionCallback((_) { });
+    final VoidCallback remover1 = a1.addCompositionCallback((final _) { });
+    final VoidCallback remover2 = a1.addCompositionCallback((final _) { });
 
     expect(root.subtreeHasCompositionCallbacks, true);
     expect(a1.subtreeHasCompositionCallbacks, true);
@@ -986,7 +986,7 @@ void main() {
 
   test('Double removing a observe callback throws', () {
     final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final VoidCallback callback = root.addCompositionCallback((final _) { });
     callback();
 
     expect(() => callback(), throwsAssertionError);
@@ -994,7 +994,7 @@ void main() {
 
   test('Removing an observe callback on a disposed layer does not throw', () {
     final ContainerLayer root = ContainerLayer();
-    final VoidCallback callback = root.addCompositionCallback((_) { });
+    final VoidCallback callback = root.addCompositionCallback((final _) { });
     root.dispose();
     expect(() => callback(), returnsNormally);
   });
@@ -1051,7 +1051,7 @@ class FakePicture extends Fake implements Picture {
 
 class ConcreteLayer extends Layer {
   @override
-  void addToScene(SceneBuilder builder) {}
+  void addToScene(final SceneBuilder builder) {}
 }
 
 class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {
@@ -1071,7 +1071,7 @@ class FakeSceneBuilder extends Fake implements SceneBuilder {
   bool addedPicture = false;
 
   @override
-  dynamic noSuchMethod(Invocation invocation) {
+  dynamic noSuchMethod(final Invocation invocation) {
     // Use noSuchMethod forwarding instead of override these methods to make it easier
     // for these methods to add new optional arguments in the future.
     switch (invocation.memberName) {

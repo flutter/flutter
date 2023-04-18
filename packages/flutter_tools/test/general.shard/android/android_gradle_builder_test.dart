@@ -100,14 +100,14 @@ void main() {
           configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
-              test: (String line) {
+              test: (final String line) {
                 return line.contains('Some gradle message');
               },
               handler: ({
-                String? line,
-                FlutterProject? project,
-                bool? usesAndroidX,
-                bool? multidexEnabled
+                final String? line,
+                final FlutterProject? project,
+                final bool? usesAndroidX,
+                final bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -266,7 +266,7 @@ void main() {
           configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
-              test: (String line) {
+              test: (final String line) {
                 if (line.contains('Some gradle message')) {
                   testFnCalled++;
                   return true;
@@ -274,10 +274,10 @@ void main() {
                 return false;
               },
               handler: ({
-                String? line,
-                FlutterProject? project,
-                bool? usesAndroidX,
-                bool? multidexEnabled
+                final String? line,
+                final FlutterProject? project,
+                final bool? usesAndroidX,
+                final bool? multidexEnabled
               }) async {
                 return GradleBuildStatus.retry;
               },
@@ -361,14 +361,14 @@ void main() {
           configOnly: false,
           localGradleErrors: <GradleHandledError>[
             GradleHandledError(
-              test: (String line) {
+              test: (final String line) {
                 return line.contains('Some gradle message');
               },
               handler: ({
-                String? line,
-                FlutterProject? project,
-                bool? usesAndroidX,
-                bool? multidexEnabled
+                final String? line,
+                final FlutterProject? project,
+                final bool? usesAndroidX,
+                final bool? multidexEnabled
               }) async {
                 handlerCalled = true;
                 return GradleBuildStatus.exit;
@@ -533,14 +533,14 @@ void main() {
         configOnly: false,
         localGradleErrors: <GradleHandledError>[
           GradleHandledError(
-            test: (String line) {
+            test: (final String line) {
               return line.contains('Some gradle message');
             },
             handler: ({
-              String? line,
-              FlutterProject? project,
-              bool? usesAndroidX,
-                bool? multidexEnabled
+              final String? line,
+              final FlutterProject? project,
+              final bool? usesAndroidX,
+                final bool? multidexEnabled
             }) async {
               return GradleBuildStatus.retry;
             },
@@ -1682,7 +1682,7 @@ android {
 
 class FakeGradleUtils extends Fake implements GradleUtils {
   @override
-  String getExecutable(FlutterProject project) {
+  String getExecutable(final FlutterProject project) {
     return 'gradlew';
   }
 }

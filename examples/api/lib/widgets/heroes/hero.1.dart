@@ -17,7 +17,7 @@ class HeroApp extends StatelessWidget {
   const HeroApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: HeroExample(),
     );
@@ -28,7 +28,7 @@ class HeroExample extends StatelessWidget {
   const HeroExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Hero Sample')),
       body: Column(
@@ -49,7 +49,7 @@ class HeroExample extends StatelessWidget {
           ListTile(
             leading: Hero(
               tag: 'hero-custom-tween',
-              createRectTween: (Rect? begin, Rect? end) {
+              createRectTween: (final Rect? begin, final Rect? end) {
                 return MaterialRectCenterArcTween(begin: begin, end: end);
               },
               child: BoxWidget(
@@ -71,9 +71,9 @@ class HeroExample extends StatelessWidget {
     );
   }
 
-  void _gotoDetailsPage(BuildContext context) {
+  void _gotoDetailsPage(final BuildContext context) {
     Navigator.of(context).push(MaterialPageRoute<void>(
-      builder: (BuildContext context) => Scaffold(
+      builder: (final BuildContext context) => Scaffold(
         appBar: AppBar(
           title: const Text('Second Page'),
         ),
@@ -83,7 +83,7 @@ class HeroExample extends StatelessWidget {
             children: <Widget>[
               Hero(
                 tag: 'hero-custom-tween',
-                createRectTween: (Rect? begin, Rect? end) {
+                createRectTween: (final Rect? begin, final Rect? end) {
                   return MaterialRectCenterArcTween(begin: begin, end: end);
                 },
                 child: BoxWidget(
@@ -117,7 +117,7 @@ class BoxWidget extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       width: size.width,
       height: size.height,

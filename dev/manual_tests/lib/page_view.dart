@@ -32,7 +32,7 @@ class PageViewAppState extends State<PageViewApp> {
       Size(300.0, 400.0),
     ];
 
-    cardModels = List<CardModel>.generate(cardSizes.length, (int i) {
+    cardModels = List<CardModel>.generate(cardSizes.length, (final int i) {
       final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
       return CardModel(i, cardSizes[i], color!);
     });
@@ -46,7 +46,7 @@ class PageViewAppState extends State<PageViewApp> {
   Axis scrollDirection = Axis.horizontal;
   bool itemsWrap = false;
 
-  Widget buildCard(CardModel cardModel) {
+  Widget buildCard(final CardModel cardModel) {
     final Widget card = Card(
       color: cardModel.color,
       child: Container(
@@ -119,7 +119,7 @@ class PageViewAppState extends State<PageViewApp> {
     );
   }
 
-  Widget _buildBody(BuildContext context) {
+  Widget _buildBody(final BuildContext context) {
     return PageView(
       // TODO(abarth): itemsWrap: itemsWrap,
       scrollDirection: scrollDirection,
@@ -128,7 +128,7 @@ class PageViewAppState extends State<PageViewApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return IconTheme(
       data: const IconThemeData(color: Colors.white),
       child: Scaffold(

@@ -19,14 +19,14 @@ import '../framework/utils.dart';
 /// Must match flutter_driver/lib/src/common.dart.
 ///
 /// Redefined here to avoid taking a dependency on flutter_driver.
-String _testOutputDirectory(String testDirectory) {
+String _testOutputDirectory(final String testDirectory) {
   return Platform.environment['FLUTTER_TEST_OUTPUTS_DIR'] ?? '$testDirectory/build';
 }
 
 TaskFunction createComplexLayoutScrollPerfTest({
-  bool measureCpuGpu = true,
-  bool badScroll = false,
-  bool enableImpeller = false,
+  final bool measureCpuGpu = true,
+  final bool badScroll = false,
+  final bool enableImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -39,7 +39,7 @@ TaskFunction createComplexLayoutScrollPerfTest({
   ).run;
 }
 
-TaskFunction createTilesScrollPerfTest({bool enableImpeller = false}) {
+TaskFunction createTilesScrollPerfTest({final bool enableImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
@@ -48,7 +48,7 @@ TaskFunction createTilesScrollPerfTest({bool enableImpeller = false}) {
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
+TaskFunction createUiKitViewScrollPerfTest({final bool enableImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf.dart',
@@ -59,7 +59,7 @@ TaskFunction createUiKitViewScrollPerfTest({bool enableImpeller = false}) {
   ).run;
 }
 
-TaskFunction createUiKitViewScrollPerfNonIntersectingTest({bool enableImpeller = false}) {
+TaskFunction createUiKitViewScrollPerfNonIntersectingTest({final bool enableImpeller = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/platform_views_layout',
     'test_driver/uikit_view_scroll_perf_non_intersecting.dart',
@@ -129,8 +129,8 @@ TaskFunction createCubicBezierPerfE2ETest() {
 }
 
 TaskFunction createBackdropFilterPerfTest({
-    bool measureCpuGpu = true,
-    bool enableImpeller = false,
+    final bool measureCpuGpu = true,
+    final bool enableImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -143,7 +143,7 @@ TaskFunction createBackdropFilterPerfTest({
   ).run;
 }
 
-TaskFunction createAnimationWithMicrotasksPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createAnimationWithMicrotasksPerfTest({final bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -161,7 +161,7 @@ TaskFunction createBackdropFilterPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createPostBackdropFilterPerfTest({final bool measureCpuGpu = true}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/run_app.dart',
@@ -173,8 +173,8 @@ TaskFunction createPostBackdropFilterPerfTest({bool measureCpuGpu = true}) {
 }
 
 TaskFunction createSimpleAnimationPerfTest({
-  bool measureCpuGpu = true,
-  bool enableImpeller = false,
+  final bool measureCpuGpu = true,
+  final bool enableImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -219,7 +219,7 @@ TaskFunction createPictureCacheComplexityScoringPerfTest() {
   ).run;
 }
 
-TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
+TaskFunction createOpenPayScrollPerfTest({final bool measureCpuGpu = true}) {
   return PerfTest(
     openpayDirectory.path,
     'test_driver/scroll_perf.dart',
@@ -230,7 +230,7 @@ TaskFunction createOpenPayScrollPerfTest({bool measureCpuGpu = true}) {
   ).run;
 }
 
-TaskFunction createFlutterGalleryStartupTest({String target = 'lib/main.dart'}) {
+TaskFunction createFlutterGalleryStartupTest({final String target = 'lib/main.dart'}) {
   return StartupTest(
     '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
     target: target,
@@ -355,7 +355,7 @@ TaskFunction createFullscreenTextfieldPerfTest() {
 }
 
 TaskFunction createFullscreenTextfieldPerfE2ETest({
-  bool enableImpeller = false,
+  final bool enableImpeller = false,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -381,7 +381,7 @@ TaskFunction createColorFilterAndFadePerfTest() {
   ).run;
 }
 
-TaskFunction createColorFilterAndFadePerfE2ETest({bool enableImpeller = false}) {
+TaskFunction createColorFilterAndFadePerfE2ETest({final bool enableImpeller = false}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/color_filter_and_fade_perf_e2e.dart',
@@ -428,7 +428,7 @@ TaskFunction createFadingChildAnimationPerfTest() {
 }
 
 TaskFunction createImageFilteredTransformAnimationPerfTest({
-  bool enableImpeller = false,
+  final bool enableImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -447,7 +447,7 @@ TaskFunction createsMultiWidgetConstructPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createListTextLayoutPerfE2ETest({bool enableImpeller = false}) {
+TaskFunction createListTextLayoutPerfE2ETest({final bool enableImpeller = false}) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/list_text_layout_perf_e2e.dart',
@@ -480,7 +480,7 @@ TaskFunction createsScrollSmoothnessPerfTest() {
       ) as Map<String, dynamic>;
 
       final Map<String, dynamic> result = <String, dynamic>{};
-      void addResult(dynamic data, String suffix) {
+      void addResult(final dynamic data, final String suffix) {
         assert(data is Map<String, dynamic>);
         if (data is Map<String, dynamic>) {
           const List<String> metricKeys = <String>[
@@ -621,7 +621,7 @@ TaskFunction createGradientStaticPerfE2ETest() {
 }
 
 TaskFunction createAnimatedBlurBackropFilterPerfTest({
-  bool enableImpeller = false,
+  final bool enableImpeller = false,
 }) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -634,7 +634,7 @@ TaskFunction createAnimatedBlurBackropFilterPerfTest({
 }
 
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
-  bool enableImpeller = false,
+  final bool enableImpeller = false,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -644,7 +644,7 @@ TaskFunction createAnimatedComplexOpacityPerfE2ETest({
 }
 
 TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({
-  bool enableImpeller = false,
+  final bool enableImpeller = false,
 }) {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -654,10 +654,10 @@ TaskFunction createAnimatedComplexImageFilteredPerfE2ETest({
 }
 
 
-Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations) {
+Map<String, dynamic> _average(final List<Map<String, dynamic>> results, final int iterations) {
   final Map<String, dynamic> tally = <String, dynamic>{};
   for (final Map<String, dynamic> item in results) {
-    item.forEach((String key, dynamic value) {
+    item.forEach((final String key, final dynamic value) {
       if (tally.containsKey(key)) {
         tally[key] = (tally[key] as int) + (value as int);
       } else {
@@ -665,7 +665,7 @@ Map<String, dynamic> _average(List<Map<String, dynamic>> results, int iterations
       }
     });
   }
-  tally.forEach((String key, dynamic value) {
+  tally.forEach((final String key, final dynamic value) {
     tally[key] = (value as int) ~/ iterations;
   });
   return tally;
@@ -881,7 +881,7 @@ class DevtoolsStartupTest {
       process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           print('[STDOUT]: $line');
         // Wait for devtools output.
         if (line.contains('The Flutter DevTools debugger and profiler')) {
@@ -932,7 +932,7 @@ class PerfTest {
     this.needsFullTimeline = true,
     this.benchmarkScoreKeys,
     this.dartDefine = '',
-    String? resultFilename,
+    final String? resultFilename,
     this.device,
     this.flutterDriveCallback,
     this.enableImpeller = false,
@@ -948,7 +948,7 @@ class PerfTest {
     this.needsFullTimeline = false,
     this.benchmarkScoreKeys = _kCommonScoreKeys,
     this.dartDefine = '',
-    String resultFilename = 'e2e_perf_summary',
+    final String resultFilename = 'e2e_perf_summary',
     this.device,
     this.flutterDriveCallback,
     this.enableImpeller = false,
@@ -1021,7 +1021,7 @@ class PerfTest {
 
   @protected
   Future<TaskResult> internalRun({
-      String? existingApp,
+      final String? existingApp,
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       late Device selectedDevice;
@@ -1185,9 +1185,9 @@ class WebCompileTest {
   /// Run a single web compile test for the app under [directory], and store
   /// its metrics with prefix [metric].
   static Future<Map<String, int>> runSingleBuildTest({
-    required String directory,
-    required String metric,
-    bool measureBuildTime = false,
+    required final String directory,
+    required final String metric,
+    final bool measureBuildTime = false,
   }) {
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
@@ -1227,10 +1227,10 @@ class WebCompileTest {
   /// Obtains the size and gzipped size of both [dartBundleFile] and [buildDir].
   static Future<Map<String, int>> getSize({
     /// Mapping of metric key name to file system path for directories to measure
-    Map<String, String> directories = const <String, String>{},
+    final Map<String, String> directories = const <String, String>{},
     /// Mapping of metric key name to file system path for files to measure
-    Map<String, String> files = const <String, String>{},
-    required String metric,
+    final Map<String, String> files = const <String, String>{},
+    required final String metric,
   }) async {
     const String kGzipCompressionLevel = '-9';
     final Map<String, int> sizeMetrics = <String, int>{};
@@ -1339,7 +1339,7 @@ class CompileTest {
     });
   }
 
-  Future<Map<String, dynamic>> _compileApp({required bool deleteGradleCache}) async {
+  Future<Map<String, dynamic>> _compileApp({required final bool deleteGradleCache}) async {
     await flutter('clean');
     if (deleteGradleCache) {
       final Directory gradleCacheDir = Directory('$testDirectory/android/.gradle');
@@ -1456,9 +1456,9 @@ class CompileTest {
   }
 
   Future<Map<String, dynamic>> _compileDebug({
-    required bool deleteGradleCache,
-    required bool clean,
-    required String metricKey,
+    required final bool deleteGradleCache,
+    required final bool clean,
+    required final String metricKey,
   }) async {
     if (clean) {
       await flutter('clean');
@@ -1502,8 +1502,8 @@ class CompileTest {
   }
 
   static Future<Map<String, Object>> getSizesFromDarwinApp({
-    required String appPath,
-    required DeviceOperatingSystem operatingSystem,
+    required final String appPath,
+    required final DeviceOperatingSystem operatingSystem,
   }) async {
     late final File flutterFramework;
     late final String frameworkDirectory;
@@ -1551,7 +1551,7 @@ class CompileTest {
     };
   }
 
-  static Future<Map<String, dynamic>> getSizesFromApk(String apkPath) async {
+  static Future<Map<String, dynamic>> getSizesFromApk(final String apkPath) async {
     final  String output = await eval('unzip', <String>['-v', apkPath]);
     final List<String> lines = output.split('\n');
     final Map<String, _UnzipListEntry> fileToMetadata = <String, _UnzipListEntry>{};
@@ -1593,7 +1593,7 @@ class MemoryTest {
 
   /// Prepares the [receivedNextMessage] future such that it will complete
   /// when `adb logcat` sees a log line with the given `message`.
-  void prepareForNextMessage(String message) {
+  void prepareForNextMessage(final String message) {
     _nextMessage = message;
     _receivedNextMessage = Completer<void>();
   }
@@ -1613,7 +1613,7 @@ class MemoryTest {
       await flutter('packages', options: <String>['get']);
 
       final StreamSubscription<String> adb = device!.logcat.listen(
-        (String data) {
+        (final String data) {
           if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ====')) {
             _receivedNextMessage?.complete();
           }
@@ -1769,7 +1769,7 @@ enum ReportedDurationTestFlavor {
   debug, profile, release
 }
 
-String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
+String _reportedDurationTestToString(final ReportedDurationTestFlavor flavor) {
   switch (flavor) {
     case ReportedDurationTestFlavor.debug:
       return 'debug';
@@ -1806,7 +1806,7 @@ class ReportedDurationTest {
       await flutter('packages', options: <String>['get']);
 
       final StreamSubscription<String> adb = device!.logcat.listen(
-        (String data) {
+        (final String data) {
           if (durationPattern.hasMatch(data)) {
             durationCompleter.complete(int.parse(durationPattern.firstMatch(data)!.group(1)!));
           }
@@ -1842,7 +1842,7 @@ class ReportedDurationTest {
 
 /// Holds simple statistics of an odd-lengthed list of integers.
 class ListStatistics {
-  factory ListStatistics(Iterable<int> data) {
+  factory ListStatistics(final Iterable<int> data) {
     assert(data.isNotEmpty);
     assert(data.length.isOdd);
     final List<int> sortedData = data.toList()..sort();
@@ -1859,7 +1859,7 @@ class ListStatistics {
   final int max;
   final int median;
 
-  Map<String, int> asMap(String prefix) {
+  Map<String, int> asMap(final String prefix) {
     return <String, int>{
       '$prefix-min': min,
       '$prefix-max': max,
@@ -1869,7 +1869,7 @@ class ListStatistics {
 }
 
 class _UnzipListEntry {
-  factory _UnzipListEntry.fromLine(String line) {
+  factory _UnzipListEntry.fromLine(final String line) {
     final List<String> data = line.trim().split(RegExp(r'\s+'));
     assert(data.length == 8);
     return _UnzipListEntry._(
@@ -1891,7 +1891,7 @@ class _UnzipListEntry {
 }
 
 /// Wait for up to 1 hour for the file to appear.
-Future<File> waitForFile(String path) async {
+Future<File> waitForFile(final String path) async {
   for (int i = 0; i < 180; i += 1) {
     final File file = File(path);
     print('looking for ${file.path}');
@@ -1903,7 +1903,7 @@ Future<File> waitForFile(String path) async {
   throw StateError('Did not find vmservice out file after 1 hour');
 }
 
-String? _findDarwinAppInBuildDirectory(String searchDirectory) {
+String? _findDarwinAppInBuildDirectory(final String searchDirectory) {
   for (final FileSystemEntity entity in Directory(searchDirectory)
     .listSync(recursive: true)) {
     if (entity.path.endsWith('.app')) {

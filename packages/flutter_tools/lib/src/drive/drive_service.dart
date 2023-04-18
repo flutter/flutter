@@ -23,11 +23,11 @@ import 'web_driver_service.dart';
 
 class FlutterDriverFactory {
   FlutterDriverFactory({
-    required ApplicationPackageFactory applicationPackageFactory,
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required String dartSdkPath,
-    required DevtoolsLauncher devtoolsLauncher,
+    required final ApplicationPackageFactory applicationPackageFactory,
+    required final Logger logger,
+    required final ProcessUtils processUtils,
+    required final String dartSdkPath,
+    required final DevtoolsLauncher devtoolsLauncher,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _processUtils = processUtils,
@@ -41,7 +41,7 @@ class FlutterDriverFactory {
   final DevtoolsLauncher _devtoolsLauncher;
 
   /// Create a driver service for running `flutter drive`.
-  DriverService createDriverService(bool web) {
+  DriverService createDriverService(final bool web) {
     if (web) {
       return WebDriverService(
         logger: _logger,
@@ -63,23 +63,23 @@ class FlutterDriverFactory {
 abstract class DriverService {
   /// Install and launch the application for the provided [device].
   Future<void> start(
-    BuildInfo buildInfo,
-    Device device,
-    DebuggingOptions debuggingOptions,
-    bool ipv6, {
-    File? applicationBinary,
-    String? route,
-    String? userIdentifier,
-    String? mainPath,
-    Map<String, Object> platformArgs = const <String, Object>{},
+    final BuildInfo buildInfo,
+    final Device device,
+    final DebuggingOptions debuggingOptions,
+    final bool ipv6, {
+    final File? applicationBinary,
+    final String? route,
+    final String? userIdentifier,
+    final String? mainPath,
+    final Map<String, Object> platformArgs = const <String, Object>{},
   });
 
   /// If --use-existing-app is provided, configured the correct VM Service URI.
   Future<void> reuseApplication(
-    Uri vmServiceUri,
-    Device device,
-    DebuggingOptions debuggingOptions,
-    bool ipv6,
+    final Uri vmServiceUri,
+    final Device device,
+    final DebuggingOptions debuggingOptions,
+    final bool ipv6,
   );
 
   /// Start the test file with the provided [arguments] and [environment], returning
@@ -88,18 +88,18 @@ abstract class DriverService {
   /// if [profileMemory] is provided, it will be treated as a file path to write a
   /// devtools memory profile.
   Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    Map<String, String> environment,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String> webBrowserFlags,
-    List<String>? browserDimension,
-    String? profileMemory,
+    final String testFile,
+    final List<String> arguments,
+    final Map<String, String> environment,
+    final PackageConfig packageConfig, {
+    final bool? headless,
+    final String? chromeBinary,
+    final String? browserName,
+    final bool? androidEmulator,
+    final int? driverPort,
+    final List<String> webBrowserFlags,
+    final List<String>? browserDimension,
+    final String? profileMemory,
   });
 
   /// Stop the running application and uninstall it from the device.
@@ -108,8 +108,8 @@ abstract class DriverService {
   /// and write SkSL to the file. This is only supported on mobile and
   /// desktop devices.
   Future<void> stop({
-    File? writeSkslOnExit,
-    String? userIdentifier,
+    final File? writeSkslOnExit,
+    final String? userIdentifier,
   });
 }
 
@@ -117,12 +117,12 @@ abstract class DriverService {
 /// applications.
 class FlutterDriverService extends DriverService {
   FlutterDriverService({
-    required ApplicationPackageFactory applicationPackageFactory,
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required String dartSdkPath,
-    required DevtoolsLauncher devtoolsLauncher,
-    @visibleForTesting VMServiceConnector vmServiceConnector = connectToVmService,
+    required final ApplicationPackageFactory applicationPackageFactory,
+    required final Logger logger,
+    required final ProcessUtils processUtils,
+    required final String dartSdkPath,
+    required final DevtoolsLauncher devtoolsLauncher,
+    @visibleForTesting final VMServiceConnector vmServiceConnector = connectToVmService,
   }) : _applicationPackageFactory = applicationPackageFactory,
        _logger = logger,
        _processUtils = processUtils,
@@ -146,15 +146,15 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<void> start(
-    BuildInfo buildInfo,
-    Device device,
-    DebuggingOptions debuggingOptions,
-    bool ipv6, {
-    File? applicationBinary,
-    String? route,
-    String? userIdentifier,
-    Map<String, Object> platformArgs = const <String, Object>{},
-    String? mainPath,
+    final BuildInfo buildInfo,
+    final Device device,
+    final DebuggingOptions debuggingOptions,
+    final bool ipv6, {
+    final File? applicationBinary,
+    final String? route,
+    final String? userIdentifier,
+    final Map<String, Object> platformArgs = const <String, Object>{},
+    final String? mainPath,
   }) async {
     if (buildInfo.isRelease) {
       throwToolExit(
@@ -205,10 +205,10 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<void> reuseApplication(
-    Uri vmServiceUri,
-    Device device,
-    DebuggingOptions debuggingOptions,
-    bool ipv6,
+    final Uri vmServiceUri,
+    final Device device,
+    final DebuggingOptions debuggingOptions,
+    final bool ipv6,
   ) async {
     Uri uri;
     if (vmServiceUri.scheme == 'ws') {
@@ -246,18 +246,18 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    Map<String, String> environment,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String> webBrowserFlags = const <String>[],
-    List<String>? browserDimension,
-    String? profileMemory,
+    final String testFile,
+    final List<String> arguments,
+    final Map<String, String> environment,
+    final PackageConfig packageConfig, {
+    final bool? headless,
+    final String? chromeBinary,
+    final String? browserName,
+    final bool? androidEmulator,
+    final int? driverPort,
+    final List<String> webBrowserFlags = const <String>[],
+    final List<String>? browserDimension,
+    final String? profileMemory,
   }) async {
     if (profileMemory != null) {
       unawaited(_devtoolsLauncher.launch(
@@ -285,8 +285,8 @@ class FlutterDriverService extends DriverService {
 
   @override
   Future<void> stop({
-    File? writeSkslOnExit,
-    String? userIdentifier,
+    final File? writeSkslOnExit,
+    final String? userIdentifier,
   }) async {
     if (writeSkslOnExit != null) {
       final FlutterView flutterView = (await _vmService.getFlutterViews()).first;
@@ -308,7 +308,7 @@ class FlutterDriverService extends DriverService {
       // Otherwise use the VM Service URI to stop the app as a best effort approach.
       final vm_service.VM vm = await _vmService.service.getVM();
       final vm_service.IsolateRef isolateRef = vm.isolates!
-        .firstWhere((vm_service.IsolateRef element) {
+        .firstWhere((final vm_service.IsolateRef element) {
           return !element.isSystemIsolate!;
         });
       unawaited(_vmService.flutterExit(isolateId: isolateRef.id!));

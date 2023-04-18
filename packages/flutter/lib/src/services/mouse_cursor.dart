@@ -36,7 +36,7 @@ class MouseCursorManager {
   ///
   /// Only valid when asserts are enabled. In release builds, always returns
   /// null.
-  MouseCursor? debugDeviceActiveCursor(int device) {
+  MouseCursor? debugDeviceActiveCursor(final int device) {
     MouseCursor? result;
     assert(() {
       result = _lastSession[device]?.cursor;
@@ -56,9 +56,9 @@ class MouseCursorManager {
   /// frame is complete. In either case, `cursorCandidates` should be the list of
   /// cursors at the location of the mouse in hit-test order.
   void handleDeviceCursorUpdate(
-    int device,
-    PointerEvent? triggeringEvent,
-    Iterable<MouseCursor> cursorCandidates,
+    final int device,
+    final PointerEvent? triggeringEvent,
+    final Iterable<MouseCursor> cursorCandidates,
   ) {
     if (triggeringEvent is PointerRemovedEvent) {
       _lastSession.remove(device);
@@ -199,7 +199,7 @@ abstract class MouseCursor with Diagnosticable {
   /// time, in which case this method will be called separately for each device.
   @protected
   @factory
-  MouseCursorSession createSession(int device);
+  MouseCursorSession createSession(final int device);
 
   /// A very short description of the mouse cursor.
   ///
@@ -211,7 +211,7 @@ abstract class MouseCursor with Diagnosticable {
   String get debugDescription;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString({final DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     final String debugDescription = this.debugDescription;
     if (minLevel.index >= DiagnosticLevel.info.index) {
       return debugDescription;
@@ -249,7 +249,7 @@ class _DeferringMouseCursor extends MouseCursor {
   const _DeferringMouseCursor._();
 
   @override
-  MouseCursorSession createSession(int device) {
+  MouseCursorSession createSession(final int device) {
     assert(false, '_DeferringMouseCursor can not create a session');
     throw UnimplementedError();
   }
@@ -258,7 +258,7 @@ class _DeferringMouseCursor extends MouseCursor {
   String get debugDescription => 'defer';
 
   /// Returns the first cursor that is not a [MouseCursor.defer].
-  static MouseCursor? firstNonDeferred(Iterable<MouseCursor> cursors) {
+  static MouseCursor? firstNonDeferred(final Iterable<MouseCursor> cursors) {
     for (final MouseCursor cursor in cursors) {
       if (cursor != MouseCursor.defer) {
         return cursor;
@@ -294,7 +294,7 @@ class _NoopMouseCursor extends MouseCursor {
 
   @override
   @protected
-  _NoopMouseCursorSession createSession(int device) => _NoopMouseCursorSession(this, device);
+  _NoopMouseCursorSession createSession(final int device) => _NoopMouseCursorSession(this, device);
 
   @override
   String get debugDescription => 'uncontrolled';
@@ -367,10 +367,10 @@ class SystemMouseCursor extends MouseCursor {
 
   @override
   @protected
-  MouseCursorSession createSession(int device) => _SystemMouseCursorSession(this, device);
+  MouseCursorSession createSession(final int device) => _SystemMouseCursorSession(this, device);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -382,7 +382,7 @@ class SystemMouseCursor extends MouseCursor {
   int get hashCode => kind.hashCode;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('kind', kind, level: DiagnosticLevel.debug));
   }

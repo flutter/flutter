@@ -13,8 +13,8 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 TaskFunction dartPluginRegistryTest({
-  String? deviceIdOverride,
-  Map<String, String>? environment,
+  final String? deviceIdOverride,
+  final Map<String, String>? environment,
 }) {
   final Directory tempDir = Directory.systemTemp
       .createTempSync('flutter_devicelab_dart_plugin_test.');
@@ -153,7 +153,7 @@ class ApluginPlatformInterfaceMacOS {
       final StreamSubscription<void> stdoutSub = run.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           if (line.contains('ApluginPlatformInterfaceMacOS.registerWith() was called')) {
             registryExecutedCompleter.complete();
           }
@@ -163,7 +163,7 @@ class ApluginPlatformInterfaceMacOS {
       final StreamSubscription<void> stderrSub = run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           print('stderr: $line');
         });
 
@@ -174,7 +174,7 @@ class ApluginPlatformInterfaceMacOS {
         return Future.wait<void>(<Future<void>>[stdoutDone, stderrDone]);
       }
 
-      Future<void> waitOrExit(Future<void> future) async {
+      Future<void> waitOrExit(final Future<void> future) async {
         final dynamic result = await Future.any<dynamic>(
           <Future<dynamic>>[
             future,

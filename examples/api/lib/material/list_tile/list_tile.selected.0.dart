@@ -12,7 +12,7 @@ class ListTileApp extends StatelessWidget {
   const ListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const LisTileExample(),
@@ -31,12 +31,12 @@ class _LisTileExampleState extends State<LisTileExample> {
   int _selectedIndex = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView.builder(
         itemCount: 10,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return ListTile(
             title: Text('Item $index'),
             selected: index == _selectedIndex,

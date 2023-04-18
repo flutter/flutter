@@ -17,9 +17,9 @@ class ProductPage extends StatelessWidget {
   final Category category;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget? child, AppStateModel model) {
+      builder: (final BuildContext context, final Widget? child, final AppStateModel model) {
         return AsymmetricView(products: model.getProducts());
       });
   }
@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
   final Backdrop? backdrop;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       children: <Widget>[
         if (backdrop != null)

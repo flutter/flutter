@@ -22,8 +22,8 @@ class MenuEntry {
   final VoidCallback? onPressed;
   final List<MenuEntry>? menuChildren;
 
-  static List<Widget> build(List<MenuEntry> selections) {
-    Widget buildSelection(MenuEntry selection) {
+  static List<Widget> build(final List<MenuEntry> selections) {
+    Widget buildSelection(final MenuEntry selection) {
       if (selection.menuChildren != null) {
         return SubmenuButton(
           menuChildren: MenuEntry.build(selection.menuChildren!),
@@ -40,7 +40,7 @@ class MenuEntry {
     return selections.map<Widget>(buildSelection).toList();
   }
 
-  static Map<MenuSerializableShortcut, Intent> shortcuts(List<MenuEntry> selections) {
+  static Map<MenuSerializableShortcut, Intent> shortcuts(final List<MenuEntry> selections) {
     final Map<MenuSerializableShortcut, Intent> result = <MenuSerializableShortcut, Intent>{};
     for (final MenuEntry selection in selections) {
       if (selection.menuChildren != null) {
@@ -73,7 +73,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
 
   Color get backgroundColor => _backgroundColor;
   Color _backgroundColor = Colors.red;
-  set backgroundColor(Color value) {
+  set backgroundColor(final Color value) {
     if (_backgroundColor != value) {
       setState(() {
         _backgroundColor = value;
@@ -83,7 +83,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
 
   bool get showingMessage => _showMessage;
   bool _showMessage = false;
-  set showingMessage(bool value) {
+  set showingMessage(final bool value) {
     if (_showMessage != value) {
       setState(() {
         _showMessage = value;
@@ -98,7 +98,7 @@ class _MyMenuBarState extends State<MyMenuBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         Row(
@@ -228,7 +228,7 @@ class MenuBarApp extends StatelessWidget {
   static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: MyMenuBar(message: kMessage)),
     );

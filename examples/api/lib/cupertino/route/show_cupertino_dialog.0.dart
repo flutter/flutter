@@ -12,7 +12,7 @@ class CupertinoDialogApp extends StatelessWidget {
   const CupertinoDialogApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       restorationScopeId: 'app',
@@ -25,7 +25,7 @@ class CupertinoDialogExample extends StatelessWidget {
   const CupertinoDialogExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Home'),
@@ -42,10 +42,10 @@ class CupertinoDialogExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(final BuildContext context, final Object? arguments) {
     return CupertinoDialogRoute<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return CupertinoAlertDialog(
           title: const Text('Title'),
           content: const Text('Content'),

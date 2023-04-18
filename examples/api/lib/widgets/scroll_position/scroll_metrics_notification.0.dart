@@ -19,7 +19,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
   double windowSize = 200.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -32,7 +32,7 @@ class ScrollMetricsDemoState extends State<ScrollMetricsDemo> {
           }),
         ),
         body: NotificationListener<ScrollMetricsNotification>(
-          onNotification: (ScrollMetricsNotification notification) {
+          onNotification: (final ScrollMetricsNotification notification) {
             ScaffoldMessenger.of(notification.context).showSnackBar(
               const SnackBar(
                 content: Text('Scroll metrics changed!'),

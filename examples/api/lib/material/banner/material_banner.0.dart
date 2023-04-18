@@ -12,7 +12,7 @@ class MaterialBannerExampleApp extends StatelessWidget {
   const MaterialBannerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: MaterialBannerExample(),
     );
@@ -23,7 +23,7 @@ class MaterialBannerExample extends StatelessWidget {
   const MaterialBannerExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('The MaterialBanner is below'),

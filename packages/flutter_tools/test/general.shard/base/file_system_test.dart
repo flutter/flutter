@@ -98,7 +98,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
 
       final Directory destination = fileSystem.directory('/destination');
-      copyDirectory(origin, destination, shouldCopyFile: (File origin, File dest) {
+      copyDirectory(origin, destination, shouldCopyFile: (final File origin, final File dest) {
         return origin.basename == 'b.txt';
       });
 
@@ -120,7 +120,7 @@ void main() {
       fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
 
       final Directory destination = fileSystem.directory('/destination');
-      copyDirectory(origin, destination, shouldCopyDirectory: (Directory directory) {
+      copyDirectory(origin, destination, shouldCopyDirectory: (final Directory directory) {
         return !directory.path.endsWith('nested');
       });
 
@@ -187,7 +187,7 @@ void main() {
       );
       final Directory temp = localFileSystem.systemTempDirectory;
 
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         completer.complete();
       });
 

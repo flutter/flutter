@@ -12,7 +12,7 @@ import 'fuchsia_pm.dart';
 class FuchsiaPkgctl {
   /// Teaches pkgctl on [device] about the Fuchsia package server
   Future<bool> addRepo(
-      FuchsiaDevice device, FuchsiaPackageServer server) async {
+      final FuchsiaDevice device, final FuchsiaPackageServer server) async {
     final String localIp = await device.hostAddress;
     final String configUrl = 'http://[$localIp]:${server.port}/config.json';
     final RunResult result =
@@ -23,7 +23,7 @@ class FuchsiaPkgctl {
   /// Instructs pkgctl instance running on [device] to forget about the
   /// Fuchsia package server with the given name
   /// pkgctl repo rm fuchsia-pkg://mycorp.com
-  Future<bool> rmRepo(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> rmRepo(final FuchsiaDevice device, final FuchsiaPackageServer server) async {
     final RunResult result = await device.shell(
       'pkgctl repo rm fuchsia-pkg://${server.name}',
     );
@@ -33,9 +33,9 @@ class FuchsiaPkgctl {
   /// Instructs the pkgctl instance running on [device] to prefetch the package
   /// with the given [packageUrl] hosted in the given [serverName].
   Future<bool> resolve(
-    FuchsiaDevice device,
-    String serverName,
-    String packageName,
+    final FuchsiaDevice device,
+    final String serverName,
+    final String packageName,
   ) async {
     final String packageUrl = 'fuchsia-pkg://$serverName/$packageName';
     final RunResult result = await device.shell('pkgctl resolve $packageUrl');

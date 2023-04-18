@@ -9,7 +9,7 @@ class TestFontLoader extends FontLoader {
   TestFontLoader(super.family);
 
   @override
-  Future<void> loadFont(Uint8List list, String family) async {
+  Future<void> loadFont(final Uint8List list, final String family) async {
     fontAssets.add(list);
   }
 

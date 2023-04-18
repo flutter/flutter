@@ -24,7 +24,7 @@ class DriverTestAppState extends State<DriverTestApp> {
   Letter _selectedValue = Letter.a;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -59,7 +59,7 @@ class DriverTestAppState extends State<DriverTestApp> {
                 DropdownButton<Letter>(
                   key: const ValueKey<String>('dropdown'),
                   value: _selectedValue,
-                  onChanged: (Letter? newValue) {
+                  onChanged: (final Letter? newValue) {
                     setState(() {
                       _selectedValue = newValue!;
                     });

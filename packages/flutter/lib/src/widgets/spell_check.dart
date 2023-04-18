@@ -55,9 +55,9 @@ class SpellCheckConfiguration {
   /// Returns a copy of the current [SpellCheckConfiguration] instance with
   /// specified overrides.
   SpellCheckConfiguration copyWith({
-    SpellCheckService? spellCheckService,
-    TextStyle? misspelledTextStyle,
-    EditableTextContextMenuBuilder? spellCheckSuggestionsToolbarBuilder}) {
+    final SpellCheckService? spellCheckService,
+    final TextStyle? misspelledTextStyle,
+    final EditableTextContextMenuBuilder? spellCheckSuggestionsToolbarBuilder}) {
     if (!_spellCheckEnabled) {
       // A new configuration should be constructed to enable spell check.
       return const SpellCheckConfiguration.disabled();
@@ -82,7 +82,7 @@ class SpellCheckConfiguration {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
         return true;
     }
@@ -107,7 +107,7 @@ class SpellCheckConfiguration {
 /// Used in the case where the request for the spell check results of the
 /// [newText] is lagging in order to avoid display of incorrect results.
 List<SuggestionSpan> _correctSpellCheckResults(
-    String newText, String resultsText, List<SuggestionSpan> results) {
+    final String newText, final String resultsText, final List<SuggestionSpan> results) {
   final List<SuggestionSpan> correctedSpellCheckResults = <SuggestionSpan>[];
   int spanPointer = 0;
   int offset = 0;
@@ -180,11 +180,11 @@ List<SuggestionSpan> _correctSpellCheckResults(
 /// words within the [value]'s text with. The [spellCheckResults] are the
 /// results of spell checking the [value]'s text.
 TextSpan buildTextSpanWithSpellCheckSuggestions(
-    TextEditingValue value,
-    bool composingWithinCurrentTextRange,
-    TextStyle? style,
-    TextStyle misspelledTextStyle,
-    SpellCheckResults spellCheckResults) {
+    final TextEditingValue value,
+    final bool composingWithinCurrentTextRange,
+    final TextStyle? style,
+    final TextStyle misspelledTextStyle,
+    final SpellCheckResults spellCheckResults) {
   List<SuggestionSpan> spellCheckResultsSpans =
       spellCheckResults.suggestionSpans;
   final String spellCheckResultsText = spellCheckResults.spellCheckedText;
@@ -230,11 +230,11 @@ TextSpan buildTextSpanWithSpellCheckSuggestions(
 /// edited and shouldn't be spell checked. This is useful for platforms and IMEs
 /// that don't use the composing region for the active word.
 List<TextSpan> _buildSubtreesWithoutComposingRegion(
-    List<SuggestionSpan>? spellCheckSuggestions,
-    TextEditingValue value,
-    TextStyle? style,
-    TextStyle misspelledStyle,
-    int cursorIndex,
+    final List<SuggestionSpan>? spellCheckSuggestions,
+    final TextEditingValue value,
+    final TextStyle? style,
+    final TextStyle misspelledStyle,
+    final int cursorIndex,
 ) {
   final List<TextSpan> textSpanTreeChildren = <TextSpan>[];
 
@@ -298,11 +298,11 @@ List<TextSpan> _buildSubtreesWithoutComposingRegion(
 /// Builds [TextSpan] subtree for text with misspelled words with logic based on
 /// a valid composing region.
 List<TextSpan> _buildSubtreesWithComposingRegion(
-    List<SuggestionSpan>? spellCheckSuggestions,
-    TextEditingValue value,
-    TextStyle? style,
-    TextStyle misspelledStyle,
-    bool composingWithinCurrentTextRange) {
+    final List<SuggestionSpan>? spellCheckSuggestions,
+    final TextEditingValue value,
+    final TextStyle? style,
+    final TextStyle misspelledStyle,
+    final bool composingWithinCurrentTextRange) {
   final List<TextSpan> textSpanTreeChildren = <TextSpan>[];
 
   int textPointer = 0;
@@ -404,12 +404,12 @@ List<TextSpan> _buildSubtreesWithComposingRegion(
 /// Helper method to create [TextSpan] tree children for specified range of
 /// text up to and including the composing region.
 void _addComposingRegionTextSpans(
-    List<TextSpan> treeChildren,
-    String text,
-    int start,
-    TextRange composingRegion,
-    TextStyle? style,
-    TextStyle composingTextStyle) {
+    final List<TextSpan> treeChildren,
+    final String text,
+    final int start,
+    final TextRange composingRegion,
+    final TextStyle? style,
+    final TextStyle composingTextStyle) {
   treeChildren.add(
     TextSpan(
       style: style,

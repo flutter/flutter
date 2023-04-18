@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 void main() {
   const String errorMessage = 'Some error message';
 
-  testWidgets('test draw error paragraph', (WidgetTester tester) async {
+  testWidgets('test draw error paragraph', (final WidgetTester tester) async {
     await tester.pumpWidget(ErrorWidget(Exception(errorMessage)));
     expect(
       find.byType(ErrorWidget),
@@ -21,7 +21,7 @@ void main() {
         ..paragraph(offset: const Offset(64.0, 96.0)),
     );
 
-    final Widget error = Builder(builder: (BuildContext context) => throw 'pillow');
+    final Widget error = Builder(builder: (final BuildContext context) => throw 'pillow');
 
     await tester.pumpWidget(Center(child: SizedBox(width: 100.0, child: error)));
     expect(tester.takeException(), 'pillow');

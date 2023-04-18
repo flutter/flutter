@@ -33,7 +33,7 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
 
         // Set callback that doesn't call presentError.
         bool onErrorCalled = false;
-        FlutterError.onError = (FlutterErrorDetails details) {
+        FlutterError.onError = (final FlutterErrorDetails details) {
           onErrorCalled = true;
         };
 
@@ -53,7 +53,7 @@ class StructureErrorTestWidgetInspectorService extends TestWidgetInspectorServic
 
         // Set callback that calls presentError.
         onErrorCalled = false;
-        FlutterError.onError = (FlutterErrorDetails details) {
+        FlutterError.onError = (final FlutterErrorDetails details) {
           FlutterError.presentError(details);
           onErrorCalled = true;
         };

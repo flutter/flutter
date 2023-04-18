@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  void onPressed(TestMenu item) {}
+  void onPressed(final TestMenu item) {}
 
-  Finder findMenuPanels(Axis orientation) {
-    return find.byWidgetPredicate((Widget widget) {
+  Finder findMenuPanels(final Axis orientation) {
+    return find.byWidgetPredicate((final Widget widget) {
       // ignore: avoid_dynamic_calls
       return widget.runtimeType.toString() == '_MenuPanel' && (widget as dynamic).orientation == orientation;
     });
@@ -27,15 +27,15 @@ void main() {
     return find.descendant(of: findSubmenuPanel().last, matching: find.byType(MenuItemButton));
   }
 
-  Material getMenuBarPanelMaterial(WidgetTester tester) {
+  Material getMenuBarPanelMaterial(final WidgetTester tester) {
     return tester.widget<Material>(find.descendant(of: findMenuBarPanel(), matching: find.byType(Material)).first);
   }
 
-  Material getSubmenuPanelMaterial(WidgetTester tester) {
+  Material getSubmenuPanelMaterial(final WidgetTester tester) {
     return tester.widget<Material>(find.descendant(of: findSubmenuPanel(), matching: find.byType(Material)).first);
   }
 
-  DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+  DefaultTextStyle getLabelStyle(final WidgetTester tester, final String labelText) {
     return tester.widget<DefaultTextStyle>(
       find
           .ancestor(
@@ -52,11 +52,11 @@ void main() {
     expect(identical(MenuThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('theme is honored', (WidgetTester tester) async {
+  testWidgets('theme is honored', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(builder: (final BuildContext context) {
             return MenuBarTheme(
               data: const MenuBarThemeData(
                 style: MenuStyle(
@@ -104,12 +104,12 @@ void main() {
     expect(subMenuMaterial.color, equals(Colors.red));
   });
 
-  testWidgets('Constructor parameters override theme parameters', (WidgetTester tester) async {
+  testWidgets('Constructor parameters override theme parameters', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return MenuBarTheme(
                 data: const MenuBarThemeData(
                   style: MenuStyle(
@@ -198,20 +198,20 @@ void main() {
 }
 
 List<Widget> createTestMenus({
-  void Function(TestMenu)? onPressed,
-  void Function(TestMenu)? onOpen,
-  void Function(TestMenu)? onClose,
-  Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
-  bool includeStandard = false,
-  Color? itemOverlay,
-  Color? itemBackground,
-  Color? itemForeground,
-  EdgeInsetsDirectional? itemPadding,
-  Color? menuBackground,
-  EdgeInsetsDirectional? menuPadding,
-  OutlinedBorder? menuShape,
-  double? menuElevation,
-  OutlinedBorder? itemShape,
+  final void Function(TestMenu)? onPressed,
+  final void Function(TestMenu)? onOpen,
+  final void Function(TestMenu)? onClose,
+  final Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
+  final bool includeStandard = false,
+  final Color? itemOverlay,
+  final Color? itemBackground,
+  final Color? itemForeground,
+  final EdgeInsetsDirectional? itemPadding,
+  final Color? menuBackground,
+  final EdgeInsetsDirectional? menuPadding,
+  final OutlinedBorder? menuShape,
+  final double? menuElevation,
+  final OutlinedBorder? itemShape,
 }) {
   final MenuStyle menuStyle = MenuStyle(
     padding: menuPadding != null ? MaterialStatePropertyAll<EdgeInsetsGeometry>(menuPadding) : null,

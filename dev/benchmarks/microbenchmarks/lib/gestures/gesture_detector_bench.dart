@@ -15,7 +15,7 @@ Future<void> main() async {
   final Stopwatch watch = Stopwatch();
   print('GestureDetector semantics benchmark...');
 
-  await benchmarkWidgets((WidgetTester tester) async {
+  await benchmarkWidgets((final WidgetTester tester) async {
     button_matrix.main();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));

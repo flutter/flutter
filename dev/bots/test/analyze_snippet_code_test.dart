@@ -40,7 +40,7 @@ const List<String> expectedUiErrors = <String>[
 ];
 
 final RegExp errorPrefixRE = RegExp(r'^([-a-z0-9/_.:]+): .*(\([-a-z_ ]+\) \([-a-z_ ]+\))$');
-String removeLintDescriptions(String error) {
+String removeLintDescriptions(final String error) {
   final RegExpMatch? match = errorPrefixRE.firstMatch(error);
   if (match != null) {
     return '${match[1]}: ${match[2]}';

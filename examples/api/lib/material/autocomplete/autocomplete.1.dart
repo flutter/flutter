@@ -12,7 +12,7 @@ class AutocompleteExampleApp extends StatelessWidget {
   const AutocompleteExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -42,7 +42,7 @@ class User {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -62,21 +62,21 @@ class AutocompleteBasicUserExample extends StatelessWidget {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  static String _displayStringForOption(User option) => option.name;
+  static String _displayStringForOption(final User option) => option.name;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Autocomplete<User>(
       displayStringForOption: _displayStringForOption,
-      optionsBuilder: (TextEditingValue textEditingValue) {
+      optionsBuilder: (final TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
           return const Iterable<User>.empty();
         }
-        return _userOptions.where((User option) {
+        return _userOptions.where((final User option) {
           return option.toString().contains(textEditingValue.text.toLowerCase());
         });
       },
-      onSelected: (User selection) {
+      onSelected: (final User selection) {
         debugPrint('You just selected ${_displayStringForOption(selection)}');
       },
     );

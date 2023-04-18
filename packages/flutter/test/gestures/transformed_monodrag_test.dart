@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Horizontal', () {
-    testWidgets('gets local coordinates', (WidgetTester tester) async {
+    testWidgets('gets local coordinates', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -24,16 +24,16 @@ void main() {
             onHorizontalDragCancel: () {
               dragCancelCount++;
             },
-            onHorizontalDragDown: (DragDownDetails details) {
+            onHorizontalDragDown: (final DragDownDetails details) {
               downDetails.add(details);
             },
-            onHorizontalDragEnd: (DragEndDetails details) {
+            onHorizontalDragEnd: (final DragEndDetails details) {
               endDetails.add(details);
             },
-            onHorizontalDragStart: (DragStartDetails details) {
+            onHorizontalDragStart: (final DragStartDetails details) {
               startDetails.add(details);
             },
-            onHorizontalDragUpdate: (DragUpdateDetails details) {
+            onHorizontalDragUpdate: (final DragUpdateDetails details) {
               updateDetails.add(details);
             },
             child: Container(
@@ -56,16 +56,16 @@ void main() {
       expect(updateDetails.last.localPosition, const Offset(50 + 100.0, 75));
       expect(updateDetails.last.globalPosition, const Offset(400 + 100.0, 300));
       expect(
-        updateDetails.fold(Offset.zero, (Offset offset, DragUpdateDetails details) => offset + details.delta),
+        updateDetails.fold(Offset.zero, (final Offset offset, final DragUpdateDetails details) => offset + details.delta),
         const Offset(100, 0),
       );
       expect(
-        updateDetails.fold(0.0, (double offset, DragUpdateDetails details) => offset + (details.primaryDelta ?? 0)),
+        updateDetails.fold(0.0, (final double offset, final DragUpdateDetails details) => offset + (details.primaryDelta ?? 0)),
         100.0,
       );
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -81,16 +81,16 @@ void main() {
               onHorizontalDragCancel: () {
                 dragCancelCount++;
               },
-              onHorizontalDragDown: (DragDownDetails details) {
+              onHorizontalDragDown: (final DragDownDetails details) {
                 downDetails.add(details);
               },
-              onHorizontalDragEnd: (DragEndDetails details) {
+              onHorizontalDragEnd: (final DragEndDetails details) {
                 endDetails.add(details);
               },
-              onHorizontalDragStart: (DragStartDetails details) {
+              onHorizontalDragStart: (final DragStartDetails details) {
                 startDetails.add(details);
               },
-              onHorizontalDragUpdate: (DragUpdateDetails details) {
+              onHorizontalDragUpdate: (final DragUpdateDetails details) {
                 updateDetails.add(details);
               },
               onTap: () {
@@ -163,7 +163,7 @@ void main() {
       updateDetails.clear();
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -179,16 +179,16 @@ void main() {
               onHorizontalDragCancel: () {
                 dragCancelCount++;
               },
-              onHorizontalDragDown: (DragDownDetails details) {
+              onHorizontalDragDown: (final DragDownDetails details) {
                 downDetails.add(details);
               },
-              onHorizontalDragEnd: (DragEndDetails details) {
+              onHorizontalDragEnd: (final DragEndDetails details) {
                 endDetails.add(details);
               },
-              onHorizontalDragStart: (DragStartDetails details) {
+              onHorizontalDragStart: (final DragStartDetails details) {
                 startDetails.add(details);
               },
-              onHorizontalDragUpdate: (DragUpdateDetails details) {
+              onHorizontalDragUpdate: (final DragUpdateDetails details) {
                 updateDetails.add(details);
               },
               onTap: () {
@@ -261,7 +261,7 @@ void main() {
       updateDetails.clear();
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -277,16 +277,16 @@ void main() {
               onHorizontalDragCancel: () {
                 dragCancelCount++;
               },
-              onHorizontalDragDown: (DragDownDetails details) {
+              onHorizontalDragDown: (final DragDownDetails details) {
                 downDetails.add(details);
               },
-              onHorizontalDragEnd: (DragEndDetails details) {
+              onHorizontalDragEnd: (final DragEndDetails details) {
                 endDetails.add(details);
               },
-              onHorizontalDragStart: (DragStartDetails details) {
+              onHorizontalDragStart: (final DragStartDetails details) {
                 startDetails.add(details);
               },
-              onHorizontalDragUpdate: (DragUpdateDetails details) {
+              onHorizontalDragUpdate: (final DragUpdateDetails details) {
                 updateDetails.add(details);
               },
               onTap: () {
@@ -338,7 +338,7 @@ void main() {
   });
 
   group('Vertical', () {
-    testWidgets('gets local coordinates', (WidgetTester tester) async {
+    testWidgets('gets local coordinates', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -352,16 +352,16 @@ void main() {
             onVerticalDragCancel: () {
               dragCancelCount++;
             },
-            onVerticalDragDown: (DragDownDetails details) {
+            onVerticalDragDown: (final DragDownDetails details) {
               downDetails.add(details);
             },
-            onVerticalDragEnd: (DragEndDetails details) {
+            onVerticalDragEnd: (final DragEndDetails details) {
               endDetails.add(details);
             },
-            onVerticalDragStart: (DragStartDetails details) {
+            onVerticalDragStart: (final DragStartDetails details) {
               startDetails.add(details);
             },
-            onVerticalDragUpdate: (DragUpdateDetails details) {
+            onVerticalDragUpdate: (final DragUpdateDetails details) {
               updateDetails.add(details);
             },
             child: Container(
@@ -384,16 +384,16 @@ void main() {
       expect(updateDetails.last.localPosition, const Offset(50, 75 + 100.0));
       expect(updateDetails.last.globalPosition, const Offset(400, 300 + 100.0));
       expect(
-        updateDetails.fold(Offset.zero, (Offset offset, DragUpdateDetails details) => offset + details.delta),
+        updateDetails.fold(Offset.zero, (final Offset offset, final DragUpdateDetails details) => offset + details.delta),
         const Offset(0, 100),
       );
       expect(
-        updateDetails.fold(0.0, (double offset, DragUpdateDetails details) => offset + (details.primaryDelta ?? 0)),
+        updateDetails.fold(0.0, (final double offset, final DragUpdateDetails details) => offset + (details.primaryDelta ?? 0)),
         100.0,
       );
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled up', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -409,16 +409,16 @@ void main() {
               onVerticalDragCancel: () {
                 dragCancelCount++;
               },
-              onVerticalDragDown: (DragDownDetails details) {
+              onVerticalDragDown: (final DragDownDetails details) {
                 downDetails.add(details);
               },
-              onVerticalDragEnd: (DragEndDetails details) {
+              onVerticalDragEnd: (final DragEndDetails details) {
                 endDetails.add(details);
               },
-              onVerticalDragStart: (DragStartDetails details) {
+              onVerticalDragStart: (final DragStartDetails details) {
                 startDetails.add(details);
               },
-              onVerticalDragUpdate: (DragUpdateDetails details) {
+              onVerticalDragUpdate: (final DragUpdateDetails details) {
                 updateDetails.add(details);
               },
               onTap: () {
@@ -491,7 +491,7 @@ void main() {
       updateDetails.clear();
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when scaled down', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -507,16 +507,16 @@ void main() {
               onVerticalDragCancel: () {
                 dragCancelCount++;
               },
-              onVerticalDragDown: (DragDownDetails details) {
+              onVerticalDragDown: (final DragDownDetails details) {
                 downDetails.add(details);
               },
-              onVerticalDragEnd: (DragEndDetails details) {
+              onVerticalDragEnd: (final DragEndDetails details) {
                 endDetails.add(details);
               },
-              onVerticalDragStart: (DragStartDetails details) {
+              onVerticalDragStart: (final DragStartDetails details) {
                 startDetails.add(details);
               },
-              onVerticalDragUpdate: (DragUpdateDetails details) {
+              onVerticalDragUpdate: (final DragUpdateDetails details) {
                 updateDetails.add(details);
               },
               onTap: () {
@@ -589,7 +589,7 @@ void main() {
       updateDetails.clear();
     });
 
-    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (WidgetTester tester) async {
+    testWidgets('kTouchSlop is evaluated in the global coordinate space when rotated 45 degrees', (final WidgetTester tester) async {
       int dragCancelCount = 0;
       final List<DragDownDetails> downDetails = <DragDownDetails>[];
       final List<DragEndDetails> endDetails = <DragEndDetails>[];
@@ -605,16 +605,16 @@ void main() {
               onVerticalDragCancel: () {
                 dragCancelCount++;
               },
-              onVerticalDragDown: (DragDownDetails details) {
+              onVerticalDragDown: (final DragDownDetails details) {
                 downDetails.add(details);
               },
-              onVerticalDragEnd: (DragEndDetails details) {
+              onVerticalDragEnd: (final DragEndDetails details) {
                 endDetails.add(details);
               },
-              onVerticalDragStart: (DragStartDetails details) {
+              onVerticalDragStart: (final DragStartDetails details) {
                 startDetails.add(details);
               },
-              onVerticalDragUpdate: (DragUpdateDetails details) {
+              onVerticalDragUpdate: (final DragUpdateDetails details) {
                 updateDetails.add(details);
               },
               onTap: () {

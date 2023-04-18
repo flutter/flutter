@@ -12,7 +12,7 @@ class SliverFadeTransitionExampleApp extends StatelessWidget {
   const SliverFadeTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverFadeTransition Sample')),
@@ -44,7 +44,7 @@ class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExampl
   @override
   void initState() {
     super.initState();
-    animation.addStatusListener((AnimationStatus status) {
+    animation.addStatusListener((final AnimationStatus status) {
       if (status == AnimationStatus.completed) {
         controller.reverse();
       } else if (status == AnimationStatus.dismissed) {
@@ -61,14 +61,14 @@ class _SliverFadeTransitionExampleState extends State<SliverFadeTransitionExampl
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomScrollView(slivers: <Widget>[
       SliverFadeTransition(
         opacity: animation,
         sliver: SliverFixedExtentList(
           itemExtent: 100.0,
           delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+            (final BuildContext context, final int index) {
               return Container(
                 color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
               );

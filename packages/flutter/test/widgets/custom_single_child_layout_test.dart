@@ -12,7 +12,7 @@ class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   late Size childSizeFromGetPositionForChild;
 
   @override
-  Size getSize(BoxConstraints constraints) {
+  Size getSize(final BoxConstraints constraints) {
     if (!RenderObject.debugCheckingIntrinsics) {
       constraintsFromGetSize = constraints;
     }
@@ -20,14 +20,14 @@ class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   }
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     assert(!RenderObject.debugCheckingIntrinsics);
     constraintsFromGetConstraintsForChild = constraints;
     return const BoxConstraints(minWidth: 100.0, maxWidth: 150.0, minHeight: 200.0, maxHeight: 400.0);
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     assert(!RenderObject.debugCheckingIntrinsics);
     sizeFromGetPositionForChild = size;
     childSizeFromGetPositionForChild = childSize;
@@ -38,7 +38,7 @@ class TestSingleChildLayoutDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayoutValue = false;
 
   @override
-  bool shouldRelayout(_) {
+  bool shouldRelayout(final _) {
     assert(!RenderObject.debugCheckingIntrinsics);
     shouldRelayoutCalled = true;
     return shouldRelayoutValue;
@@ -51,15 +51,15 @@ class FixedSizeLayoutDelegate extends SingleChildLayoutDelegate {
   final Size size;
 
   @override
-  Size getSize(BoxConstraints constraints) => size;
+  Size getSize(final BoxConstraints constraints) => size;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     return BoxConstraints.tight(size);
   }
 
   @override
-  bool shouldRelayout(FixedSizeLayoutDelegate oldDelegate) {
+  bool shouldRelayout(final FixedSizeLayoutDelegate oldDelegate) {
     return size != oldDelegate.size;
   }
 }
@@ -70,20 +70,20 @@ class NotifierLayoutDelegate extends SingleChildLayoutDelegate {
   final ValueNotifier<Size> size;
 
   @override
-  Size getSize(BoxConstraints constraints) => size.value;
+  Size getSize(final BoxConstraints constraints) => size.value;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     return BoxConstraints.tight(size.value);
   }
 
   @override
-  bool shouldRelayout(NotifierLayoutDelegate oldDelegate) {
+  bool shouldRelayout(final NotifierLayoutDelegate oldDelegate) {
     return size != oldDelegate.size;
   }
 }
 
-Widget buildFrame(SingleChildLayoutDelegate delegate) {
+Widget buildFrame(final SingleChildLayoutDelegate delegate) {
   return Center(
     child: CustomSingleChildLayout(
       delegate: delegate,
@@ -93,7 +93,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 }
 
 void main() {
-  testWidgets('Control test for CustomSingleChildLayout', (WidgetTester tester) async {
+  testWidgets('Control test for CustomSingleChildLayout', (final WidgetTester tester) async {
     final TestSingleChildLayoutDelegate delegate = TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
@@ -114,7 +114,7 @@ void main() {
     expect(delegate.childSizeFromGetPositionForChild.height, 400.0);
   });
 
-  testWidgets('Test SingleChildDelegate shouldRelayout method', (WidgetTester tester) async {
+  testWidgets('Test SingleChildDelegate shouldRelayout method', (final WidgetTester tester) async {
     TestSingleChildLayoutDelegate delegate =
         TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
@@ -138,7 +138,7 @@ void main() {
     expect(delegate.constraintsFromGetConstraintsForChild, isNotNull);
   });
 
-  testWidgets('Delegate can change size', (WidgetTester tester) async {
+  testWidgets('Delegate can change size', (final WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(FixedSizeLayoutDelegate(const Size(100.0, 200.0))));
 
     RenderBox box = tester.renderObject(find.byType(CustomSingleChildLayout));
@@ -150,7 +150,7 @@ void main() {
     expect(box.size, equals(const Size(150.0, 240.0)));
   });
 
-  testWidgets('Can use listener for relayout', (WidgetTester tester) async {
+  testWidgets('Can use listener for relayout', (final WidgetTester tester) async {
     final ValueNotifier<Size> size = ValueNotifier<Size>(const Size(100.0, 200.0));
 
     await tester.pumpWidget(buildFrame(NotifierLayoutDelegate(size)));

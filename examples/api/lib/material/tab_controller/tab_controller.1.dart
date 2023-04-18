@@ -12,7 +12,7 @@ class TabControllerExampleApp extends StatelessWidget {
   const TabControllerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: TabControllerExample(),
     );
@@ -29,12 +29,12 @@ class TabControllerExample extends StatelessWidget {
   const TabControllerExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: tabs.length,
       // The Builder widget is used to have a different BuildContext to access
       // closest DefaultTabController.
-      child: Builder(builder: (BuildContext context) {
+      child: Builder(builder: (final BuildContext context) {
         final TabController tabController = DefaultTabController.of(context);
         tabController.addListener(() {
           if (!tabController.indexIsChanging) {
@@ -49,7 +49,7 @@ class TabControllerExample extends StatelessWidget {
             ),
           ),
           body: TabBarView(
-            children: tabs.map((Tab tab) {
+            children: tabs.map((final Tab tab) {
               return Center(
                 child: Text(
                   '${tab.text!} Tab',

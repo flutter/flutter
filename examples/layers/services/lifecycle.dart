@@ -28,14 +28,14 @@ class _LifecycleWatcherState extends State<LifecycleWatcher>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(final AppLifecycleState state) {
     setState(() {
       _lastLifecycleState = state;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (_lastLifecycleState == null) {
       return const Text('This widget has not observed any lifecycle changes.');
     }

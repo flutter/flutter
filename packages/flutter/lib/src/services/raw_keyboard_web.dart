@@ -12,7 +12,7 @@ export 'package:flutter/foundation.dart' show DiagnosticPropertiesBuilder;
 export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
-String? _unicodeChar(String key) {
+String? _unicodeChar(final String key) {
   if (key.length == 1) {
     return key.substring(0, 1);
   }
@@ -124,8 +124,8 @@ class RawKeyEventDataWeb extends RawKeyEventData {
 
   @override
   bool isModifierPressed(
-    ModifierKey key, {
-    KeyboardSide side = KeyboardSide.any,
+    final ModifierKey key, {
+    final KeyboardSide side = KeyboardSide.any,
   }) {
     switch (key) {
       case ModifierKey.controlModifier:
@@ -150,7 +150,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
+  KeyboardSide getModifierSide(final ModifierKey key) {
     // On Web, we don't distinguish the sides of modifier keys. Both left shift
     // and right shift, for example, are reported as the "Shift" modifier.
     //
@@ -160,7 +160,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
         properties.add(DiagnosticsProperty<String>('code', code));
         properties.add(DiagnosticsProperty<String>('key', key));
@@ -170,7 +170,7 @@ class RawKeyEventDataWeb extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

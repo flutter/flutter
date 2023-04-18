@@ -129,12 +129,12 @@ class FadeInImage extends StatefulWidget {
   ///    the network.
   FadeInImage.memoryNetwork({
     super.key,
-    required Uint8List placeholder,
+    required final Uint8List placeholder,
     this.placeholderErrorBuilder,
-    required String image,
+    required final String image,
     this.imageErrorBuilder,
-    double placeholderScale = 1.0,
-    double imageScale = 1.0,
+    final double placeholderScale = 1.0,
+    final double imageScale = 1.0,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -150,10 +150,10 @@ class FadeInImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-    int? placeholderCacheWidth,
-    int? placeholderCacheHeight,
-    int? imageCacheWidth,
-    int? imageCacheHeight,
+    final int? placeholderCacheWidth,
+    final int? placeholderCacheHeight,
+    final int? imageCacheWidth,
+    final int? imageCacheHeight,
   }) : placeholder = ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, MemoryImage(placeholder, scale: placeholderScale)),
        image = ResizeImage.resizeIfNeeded(imageCacheWidth, imageCacheHeight, NetworkImage(image, scale: imageScale));
 
@@ -190,13 +190,13 @@ class FadeInImage extends StatefulWidget {
   ///    the network.
   FadeInImage.assetNetwork({
     super.key,
-    required String placeholder,
+    required final String placeholder,
     this.placeholderErrorBuilder,
-    required String image,
+    required final String image,
     this.imageErrorBuilder,
-    AssetBundle? bundle,
-    double? placeholderScale,
-    double imageScale = 1.0,
+    final AssetBundle? bundle,
+    final double? placeholderScale,
+    final double imageScale = 1.0,
     this.excludeFromSemantics = false,
     this.imageSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
@@ -212,10 +212,10 @@ class FadeInImage extends StatefulWidget {
     this.alignment = Alignment.center,
     this.repeat = ImageRepeat.noRepeat,
     this.matchTextDirection = false,
-    int? placeholderCacheWidth,
-    int? placeholderCacheHeight,
-    int? imageCacheWidth,
-    int? imageCacheHeight,
+    final int? placeholderCacheWidth,
+    final int? placeholderCacheHeight,
+    final int? imageCacheWidth,
+    final int? imageCacheHeight,
   }) : placeholder = placeholderScale != null
          ? ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale))
          : ResizeImage.resizeIfNeeded(placeholderCacheWidth, placeholderCacheHeight, AssetImage(placeholder, bundle: bundle)),
@@ -365,12 +365,12 @@ class _FadeInImageState extends State<FadeInImage> {
   final ProxyAnimation _placeholderAnimation = ProxyAnimation(_kOpaqueAnimation);
 
   Image _image({
-    required ImageProvider image,
-    ImageErrorWidgetBuilder? errorBuilder,
-    ImageFrameBuilder? frameBuilder,
-    BoxFit? fit,
-    required FilterQuality filterQuality,
-    required Animation<double> opacity,
+    required final ImageProvider image,
+    final ImageErrorWidgetBuilder? errorBuilder,
+    final ImageFrameBuilder? frameBuilder,
+    final BoxFit? fit,
+    required final FilterQuality filterQuality,
+    required final Animation<double> opacity,
   }) {
     return Image(
       image: image,
@@ -390,14 +390,14 @@ class _FadeInImageState extends State<FadeInImage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget result = _image(
       image: widget.image,
       errorBuilder: widget.imageErrorBuilder,
       opacity: _imageAnimation,
       fit: widget.fit,
       filterQuality: widget.filterQuality,
-      frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+      frameBuilder: (final BuildContext context, final Widget child, final int? frame, final bool wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) {
           targetLoaded = true;
         }
@@ -472,16 +472,16 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
   Animation<double>? _placeholderOpacityAnimation;
 
   @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
+  void forEachTween(final TweenVisitor<dynamic> visitor) {
     _targetOpacity = visitor(
       _targetOpacity,
       widget.isTargetLoaded ? 1.0 : 0.0,
-      (dynamic value) => Tween<double>(begin: value as double),
+      (final dynamic value) => Tween<double>(begin: value as double),
     ) as Tween<double>?;
     _placeholderOpacity = visitor(
       _placeholderOpacity,
       widget.isTargetLoaded ? 0.0 : 1.0,
-      (dynamic value) => Tween<double>(begin: value as double),
+      (final dynamic value) => Tween<double>(begin: value as double),
     ) as Tween<double>?;
   }
 
@@ -501,7 +501,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
         tween: ConstantTween<double>(0),
         weight: widget.fadeInDuration.inMilliseconds.toDouble(),
       ),
-    ]))..addStatusListener((AnimationStatus status) {
+    ]))..addStatusListener((final AnimationStatus status) {
       if (_placeholderOpacityAnimation!.isCompleted) {
         // Need to rebuild to remove placeholder now that it is invisible.
         setState(() {});
@@ -524,7 +524,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (widget.wasSynchronouslyLoaded ||
         (_placeholderOpacityAnimation?.isCompleted ?? true)) {
       return widget.target;
@@ -544,7 +544,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('targetOpacity', _targetOpacityAnimation));
     properties.add(DiagnosticsProperty<Animation<double>>('placeholderOpacity', _placeholderOpacityAnimation));

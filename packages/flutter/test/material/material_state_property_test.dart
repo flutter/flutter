@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('MaterialStateProperty.resolveWith()', () {
     final MaterialStateProperty<MaterialState> value = MaterialStateProperty.resolveWith<MaterialState>(
-      (Set<MaterialState> states) => states.first,
+      (final Set<MaterialState> states) => states.first,
     );
     expect(value.resolve(<MaterialState>{MaterialState.hovered}), MaterialState.hovered);
     expect(value.resolve(<MaterialState>{MaterialState.focused}), MaterialState.focused);

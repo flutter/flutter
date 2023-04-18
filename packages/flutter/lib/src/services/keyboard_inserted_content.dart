@@ -20,7 +20,7 @@ class KeyboardInsertedContent {
   const KeyboardInsertedContent({required this.mimeType, required this.uri, this.data});
 
   /// Converts JSON received from the Flutter Engine into the Dart class.
-  KeyboardInsertedContent.fromJson(Map<String, dynamic> metadata):
+  KeyboardInsertedContent.fromJson(final Map<String, dynamic> metadata):
       mimeType = metadata['mimeType'] as String,
       uri = metadata['uri'] as String,
       data = metadata['data'] != null
@@ -43,7 +43,7 @@ class KeyboardInsertedContent {
   String toString() => '${objectRuntimeType(this, 'KeyboardInsertedContent')}($mimeType, $uri, $data)';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

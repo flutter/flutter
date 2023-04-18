@@ -453,7 +453,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   const CupertinoScrollBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context , Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(final BuildContext context , final Widget child, final ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
     switch (getPlatform(context)) {
@@ -473,7 +473,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(final BuildContext context, final Widget child, final ScrollableDetails details) {
     // No overscroll indicator.
     // When modifying this function, consider modifying the implementation in
     // the base class as well.
@@ -481,7 +481,7 @@ class CupertinoScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  ScrollPhysics getScrollPhysics(BuildContext context) {
+  ScrollPhysics getScrollPhysics(final BuildContext context) {
     // When modifying this function, consider modifying the implementation in
     // the base class ScrollBehavior as well.
     if (getPlatform(context) == TargetPlatform.macOS) {
@@ -514,7 +514,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     ];
   }
 
-  Widget _inspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed) {
+  Widget _inspectorSelectButtonBuilder(final BuildContext context, final VoidCallback onPressed) {
     return CupertinoButton.filled(
       padding: EdgeInsets.zero,
       onPressed: onPressed,
@@ -526,7 +526,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
     );
   }
 
-  WidgetsApp _buildWidgetApp(BuildContext context) {
+  WidgetsApp _buildWidgetApp(final BuildContext context) {
     final CupertinoThemeData effectiveThemeData = CupertinoTheme.of(context);
     final Color color = CupertinoDynamicColor.resolve(widget.color ?? effectiveThemeData.primaryColor, context);
 
@@ -564,7 +564,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
       navigatorObservers: widget.navigatorObservers!,
-      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+      pageRouteBuilder: <T>(final RouteSettings settings, final WidgetBuilder builder) {
         return CupertinoPageRoute<T>(settings: settings, builder: builder);
       },
       home: widget.home,
@@ -596,7 +596,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final CupertinoThemeData effectiveThemeData = (widget.theme ?? const CupertinoThemeData()).resolveFrom(context);
 
     return ScrollConfiguration(

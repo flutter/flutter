@@ -64,10 +64,10 @@ void main() {
     }
   });
 
-  testWidgets('debugCheckHasTable control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasTable control test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           late FlutterError error;
           try {
             debugCheckHasTable(context);
@@ -95,13 +95,13 @@ void main() {
     );
   });
 
-  testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMediaQuery control test', (final WidgetTester tester) async {
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           late FlutterError error;
           try {
             debugCheckHasMediaQuery(context);
@@ -228,7 +228,7 @@ void main() {
     }
   });
 
-  testWidgets('debugCheckHasWidgetsLocalizations throws', (WidgetTester tester) async {
+  testWidgets('debugCheckHasWidgetsLocalizations throws', (final WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -236,7 +236,7 @@ void main() {
       Container(
         key: noLocalizationsAvailable,
         child: WidgetsApp(
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return Container(
               key: localizationsAvailable,
             );
@@ -249,7 +249,7 @@ void main() {
     expect(
       () => debugCheckHasWidgetsLocalizations(noLocalizationsAvailable.currentContext!),
       throwsA(isAssertionError.having(
-        (AssertionError e) => e.message,
+        (final AssertionError e) => e.message,
         'message',
         contains('No WidgetsLocalizations found'),
       )),
@@ -277,7 +277,7 @@ void main() {
     debugHighlightDeprecatedWidgets = false;
   });
 
-  testWidgets('debugCreator of layers should not be null', (WidgetTester tester) async {
+  testWidgets('debugCreator of layers should not be null', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -302,7 +302,7 @@ void main() {
                   child: const Placeholder(),
                 ),
                 ShaderMask(
-                  shaderCallback: (Rect bounds) => const RadialGradient(
+                  shaderCallback: (final Rect bounds) => const RadialGradient(
                     radius: 0.05,
                     colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
                     tileMode: TileMode.mirror,
@@ -341,7 +341,7 @@ void main() {
   });
 }
 
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
+Future<void> pumpWidgetWithoutViewWrapper({required final WidgetTester tester, required  final Widget widget}) {
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();

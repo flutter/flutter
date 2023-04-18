@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/routes/show_general_dialog.0.dart' a
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Open and dismiss general dialog', (WidgetTester tester) async {
+  testWidgets('Open and dismiss general dialog', (final WidgetTester tester) async {
     const String dialogText = 'Alert!';
 
     await tester.pumpWidget(

@@ -13,7 +13,7 @@ class ShortcutsExampleApp extends StatelessWidget {
   const ShortcutsExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Shortcuts Sample')),
@@ -27,12 +27,12 @@ class ShortcutsExampleApp extends StatelessWidget {
 
 class Model with ChangeNotifier {
   int count = 0;
-  void incrementBy(int amount) {
+  void incrementBy(final int amount) {
     count += amount;
     notifyListeners();
   }
 
-  void decrementBy(int amount) {
+  void decrementBy(final int amount) {
     count -= amount;
     notifyListeners();
   }
@@ -56,7 +56,7 @@ class IncrementAction extends Action<IncrementIntent> {
   final Model model;
 
   @override
-  void invoke(covariant IncrementIntent intent) {
+  void invoke(covariant final IncrementIntent intent) {
     model.incrementBy(intent.amount);
   }
 }
@@ -67,7 +67,7 @@ class DecrementAction extends Action<DecrementIntent> {
   final Model model;
 
   @override
-  void invoke(covariant DecrementIntent intent) {
+  void invoke(covariant final DecrementIntent intent) {
     model.decrementBy(intent.amount);
   }
 }
@@ -83,7 +83,7 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
   Model model = Model();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Shortcuts(
       shortcuts: <ShortcutActivator, Intent>{
         LogicalKeySet(LogicalKeyboardKey.arrowUp): const IncrementIntent(2),
@@ -102,7 +102,7 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
               const Text('Subtract from the counter by pressing the down arrow key'),
               AnimatedBuilder(
                 animation: model,
-                builder: (BuildContext context, Widget? child) {
+                builder: (final BuildContext context, final Widget? child) {
                   return Text('count: ${model.count}');
                 },
               ),

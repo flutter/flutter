@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('awaiting animation controllers - using direct future', (WidgetTester tester) async {
+  testWidgets('awaiting animation controllers - using direct future', (final WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -31,7 +31,7 @@ void main() {
       log.add('d'); // wants to end at t=1099 but missed frames until t=1200
     }
     log.add('start');
-    runTest().then((void value) {
+    runTest().then((final void value) {
       log.add('end');
     });
     await tester.pump(); // t=0
@@ -56,7 +56,7 @@ void main() {
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });
 
-  testWidgets('awaiting animation controllers - using orCancel', (WidgetTester tester) async {
+  testWidgets('awaiting animation controllers - using orCancel', (final WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -80,7 +80,7 @@ void main() {
       log.add('d'); // wants to end at t=1099 but missed frames until t=1200
     }
     log.add('start');
-    runTest().then((void value) {
+    runTest().then((final void value) {
       log.add('end');
     });
     await tester.pump(); // t=0
@@ -105,7 +105,7 @@ void main() {
     expect(log, <String>['start', 'a', 'b', 'c', 'd', 'end']);
   });
 
-  testWidgets('awaiting animation controllers and failing', (WidgetTester tester) async {
+  testWidgets('awaiting animation controllers and failing', (final WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -120,7 +120,7 @@ void main() {
         log.add('caught');
       }
     }
-    runTest().then((void value) {
+    runTest().then((final void value) {
       log.add('end');
     });
     await tester.pump(); // start ticker
@@ -133,7 +133,7 @@ void main() {
     expect(log, <String>['start', 'caught', 'end']);
   });
 
-  testWidgets('creating orCancel future later', (WidgetTester tester) async {
+  testWidgets('creating orCancel future later', (final WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -146,7 +146,7 @@ void main() {
     expect(true, isTrue); // should reach here
   });
 
-  testWidgets('creating orCancel future later', (WidgetTester tester) async {
+  testWidgets('creating orCancel future later', (final WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -163,7 +163,7 @@ void main() {
     expect(ok, isTrue); // should reach here
   });
 
-  testWidgets('TickerFuture is a Future', (WidgetTester tester) async {
+  testWidgets('TickerFuture is a Future', (final WidgetTester tester) async {
     final AnimationController controller1 = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -172,8 +172,8 @@ void main() {
     await tester.pump(); // start ticker
     await tester.pump(const Duration(milliseconds: 200)); // end ticker
     expect(f.asStream().single, isA<Future<void>>());
-    await f.catchError((dynamic e) { throw 'do not reach'; });
-    expect(await f.then<bool>((_) => true), isTrue);
+    await f.catchError((final dynamic e) { throw 'do not reach'; });
+    expect(await f.then<bool>((final _) => true), isTrue);
     expect(f.whenComplete(() => false), isA<Future<void>>());
     expect(f.timeout(const Duration(seconds: 5)), isA<Future<void>>());
   });

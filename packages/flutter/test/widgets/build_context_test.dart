@@ -6,10 +6,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('StatefulWidget BuildContext.mounted', (WidgetTester tester) async {
+  testWidgets('StatefulWidget BuildContext.mounted', (final WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(TestStatefulWidget(
-        onBuild: (BuildContext context) {
+        onBuild: (final BuildContext context) {
           capturedContext = context;
         }
     ));
@@ -18,10 +18,10 @@ void main() {
     expect(capturedContext.mounted, isFalse);
   });
 
-  testWidgets('StatelessWidget BuildContext.mounted', (WidgetTester tester) async {
+  testWidgets('StatelessWidget BuildContext.mounted', (final WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(TestStatelessWidget(
-      onBuild: (BuildContext context) {
+      onBuild: (final BuildContext context) {
         capturedContext = context;
       }
     ));
@@ -39,7 +39,7 @@ class TestStatelessWidget extends StatelessWidget {
   final BuildCallback onBuild;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     onBuild(context);
     return Container();
   }
@@ -56,7 +56,7 @@ class TestStatefulWidget extends StatefulWidget {
 
 class _TestStatefulWidgetState extends State<TestStatefulWidget> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     widget.onBuild(context);
     return Container();
   }

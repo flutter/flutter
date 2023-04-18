@@ -20,7 +20,7 @@ enum LeaveBehindDemoAction {
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
   LeaveBehindItem({ this.index, this.name, this.subject, this.body });
 
-  LeaveBehindItem.from(LeaveBehindItem item)
+  LeaveBehindItem.from(final LeaveBehindItem item)
     : index = item.index, name = item.name, subject = item.subject, body = item.body;
 
   final int? index;
@@ -29,7 +29,7 @@ class LeaveBehindItem implements Comparable<LeaveBehindItem> {
   final String? body;
 
   @override
-  int compareTo(LeaveBehindItem other) => index!.compareTo(other.index!);
+  int compareTo(final LeaveBehindItem other) => index!.compareTo(other.index!);
 }
 
 class LeaveBehindDemo extends StatefulWidget {
@@ -47,7 +47,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   late List<LeaveBehindItem> leaveBehindItems;
 
   void initListItems() {
-    leaveBehindItems = List<LeaveBehindItem>.generate(16, (int index) {
+    leaveBehindItems = List<LeaveBehindItem>.generate(16, (final int index) {
       return LeaveBehindItem(
         index: index,
         name: 'Item $index Sender',
@@ -63,7 +63,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     initListItems();
   }
 
-  void handleDemoAction(LeaveBehindDemoAction action) {
+  void handleDemoAction(final LeaveBehindDemoAction action) {
     setState(() {
       switch (action) {
         case LeaveBehindDemoAction.reset:
@@ -80,14 +80,14 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     });
   }
 
-  void handleUndo(LeaveBehindItem item) {
+  void handleUndo(final LeaveBehindItem item) {
     final int insertionIndex = lowerBound(leaveBehindItems, item);
     setState(() {
       leaveBehindItems.insert(insertionIndex, item);
     });
   }
 
-  void _handleArchive(LeaveBehindItem item) {
+  void _handleArchive(final LeaveBehindItem item) {
     setState(() {
       leaveBehindItems.remove(item);
     });
@@ -100,7 +100,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     ));
   }
 
-  void _handleDelete(LeaveBehindItem item) {
+  void _handleDelete(final LeaveBehindItem item) {
     setState(() {
       leaveBehindItems.remove(item);
     });
@@ -114,7 +114,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget body;
     if (leaveBehindItems.isEmpty) {
       body = Center(
@@ -127,7 +127,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       body = Scrollbar(
         child: ListView(
           primary: true,
-          children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
+          children: leaveBehindItems.map<Widget>((final LeaveBehindItem item) {
             return _LeaveBehindListItem(
               confirmDismiss: _confirmDismiss,
               item: item,
@@ -147,7 +147,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           MaterialDemoDocumentationButton(LeaveBehindDemo.routeName),
           PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
+            itemBuilder: (final BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               const PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
                 child: Text('Reset the list'),
@@ -206,7 +206,7 @@ class _LeaveBehindListItem extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Semantics(
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
@@ -216,14 +216,14 @@ class _LeaveBehindListItem extends StatelessWidget {
       child: Dismissible(
         key: ObjectKey(item),
         direction: dismissDirection,
-        onDismissed: (DismissDirection direction) {
+        onDismissed: (final DismissDirection direction) {
           if (direction == DismissDirection.endToStart) {
             _handleArchive();
           } else {
             _handleDelete();
           }
         },
-        confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
+        confirmDismiss: !confirmDismiss ? null : (final DismissDirection dismissDirection) async {
           switch(dismissDirection) {
             case DismissDirection.endToStart:
               return await _showConfirmationDialog(context, 'archive') ?? false;
@@ -269,10 +269,10 @@ class _LeaveBehindListItem extends StatelessWidget {
     );
   }
 
-  Future<bool?> _showConfirmationDialog(BuildContext context, String action) {
+  Future<bool?> _showConfirmationDialog(final BuildContext context, final String action) {
     return showDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return AlertDialog(
           title: Text('Do you want to $action this item?'),
           actions: <Widget>[

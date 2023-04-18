@@ -42,10 +42,10 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (BuildContext context, _) {
+      builder: (final BuildContext context, final _) {
         final int totalLength = widget.rowCount * widget.columnCount;
         final int widgetCounter = counter * totalLength;
         final double height = MediaQuery.of(context).size.height / widget.rowCount;
@@ -59,10 +59,10 @@ class _MultiWidgetConstructTableState extends State<MultiWidgetConstructTable>
           body: Table(
             children: List<TableRow>.generate(
               widget.rowCount,
-              (int row) => TableRow(
+              (final int row) => TableRow(
                 children: List<Widget>.generate(
                   widget.columnCount,
-                  (int column) {
+                  (final int column) {
                     final int label = row * widget.columnCount + column;
                     // This implementation rebuild the widget tree for every
                     // frame, and is intentionally designed of poor performance
@@ -103,7 +103,7 @@ class MyContainer extends StatelessWidget {
   final BoxConstraints constraints;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       color: color,
       constraints: constraints,

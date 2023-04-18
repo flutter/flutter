@@ -8,13 +8,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Theme.wrap()', (WidgetTester tester) async {
+  testWidgets('Theme.wrap()', (final WidgetTester tester) async {
     const Color primaryColor = Color(0xFF00FF00);
     final Key primaryContainerKey = UniqueKey();
 
     // Effectively the same as a StatelessWidget subclass.
     final Widget primaryBox = Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return Container(
           key: primaryContainerKey,
           color: Theme.of(context).primaryColor,
@@ -28,12 +28,12 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           body: Builder( // Introduce a context so the app's Theme is visible.
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               navigatorContext = context;
               return Theme(
                 data: Theme.of(context).copyWith(primaryColor: primaryColor),
                 child: Builder( // Introduce a context so the shadow Theme is visible to captureAll().
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -44,7 +44,7 @@ void main() {
                               Navigator.of(context).push<void>(
                                 MaterialPageRoute<void>(
                                   // The primaryBox will see the default Theme when built.
-                                  builder: (BuildContext _) => primaryBox,
+                                  builder: (final BuildContext _) => primaryBox,
                                 ),
                               );
                             },
@@ -55,7 +55,7 @@ void main() {
                               Navigator.of(context).push<void>(
                                 MaterialPageRoute<void>(
                                   // Capture the shadow Theme.
-                                  builder: (BuildContext _) => InheritedTheme.captureAll(context, primaryBox),
+                                  builder: (final BuildContext _) => InheritedTheme.captureAll(context, primaryBox),
                                 ),
                               );
                             },
@@ -93,7 +93,7 @@ void main() {
     expect(containerColor(), isNot(primaryColor));
   });
 
-  testWidgets('PopupMenuTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('PopupMenuTheme.wrap()', (final WidgetTester tester) async {
     const double menuFontSize = 24;
     const Color menuTextColor = Color(0xFF0000FF);
 
@@ -112,8 +112,8 @@ void main() {
                 // PopupMenuTheme defined above. Popup menus use
                 // InheritedTheme.captureAll() by default.
                 child: const Text('show popupmenu'),
-                onSelected: (int result) { },
-                itemBuilder: (BuildContext context) {
+                onSelected: (final int result) { },
+                itemBuilder: (final BuildContext context) {
                   return const <PopupMenuEntry<int>>[
                     PopupMenuItem<int>(value: 1, child: Text('One')),
                     PopupMenuItem<int>(value: 2, child: Text('Two')),
@@ -126,7 +126,7 @@ void main() {
       );
     }
 
-    TextStyle itemTextStyle(String text) {
+    TextStyle itemTextStyle(final String text) {
       return tester.widget<RichText>(
         find.descendant(of: find.text(text), matching: find.byType(RichText)),
       ).text.style!;
@@ -146,7 +146,7 @@ void main() {
     await tester.pumpAndSettle(); // menu route animation
   });
 
-  testWidgets('BannerTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('BannerTheme.wrap()', (final WidgetTester tester) async {
     const Color bannerBackgroundColor = Color(0xFF0000FF);
     const double bannerFontSize = 48;
     const Color bannerTextColor = Color(0xFF00FF00);
@@ -172,7 +172,7 @@ void main() {
               contentTextStyle: TextStyle(fontSize: bannerFontSize, color: bannerTextColor),
             ),
             child: Builder( // Introduce a context so the shadow BannerTheme is visible to captureAll().
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 navigatorContext = context;
                 return Center(
                   child: Column(
@@ -184,7 +184,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // The Banner will see the default BannerTheme when built.
-                              builder: (BuildContext _) => banner,
+                              builder: (final BuildContext _) => banner,
                             ),
                           );
                         },
@@ -195,7 +195,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder: (BuildContext _) => InheritedTheme.captureAll(context, banner),
+                              builder: (final BuildContext _) => InheritedTheme.captureAll(context, banner),
                             ),
                           );
                         },
@@ -216,7 +216,7 @@ void main() {
       ).color!;
     }
 
-    TextStyle getTextStyle(String text) {
+    TextStyle getTextStyle(final String text) {
       return tester.widget<RichText>(
         find.descendant(
           of: find.text(text),
@@ -244,7 +244,7 @@ void main() {
     expect(getTextStyle('hello').color, isNot(bannerTextColor));
   });
 
-  testWidgets('DividerTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('DividerTheme.wrap()', (final WidgetTester tester) async {
     const Color dividerColor = Color(0xFF0000FF);
     const double dividerSpace = 13;
     const double dividerThickness = 7;
@@ -262,7 +262,7 @@ void main() {
               thickness: dividerThickness,
             ),
             child: Builder( // Introduce a context so the shadow DividerTheme is visible to captureAll().
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 navigatorContext = context;
                 return Center(
                   child: Column(
@@ -274,7 +274,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // The Banner will see the default BannerTheme when built.
-                              builder: (BuildContext _) => divider,
+                              builder: (final BuildContext _) => divider,
                             ),
                           );
                         },
@@ -285,7 +285,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder: (BuildContext _) => InheritedTheme.captureAll(context, divider),
+                              builder: (final BuildContext _) => InheritedTheme.captureAll(context, divider),
                             ),
                           );
                         },
@@ -326,7 +326,7 @@ void main() {
     expect(dividerBorder().width, isNot(dividerThickness));
   });
 
-  testWidgets('ListTileTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('ListTileTheme.wrap()', (final WidgetTester tester) async {
     const Color tileSelectedColor = Color(0xFF00FF00);
     const Color tileIconColor = Color(0xFF0000FF);
     const Color tileTextColor = Color(0xFFFF0000);
@@ -363,7 +363,7 @@ void main() {
             textColor: tileTextColor,
             iconColor: tileIconColor,
             child: Builder( // Introduce a context so the shadow ListTileTheme is visible to captureAll().
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 navigatorContext = context;
                 return Center(
                   child: Column(
@@ -375,7 +375,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // The Banner will see the default BannerTheme when built.
-                              builder: (BuildContext _) => listTiles,
+                              builder: (final BuildContext _) => listTiles,
                             ),
                           );
                         },
@@ -386,7 +386,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow BannerTheme.
-                              builder: (BuildContext _) => InheritedTheme.captureAll(context, listTiles),
+                              builder: (final BuildContext _) => InheritedTheme.captureAll(context, listTiles),
                             ),
                           );
                         },
@@ -401,13 +401,13 @@ void main() {
       );
     }
 
-    TextStyle getTextStyle(String text) {
+    TextStyle getTextStyle(final String text) {
       return tester.widget<RichText>(
         find.descendant(of: find.text(text), matching: find.byType(RichText)),
       ).text.style!;
     }
 
-    TextStyle getIconStyle(Key key) {
+    TextStyle getIconStyle(final Key key) {
       return tester.widget<RichText>(
         find.descendant(
           of: find.byKey(key),
@@ -437,7 +437,7 @@ void main() {
     expect(getIconStyle(unselectedIconKey).color, isNot(tileIconColor));
   });
 
-  testWidgets('SliderTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('SliderTheme.wrap()', (final WidgetTester tester) async {
     const Color activeTrackColor = Color(0xFF00FF00);
     const Color inactiveTrackColor = Color(0xFF0000FF);
     const Color thumbColor = Color(0xFFFF0000);
@@ -446,7 +446,7 @@ void main() {
       body: Center(
         child: Slider(
           value: 0.5,
-          onChanged: (double value) { },
+          onChanged: (final double value) { },
         ),
       ),
     );
@@ -463,7 +463,7 @@ void main() {
               thumbColor: thumbColor,
             ),
             child: Builder( // Introduce a context so the shadow SliderTheme is visible to captureAll().
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 navigatorContext = context;
                 return Center(
                   child: Column(
@@ -475,7 +475,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // The slider will see the default SliderTheme when built.
-                              builder: (BuildContext _) => slider,
+                              builder: (final BuildContext _) => slider,
                             ),
                           );
                         },
@@ -486,7 +486,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow SliderTheme.
-                              builder: (BuildContext _) => InheritedTheme.captureAll(context, slider),
+                              builder: (final BuildContext _) => InheritedTheme.captureAll(context, slider),
                             ),
                           );
                         },
@@ -520,7 +520,7 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 
-  testWidgets('ToggleButtonsTheme.wrap()', (WidgetTester tester) async {
+  testWidgets('ToggleButtonsTheme.wrap()', (final WidgetTester tester) async {
     const Color buttonColor = Color(0xFF00FF00);
     const Color selectedButtonColor = Color(0xFFFF0000);
 
@@ -532,7 +532,7 @@ void main() {
             Text('selected'),
             Text('unselected'),
           ],
-          onPressed: (int index) { },
+          onPressed: (final int index) { },
         ),
       ),
     );
@@ -548,7 +548,7 @@ void main() {
               selectedColor: selectedButtonColor,
             ),
             child: Builder( // Introduce a context so the shadow ToggleButtonsTheme is visible to captureAll().
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 navigatorContext = context;
                 return Center(
                   child: Column(
@@ -560,7 +560,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // The slider will see the default ToggleButtonsTheme when built.
-                              builder: (BuildContext _) => toggleButtons,
+                              builder: (final BuildContext _) => toggleButtons,
                             ),
                           );
                         },
@@ -571,7 +571,7 @@ void main() {
                           Navigator.of(context).push<void>(
                             MaterialPageRoute<void>(
                               // Capture the shadow toggleButtons.
-                              builder: (BuildContext _) => InheritedTheme.captureAll(context, toggleButtons),
+                              builder: (final BuildContext _) => InheritedTheme.captureAll(context, toggleButtons),
                             ),
                           );
                         },
@@ -586,7 +586,7 @@ void main() {
       );
     }
 
-    Color getTextColor(String text) {
+    Color getTextColor(final String text) {
       return tester.widget<RichText>(
         find.descendant(of: find.text(text), matching: find.byType(RichText)),
       ).text.style!.color!;

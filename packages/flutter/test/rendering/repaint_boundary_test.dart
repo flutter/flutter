@@ -113,7 +113,7 @@ class _TestRepaintBoundaryThatOverwritesItsLayer extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     layer = OpacityLayer(alpha: 50);
   }
 }
@@ -140,7 +140,7 @@ class _TestCompositedBox extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     layer = OpacityLayer(alpha: 50);
   }
 }

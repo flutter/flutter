@@ -214,7 +214,7 @@ void main() {
           "The list's length has changed from 1 to 2.",
         ));
         expect(
-          error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          error.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
         );
       }
@@ -264,11 +264,11 @@ void main() {
         ));
 
         expect(
-          error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          error.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
         );
         // Two previous children and two new children.
-        expect(error.diagnostics.where((DiagnosticsNode node) => node.value is SemanticsNode).length, 4);
+        expect(error.diagnostics.where((final DiagnosticsNode node) => node.value is SemanticsNode).length, 4);
       }
     });
 
@@ -726,7 +726,7 @@ void main() {
 
   test('Semantics id does not repeat', () {
     final SemanticsOwner owner = SemanticsOwner(
-      onSemanticsUpdate: (SemanticsUpdate update) {},
+      onSemanticsUpdate: (final SemanticsUpdate update) {},
     );
     const int expectId = 1400;
     SemanticsNode? nodeToRemove;
@@ -801,8 +801,8 @@ void main() {
     void onLongPress() { }
     void onDecrease() { }
     void onIncrease() { }
-    void onMoveCursorForwardByCharacter(bool _) { }
-    void onMoveCursorBackwardByCharacter(bool _) { }
+    void onMoveCursorForwardByCharacter(final bool _) { }
+    void onMoveCursorBackwardByCharacter(final bool _) { }
     void onTap() { }
     void onCustomAction() { }
 
@@ -855,7 +855,7 @@ class TestRender extends RenderProxyBox {
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
     this.isSemanticBoundary = false,
-    RenderBox? child,
+    final RenderBox? child,
   }) : super(child);
 
   bool hasTapAction;
@@ -867,7 +867,7 @@ class TestRender extends RenderProxyBox {
   bool isSemanticBoundary;
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isSemanticBoundary;

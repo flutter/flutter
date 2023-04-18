@@ -117,15 +117,15 @@ class ButtonBarThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ButtonBarThemeData copyWith({
-    MainAxisAlignment? alignment,
-    MainAxisSize? mainAxisSize,
-    ButtonTextTheme? buttonTextTheme,
-    double? buttonMinWidth,
-    double? buttonHeight,
-    EdgeInsetsGeometry? buttonPadding,
-    bool? buttonAlignedDropdown,
-    ButtonBarLayoutBehavior? layoutBehavior,
-    VerticalDirection? overflowDirection,
+    final MainAxisAlignment? alignment,
+    final MainAxisSize? mainAxisSize,
+    final ButtonTextTheme? buttonTextTheme,
+    final double? buttonMinWidth,
+    final double? buttonHeight,
+    final EdgeInsetsGeometry? buttonPadding,
+    final bool? buttonAlignedDropdown,
+    final ButtonBarLayoutBehavior? layoutBehavior,
+    final VerticalDirection? overflowDirection,
   }) {
     return ButtonBarThemeData(
       alignment: alignment ?? this.alignment,
@@ -145,7 +145,7 @@ class ButtonBarThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ButtonBarThemeData? lerp(ButtonBarThemeData? a, ButtonBarThemeData? b, double t) {
+  static ButtonBarThemeData? lerp(final ButtonBarThemeData? a, final ButtonBarThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -176,7 +176,7 @@ class ButtonBarThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -196,7 +196,7 @@ class ButtonBarThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MainAxisAlignment>('alignment', alignment, defaultValue: null));
     properties.add(DiagnosticsProperty<MainAxisSize>('mainAxisSize', mainAxisSize, defaultValue: null));
@@ -253,11 +253,11 @@ class ButtonBarTheme extends InheritedWidget {
   /// ```dart
   /// ButtonBarThemeData theme = ButtonBarTheme.of(context);
   /// ```
-  static ButtonBarThemeData of(BuildContext context) {
+  static ButtonBarThemeData of(final BuildContext context) {
     final ButtonBarTheme? buttonBarTheme = context.dependOnInheritedWidgetOfExactType<ButtonBarTheme>();
     return buttonBarTheme?.data ?? Theme.of(context).buttonBarTheme;
   }
 
   @override
-  bool updateShouldNotify(ButtonBarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ButtonBarTheme oldWidget) => data != oldWidget.data;
 }

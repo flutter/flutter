@@ -87,7 +87,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   @override
   PhysicalKeyboardKey get physicalKey => kFuchsiaToPhysicalKey[hidUsage] ?? PhysicalKeyboardKey(LogicalKeyboardKey.fuchsiaPlane + hidUsage);
 
-  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+  bool _isLeftRightModifierPressed(final KeyboardSide side, final int anyMask, final int leftMask, final int rightMask) {
     if (modifiers & anyMask == 0) {
       return false;
     }
@@ -104,7 +104,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, { KeyboardSide side = KeyboardSide.any }) {
+  bool isModifierPressed(final ModifierKey key, { final KeyboardSide side = KeyboardSide.any }) {
     switch (key) {
       case ModifierKey.controlModifier:
         return _isLeftRightModifierPressed(side, modifierControl, modifierLeftControl, modifierRightControl);
@@ -126,8 +126,8 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
+  KeyboardSide? getModifierSide(final ModifierKey key) {
+    KeyboardSide? findSide(final int anyMask, final int leftMask, final int rightMask) {
       final int combined = modifiers & anyMask;
       if (combined == leftMask) {
         return KeyboardSide.left;
@@ -160,7 +160,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<int>('hidUsage', hidUsage));
     properties.add(DiagnosticsProperty<int>('codePoint', codePoint));
@@ -168,7 +168,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

@@ -64,7 +64,7 @@ class _HeroTag {
   String toString() => 'Default Hero tag for Cupertino navigation bars with navigator $navigator';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -112,7 +112,7 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Positioned(
       top: offsetAnimation.value.dy,
       left: isLTR ? offsetAnimation.value.dx : null,
@@ -130,11 +130,11 @@ class _FixedSizeSlidingTransition extends AnimatedWidget {
 /// When `updateSystemUiOverlay` is true, the nav bar will update the OS
 /// status bar's color theme based on the background color of the nav bar.
 Widget _wrapWithBackground({
-  Border? border,
-  required Color backgroundColor,
-  Brightness? brightness,
-  required Widget child,
-  bool updateSystemUiOverlay = true,
+  final Border? border,
+  required final Color backgroundColor,
+  final Brightness? brightness,
+  required final Widget child,
+  final bool updateSystemUiOverlay = true,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
@@ -185,7 +185,7 @@ Widget _wrapWithBackground({
 }
 
 // Whether the current route supports nav bar hero transitions from or to.
-bool _isTransitionable(BuildContext context) {
+bool _isTransitionable(final BuildContext context) {
   final ModalRoute<dynamic>? route = ModalRoute.of(context);
 
   // Fullscreen dialogs never transitions their nav bar with other push-style
@@ -421,7 +421,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
 
   /// True if the navigation bar's background color has no transparency.
   @override
-  bool shouldFullyObstruct(BuildContext context) {
+  bool shouldFullyObstruct(final BuildContext context) {
     final Color backgroundColor = CupertinoDynamicColor.maybeResolve(this.backgroundColor, context)
                                ?? CupertinoTheme.of(context).barBackgroundColor;
     return backgroundColor.alpha == 0xFF;
@@ -449,7 +449,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color backgroundColor =
       CupertinoDynamicColor.maybeResolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor;
 
@@ -487,7 +487,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
 
     return Builder(
       // Get the context that might have a possibly changed CupertinoTheme.
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return Hero(
           tag: widget.heroTag == _defaultHeroTag
               ? _HeroTag(Navigator.of(context))
@@ -726,7 +726,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final _NavigationBarStaticComponents components = _NavigationBarStaticComponents(
       keys: keys,
       route: ModalRoute.of(context),
@@ -806,7 +806,7 @@ class _LargeTitleNavigationBarSliverDelegate
   OverScrollHeaderStretchConfiguration? stretchConfiguration;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
     final _PersistentNavigationBar persistentNavigationBar =
@@ -903,7 +903,7 @@ class _LargeTitleNavigationBarSliverDelegate
   }
 
   @override
-  bool shouldRebuild(_LargeTitleNavigationBarSliverDelegate oldDelegate) {
+  bool shouldRebuild(final _LargeTitleNavigationBarSliverDelegate oldDelegate) {
     return components != oldDelegate.components
         || userMiddle != oldDelegate.userMiddle
         || backgroundColor != oldDelegate.backgroundColor
@@ -925,25 +925,25 @@ class _LargeTitle extends SingleChildRenderObjectWidget {
   const _LargeTitle({ super.child });
 
   @override
-  _RenderLargeTitle createRenderObject(BuildContext context) {
+  _RenderLargeTitle createRenderObject(final BuildContext context) {
     return _RenderLargeTitle(alignment: AlignmentDirectional.bottomStart.resolve(Directionality.of(context)));
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderLargeTitle renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderLargeTitle renderObject) {
     renderObject.alignment = AlignmentDirectional.bottomStart.resolve(Directionality.of(context));
   }
 }
 
 class _RenderLargeTitle extends RenderShiftedBox {
   _RenderLargeTitle({
-    required Alignment alignment,
+    required final Alignment alignment,
   })  : _alignment = alignment,
         super(null);
 
   Alignment get alignment => _alignment;
   Alignment _alignment;
-  set alignment(Alignment value) {
+  set alignment(final Alignment value) {
     if (_alignment == value) {
       return;
     }
@@ -983,7 +983,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
   }
 
   @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  void applyPaintTransform(final RenderBox child, final Matrix4 transform) {
     assert(child == this.child);
 
     super.applyPaintTransform(child, transform);
@@ -992,7 +992,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final RenderBox? child = this.child;
 
     if (child == null) {
@@ -1004,14 +1004,14 @@ class _RenderLargeTitle extends RenderShiftedBox {
         needsCompositing,
         offset + childParentData.offset,
         Matrix4.diagonal3Values(_scale, _scale, 1.0),
-        (PaintingContext context, Offset offset) => context.paintChild(child, offset),
+        (final PaintingContext context, final Offset offset) => context.paintChild(child, offset),
         oldLayer: layer as TransformLayer?,
       );
     }
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(final BoxHitTestResult result, {required final Offset position}) {
     final RenderBox? child = this.child;
 
     if (child == null) {
@@ -1027,7 +1027,7 @@ class _RenderLargeTitle extends RenderShiftedBox {
     return result.addWithRawTransform(
       transform: transform,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset transformed) {
+      hitTest: (final BoxHitTestResult result, final Offset transformed) {
         return child.hitTest(result, position: transformed);
       }
     );
@@ -1054,7 +1054,7 @@ class _PersistentNavigationBar extends StatelessWidget {
   final bool? middleVisible;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget? middle = components.middle;
 
     if (middle != null) {
@@ -1144,17 +1144,17 @@ class _NavigationBarStaticComponentsKeys {
 @immutable
 class _NavigationBarStaticComponents {
   _NavigationBarStaticComponents({
-    required _NavigationBarStaticComponentsKeys keys,
-    required ModalRoute<dynamic>? route,
-    required Widget? userLeading,
-    required bool automaticallyImplyLeading,
-    required bool automaticallyImplyTitle,
-    required String? previousPageTitle,
-    required Widget? userMiddle,
-    required Widget? userTrailing,
-    required Widget? userLargeTitle,
-    required EdgeInsetsDirectional? padding,
-    required bool large,
+    required final _NavigationBarStaticComponentsKeys keys,
+    required final ModalRoute<dynamic>? route,
+    required final Widget? userLeading,
+    required final bool automaticallyImplyLeading,
+    required final bool automaticallyImplyTitle,
+    required final String? previousPageTitle,
+    required final Widget? userMiddle,
+    required final Widget? userTrailing,
+    required final Widget? userLargeTitle,
+    required final EdgeInsetsDirectional? padding,
+    required final bool large,
   }) : leading = createLeading(
          leadingKey: keys.leadingKey,
          userLeading: userLeading,
@@ -1197,8 +1197,8 @@ class _NavigationBarStaticComponents {
        );
 
   static Widget? _derivedTitle({
-    required bool automaticallyImplyTitle,
-    ModalRoute<dynamic>? currentRoute,
+    required final bool automaticallyImplyTitle,
+    final ModalRoute<dynamic>? currentRoute,
   }) {
     // Auto use the CupertinoPageRoute's title if middle not provided.
     if (automaticallyImplyTitle &&
@@ -1212,11 +1212,11 @@ class _NavigationBarStaticComponents {
 
   final KeyedSubtree? leading;
   static KeyedSubtree? createLeading({
-    required GlobalKey leadingKey,
-    required Widget? userLeading,
-    required ModalRoute<dynamic>? route,
-    required bool automaticallyImplyLeading,
-    required EdgeInsetsDirectional? padding,
+    required final GlobalKey leadingKey,
+    required final Widget? userLeading,
+    required final ModalRoute<dynamic>? route,
+    required final bool automaticallyImplyLeading,
+    required final EdgeInsetsDirectional? padding,
   }) {
     Widget? leadingContent;
 
@@ -1257,10 +1257,10 @@ class _NavigationBarStaticComponents {
 
   final KeyedSubtree? backChevron;
   static KeyedSubtree? createBackChevron({
-    required GlobalKey backChevronKey,
-    required Widget? userLeading,
-    required ModalRoute<dynamic>? route,
-    required bool automaticallyImplyLeading,
+    required final GlobalKey backChevronKey,
+    required final Widget? userLeading,
+    required final ModalRoute<dynamic>? route,
+    required final bool automaticallyImplyLeading,
   }) {
     if (
       userLeading != null ||
@@ -1279,11 +1279,11 @@ class _NavigationBarStaticComponents {
   /// animate during transitions.
   final KeyedSubtree? backLabel;
   static KeyedSubtree? createBackLabel({
-    required GlobalKey backLabelKey,
-    required Widget? userLeading,
-    required ModalRoute<dynamic>? route,
-    required bool automaticallyImplyLeading,
-    required String? previousPageTitle,
+    required final GlobalKey backLabelKey,
+    required final Widget? userLeading,
+    required final ModalRoute<dynamic>? route,
+    required final bool automaticallyImplyLeading,
+    required final String? previousPageTitle,
   }) {
     if (
       userLeading != null ||
@@ -1308,12 +1308,12 @@ class _NavigationBarStaticComponents {
   /// animate during transitions.
   final KeyedSubtree? middle;
   static KeyedSubtree? createMiddle({
-    required GlobalKey middleKey,
-    required Widget? userMiddle,
-    required Widget? userLargeTitle,
-    required bool large,
-    required bool automaticallyImplyTitle,
-    required ModalRoute<dynamic>? route,
+    required final GlobalKey middleKey,
+    required final Widget? userMiddle,
+    required final Widget? userLargeTitle,
+    required final bool large,
+    required final bool automaticallyImplyTitle,
+    required final ModalRoute<dynamic>? route,
   }) {
     Widget? middleContent = userMiddle;
 
@@ -1338,9 +1338,9 @@ class _NavigationBarStaticComponents {
 
   final KeyedSubtree? trailing;
   static KeyedSubtree? createTrailing({
-    required GlobalKey trailingKey,
-    required Widget? userTrailing,
-    required EdgeInsetsDirectional? padding,
+    required final GlobalKey trailingKey,
+    required final Widget? userTrailing,
+    required final EdgeInsetsDirectional? padding,
   }) {
     if (userTrailing == null) {
       return null;
@@ -1366,11 +1366,11 @@ class _NavigationBarStaticComponents {
   /// animate during transitions.
   final KeyedSubtree? largeTitle;
   static KeyedSubtree? createLargeTitle({
-    required GlobalKey largeTitleKey,
-    required Widget? userLargeTitle,
-    required bool large,
-    required bool automaticImplyTitle,
-    required ModalRoute<dynamic>? route,
+    required final GlobalKey largeTitleKey,
+    required final Widget? userLargeTitle,
+    required final bool large,
+    required final bool automaticImplyTitle,
+    required final ModalRoute<dynamic>? route,
   }) {
     if (!large) {
       return null;
@@ -1455,7 +1455,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   final Widget? _backLabel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ModalRoute<dynamic>? currentRoute = ModalRoute.of(context);
     if (onPressed == null) {
       assert(
@@ -1513,7 +1513,7 @@ class _BackChevron extends StatelessWidget {
   const _BackChevron();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     final TextStyle textStyle = DefaultTextStyle.of(context).style;
 
@@ -1563,7 +1563,7 @@ class _BackLabel extends StatelessWidget {
 
   // `child` is never passed in into ValueListenableBuilder so it's always
   // null here and unused.
-  Widget _buildPreviousTitleWidget(BuildContext context, String? previousTitle, Widget? child) {
+  Widget _buildPreviousTitleWidget(final BuildContext context, final String? previousTitle, final Widget? child) {
     if (previousTitle == null) {
       return const SizedBox.shrink();
     }
@@ -1586,7 +1586,7 @@ class _BackLabel extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (specifiedPreviousTitle != null) {
       return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
     } else if (route is CupertinoRouteTransitionMixin<dynamic> && !route!.isFirst) {
@@ -1648,10 +1648,10 @@ class _TransitionableNavigationBar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(() {
       bool inHero = false;
-      context.visitAncestorElements((Element ancestor) {
+      context.visitAncestorElements((final Element ancestor) {
         if (ancestor is ComponentElement) {
           assert(
             ancestor.widget.runtimeType != _NavigationBarTransition,
@@ -1719,7 +1719,7 @@ class _NavigationBarTransition extends StatelessWidget {
   final BorderTween borderTween;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final _NavigationBarComponentsTransition componentsTransition = _NavigationBarComponentsTransition(
       animation: animation,
       bottomNavBar: bottomNavBar,
@@ -1732,7 +1732,7 @@ class _NavigationBarTransition extends StatelessWidget {
       // moving components without any components inside it itself.
       AnimatedBuilder(
         animation: animation,
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return _wrapWithBackground(
             // Don't update the system status bar color mid-flight.
             updateSystemUiOverlay: false,
@@ -1805,9 +1805,9 @@ class _NavigationBarTransition extends StatelessWidget {
 class _NavigationBarComponentsTransition {
   _NavigationBarComponentsTransition({
     required this.animation,
-    required _TransitionableNavigationBar bottomNavBar,
-    required _TransitionableNavigationBar topNavBar,
-    required TextDirection directionality,
+    required final _TransitionableNavigationBar bottomNavBar,
+    required final _TransitionableNavigationBar topNavBar,
+    required final TextDirection directionality,
   }) : bottomComponents = bottomNavBar.componentsKeys,
        topComponents = topNavBar.componentsKeys,
        bottomNavBarBox = bottomNavBar.renderBox,
@@ -1868,8 +1868,8 @@ class _NavigationBarComponentsTransition {
   // Take a widget it its original ancestor navigation bar render box and
   // translate it into a RelativeBox in the transition navigation bar box.
   RelativeRect positionInTransitionBox(
-    GlobalKey key, {
-    required RenderBox from,
+    final GlobalKey key, {
+    required final RenderBox from,
   }) {
     final RenderBox componentBox = key.currentContext!.findRenderObject()! as RenderBox;
     assert(componentBox.attached);
@@ -1894,11 +1894,11 @@ class _NavigationBarComponentsTransition {
   // incoming constraints used for sizing the child widget will be exactly the
   // same.
   _FixedSizeSlidingTransition slideFromLeadingEdge({
-    required GlobalKey fromKey,
-    required RenderBox fromNavBarBox,
-    required GlobalKey toKey,
-    required RenderBox toNavBarBox,
-    required Widget child,
+    required final GlobalKey fromKey,
+    required final RenderBox fromNavBarBox,
+    required final GlobalKey toKey,
+    required final RenderBox toNavBarBox,
+    required final Widget child,
   }) {
     final RenderBox fromBox = fromKey.currentContext!.findRenderObject()! as RenderBox;
     final RenderBox toBox = toKey.currentContext!.findRenderObject()! as RenderBox;
@@ -1950,13 +1950,13 @@ class _NavigationBarComponentsTransition {
     );
   }
 
-  Animation<double> fadeInFrom(double t, { Curve curve = Curves.easeIn }) {
+  Animation<double> fadeInFrom(final double t, { final Curve curve = Curves.easeIn }) {
     return animation.drive(fadeIn.chain(
       CurveTween(curve: Interval(t, 1.0, curve: curve)),
     ));
   }
 
-  Animation<double> fadeOutBy(double t, { Curve curve = Curves.easeOut }) {
+  Animation<double> fadeOutBy(final double t, { final Curve curve = Curves.easeOut }) {
     return animation.drive(fadeOut.chain(
       CurveTween(curve: Interval(0.0, t, curve: curve)),
     ));
@@ -2401,7 +2401,7 @@ class _NavigationBarComponentsTransition {
 
 /// Navigation bars' hero rect tween that will move between the static bars
 /// but keep a constant size that's the bigger of both navigation bars.
-RectTween _linearTranslateWithLargestRectSizeTween(Rect? begin, Rect? end) {
+RectTween _linearTranslateWithLargestRectSizeTween(final Rect? begin, final Rect? end) {
   final Size largestSize = Size(
     math.max(begin!.size.width, end!.size.width),
     math.max(begin.size.height, end.size.height),
@@ -2413,9 +2413,9 @@ RectTween _linearTranslateWithLargestRectSizeTween(Rect? begin, Rect? end) {
 }
 
 Widget _navBarHeroLaunchPadBuilder(
-  BuildContext context,
-  Size heroSize,
-  Widget child,
+  final BuildContext context,
+  final Size heroSize,
+  final Widget child,
 ) {
   assert(child is _TransitionableNavigationBar);
   // Tree reshaping is fine here because the Heroes' child is always a
@@ -2440,11 +2440,11 @@ Widget _navBarHeroLaunchPadBuilder(
 
 /// Navigation bars' hero flight shuttle builder.
 Widget _navBarHeroFlightShuttleBuilder(
-  BuildContext flightContext,
-  Animation<double> animation,
-  HeroFlightDirection flightDirection,
-  BuildContext fromHeroContext,
-  BuildContext toHeroContext,
+  final BuildContext flightContext,
+  final Animation<double> animation,
+  final HeroFlightDirection flightDirection,
+  final BuildContext fromHeroContext,
+  final BuildContext toHeroContext,
 ) {
   assert(fromHeroContext.widget is Hero);
   assert(toHeroContext.widget is Hero);

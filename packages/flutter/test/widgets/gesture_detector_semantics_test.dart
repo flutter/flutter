@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Vertical gesture detector has up/down actions', (WidgetTester tester) async {
+  testWidgets('Vertical gesture detector has up/down actions', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     int callCount = 0;
@@ -20,7 +20,7 @@ void main() {
       Center(
         child: GestureDetector(
           key: detectorKey,
-          onVerticalDragStart: (DragStartDetails _) {
+          onVerticalDragStart: (final DragStartDetails _) {
             callCount += 1;
           },
           child: Container(),
@@ -44,7 +44,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Horizontal gesture detector has up/down actions', (WidgetTester tester) async {
+  testWidgets('Horizontal gesture detector has up/down actions', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     int callCount = 0;
@@ -54,7 +54,7 @@ void main() {
         Center(
           child: GestureDetector(
             key: detectorKey,
-            onHorizontalDragStart: (DragStartDetails _) {
+            onHorizontalDragStart: (final DragStartDetails _) {
               callCount += 1;
             },
             child: Container(),
@@ -78,7 +78,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('All registered handlers for the gesture kind are called', (WidgetTester tester) async {
+  testWidgets('All registered handlers for the gesture kind are called', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final Set<String> logs = <String>{};
@@ -88,8 +88,8 @@ void main() {
       Center(
         child: GestureDetector(
           key: detectorKey,
-          onHorizontalDragStart: (_) { logs.add('horizontal'); },
-          onPanStart: (_) { logs.add('pan'); },
+          onHorizontalDragStart: (final _) { logs.add('horizontal'); },
+          onPanStart: (final _) { logs.add('pan'); },
           child: Container(),
         ),
       ),
@@ -102,7 +102,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Replacing recognizers should update semantic handlers', (WidgetTester tester) async {
+  testWidgets('Replacing recognizers should update semantic handlers', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // How the test is set up:
@@ -121,7 +121,7 @@ void main() {
       detectorKey.currentState!.replaceGestureRecognizers(<Type, GestureRecognizerFactory>{
         TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
           () => TapGestureRecognizer(),
-          (TapGestureRecognizer instance) {
+          (final TapGestureRecognizer instance) {
             instance.onTap = () { logs.add('tap'); };
           },
         ),
@@ -132,7 +132,7 @@ void main() {
     late VoidCallback introduceLayoutPerformer;
     await tester.pumpWidget(
       StatefulBuilder(
-        builder: (BuildContext context, StateSetter setter) {
+        builder: (final BuildContext context, final StateSetter setter) {
           introduceLayoutPerformer = () {
             setter(() {
               hasLayoutPerformer = true;
@@ -144,8 +144,8 @@ void main() {
               gestures: <Type, GestureRecognizerFactory>{
                 HorizontalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
                   () => HorizontalDragGestureRecognizer(),
-                  (HorizontalDragGestureRecognizer instance) {
-                    instance.onStart = (_) { logs.add('horizontal'); };
+                  (final HorizontalDragGestureRecognizer instance) {
+                    instance.onStart = (final _) { logs.add('horizontal'); };
                   },
                 ),
               },
@@ -173,7 +173,7 @@ void main() {
   });
 
   group("RawGestureDetector's custom semantics delegate", () {
-    testWidgets('should update semantics notations when switching from the default delegate', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when switching from the default delegate', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
         _buildGestureMap(() => LongPressGestureRecognizer(), null)
@@ -208,7 +208,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('should update semantics notations when switching to the default delegate', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when switching to the default delegate', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
         _buildGestureMap(() => LongPressGestureRecognizer(), null)
@@ -243,7 +243,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('should update semantics notations when switching from a different custom delegate', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when switching from a different custom delegate', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final Map<Type, GestureRecognizerFactory> gestures =
         _buildGestureMap(() => LongPressGestureRecognizer(), null)
@@ -279,7 +279,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('should correctly call callbacks', (WidgetTester tester) async {
+    testWidgets('should correctly call callbacks', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> logs = <String>[];
       final GlobalKey<RawGestureDetectorState> detectorKey = GlobalKey();
@@ -290,8 +290,8 @@ void main() {
             semantics: _TestSemanticsGestureDelegate(
               onTap: () { logs.add('tap'); },
               onLongPress: () { logs.add('longPress'); },
-              onHorizontalDragUpdate: (_) { logs.add('horizontal'); },
-              onVerticalDragUpdate: (_) { logs.add('vertical'); },
+              onHorizontalDragUpdate: (final _) { logs.add('horizontal'); },
+              onVerticalDragUpdate: (final _) { logs.add('vertical'); },
             ),
             child: Container(),
           ),
@@ -321,7 +321,7 @@ void main() {
 
   group("RawGestureDetector's default semantics delegate", () {
     group('should map onTap to', () {
-      testWidgets('null when there is no TapGR', (WidgetTester tester) async {
+      testWidgets('null when there is no TapGR', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -339,7 +339,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('non-null when there is TapGR with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is TapGR with no callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -360,7 +360,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
@@ -370,14 +370,14 @@ void main() {
               key: detectorKey,
               gestures: _buildGestureMap(
                 () => TapGestureRecognizer(),
-                (TapGestureRecognizer tap) {
+                (final TapGestureRecognizer tap) {
                   tap
                     ..onTap = () {logs.add('tap');}
-                    ..onTapUp = (_) {logs.add('tapUp');}
-                    ..onTapDown = (_) {logs.add('tapDown');}
+                    ..onTapUp = (final _) {logs.add('tapUp');}
+                    ..onTapDown = (final _) {logs.add('tapDown');}
                     ..onTapCancel = () {logs.add('WRONG');}
-                    ..onSecondaryTapDown = (_) {logs.add('WRONG');}
-                    ..onTertiaryTapDown = (_) {logs.add('WRONG');};
+                    ..onSecondaryTapDown = (final _) {logs.add('WRONG');}
+                    ..onTertiaryTapDown = (final _) {logs.add('WRONG');};
                 },
               ),
               child: Container(),
@@ -394,7 +394,7 @@ void main() {
     });
 
     group('should map onLongPress to', () {
-      testWidgets('null when there is no LongPressGR ', (WidgetTester tester) async {
+      testWidgets('null when there is no LongPressGR ', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -412,7 +412,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('non-null when there is LongPressGR with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is LongPressGR with no callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -433,7 +433,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
@@ -443,13 +443,13 @@ void main() {
               key: detectorKey,
               gestures: _buildGestureMap(
                 () => LongPressGestureRecognizer(),
-                (LongPressGestureRecognizer longPress) {
+                (final LongPressGestureRecognizer longPress) {
                   longPress
                     ..onLongPress = () {logs.add('LP');}
-                    ..onLongPressStart = (_) {logs.add('LPStart');}
+                    ..onLongPressStart = (final _) {logs.add('LPStart');}
                     ..onLongPressUp = () {logs.add('LPUp');}
-                    ..onLongPressEnd = (_) {logs.add('LPEnd');}
-                    ..onLongPressMoveUpdate = (_) {logs.add('WRONG');};
+                    ..onLongPressEnd = (final _) {logs.add('LPEnd');}
+                    ..onLongPressMoveUpdate = (final _) {logs.add('WRONG');};
                 },
               ),
               child: Container(),
@@ -466,7 +466,7 @@ void main() {
     });
 
     group('should map onHorizontalDragUpdate to', () {
-      testWidgets('null when there is no matching recognizers ', (WidgetTester tester) async {
+      testWidgets('null when there is no matching recognizers ', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -484,7 +484,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is either matching recognizer with no callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -526,28 +526,28 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
         final Map<Type, GestureRecognizerFactory> gestures = _buildGestureMap(
           () => HorizontalDragGestureRecognizer(),
-          (HorizontalDragGestureRecognizer horizontal) {
+          (final HorizontalDragGestureRecognizer horizontal) {
             horizontal
-              ..onStart = (_) {logs.add('HStart');}
-              ..onDown = (_) {logs.add('HDown');}
-              ..onEnd = (_) {logs.add('HEnd');}
-              ..onUpdate = (_) {logs.add('HUpdate');}
+              ..onStart = (final _) {logs.add('HStart');}
+              ..onDown = (final _) {logs.add('HDown');}
+              ..onEnd = (final _) {logs.add('HEnd');}
+              ..onUpdate = (final _) {logs.add('HUpdate');}
               ..onCancel = () {logs.add('WRONG');};
           },
         )..addAll(_buildGestureMap(
           () => PanGestureRecognizer(),
-          (PanGestureRecognizer pan) {
+          (final PanGestureRecognizer pan) {
             pan
-              ..onStart = (_) {logs.add('PStart');}
-              ..onDown = (_) {logs.add('PDown');}
-              ..onEnd = (_) {logs.add('PEnd');}
-              ..onUpdate = (_) {logs.add('PUpdate');}
+              ..onStart = (final _) {logs.add('PStart');}
+              ..onDown = (final _) {logs.add('PDown');}
+              ..onEnd = (final _) {logs.add('PEnd');}
+              ..onUpdate = (final _) {logs.add('PUpdate');}
               ..onCancel = () {logs.add('WRONG');};
           },
         ));
@@ -576,7 +576,7 @@ void main() {
     });
 
     group('should map onVerticalDragUpdate to', () {
-      testWidgets('null when there is no matching recognizers ', (WidgetTester tester) async {
+      testWidgets('null when there is no matching recognizers ', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -594,7 +594,7 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
+      testWidgets('non-null when there is either matching recognizer with no callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         await tester.pumpWidget(
           Center(
@@ -617,28 +617,28 @@ void main() {
         semantics.dispose();
       });
 
-      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+      testWidgets('a callback that correctly calls callbacks', (final WidgetTester tester) async {
         final SemanticsTester semantics = SemanticsTester(tester);
         final GlobalKey detectorKey = GlobalKey();
         final List<String> logs = <String>[];
         final Map<Type, GestureRecognizerFactory> gestures = _buildGestureMap(
           () => VerticalDragGestureRecognizer(),
-          (VerticalDragGestureRecognizer horizontal) {
+          (final VerticalDragGestureRecognizer horizontal) {
             horizontal
-              ..onStart = (_) {logs.add('VStart');}
-              ..onDown = (_) {logs.add('VDown');}
-              ..onEnd = (_) {logs.add('VEnd');}
-              ..onUpdate = (_) {logs.add('VUpdate');}
+              ..onStart = (final _) {logs.add('VStart');}
+              ..onDown = (final _) {logs.add('VDown');}
+              ..onEnd = (final _) {logs.add('VEnd');}
+              ..onUpdate = (final _) {logs.add('VUpdate');}
               ..onCancel = () {logs.add('WRONG');};
           },
         )..addAll(_buildGestureMap(
           () => PanGestureRecognizer(),
-          (PanGestureRecognizer pan) {
+          (final PanGestureRecognizer pan) {
             pan
-              ..onStart = (_) {logs.add('PStart');}
-              ..onDown = (_) {logs.add('PDown');}
-              ..onEnd = (_) {logs.add('PEnd');}
-              ..onUpdate = (_) {logs.add('PUpdate');}
+              ..onStart = (final _) {logs.add('PStart');}
+              ..onDown = (final _) {logs.add('PDown');}
+              ..onEnd = (final _) {logs.add('PEnd');}
+              ..onUpdate = (final _) {logs.add('PUpdate');}
               ..onCancel = () {logs.add('WRONG');};
           },
         ));
@@ -666,7 +666,7 @@ void main() {
       });
     });
 
-    testWidgets('should update semantics notations when receiving new gestures', (WidgetTester tester) async {
+    testWidgets('should update semantics notations when receiving new gestures', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(
         Center(
@@ -707,18 +707,18 @@ class _TestLayoutPerformer extends SingleChildRenderObjectWidget {
   final VoidCallback performLayout;
 
   @override
-  _RenderTestLayoutPerformer createRenderObject(BuildContext context) {
+  _RenderTestLayoutPerformer createRenderObject(final BuildContext context) {
     return _RenderTestLayoutPerformer(performLayout: performLayout);
   }
 }
 
 class _RenderTestLayoutPerformer extends RenderBox {
-  _RenderTestLayoutPerformer({required VoidCallback performLayout}) : _performLayout = performLayout;
+  _RenderTestLayoutPerformer({required final VoidCallback performLayout}) : _performLayout = performLayout;
 
   final VoidCallback _performLayout;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return const Size(1, 1);
   }
 
@@ -730,8 +730,8 @@ class _RenderTestLayoutPerformer extends RenderBox {
 }
 
 Map<Type, GestureRecognizerFactory> _buildGestureMap<T extends GestureRecognizer>(
-  GestureRecognizerFactoryConstructor<T>? constructor,
-  GestureRecognizerFactoryInitializer<T>? initializer,
+  final GestureRecognizerFactoryConstructor<T>? constructor,
+  final GestureRecognizerFactoryInitializer<T>? initializer,
 ) {
   if (constructor == null) {
     return <Type, GestureRecognizerFactory>{};
@@ -739,7 +739,7 @@ Map<Type, GestureRecognizerFactory> _buildGestureMap<T extends GestureRecognizer
   return <Type, GestureRecognizerFactory>{
     T: GestureRecognizerFactoryWithHandlers<T>(
       constructor,
-      initializer ?? (T o) {},
+      initializer ?? (final T o) {},
     ),
   };
 }
@@ -758,7 +758,7 @@ class _TestSemanticsGestureDelegate extends SemanticsGestureDelegate {
   final GestureDragUpdateCallback? onVerticalDragUpdate;
 
   @override
-  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  void assignSemantics(final RenderSemanticsGestureHandler renderObject) {
     renderObject
       ..onTap = onTap
       ..onLongPress = onLongPress

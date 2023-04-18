@@ -68,13 +68,13 @@ class BottomAppBarTheme with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BottomAppBarTheme copyWith({
-    Color? color,
-    double? elevation,
-    NotchedShape? shape,
-    double? height,
-    Color? surfaceTintColor,
-    Color? shadowColor,
-    EdgeInsetsGeometry? padding,
+    final Color? color,
+    final double? elevation,
+    final NotchedShape? shape,
+    final double? height,
+    final Color? surfaceTintColor,
+    final Color? shadowColor,
+    final EdgeInsetsGeometry? padding,
   }) {
     return BottomAppBarTheme(
       color: color ?? this.color,
@@ -88,7 +88,7 @@ class BottomAppBarTheme with Diagnosticable {
   }
 
   /// The [ThemeData.bottomAppBarTheme] property of the ambient [Theme].
-  static BottomAppBarTheme of(BuildContext context) {
+  static BottomAppBarTheme of(final BuildContext context) {
     return Theme.of(context).bottomAppBarTheme;
   }
 
@@ -97,7 +97,7 @@ class BottomAppBarTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomAppBarTheme lerp(BottomAppBarTheme? a, BottomAppBarTheme? b, double t) {
+  static BottomAppBarTheme lerp(final BottomAppBarTheme? a, final BottomAppBarTheme? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -124,7 +124,7 @@ class BottomAppBarTheme with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -142,7 +142,7 @@ class BottomAppBarTheme with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));

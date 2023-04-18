@@ -17,7 +17,7 @@ void main() {
     0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
   ];
 
-  testWidgets('Ink ancestor material is not clipped', (WidgetTester tester) async {
+  testWidgets('Ink ancestor material is not clipped', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

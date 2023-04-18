@@ -12,7 +12,7 @@ class PageTransitionsThemeApp extends StatelessWidget {
   const PageTransitionsThemeApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -33,7 +33,7 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueGrey,
       body: Center(
@@ -41,7 +41,7 @@ class HomePage extends StatelessWidget {
           onPressed: () {
             Navigator.of(context).push(
               MaterialPageRoute<SecondPage>(
-                builder: (BuildContext context) => const SecondPage(),
+                builder: (final BuildContext context) => const SecondPage(),
               ),
             );
           },
@@ -56,7 +56,7 @@ class SecondPage extends StatelessWidget {
   const SecondPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.purple[200],
       body: Center(

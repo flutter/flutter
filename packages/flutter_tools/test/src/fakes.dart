@@ -29,13 +29,13 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
   };
 
   @override
-  Future<bool> isUpToDate(FileSystem fileSystem) => Future<bool>.value(true);
+  Future<bool> isUpToDate(final FileSystem fileSystem) => Future<bool>.value(true);
 
   @override
   String get name => 'fake';
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, {bool offline = false}) async {
+  Future<void> update(final ArtifactUpdater artifactUpdater, final Logger logger, final FileSystem fileSystem, final OperatingSystemUtils operatingSystemUtils, {final bool offline = false}) async {
   }
 }
 
@@ -43,8 +43,8 @@ class FakeDyldEnvironmentArtifact extends ArtifactSet {
 class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,
-    Future<int>? exitCode,
-    IOSink? stdin,
+    final Future<int>? exitCode,
+    final IOSink? stdin,
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
@@ -66,7 +66,7 @@ class FakeProcess implements Process {
   final Stream<List<int>> stderr;
 
   @override
-  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool kill([final io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     return true;
   }
 }
@@ -84,7 +84,7 @@ class CompleterIOSink extends MemoryIOSink {
   Future<List<int>> get future => _completer.future;
 
   @override
-  void add(List<int> data) {
+  void add(final List<int> data) {
     if (!_completer.isCompleted) {
       // When throwOnAdd is true, complete with empty so any expected output
       // doesn't appear.
@@ -105,16 +105,16 @@ class MemoryIOSink implements IOSink {
   final List<List<int>> writes = <List<int>>[];
 
   @override
-  void add(List<int> data) {
+  void add(final List<int> data) {
     writes.add(data);
   }
 
   @override
-  Future<void> addStream(Stream<List<int>> stream) {
+  Future<void> addStream(final Stream<List<int>> stream) {
     final Completer<void> completer = Completer<void>();
     late StreamSubscription<List<int>> sub;
     sub = stream.listen(
-      (List<int> data) {
+      (final List<int> data) {
         try {
           add(data);
         // Catches all exceptions to propagate them to the completer.
@@ -131,22 +131,22 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeCharCode(int charCode) {
+  void writeCharCode(final int charCode) {
     add(<int>[charCode]);
   }
 
   @override
-  void write(Object? obj) {
+  void write(final Object? obj) {
     add(encoding.encode('$obj'));
   }
 
   @override
-  void writeln([ Object? obj = '' ]) {
+  void writeln([ final Object? obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
+  void writeAll(final Iterable<dynamic> objects, [ final String separator = '' ]) {
     bool addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
@@ -158,7 +158,7 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [ StackTrace? stackTrace ]) {
+  void addError(final dynamic error, [ final StackTrace? stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -176,7 +176,7 @@ class MemoryIOSink implements IOSink {
   }
 
   String getAndClear() {
-    final String result = utf8.decode(writes.expand((List<int> l) => l).toList());
+    final String result = utf8.decode(writes.expand((final List<int> l) => l).toList());
     clear();
     return result;
   }
@@ -185,7 +185,7 @@ class MemoryIOSink implements IOSink {
 class MemoryStdout extends MemoryIOSink implements io.Stdout {
   @override
   bool get hasTerminal => _hasTerminal;
-  set hasTerminal(bool value) {
+  set hasTerminal(final bool value) {
     _hasTerminal = value;
   }
   bool _hasTerminal = true;
@@ -195,7 +195,7 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
 
   @override
   bool get supportsAnsiEscapes => _supportsAnsiEscapes;
-  set supportsAnsiEscapes(bool value) {
+  set supportsAnsiEscapes(final bool value) {
     _supportsAnsiEscapes = value;
   }
   bool _supportsAnsiEscapes = true;
@@ -207,7 +207,7 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     }
     throw const io.StdoutException('unspecified mock value');
   }
-  set terminalColumns(int value) => _terminalColumns = value;
+  set terminalColumns(final int value) => _terminalColumns = value;
   int? _terminalColumns;
 
   @override
@@ -217,7 +217,7 @@ class MemoryStdout extends MemoryIOSink implements io.Stdout {
     }
     throw const io.StdoutException('unspecified mock value');
   }
-  set terminalLines(int value) => _terminalLines = value;
+  set terminalLines(final int value) => _terminalLines = value;
   int? _terminalLines;
 }
 
@@ -236,7 +236,7 @@ class FakeStdio extends Stdio {
   @override
   Stream<List<int>> get stdin => _stdin;
 
-  void simulateStdin(String line) {
+  void simulateStdin(final String line) {
     _stdin.controller.add(utf8.encode('$line\n'));
   }
 
@@ -257,16 +257,16 @@ class FakeStdin extends Fake implements Stdin {
   bool lineMode = true;
 
   @override
-  Stream<S> transform<S>(StreamTransformer<List<int>, S> transformer) {
+  Stream<S> transform<S>(final StreamTransformer<List<int>, S> transformer) {
     return controller.stream.transform(transformer);
   }
 
   @override
   StreamSubscription<List<int>> listen(
-    void Function(List<int> event)? onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
+    final void Function(List<int> event)? onData, {
+    final Function? onError,
+    final void Function()? onDone,
+    final bool? cancelOnError,
   }) {
     return controller.stream.listen(
       onData,
@@ -278,30 +278,30 @@ class FakeStdin extends Fake implements Stdin {
 }
 
 class FakePlistParser implements PlistParser {
-  FakePlistParser([Map<String, Object>? underlyingValues]):
+  FakePlistParser([final Map<String, Object>? underlyingValues]):
     _underlyingValues = underlyingValues ?? <String, Object>{};
 
   final Map<String, Object> _underlyingValues;
 
-  void setProperty(String key, Object value) {
+  void setProperty(final String key, final Object value) {
     _underlyingValues[key] = value;
   }
 
   @override
-  String? plistXmlContent(String plistFilePath) => throw UnimplementedError();
+  String? plistXmlContent(final String plistFilePath) => throw UnimplementedError();
 
   @override
-  Map<String, Object> parseFile(String plistFilePath) {
+  Map<String, Object> parseFile(final String plistFilePath) {
     return _underlyingValues;
   }
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
+  String? getStringValueFromFile(final String plistFilePath, final String key) {
     return _underlyingValues[key] as String?;
   }
 
   @override
-  bool replaceKey(String plistFilePath, {required String key, String? value}) {
+  bool replaceKey(final String plistFilePath, {required final String key, final String? value}) {
     if (value == null) {
       _underlyingValues.remove(key);
       return true;
@@ -312,7 +312,7 @@ class FakePlistParser implements PlistParser {
 }
 
 class FakeBotDetector implements BotDetector {
-  const FakeBotDetector(bool isRunningOnBot)
+  const FakeBotDetector(final bool isRunningOnBot)
       : _isRunningOnBot = isRunningOnBot;
 
   @override
@@ -396,12 +396,12 @@ class FakeFlutterVersion implements FlutterVersion {
   Future<void> ensureVersionFile() async { }
 
   @override
-  String getBranchName({bool redactUnknownBranches = false}) {
+  String getBranchName({final bool redactUnknownBranches = false}) {
     return 'master';
   }
 
   @override
-  String getVersionString({bool redactUnknownBranches = false}) {
+  String getVersionString({final bool redactUnknownBranches = false}) {
     return 'v0.0.0';
   }
 
@@ -458,7 +458,7 @@ class TestFeatureFlags implements FeatureFlags {
   final bool isFlutterWebWasmEnabled;
 
   @override
-  bool isEnabled(Feature feature) {
+  bool isEnabled(final Feature feature) {
     switch (feature) {
       case flutterWebFeature:
         return isWebEnabled;
@@ -489,30 +489,30 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   final List<List<String>> chmods = <List<String>>[];
 
   @override
-  void makeExecutable(File file) { }
+  void makeExecutable(final File file) { }
 
   @override
   HostPlatform hostPlatform = HostPlatform.linux_x64;
 
   @override
-  void chmod(FileSystemEntity entity, String mode) {
+  void chmod(final FileSystemEntity entity, final String mode) {
     chmods.add(<String>[entity.path, mode]);
   }
 
   @override
-  File? which(String execName) => null;
+  File? which(final String execName) => null;
 
   @override
-  List<File> whichAll(String execName) => <File>[];
+  List<File> whichAll(final String execName) => <File>[];
 
   @override
-  void unzip(File file, Directory targetDirectory) { }
+  void unzip(final File file, final Directory targetDirectory) { }
 
   @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) { }
+  void unpack(final File gzippedTarFile, final Directory targetDirectory) { }
 
   @override
-  Stream<List<int>> gzipLevel1Stream(Stream<List<int>> stream) => stream;
+  Stream<List<int>> gzipLevel1Stream(final Stream<List<int>> stream) => stream;
 
   @override
   String get name => 'fake OS name and version';
@@ -521,7 +521,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   String get pathVarSeparator => ';';
 
   @override
-  Future<int> findFreePort({bool ipv6 = false}) async => 12345;
+  Future<int> findFreePort({final bool ipv6 = false}) async => 12345;
 }
 
 class FakeStopwatch implements Stopwatch {
@@ -562,8 +562,8 @@ class FakeStopwatch implements Stopwatch {
 
 class FakeStopwatchFactory implements StopwatchFactory {
   FakeStopwatchFactory({
-    Stopwatch? stopwatch,
-    Map<String, Stopwatch>? stopwatches
+    final Stopwatch? stopwatch,
+    final Map<String, Stopwatch>? stopwatches
   }) : stopwatches = <String, Stopwatch>{
          if (stopwatches != null) ...stopwatches,
          if (stopwatch != null) '': stopwatch,
@@ -572,14 +572,14 @@ class FakeStopwatchFactory implements StopwatchFactory {
   Map<String, Stopwatch> stopwatches;
 
   @override
-  Stopwatch createStopwatch([String name = '']) {
+  Stopwatch createStopwatch([final String name = '']) {
     return stopwatches[name] ?? FakeStopwatch();
   }
 }
 
 class FakeFlutterProjectFactory implements FlutterProjectFactory {
   @override
-  FlutterProject fromDirectory(Directory directory) {
+  FlutterProject fromDirectory(final Directory directory) {
     return FlutterProject.fromDirectoryTest(directory);
   }
 

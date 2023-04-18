@@ -65,11 +65,11 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ProgressIndicatorThemeData copyWith({
-    Color? color,
-    Color? linearTrackColor,
-    double? linearMinHeight,
-    Color? circularTrackColor,
-    Color? refreshBackgroundColor,
+    final Color? color,
+    final Color? linearTrackColor,
+    final double? linearMinHeight,
+    final Color? circularTrackColor,
+    final Color? refreshBackgroundColor,
   }) {
     return ProgressIndicatorThemeData(
       color: color ?? this.color,
@@ -83,7 +83,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
   /// Linearly interpolate between two progress indicator themes.
   ///
   /// If both arguments are null, then null is returned.
-  static ProgressIndicatorThemeData? lerp(ProgressIndicatorThemeData? a, ProgressIndicatorThemeData? b, double t) {
+  static ProgressIndicatorThemeData? lerp(final ProgressIndicatorThemeData? a, final ProgressIndicatorThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -106,7 +106,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
   );
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -122,7 +122,7 @@ class ProgressIndicatorThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(ColorProperty('linearTrackColor', linearTrackColor, defaultValue: null));
@@ -172,16 +172,16 @@ class ProgressIndicatorTheme extends InheritedTheme {
   /// ```dart
   /// ProgressIndicatorThemeData theme = ProgressIndicatorTheme.of(context);
   /// ```
-  static ProgressIndicatorThemeData of(BuildContext context) {
+  static ProgressIndicatorThemeData of(final BuildContext context) {
     final ProgressIndicatorTheme? progressIndicatorTheme = context.dependOnInheritedWidgetOfExactType<ProgressIndicatorTheme>();
     return progressIndicatorTheme?.data ?? Theme.of(context).progressIndicatorTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return ProgressIndicatorTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ProgressIndicatorTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ProgressIndicatorTheme oldWidget) => data != oldWidget.data;
 }

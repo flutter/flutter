@@ -34,7 +34,7 @@ class TestWidgetState extends State<TestWidget> {
   }
 
   @override
-  void didUpdateWidget(TestWidget oldWidget) {
+  void didUpdateWidget(final TestWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     syncedState = widget.syncedState;
     // we explicitly do NOT sync the persistentState from the new instance
@@ -43,12 +43,12 @@ class TestWidgetState extends State<TestWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(final BuildContext context) => widget.child;
 }
 
 void main() {
 
-  testWidgets('no change', (WidgetTester tester) async {
+  testWidgets('no change', (final WidgetTester tester) async {
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.blue,
@@ -88,7 +88,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('remove one', (WidgetTester tester) async {
+  testWidgets('remove one', (final WidgetTester tester) async {
     await tester.pumpWidget(
       ColoredBox(
         color: Colors.blue,
@@ -127,7 +127,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('swap instances around', (WidgetTester tester) async {
+  testWidgets('swap instances around', (final WidgetTester tester) async {
     const Widget a = TestWidget(persistentState: 0x61, syncedState: 0x41, child: Text('apple', textDirection: TextDirection.ltr));
     const Widget b = TestWidget(persistentState: 0x62, syncedState: 0x42, child: Text('banana', textDirection: TextDirection.ltr));
     await tester.pumpWidget(const Column());

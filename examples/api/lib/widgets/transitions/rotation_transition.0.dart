@@ -12,7 +12,7 @@ class RotationTransitionExampleApp extends StatelessWidget {
   const RotationTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: RotationTransitionExample(),
     );
@@ -45,7 +45,7 @@ class _RotationTransitionExampleState extends State<RotationTransitionExample> w
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: RotationTransition(

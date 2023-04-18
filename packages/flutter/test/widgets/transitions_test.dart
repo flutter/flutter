@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('toString control test', (WidgetTester tester) async {
+  testWidgets('toString control test', (final WidgetTester tester) async {
     const Widget widget = FadeTransition(
       opacity: kAlwaysCompleteAnimation,
       child: Text('Ready', textDirection: TextDirection.ltr),
@@ -47,7 +47,7 @@ void main() {
       controller = AnimationController(vsync: const TestVSync());
     });
 
-    testWidgets('decoration test', (WidgetTester tester) async {
+    testWidgets('decoration test', (final WidgetTester tester) async {
       final DecoratedBoxTransition transitionUnderTest =
       DecoratedBoxTransition(
         decoration: decorationTween.animate(controller),
@@ -95,7 +95,7 @@ void main() {
       expect(actualDecoration.boxShadow, null);
     });
 
-    testWidgets('animations work with curves test', (WidgetTester tester) async {
+    testWidgets('animations work with curves test', (final WidgetTester tester) async {
       final Animation<Decoration> curvedDecorationAnimation =
         decorationTween.animate(CurvedAnimation(
         parent: controller,
@@ -144,7 +144,7 @@ void main() {
     });
   });
 
-  testWidgets('AlignTransition animates', (WidgetTester tester) async {
+  testWidgets('AlignTransition animates', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
@@ -168,7 +168,7 @@ void main() {
     expect(actualAlignment, const Alignment(0.0, 0.5));
   });
 
-  testWidgets('RelativePositionedTransition animates', (WidgetTester tester) async {
+  testWidgets('RelativePositionedTransition animates', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<Rect?> rectTween = RectTween(
       begin: const Rect.fromLTWH(0, 0, 30, 40),
@@ -214,7 +214,7 @@ void main() {
     expect(renderBox.size, equals(const Size(665, 420)));
   });
 
-  testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
+  testWidgets('AlignTransition keeps width and height factors', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<Alignment> alignmentTween = AlignmentTween(
       begin: Alignment.centerLeft,
@@ -235,7 +235,7 @@ void main() {
     expect(actualAlign.heightFactor, 0.4);
   });
 
-  testWidgets('SizeTransition clamps negative size factors - vertical axis', (WidgetTester tester) async {
+  testWidgets('SizeTransition clamps negative size factors - vertical axis', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
@@ -265,7 +265,7 @@ void main() {
     expect(actualPositionedBox.heightFactor, 1.0);
   });
 
-  testWidgets('SizeTransition clamps negative size factors - horizontal axis', (WidgetTester tester) async {
+  testWidgets('SizeTransition clamps negative size factors - horizontal axis', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
@@ -296,7 +296,7 @@ void main() {
     expect(actualPositionedBox.widthFactor, 1.0);
   });
 
-  testWidgets('RotationTransition animates', (WidgetTester tester) async {
+  testWidgets('RotationTransition animates', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
@@ -335,7 +335,7 @@ void main() {
     ])..transpose());
   });
 
-  testWidgets('RotationTransition maintains chosen alignment during animation', (WidgetTester tester) async {
+  testWidgets('RotationTransition maintains chosen alignment during animation', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(vsync: const TestVSync());
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
@@ -356,7 +356,7 @@ void main() {
   });
 
   group('FadeTransition', () {
-    double getOpacity(WidgetTester tester, String textValue) {
+    double getOpacity(final WidgetTester tester, final String textValue) {
       final FadeTransition opacityWidget = tester.widget<FadeTransition>(
         find.ancestor(
           of: find.text(textValue),
@@ -365,7 +365,7 @@ void main() {
       );
       return opacityWidget.opacity.value;
     }
-    testWidgets('animates', (WidgetTester tester) async {
+    testWidgets('animates', (final WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
@@ -399,7 +399,7 @@ void main() {
   });
 
   group('SliverFadeTransition', () {
-    double getOpacity(WidgetTester tester, String textValue) {
+    double getOpacity(final WidgetTester tester, final String textValue) {
       final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
         find.ancestor(
           of: find.text(textValue),
@@ -408,7 +408,7 @@ void main() {
       );
       return opacityWidget.opacity.value;
     }
-    testWidgets('animates', (WidgetTester tester) async {
+    testWidgets('animates', (final WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget = Localizations(
@@ -458,7 +458,7 @@ void main() {
   });
 
   group('ScaleTransition', () {
-    testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+    testWidgets('uses ImageFilter when provided with FilterQuality argument', (final WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
@@ -479,7 +479,7 @@ void main() {
       await tester.pump();
 
       expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        (final ImageFilterLayer layer) => layer.imageFilter.toString(),
         'image filter',
         startsWith('ImageFilter.matrix('),
       )));
@@ -488,7 +488,7 @@ void main() {
       await tester.pump();
 
       expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        (final ImageFilterLayer layer) => layer.imageFilter.toString(),
         'image filter',
         startsWith('ImageFilter.matrix('),
       )));
@@ -497,7 +497,7 @@ void main() {
       await tester.pump();
 
       expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        (final ImageFilterLayer layer) => layer.imageFilter.toString(),
         'image filter',
         startsWith('ImageFilter.matrix('),
       )));
@@ -511,7 +511,7 @@ void main() {
   });
 
   group('RotationTransition', () {
-    testWidgets('uses ImageFilter when provided with FilterQuality argument', (WidgetTester tester) async {
+    testWidgets('uses ImageFilter when provided with FilterQuality argument', (final WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
       final Widget widget =  Directionality(
@@ -532,7 +532,7 @@ void main() {
       await tester.pump();
 
       expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        (final ImageFilterLayer layer) => layer.imageFilter.toString(),
         'image filter',
         startsWith('ImageFilter.matrix('),
       )));
@@ -541,7 +541,7 @@ void main() {
       await tester.pump();
 
       expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        (final ImageFilterLayer layer) => layer.imageFilter.toString(),
         'image filter',
         startsWith('ImageFilter.matrix('),
       )));
@@ -550,7 +550,7 @@ void main() {
       await tester.pump();
 
       expect(tester.layers, contains(isA<ImageFilterLayer>().having(
-        (ImageFilterLayer layer) => layer.imageFilter.toString(),
+        (final ImageFilterLayer layer) => layer.imageFilter.toString(),
         'image filter',
         startsWith('ImageFilter.matrix('),
       )));
@@ -564,7 +564,7 @@ void main() {
   });
 
   group('Builders', () {
-    testWidgets('AnimatedBuilder rebuilds when changed', (WidgetTester tester) async {
+    testWidgets('AnimatedBuilder rebuilds when changed', (final WidgetTester tester) async {
       final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
       await tester.pumpWidget(
@@ -572,7 +572,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: AnimatedBuilder(
             animation: notifier,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return RedrawCounter(key: redrawKey, child: child);
             },
           ),
@@ -592,7 +592,7 @@ void main() {
       expect(redrawKey.currentState!.redraws, equals(2));
     });
 
-    testWidgets("AnimatedBuilder doesn't rebuild the child", (WidgetTester tester) async {
+    testWidgets("AnimatedBuilder doesn't rebuild the child", (final WidgetTester tester) async {
       final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
       final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
@@ -601,7 +601,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: AnimatedBuilder(
             animation: notifier,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return RedrawCounter(key: redrawKey, child: child);
             },
             child: RedrawCounter(key: redrawKeyChild),
@@ -626,7 +626,7 @@ void main() {
       expect(redrawKeyChild.currentState!.redraws, equals(1));
     });
 
-    testWidgets('ListenableBuilder rebuilds when changed', (WidgetTester tester) async {
+    testWidgets('ListenableBuilder rebuilds when changed', (final WidgetTester tester) async {
       final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
       await tester.pumpWidget(
@@ -634,7 +634,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ListenableBuilder(
             listenable: notifier,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return RedrawCounter(key: redrawKey, child: child);
             },
           ),
@@ -654,7 +654,7 @@ void main() {
       expect(redrawKey.currentState!.redraws, equals(2));
     });
 
-    testWidgets("ListenableBuilder doesn't rebuild the child", (WidgetTester tester) async {
+    testWidgets("ListenableBuilder doesn't rebuild the child", (final WidgetTester tester) async {
       final GlobalKey<RedrawCounterState> redrawKey = GlobalKey<RedrawCounterState>();
       final GlobalKey<RedrawCounterState> redrawKeyChild = GlobalKey<RedrawCounterState>();
       final ChangeNotifier notifier = ChangeNotifier();
@@ -663,7 +663,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: ListenableBuilder(
             listenable: notifier,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return RedrawCounter(key: redrawKey, child: child);
             },
             child: RedrawCounter(key: redrawKeyChild),
@@ -703,7 +703,7 @@ class RedrawCounterState extends State<RedrawCounter> {
   int redraws = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     redraws += 1;
     return SizedBox(child: widget.child);
   }

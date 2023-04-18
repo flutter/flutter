@@ -46,7 +46,7 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  Cache createCache(Platform platform) {
+  Cache createCache(final Platform platform) {
     return Cache.test(
       platform: platform,
       processManager: fakeProcessManager
@@ -129,7 +129,7 @@ void main() {
         ..version = 'asdasd'
         ..artifactDirectory = artifactDir
         ..downloadDir = downloadDir
-        ..onSetStamp = (String name, String version) {
+        ..onSetStamp = (final String name, final String version) {
           throw const FileSystemException('stamp write failed');
         };
 
@@ -364,7 +364,7 @@ void main() {
     final Directory dir = fileSystem.systemTempDirectory
         .listSync(recursive: true)
         .whereType<Directory>()
-        .singleWhereOrNull((Directory directory) => directory.basename == 'bin_dir')!;
+        .singleWhereOrNull((final Directory directory) => directory.basename == 'bin_dir')!;
 
     expect(dir, isNotNull);
     expect(dir.path, artifactDir.childDirectory('bin_dir').path);
@@ -789,7 +789,7 @@ void main() {
     final List<String> messages = <String>[];
     final List<String> downloads = <String>[];
     final List<String> locations = <String>[];
-    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+    artifactUpdater.onDownloadZipArchive = (final String message, final Uri uri, final Directory location) {
       messages.add(message);
       downloads.add(uri.toString());
       locations.add(location.path);
@@ -845,7 +845,7 @@ void main() {
 
     final List<String> downloads = <String>[];
     final List<String> locations = <String>[];
-    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+    artifactUpdater.onDownloadZipArchive = (final String message, final Uri uri, final Directory location) {
       downloads.add(uri.toString());
       locations.add(location.path);
       location.createSync(recursive: true);
@@ -868,7 +868,7 @@ void main() {
     final FakeArtifactUpdater artifactUpdater = FakeArtifactUpdater();
     final FlutterWebSdk webSdk = FlutterWebSdk(cache);
 
-    artifactUpdater.onDownloadZipArchive = (String message, Uri uri, Directory location) {
+    artifactUpdater.onDownloadZipArchive = (final String message, final Uri uri, final Directory location) {
       location.createSync(recursive: true);
       location.childFile('foo').createSync();
     };
@@ -1006,7 +1006,7 @@ void main() {
     expect(
       pub.invocations.first,
       predicate<FakePubInvocation>(
-        (FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
+        (final FakePubInvocation invocation) => invocation.outputMode == PubOutputMode.none,
         'Pub invoked with PubOutputMode.none',
       ),
     );
@@ -1099,9 +1099,9 @@ void main() {
 
 class FakeCachedArtifact extends EngineCachedArtifact {
   FakeCachedArtifact({
-    String stampName = 'STAMP',
-    required Cache cache,
-    required DevelopmentArtifact requiredArtifacts,
+    final String stampName = 'STAMP',
+    required final Cache cache,
+    required final DevelopmentArtifact requiredArtifacts,
     this.binaryDirs = const <List<String>>[],
     this.licenseDirs = const <String>[],
     this.packageDirs = const <String>[],
@@ -1122,14 +1122,14 @@ class FakeCachedArtifact extends EngineCachedArtifact {
 }
 
 class FakeSimpleArtifact extends CachedArtifact {
-  FakeSimpleArtifact(Cache cache) : super(
+  FakeSimpleArtifact(final Cache cache) : super(
     'fake',
     cache,
     DevelopmentArtifact.universal,
   );
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
+  Future<void> updateInner(final ArtifactUpdater artifactUpdater, final FileSystem fileSystem, final OperatingSystemUtils operatingSystemUtils) async { }
 }
 
 class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
@@ -1138,10 +1138,10 @@ class FakeSecondaryCachedArtifact extends Fake implements CachedArtifact {
   Exception? updateException;
 
   @override
-  Future<bool> isUpToDate(FileSystem fileSystem) async => upToDate;
+  Future<bool> isUpToDate(final FileSystem fileSystem) async => upToDate;
 
   @override
-  Future<void> update(ArtifactUpdater artifactUpdater, Logger logger, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils, {bool offline = false}) async {
+  Future<void> update(final ArtifactUpdater artifactUpdater, final Logger logger, final FileSystem fileSystem, final OperatingSystemUtils operatingSystemUtils, {final bool offline = false}) async {
     if (updateException != null) {
       throw updateException!;
     }
@@ -1173,10 +1173,10 @@ class FakeSecondaryCache extends Fake implements Cache {
   Directory getDownloadDir() => artifactDirectory;
 
   @override
-  Directory getArtifactDirectory(String name) => artifactDirectory;
+  Directory getArtifactDirectory(final String name) => artifactDirectory;
 
   @override
-  Directory getCacheDir(String name, { bool shouldCreate = true }) {
+  Directory getCacheDir(final String name, { final bool shouldCreate = true }) {
     return artifactDirectory.childDirectory(name);
   }
 
@@ -1186,10 +1186,10 @@ class FakeSecondaryCache extends Fake implements Cache {
   }
 
   @override
-  String? getVersionFor(String artifactName) => version;
+  String? getVersionFor(final String artifactName) => version;
 
   @override
-  void setStampFor(String artifactName, String version) {
+  void setStampFor(final String artifactName, final String version) {
     onSetStamp(artifactName, version);
   }
 }
@@ -1198,7 +1198,7 @@ class FakeVersionedPackageResolver extends Fake implements VersionedPackageResol
   final List<List<String>> resolved = <List<String>>[];
 
   @override
-  String resolveUrl(String packageName, String version) {
+  String resolveUrl(final String packageName, final String version) {
     resolved.add(<String>[packageName, version]);
     return '';
   }
@@ -1218,16 +1218,16 @@ class FakePub extends Fake implements Pub {
 
   @override
   Future<void> get({
-    PubContext? context,
-    required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    bool printProgress = true,
-    PubOutputMode outputMode = PubOutputMode.all,
+    final PubContext? context,
+    required final FlutterProject project,
+    final bool upgrade = false,
+    final bool offline = false,
+    final bool generateSyntheticPackage = false,
+    final String? flutterRootOverride,
+    final bool checkUpToDate = false,
+    final bool shouldSkipThirdPartyGenerator = true,
+    final bool printProgress = true,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     invocations.add(FakePubInvocation(outputMode: outputMode));
   }
@@ -1246,7 +1246,7 @@ class FakeCache extends Cache {
   late File stampFile;
 
   @override
-  File getStampFileFor(String artifactName) {
+  File getStampFileFor(final String artifactName) {
     return stampFile;
   }
 }
@@ -1265,12 +1265,12 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadZipTarball;
 
   @override
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
+  Future<void> downloadZippedTarball(final String message, final Uri url, final Directory location) async {
     onDownloadZipTarball?.call(message, url, location);
   }
 
   @override
-  Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
+  Future<void> downloadZipArchive(final String message, final Uri url, final Directory location) async {
     onDownloadZipArchive?.call(message, url, location);
   }
 
@@ -1289,7 +1289,7 @@ class FakeArtifactUpdaterDownload extends ArtifactUpdater {
     required super.allowedBaseUrls
   });
 
-  void addFiles(List<File> files) {
+  void addFiles(final List<File> files) {
     downloadedFiles.addAll(files);
   }
 }

@@ -121,7 +121,7 @@ class TestTextInput {
     _isVisible = false;
   }
 
-  Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
+  Future<dynamic> _handleTextInputCall(final MethodCall methodCall) async {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
@@ -175,7 +175,7 @@ class TestTextInput {
   ///
   ///  * [updateEditingValue], which takes a [TextEditingValue] so that one can
   ///    also change the selection.
-  void enterText(String text) {
+  void enterText(final String text) {
     updateEditingValue(TextEditingValue(
       text: text,
       selection: TextSelection.collapsed(offset: text.length),
@@ -197,7 +197,7 @@ class TestTextInput {
   ///
   ///  * [enterText], which is similar but takes only a String and resets the
   ///    selection.
-  void updateEditingValue(TextEditingValue value) {
+  void updateEditingValue(final TextEditingValue value) {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
@@ -206,7 +206,7 @@ class TestTextInput {
           <dynamic>[_client ?? -1, value.toJSON()],
         ),
       ),
-      (ByteData? data) { /* ignored */ },
+      (final ByteData? data) { /* ignored */ },
     );
   }
 
@@ -219,7 +219,7 @@ class TestTextInput {
   /// If this is used to inject an action when there is a real IME connection,
   /// for example when using the [integration_test] library, there is a risk
   /// that the real IME will become confused as to the current state of input.
-  Future<void> receiveAction(TextInputAction action) async {
+  Future<void> receiveAction(final TextInputAction action) async {
     return TestAsyncUtils.guard(() {
       final Completer<void> completer = Completer<void>();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -230,7 +230,7 @@ class TestTextInput {
             <dynamic>[_client ?? -1, action.toString()],
           ),
         ),
-        (ByteData? data) {
+        (final ByteData? data) {
           assert(data != null);
           try {
             // Decoding throws a PlatformException if the data represents an
@@ -270,7 +270,7 @@ class TestTextInput {
            <dynamic>[_client ?? -1],
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (final ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
@@ -285,7 +285,7 @@ class TestTextInput {
            <dynamic>[_client ?? -1,]
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (final ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
@@ -300,12 +300,12 @@ class TestTextInput {
            <dynamic>[_client ?? -1,]
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (final ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
   /// Simulates a Scribble focus.
-  Future<void> scribbleFocusElement(String elementIdentifier, Offset offset) async {
+  Future<void> scribbleFocusElement(final String elementIdentifier, final Offset offset) async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
@@ -315,12 +315,12 @@ class TestTextInput {
            <dynamic>[elementIdentifier, offset.dx, offset.dy]
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (final ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
   /// Simulates iOS asking for the list of Scribble elements during UIIndirectScribbleInteraction.
-  Future<List<List<dynamic>>> scribbleRequestElementsInRect(Rect rect) async {
+  Future<List<List<dynamic>>> scribbleRequestElementsInRect(final Rect rect) async {
     assert(isRegistered);
     List<List<dynamic>> response = <List<dynamic>>[];
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
@@ -331,8 +331,8 @@ class TestTextInput {
            <dynamic>[rect.left, rect.top, rect.width, rect.height]
         ),
       ),
-      (ByteData? data) {
-        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>).map((dynamic element) => element as List<dynamic>).toList();
+      (final ByteData? data) {
+        response = (SystemChannels.textInput.codec.decodeEnvelope(data!) as List<dynamic>).map((final dynamic element) => element as List<dynamic>).toList();
       },
     );
 
@@ -350,7 +350,7 @@ class TestTextInput {
            <dynamic>[_client ?? -1, 0.0, 0.0]
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (final ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
@@ -365,29 +365,29 @@ class TestTextInput {
            <dynamic>[_client ?? -1]
         ),
       ),
-      (ByteData? data) { /* response from framework is discarded */ },
+      (final ByteData? data) { /* response from framework is discarded */ },
     );
   }
 
   /// Gives text input chance to respond to unhandled key down event.
-  Future<void> handleKeyDownEvent(LogicalKeyboardKey key) async {
+  Future<void> handleKeyDownEvent(final LogicalKeyboardKey key) async {
     await _keyHandler?.handleKeyDownEvent(key);
   }
 
   /// Gives text input chance to respond to unhandled key up event.
-  Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
+  Future<void> handleKeyUpEvent(final LogicalKeyboardKey key) async {
     await _keyHandler?.handleKeyUpEvent(key);
   }
 
   /// Simulates iOS responding to an undo or redo gesture or button.
-  Future<void> handleKeyboardUndo(String direction) async {
+  Future<void> handleKeyboardUndo(final String direction) async {
     assert(isRegistered);
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall('TextInputClient.handleUndo', <dynamic>[direction]),
       ),
-      (ByteData? data) {/* response from framework is discarded */},
+      (final ByteData? data) {/* response from framework is discarded */},
     );
   }
 }

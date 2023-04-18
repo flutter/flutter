@@ -34,7 +34,7 @@ void main() {
   });
 
   test('HitTestResult should correctly push and pop transforms', () {
-    Matrix4? currentTransform(HitTestResult targetResult) {
+    Matrix4? currentTransform(final HitTestResult targetResult) {
       final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
       targetResult.add(entry);
       return entry.transform;
@@ -76,7 +76,7 @@ void main() {
   });
 
   test('HitTestResult should correctly push and pop offsets', () {
-    Matrix4? currentTransform(HitTestResult targetResult) {
+    Matrix4? currentTransform(final HitTestResult targetResult) {
       final HitTestEntry entry = HitTestEntry(_DummyHitTestTarget());
       targetResult.add(entry);
       return entry.transform;
@@ -129,7 +129,7 @@ void main() {
 
 class _DummyHitTestTarget implements HitTestTarget {
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     // Nothing to do.
   }
 }
@@ -138,7 +138,7 @@ class MyHitTestResult extends HitTestResult {
   MyHitTestResult();
   MyHitTestResult.wrap(super.result) : super.wrap();
 
-  void publicPushTransform(Matrix4 transform) => pushTransform(transform);
-  void publicPushOffset(Offset offset) => pushOffset(offset);
+  void publicPushTransform(final Matrix4 transform) => pushTransform(transform);
+  void publicPushOffset(final Offset offset) => pushOffset(offset);
   void publicPopTransform() => popTransform();
 }

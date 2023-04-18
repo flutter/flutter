@@ -152,7 +152,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final SnackBarThemeData defaults = Theme.of(context).useMaterial3
         ? _SnackbarDefaultsM3(context)
         : _SnackbarDefaultsM2(context);
@@ -173,7 +173,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
         }
       }
 
-      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      return MaterialStateColor.resolveWith((final Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return widget.disabledTextColor ??
               snackBarTheme.disabledActionTextColor ??
@@ -192,7 +192,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
       if (snackBarTheme.actionBackgroundColor is MaterialStateColor) {
         return snackBarTheme.actionBackgroundColor! as MaterialStateColor;
       }
-      return MaterialStateColor.resolveWith((Set<MaterialState> states) {
+      return MaterialStateColor.resolveWith((final Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return widget.disabledBackgroundColor ??
               snackBarTheme.disabledActionBackgroundColor ??
@@ -460,7 +460,7 @@ class SnackBar extends StatefulWidget {
   // API for ScaffoldMessengerState.showSnackBar():
 
   /// Creates an animation controller useful for driving a snack bar's entrance and exit animation.
-  static AnimationController createAnimationController({ required TickerProvider vsync }) {
+  static AnimationController createAnimationController({ required final TickerProvider vsync }) {
     return AnimationController(
       duration: _snackBarTransitionDuration,
       debugLabel: 'SnackBar',
@@ -472,7 +472,7 @@ class SnackBar extends StatefulWidget {
   ///
   /// If the original snack bar lacks a key, the newly created snack bar will
   /// use the given fallback key.
-  SnackBar withAnimation(Animation<double> newAnimation, { Key? fallbackKey }) {
+  SnackBar withAnimation(final Animation<double> newAnimation, { final Key? fallbackKey }) {
     return SnackBar(
       key: key ?? fallbackKey,
       content: content,
@@ -509,7 +509,7 @@ class _SnackBarState extends State<SnackBar> {
   }
 
   @override
-  void didUpdateWidget(SnackBar oldWidget) {
+  void didUpdateWidget(final SnackBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation!.removeStatusListener(_onAnimationStatusChanged);
@@ -523,7 +523,7 @@ class _SnackBarState extends State<SnackBar> {
     super.dispose();
   }
 
-  void _onAnimationStatusChanged(AnimationStatus animationStatus) {
+  void _onAnimationStatusChanged(final AnimationStatus animationStatus) {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
       case AnimationStatus.forward:
@@ -538,7 +538,7 @@ class _SnackBarState extends State<SnackBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
     assert(widget.animation != null);
@@ -583,7 +583,7 @@ class _SnackBarState extends State<SnackBar> {
       // Whether the behavior is set through the constructor or the theme,
       // assert that our other properties are configured properly.
       if (snackBarBehavior != SnackBarBehavior.floating) {
-        String message(String parameter) {
+        String message(final String parameter) {
           final String prefix = '$parameter can only be used with floating behavior.';
           if (widget.behavior != null) {
             return '$prefix SnackBarBehavior.fixed was set in the SnackBar constructor.';
@@ -770,7 +770,7 @@ class _SnackBarState extends State<SnackBar> {
         key: const Key('dismissible'),
         direction: widget.dismissDirection,
         resizeDuration: null,
-        onDismissed: (DismissDirection direction) {
+        onDismissed: (final DismissDirection direction) {
           ScaffoldMessenger.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
@@ -791,7 +791,7 @@ class _SnackBarState extends State<SnackBar> {
         opacity: fadeInM3Animation,
         child: AnimatedBuilder(
           animation: heightM3Animation,
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return Align(
               alignment: AlignmentDirectional.bottomStart,
               heightFactor: heightM3Animation.value,
@@ -804,7 +804,7 @@ class _SnackBarState extends State<SnackBar> {
     } else {
       snackBarTransition = AnimatedBuilder(
         animation: heightAnimation,
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return Align(
             alignment: AlignmentDirectional.topStart,
             heightFactor: heightAnimation.value,
@@ -828,7 +828,7 @@ class _SnackBarState extends State<SnackBar> {
 
 // Hand coded defaults based on Material Design 2.
 class _SnackbarDefaultsM2 extends SnackBarThemeData {
-  _SnackbarDefaultsM2(BuildContext context)
+  _SnackbarDefaultsM2(final BuildContext context)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(elevation: 6.0);
@@ -899,7 +899,7 @@ class _SnackbarDefaultsM3 extends SnackBarThemeData {
   Color get backgroundColor => _colors.inverseSurface;
 
   @override
-  Color get actionTextColor =>  MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  Color get actionTextColor =>  MaterialStateColor.resolveWith((final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return _colors.inversePrimary;
     }

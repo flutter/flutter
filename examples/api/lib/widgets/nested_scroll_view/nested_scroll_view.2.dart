@@ -12,7 +12,7 @@ class NestedScrollViewExampleApp extends StatelessWidget {
   const NestedScrollViewExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: NestedScrollViewExample(),
     );
@@ -23,9 +23,9 @@ class NestedScrollViewExample extends StatelessWidget {
   const NestedScrollViewExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
-        body: NestedScrollView(headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        body: NestedScrollView(headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
       return <Widget>[
         SliverOverlapAbsorber(
           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -38,7 +38,7 @@ class NestedScrollViewExample extends StatelessWidget {
           ),
         ),
       ];
-    }, body: Builder(builder: (BuildContext context) {
+    }, body: Builder(builder: (final BuildContext context) {
       return CustomScrollView(
         // The "controller" and "primary" members should be left unset, so that
         // the NestedScrollView can control this inner scroll view.
@@ -49,7 +49,7 @@ class NestedScrollViewExample extends StatelessWidget {
           SliverFixedExtentList(
             itemExtent: 48.0,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) => ListTile(title: Text('Item $index')),
+              (final BuildContext context, final int index) => ListTile(title: Text('Item $index')),
               childCount: 30,
             ),
           ),

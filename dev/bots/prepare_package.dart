@@ -64,7 +64,7 @@ enum Branch {
 /// properly without dropping any.
 class ProcessRunner {
   ProcessRunner({
-    ProcessManager? processManager,
+    final ProcessManager? processManager,
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
@@ -97,9 +97,9 @@ class ProcessRunner {
   /// Set `failOk` if [runProcess] should not throw an exception when the
   /// command completes with a non-zero exit code.
   Future<String> runProcess(
-    List<String> commandLine, {
+    final List<String> commandLine, {
     Directory? workingDirectory,
-    bool failOk = false,
+    final bool failOk = false,
   }) async {
     workingDirectory ??= defaultWorkingDirectory ?? Directory.current;
     if (subprocessOutput) {
@@ -122,7 +122,7 @@ class ProcessRunner {
         environment: environment,
       );
       process.stdout.listen(
-        (List<int> event) {
+        (final List<int> event) {
           output.addAll(event);
           if (subprocessOutput) {
             stdout.add(event);
@@ -132,7 +132,7 @@ class ProcessRunner {
       );
       if (subprocessOutput) {
         process.stderr.listen(
-          (List<int> event) {
+          (final List<int> event) {
             stderr.add(event);
           },
           onDone: () async => stderrComplete.complete(),
@@ -175,15 +175,15 @@ class ArchiveCreator {
   /// If subprocessOutput is true, then output from processes invoked during
   /// archive creation is echoed to stderr and stdout.
   factory ArchiveCreator(
-    Directory tempDir,
-    Directory outputDir,
-    String revision,
-    Branch branch, {
-    bool strict = true,
-    ProcessManager? processManager,
-    bool subprocessOutput = true,
-    Platform platform = const LocalPlatform(),
-    HttpReader? httpReader,
+    final Directory tempDir,
+    final Directory outputDir,
+    final String revision,
+    final Branch branch, {
+    final bool strict = true,
+    final ProcessManager? processManager,
+    final bool subprocessOutput = true,
+    final Platform platform = const LocalPlatform(),
+    final HttpReader? httpReader,
   }) {
     final Directory flutterRoot = Directory(path.join(tempDir.path, 'flutter'));
     final ProcessRunner processRunner = ProcessRunner(
@@ -230,10 +230,10 @@ class ArchiveCreator {
     required this.revision,
     required this.branch,
     required this.strict,
-    required ProcessRunner processRunner,
+    required final ProcessRunner processRunner,
     required this.httpReader,
-    required String flutterExecutable,
-    required String dartExecutable,
+    required final String flutterExecutable,
+    required final String dartExecutable,
   }) :
     assert(revision.length == 40),
     _processRunner = processRunner,
@@ -392,7 +392,7 @@ class ArchiveCreator {
     final String versionJson = await _runFlutter(<String>['--version', '--machine']);
     final Map<String, String> versionMap = <String, String>{};
     final Map<String, dynamic> result = json.decode(versionJson) as Map<String, dynamic>;
-    result.forEach((String key, dynamic value) => versionMap[key] = value.toString());
+    result.forEach((final String key, final dynamic value) => versionMap[key] = value.toString());
     versionMap[frameworkVersionTag] = gitVersion;
     versionMap[dartTargetArchTag] = await _dartArch;
     return versionMap;
@@ -443,7 +443,7 @@ class ArchiveCreator {
     final Directory preloadCache = Directory(path.join(flutterRoot.path, '.pub-preload-cache'));
     preloadCache.createSync(recursive: true);
     /// Fetch a single package.
-    Future<void> fetchPackageArchive(String name, String version) async {
+    Future<void> fetchPackageArchive(final String name, final String version) async {
       await pool.withResource(() async {
         stderr.write('Fetching package archive for $name-$version.\n');
         int retries = 7;
@@ -467,7 +467,7 @@ class ArchiveCreator {
               throw const FormatException('.versions should be a list');
             }
             final Map<String, dynamic> versionDescription = versions.firstWhere(
-              (dynamic description) {
+              (final dynamic description) {
                 if (description is! Map) {
                   throw const FormatException('.versions elements should be maps');
                 }
@@ -582,7 +582,7 @@ class ArchiveCreator {
   }
 
   /// Write the archive to the given output file.
-  Future<void> _archiveFiles(File outputFile) async {
+  Future<void> _archiveFiles(final File outputFile) async {
     if (outputFile.path.toLowerCase().endsWith('.zip')) {
       await _createZipArchive(outputFile, flutterRoot);
     } else if (outputFile.path.toLowerCase().endsWith('.tar.xz')) {
@@ -590,21 +590,21 @@ class ArchiveCreator {
     }
   }
 
-  Future<String> _runDart(List<String> args, {Directory? workingDirectory}) {
+  Future<String> _runDart(final List<String> args, {final Directory? workingDirectory}) {
     return _processRunner.runProcess(
       <String>[_dart, ...args],
       workingDirectory: workingDirectory ?? flutterRoot,
     );
   }
 
-  Future<String> _runFlutter(List<String> args, {Directory? workingDirectory}) {
+  Future<String> _runFlutter(final List<String> args, {final Directory? workingDirectory}) {
     return _processRunner.runProcess(
       <String>[_flutter, ...args],
       workingDirectory: workingDirectory ?? flutterRoot,
     );
   }
 
-  Future<String> _runGit(List<String> args, {Directory? workingDirectory}) {
+  Future<String> _runGit(final List<String> args, {final Directory? workingDirectory}) {
     return _processRunner.runProcess(
       <String>['git', ...args],
       workingDirectory: workingDirectory ?? flutterRoot,
@@ -613,7 +613,7 @@ class ArchiveCreator {
 
   /// Unpacks the given zip file into the currentDirectory (if set), or the
   /// same directory as the archive.
-  Future<String> _unzipArchive(File archive, {Directory? workingDirectory}) {
+  Future<String> _unzipArchive(final File archive, {Directory? workingDirectory}) {
     workingDirectory ??= Directory(path.dirname(archive.absolute.path));
     List<String> commandLine;
     if (platform.isWindows) {
@@ -632,7 +632,7 @@ class ArchiveCreator {
   }
 
   /// Create a zip archive from the directory source.
-  Future<String> _createZipArchive(File output, Directory source) async {
+  Future<String> _createZipArchive(final File output, final Directory source) async {
     List<String> commandLine;
     if (platform.isWindows) {
       // Unhide the .git folder, https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/attrib.
@@ -665,7 +665,7 @@ class ArchiveCreator {
   }
 
   /// Create a tar archive from the directory source.
-  Future<String> _createTarArchive(File output, Directory source) {
+  Future<String> _createTarArchive(final File output, final Directory source) {
     return _processRunner.runProcess(<String>[
       'tar',
       'cJf',
@@ -683,8 +683,8 @@ class ArchivePublisher {
     this.version,
     this.outputFile,
     this.dryRun, {
-    ProcessManager? processManager,
-    bool subprocessOutput = true,
+    final ProcessManager? processManager,
+    final bool subprocessOutput = true,
     this.platform = const LocalPlatform(),
   })  : assert(revision.length == 40),
         platformName = platform.operatingSystem.toLowerCase(),
@@ -705,14 +705,14 @@ class ArchivePublisher {
   final ProcessRunner _processRunner;
   final bool dryRun;
   String get destinationArchivePath => '${branch.name}/$platformName/${path.basename(outputFile.path)}';
-  static String getMetadataFilename(Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
+  static String getMetadataFilename(final Platform platform) => 'releases_${platform.operatingSystem.toLowerCase()}.json';
 
-  Future<String> _getChecksum(File archiveFile) async {
+  Future<String> _getChecksum(final File archiveFile) async {
     final DigestSink digestSink = DigestSink();
     final ByteConversionSink sink = sha256.startChunkedConversion(digestSink);
 
     final Stream<List<int>> stream = archiveFile.openRead();
-    await stream.forEach((List<int> chunk) {
+    await stream.forEach((final List<int> chunk) {
       sink.add(chunk);
     });
     sink.close();
@@ -723,7 +723,7 @@ class ArchivePublisher {
   ///
   /// This method will throw if the target archive already exists on cloud
   /// storage.
-  Future<void> publishArchive([bool forceUpload = false]) async {
+  Future<void> publishArchive([final bool forceUpload = false]) async {
     final String destGsPath = '$gsReleaseFolder/$destinationArchivePath';
     if (!forceUpload) {
       if (await _cloudPathExists(destGsPath) && !dryRun) {
@@ -746,7 +746,7 @@ class ArchivePublisher {
     await _updateMetadata('$gsReleaseFolder/${getMetadataFilename(platform)}');
   }
 
-  Future<Map<String, dynamic>> _addRelease(Map<String, dynamic> jsonData) async {
+  Future<Map<String, dynamic>> _addRelease(final Map<String, dynamic> jsonData) async {
     jsonData['base_url'] = '$baseUrl$releaseFolder';
     if (!jsonData.containsKey('current_release')) {
       jsonData['current_release'] = <String, String>{};
@@ -775,7 +775,7 @@ class ArchivePublisher {
             entry['dart_sdk_arch'] != newEntry['dart_sdk_arch'])
           entry,
       newEntry,
-    ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
+    ]..sort((final Map<String, dynamic> a, final Map<String, dynamic> b) {
       final DateTime aDate = DateTime.parse(a['release_date'] as String);
       final DateTime bDate = DateTime.parse(b['release_date'] as String);
       return bDate.compareTo(aDate);
@@ -783,7 +783,7 @@ class ArchivePublisher {
     return jsonData;
   }
 
-  Future<void> _updateMetadata(String gsPath) async {
+  Future<void> _updateMetadata(final String gsPath) async {
     // We can't just cat the metadata from the server with 'gsutil cat', because
     // Windows wants to echo the commands that execute in gsutil.bat to the
     // stdout when we do that. So, we copy the file locally and then read it
@@ -814,7 +814,7 @@ class ArchivePublisher {
   }
 
   /// Publishes the metadata file to GCS.
-  Future<void> _publishMetadata(String gsPath) async {
+  Future<void> _publishMetadata(final String gsPath) async {
     final File metadataFile = File(
       path.join(tempDir.absolute.path, getMetadataFilename(platform)),
     );
@@ -829,9 +829,9 @@ class ArchivePublisher {
   }
 
   Future<String> _runGsUtil(
-    List<String> args, {
-    Directory? workingDirectory,
-    bool failOk = false,
+    final List<String> args, {
+    final Directory? workingDirectory,
+    final bool failOk = false,
   }) async {
     if (dryRun) {
       print('gsutil.py -- $args');
@@ -853,7 +853,7 @@ class ArchivePublisher {
   }
 
   /// Determine if a file exists at a given [cloudPath].
-  Future<bool> _cloudPathExists(String cloudPath) async {
+  Future<bool> _cloudPathExists(final String cloudPath) async {
     try {
       await _runGsUtil(
         <String>['stat', cloudPath],
@@ -866,9 +866,9 @@ class ArchivePublisher {
   }
 
   Future<String> _cloudCopy({
-    required String src,
-    required String dest,
-    int? cacheSeconds,
+    required final String src,
+    required final String dest,
+    final int? cacheSeconds,
   }) async {
     // We often don't have permission to overwrite, but
     // we have permission to remove, so that's what we do.
@@ -902,7 +902,7 @@ class ArchivePublisher {
 ///
 /// Archives contain the executables and customizations for the platform that
 /// they are created on.
-Future<void> main(List<String> rawArguments) async {
+Future<void> main(final List<String> rawArguments) async {
   final ArgParser argParser = ArgParser();
   argParser.addOption(
     'temp_dir',
@@ -917,7 +917,7 @@ Future<void> main(List<String> rawArguments) async {
           'archive with. Must be the full 40-character hash. Required.');
   argParser.addOption(
     'branch',
-    allowed: Branch.values.map<String>((Branch branch) => branch.name),
+    allowed: Branch.values.map<String>((final Branch branch) => branch.name),
     help: 'The Flutter branch to build the archive with. Required.',
   );
   argParser.addOption(
@@ -956,7 +956,7 @@ Future<void> main(List<String> rawArguments) async {
     exit(0);
   }
 
-  void errorExit(String message, {int exitCode = -1}) {
+  void errorExit(final String message, {final int exitCode = -1}) {
     stderr.write('Error: $message\n\n');
     stderr.write('${argParser.usage}\n');
     exit(exitCode);

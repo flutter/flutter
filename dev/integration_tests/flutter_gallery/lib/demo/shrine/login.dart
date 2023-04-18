@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
@@ -129,7 +129,7 @@ class PrimaryColorOverride extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Theme(
       data: Theme.of(context).copyWith(primaryColor: color),
       child: child!,

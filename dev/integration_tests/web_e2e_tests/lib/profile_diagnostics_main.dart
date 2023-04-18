@@ -18,7 +18,7 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   String kMessage = 'ABC';
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // cause cast error.
     print(kMessage as int);
     return const Text('Hello');

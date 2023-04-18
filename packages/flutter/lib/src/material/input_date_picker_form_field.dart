@@ -46,9 +46,9 @@ class InputDatePickerFormField extends StatefulWidget {
   ///
   InputDatePickerFormField({
     super.key,
-    DateTime? initialDate,
-    required DateTime firstDate,
-    required DateTime lastDate,
+    final DateTime? initialDate,
+    required final DateTime firstDate,
+    required final DateTime lastDate,
     this.onDateSubmitted,
     this.onDateSaved,
     this.selectableDayPredicate,
@@ -167,11 +167,11 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
   }
 
   @override
-  void didUpdateWidget(InputDatePickerFormField oldWidget) {
+  void didUpdateWidget(final InputDatePickerFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialDate != oldWidget.initialDate) {
       // Can't update the form field in the middle of a build, so do it next frame
-      WidgetsBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((final Duration timeStamp) {
         setState(() {
           _selectedDate = widget.initialDate;
           _updateValueForSelectedDate();
@@ -200,12 +200,12 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     }
   }
 
-  DateTime? _parseDate(String? text) {
+  DateTime? _parseDate(final String? text) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return localizations.parseCompactDate(text);
   }
 
-  bool _isValidAcceptableDate(DateTime? date) {
+  bool _isValidAcceptableDate(final DateTime? date) {
     return
       date != null &&
       !date.isBefore(widget.firstDate) &&
@@ -213,7 +213,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
       (widget.selectableDayPredicate == null || widget.selectableDayPredicate!(date));
   }
 
-  String? _validateDate(String? text) {
+  String? _validateDate(final String? text) {
     if ((text == null || text.isEmpty) && widget.acceptEmptyDate) {
       return null;
     }
@@ -226,7 +226,7 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     return null;
   }
 
-  void _updateDate(String? text, ValueChanged<DateTime>? callback) {
+  void _updateDate(final String? text, final ValueChanged<DateTime>? callback) {
     final DateTime? date = _parseDate(text);
     if (_isValidAcceptableDate(date)) {
       _selectedDate = date;
@@ -235,16 +235,16 @@ class _InputDatePickerFormFieldState extends State<InputDatePickerFormField> {
     }
   }
 
-  void _handleSaved(String? text) {
+  void _handleSaved(final String? text) {
     _updateDate(text, widget.onDateSaved);
   }
 
-  void _handleSubmitted(String text) {
+  void _handleSubmitted(final String text) {
     _updateDate(text, widget.onDateSubmitted);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool useMaterial3 = theme.useMaterial3;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);

@@ -23,7 +23,7 @@ extension TestBinaryMessengerExtension on BinaryMessenger {
     'For the first argument, pass channel.name. '
     'This feature was deprecated after v3.9.0-19.0.pre.'
   )
-  void setMockMessageHandler(String channel, MessageHandler? handler) {
+  void setMockMessageHandler(final String channel, final MessageHandler? handler) {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(channel, handler);
   }
 
@@ -34,7 +34,7 @@ extension TestBinaryMessengerExtension on BinaryMessenger {
     'For the first argument, pass channel.name. '
     'This feature was deprecated after v3.9.0-19.0.pre.'
   )
-  bool checkMockMessageHandler(String channel, Object? handler) {
+  bool checkMockMessageHandler(final String channel, final Object? handler) {
     return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(channel, handler);
   }
 }
@@ -55,7 +55,7 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
     'Pass the channel as the first argument. '
     'This feature was deprecated after v3.9.0-19.0.pre.'
   )
-  void setMockMessageHandler(Future<T> Function(T? message)? handler) {
+  void setMockMessageHandler(final Future<T> Function(T? message)? handler) {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockDecodedMessageHandler<T>(this, handler);
   }
 
@@ -66,7 +66,7 @@ extension TestBasicMessageChannelExtension<T> on BasicMessageChannel<T> {
     'For the first argument, pass channel.name. '
     'This feature was deprecated after v3.9.0-19.0.pre.'
   )
-  bool checkMockMessageHandler(Object? handler) {
+  bool checkMockMessageHandler(final Object? handler) {
     return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
   }
 }
@@ -87,7 +87,7 @@ extension TestMethodChannelExtension on MethodChannel {
     'Pass the channel as the first argument. '
     'This feature was deprecated after v3.9.0-19.0.pre.'
   )
-  void setMockMethodCallHandler(Future<dynamic>? Function(MethodCall call)? handler) {
+  void setMockMethodCallHandler(final Future<dynamic>? Function(MethodCall call)? handler) {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(this, handler);
   }
 
@@ -98,7 +98,7 @@ extension TestMethodChannelExtension on MethodChannel {
     'For the first argument, pass channel.name. '
     'This feature was deprecated after v3.9.0-19.0.pre.'
   )
-  bool checkMockMethodCallHandler(Object? handler) {
+  bool checkMockMethodCallHandler(final Object? handler) {
     return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(name, handler);
   }
 }

@@ -31,7 +31,7 @@ class _AnimatedComplexOpacityState extends State<AnimatedComplexOpacity> with Si
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: ListView(
@@ -51,7 +51,7 @@ class ModeratelyComplexWidget extends StatelessWidget {
   const ModeratelyComplexWidget({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Material(
       elevation: 10,
       clipBehavior: Clip.hardEdge,

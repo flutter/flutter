@@ -11,11 +11,11 @@ class PrintOverrideTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   DebugPrintCallback get debugPrintOverride => _enablePrint ? debugPrint : _emptyPrint;
 
-  static void _emptyPrint(String? message, { int? wrapWidth }) {}
+  static void _emptyPrint(final String? message, { final int? wrapWidth }) {}
 
   static bool _enablePrint = true;
 
-  static void runWithDebugPrintDisabled(void Function() f) {
+  static void runWithDebugPrintDisabled(final void Function() f) {
     try {
       _enablePrint = false;
       f();
@@ -39,7 +39,7 @@ void main() {
 
     final ObjectEvent event = ObjectDisposed(object: 'object');
     ObjectEvent? receivedEvent;
-    void listener(ObjectEvent event) => receivedEvent = event;
+    void listener(final ObjectEvent event) => receivedEvent = event;
     expect(ma.hasListeners, isFalse);
 
     ma.addListener(listener);
@@ -56,19 +56,19 @@ void main() {
     _checkSdkHandlersNotSet();
   });
 
-  testWidgets('dispatchObjectEvent handles bad listeners', (WidgetTester tester) async {
+  testWidgets('dispatchObjectEvent handles bad listeners', (final WidgetTester tester) async {
     final ObjectEvent event = ObjectDisposed(object: 'object');
     final List<String> log = <String>[];
-    void badListener1(ObjectEvent event) {
+    void badListener1(final ObjectEvent event) {
       log.add('badListener1');
       throw ArgumentError();
     }
-    void listener1(ObjectEvent event) => log.add('listener1');
-    void badListener2(ObjectEvent event) {
+    void listener1(final ObjectEvent event) => log.add('listener1');
+    void badListener2(final ObjectEvent event) {
       log.add('badListener2');
       throw ArgumentError();
     }
-    void listener2(ObjectEvent event) => log.add('listener2');
+    void listener2(final ObjectEvent event) => log.add('listener2');
 
     ma.addListener(badListener1);
     _checkSdkHandlersSet();
@@ -99,8 +99,8 @@ void main() {
     final ObjectEvent event = ObjectDisposed(object: 'object');
     final List<String> log = <String>[];
 
-    void listener2(ObjectEvent event) => log.add('listener2');
-    void listener1(ObjectEvent event) {
+    void listener2(final ObjectEvent event) => log.add('listener2');
+    void listener1(final ObjectEvent event) {
       log.add('listener1');
       ma.addListener(listener2);
     }
@@ -129,8 +129,8 @@ void main() {
     final ObjectEvent event = ObjectDisposed(object: 'object');
     final List<String> log = <String>[];
 
-    void listener2(ObjectEvent event) => log.add('listener2');
-    void listener1(ObjectEvent event) {
+    void listener2(final ObjectEvent event) => log.add('listener2');
+    void listener1(final ObjectEvent event) {
       log.add('listener1');
       ma.removeListener(listener2);
       expect(ma.hasListeners, isFalse);
@@ -150,8 +150,8 @@ void main() {
   });
 
   test('last removeListener unsubscribes from Flutter SDK events', () {
-    void listener1(ObjectEvent event) {}
-    void listener2(ObjectEvent event) {}
+    void listener1(final ObjectEvent event) {}
+    void listener2(final ObjectEvent event) {}
 
     ma.addListener(listener1);
     _checkSdkHandlersSet();
@@ -172,7 +172,7 @@ void main() {
 
   test('publishers in Flutter dispatch events in debug mode', () async {
     int eventCount = 0;
-    void listener(ObjectEvent event) => eventCount++;
+    void listener(final ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
     final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();

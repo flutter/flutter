@@ -8,12 +8,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('simultaneously dispose a widget and end the scroll animation', (WidgetTester tester) async {
+  testWidgets('simultaneously dispose a widget and end the scroll animation', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: FlipWidget(
-          left: ListView(children: List<Widget>.generate(250, (int i) => Text('$i'))),
+          left: ListView(children: List<Widget>.generate(250, (final int i) => Text('$i'))),
           right: Container(),
         ),
       ),
@@ -26,7 +26,7 @@ void main() {
     await tester.pump(const Duration(hours: 5));
   });
 
-  testWidgets('Disposing a (nested) Scrollable while holding in overscroll does not crash', (WidgetTester tester) async {
+  testWidgets('Disposing a (nested) Scrollable while holding in overscroll does not crash', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/27707.
 
     final ScrollController controller = ScrollController();
@@ -45,7 +45,7 @@ void main() {
                 width: 500.0,
                 child: ListView.builder(
                   controller: controller,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return Container(
                       color: index.isEven ? Colors.red : Colors.green,
                       height: 200.0,

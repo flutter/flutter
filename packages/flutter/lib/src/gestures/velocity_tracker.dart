@@ -30,12 +30,12 @@ class Velocity {
   Velocity operator -() => Velocity(pixelsPerSecond: -pixelsPerSecond);
 
   /// Return the difference of two velocities.
-  Velocity operator -(Velocity other) {
+  Velocity operator -(final Velocity other) {
     return Velocity(pixelsPerSecond: pixelsPerSecond - other.pixelsPerSecond);
   }
 
   /// Return the sum of two velocities.
-  Velocity operator +(Velocity other) {
+  Velocity operator +(final Velocity other) {
     return Velocity(pixelsPerSecond: pixelsPerSecond + other.pixelsPerSecond);
   }
 
@@ -49,7 +49,7 @@ class Velocity {
   ///
   /// If the magnitude of this Velocity is within the specified bounds then
   /// just return this.
-  Velocity clampMagnitude(double minValue, double maxValue) {
+  Velocity clampMagnitude(final double minValue, final double maxValue) {
     assert(minValue >= 0.0);
     assert(maxValue >= 0.0 && maxValue >= minValue);
     final double valueSquared = pixelsPerSecond.distanceSquared;
@@ -63,7 +63,7 @@ class Velocity {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is Velocity
         && other.pixelsPerSecond == pixelsPerSecond;
   }
@@ -158,7 +158,7 @@ class VelocityTracker {
   int _index = 0;
 
   /// Adds a position as the given time to the tracker.
-  void addPosition(Duration time, Offset position) {
+  void addPosition(final Duration time, final Offset position) {
     _index += 1;
     if (_index == _historySize) {
       _index = 0;
@@ -291,7 +291,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   final List<_PointAtTime?> _touchSamples = List<_PointAtTime?>.filled(_sampleSize, null);
 
   @override
-  void addPosition(Duration time, Offset position) {
+  void addPosition(final Duration time, final Offset position) {
     assert(() {
       final _PointAtTime? previousPoint = _touchSamples[_index];
       if (previousPoint == null || previousPoint.time <= time) {
@@ -309,7 +309,7 @@ class IOSScrollViewFlingVelocityTracker extends VelocityTracker {
   // Computes the velocity using 2 adjacent points in history. When index = 0,
   // it uses the latest point recorded and the point recorded immediately before
   // it. The smaller index is, the earlier in history the points used are.
-  Offset _previousVelocityAt(int index) {
+  Offset _previousVelocityAt(final int index) {
     final int endIndex = (_index + index) % _sampleSize;
     final int startIndex = (_index + index - 1) % _sampleSize;
     final _PointAtTime? end = _touchSamples[endIndex];

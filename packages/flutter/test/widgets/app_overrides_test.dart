@@ -23,16 +23,16 @@ class TestRoute<T> extends PageRoute<T> {
   bool get maintainState => false;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
     return child;
   }
 }
 
-Future<void> pumpApp(WidgetTester tester) async {
+Future<void> pumpApp(final WidgetTester tester) async {
   await tester.pumpWidget(
     WidgetsApp(
       color: const Color(0xFF333333),
-      onGenerateRoute: (RouteSettings settings) {
+      onGenerateRoute: (final RouteSettings settings) {
         return TestRoute<void>(settings: settings, child: Container());
       },
     ),
@@ -40,7 +40,7 @@ Future<void> pumpApp(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('WidgetsApp control test', (WidgetTester tester) async {
+  testWidgets('WidgetsApp control test', (final WidgetTester tester) async {
     await pumpApp(tester);
     expect(find.byType(WidgetsApp), findsOneWidget);
     expect(find.byType(Navigator), findsOneWidget);
@@ -48,7 +48,7 @@ void main() {
     expect(find.byType(CheckedModeBanner), findsOneWidget);
   });
 
-  testWidgets('showPerformanceOverlayOverride true', (WidgetTester tester) async {
+  testWidgets('showPerformanceOverlayOverride true', (final WidgetTester tester) async {
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     WidgetsApp.showPerformanceOverlayOverride = true;
     await pumpApp(tester);
@@ -59,7 +59,7 @@ void main() {
     WidgetsApp.showPerformanceOverlayOverride = false;
   });
 
-  testWidgets('showPerformanceOverlayOverride false', (WidgetTester tester) async {
+  testWidgets('showPerformanceOverlayOverride false', (final WidgetTester tester) async {
     WidgetsApp.showPerformanceOverlayOverride = true;
     expect(WidgetsApp.showPerformanceOverlayOverride, true);
     WidgetsApp.showPerformanceOverlayOverride = false;
@@ -70,7 +70,7 @@ void main() {
     expect(find.byType(CheckedModeBanner), findsOneWidget);
   });
 
-  testWidgets('debugAllowBannerOverride false', (WidgetTester tester) async {
+  testWidgets('debugAllowBannerOverride false', (final WidgetTester tester) async {
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     expect(WidgetsApp.debugAllowBannerOverride, true);
     WidgetsApp.debugAllowBannerOverride = false;
@@ -82,7 +82,7 @@ void main() {
     WidgetsApp.debugAllowBannerOverride = true; // restore to default value
   });
 
-  testWidgets('debugAllowBannerOverride true', (WidgetTester tester) async {
+  testWidgets('debugAllowBannerOverride true', (final WidgetTester tester) async {
     WidgetsApp.debugAllowBannerOverride = false;
     expect(WidgetsApp.showPerformanceOverlayOverride, false);
     expect(WidgetsApp.debugAllowBannerOverride, false);

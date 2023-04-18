@@ -20,10 +20,10 @@ import 'package:shelf_static/shelf_static.dart';
 /// request to "/test-result" containing result data as plain text body of the
 /// request. This function has no opinion about what that string contains.
 Future<String> evalTestAppInChrome({
-  required String appUrl,
-  required String appDirectory,
-  int serverPort = 8080,
-  int browserDebugPort = 8081,
+  required final String appUrl,
+  required final String appDirectory,
+  final int serverPort = 8080,
+  final int browserDebugPort = 8081,
 }) async {
   io.HttpServer? server;
   Chrome? chrome;
@@ -31,7 +31,7 @@ Future<String> evalTestAppInChrome({
     final Completer<String> resultCompleter = Completer<String>();
     server = await io.HttpServer.bind('localhost', serverPort);
     final Cascade cascade = Cascade()
-      .add((Request request) async {
+      .add((final Request request) async {
         if (request.requestedUri.path.endsWith('/test-result')) {
           resultCompleter.complete(await request.readAsString());
           return Response.ok('Test results received');
@@ -62,13 +62,13 @@ class AppServer {
   AppServer._(this._server, this.chrome, this.onChromeError);
 
   static Future<AppServer> start({
-    required String appUrl,
-    required String appDirectory,
-    required String cacheControl,
-    int serverPort = 8080,
-    int browserDebugPort = 8081,
-    bool headless = true,
-    List<Handler>? additionalRequestHandlers,
+    required final String appUrl,
+    required final String appDirectory,
+    required final String cacheControl,
+    final int serverPort = 8080,
+    final int browserDebugPort = 8081,
+    final bool headless = true,
+    final List<Handler>? additionalRequestHandlers,
   }) async {
     io.HttpServer server;
     Chrome chrome;
@@ -80,7 +80,7 @@ class AppServer {
         cascade = cascade.add(handler);
       }
     }
-    cascade = cascade.add((Request request) async {
+    cascade = cascade.add((final Request request) async {
       final Response response = await staticHandler(request);
       return response.change(headers: <String, Object>{
         'cache-control': cacheControl,

@@ -50,8 +50,8 @@ abstract class DoctorValidatorsProvider {
   // Allow tests to construct a [_DefaultDoctorValidatorsProvider] with explicit
   // [FeatureFlags].
   factory DoctorValidatorsProvider.test({
-    Platform? platform,
-    required FeatureFlags featureFlags,
+    final Platform? platform,
+    required final FeatureFlags featureFlags,
   }) {
     return _DefaultDoctorValidatorsProvider(
       featureFlags: featureFlags,
@@ -221,7 +221,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
 class Doctor {
   Doctor({
-    required Logger logger,
+    required final Logger logger,
   }) : _logger = logger;
 
   final Logger _logger;
@@ -253,12 +253,12 @@ class Doctor {
               validatorFuture,
               // This future can only complete with an error
               timeoutCompleter.future,
-            ]).then((ValidationResult result) async {
+            ]).then((final ValidationResult result) async {
               timer.cancel();
               return result;
             });
           },
-          onError: (Object exception, StackTrace stackTrace) {
+          onError: (final Object exception, final StackTrace stackTrace) {
             return ValidationResult.crash(exception, stackTrace);
           },
         ),
@@ -334,7 +334,7 @@ class Doctor {
     return buffer.toString();
   }
 
-  Future<bool> checkRemoteArtifacts(String engineRevision) async {
+  Future<bool> checkRemoteArtifacts(final String engineRevision) async {
     return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
@@ -350,12 +350,12 @@ class Doctor {
   /// To exclude personally identifiable information like device names and
   /// paths, set [showPii] to false.
   Future<bool> diagnose({
-    bool androidLicenses = false,
-    bool verbose = true,
-    AndroidLicenseValidator? androidLicenseValidator,
-    bool showPii = true,
-    List<ValidatorTask>? startedValidatorTasks,
-    bool sendEvent = true,
+    final bool androidLicenses = false,
+    final bool verbose = true,
+    final AndroidLicenseValidator? androidLicenseValidator,
+    final bool showPii = true,
+    final List<ValidatorTask>? startedValidatorTasks,
+    final bool sendEvent = true,
   }) async {
     final bool showColor = globals.terminal.supportsColor;
     if (androidLicenses && androidLicenseValidator != null) {
@@ -446,13 +446,13 @@ class Doctor {
     return doctorResult;
   }
 
-  bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
+  bool get canListAnything => workflows.any((final Workflow workflow) => workflow.canListDevices);
 
   bool get canLaunchAnything {
     if (FlutterTesterDevices.showFlutterTesterDevice) {
       return true;
     }
-    return workflows.any((Workflow workflow) => workflow.canLaunchDevices);
+    return workflows.any((final Workflow workflow) => workflow.canLaunchDevices);
   }
 }
 
@@ -463,15 +463,15 @@ class Doctor {
 /// specific commit information.
 class FlutterValidator extends DoctorValidator {
   FlutterValidator({
-    required Platform platform,
-    required FlutterVersion Function() flutterVersion,
-    required String Function() devToolsVersion,
-    required UserMessages userMessages,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required String Function() flutterRoot,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final Platform platform,
+    required final FlutterVersion Function() flutterVersion,
+    required final String Function() devToolsVersion,
+    required final UserMessages userMessages,
+    required final FileSystem fileSystem,
+    required final Artifacts artifacts,
+    required final ProcessManager processManager,
+    required final String Function() flutterRoot,
+    required final OperatingSystemUtils operatingSystemUtils,
   }) : _flutterVersion = flutterVersion,
        _devToolsVersion = devToolsVersion,
        _platform = platform,
@@ -550,7 +550,7 @@ class FlutterValidator extends DoctorValidator {
     }
 
     ValidationType valid;
-    if (messages.every((ValidationMessage message) => message.isInformation)) {
+    if (messages.every((final ValidationMessage message) => message.isInformation)) {
       valid = ValidationType.success;
     } else {
       // The issues for this validator stem from broken git configuration of the local install;
@@ -574,7 +574,7 @@ class FlutterValidator extends DoctorValidator {
     );
   }
 
-  ValidationMessage _getFlutterVersionMessage(String frameworkVersion, String versionChannel, String flutterRoot) {
+  ValidationMessage _getFlutterVersionMessage(final String frameworkVersion, final String versionChannel, final String flutterRoot) {
     String flutterVersionMessage = _userMessages.flutterVersion(frameworkVersion, versionChannel, flutterRoot);
 
     // The tool sets the channel as "unknown", if the current branch is on a
@@ -593,7 +593,7 @@ class FlutterValidator extends DoctorValidator {
     return ValidationMessage.hint(flutterVersionMessage);
   }
 
-  List<ValidationMessage> _validateRequiredBinaries(String flutterRoot) {
+  List<ValidationMessage> _validateRequiredBinaries(final String flutterRoot) {
     final ValidationMessage? flutterWarning = _validateSdkBinary('flutter', flutterRoot);
     final ValidationMessage? dartWarning = _validateSdkBinary('dart', flutterRoot);
     return <ValidationMessage>[
@@ -604,7 +604,7 @@ class FlutterValidator extends DoctorValidator {
 
   /// Return a warning if the provided [binary] on the user's path does not
   /// resolve within the Flutter SDK.
-  ValidationMessage? _validateSdkBinary(String binary, String flutterRoot) {
+  ValidationMessage? _validateSdkBinary(final String binary, final String flutterRoot) {
     final String flutterBinDir = _fileSystem.path.join(flutterRoot, 'bin');
 
     final File? flutterBin = _operatingSystemUtils.which(binary);
@@ -625,14 +625,14 @@ class FlutterValidator extends DoctorValidator {
     return null;
   }
 
-  bool _filePathContainsDirPath(String directory, String file) {
+  bool _filePathContainsDirPath(final String directory, final String file) {
     // calling .canonicalize() will normalize for alphabetic case and path
     // separators
     return _fileSystem.path.canonicalize(file)
         .startsWith(_fileSystem.path.canonicalize(directory) + _fileSystem.path.separator);
   }
 
-  ValidationMessage _getFlutterUpstreamMessage(FlutterVersion version) {
+  ValidationMessage _getFlutterUpstreamMessage(final FlutterVersion version) {
     final String? repositoryUrl = version.repositoryUrl;
     final VersionCheckError? upstreamValidationError = VersionUpstreamValidator(version: version, platform: _platform).run();
 
@@ -653,7 +653,7 @@ class FlutterValidator extends DoctorValidator {
     return ValidationMessage(_userMessages.flutterUpstreamRepositoryUrl(repositoryUrl!));
   }
 
-  bool _genSnapshotRuns(String genSnapshotPath) {
+  bool _genSnapshotRuns(final String genSnapshotPath) {
     const int kExpectedExitCode = 255;
     try {
       return _processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
@@ -666,8 +666,8 @@ class FlutterValidator extends DoctorValidator {
 class DeviceValidator extends DoctorValidator {
   // TODO(jmagman): Make required once g3 rolls and is updated.
   DeviceValidator({
-    DeviceManager? deviceManager,
-    UserMessages? userMessages,
+    final DeviceManager? deviceManager,
+    final UserMessages? userMessages,
   }) : _deviceManager = deviceManager ?? globals.deviceManager!,
        _userMessages = userMessages ?? globals.userMessages,
        super('Connected device');
@@ -686,13 +686,13 @@ class DeviceValidator extends DoctorValidator {
     List<ValidationMessage> installedMessages = <ValidationMessage>[];
     if (devices.isNotEmpty) {
       installedMessages = (await Device.descriptions(devices))
-          .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+          .map<ValidationMessage>((final String msg) => ValidationMessage(msg)).toList();
     }
 
     List<ValidationMessage> diagnosticMessages = <ValidationMessage>[];
     final List<String> diagnostics = await _deviceManager.getDeviceDiagnostics();
     if (diagnostics.isNotEmpty) {
-      diagnosticMessages = diagnostics.map<ValidationMessage>((String message) => ValidationMessage.hint(message)).toList();
+      diagnosticMessages = diagnostics.map<ValidationMessage>((final String message) => ValidationMessage.hint(message)).toList();
     } else if (devices.isEmpty) {
       diagnosticMessages = <ValidationMessage>[ValidationMessage.hint(_userMessages.devicesMissing)];
     }
@@ -719,8 +719,8 @@ class DeviceValidator extends DoctorValidator {
 /// Wrapper for doctor to run multiple times with PII and without, running the validators only once.
 class DoctorText {
   DoctorText(
-    BufferLogger logger, {
-    @visibleForTesting Doctor? doctor,
+    final BufferLogger logger, {
+    @visibleForTesting final Doctor? doctor,
   }) : _doctor = doctor ?? Doctor(logger: logger), _logger = logger;
 
   final BufferLogger _logger;
@@ -733,7 +733,7 @@ class DoctorText {
   // Start the validator tasks only once.
   late final List<ValidatorTask> _validatorTasks = _doctor.startValidatorTasks();
 
-  Future<String> _runDiagnosis(bool showPii) async {
+  Future<String> _runDiagnosis(final bool showPii) async {
     try {
       await _doctor.diagnose(startedValidatorTasks: _validatorTasks, showPii: showPii, sendEvent: _sendDoctorEvent);
       // Do not send the doctor event a second time.

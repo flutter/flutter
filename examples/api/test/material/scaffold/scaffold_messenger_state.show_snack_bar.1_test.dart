@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/scaffold/scaffold_messenger_state.s
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Floating SnackBar is visible', (WidgetTester tester) async {
+  testWidgets('Floating SnackBar is visible', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SnackBarApp(),
     );

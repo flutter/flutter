@@ -110,8 +110,8 @@ void main() {
     });
 
     Future<LaunchResult> setupAndStartApp({
-      required bool prebuilt,
-      required BuildMode mode,
+      required final bool prebuilt,
+      required final BuildMode mode,
     }) async {
       const String appName = 'app_name';
       final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
@@ -443,10 +443,10 @@ void main() {
 }
 
 Process _createFakeProcess({
-  int exitCode = 0,
-  String stdout = '',
-  String stderr = '',
-  bool persistent = false,
+  final int exitCode = 0,
+  final String stdout = '',
+  final String stderr = '',
+  final bool persistent = false,
 }) {
   final Stream<List<int>> stdoutStream =
       Stream<List<int>>.fromIterable(<List<int>>[
@@ -471,7 +471,7 @@ class FuchsiaDeviceWithFakeDiscovery extends FuchsiaDevice {
 
   @override
   FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(
-      String isolateName) {
+      final String isolateName) {
     return FakeFuchsiaIsolateDiscoveryProtocol();
   }
 
@@ -492,18 +492,18 @@ class FakeFuchsiaIsolateDiscoveryProtocol
 class FakeFuchsiaPkgctl implements FuchsiaPkgctl {
   @override
   Future<bool> addRepo(
-      FuchsiaDevice device, FuchsiaPackageServer server) async {
+      final FuchsiaDevice device, final FuchsiaPackageServer server) async {
     return true;
   }
 
   @override
   Future<bool> resolve(
-      FuchsiaDevice device, String serverName, String packageName) async {
+      final FuchsiaDevice device, final String serverName, final String packageName) async {
     return true;
   }
 
   @override
-  Future<bool> rmRepo(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> rmRepo(final FuchsiaDevice device, final FuchsiaPackageServer server) async {
     return true;
   }
 }
@@ -511,26 +511,26 @@ class FakeFuchsiaPkgctl implements FuchsiaPkgctl {
 class FailingPkgctl implements FuchsiaPkgctl {
   @override
   Future<bool> addRepo(
-      FuchsiaDevice device, FuchsiaPackageServer server) async {
+      final FuchsiaDevice device, final FuchsiaPackageServer server) async {
     return false;
   }
 
   @override
   Future<bool> resolve(
-      FuchsiaDevice device, String serverName, String packageName) async {
+      final FuchsiaDevice device, final String serverName, final String packageName) async {
     return false;
   }
 
   @override
-  Future<bool> rmRepo(FuchsiaDevice device, FuchsiaPackageServer server) async {
+  Future<bool> rmRepo(final FuchsiaDevice device, final FuchsiaPackageServer server) async {
     return false;
   }
 }
 
 class FakeFuchsiaDeviceTools implements FuchsiaDeviceTools {
   FakeFuchsiaDeviceTools({
-    FuchsiaPkgctl? pkgctl,
-    FuchsiaFfx? ffx,
+    final FuchsiaPkgctl? pkgctl,
+    final FuchsiaFfx? ffx,
   })  : pkgctl = pkgctl ?? FakeFuchsiaPkgctl(),
         ffx = ffx ?? FakeFuchsiaFfx();
 
@@ -545,7 +545,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
   String? _appName;
 
   @override
-  Future<bool> init(String buildPath, String appName) async {
+  Future<bool> init(final String buildPath, final String appName) async {
     if (!globals.fs.directory(buildPath).existsSync()) {
       return false;
     }
@@ -557,7 +557,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> build(String buildPath, String manifestPath) async {
+  Future<bool> build(final String buildPath, final String manifestPath) async {
     if (!globals.fs
             .file(globals.fs.path.join(buildPath, 'meta', 'package'))
             .existsSync() ||
@@ -571,7 +571,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(String buildPath, String manifestPath) async {
+  Future<bool> archive(final String buildPath, final String manifestPath) async {
     if (!globals.fs
             .file(globals.fs.path.join(buildPath, 'meta', 'package'))
             .existsSync() ||
@@ -588,7 +588,7 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<bool> newrepo(String repoPath) async {
+  Future<bool> newrepo(final String repoPath) async {
     if (!globals.fs.directory(repoPath).existsSync()) {
       return false;
     }
@@ -596,12 +596,12 @@ class FakeFuchsiaPM implements FuchsiaPM {
   }
 
   @override
-  Future<Process> serve(String repoPath, String host, int port) async {
+  Future<Process> serve(final String repoPath, final String host, final int port) async {
     return _createFakeProcess(persistent: true);
   }
 
   @override
-  Future<bool> publish(String repoPath, String packagePath) async {
+  Future<bool> publish(final String repoPath, final String packagePath) async {
     if (!globals.fs.directory(repoPath).existsSync()) {
       return false;
     }
@@ -614,32 +614,32 @@ class FakeFuchsiaPM implements FuchsiaPM {
 
 class FailingPM implements FuchsiaPM {
   @override
-  Future<bool> init(String buildPath, String appName) async {
+  Future<bool> init(final String buildPath, final String appName) async {
     return false;
   }
 
   @override
-  Future<bool> build(String buildPath, String manifestPath) async {
+  Future<bool> build(final String buildPath, final String manifestPath) async {
     return false;
   }
 
   @override
-  Future<bool> archive(String buildPath, String manifestPath) async {
+  Future<bool> archive(final String buildPath, final String manifestPath) async {
     return false;
   }
 
   @override
-  Future<bool> newrepo(String repoPath) async {
+  Future<bool> newrepo(final String repoPath) async {
     return false;
   }
 
   @override
-  Future<Process> serve(String repoPath, String host, int port) async {
+  Future<Process> serve(final String repoPath, final String host, final int port) async {
     return _createFakeProcess(exitCode: 6);
   }
 
   @override
-  Future<bool> publish(String repoPath, String packagePath) async {
+  Future<bool> publish(final String repoPath, final String packagePath) async {
     return false;
   }
 }
@@ -647,9 +647,9 @@ class FailingPM implements FuchsiaPM {
 class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
   @override
   Future<void> build({
-    required FuchsiaProject fuchsiaProject,
-    required String target, // E.g., lib/main.dart
-    BuildInfo buildInfo = BuildInfo.debug,
+    required final FuchsiaProject fuchsiaProject,
+    required final String target, // E.g., lib/main.dart
+    final BuildInfo buildInfo = BuildInfo.debug,
   }) async {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
@@ -661,12 +661,12 @@ class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
 
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration? timeout}) async {
+  Future<List<String>> list({final Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
   @override
-  Future<String> resolve(String deviceName) async {
+  Future<String> resolve(final String deviceName) async {
     return '192.168.42.10';
   }
 
@@ -676,19 +676,19 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 
   @override
-  Future<bool> sessionAdd(String url) async {
+  Future<bool> sessionAdd(final String url) async {
     return false;
   }
 }
 
 class FakeFuchsiaFfxWithSession implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration? timeout}) async {
+  Future<List<String>> list({final Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
   @override
-  Future<String> resolve(String deviceName) async {
+  Future<String> resolve(final String deviceName) async {
     return '192.168.42.10';
   }
 
@@ -698,16 +698,16 @@ class FakeFuchsiaFfxWithSession implements FuchsiaFfx {
   }
 
   @override
-  Future<bool> sessionAdd(String url) async {
+  Future<bool> sessionAdd(final String url) async {
     return true;
   }
 }
 
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM? pm,
-    FuchsiaKernelCompiler? compiler,
-    FuchsiaFfx? ffx,
+    final FuchsiaPM? pm,
+    final FuchsiaKernelCompiler? compiler,
+    final FuchsiaFfx? ffx,
   })  : fuchsiaPM = pm ?? FakeFuchsiaPM(),
         fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
         fuchsiaFfx = ffx ?? FakeFuchsiaFfx();

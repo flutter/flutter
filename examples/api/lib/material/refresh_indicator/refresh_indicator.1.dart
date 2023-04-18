@@ -12,7 +12,7 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
   const RefreshIndicatorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: RefreshIndicatorExample(),
     );
@@ -23,7 +23,7 @@ class RefreshIndicatorExample extends StatelessWidget {
   const RefreshIndicatorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('RefreshIndicator Sample'),
@@ -44,7 +44,7 @@ class RefreshIndicatorExample extends StatelessWidget {
         //
         // Here setting `notification.depth == 1` triggers the refresh indicator
         // when overscrolling the nested scroll view.
-        notificationPredicate: (ScrollNotification notification) {
+        notificationPredicate: (final ScrollNotification notification) {
           return notification.depth == 1;
         },
         child: SingleChildScrollView(
@@ -70,7 +70,7 @@ class RefreshIndicatorExample extends StatelessWidget {
                 child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: 25,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return const ListTile(
                       title: Text('Pull down here'),
                       subtitle: Text('RefreshIndicator will trigger'),

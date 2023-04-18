@@ -110,7 +110,7 @@ class CupertinoFormRow extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
     final TextStyle textStyle = theme.textTheme.textStyle.copyWith(
       color: CupertinoDynamicColor.maybeResolve(theme.textTheme.textStyle.color, context)

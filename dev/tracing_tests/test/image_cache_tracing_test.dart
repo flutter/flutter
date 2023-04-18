@@ -63,7 +63,7 @@ void main() {
   }, skip: isBrowser); // [intended] uses dart:isolate and io.
 }
 
-void _expectTimelineEvents(List<TimelineEvent> events, List<Map<String, dynamic>> expected) {
+void _expectTimelineEvents(final List<TimelineEvent> events, final List<Map<String, dynamic>> expected) {
   for (final TimelineEvent event in events) {
     for (int index = 0; index < expected.length; index += 1) {
       if (expected[index]['name'] == event.json!['name']) {
@@ -81,7 +81,7 @@ void _expectTimelineEvents(List<TimelineEvent> events, List<Map<String, dynamic>
   }
 }
 
-bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
+bool _mapsEqual(final Map<String, dynamic> expectedArgs, final Map<String, dynamic> args) {
   for (final String key in expectedArgs.keys) {
     if (expectedArgs[key] != args[key]) {
       return false;
@@ -91,7 +91,7 @@ bool _mapsEqual(Map<String, dynamic> expectedArgs, Map<String, dynamic> args) {
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  void testSetImage(ImageInfo image) {
+  void testSetImage(final ImageInfo image) {
     setImage(image);
   }
 }

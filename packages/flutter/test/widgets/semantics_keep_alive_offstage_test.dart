@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler', (WidgetTester tester) async {
+  testWidgets('Un-layouted RenderObject in keep alive offstage area do not crash semantics compiler', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20313.
 
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -81,9 +81,9 @@ void main() {
 final Key paddingWidget = GlobalKey();
 
 Widget _buildTestWidget({
-  required bool extraPadding,
-  required String text,
-  required ScrollController controller,
+  required final bool extraPadding,
+  required final String text,
+  required final ScrollController controller,
 }) {
   return MaterialApp(
     home: Scaffold(
@@ -96,7 +96,7 @@ Widget _buildTestWidget({
             height: 500.0,
             child: ListView(
               controller: controller,
-              children: List<Widget>.generate(10, (int i) {
+              children: List<Widget>.generate(10, (final int i) {
                 return Container(
                   color: i.isEven ? Colors.red : Colors.blue,
                   height: 250.0,
@@ -133,7 +133,7 @@ class ProblemWidget extends StatefulWidget {
 
 class ProblemWidgetState extends State<ProblemWidget> with AutomaticKeepAliveClientMixin<ProblemWidget> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     Widget child = Semantics(
       container: true,

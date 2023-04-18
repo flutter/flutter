@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 /// Flutter code sample for [AppBar].
 
-final List<int> _items = List<int>.generate(51, (int index) => index);
+final List<int> _items = List<int>.generate(51, (final int index) => index);
 
 void main() => runApp(const AppBarApp());
 
@@ -14,7 +14,7 @@ class AppBarApp extends StatelessWidget {
   const AppBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         colorSchemeSeed: const Color(0xff6750a4),
@@ -37,7 +37,7 @@ class _AppBarExampleState extends State<AppBarExample> {
   double? scrolledUnderElevation;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color oddItemColor = colorScheme.primary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.primary.withOpacity(0.15);
@@ -57,7 +57,7 @@ class _AppBarExampleState extends State<AppBarExample> {
           mainAxisSpacing: 10.0,
           crossAxisSpacing: 10.0,
         ),
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           if (index == 0) {
             return Center(
               child: Text(

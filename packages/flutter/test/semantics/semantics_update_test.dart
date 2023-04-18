@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   SemanticsUpdateTestBinding();
 
-  testWidgets('Semantics update does not send update for merged nodes.', (WidgetTester tester) async {
+  testWidgets('Semantics update does not send update for merged nodes.', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -85,7 +85,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Semantics update receives attributed text', (WidgetTester tester) async {
+  testWidgets('Semantics update receives attributed text', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     // Pumps a placeholder to trigger the warm up frame.
     await tester.pumpWidget(
@@ -180,38 +180,38 @@ class SemanticsUpdateBuilderSpy extends ui.SemanticsUpdateBuilder {
 
   @override
   void updateNode({
-    required int id,
-    required int flags,
-    required int actions,
-    required int maxValueLength,
-    required int currentValueLength,
-    required int textSelectionBase,
-    required int textSelectionExtent,
-    required int platformViewId,
-    required int scrollChildren,
-    required int scrollIndex,
-    required double scrollPosition,
-    required double scrollExtentMax,
-    required double scrollExtentMin,
-    required double elevation,
-    required double thickness,
-    required Rect rect,
-    required String label,
-    List<StringAttribute>? labelAttributes,
-    required String value,
-    List<StringAttribute>? valueAttributes,
-    required String increasedValue,
-    List<StringAttribute>? increasedValueAttributes,
-    required String decreasedValue,
-    List<StringAttribute>? decreasedValueAttributes,
-    required String hint,
-    List<StringAttribute>? hintAttributes,
-    String? tooltip,
-    TextDirection? textDirection,
-    required Float64List transform,
-    required Int32List childrenInTraversalOrder,
-    required Int32List childrenInHitTestOrder,
-    required Int32List additionalActions,
+    required final int id,
+    required final int flags,
+    required final int actions,
+    required final int maxValueLength,
+    required final int currentValueLength,
+    required final int textSelectionBase,
+    required final int textSelectionExtent,
+    required final int platformViewId,
+    required final int scrollChildren,
+    required final int scrollIndex,
+    required final double scrollPosition,
+    required final double scrollExtentMax,
+    required final double scrollExtentMin,
+    required final double elevation,
+    required final double thickness,
+    required final Rect rect,
+    required final String label,
+    final List<StringAttribute>? labelAttributes,
+    required final String value,
+    final List<StringAttribute>? valueAttributes,
+    required final String increasedValue,
+    final List<StringAttribute>? increasedValueAttributes,
+    required final String decreasedValue,
+    final List<StringAttribute>? decreasedValueAttributes,
+    required final String hint,
+    final List<StringAttribute>? hintAttributes,
+    final String? tooltip,
+    final TextDirection? textDirection,
+    required final Float64List transform,
+    required final Int32List childrenInTraversalOrder,
+    required final Int32List childrenInHitTestOrder,
+    required final Int32List additionalActions,
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));

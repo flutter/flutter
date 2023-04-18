@@ -46,7 +46,7 @@ void main() {
     final Completer<Event> completer = Completer<Event>();
     vmService
         .onExtensionEvent
-        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        .firstWhere((final Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
@@ -82,7 +82,7 @@ void main() {
     final Completer<Event> completer = Completer<Event>();
     vmService
         .onExtensionEvent
-        .firstWhere((Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
+        .firstWhere((final Event event) => event.extensionKind == 'Flutter.ImageSizesForFrame')
         .then(completer.complete);
 
     final ui.Image image = await createTestImage(width: 300, height: 300);
@@ -113,5 +113,5 @@ void main() {
 
 class TestCanvas implements Canvas {
   @override
-  void noSuchMethod(Invocation invocation) {}
+  void noSuchMethod(final Invocation invocation) {}
 }

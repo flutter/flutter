@@ -25,11 +25,11 @@ final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {
   factory XcodeProjectInterpreter({
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Usage usage,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Usage usage,
   }) {
     return XcodeProjectInterpreter._(
       platform: platform,
@@ -41,13 +41,13 @@ class XcodeProjectInterpreter {
   }
 
   XcodeProjectInterpreter._({
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Usage usage,
-    Version? version,
-    String? build,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Usage usage,
+    final Version? version,
+    final String? build,
   }) : _platform = platform,
         _fileSystem = fileSystem,
         _logger = logger,
@@ -70,9 +70,9 @@ class XcodeProjectInterpreter {
   /// test [Usage], and test [Terminal].
   /// Set [version] to null to simulate Xcode not being installed.
   factory XcodeProjectInterpreter.test({
-    required ProcessManager processManager,
-    Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
-    String? build = '13C100',
+    required final ProcessManager processManager,
+    final Version? version = const Version.withText(1000, 0, 0, '1000.0.0'),
+    final String? build = '13C100',
   }) {
     final Platform platform = FakePlatform(
       operatingSystem: 'macos',
@@ -178,9 +178,9 @@ class XcodeProjectInterpreter {
   /// If [scheme] is null, xcodebuild will return build settings for the first discovered
   /// target (by default this is Runner).
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
-    required XcodeProjectBuildContext buildContext,
-    Duration timeout = const Duration(minutes: 1),
+    final String projectPath, {
+    required final XcodeProjectBuildContext buildContext,
+    final Duration timeout = const Duration(minutes: 1),
   }) async {
     final Status status = _logger.startSpinner();
     final String? scheme = buildContext.scheme;
@@ -244,8 +244,8 @@ class XcodeProjectInterpreter {
   ///
   /// Returns the stdout of the Xcode command.
   Future<String?> pluginsBuildSettingsOutput(
-      Directory podXcodeProject, {
-        Duration timeout = const Duration(minutes: 1),
+      final Directory podXcodeProject, {
+        final Duration timeout = const Duration(minutes: 1),
       }) async {
     if (!podXcodeProject.existsSync()) {
       // No plugins.
@@ -295,7 +295,7 @@ class XcodeProjectInterpreter {
     }
   }
 
-  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async {
+  Future<void> cleanWorkspace(final String workspacePath, final String scheme, { final bool verbose = false }) async {
     await _processUtils.run(<String>[
       ...xcrunCommand(),
       'xcodebuild',
@@ -310,14 +310,14 @@ class XcodeProjectInterpreter {
     ], workingDirectory: _fileSystem.currentDirectory.path);
   }
 
-  Future<XcodeProjectInfo?> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo?> getInfo(final String projectPath, {final String? projectFilename}) async {
     // The exit code returned by 'xcodebuild -list' when either:
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
     const int missingProjectExitCode = 66;
     // The exit code returned by 'xcodebuild -list' when the project is corrupted.
     const int corruptedProjectExitCode = 74;
-    bool allowedFailures(int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
+    bool allowedFailures(final int c) => c == missingProjectExitCode || c == corruptedProjectExitCode;
     final RunResult result = await _processUtils.run(
       <String>[
         ...xcrunCommand(),
@@ -341,18 +341,18 @@ class XcodeProjectInterpreter {
 /// This allows developers to pass arbitrary build settings in without the tool needing to make a flag
 /// for or be aware of each one. This could be used to set code signing build settings in a CI
 /// environment without requiring settings changes in the Xcode project.
-List<String> environmentVariablesAsXcodeBuildSettings(Platform platform) {
+List<String> environmentVariablesAsXcodeBuildSettings(final Platform platform) {
   const String xcodeBuildSettingPrefix = 'FLUTTER_XCODE_';
-  return platform.environment.entries.where((MapEntry<String, String> mapEntry) {
+  return platform.environment.entries.where((final MapEntry<String, String> mapEntry) {
     return mapEntry.key.startsWith(xcodeBuildSettingPrefix);
-  }).expand<String>((MapEntry<String, String> mapEntry) {
+  }).expand<String>((final MapEntry<String, String> mapEntry) {
     // Remove FLUTTER_XCODE_ prefix from the environment variable to get the build setting.
     final String trimmedBuildSettingKey = mapEntry.key.substring(xcodeBuildSettingPrefix.length);
     return <String>['$trimmedBuildSettingKey=${mapEntry.value}'];
   }).toList();
 }
 
-Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
+Map<String, String> parseXcodeBuildSettings(final String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
   for (final Match? match in showBuildSettingsOutput.split('\n').map<Match?>(_settingExpr.firstMatch)) {
     if (match != null) {
@@ -364,13 +364,13 @@ Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
 
 /// Substitutes variables in [str] with their values from the specified Xcode
 /// project and target.
-String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
+String substituteXcodeVariables(final String str, final Map<String, String> xcodeBuildSettings) {
   final Iterable<Match> matches = _varExpr.allMatches(str);
   if (matches.isEmpty) {
     return str;
   }
 
-  return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]!] ?? m[0]!);
+  return str.replaceAllMapped(_varExpr, (final Match m) => xcodeBuildSettings[m[1]!] ?? m[0]!);
 }
 
 @immutable
@@ -393,7 +393,7 @@ class XcodeProjectBuildContext {
   int get hashCode => Object.hash(scheme, configuration, environmentType, deviceId);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(other, this)) {
       return true;
     }
@@ -414,10 +414,10 @@ class XcodeProjectInfo {
     this.targets,
     this.buildConfigurations,
     this.schemes,
-    Logger logger
+    final Logger logger
   ) : _logger = logger;
 
-  factory XcodeProjectInfo.fromXcodeBuildOutput(String output, Logger logger) {
+  factory XcodeProjectInfo.fromXcodeBuildOutput(final String output, final Logger logger) {
     final List<String> targets = <String>[];
     final List<String> buildConfigurations = <String>[];
     final List<String> schemes = <String>[];
@@ -453,12 +453,12 @@ class XcodeProjectInfo {
 
   /// The expected scheme for [buildInfo].
   @visibleForTesting
-  static String expectedSchemeFor(BuildInfo? buildInfo) {
+  static String expectedSchemeFor(final BuildInfo? buildInfo) {
     return sentenceCase(buildInfo?.flavor ?? 'runner');
   }
 
   /// The expected build configuration for [buildInfo] and [scheme].
-  static String expectedBuildConfigurationFor(BuildInfo buildInfo, String scheme) {
+  static String expectedBuildConfigurationFor(final BuildInfo buildInfo, final String scheme) {
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
     if (buildInfo.flavor == null) {
       return baseConfiguration;
@@ -479,12 +479,12 @@ class XcodeProjectInfo {
   }
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
-  String? schemeFor(BuildInfo? buildInfo) {
+  String? schemeFor(final BuildInfo? buildInfo) {
     final String expectedScheme = expectedSchemeFor(buildInfo);
     if (schemes.contains(expectedScheme)) {
       return expectedScheme;
     }
-    return _uniqueMatch(schemes, (String candidate) {
+    return _uniqueMatch(schemes, (final String candidate) {
       return candidate.toLowerCase() == expectedScheme.toLowerCase();
     });
   }
@@ -501,7 +501,7 @@ class XcodeProjectInfo {
 
   /// Returns unique build configuration matching [buildInfo] and [scheme], or
   /// null, if there is no unique best match.
-  String? buildConfigurationFor(BuildInfo? buildInfo, String scheme) {
+  String? buildConfigurationFor(final BuildInfo? buildInfo, final String scheme) {
     if (buildInfo == null) {
       return null;
     }
@@ -519,7 +519,7 @@ class XcodeProjectInfo {
     });
   }
 
-  static String _baseConfigurationFor(BuildInfo buildInfo) {
+  static String _baseConfigurationFor(final BuildInfo buildInfo) {
     if (buildInfo.isDebug) {
       return 'Debug';
     }
@@ -529,7 +529,7 @@ class XcodeProjectInfo {
     return 'Release';
   }
 
-  static String? _uniqueMatch(Iterable<String> strings, bool Function(String s) matches) {
+  static String? _uniqueMatch(final Iterable<String> strings, final bool Function(String s) matches) {
     final List<String> options = strings.where(matches).toList();
     if (options.length == 1) {
       return options.first;

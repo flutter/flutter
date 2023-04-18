@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/context_menu/cupertino_context_men
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can open cupertino context menu', (WidgetTester tester) async {
+  testWidgets('Can open cupertino context menu', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ContextMenuApp(),
     );

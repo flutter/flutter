@@ -12,9 +12,9 @@ void main() {
     'picture_cache_complexity_scoring_perf',
     kPictureCacheComplexityScoringRouteName,
     pageDelay: const Duration(seconds: 1),
-    driverOps: (FlutterDriver driver) async {
+    driverOps: (final FlutterDriver driver) async {
       final SerializableFinder tabBarView = find.byValueKey('tabbar_view_complexity');
-      Future<void> scrollOnce(double offset) async {
+      Future<void> scrollOnce(final double offset) async {
         // Technically it's not scrolling but moving
         await driver.scroll(tabBarView, offset, 0.0, const Duration(milliseconds: 300));
         await Future<void>.delayed(const Duration(milliseconds: 500));

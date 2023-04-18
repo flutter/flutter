@@ -41,7 +41,7 @@ String? currentLocale;
 /// ```
 /// dart dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 /// ```
-Future<void> main(List<String> rawArgs) async {
+Future<void> main(final List<String> rawArgs) async {
   checkCwdIsRepoRoot(_kCommandName);
 
   final bool writeToFile = parseArgs(rawArgs).writeToFile;
@@ -101,12 +101,12 @@ import 'package:intl/date_symbols.dart' as intl;
 /// The subset of date symbols supported by the intl package which are also
 /// supported by flutter_localizations.''');
   buffer.writeln('final Map<String, intl.DateSymbols> dateSymbols = <String, intl.DateSymbols> {');
-  symbolFiles.forEach((String locale, File data) {
+  symbolFiles.forEach((final String locale, final File data) {
     currentLocale = locale;
     if (supportedLocales.contains(locale)) {
       final Map<String, Object?> objData =  json.decode(data.readAsStringSync()) as Map<String, Object?>;
       buffer.writeln("'$locale': intl.DateSymbols(");
-      objData.forEach((String key, Object? value) {
+      objData.forEach((final String key, final Object? value) {
         if (value == null) {
           return;
         }
@@ -124,11 +124,11 @@ import 'package:intl/date_symbols.dart' as intl;
 /// The subset of date patterns supported by the intl package which are also
 /// supported by flutter_localizations.''');
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
-  patternFiles.forEach((String locale, File data) {
+  patternFiles.forEach((final String locale, final File data) {
     if (supportedLocales.contains(locale)) {
       final Map<String, dynamic> patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
-      patterns.forEach((String key, dynamic value) {
+      patterns.forEach((final String key, final dynamic value) {
         assert(value is String);
         buffer.writeln(_jsonToMapEntry(key, value));
       });
@@ -155,15 +155,15 @@ import 'package:intl/date_symbols.dart' as intl;
   }
 }
 
-String _jsonToConstructorEntry(String key, dynamic value) {
+String _jsonToConstructorEntry(final String key, final dynamic value) {
   return '$key: ${_jsonToObject(value)},';
 }
 
-String _jsonToMapEntry(String key, dynamic value) {
+String _jsonToMapEntry(final String key, final dynamic value) {
   return "'$key': ${_jsonToMap(value)},";
 }
 
-String _jsonToObject(dynamic json) {
+String _jsonToObject(final dynamic json) {
   if (json == null || json is num || json is bool) {
     return '$json';
   }
@@ -184,7 +184,7 @@ String _jsonToObject(dynamic json) {
 
   if (json is Map<String, dynamic>) {
     final StringBuffer buffer = StringBuffer('<String, Object>{');
-    json.forEach((String key, dynamic value) {
+    json.forEach((final String key, final dynamic value) {
       buffer.writeln(_jsonToMapEntry(key, value));
     });
     buffer.write('}');
@@ -194,7 +194,7 @@ String _jsonToObject(dynamic json) {
   throw 'Unsupported JSON type ${json.runtimeType} of value $json.';
 }
 
-String _jsonToMap(dynamic json) {
+String _jsonToMap(final dynamic json) {
   if (json == null || json is num || json is bool) {
     return '$json';
   }
@@ -214,7 +214,7 @@ String _jsonToMap(dynamic json) {
 
   if (json is Map<String, dynamic>) {
     final StringBuffer buffer = StringBuffer('<String, Object>{');
-    json.forEach((String key, dynamic value) {
+    json.forEach((final String key, final dynamic value) {
       buffer.writeln(_jsonToMapEntry(key, value));
     });
     buffer.write('}');
@@ -245,12 +245,12 @@ Set<String> _supportedLocales() {
   return supportedLocales;
 }
 
-Map<String, File> _listIntlData(Directory directory) {
+Map<String, File> _listIntlData(final Directory directory) {
   final Map<String, File> localeFiles = <String, File>{};
   final Iterable<File> files = directory
     .listSync()
     .whereType<File>()
-    .where((File file) => file.path.endsWith('.json'));
+    .where((final File file) => file.path.endsWith('.json'));
   for (final File file in files) {
     final String locale = path.basenameWithoutExtension(file.path);
     localeFiles[locale] = file;
@@ -258,5 +258,5 @@ Map<String, File> _listIntlData(Directory directory) {
 
   final List<String> locales = localeFiles.keys.toList(growable: false);
   locales.sort();
-  return Map<String, File>.fromIterable(locales, value: (dynamic locale) => localeFiles[locale]!);
+  return Map<String, File>.fromIterable(locales, value: (final dynamic locale) => localeFiles[locale]!);
 }

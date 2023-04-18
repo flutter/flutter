@@ -14,7 +14,7 @@ class FlutterView extends StatelessWidget {
   const FlutterView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Flutter View',
       theme: ThemeData(
@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
     platform.setMessageHandler(_handlePlatformIncrement);
   }
 
-  Future<String> _handlePlatformIncrement(String? message) async {
+  Future<String> _handlePlatformIncrement(final String? message) async {
     setState(() {
       _counter++;
     });
@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

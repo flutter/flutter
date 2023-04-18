@@ -30,24 +30,24 @@ class ABCModel extends InheritedModel<String> {
   final Set<String>? aspects;
 
   @override
-  bool isSupportedAspect(Object aspect) {
+  bool isSupportedAspect(final Object aspect) {
     return aspects == null || aspects!.contains(aspect);
   }
 
   @override
-  bool updateShouldNotify(ABCModel old) {
+  bool updateShouldNotify(final ABCModel old) {
     return !setEquals<String>(aspects, old.aspects) || a != old.a || b != old.b || c != old.c;
   }
 
   @override
-  bool updateShouldNotifyDependent(ABCModel old, Set<String> dependencies) {
+  bool updateShouldNotifyDependent(final ABCModel old, final Set<String> dependencies) {
     return !setEquals<String>(aspects, old.aspects)
         || (a != old.a && dependencies.contains('a'))
         || (b != old.b && dependencies.contains('b'))
         || (c != old.c && dependencies.contains('c'));
   }
 
-  static ABCModel? of(BuildContext context, { String? fieldName }) {
+  static ABCModel? of(final BuildContext context, { final String? fieldName }) {
     return InheritedModel.inheritFrom<ABCModel>(context, aspect: fieldName);
   }
 }
@@ -65,7 +65,7 @@ class _ShowABCFieldState extends State<ShowABCField> {
   int _buildCount = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ABCModel abc = ABCModel.of(context, fieldName: widget.fieldName)!;
     final int? value = widget.fieldName == 'a' ? abc.a : (widget.fieldName == 'b' ? abc.b : abc.c);
     return Text('${widget.fieldName}: $value [${_buildCount++}]');
@@ -73,13 +73,13 @@ class _ShowABCFieldState extends State<ShowABCField> {
 }
 
 void main() {
-  testWidgets('InheritedModel basics', (WidgetTester tester) async {
+  testWidgets('InheritedModel basics', (final WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;
 
     final Widget abcPage = StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
+      builder: (final BuildContext context, final StateSetter setState) {
         const Widget showA = ShowABCField(fieldName: 'a');
         const Widget showB = ShowABCField(fieldName: 'b');
         const Widget showC = ShowABCField(fieldName: 'c');
@@ -87,7 +87,7 @@ void main() {
         // Unconditionally depends on the ABCModel: rebuilt when any
         // aspect of the model changes.
         final Widget showABC = Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}');
           },
@@ -95,7 +95,7 @@ void main() {
 
         return Scaffold(
           body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return ABCModel(
                 a: a,
                 b: b,
@@ -189,12 +189,12 @@ void main() {
     expect(find.text('a: 2 b: 2 c: 3'), findsOneWidget);
   });
 
-  testWidgets('Looking up an non existent InheritedModel ancestor returns null', (WidgetTester tester) async {
+  testWidgets('Looking up an non existent InheritedModel ancestor returns null', (final WidgetTester tester) async {
     ABCModel? inheritedModel;
 
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           inheritedModel = InheritedModel.inheritFrom(context);
           return Container();
         },
@@ -205,7 +205,7 @@ void main() {
     expect(inheritedModel, null);
   });
 
-  testWidgets('Inner InheritedModel shadows the outer one', (WidgetTester tester) async {
+  testWidgets('Inner InheritedModel shadows the outer one', (final WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;
@@ -216,7 +216,7 @@ void main() {
     // matters: the inner model only supports the model's "a" aspect,
     // so showB and showC will depend on the outer model.
     final Widget abcPage = StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
+      builder: (final BuildContext context, final StateSetter setState) {
         const Widget showA = ShowABCField(fieldName: 'a');
         const Widget showB = ShowABCField(fieldName: 'b');
         const Widget showC = ShowABCField(fieldName: 'c');
@@ -224,7 +224,7 @@ void main() {
         // Unconditionally depends on the closest ABCModel ancestor.
         // Which is the inner model, for which b,c are null.
         final Widget showABC = Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.titleLarge);
           },
@@ -232,7 +232,7 @@ void main() {
 
         return Scaffold(
           body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return ABCModel( // The "outer" model
                 a: a,
                 b: b,
@@ -323,7 +323,7 @@ void main() {
     expect(find.text('a: 102 b: 102 c: null'), findsOneWidget);
   });
 
-  testWidgets('InheritedModel inner models supported aspect change', (WidgetTester tester) async {
+  testWidgets('InheritedModel inner models supported aspect change', (final WidgetTester tester) async {
     int a = 0;
     int b = 1;
     int c = 2;
@@ -333,7 +333,7 @@ void main() {
     // test except: the "Add b aspect" changes adds 'b' to the set of
     // aspects supported by the inner model.
     final Widget abcPage = StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
+      builder: (final BuildContext context, final StateSetter setState) {
         const Widget showA = ShowABCField(fieldName: 'a');
         const Widget showB = ShowABCField(fieldName: 'b');
         const Widget showC = ShowABCField(fieldName: 'c');
@@ -341,7 +341,7 @@ void main() {
         // Unconditionally depends on the closest ABCModel ancestor.
         // Which is the inner model, for which b,c are null.
         final Widget showABC = Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             final ABCModel abc = ABCModel.of(context)!;
             return Text('a: ${abc.a} b: ${abc.b} c: ${abc.c}', style: Theme.of(context).textTheme.titleLarge);
           },
@@ -349,7 +349,7 @@ void main() {
 
         return Scaffold(
           body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return ABCModel( // The "outer" model
                 a: a,
                 b: b,

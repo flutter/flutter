@@ -29,7 +29,7 @@ void main() {
       await expectLater(
         () => driver.waitForAbsent(presentText, timeout: const Duration(seconds: 1)),
         throwsA(isA<DriverError>().having(
-          (DriverError error) => error.message,
+          (final DriverError error) => error.message,
           'message',
           contains('Timeout while executing waitForAbsent'),
         )),
@@ -56,7 +56,7 @@ void main() {
       await expectLater(
         () => driver.waitFor(presentText, timeout: const Duration(seconds: 1)),
         throwsA(isA<DriverError>().having(
-          (DriverError error) => error.message,
+          (final DriverError error) => error.message,
           'message',
           contains('Timeout while executing waitFor'),
         )),

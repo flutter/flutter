@@ -24,19 +24,19 @@ enum RemoteName {
 
 class Remote {
   const Remote({
-    required RemoteName name,
+    required final RemoteName name,
     required this.url,
   })  : _name = name,
         assert(url != '');
 
-  factory Remote.mirror(String url) {
+  factory Remote.mirror(final String url) {
     return Remote(
       name: RemoteName.mirror,
       url: url,
     );
   }
 
-  factory Remote.upstream(String url) {
+  factory Remote.upstream(final String url) {
     return Remote(
       name: RemoteName.upstream,
       url: url,
@@ -192,7 +192,7 @@ abstract class Repository {
   static final RegExp _lsRemotePattern = RegExp(r'.*\s+refs\/heads\/([^\s]+)$');
 
   /// Parse git ls-remote --heads and return branch names.
-  Future<List<String>> listRemoteBranches(String remote) async {
+  Future<List<String>> listRemoteBranches(final String remote) async {
     final String output = await git.getOutput(
       <String>['ls-remote', '--heads', remote],
       'get remote branches',
@@ -211,7 +211,7 @@ abstract class Repository {
   }
 
   /// Ensure the repository is cloned to disk and initialized with proper state.
-  Future<void> lazilyInitialize(Directory checkoutDirectory) async {
+  Future<void> lazilyInitialize(final Directory checkoutDirectory) async {
     if (checkoutDirectory.existsSync()) {
       stdio.printTrace('Deleting $name from ${checkoutDirectory.path}...');
       checkoutDirectory.deleteSync(recursive: true);
@@ -270,7 +270,7 @@ abstract class Repository {
   }
 
   /// The URL of the remote named [remoteName].
-  Future<String> remoteUrl(String remoteName) async {
+  Future<String> remoteUrl(final String remoteName) async {
     return git.getOutput(
       <String>['remote', 'get-url', remoteName],
       'verify the URL of the $remoteName remote',
@@ -289,7 +289,7 @@ abstract class Repository {
   }
 
   /// Return the revision for the branch point between two refs.
-  Future<String> branchPoint(String firstRef, String secondRef) async {
+  Future<String> branchPoint(final String firstRef, final String secondRef) async {
     return (await git.getOutput(
       <String>['merge-base', firstRef, secondRef],
       'determine the merge base between $firstRef and $secondRef',
@@ -298,7 +298,7 @@ abstract class Repository {
   }
 
   /// Fetch all branches and associated commits and tags from [remoteName].
-  Future<void> fetch(String remoteName) async {
+  Future<void> fetch(final String remoteName) async {
     await git.run(
       <String>['fetch', remoteName, '--tags'],
       'fetch $remoteName --tags',
@@ -309,7 +309,7 @@ abstract class Repository {
   /// Create (and checkout) a new branch based on the current HEAD.
   ///
   /// Runs `git checkout -b $branchName`.
-  Future<void> newBranch(String branchName) async {
+  Future<void> newBranch(final String branchName) async {
     await git.run(
       <String>['checkout', '-b', branchName],
       'create & checkout new branch $branchName',
@@ -318,7 +318,7 @@ abstract class Repository {
   }
 
   /// Check out the given ref.
-  Future<void> checkout(String ref) async {
+  Future<void> checkout(final String ref) async {
     await git.run(
       <String>['checkout', ref],
       'checkout ref',
@@ -328,9 +328,9 @@ abstract class Repository {
 
   /// Obtain the version tag at the tip of a release branch.
   Future<String> getFullTag(
-    String remoteName,
-    String branchName, {
-    bool exact = true,
+    final String remoteName,
+    final String branchName, {
+    final bool exact = true,
   }) async {
     // includes both stable (e.g. 1.2.3) and dev tags (e.g. 1.2.3-4.5.pre)
     const String glob = '*.*.*';
@@ -351,7 +351,7 @@ abstract class Repository {
   }
 
   /// Tag [commit] and push the tag to the remote.
-  Future<void> tag(String commit, String tagName, String remote) async {
+  Future<void> tag(final String commit, final String tagName, final String remote) async {
     assert(commit.isNotEmpty);
     assert(tagName.isNotEmpty);
     assert(remote.isNotEmpty);
@@ -372,7 +372,7 @@ abstract class Repository {
   }
 
   /// List commits in reverse chronological order.
-  Future<List<String>> revList(List<String> args) async {
+  Future<List<String>> revList(final List<String> args) async {
     return (await git.getOutput(<String>['rev-list', ...args],
             'rev-list with args ${args.join(' ')}',
             workingDirectory: (await checkoutDirectory).path))
@@ -381,7 +381,7 @@ abstract class Repository {
   }
 
   /// Look up the commit for [ref].
-  Future<String> reverseParse(String ref) async {
+  Future<String> reverseParse(final String ref) async {
     final String revisionHash = await git.getOutput(
       <String>['rev-parse', ref],
       'look up the commit for the ref $ref',
@@ -392,7 +392,7 @@ abstract class Repository {
   }
 
   /// Determines if one ref is an ancestor for another.
-  Future<bool> isAncestor(String possibleAncestor, String possibleDescendant) async {
+  Future<bool> isAncestor(final String possibleAncestor, final String possibleDescendant) async {
     final int exitcode = await git.run(
       <String>[
         'merge-base',
@@ -408,7 +408,7 @@ abstract class Repository {
   }
 
   /// Determines if a given commit has a tag.
-  Future<bool> isCommitTagged(String commit) async {
+  Future<bool> isCommitTagged(final String commit) async {
     final int exitcode = await git.run(
       <String>['describe', '--exact-match', '--tags', commit],
       'verify $commit is already tagged',
@@ -419,7 +419,7 @@ abstract class Repository {
   }
 
   /// Resets repository HEAD to [ref].
-  Future<void> reset(String ref) async {
+  Future<void> reset(final String ref) async {
     await git.run(
       <String>['reset', ref, '--hard'],
       'reset to $ref',
@@ -429,11 +429,11 @@ abstract class Repository {
 
   /// Push [commit] to the release channel [branch].
   Future<void> pushRef({
-    required String fromRef,
-    required String remote,
-    required String toRef,
-    bool force = false,
-    bool dryRun = false,
+    required final String fromRef,
+    required final String remote,
+    required final String toRef,
+    final bool force = false,
+    final bool dryRun = false,
   }) async {
     final List<String> args = <String>[
       'push',
@@ -458,9 +458,9 @@ abstract class Repository {
   }
 
   Future<String> commit(
-    String message, {
-    bool addFirst = false,
-    String? author,
+    final String message, {
+    final bool addFirst = false,
+    final String? author,
   }) async {
     final bool hasChanges = (await git.getOutput(
       <String>['status', '--porcelain'],
@@ -508,7 +508,7 @@ abstract class Repository {
 
   /// Create an empty commit and return the revision.
   @visibleForTesting
-  Future<String> authorEmptyCommit([String message = 'An empty commit']) async {
+  Future<String> authorEmptyCommit([final String message = 'An empty commit']) async {
     await git.run(
       <String>[
         '-c',
@@ -533,7 +533,7 @@ abstract class Repository {
   ///
   /// This method is for testing purposes.
   @visibleForTesting
-  Future<Repository> cloneRepository(String cloneName);
+  Future<Repository> cloneRepository(final String cloneName);
 }
 
 class FrameworkRepository extends Repository {
@@ -546,7 +546,7 @@ class FrameworkRepository extends Repository {
     super.previousCheckoutLocation,
     String super.initialRef = FrameworkRepository.defaultBranch,
     super.mirrorRemote,
-    List<String>? additionalRequiredLocalBranches,
+    final List<String>? additionalRequiredLocalBranches,
   }) : super(
           fileSystem: checkouts.fileSystem,
           parentDirectory: checkouts.directory,
@@ -564,11 +564,11 @@ class FrameworkRepository extends Repository {
   /// This is useful when testing a commit that has not been merged upstream
   /// yet.
   factory FrameworkRepository.localRepoAsUpstream(
-    Checkouts checkouts, {
-    String name = 'framework',
-    String? previousCheckoutLocation,
-    String initialRef = FrameworkRepository.defaultBranch,
-    required String upstreamPath,
+    final Checkouts checkouts, {
+    final String name = 'framework',
+    final String? previousCheckoutLocation,
+    final String initialRef = FrameworkRepository.defaultBranch,
+    required final String upstreamPath,
   }) {
     return FrameworkRepository(
       checkouts,
@@ -627,7 +627,7 @@ class FrameworkRepository extends Repository {
     ]);
   }
 
-  Future<io.ProcessResult> runFlutter(List<String> args) async {
+  Future<io.ProcessResult> runFlutter(final List<String> args) async {
     await _ensureToolReady();
     return processManager.run(<String>[
       fileSystem.path.join((await checkoutDirectory).path, 'bin', 'flutter'),
@@ -636,9 +636,9 @@ class FrameworkRepository extends Repository {
   }
 
   Future<io.Process> streamFlutter(
-    List<String> args, {
-    void Function(String)? stdoutCallback,
-    void Function(String)? stderrCallback,
+    final List<String> args, {
+    final void Function(String)? stdoutCallback,
+    final void Function(String)? stderrCallback,
   }) async {
     await _ensureToolReady();
     final io.Process process = await processManager.start(<String>[
@@ -659,7 +659,7 @@ class FrameworkRepository extends Repository {
   }
 
   @override
-  Future<void> checkout(String ref) async {
+  Future<void> checkout(final String ref) async {
     await super.checkout(ref);
     // The tool will overwrite old cached artifacts, but not delete unused
     // artifacts from a previous version. Thus, delete the entire cache and
@@ -689,7 +689,7 @@ class FrameworkRepository extends Repository {
   ///
   /// Returns [true] if the version file was updated and a commit is needed.
   Future<bool> updateCandidateBranchVersion(
-    String branch, {
+    final String branch, {
     @visibleForTesting File? versionFile,
   }) async {
     assert(branch.isNotEmpty);
@@ -719,7 +719,7 @@ class FrameworkRepository extends Repository {
   ///
   /// Returns [true] if the version file was updated and a commit is needed.
   Future<bool> updateEngineRevision(
-    String newEngine, {
+    final String newEngine, {
     @visibleForTesting File? engineVersionFile,
   }) async {
     assert(newEngine.isNotEmpty);
@@ -751,9 +751,9 @@ class FrameworkRepository extends Repository {
 /// [ConductorException].
 class HostFrameworkRepository extends FrameworkRepository {
   HostFrameworkRepository({
-    required Checkouts checkouts,
-    String name = 'host-framework',
-    required String upstreamPath,
+    required final Checkouts checkouts,
+    final String name = 'host-framework',
+    required final String upstreamPath,
   }) : super(
           checkouts,
           name: name,
@@ -770,40 +770,40 @@ class HostFrameworkRepository extends FrameworkRepository {
   Future<Directory> get checkoutDirectory async => _checkoutDirectory!;
 
   @override
-  Future<void> newBranch(String branchName) async {
+  Future<void> newBranch(final String branchName) async {
     throw ConductorException(
         'newBranch not implemented for the host repository');
   }
 
   @override
-  Future<void> checkout(String ref) async {
+  Future<void> checkout(final String ref) async {
     throw ConductorException(
         'checkout not implemented for the host repository');
   }
 
   @override
-  Future<String> reset(String ref) async {
+  Future<String> reset(final String ref) async {
     throw ConductorException('reset not implemented for the host repository');
   }
 
   @override
-  Future<void> tag(String commit, String tagName, String remote) async {
+  Future<void> tag(final String commit, final String tagName, final String remote) async {
     throw ConductorException('tag not implemented for the host repository');
   }
 
   void updateChannel(
-    String commit,
-    String remote,
-    String branch, {
-    bool force = false,
-    bool dryRun = false,
+    final String commit,
+    final String remote,
+    final String branch, {
+    final bool force = false,
+    final bool dryRun = false,
   }) {
     throw ConductorException(
         'updateChannel not implemented for the host repository');
   }
 
   @override
-  Future<String> authorEmptyCommit([String message = 'An empty commit']) async {
+  Future<String> authorEmptyCommit([final String message = 'An empty commit']) async {
     throw ConductorException(
       'authorEmptyCommit not implemented for the host repository',
     );
@@ -820,7 +820,7 @@ class EngineRepository extends Repository {
     super.localUpstream,
     super.previousCheckoutLocation,
     super.mirrorRemote,
-    List<String>? additionalRequiredLocalBranches,
+    final List<String>? additionalRequiredLocalBranches,
   }) : super(
           fileSystem: checkouts.fileSystem,
           parentDirectory: checkouts.directory,
@@ -837,7 +837,7 @@ class EngineRepository extends Repository {
 
   /// Update the `dart_revision` entry in the DEPS file.
   Future<void> updateDartRevision(
-    String newRevision, {
+    final String newRevision, {
     @visibleForTesting File? depsFile,
   }) async {
     assert(newRevision.length == 40);
@@ -886,8 +886,8 @@ class Checkouts {
     required this.platform,
     required this.processManager,
     required this.stdio,
-    required Directory parentDirectory,
-    String directoryName = 'flutter_conductor_checkouts',
+    required final Directory parentDirectory,
+    final String directoryName = 'flutter_conductor_checkouts',
   }) : directory = parentDirectory.childDirectory(directoryName) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);

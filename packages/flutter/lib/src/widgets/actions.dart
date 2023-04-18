@@ -26,9 +26,9 @@ import 'shortcuts.dart';
 /// this is what [_getParent] is used for.
 ///
 /// [_getParent] is O(1), because it always stops at the first ancestor.
-BuildContext _getParent(BuildContext context) {
+BuildContext _getParent(final BuildContext context) {
   late final BuildContext parent;
-  context.visitAncestorElements((Element ancestor) {
+  context.visitAncestorElements((final Element ancestor) {
     parent = ancestor;
     return false;
   });
@@ -168,8 +168,8 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// ** See code in examples/api/lib/widgets/actions/action.action_overridable.0.dart **
   /// {@end-tool}
   factory Action.overridable({
-    required Action<T> defaultAction,
-    required BuildContext context,
+    required final Action<T> defaultAction,
+    required final BuildContext context,
   }) {
     return defaultAction._makeOverridableAction(context);
   }
@@ -178,7 +178,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
 
   Action<T>? _currentCallingAction;
   // ignore: use_setters_to_change_properties, (code predates enabling of this lint)
-  void _updateCallingAction(Action<T>? value) {
+  void _updateCallingAction(final Action<T>? value) {
     _currentCallingAction = value;
   }
 
@@ -233,7 +233,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// This will be called by the [ActionDispatcher] before attempting to invoke
   /// the action.
-  bool isEnabled(T intent) => isActionEnabled;
+  bool isEnabled(final T intent) => isActionEnabled;
 
   /// Whether this [Action] is inherently enabled.
   ///
@@ -258,7 +258,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// widgets to receive the key event.
   ///
   /// The default implementation returns true.
-  bool consumesKey(T intent) => true;
+  bool consumesKey(final T intent) => true;
 
   /// Converts the result of [invoke] of this action to a [KeyEventResult].
   ///
@@ -273,7 +273,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// Concrete implementations may refine the type of [invokeResult], since
   /// they know the type returned by [invoke].
-  KeyEventResult toKeyEventResult(T intent, covariant Object? invokeResult) {
+  KeyEventResult toKeyEventResult(final T intent, covariant final Object? invokeResult) {
     return consumesKey(intent)
       ? KeyEventResult.handled
       : KeyEventResult.skipRemainingHandlers;
@@ -314,7 +314,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// [Actions.invoke], or by invoking it using an [ActionDispatcher]. An action
   /// invoked via a [Shortcuts] widget will have its return value ignored.
   @protected
-  Object? invoke(T intent);
+  Object? invoke(final T intent);
 
   /// Register a callback to listen for changes to the state of this action.
   ///
@@ -338,7 +338,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   /// registrations to a common upstream object.
   /// {@endtemplate}
   @mustCallSuper
-  void addActionListener(ActionListenerCallback listener) => _listeners.add(listener);
+  void addActionListener(final ActionListenerCallback listener) => _listeners.add(listener);
 
   /// Remove a previously registered closure from the list of closures that are
   /// notified when the object changes.
@@ -352,7 +352,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   ///
   /// {@macro flutter.widgets.Action.addActionListener}
   @mustCallSuper
-  void removeActionListener(ActionListenerCallback listener) => _listeners.remove(listener);
+  void removeActionListener(final ActionListenerCallback listener) => _listeners.remove(listener);
 
   /// Call all the registered listeners.
   ///
@@ -406,7 +406,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
     }
   }
 
-  Action<T> _makeOverridableAction(BuildContext context) {
+  Action<T> _makeOverridableAction(final BuildContext context) {
     return _OverridableAction<T>(defaultAction: this, lookupContext: context);
   }
 }
@@ -467,7 +467,7 @@ class _ActionListenerState extends State<ActionListener> {
   }
 
   @override
-  void didUpdateWidget(ActionListener oldWidget) {
+  void didUpdateWidget(final ActionListener oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.action == widget.action && oldWidget.listener == widget.listener) {
       return;
@@ -483,7 +483,7 @@ class _ActionListenerState extends State<ActionListener> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(final BuildContext context) => widget.child;
 }
 
 /// An abstract [Action] subclass that adds an optional [BuildContext] to the
@@ -528,10 +528,10 @@ abstract class ContextAction<T extends Intent> extends Action<T> {
   /// ```
   @protected
   @override
-  Object? invoke(T intent, [BuildContext? context]);
+  Object? invoke(final T intent, [final BuildContext? context]);
 
   @override
-  ContextAction<T> _makeOverridableAction(BuildContext context) {
+  ContextAction<T> _makeOverridableAction(final BuildContext context) {
     return _OverridableContextAction<T>(defaultAction: this, lookupContext: context);
   }
 }
@@ -567,7 +567,7 @@ class CallbackAction<T extends Intent> extends Action<T> {
   final OnInvokeCallback<T> onInvoke;
 
   @override
-  Object? invoke(T intent) => onInvoke(intent);
+  Object? invoke(final T intent) => onInvoke(intent);
 }
 
 /// An action dispatcher that invokes the actions given to it.
@@ -601,8 +601,8 @@ class ActionDispatcher with Diagnosticable {
   /// calling this function. This function will assert if the action is not
   /// enabled when called.
   Object? invokeAction(
-    covariant Action<Intent> action,
-    covariant Intent intent, [
+    covariant final Action<Intent> action,
+    covariant final Intent intent, [
     BuildContext? context,
   ]) {
     assert(action.isEnabled(intent), 'Action must be enabled when calling invokeAction');
@@ -687,7 +687,7 @@ class Actions extends StatefulWidget {
   // Visits the Actions widget ancestors of the given element using
   // getElementForInheritedWidgetOfExactType. Returns true if the visitor found
   // what it was looking for.
-  static bool _visitActionsAncestors(BuildContext context, bool Function(InheritedElement element) visitor) {
+  static bool _visitActionsAncestors(final BuildContext context, final bool Function(InheritedElement element) visitor) {
     InheritedElement? actionsElement = context.getElementForInheritedWidgetOfExactType<_ActionsScope>();
     while (actionsElement != null) {
       if (visitor(actionsElement) == true) {
@@ -704,9 +704,9 @@ class Actions extends StatefulWidget {
 
   // Finds the nearest valid ActionDispatcher, or creates a new one if it
   // doesn't find one.
-  static ActionDispatcher _findDispatcher(BuildContext context) {
+  static ActionDispatcher _findDispatcher(final BuildContext context) {
     ActionDispatcher? dispatcher;
-    _visitActionsAncestors(context, (InheritedElement element) {
+    _visitActionsAncestors(context, (final InheritedElement element) {
       final ActionDispatcher? found = (element.widget as _ActionsScope).dispatcher;
       if (found != null) {
         dispatcher = found;
@@ -732,7 +732,7 @@ class Actions extends StatefulWidget {
   /// The value returned from the [Action.invoke] method is discarded when the
   /// returned callback is called. If the return value is needed, consider using
   /// [Actions.invoke] instead.
-  static VoidCallback? handler<T extends Intent>(BuildContext context, T intent) {
+  static VoidCallback? handler<T extends Intent>(final BuildContext context, final T intent) {
     final Action<T>? action = Actions.maybeFind<T>(context);
     if (action != null && action.isEnabled(intent)) {
       return () {
@@ -763,7 +763,7 @@ class Actions extends StatefulWidget {
   ///
   ///  * [maybeFind], which is similar to this function, but will return null if
   ///    no [Actions] ancestor is found.
-  static Action<T> find<T extends Intent>(BuildContext context, { T? intent }) {
+  static Action<T> find<T extends Intent>(final BuildContext context, { final T? intent }) {
     final Action<T>? action = maybeFind(context, intent: intent);
 
     assert(() {
@@ -802,7 +802,7 @@ class Actions extends StatefulWidget {
   ///
   ///  * [find], which is similar to this function, but will throw if
   ///    no [Actions] ancestor is found.
-  static Action<T>? maybeFind<T extends Intent>(BuildContext context, { T? intent }) {
+  static Action<T>? maybeFind<T extends Intent>(final BuildContext context, { final T? intent }) {
     Action<T>? action;
 
     // Specialize the type if a runtime example instance of the intent is given.
@@ -817,7 +817,7 @@ class Actions extends StatefulWidget {
       '"intent" argument is passed.',
     );
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    _visitActionsAncestors(context, (final InheritedElement element) {
       final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
@@ -831,7 +831,7 @@ class Actions extends StatefulWidget {
     return action;
   }
 
-  static Action<T>? _maybeFindWithoutDependingOn<T extends Intent>(BuildContext context, { T? intent }) {
+  static Action<T>? _maybeFindWithoutDependingOn<T extends Intent>(final BuildContext context, { final T? intent }) {
     Action<T>? action;
 
     // Specialize the type if a runtime example instance of the intent is given.
@@ -846,7 +846,7 @@ class Actions extends StatefulWidget {
       '"intent" argument is passed.',
     );
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    _visitActionsAncestors(context, (final InheritedElement element) {
       final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null) {
@@ -861,7 +861,7 @@ class Actions extends StatefulWidget {
 
   // Find the [Action] that handles the given `intent` in the given
   // `_ActionsScope`, and verify it has the right type parameter.
-  static Action<T>? _castAction<T extends Intent>(_ActionsScope actionsMarker, { T? intent }) {
+  static Action<T>? _castAction<T extends Intent>(final _ActionsScope actionsMarker, { final T? intent }) {
     final Action<Intent>? mappedAction = actionsMarker.actions[intent?.runtimeType ?? T];
     if (mappedAction is Action<T>?) {
       return mappedAction;
@@ -879,7 +879,7 @@ class Actions extends StatefulWidget {
   ///
   /// Will return a newly created [ActionDispatcher] if no ambient [Actions]
   /// widget is found.
-  static ActionDispatcher of(BuildContext context) {
+  static ActionDispatcher of(final BuildContext context) {
     final _ActionsScope? marker = context.dependOnInheritedWidgetOfExactType<_ActionsScope>();
     return marker?.dispatcher ?? _findDispatcher(context);
   }
@@ -899,12 +899,12 @@ class Actions extends StatefulWidget {
   /// found, or when a suitable [Action] is found but it returns false for
   /// [Action.isEnabled].
   static Object? invoke<T extends Intent>(
-    BuildContext context,
-    T intent,
+    final BuildContext context,
+    final T intent,
   ) {
     Object? returnValue;
 
-    final bool actionFound = _visitActionsAncestors(context, (InheritedElement element) {
+    final bool actionFound = _visitActionsAncestors(context, (final InheritedElement element) {
       final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result.isEnabled(intent)) {
@@ -950,12 +950,12 @@ class Actions extends StatefulWidget {
   /// If a suitable [Action] is found but its [Action.isEnabled] returns false,
   /// the search will stop and this method will return null.
   static Object? maybeInvoke<T extends Intent>(
-    BuildContext context,
-    T intent,
+    final BuildContext context,
+    final T intent,
   ) {
     Object? returnValue;
 
-    _visitActionsAncestors(context, (InheritedElement element) {
+    _visitActionsAncestors(context, (final InheritedElement element) {
       final _ActionsScope actions = element.widget as _ActionsScope;
       final Action<T>? result = _castAction(actions, intent: intent);
       if (result != null && result.isEnabled(intent)) {
@@ -972,7 +972,7 @@ class Actions extends StatefulWidget {
   State<Actions> createState() => _ActionsState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ActionDispatcher>('dispatcher', dispatcher));
     properties.add(DiagnosticsProperty<Map<Type, Action<Intent>>>('actions', actions));
@@ -992,7 +992,7 @@ class _ActionsState extends State<Actions> {
     _updateActionListeners();
   }
 
-  void _handleActionChanged(Action<Intent> action) {
+  void _handleActionChanged(final Action<Intent> action) {
     // Generate a new key so that the marker notifies dependents.
     setState(() {
       rebuildKey = Object();
@@ -1014,7 +1014,7 @@ class _ActionsState extends State<Actions> {
   }
 
   @override
-  void didUpdateWidget(Actions oldWidget) {
+  void didUpdateWidget(final Actions oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateActionListeners();
   }
@@ -1029,7 +1029,7 @@ class _ActionsState extends State<Actions> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _ActionsScope(
       actions: widget.actions,
       dispatcher: widget.dispatcher,
@@ -1054,7 +1054,7 @@ class _ActionsScope extends InheritedWidget {
   final Object rebuildKey;
 
   @override
-  bool updateShouldNotify(_ActionsScope oldWidget) {
+  bool updateShouldNotify(final _ActionsScope oldWidget) {
     return rebuildKey != oldWidget.rebuildKey
         || oldWidget.dispatcher != dispatcher
         || !mapEquals<Type, Action<Intent>>(oldWidget.actions, actions);
@@ -1181,7 +1181,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   @override
   void initState() {
     super.initState();
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((final Duration duration) {
       _updateHighlightMode(FocusManager.instance.highlightMode);
     });
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
@@ -1194,7 +1194,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool _canShowHighlight = false;
-  void _updateHighlightMode(FocusHighlightMode mode) {
+  void _updateHighlightMode(final FocusHighlightMode mode) {
     _mayTriggerCallback(task: () {
       switch (FocusManager.instance.highlightMode) {
         case FocusHighlightMode.touch:
@@ -1209,7 +1209,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   // called in initState, where things aren't mounted yet.
   // Since this method is a highlight mode listener, it is only called
   // immediately following pointer events.
-  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+  void _handleFocusHighlightModeChange(final FocusHighlightMode mode) {
     if (!mounted) {
       return;
     }
@@ -1217,7 +1217,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool _hovering = false;
-  void _handleMouseEnter(PointerEnterEvent event) {
+  void _handleMouseEnter(final PointerEnterEvent event) {
     if (!_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = true;
@@ -1225,7 +1225,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     }
   }
 
-  void _handleMouseExit(PointerExitEvent event) {
+  void _handleMouseExit(final PointerExitEvent event) {
     if (_hovering) {
       _mayTriggerCallback(task: () {
         _hovering = false;
@@ -1234,7 +1234,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   bool _focused = false;
-  void _handleFocusChange(bool focused) {
+  void _handleFocusChange(final bool focused) {
     if (_focused != focused) {
       _mayTriggerCallback(task: () {
         _focused = focused;
@@ -1249,12 +1249,12 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   // The old states are collected from `oldWidget` if it is provided, or the
   // current widget (before doing `task`) otherwise. The new states are always
   // collected from the current widget.
-  void _mayTriggerCallback({VoidCallback? task, FocusableActionDetector? oldWidget}) {
-    bool shouldShowHoverHighlight(FocusableActionDetector target) {
+  void _mayTriggerCallback({final VoidCallback? task, final FocusableActionDetector? oldWidget}) {
+    bool shouldShowHoverHighlight(final FocusableActionDetector target) {
       return _hovering && target.enabled && _canShowHighlight;
     }
 
-    bool canRequestFocus(FocusableActionDetector target) {
+    bool canRequestFocus(final FocusableActionDetector target) {
       final NavigationMode mode = MediaQuery.maybeNavigationModeOf(context) ?? NavigationMode.traditional;
       switch (mode) {
         case NavigationMode.traditional:
@@ -1264,7 +1264,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
       }
     }
 
-    bool shouldShowFocusHighlight(FocusableActionDetector target) {
+    bool shouldShowFocusHighlight(final FocusableActionDetector target) {
       return _focused && _canShowHighlight && canRequestFocus(target);
     }
 
@@ -1286,10 +1286,10 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   }
 
   @override
-  void didUpdateWidget(FocusableActionDetector oldWidget) {
+  void didUpdateWidget(final FocusableActionDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.enabled != oldWidget.enabled) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      SchedulerBinding.instance.addPostFrameCallback((final Duration duration) {
         _mayTriggerCallback(oldWidget: oldWidget);
       });
     }
@@ -1313,7 +1313,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   final GlobalKey _mouseRegionKey = GlobalKey();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget child = MouseRegion(
       key: _mouseRegionKey,
       onEnter: _handleMouseEnter,
@@ -1361,7 +1361,7 @@ class VoidCallbackIntent extends Intent {
 ///    on the action, not the intent, like this class.
 class VoidCallbackAction extends Action<VoidCallbackIntent> {
   @override
-  Object? invoke(VoidCallbackIntent intent) {
+  Object? invoke(final VoidCallbackIntent intent) {
     intent.callback();
     return null;
   }
@@ -1437,14 +1437,14 @@ class DoNothingAction extends Action<Intent> {
   /// Creates a [DoNothingAction].
   ///
   /// The optional [consumesKey] argument defaults to true.
-  DoNothingAction({bool consumesKey = true}) : _consumesKey = consumesKey;
+  DoNothingAction({final bool consumesKey = true}) : _consumesKey = consumesKey;
 
   @override
-  bool consumesKey(Intent intent) => _consumesKey;
+  bool consumesKey(final Intent intent) => _consumesKey;
   final bool _consumesKey;
 
   @override
-  void invoke(Intent intent) {}
+  void invoke(final Intent intent) {}
 }
 
 /// An [Intent] that activates the currently focused control.
@@ -1545,7 +1545,7 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   late Intent _selectedIntent;
 
   @override
-  bool isEnabled(PrioritizedIntents intent) {
+  bool isEnabled(final PrioritizedIntents intent) {
     final FocusNode? focus = primaryFocus;
     if  (focus == null || focus.context == null) {
       return false;
@@ -1565,7 +1565,7 @@ class PrioritizedAction extends Action<PrioritizedIntents> {
   }
 
   @override
-  void invoke(PrioritizedIntents intent) {
+  void invoke(final PrioritizedIntents intent) {
     _selectedAction.invoke(_selectedIntent);
   }
 }
@@ -1587,9 +1587,9 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   BuildContext get lookupContext;
 
   // How to invoke [defaultAction], given the caller [fromAction].
-  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context);
+  Object? invokeDefaultAction(final T intent, final Action<T>? fromAction, final BuildContext? context);
 
-  Action<T>? getOverrideAction({ bool declareDependency = false }) {
+  Action<T>? getOverrideAction({ final bool declareDependency = false }) {
     final Action<T>? override = declareDependency
      ? Actions.maybeFind(lookupContext)
      : Actions._maybeFindWithoutDependingOn(lookupContext);
@@ -1598,12 +1598,12 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 
   @override
-  void _updateCallingAction(Action<T>? value) {
+  void _updateCallingAction(final Action<T>? value) {
     super._updateCallingAction(value);
     defaultAction._updateCallingAction(value);
   }
 
-  Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
+  Object? _invokeOverride(final Action<T> overrideAction, final T intent, final BuildContext? context) {
     assert(!debugAssertMutuallyRecursive);
     assert(() {
       debugAssertMutuallyRecursive = true;
@@ -1622,7 +1622,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 
   @override
-  Object? invoke(T intent, [BuildContext? context]) {
+  Object? invoke(final T intent, [final BuildContext? context]) {
     final Action<T>? overrideAction = getOverrideAction();
     final Object? returnValue = overrideAction == null
       ? invokeDefaultAction(intent, callingAction, context)
@@ -1630,7 +1630,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
     return returnValue;
   }
 
-  bool isOverrideActionEnabled(Action<T> overrideAction) {
+  bool isOverrideActionEnabled(final Action<T> overrideAction) {
     assert(!debugAssertIsActionEnabledMutuallyRecursive);
     assert(() {
       debugAssertIsActionEnabledMutuallyRecursive = true;
@@ -1656,7 +1656,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 
   @override
-  bool isEnabled(T intent) {
+  bool isEnabled(final T intent) {
     assert(!debugAssertIsEnabledMutuallyRecursive);
     assert(() {
       debugAssertIsEnabledMutuallyRecursive = true;
@@ -1675,7 +1675,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 
   @override
-  bool consumesKey(T intent) {
+  bool consumesKey(final T intent) {
     assert(!debugAssertConsumeKeyMutuallyRecursive);
     assert(() {
       debugAssertConsumeKeyMutuallyRecursive = true;
@@ -1693,7 +1693,7 @@ mixin _OverridableActionMixin<T extends Intent> on Action<T> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Action<T>>('defaultAction', defaultAction));
   }
@@ -1709,7 +1709,7 @@ class _OverridableAction<T extends Intent> extends ContextAction<T> with _Overri
   final BuildContext lookupContext;
 
   @override
-  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+  Object? invokeDefaultAction(final T intent, final Action<T>? fromAction, final BuildContext? context) {
     if (fromAction == null) {
       return defaultAction.invoke(intent);
     } else {
@@ -1719,7 +1719,7 @@ class _OverridableAction<T extends Intent> extends ContextAction<T> with _Overri
   }
 
   @override
-  ContextAction<T> _makeOverridableAction(BuildContext context) {
+  ContextAction<T> _makeOverridableAction(final BuildContext context) {
     return _OverridableAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }
@@ -1734,7 +1734,7 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
   final BuildContext lookupContext;
 
   @override
-  Object? _invokeOverride(Action<T> overrideAction, T intent, BuildContext? context) {
+  Object? _invokeOverride(final Action<T> overrideAction, final T intent, final BuildContext? context) {
     assert(context != null);
     assert(!debugAssertMutuallyRecursive);
     assert(() {
@@ -1760,7 +1760,7 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
   }
 
   @override
-  Object? invokeDefaultAction(T intent, Action<T>? fromAction, BuildContext? context) {
+  Object? invokeDefaultAction(final T intent, final Action<T>? fromAction, final BuildContext? context) {
     if (fromAction == null) {
       return defaultAction.invoke(intent, context);
     } else {
@@ -1770,7 +1770,7 @@ class _OverridableContextAction<T extends Intent> extends ContextAction<T> with 
   }
 
   @override
-  ContextAction<T> _makeOverridableAction(BuildContext context) {
+  ContextAction<T> _makeOverridableAction(final BuildContext context) {
     return _OverridableContextAction<T>(defaultAction: defaultAction, lookupContext: context);
   }
 }
@@ -1782,7 +1782,7 @@ class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
   final ContextAction<T> action;
 
   @override
-  void _updateCallingAction(Action<T>? value) {
+  void _updateCallingAction(final Action<T>? value) {
     action._updateCallingAction(value);
   }
 
@@ -1790,22 +1790,22 @@ class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
   Action<T>? get callingAction => action.callingAction;
 
   @override
-  bool isEnabled(T intent) => action.isEnabled(intent);
+  bool isEnabled(final T intent) => action.isEnabled(intent);
 
   @override
   bool get isActionEnabled => action.isActionEnabled;
 
   @override
-  bool consumesKey(T intent) => action.consumesKey(intent);
+  bool consumesKey(final T intent) => action.consumesKey(intent);
 
   @override
-  void addActionListener(ActionListenerCallback listener) {
+  void addActionListener(final ActionListenerCallback listener) {
     super.addActionListener(listener);
     action.addActionListener(listener);
   }
 
   @override
-  void removeActionListener(ActionListenerCallback listener) {
+  void removeActionListener(final ActionListenerCallback listener) {
     super.removeActionListener(listener);
     action.removeActionListener(listener);
   }
@@ -1815,5 +1815,5 @@ class _ContextActionToActionAdapter<T extends Intent> extends Action<T> {
   void notifyActionListeners() => action.notifyActionListeners();
 
   @override
-  Object? invoke(T intent) => action.invoke(intent, invokeContext);
+  Object? invoke(final T intent) => action.invoke(intent, invokeContext);
 }

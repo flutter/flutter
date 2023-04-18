@@ -12,7 +12,7 @@ class SelectionAreaExampleApp extends StatelessWidget {
   const SelectionAreaExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: SelectionArea(
         child: Scaffold(

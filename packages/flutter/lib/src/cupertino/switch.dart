@@ -166,7 +166,7 @@ class CupertinoSwitch extends StatefulWidget {
   State<CupertinoSwitch> createState() => _CupertinoSwitchState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
     properties.add(ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
@@ -232,7 +232,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   }
 
   @override
-  void didUpdateWidget(CupertinoSwitch oldWidget) {
+  void didUpdateWidget(final CupertinoSwitch oldWidget) {
     super.didUpdateWidget(oldWidget);
     _drag.dragStartBehavior = widget.dragStartBehavior;
 
@@ -247,7 +247,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   //
   // It can be set to false when it's an implicit animation triggered by
   // widget.value changes.
-  void _resumePositionAnimation({ bool isLinear = true }) {
+  void _resumePositionAnimation({ final bool isLinear = true }) {
     needsPositionAnimation = false;
     position
       ..curve = isLinear ? Curves.linear : Curves.ease
@@ -259,21 +259,21 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(final TapDownDetails details) {
     if (isInteractive) {
       needsPositionAnimation = false;
     }
       _reactionController.forward();
   }
 
-  void _handleTap([Intent? _]) {
+  void _handleTap([final Intent? _]) {
     if (isInteractive) {
       widget.onChanged!(!widget.value);
       _emitVibration();
     }
   }
 
-  void _handleTapUp(TapUpDetails details) {
+  void _handleTapUp(final TapUpDetails details) {
     if (isInteractive) {
       needsPositionAnimation = false;
       _reactionController.reverse();
@@ -286,7 +286,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart(final DragStartDetails details) {
     if (isInteractive) {
       needsPositionAnimation = false;
       _reactionController.forward();
@@ -294,7 +294,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     if (isInteractive) {
       position
         ..curve = Curves.linear
@@ -309,7 +309,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     // Deferring the animation to the next build phase.
     setState(() { needsPositionAnimation = true; });
     // Call onChanged when the user's intent to change value is clear.
@@ -332,12 +332,12 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     }
   }
 
-  void _onShowFocusHighlight(bool showHighlight) {
+  void _onShowFocusHighlight(final bool showHighlight) {
     setState(() { isFocused = showHighlight; });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final CupertinoThemeData theme = CupertinoTheme.of(context);
     final Color activeColor = CupertinoDynamicColor.resolve(
       widget.activeColor
@@ -415,7 +415,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final bool isFocused;
 
   @override
-  _RenderCupertinoSwitch createRenderObject(BuildContext context) {
+  _RenderCupertinoSwitch createRenderObject(final BuildContext context) {
     return _RenderCupertinoSwitch(
       value: value,
       activeColor: activeColor,
@@ -430,7 +430,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoSwitch renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderCupertinoSwitch renderObject) {
     assert(renderObject._state == state);
     renderObject
       ..value = value
@@ -460,15 +460,15 @@ const Duration _kToggleDuration = Duration(milliseconds: 200);
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox {
   _RenderCupertinoSwitch({
-    required bool value,
-    required Color activeColor,
-    required Color trackColor,
-    required Color thumbColor,
-    required Color focusColor,
-    ValueChanged<bool>? onChanged,
-    required TextDirection textDirection,
-    required bool isFocused,
-    required _CupertinoSwitchState state,
+    required final bool value,
+    required final Color activeColor,
+    required final Color trackColor,
+    required final Color thumbColor,
+    required final Color focusColor,
+    final ValueChanged<bool>? onChanged,
+    required final TextDirection textDirection,
+    required final bool isFocused,
+    required final _CupertinoSwitchState state,
   }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
@@ -487,7 +487,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   bool get value => _value;
   bool _value;
-  set value(bool value) {
+  set value(final bool value) {
     if (value == _value) {
       return;
     }
@@ -497,7 +497,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   Color get activeColor => _activeColor;
   Color _activeColor;
-  set activeColor(Color value) {
+  set activeColor(final Color value) {
     if (value == _activeColor) {
       return;
     }
@@ -507,7 +507,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   Color get trackColor => _trackColor;
   Color _trackColor;
-  set trackColor(Color value) {
+  set trackColor(final Color value) {
     if (value == _trackColor) {
       return;
     }
@@ -517,7 +517,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   Color get thumbColor => _thumbPainter.color;
   CupertinoThumbPainter _thumbPainter;
-  set thumbColor(Color value) {
+  set thumbColor(final Color value) {
     if (value == thumbColor) {
       return;
     }
@@ -527,7 +527,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   Color get focusColor => _focusColor;
   Color _focusColor;
-  set focusColor(Color value) {
+  set focusColor(final Color value) {
     if (value == _focusColor) {
       return;
     }
@@ -537,7 +537,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   ValueChanged<bool>? get onChanged => _onChanged;
   ValueChanged<bool>? _onChanged;
-  set onChanged(ValueChanged<bool>? value) {
+  set onChanged(final ValueChanged<bool>? value) {
     if (value == _onChanged) {
       return;
     }
@@ -551,7 +551,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (_textDirection == value) {
       return;
     }
@@ -561,7 +561,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   bool get isFocused => _isFocused;
   bool _isFocused;
-  set isFocused(bool value) {
+  set isFocused(final bool value) {
     if(value == _isFocused) {
       return;
     }
@@ -572,10 +572,10 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get isInteractive => onChanged != null;
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 
   @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive) {
       _state._drag.addPointer(event);
@@ -584,7 +584,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     if (isInteractive) {
@@ -596,7 +596,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final Canvas canvas = context.canvas;
 
     final double currentValue = _state.position.value;
@@ -653,7 +653,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       thumbCenterY + CupertinoThumbPainter.radius,
     );
 
-    _clipRRectLayer.layer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
+    _clipRRectLayer.layer = context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (final PaintingContext innerContext, final Offset offset) {
       _thumbPainter.paint(innerContext.canvas, thumbBounds);
     }, oldLayer: _clipRRectLayer.layer);
   }
@@ -667,7 +667,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(FlagProperty('value', value: value, ifTrue: 'checked', ifFalse: 'unchecked', showName: true));
     description.add(FlagProperty('isInteractive', value: isInteractive, ifTrue: 'enabled', ifFalse: 'disabled', showName: true, defaultValue: true));

@@ -30,7 +30,7 @@ class _ColorFilterCachePageState extends State<ColorFilterCachePage>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue,
       body: ListView(

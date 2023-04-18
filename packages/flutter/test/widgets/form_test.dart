@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('onSaved callback is called', (WidgetTester tester) async {
+  testWidgets('onSaved callback is called', (final WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
 
@@ -23,7 +23,7 @@ void main() {
                 child: Form(
                   key: formKey,
                   child: TextFormField(
-                    onSaved: (String? value) { fieldValue = value; },
+                    onSaved: (final String? value) { fieldValue = value; },
                   ),
                 ),
               ),
@@ -37,7 +37,7 @@ void main() {
 
     expect(fieldValue, isNull);
 
-    Future<void> checkText(String testValue) async {
+    Future<void> checkText(final String testValue) async {
       await tester.enterText(find.byType(TextFormField), testValue);
       formKey.currentState!.save();
       // Pumping is unnecessary because callback happens regardless of frames.
@@ -48,7 +48,7 @@ void main() {
     await checkText('');
   });
 
-  testWidgets('onChanged callback is called', (WidgetTester tester) async {
+  testWidgets('onChanged callback is called', (final WidgetTester tester) async {
     String? fieldValue;
 
     Widget builder() {
@@ -61,7 +61,7 @@ void main() {
               child: Material(
                 child: Form(
                   child: TextField(
-                    onChanged: (String value) { fieldValue = value; },
+                    onChanged: (final String value) { fieldValue = value; },
                   ),
                 ),
               ),
@@ -75,7 +75,7 @@ void main() {
 
     expect(fieldValue, isNull);
 
-    Future<void> checkText(String testValue) async {
+    Future<void> checkText(final String testValue) async {
       await tester.enterText(find.byType(TextField), testValue);
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
@@ -85,11 +85,11 @@ void main() {
     await checkText('');
   });
 
-  testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
+  testWidgets('Validator sets the error text only when validate is called', (final WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-    String? errorText(String? value) => '${value ?? ''}/error';
+    String? errorText(final String? value) => '${value ?? ''}/error';
 
-    Widget builder(AutovalidateMode autovalidateMode) {
+    Widget builder(final AutovalidateMode autovalidateMode) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(),
@@ -114,7 +114,7 @@ void main() {
     // Start off not autovalidating.
     await tester.pumpWidget(builder(AutovalidateMode.disabled));
 
-    Future<void> checkErrorText(String testValue) async {
+    Future<void> checkErrorText(final String testValue) async {
       formKey.currentState!.reset();
       await tester.pumpWidget(builder(AutovalidateMode.disabled));
       await tester.enterText(find.byType(TextFormField), testValue);
@@ -139,7 +139,7 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgets('Should announce error text when validate returns error', (WidgetTester tester) async {
+  testWidgets('Should announce error text when validate returns error', (final WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -152,7 +152,7 @@ void main() {
                 child: Form(
                   key: formKey,
                   child: TextFormField(
-                    validator: (_)=> 'error',
+                    validator: (final _)=> 'error',
                   ),
                 ),
               ),
@@ -178,11 +178,11 @@ void main() {
 
   });
 
-  testWidgets('isValid returns true when a field is valid', (WidgetTester tester) async {
+  testWidgets('isValid returns true when a field is valid', (final WidgetTester tester) async {
     final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
     final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
     const String validString = 'Valid string';
-    String? validator(String? s) => s == validString ? null : 'Error text';
+    String? validator(final String? s) => s == validString ? null : 'Error text';
 
     Widget builder() {
       return MaterialApp(
@@ -225,11 +225,11 @@ void main() {
 
   testWidgets(
     'isValid returns false when the field is invalid and does not change error display',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final GlobalKey<FormFieldState<String>> fieldKey1 = GlobalKey<FormFieldState<String>>();
       final GlobalKey<FormFieldState<String>> fieldKey2 = GlobalKey<FormFieldState<String>>();
       const String validString = 'Valid string';
-      String? validator(String? s) => s == validString ? null : 'Error text';
+      String? validator(final String? s) => s == validString ? null : 'Error text';
 
       Widget builder() {
         return MaterialApp(
@@ -272,11 +272,11 @@ void main() {
     },
   );
 
-  testWidgets('Multiple TextFormFields communicate', (WidgetTester tester) async {
+  testWidgets('Multiple TextFormFields communicate', (final WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> fieldKey = GlobalKey<FormFieldState<String>>();
     // Input 2's validator depends on a input 1's value.
-    String? errorText(String? input) => '${fieldKey.currentState!.value}/error';
+    String? errorText(final String? input) => '${fieldKey.currentState!.value}/error';
 
     Widget builder() {
       return MaterialApp(
@@ -309,7 +309,7 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    Future<void> checkErrorText(String testValue) async {
+    Future<void> checkErrorText(final String testValue) async {
       await tester.enterText(find.byType(TextFormField).first, testValue);
       await tester.pump();
 
@@ -322,7 +322,7 @@ void main() {
     await checkErrorText('');
   });
 
-  testWidgets('Provide initial value to input when no controller is specified', (WidgetTester tester) async {
+  testWidgets('Provide initial value to input when no controller is specified', (final WidgetTester tester) async {
     const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
 
@@ -366,7 +366,7 @@ void main() {
     expect(editableText.widget.controller.text, equals('world'));
   });
 
-  testWidgets('Controller defines initial value', (WidgetTester tester) async {
+  testWidgets('Controller defines initial value', (final WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: 'hello');
     const String initialValue = 'hello';
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
@@ -413,7 +413,7 @@ void main() {
     expect(controller.text, equals('world'));
   });
 
-  testWidgets('TextFormField resets to its initial value', (WidgetTester tester) async {
+  testWidgets('TextFormField resets to its initial value', (final WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
     final TextEditingController controller = TextEditingController(text: 'Plover');
@@ -459,7 +459,7 @@ void main() {
     expect(controller.text, equals('Plover'));
   });
 
-  testWidgets('TextEditingController updates to/from form field value', (WidgetTester tester) async {
+  testWidgets('TextEditingController updates to/from form field value', (final WidgetTester tester) async {
     final TextEditingController controller1 = TextEditingController(text: 'Foo');
     final TextEditingController controller2 = TextEditingController(text: 'Bar');
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
@@ -469,7 +469,7 @@ void main() {
 
     Widget builder() {
       return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setter) {
+        builder: (final BuildContext context, final StateSetter setter) {
           setState = setter;
           return MaterialApp(
             home: MediaQuery(
@@ -566,11 +566,11 @@ void main() {
     expect(controller2.text, equals('Xyzzy'));
   });
 
-  testWidgets('No crash when a TextFormField is removed from the tree', (WidgetTester tester) async {
+  testWidgets('No crash when a TextFormField is removed from the tree', (final WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
 
-    Widget builder(bool remove) {
+    Widget builder(final bool remove) {
       return MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(),
@@ -582,8 +582,8 @@ void main() {
                   key: formKey,
                   child: remove ? Container() : TextFormField(
                     autofocus: true,
-                    onSaved: (String? value) { fieldValue = value; },
-                    validator: (String? value) { return (value == null || value.isEmpty) ? null : 'yes'; },
+                    onSaved: (final String? value) { fieldValue = value; },
+                    validator: (final String? value) { return (value == null || value.isEmpty) ? null : 'yes'; },
                   ),
                 ),
               ),
@@ -620,10 +620,10 @@ void main() {
     expect(formKey.currentState!.validate(), isTrue);
   });
 
-  testWidgets('Does not auto-validate before value changes when autovalidateMode is set to onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Does not auto-validate before value changes when autovalidateMode is set to onUserInteraction', (final WidgetTester tester) async {
     late FormFieldState<String> formFieldState;
 
-    String? errorText(String? value) => '$value/error';
+    String? errorText(final String? value) => '$value/error';
 
     Widget builder() {
       return MaterialApp(
@@ -636,7 +636,7 @@ void main() {
                 child: FormField<String>(
                   initialValue: 'foo',
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  builder: (FormFieldState<String> state) {
+                  builder: (final FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
                   },
@@ -656,10 +656,10 @@ void main() {
     expect(find.text(errorText('foo')!), findsNothing);
   });
 
-  testWidgets('auto-validate before value changes if autovalidateMode was set to always', (WidgetTester tester) async {
+  testWidgets('auto-validate before value changes if autovalidateMode was set to always', (final WidgetTester tester) async {
     late FormFieldState<String> formFieldState;
 
-    String? errorText(String? value) => '$value/error';
+    String? errorText(final String? value) => '$value/error';
 
     Widget builder() {
       return MaterialApp(
@@ -672,7 +672,7 @@ void main() {
                 child: FormField<String>(
                   initialValue: 'foo',
                   autovalidateMode: AutovalidateMode.always,
-                  builder: (FormFieldState<String> state) {
+                  builder: (final FormFieldState<String> state) {
                     formFieldState = state;
                     return Container();
                   },
@@ -689,9 +689,9 @@ void main() {
     expect(formFieldState.hasError, isTrue);
   });
 
-  testWidgets('Form auto-validates form fields only after one of them changes if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Form auto-validates form fields only after one of them changes if autovalidateMode is onUserInteraction', (final WidgetTester tester) async {
     const String initialValue = 'foo';
-    String? errorText(String? value) => 'error/$value';
+    String? errorText(final String? value) => 'error/$value';
 
     Widget builder() {
       return MaterialApp(
@@ -743,8 +743,8 @@ void main() {
     expect(find.text(errorText(initialValue)!), findsNWidgets(2));
   });
 
-  testWidgets('Form auto-validates form fields even before any have changed if autovalidateMode is set to always', (WidgetTester tester) async {
-    String? errorText(String? value) => 'error/$value';
+  testWidgets('Form auto-validates form fields even before any have changed if autovalidateMode is set to always', (final WidgetTester tester) async {
+    String? errorText(final String? value) => 'error/$value';
 
     Widget builder() {
       return MaterialApp(
@@ -773,9 +773,9 @@ void main() {
     expect(find.text(errorText('')!), findsOneWidget);
   });
 
-  testWidgets('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction', (WidgetTester tester) async {
+  testWidgets('Form.reset() resets form fields, and auto validation will only happen on the next user interaction if autovalidateMode is onUserInteraction', (final WidgetTester tester) async {
     final GlobalKey<FormState> formState = GlobalKey<FormState>();
-    String? errorText(String? value) => '$value/error';
+    String? errorText(final String? value) => '$value/error';
 
     Widget builder() {
       return MaterialApp(
@@ -818,7 +818,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/63753.
-  testWidgets('Validate form should return correct validation if the value is composing', (WidgetTester tester) async {
+  testWidgets('Validate form should return correct validation if the value is composing', (final WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String? fieldValue;
 
@@ -834,8 +834,8 @@ void main() {
                 child: TextFormField(
                   maxLength: 5,
                   maxLengthEnforcement: MaxLengthEnforcement.truncateAfterCompositionEnds,
-                  onSaved: (String? value) { fieldValue = value; },
-                  validator: (String? value) => (value != null && value.length > 5) ? 'Exceeded' : null,
+                  onSaved: (final String? value) { fieldValue = value; },
+                  validator: (final String? value) => (value != null && value.length > 5) ? 'Exceeded' : null,
                 ),
               ),
             ),

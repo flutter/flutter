@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/tooltip/tooltip.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Tooltip wait and show duration', (WidgetTester tester) async {
+  testWidgets('Tooltip wait and show duration', (final WidgetTester tester) async {
     const String tooltipText = 'I am a Tooltip';
 
     await tester.pumpWidget(

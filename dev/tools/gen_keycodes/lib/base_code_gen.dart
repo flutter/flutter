@@ -7,7 +7,7 @@ import 'logical_key_data.dart';
 
 import 'physical_key_data.dart';
 
-String _injectDictionary(String template, Map<String, String> dictionary) {
+String _injectDictionary(final String template, final Map<String, String> dictionary) {
   String result = template;
   for (final String key in dictionary.keys) {
     result = result.replaceAll('@@@$key@@@', dictionary[key] ?? '@@@$key@@@');
@@ -53,7 +53,7 @@ abstract class PlatformCodeGenerator extends BaseCodeGenerator {
   /// Absolute path to the output file.
   ///
   /// How this value will be used is based on the callee.
-  String outputPath(String platform);
+  String outputPath(final String platform);
 
   static String engineRoot = '';
 }

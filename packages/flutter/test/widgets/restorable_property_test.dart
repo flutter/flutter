@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('value is not accessible when not registered', (WidgetTester tester) async {
+  testWidgets('value is not accessible when not registered', (final WidgetTester tester) async {
     expect(() => RestorableNum<num>(0).value, throwsAssertionError);
     expect(() => RestorableDouble(1.0).value, throwsAssertionError);
     expect(() => RestorableInt(1).value, throwsAssertionError);
@@ -25,7 +25,7 @@ void main() {
     expect(() => _TestRestorableValue().value, throwsAssertionError);
   });
 
-  testWidgets('work when not in restoration scope', (WidgetTester tester) async {
+  testWidgets('work when not in restoration scope', (final WidgetTester tester) async {
     await tester.pumpWidget(const _RestorableWidget());
 
     expect(find.text('hello world'), findsOneWidget);
@@ -89,7 +89,7 @@ void main() {
     expect(find.text('guten tag'), findsOneWidget);
   });
 
-  testWidgets('restart and restore', (WidgetTester tester) async {
+  testWidgets('restart and restore', (final WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -180,7 +180,7 @@ void main() {
     expect(find.text('guten tag'), findsOneWidget);
   });
 
-  testWidgets('restore to older state', (WidgetTester tester) async {
+  testWidgets('restore to older state', (final WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -278,7 +278,7 @@ void main() {
     expect(find.text('hello world'), findsOneWidget);
   });
 
-  testWidgets('call notifiers when value changes', (WidgetTester tester) async {
+  testWidgets('call notifiers when value changes', (final WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -460,7 +460,7 @@ void main() {
     expect(notifyLog, isEmpty);
   });
 
-  testWidgets('RestorableValue calls didUpdateValue', (WidgetTester tester) async {
+  testWidgets('RestorableValue calls didUpdateValue', (final WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -484,7 +484,7 @@ void main() {
     expect(state.objectValue.didUpdateValueCallCount, 1);
   });
 
-  testWidgets('RestorableEnum and RestorableEnumN assert if default value is not in enum', (WidgetTester tester) async {
+  testWidgets('RestorableEnum and RestorableEnumN assert if default value is not in enum', (final WidgetTester tester) async {
     expect(() => RestorableEnum<TestEnum>(
       TestEnum.four,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
@@ -493,7 +493,7 @@ void main() {
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four})), throwsAssertionError);
   });
 
-  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (WidgetTester tester) async {
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are set', (final WidgetTester tester) async {
     final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
@@ -506,7 +506,7 @@ void main() {
     expect(() => nullableEnumMissingValue.value = TestEnum.four, throwsAssertionError);
   });
 
-  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are restored', (WidgetTester tester) async {
+  testWidgets('RestorableEnum and RestorableEnumN assert if unknown values are restored', (final WidgetTester tester) async {
     final RestorableEnum<TestEnum> enumMissingValue = RestorableEnum<TestEnum>(
       TestEnum.one,
       values: TestEnum.values.toSet().difference(<TestEnum>{TestEnum.four}),
@@ -519,7 +519,7 @@ void main() {
     expect(() => nullableEnumMissingValue.fromPrimitives('four'), throwsAssertionError);
   });
 
-  testWidgets('RestorableN types are properly defined', (WidgetTester tester) async {
+  testWidgets('RestorableN types are properly defined', (final WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root-child',
       child: _RestorableWidget(),
@@ -543,13 +543,13 @@ void main() {
     // expect(state.nullableIntValue.value.runtimeType, int);
 
     // A function that takes a nullable int value.
-    void takesInt(int? value) {}
+    void takesInt(final int? value) {}
     // The following would result in a Dart compile-time error if `value` is
     // a `num?` instead of an `int?`.
     takesInt(state.nullableIntValue.value);
 
     // A function that takes a nullable double value.
-    void takesDouble(double? value) {}
+    void takesDouble(final double? value) {}
     // The following would result in a Dart compile-time error if `value` is
     // a `num?` instead of a `double?`.
     takesDouble(state.nullableDoubleValue.value);
@@ -565,13 +565,13 @@ class _TestRestorableValue extends RestorableValue<Object?> {
   int didUpdateValueCallCount = 0;
 
   @override
-  void didUpdateValue(Object? oldValue) {
+  void didUpdateValue(final Object? oldValue) {
     didUpdateValueCallCount++;
     notifyListeners();
   }
 
   @override
-  Object? fromPrimitives(Object? data) {
+  Object? fromPrimitives(final Object? data) {
     return data;
   }
 
@@ -607,7 +607,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   final _TestRestorableValue objectValue = _TestRestorableValue();
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(numValue, 'num');
     registerForRestoration(doubleValue, 'double');
     registerForRestoration(intValue, 'int');
@@ -626,12 +626,12 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
     registerForRestoration(objectValue, 'object');
   }
 
-  void setProperties(VoidCallback callback) {
+  void setProperties(final VoidCallback callback) {
     setState(callback);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Text(stringValue.value, textDirection: TextDirection.ltr);
   }
 

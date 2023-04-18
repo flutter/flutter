@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 class TestAssetBundle extends AssetBundle {
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(final String key) async {
     if (key == 'AssetManifest.bin') {
       final Map<String, List<Object>> binManifestData = <String, List<Object>>{
         'assets/foo.png': <Object>[
@@ -27,7 +27,7 @@ class TestAssetBundle extends AssetBundle {
   }
 
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
+  Future<T> loadStructuredData<T>(final String key, final Future<T> Function(String value) parser) async {
     return parser(await loadString(key));
   }
 }

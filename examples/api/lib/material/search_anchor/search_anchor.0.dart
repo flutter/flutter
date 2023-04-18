@@ -19,9 +19,9 @@ class _SearchBarAppState extends State<SearchBarApp> {
   Color? selectedColorSeed;
   List<ColorLabel> searchHistory = <ColorLabel>[];
 
-  Iterable<Widget> getHistoryList(SearchController controller) {
+  Iterable<Widget> getHistoryList(final SearchController controller) {
     return searchHistory.map(
-      (ColorLabel color) => ListTile(
+      (final ColorLabel color) => ListTile(
         leading: const Icon(Icons.history),
         title: Text(color.label),
         trailing: IconButton(
@@ -35,10 +35,10 @@ class _SearchBarAppState extends State<SearchBarApp> {
     );
   }
 
-  Iterable<Widget> getSuggestions(SearchController controller) {
+  Iterable<Widget> getSuggestions(final SearchController controller) {
     final String input = controller.value.text;
-    return ColorLabel.values.where((ColorLabel color) => color.label.contains(input)).map(
-          (ColorLabel filteredColor) => ListTile(
+    return ColorLabel.values.where((final ColorLabel color) => color.label.contains(input)).map(
+          (final ColorLabel filteredColor) => ListTile(
             leading: CircleAvatar(backgroundColor: filteredColor.color),
             title: Text(filteredColor.label),
             trailing: IconButton(
@@ -56,7 +56,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
         );
   }
 
-  void handleSelection(ColorLabel selectedColor) {
+  void handleSelection(final ColorLabel selectedColor) {
     setState(() {
       selectedColorSeed = selectedColor.color;
       if (searchHistory.length >= 5) {
@@ -67,7 +67,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: selectedColorSeed);
     final ColorScheme colors = themeData.colorScheme;
 
@@ -81,7 +81,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
             children: <Widget>[
               SearchAnchor.bar(
                 barHintText: 'Search colors',
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
+                suggestionsBuilder: (final BuildContext context, final SearchController controller) {
                   if (controller.text.isEmpty) {
                     if (searchHistory.isNotEmpty) {
                       return getHistoryList(controller);

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/action_buttons/action_icon_theme.0.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Action Icon Buttons', (WidgetTester tester) async {
+  testWidgets('Action Icon Buttons', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/interactive_viewer/interactive_viewe
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('has correct items on screen', (WidgetTester tester) async {
+  testWidgets('has correct items on screen', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.IVBuilderExampleApp(),
     );

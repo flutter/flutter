@@ -65,7 +65,7 @@ class ImageIcon extends StatelessWidget {
   final String? semanticLabel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     final double? iconSize = size ?? iconTheme.size;
 
@@ -97,7 +97,7 @@ class ImageIcon extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));

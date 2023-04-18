@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
+  testWidgets('SliverList reverse children (with keys)', (final WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (final int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
 
@@ -53,8 +53,8 @@ void main() {
     expect(find.text('Tile 0'), findsNothing);
   });
 
-  testWidgets('SliverList replace children (with keys)', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
+  testWidgets('SliverList replace children (with keys)', (final WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (final int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
 
@@ -76,7 +76,7 @@ void main() {
     expect(find.text('Tile 19'), findsOneWidget);
 
     await tester.pumpWidget(_buildSliverList(
-      items: items.map<int>((int i) => i + 100).toList(),
+      items: items.map<int>((final int i) => i + 100).toList(),
       controller: controller,
       itemHeight: itemHeight,
       viewportHeight: viewportHeight,
@@ -105,8 +105,8 @@ void main() {
     expect(find.text('Tile 119'), findsNothing);
   });
 
-  testWidgets('SliverList replace with shorter children list (with keys)', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(20, (int i) => i);
+  testWidgets('SliverList replace with shorter children list (with keys)', (final WidgetTester tester) async {
+    final List<int> items = List<int>.generate(20, (final int i) => i);
     const double itemHeight = 300.0;
     const double viewportHeight = 500.0;
 
@@ -145,7 +145,7 @@ void main() {
     expect(find.text('Tile 19'), findsNothing);
   });
 
-  testWidgets('SliverList should layout first child in case of child reordering', (WidgetTester tester) async {
+  testWidgets('SliverList should layout first child in case of child reordering', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/35904.
     List<String> items = <String>['1', '2'];
 
@@ -163,9 +163,9 @@ void main() {
     expect(find.text('Tile 2'), findsOneWidget);
   });
 
-  testWidgets('SliverList should recalculate inaccurate layout offset case 1', (WidgetTester tester) async {
+  testWidgets('SliverList should recalculate inaccurate layout offset case 1', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
-    final List<int> items = List<int>.generate(20, (int i) => i);
+    final List<int> items = List<int>.generate(20, (final int i) => i);
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       _buildSliverList(
@@ -223,9 +223,9 @@ void main() {
 
   });
 
-  testWidgets('SliverList should recalculate inaccurate layout offset case 2', (WidgetTester tester) async {
+  testWidgets('SliverList should recalculate inaccurate layout offset case 2', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/42142.
-    final List<int> items = List<int>.generate(20, (int i) => i);
+    final List<int> items = List<int>.generate(20, (final int i) => i);
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       _buildSliverList(
@@ -275,11 +275,11 @@ void main() {
     expect(find.text('Tile 3'), findsOneWidget);
   });
 
-  testWidgets('SliverList should start to perform layout from the initial child when there is no valid offset', (WidgetTester tester) async {
+  testWidgets('SliverList should start to perform layout from the initial child when there is no valid offset', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66198.
     bool isShow = true;
     final ScrollController controller = ScrollController();
-    Widget buildSliverList(ScrollController controller) {
+    Widget buildSliverList(final ScrollController controller) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -335,7 +335,7 @@ void main() {
   });
 }
 
-Widget _buildSliverListRenderWidgetChild(List<String> items) {
+Widget _buildSliverListRenderWidgetChild(final List<String> items) {
   return MaterialApp(
     home: Directionality(
       textDirection: TextDirection.ltr,
@@ -347,7 +347,7 @@ Widget _buildSliverListRenderWidgetChild(List<String> items) {
             slivers: <Widget>[
               SliverList(
                 delegate: SliverChildListDelegate(
-                  items.map<Widget>((String item) {
+                  items.map<Widget>((final String item) {
                     return Chip(
                       key: Key(item),
                       label: Text('Tile $item'),
@@ -364,10 +364,10 @@ Widget _buildSliverListRenderWidgetChild(List<String> items) {
 }
 
 Widget _buildSliverList({
-  List<int> items = const <int>[],
-  ScrollController? controller,
-  double itemHeight = 500.0,
-  double viewportHeight = 300.0,
+  final List<int> items = const <int>[],
+  final ScrollController? controller,
+  final double itemHeight = 500.0,
+  final double viewportHeight = 300.0,
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -379,14 +379,14 @@ Widget _buildSliverList({
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int i) {
+                (final BuildContext context, final int i) {
                   return SizedBox(
                     key: ValueKey<int>(items[i]),
                     height: itemHeight,
                     child: Text('Tile ${items[i]}'),
                   );
                 },
-                findChildIndexCallback: (Key key) {
+                findChildIndexCallback: (final Key key) {
                   final ValueKey<int> valueKey = key as ValueKey<int>;
                   final int index = items.indexOf(valueKey.value);
                   return index == -1 ? null : index;

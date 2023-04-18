@@ -12,7 +12,7 @@ import '../framework/task_result.dart' show TaskResult;
 import '../framework/utils.dart' as utils;
 import '../microbenchmarks.dart' as microbenchmarks;
 
-TaskFunction runTask(adb.DeviceOperatingSystem operatingSystem) {
+TaskFunction runTask(final adb.DeviceOperatingSystem operatingSystem) {
   return () async {
     adb.deviceOperatingSystem = operatingSystem;
     final adb.Device device = await adb.devices.workingDevice;

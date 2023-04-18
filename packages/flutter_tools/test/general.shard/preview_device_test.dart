@@ -91,15 +91,15 @@ class FakeBundleBuilder extends Fake implements BundleBuilder {
 
   @override
   Future<void> build({
-    required TargetPlatform platform,
-    required BuildInfo buildInfo,
-    FlutterProject? project,
-    String? mainPath,
-    String manifestPath = defaultManifestPath,
-    String? applicationKernelFilePath,
-    String? depfilePath,
-    String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem
+    required final TargetPlatform platform,
+    required final BuildInfo buildInfo,
+    final FlutterProject? project,
+    final String? mainPath,
+    final String manifestPath = defaultManifestPath,
+    final String? applicationKernelFilePath,
+    final String? depfilePath,
+    final String? assetDirPath,
+    @visibleForTesting final BuildSystem? buildSystem
   }) async {
     final Directory assetDirectory = fileSystem
       .directory(assetDirPath)

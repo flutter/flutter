@@ -12,7 +12,7 @@ class CupertinoButtonApp extends StatelessWidget {
   const CupertinoButtonApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoButtonExample(),
@@ -24,7 +24,7 @@ class CupertinoButtonExample extends StatelessWidget {
   const CupertinoButtonExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoButton Sample'),

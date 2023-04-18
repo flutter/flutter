@@ -25,32 +25,32 @@ class _MediaQueryAspectVariant extends TestVariant<_MediaQueryAspectCase> {
   static _MediaQueryAspectCase? aspect;
 
   @override
-  String describeValue(_MediaQueryAspectCase value) {
+  String describeValue(final _MediaQueryAspectCase value) {
     return value.method.toString();
   }
 
   @override
-  Future<_MediaQueryAspectCase?> setUp(_MediaQueryAspectCase value) async {
+  Future<_MediaQueryAspectCase?> setUp(final _MediaQueryAspectCase value) async {
     final _MediaQueryAspectCase? oldAspect = aspect;
     aspect = value;
     return oldAspect;
   }
 
   @override
-  Future<void> tearDown(_MediaQueryAspectCase value, _MediaQueryAspectCase? memento) async {
+  Future<void> tearDown(final _MediaQueryAspectCase value, final _MediaQueryAspectCase? memento) async {
     aspect = memento;
   }
 }
 
 void main() {
-  testWidgets('MediaQuery does not have a default', (WidgetTester tester) async {
+  testWidgets('MediaQuery does not have a default', (final WidgetTester tester) async {
     bool tested = false;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           tested = true;
           MediaQuery.of(context); // should throw
           return Container();
@@ -88,13 +88,13 @@ void main() {
     );
   });
 
-  testWidgets('MediaQuery.of finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgets('MediaQuery.of finds a MediaQueryData when there is one', (final WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             final MediaQueryData data = MediaQuery.of(context);
             expect(data, isNotNull);
             tested = true;
@@ -108,14 +108,14 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf defaults to null', (WidgetTester tester) async {
+  testWidgets('MediaQuery.maybeOf defaults to null', (final WidgetTester tester) async {
     bool tested = false;
     // Cannot use tester.pumpWidget here because it wraps the widget in a View,
     // which introduces a MediaQuery ancestor.
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           final MediaQueryData? data = MediaQuery.maybeOf(context);
           expect(data, isNull);
           tested = true;
@@ -126,13 +126,13 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one', (WidgetTester tester) async {
+  testWidgets('MediaQuery.maybeOf finds a MediaQueryData when there is one', (final WidgetTester tester) async {
     bool tested = false;
     await tester.pumpWidget(
       MediaQuery(
         data: const MediaQueryData(),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             final MediaQueryData? data = MediaQuery.maybeOf(context);
             expect(data, isNotNull);
             tested = true;
@@ -144,7 +144,7 @@ void main() {
     expect(tested, isTrue);
   });
 
-  testWidgets('MediaQueryData.fromView is sane', (WidgetTester tester) async {
+  testWidgets('MediaQueryData.fromView is sane', (final WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     expect(data, hasOneLineDescription);
     expect(data.hashCode, equals(data.copyWith().hashCode));
@@ -159,7 +159,7 @@ void main() {
     expect(data.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQueryData.fromView uses platformData if provided', (WidgetTester tester) async {
+  testWidgets('MediaQueryData.fromView uses platformData if provided', (final WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
       textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
@@ -194,7 +194,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQueryData.fromView uses data from platformDispatcher if no platformData is provided', (WidgetTester tester) async {
+  testWidgets('MediaQueryData.fromView uses data from platformDispatcher if no platformData is provided', (final WidgetTester tester) async {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
@@ -223,7 +223,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view, preserving platform-specific data', (final WidgetTester tester) async {
     const MediaQueryData platformData = MediaQueryData(
       textScaleFactor: 1234,
       platformBrightness: Brightness.dark,
@@ -242,7 +242,7 @@ void main() {
       child: MediaQuery.fromView(
         view: tester.view,
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             data = MediaQuery.of(context);
             return const Placeholder();
           },
@@ -270,7 +270,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView injects a new MediaQuery with data from view when no surrounding MediaQuery exists', (final WidgetTester tester) async {
     tester.platformDispatcher
       ..textScaleFactorTestValue = 123
       ..platformBrightnessTestValue = Brightness.dark
@@ -282,12 +282,12 @@ void main() {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           outerData = MediaQuery.maybeOf(context);
           return MediaQuery.fromView(
               view: tester.view,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   data = MediaQuery.of(context);
                   return const Placeholder();
                 },
@@ -317,7 +317,7 @@ void main() {
     expect(data.displayFeatures, tester.view.displayFeatures);
   });
 
-  testWidgets('MediaQuery.fromView updates on notifications (no parent data)', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView updates on notifications (no parent data)', (final WidgetTester tester) async {
     addTearDown(() => tester.platformDispatcher.clearAllTestValues());
     addTearDown(() => tester.view.reset());
 
@@ -333,12 +333,12 @@ void main() {
     await pumpWidgetWithoutViewWrapper(
       tester: tester,
       widget: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           outerData = MediaQuery.maybeOf(context);
           return MediaQuery.fromView(
               view: tester.view,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   rebuildCount++;
                   data = MediaQuery.of(context);
                   return const Placeholder();
@@ -377,7 +377,7 @@ void main() {
     expect(rebuildCount, 5);
   });
 
-  testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView updates on notifications (with parent data)', (final WidgetTester tester) async {
     addTearDown(() => tester.platformDispatcher.clearAllTestValues());
     addTearDown(() => tester.view.reset());
 
@@ -399,7 +399,7 @@ void main() {
         child: MediaQuery.fromView(
           view: tester.view,
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               rebuildCount++;
               data = MediaQuery.of(context);
               return const Placeholder();
@@ -436,21 +436,21 @@ void main() {
     expect(rebuildCount, 2);
   });
 
-  testWidgets('MediaQuery.fromView updates when parent data changes', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView updates when parent data changes', (final WidgetTester tester) async {
     late MediaQueryData data;
     int rebuildCount = 0;
     double textScaleFactor = 55;
     late StateSetter stateSetter;
     await tester.pumpWidget(
       StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
+        builder: (final BuildContext context, final StateSetter setState) {
           stateSetter = setState;
           return MediaQuery(
             data: MediaQueryData(textScaleFactor: textScaleFactor),
             child: MediaQuery.fromView(
               view: tester.view,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   rebuildCount++;
                   data = MediaQuery.of(context);
                   return const Placeholder();
@@ -473,7 +473,7 @@ void main() {
     expect(rebuildCount, 2);
   });
 
-  testWidgets('MediaQueryData.copyWith defaults to source', (WidgetTester tester) async {
+  testWidgets('MediaQueryData.copyWith defaults to source', (final WidgetTester tester) async {
     final MediaQueryData data = MediaQueryData.fromView(tester.view);
     final MediaQueryData copied = data.copyWith();
     expect(copied.size, data.size);
@@ -494,7 +494,7 @@ void main() {
     expect(copied.displayFeatures, data.displayFeatures);
   });
 
-  testWidgets('MediaQuery.copyWith copies specified values', (WidgetTester tester) async {
+  testWidgets('MediaQuery.copyWith copies specified values', (final WidgetTester tester) async {
     // Random and unique double values are used to ensure that the correct
     // values are copied over exactly
     const Size customSize = Size(3.14, 2.72);
@@ -552,7 +552,7 @@ void main() {
     expect(copied.displayFeatures, customDisplayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removePadding removes specified padding', (final WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -587,7 +587,7 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery.removePadding(
               context: context,
               removeLeft: true,
@@ -595,7 +595,7 @@ void main() {
               removeRight: true,
               removeBottom: true,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
                 },
@@ -622,7 +622,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removePadding only removes specified padding', (final WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -657,12 +657,12 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery.removePadding(
               removeTop: true,
               context: context,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
                 },
@@ -689,7 +689,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewInsets removes specified viewInsets', (final WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -724,7 +724,7 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery.removeViewInsets(
               context: context,
               removeLeft: true,
@@ -732,7 +732,7 @@ void main() {
               removeRight: true,
               removeBottom: true,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
                 },
@@ -759,7 +759,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewInsets removes only specified viewInsets', (final WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -794,12 +794,12 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery.removeViewInsets(
               context: context,
               removeBottom: true,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
                 },
@@ -826,7 +826,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (final WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -861,7 +861,7 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery.removeViewPadding(
               context: context,
               removeLeft: true,
@@ -869,7 +869,7 @@ void main() {
               removeRight: true,
               removeBottom: true,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
                 },
@@ -896,7 +896,7 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeViewPadding removes only specified viewPadding', (final WidgetTester tester) async {
     const Size size = Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -931,12 +931,12 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery.removeViewPadding(
               context: context,
               removeLeft: true,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   unpadded = MediaQuery.of(context);
                   return Container();
                 },
@@ -963,20 +963,20 @@ void main() {
     expect(unpadded.displayFeatures, displayFeatures);
   });
 
-  testWidgets('MediaQuery.textScaleFactorOf', (WidgetTester tester) async {
+  testWidgets('MediaQuery.textScaleFactorOf', (final WidgetTester tester) async {
     late double outsideTextScaleFactor;
     late double insideTextScaleFactor;
 
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           outsideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               textScaleFactor: 4.0,
             ),
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 insideTextScaleFactor = MediaQuery.textScaleFactorOf(context);
                 return Container();
               },
@@ -990,20 +990,20 @@ void main() {
     expect(insideTextScaleFactor, 4.0);
   });
 
-  testWidgets('MediaQuery.platformBrightnessOf', (WidgetTester tester) async {
+  testWidgets('MediaQuery.platformBrightnessOf', (final WidgetTester tester) async {
     late Brightness outsideBrightness;
     late Brightness insideBrightness;
 
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           outsideBrightness = MediaQuery.platformBrightnessOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               platformBrightness: Brightness.dark,
             ),
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 insideBrightness = MediaQuery.platformBrightnessOf(context);
                 return Container();
               },
@@ -1017,20 +1017,20 @@ void main() {
     expect(insideBrightness, Brightness.dark);
   });
 
-  testWidgets('MediaQuery.highContrastOf', (WidgetTester tester) async {
+  testWidgets('MediaQuery.highContrastOf', (final WidgetTester tester) async {
     late bool outsideHighContrast;
     late bool insideHighContrast;
 
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           outsideHighContrast = MediaQuery.highContrastOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               highContrast: true,
             ),
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 insideHighContrast = MediaQuery.highContrastOf(context);
                 return Container();
               },
@@ -1044,20 +1044,20 @@ void main() {
     expect(insideHighContrast, true);
   });
 
-  testWidgets('MediaQuery.boldTextOf', (WidgetTester tester) async {
+  testWidgets('MediaQuery.boldTextOf', (final WidgetTester tester) async {
     late bool outsideBoldTextOverride;
     late bool insideBoldTextOverride;
 
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           outsideBoldTextOverride = MediaQuery.boldTextOf(context);
           return MediaQuery(
             data: const MediaQueryData(
               boldText: true,
             ),
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 insideBoldTextOverride = MediaQuery.boldTextOf(context);
                 return Container();
               },
@@ -1071,18 +1071,18 @@ void main() {
     expect(insideBoldTextOverride, true);
   });
 
-  testWidgets('MediaQuery.fromView creates a MediaQuery', (WidgetTester tester) async {
+  testWidgets('MediaQuery.fromView creates a MediaQuery', (final WidgetTester tester) async {
     MediaQuery? mediaQueryOutside;
     MediaQuery? mediaQueryInside;
 
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           mediaQueryOutside = context.findAncestorWidgetOfExactType<MediaQuery>();
           return MediaQuery.fromView(
             view: View.of(context),
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 mediaQueryInside = context.findAncestorWidgetOfExactType<MediaQuery>();
                 return const SizedBox();
               },
@@ -1096,14 +1096,14 @@ void main() {
     expect(mediaQueryOutside, isNot(mediaQueryInside));
   });
 
-  testWidgets('MediaQueryData.fromWindow is created using window values', (WidgetTester tester) async {
+  testWidgets('MediaQueryData.fromWindow is created using window values', (final WidgetTester tester) async {
     final MediaQueryData windowData = MediaQueryData.fromWindow(tester.view);
     late MediaQueryData fromWindowData;
 
     await tester.pumpWidget(
       MediaQuery.fromWindow(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             fromWindowData = MediaQuery.of(context);
             return const SizedBox();
           },
@@ -1132,7 +1132,7 @@ void main() {
     expect(settingsA, isNot(settingsB));
   });
 
-  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removeDisplayFeatures removes specified display features and padding', (final WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -1174,11 +1174,11 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery(
               data: MediaQuery.of(context).removeDisplayFeatures(subScreen),
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   subScreenMediaQuery = MediaQuery.of(context);
                   return Container();
                 },
@@ -1204,7 +1204,7 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, isEmpty);
   });
 
-  testWidgets('MediaQuery.removePadding only removes specified display features and padding', (WidgetTester tester) async {
+  testWidgets('MediaQuery.removePadding only removes specified display features and padding', (final WidgetTester tester) async {
     const Size size = Size(82.0, 40.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
@@ -1247,11 +1247,11 @@ void main() {
           displayFeatures: displayFeatures,
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery(
               data: MediaQuery.of(context).removeDisplayFeatures(subScreen),
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   subScreenMediaQuery = MediaQuery.of(context);
                   return Container();
                 },
@@ -1286,14 +1286,14 @@ void main() {
     expect(subScreenMediaQuery.displayFeatures, <DisplayFeature>[cutoutDisplayFeature]);
   });
 
-  testWidgets('MediaQueryData.gestureSettings is set from view.gestureSettings', (WidgetTester tester) async {
+  testWidgets('MediaQueryData.gestureSettings is set from view.gestureSettings', (final WidgetTester tester) async {
     tester.view.gestureSettings = const GestureSettings(physicalDoubleTapSlop: 100, physicalTouchSlop: 100);
     addTearDown(() => tester.view.resetGestureSettings());
 
     expect(MediaQueryData.fromView(tester.view).gestureSettings.touchSlop, closeTo(33.33, 0.1)); // Repeating, of course
   });
 
-  testWidgets('MediaQuery can be partially depended-on', (WidgetTester tester) async {
+  testWidgets('MediaQuery can be partially depended-on', (final WidgetTester tester) async {
     MediaQueryData data = const MediaQueryData(
       size: Size(800, 600),
       textScaleFactor: 1.1
@@ -1303,21 +1303,21 @@ void main() {
     int textScaleFactorBuildCount = 0;
 
     final Widget showSize = Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         sizeBuildCount++;
         return Text('size: ${MediaQuery.sizeOf(context)}');
       }
     );
 
     final Widget showTextScaleFactor = Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         textScaleFactorBuildCount++;
         return Text('textScaleFactor: ${MediaQuery.textScaleFactorOf(context).toStringAsFixed(1)}');
       }
     );
 
     final Widget page = StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
+      builder: (final BuildContext context, final StateSetter setState) {
         return MediaQuery(
           data: data,
           child: Center(
@@ -1369,13 +1369,13 @@ void main() {
     expect(textScaleFactorBuildCount, 2);
   });
 
-  testWidgets('MediaQuery partial dependencies', (WidgetTester tester) async {
+  testWidgets('MediaQuery partial dependencies', (final WidgetTester tester) async {
     MediaQueryData data = const MediaQueryData();
 
     int buildCount = 0;
 
     final Widget builder = Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         _MediaQueryAspectVariant.aspect!.method(context);
         buildCount++;
         return const SizedBox.shrink();
@@ -1383,7 +1383,7 @@ void main() {
     );
 
     final Widget page = StatefulBuilder(
-      builder: (BuildContext context, StateSetter setState) {
+      builder: (final BuildContext context, final StateSetter setState) {
         return MediaQuery(
           data: data,
           child: ListView(
@@ -1467,7 +1467,7 @@ void main() {
   ));
 }
 
-Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
+Future<void> pumpWidgetWithoutViewWrapper({required final WidgetTester tester, required  final Widget widget}) {
   tester.binding.attachRootWidget(widget);
   tester.binding.scheduleFrame();
   return tester.binding.pump();

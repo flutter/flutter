@@ -13,10 +13,10 @@ Future<void> main() async {
     'base/dex/classes.dex',
     'base/manifest/AndroidManifest.xml',
   ];
-  final Iterable<String> flutterAabAssets = flutterAssets.map((String file) => 'base/$file');
+  final Iterable<String> flutterAabAssets = flutterAssets.map((final String file) => 'base/$file');
   await task(() async {
     try {
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('App bundle content for task bundleRelease without explicit target platform');
 
         await inDirectory(project.rootPath, () {
@@ -44,7 +44,7 @@ Future<void> main() async {
         ], await getFilesInAppBundle(releaseBundle));
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('App bundle content using flavors without explicit target platform');
         // Add a few flavors.
         await project.addProductFlavors(<String> [
@@ -151,7 +151,7 @@ Future<void> main() async {
         ], await getFilesInAppBundle(productionBundlePath));
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('App bundle content for task bundleRelease with target platform = android-arm');
 
         await inDirectory(project.rootPath, () {

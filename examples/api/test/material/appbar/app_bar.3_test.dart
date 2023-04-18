@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets(
     'AppBar elevates when nested scroll view is scrolled underneath the AppBar',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       Material getMaterial() => tester.widget<Material>(find.descendant(
         of: find.byType(AppBar),
         matching: find.byType(Material),

@@ -40,7 +40,7 @@ class BenchClippedOutPictures extends SceneBuilderRecorder {
   static const int kColumns = 20;
 
   @override
-  void onDrawFrame(SceneBuilder sceneBuilder) {
+  void onDrawFrame(final SceneBuilder sceneBuilder) {
     final Size viewSize = view.physicalSize / view.devicePixelRatio;
     final Size pictureSize = Size(
       viewSize.width / kColumns,
@@ -48,7 +48,7 @@ class BenchClippedOutPictures extends SceneBuilderRecorder {
     );
 
     // Fills a single cell with random text.
-    void fillCell(int row, int column) {
+    void fillCell(final int row, final int column) {
       sceneBuilder.pushOffset(
         column * pictureSize.width,
         row * pictureSize.height,

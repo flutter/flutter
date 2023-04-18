@@ -23,7 +23,7 @@ const List<String> kSentinelStr = <String>[
 /// https://ui.perfetto.dev/#!/?s=da6628c3a92456ae8fa3f345d0186e781da77e90fc8a64d073e9fee11d1e65
 /// Regression test for https://github.com/flutter/flutter/issues/98973
 TaskFunction androidChoreographerDoFrameTest({
-  Map<String, String>? environment,
+  final Map<String, String>? environment,
 }) {
   final Directory tempDir = Directory.systemTemp
       .createTempSync('flutter_devicelab_android_surface_recreation.');
@@ -78,7 +78,7 @@ Future<void> main() async {
 }
 ''', flush: true);
 
-      Future<TaskResult> runTestFor(String mode) async {
+      Future<TaskResult> runTestFor(final String mode) async {
         int nextCompleterIdx = 0;
         final Map<String, Completer<void>> sentinelCompleters = <String, Completer<void>>{};
         for (final String sentinel in kSentinelStr) {
@@ -98,7 +98,7 @@ Future<void> main() async {
         final StreamSubscription<void> stdout = run.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
             if (currSentinelIdx < sentinelCompleters.keys.length &&
                 line.contains(sentinelCompleters.keys.elementAt(currSentinelIdx))) {
               sentinelCompleters.values.elementAt(currSentinelIdx).complete();
@@ -112,13 +112,13 @@ Future<void> main() async {
         final StreamSubscription<void> stderr = run.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
             print('stderr: $line');
           });
 
         final Completer<void> exitCompleter = Completer<void>();
 
-        unawaited(run.exitCode.then((int exitCode) {
+        unawaited(run.exitCode.then((final int exitCode) {
           exitCompleter.complete();
         }));
 

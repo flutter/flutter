@@ -30,7 +30,7 @@ class SnackBarDemo extends StatefulWidget {
 class _SnackBarDemoState extends State<SnackBarDemo> {
   int _snackBarIndex = 1;
 
-  Widget buildBody(BuildContext context) {
+  Widget buildBody(final BuildContext context) {
     return SafeArea(
       top: false,
       bottom: false,
@@ -60,7 +60,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
           ),
           const Text(_text3),
         ]
-        .map<Widget>((Widget child) {
+        .map<Widget>((final Widget child) {
           return Container(
             margin: const EdgeInsets.symmetric(vertical: 12.0),
             child: child,
@@ -72,7 +72,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Snackbar'),

@@ -60,8 +60,8 @@ void main() {
       fakeVmServices = <FakeVmService>[];
       uriConnections = <Uri>[];
       Future<vms.VmService> fakeVmConnectionFunction(
-        Uri uri, {
-        Duration? timeout,
+        final Uri uri, {
+        final Duration? timeout,
       }) {
         return Future<vms.VmService>(() async {
           final FakeVmService service = FakeVmService();
@@ -85,10 +85,10 @@ void main() {
     test('end-to-end with one vm connection and flutter view query', () async {
       int port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
-        String address,
-        int remotePort, [
-        String? interface = '',
-        String? configFile,
+        final String address,
+        final int remotePort, [
+        final String? interface = '',
+        final String? configFile,
       ]) {
         return Future<PortForwarder>(() {
           final FakePortForwarder pf = FakePortForwarder();
@@ -170,10 +170,10 @@ void main() {
     test('end-to-end with one vm and remote open port', () async {
       int port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
-        String address,
-        int remotePort, [
-        String? interface = '',
-        String? configFile,
+        final String address,
+        final int remotePort, [
+        final String? interface = '',
+        final String? configFile,
       ]) {
         return Future<PortForwarder>(() {
           final FakePortForwarder pf = FakePortForwarder();
@@ -255,10 +255,10 @@ void main() {
     test('end-to-end with one vm and ipv4', () async {
       int port = 0;
       Future<PortForwarder> fakePortForwardingFunction(
-        String address,
-        int remotePort, [
-        String? interface = '',
-        String? configFile,
+        final String address,
+        final int remotePort, [
+        final String? interface = '',
+        final String? configFile,
       ]) {
         return Future<PortForwarder>(() {
           final FakePortForwarder pf = FakePortForwarder();
@@ -350,7 +350,7 @@ void main() {
 class FakeSshCommandRunner extends Fake implements SshCommandRunner {
   List<String>? iqueryResponse;
   @override
-  Future<List<String>> run(String command) async {
+  Future<List<String>> run(final String command) async {
     if (command.startsWith('iquery --format json show')) {
       return iqueryResponse!;
     }
@@ -394,7 +394,7 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Response> callMethod(String method, {String? isolateId, Map<String, dynamic>? args}) async {
+  Future<vms.Response> callMethod(final String method, {final String? isolateId, final Map<String, dynamic>? args}) async {
     if (method == '_flutter.listViews') {
       return flutterListViews!;
     }

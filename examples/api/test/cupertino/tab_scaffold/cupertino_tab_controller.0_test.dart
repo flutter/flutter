@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/tab_scaffold/cupertino_tab_control
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can switch tabs using CupertinoTabController', (WidgetTester tester) async {
+  testWidgets('Can switch tabs using CupertinoTabController', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TabControllerApp(),
     );

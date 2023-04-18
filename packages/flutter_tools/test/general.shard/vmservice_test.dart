@@ -62,7 +62,7 @@ final FakeVmServiceRequest listViewsRequest = FakeVmServiceRequest(
 
 void main() {
   testWithoutContext('VM Service registers reloadSources', () async {
-    Future<void> reloadSources(String isolateId, { bool? pause, bool? force}) async {}
+    Future<void> reloadSources(final String isolateId, { final bool? pause, final bool? force}) async {}
 
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
@@ -124,7 +124,7 @@ void main() {
 
     await expectLater(() async => setUpVmService(
       skSLMethod: () async => 'hello',
-      printStructuredErrorLogMethod: (vm_service.Event event) { },
+      printStructuredErrorLogMethod: (final vm_service.Event event) { },
       vmService: mockVMService,
     ), throwsToolExit());
   });
@@ -132,7 +132,7 @@ void main() {
   testWithoutContext('VM Service registers flutterPrintStructuredErrorLogMethod', () async {
     final MockVMService mockVMService = MockVMService();
     await setUpVmService(
-      printStructuredErrorLogMethod: (vm_service.Event event) async => 'hello',
+      printStructuredErrorLogMethod: (final vm_service.Event event) async => 'hello',
       vmService: mockVMService,
     );
     expect(mockVMService.listenedStreams, contains(vm_service.EventStreams.kExtension));
@@ -149,7 +149,7 @@ void main() {
 
   testUsingContext('VM Service prints messages for connection failures', () {
     final BufferLogger logger = BufferLogger.test();
-    FakeAsync().run((FakeAsync time) {
+    FakeAsync().run((final FakeAsync time) {
       final Uri uri = Uri.parse('ws://127.0.0.1:12345/QqL7EFEDNG0=/ws');
       unawaited(connectToVmService(uri, logger: logger));
 
@@ -898,7 +898,7 @@ void main() {
 
   testUsingContext('WebSocket URL construction uses correct URI join primitives', () async {
     final Completer<String> completer = Completer<String>();
-    openChannelForTesting = (String url, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault, required Logger logger}) async {
+    openChannelForTesting = (final String url, {final io.CompressionOptions compression = io.CompressionOptions.compressionDefault, required final Logger logger}) async {
       completer.complete(url);
       throw Exception('');
     };
@@ -912,7 +912,7 @@ void main() {
 
 class MockFlutterProject extends Fake implements FlutterProject {
   MockFlutterProject({
-    required IosProject mockedIos
+    required final IosProject mockedIos
   }) : ios = mockedIos;
 
   @override
@@ -937,12 +937,12 @@ class MockVMService extends Fake implements vm_service.VmService {
   bool errorOnRegisterService = false;
 
   @override
-  void registerServiceCallback(String service, vm_service.ServiceCallback cb) {
+  void registerServiceCallback(final String service, final vm_service.ServiceCallback cb) {
     serviceCallBacks[service] = cb;
   }
 
   @override
-  Future<vm_service.Success> registerService(String service, String alias) async {
+  Future<vm_service.Success> registerService(final String service, final String alias) async {
     services[service] = alias;
     if (errorOnRegisterService) {
       throw vm_service.RPCError('registerService', 1234, 'error');
@@ -954,7 +954,7 @@ class MockVMService extends Fake implements vm_service.VmService {
   Stream<vm_service.Event> get onExtensionEvent => const Stream<vm_service.Event>.empty();
 
   @override
-  Future<vm_service.Success> streamListen(String streamId) async {
+  Future<vm_service.Success> streamListen(final String streamId) async {
     listenedStreams.add(streamId);
     return vm_service.Success();
   }
@@ -967,9 +967,9 @@ class FakeDevice extends Fake implements Device { }
 
 /// A [WebSocketConnector] that always throws an [io.SocketException].
 Future<io.WebSocket> failingWebSocketConnector(
-  String url, {
-  io.CompressionOptions? compression,
-  Logger? logger,
+  final String url, {
+  final io.CompressionOptions? compression,
+  final Logger? logger,
 }) {
   throw const io.SocketException('Failed WebSocket connection');
 }

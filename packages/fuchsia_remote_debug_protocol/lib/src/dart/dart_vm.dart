@@ -29,8 +29,8 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 ///
 /// Gives up after `timeout` has elapsed.
 Future<vms.VmService> _waitAndConnect(
-  Uri uri, {
-  Duration timeout = _kConnectTimeout,
+  final Uri uri, {
+  final Duration timeout = _kConnectTimeout,
 }) async {
   int attempts = 0;
   late WebSocket socket;
@@ -40,7 +40,7 @@ Future<vms.VmService> _waitAndConnect(
       final StreamController<dynamic> controller = StreamController<dynamic>();
       final Completer<void> streamClosedCompleter = Completer<void>();
       socket.listen(
-        (dynamic data) => controller.add(data),
+        (final dynamic data) => controller.add(data),
         onDone: () => streamClosedCompleter.complete(),
       );
       final vms.VmService service = vms.VmService(
@@ -105,7 +105,7 @@ class DartVm {
   /// Throws an error if unable to connect.
   static Future<DartVm> connect(
     Uri uri, {
-    Duration timeout = _kConnectTimeout,
+    final Duration timeout = _kConnectTimeout,
   }) async {
     if (uri.scheme == 'http') {
       uri = uri.replace(scheme: 'ws', path: '/ws');
@@ -120,7 +120,7 @@ class DartVm {
   /// This is not limited to Isolates running Flutter, but to any Isolate on the
   /// VM. Therefore, the [pattern] argument should be written to exclude
   /// matching unintended isolates.
-  Future<List<IsolateRef>> getMainIsolatesByPattern(Pattern pattern) async {
+  Future<List<IsolateRef>> getMainIsolatesByPattern(final Pattern pattern) async {
     final vms.VM vmRef = await _vmService.getVM();
     final List<IsolateRef> result = <IsolateRef>[];
     for (final vms.IsolateRef isolateRef in vmRef.isolates!) {
@@ -175,7 +175,7 @@ class FlutterView {
   ///
   /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
-  factory FlutterView._fromJson(Map<String, dynamic> json) {
+  factory FlutterView._fromJson(final Map<String, dynamic> json) {
     final Map<String, dynamic>? isolate = json['isolate'] as Map<String, dynamic>?;
     final String? id = json['id'] as String?;
     String? name;
@@ -218,7 +218,7 @@ class FlutterView {
 class IsolateRef {
   IsolateRef._(this.name, this.number, this.dartVm);
 
-  factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
+  factory IsolateRef._fromJson(final Map<String, dynamic> json, final DartVm dartVm) {
     final String? number = json['number'] as String?;
     final String? name = json['name'] as String?;
     final String? type = json['type'] as String?;

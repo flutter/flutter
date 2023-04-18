@@ -12,7 +12,7 @@ class SliverFillRemainingExampleApp extends StatelessWidget {
   const SliverFillRemainingExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverFillRemaining Sample')),
@@ -26,7 +26,7 @@ class SliverFillRemainingExample extends StatelessWidget {
   const SliverFillRemainingExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomScrollView(
       // The ScrollPhysics are overridden here to illustrate the functionality
       // of fillOverscroll on all devices this sample may be run on.

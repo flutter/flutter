@@ -20,7 +20,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
   double _discreteValue = 20.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Sliders'),
@@ -43,7 +43,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                     CupertinoSlider(
                       value: _value,
                       max: 100.0,
-                      onChanged: (double value) {
+                      onChanged: (final double value) {
                         setState(() {
                           _value = value;
                         });
@@ -59,7 +59,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                       value: _discreteValue,
                       max: 100.0,
                       divisions: 5,
-                      onChanged: (double value) {
+                      onChanged: (final double value) {
                         setState(() {
                           _discreteValue = value;
                         });

@@ -93,7 +93,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
     return LogicalKeyboardKey(keyCode | LogicalKeyboardKey.windowsPlane);
   }
 
-  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+  bool _isLeftRightModifierPressed(final KeyboardSide side, final int anyMask, final int leftMask, final int rightMask) {
     if (modifiers & anyMask == 0 &&
         modifiers & leftMask == 0 &&
         modifiers & rightMask == 0) {
@@ -117,7 +117,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+  bool isModifierPressed(final ModifierKey key, {final KeyboardSide side = KeyboardSide.any}) {
     final bool result;
     switch (key) {
       case ModifierKey.controlModifier:
@@ -147,8 +147,8 @@ class RawKeyEventDataWindows extends RawKeyEventData {
 
 
   @override
-  KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int leftMask, int rightMask, int anyMask) {
+  KeyboardSide? getModifierSide(final ModifierKey key) {
+    KeyboardSide? findSide(final int leftMask, final int rightMask, final int anyMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
@@ -192,7 +192,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<int>('keyCode', keyCode));
     properties.add(DiagnosticsProperty<int>('scanCode', scanCode));
@@ -201,7 +201,7 @@ class RawKeyEventDataWindows extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

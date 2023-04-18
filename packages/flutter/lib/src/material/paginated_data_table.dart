@@ -75,9 +75,9 @@ class PaginatedDataTable extends StatefulWidget {
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.7.0-5.0.pre.',
     )
-    double? dataRowHeight,
-    double? dataRowMinHeight,
-    double? dataRowMaxHeight,
+    final double? dataRowHeight,
+    final double? dataRowMinHeight,
+    final double? dataRowMaxHeight,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
@@ -289,7 +289,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   @override
-  void didUpdateWidget(PaginatedDataTable oldWidget) {
+  void didUpdateWidget(final PaginatedDataTable oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.source != widget.source) {
       oldWidget.source.removeListener(_handleDataSourceChanged);
@@ -314,7 +314,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   }
 
   /// Ensures that the given row is visible.
-  void pageTo(int rowIndex) {
+  void pageTo(final int rowIndex) {
     final int oldFirstRowIndex = _firstRowIndex;
     setState(() {
       final int rowsPerPage = widget.rowsPerPage;
@@ -326,16 +326,16 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
   }
 
-  DataRow _getBlankRowFor(int index) {
+  DataRow _getBlankRowFor(final int index) {
     return DataRow.byIndex(
       index: index,
-      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList(),
+      cells: widget.columns.map<DataCell>((final DataColumn column) => DataCell.empty).toList(),
     );
   }
 
-  DataRow _getProgressIndicatorRowFor(int index) {
+  DataRow _getProgressIndicatorRowFor(final int index) {
     bool haveProgressIndicator = false;
-    final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
+    final List<DataCell> cells = widget.columns.map<DataCell>((final DataColumn column) {
       if (!column.numeric) {
         haveProgressIndicator = true;
         return const DataCell(CircularProgressIndicator());
@@ -352,7 +352,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     );
   }
 
-  List<DataRow> _getRows(int firstRowIndex, int rowsPerPage) {
+  List<DataRow> _getRows(final int firstRowIndex, final int rowsPerPage) {
     final List<DataRow> result = <DataRow>[];
     final int nextPageFirstRowIndex = firstRowIndex + rowsPerPage;
     bool haveProgressIndicator = false;
@@ -393,7 +393,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   final GlobalKey _tableKey = GlobalKey();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // TODO(ianh): This whole build function doesn't handle RTL yet.
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData themeData = Theme.of(context);
@@ -409,7 +409,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
     if (widget.actions != null) {
       headerWidgets.addAll(
-        widget.actions!.map<Widget>((Widget action) {
+        widget.actions!.map<Widget>((final Widget action) {
           return Padding(
             // 8.0 is the default padding of an icon button
             padding: const EdgeInsetsDirectional.only(start: 24.0 - 8.0 * 2.0),
@@ -424,8 +424,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> footerWidgets = <Widget>[];
     if (widget.onRowsPerPageChanged != null) {
       final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
-        .where((int value) => value <= _rowCount || value == widget.rowsPerPage)
-        .map<DropdownMenuItem<int>>((int value) {
+        .where((final int value) => value <= _rowCount || value == widget.rowsPerPage)
+        .map<DropdownMenuItem<int>>((final int value) {
           return DropdownMenuItem<int>(
             value: value,
             child: Text('$value'),
@@ -498,7 +498,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     return Card(
       semanticContainer: false,
       child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (final BuildContext context, final BoxConstraints constraints) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[

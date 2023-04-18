@@ -72,7 +72,7 @@ class ScrollBehavior {
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    final AndroidOverscrollIndicator? androidOverscrollIndicator,
   }): _androidOverscrollIndicator = androidOverscrollIndicator;
 
   /// Specifies which overscroll indicator to use on [TargetPlatform.android].
@@ -99,17 +99,17 @@ class ScrollBehavior {
   /// the widget level, like [PageView.scrollBehavior], in order to change the
   /// default.
   ScrollBehavior copyWith({
-    bool? scrollbars,
-    bool? overscroll,
-    Set<PointerDeviceKind>? dragDevices,
-    Set<LogicalKeyboardKey>? pointerAxisModifiers,
-    ScrollPhysics? physics,
-    TargetPlatform? platform,
+    final bool? scrollbars,
+    final bool? overscroll,
+    final Set<PointerDeviceKind>? dragDevices,
+    final Set<LogicalKeyboardKey>? pointerAxisModifiers,
+    final ScrollPhysics? physics,
+    final TargetPlatform? platform,
     @Deprecated(
       'Use ThemeData.useMaterial3 or override ScrollBehavior.buildOverscrollIndicator. '
       'This feature was deprecated after v2.13.0-0.0.pre.'
     )
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    final AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) {
     return _WrappedScrollBehavior(
       delegate: this,
@@ -126,7 +126,7 @@ class ScrollBehavior {
   /// The platform whose scroll physics should be implemented.
   ///
   /// Defaults to the current platform.
-  TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
+  TargetPlatform getPlatform(final BuildContext context) => defaultTargetPlatform;
 
   /// The device kinds that the scrollable will accept drag gestures from.
   ///
@@ -156,7 +156,7 @@ class ScrollBehavior {
   };
 
   /// Applies a [RawScrollbar] to the child widget on desktop platforms.
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(final BuildContext context, final Widget child, final ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
@@ -177,7 +177,7 @@ class ScrollBehavior {
 
   /// Applies a [GlowingOverscrollIndicator] to the child widget on
   /// [TargetPlatform.android] and [TargetPlatform.fuchsia].
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(final BuildContext context, final Widget child, final ScrollableDetails details) {
     // When modifying this function, consider modifying the implementation in
     // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
@@ -222,17 +222,17 @@ class ScrollBehavior {
   /// The default implementation provides a new
   /// [IOSScrollViewFlingVelocityTracker] on iOS and macOS for each new pointer,
   /// and a new [VelocityTracker] on other platforms for each new pointer.
-  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(final BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
-        return (PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind);
+        return (final PointerEvent event) => IOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.macOS:
-        return (PointerEvent event) => MacOSScrollViewFlingVelocityTracker(event.kind);
+        return (final PointerEvent event) => MacOSScrollViewFlingVelocityTracker(event.kind);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
-        return (PointerEvent event) => VelocityTracker.withKind(event.kind);
+        return (final PointerEvent event) => VelocityTracker.withKind(event.kind);
     }
   }
 
@@ -248,7 +248,7 @@ class ScrollBehavior {
   /// Defaults to [RangeMaintainingScrollPhysics] mixed with
   /// [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
   /// Android.
-  ScrollPhysics getScrollPhysics(BuildContext context) {
+  ScrollPhysics getScrollPhysics(final BuildContext context) {
     // When modifying this function, consider modifying the implementation in
     // the Material and Cupertino subclasses as well.
     switch (getPlatform(context)) {
@@ -274,7 +274,7 @@ class ScrollBehavior {
   /// If this method returns true, all the widgets that inherit from the
   /// [ScrollConfiguration] will rebuild using the new [ScrollBehavior]. If this
   /// method returns false, the rebuilds might be optimized away.
-  bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
+  bool shouldNotify(covariant final ScrollBehavior oldDelegate) => false;
 
   @override
   String toString() => objectRuntimeType(this, 'ScrollBehavior');
@@ -285,11 +285,11 @@ class _WrappedScrollBehavior implements ScrollBehavior {
     required this.delegate,
     this.scrollbars = true,
     this.overscroll = true,
-    Set<PointerDeviceKind>? dragDevices,
-    Set<LogicalKeyboardKey>? pointerAxisModifiers,
+    final Set<PointerDeviceKind>? dragDevices,
+    final Set<LogicalKeyboardKey>? pointerAxisModifiers,
     this.physics,
     this.platform,
-    AndroidOverscrollIndicator? androidOverscrollIndicator,
+    final AndroidOverscrollIndicator? androidOverscrollIndicator,
   }) : _androidOverscrollIndicator = androidOverscrollIndicator,
        _dragDevices = dragDevices,
        _pointerAxisModifiers = pointerAxisModifiers;
@@ -314,7 +314,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   AndroidOverscrollIndicator get androidOverscrollIndicator => _androidOverscrollIndicator ?? delegate.androidOverscrollIndicator;
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(final BuildContext context, final Widget child, final ScrollableDetails details) {
     if (overscroll) {
       return delegate.buildOverscrollIndicator(context, child, details);
     }
@@ -322,7 +322,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildScrollbar(final BuildContext context, final Widget child, final ScrollableDetails details) {
     if (scrollbars) {
       return delegate.buildScrollbar(context, child, details);
     }
@@ -331,13 +331,13 @@ class _WrappedScrollBehavior implements ScrollBehavior {
 
   @override
   ScrollBehavior copyWith({
-    bool? scrollbars,
-    bool? overscroll,
-    Set<PointerDeviceKind>? dragDevices,
-    Set<LogicalKeyboardKey>? pointerAxisModifiers,
-    ScrollPhysics? physics,
-    TargetPlatform? platform,
-    AndroidOverscrollIndicator? androidOverscrollIndicator
+    final bool? scrollbars,
+    final bool? overscroll,
+    final Set<PointerDeviceKind>? dragDevices,
+    final Set<LogicalKeyboardKey>? pointerAxisModifiers,
+    final ScrollPhysics? physics,
+    final TargetPlatform? platform,
+    final AndroidOverscrollIndicator? androidOverscrollIndicator
   }) {
     return delegate.copyWith(
       scrollbars: scrollbars ?? this.scrollbars,
@@ -351,17 +351,17 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
-  TargetPlatform getPlatform(BuildContext context) {
+  TargetPlatform getPlatform(final BuildContext context) {
     return platform ?? delegate.getPlatform(context);
   }
 
   @override
-  ScrollPhysics getScrollPhysics(BuildContext context) {
+  ScrollPhysics getScrollPhysics(final BuildContext context) {
     return physics ?? delegate.getScrollPhysics(context);
   }
 
   @override
-  bool shouldNotify(_WrappedScrollBehavior oldDelegate) {
+  bool shouldNotify(final _WrappedScrollBehavior oldDelegate) {
     return oldDelegate.delegate.runtimeType != delegate.runtimeType
         || oldDelegate.scrollbars != scrollbars
         || oldDelegate.overscroll != overscroll
@@ -373,7 +373,7 @@ class _WrappedScrollBehavior implements ScrollBehavior {
   }
 
   @override
-  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(final BuildContext context) {
     return delegate.velocityTrackerBuilder(context);
   }
 
@@ -402,19 +402,19 @@ class ScrollConfiguration extends InheritedWidget {
   ///
   /// If no [ScrollConfiguration] widget is in scope of the given `context`,
   /// a default [ScrollBehavior] instance is returned.
-  static ScrollBehavior of(BuildContext context) {
+  static ScrollBehavior of(final BuildContext context) {
     final ScrollConfiguration? configuration = context.dependOnInheritedWidgetOfExactType<ScrollConfiguration>();
     return configuration?.behavior ?? const ScrollBehavior();
   }
 
   @override
-  bool updateShouldNotify(ScrollConfiguration oldWidget) {
+  bool updateShouldNotify(final ScrollConfiguration oldWidget) {
     return behavior.runtimeType != oldWidget.behavior.runtimeType
         || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollBehavior>('behavior', behavior));
   }

@@ -417,7 +417,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   }
 
   @override
-  void didUpdateWidget(Checkbox oldWidget) {
+  void didUpdateWidget(final Checkbox oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
       _previousValue = oldWidget.value;
@@ -441,7 +441,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   bool? get value => widget.value;
 
   MaterialStateProperty<Color?> get _widgetFillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return null;
       }
@@ -452,7 +452,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     });
   }
 
-  BorderSide? _resolveSide(BorderSide? side) {
+  BorderSide? _resolveSide(final BorderSide? side) {
     if (side is MaterialStateBorderSide) {
       final Set<MaterialState> sideStates = widget.isError ? (states..add(MaterialState.error)) : states;
       return MaterialStateProperty.resolveAs<BorderSide?>(side, sideStates);
@@ -464,7 +464,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     switch (widget._checkboxType) {
       case _CheckboxType.material:
         break;
@@ -514,7 +514,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((final Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
         ?? checkboxTheme.mouseCursor?.resolve(states)
         ?? MaterialStateMouseCursor.clickable.resolve(states);
@@ -618,7 +618,7 @@ const double _kStrokeWidth = 2.0;
 class _CheckboxPainter extends ToggleablePainter {
   Color get checkColor => _checkColor!;
   Color? _checkColor;
-  set checkColor(Color value) {
+  set checkColor(final Color value) {
     if (_checkColor == value) {
       return;
     }
@@ -628,7 +628,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   bool? get value => _value;
   bool? _value;
-  set value(bool? value) {
+  set value(final bool? value) {
     if (_value == value) {
       return;
     }
@@ -638,7 +638,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   bool? get previousValue => _previousValue;
   bool? _previousValue;
-  set previousValue(bool? value) {
+  set previousValue(final bool? value) {
     if (_previousValue == value) {
       return;
     }
@@ -648,7 +648,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   OutlinedBorder get shape => _shape!;
   OutlinedBorder? _shape;
-  set shape(OutlinedBorder value) {
+  set shape(final OutlinedBorder value) {
     if (_shape == value) {
       return;
     }
@@ -658,7 +658,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   BorderSide? get side => _side;
   BorderSide? _side;
-  set side(BorderSide? value) {
+  set side(final BorderSide? value) {
     if (_side == value) {
       return;
     }
@@ -670,7 +670,7 @@ class _CheckboxPainter extends ToggleablePainter {
   // At t == 0.0, the outer rect's size is _kEdgeSize (Checkbox.width)
   // At t == 0.5, .. is _kEdgeSize - _kStrokeWidth
   // At t == 1.0, .. is _kEdgeSize
-  Rect _outerRectAt(Offset origin, double t) {
+  Rect _outerRectAt(final Offset origin, final double t) {
     final double inset = 1.0 - (t - 0.5).abs() * 2.0;
     final double size = _kEdgeSize - inset * _kStrokeWidth;
     final Rect rect = Rect.fromLTWH(origin.dx + inset, origin.dy + inset, size, size);
@@ -679,7 +679,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   // The checkbox's border color if value == false, or its fill color when
   // value == true or null.
-  Color _colorAt(double t) {
+  Color _colorAt(final double t) {
     // As t goes from 0.0 to 0.25, animate from the inactiveColor to activeColor.
     return t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0)!;
   }
@@ -692,7 +692,7 @@ class _CheckboxPainter extends ToggleablePainter {
       ..strokeWidth = _kStrokeWidth;
   }
 
-  void _drawBox(Canvas canvas, Rect outer, Paint paint, BorderSide? side, bool fill) {
+  void _drawBox(final Canvas canvas, final Rect outer, final Paint paint, final BorderSide? side, final bool fill) {
     if (fill) {
       canvas.drawPath(shape.getOuterPath(outer), paint);
     }
@@ -701,7 +701,7 @@ class _CheckboxPainter extends ToggleablePainter {
     }
   }
 
-  void _drawCheck(Canvas canvas, Offset origin, double t, Paint paint) {
+  void _drawCheck(final Canvas canvas, final Offset origin, final double t, final Paint paint) {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the two check mark strokes from the
     // short side to the long side.
@@ -724,7 +724,7 @@ class _CheckboxPainter extends ToggleablePainter {
     canvas.drawPath(path, paint);
   }
 
-  void _drawDash(Canvas canvas, Offset origin, double t, Paint paint) {
+  void _drawDash(final Canvas canvas, final Offset origin, final double t, final Paint paint) {
     assert(t >= 0.0 && t <= 1.0);
     // As t goes from 0.0 to 1.0, animate the horizontal line from the
     // mid point outwards.
@@ -737,7 +737,7 @@ class _CheckboxPainter extends ToggleablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
@@ -791,7 +791,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
 // Hand coded defaults based on Material Design 2.
 class _CheckboxDefaultsM2 extends CheckboxThemeData {
-  _CheckboxDefaultsM2(BuildContext context)
+  _CheckboxDefaultsM2(final BuildContext context)
     : _theme = Theme.of(context),
       _colors = Theme.of(context).colorScheme;
 
@@ -800,7 +800,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 
   @override
   MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _theme.disabledColor;
       }
@@ -818,7 +818,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 
   @override
   MaterialStateProperty<Color?> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
@@ -857,7 +857,7 @@ class _CheckboxDefaultsM2 extends CheckboxThemeData {
 // Token database version: v0_162
 
 class _CheckboxDefaultsM3 extends CheckboxThemeData {
-  _CheckboxDefaultsM3(BuildContext context)
+  _CheckboxDefaultsM3(final BuildContext context)
     : _theme = Theme.of(context),
       _colors = Theme.of(context).colorScheme;
 
@@ -866,7 +866,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -891,7 +891,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   MaterialStateProperty<Color> get checkColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _colors.surface;
@@ -910,7 +910,7 @@ class _CheckboxDefaultsM3 extends CheckboxThemeData {
 
   @override
   MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.error)) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.error.withOpacity(0.12);

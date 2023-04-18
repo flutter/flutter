@@ -12,7 +12,7 @@ class AppBarApp extends StatelessWidget {
   const AppBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: AppBarExample(),
     );
@@ -23,7 +23,7 @@ class AppBarExample extends StatelessWidget {
   const AppBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AppBar Demo'),
@@ -40,7 +40,7 @@ class AppBarExample extends StatelessWidget {
             tooltip: 'Go to the next page',
             onPressed: () {
               Navigator.push(context, MaterialPageRoute<void>(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Scaffold(
                     appBar: AppBar(
                       title: const Text('Next page'),

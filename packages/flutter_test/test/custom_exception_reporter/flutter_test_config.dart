@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  reportTestException = (FlutterErrorDetails details, String testDescription) {
+Future<void> testExecutable(final FutureOr<void> Function() testMain) async {
+  reportTestException = (final FlutterErrorDetails details, final String testDescription) {
     expect(details.exception, isA<StateError>());
     expect((details.exception as StateError).message, 'foo');
     expect(testDescription, 'custom exception reporter');
@@ -20,7 +20,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 }
 
 void runTest() {
-  testWidgets('custom exception reporter', (WidgetTester tester) {
+  testWidgets('custom exception reporter', (final WidgetTester tester) {
     throw StateError('foo');
   });
 }

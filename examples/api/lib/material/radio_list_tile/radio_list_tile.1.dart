@@ -12,7 +12,7 @@ class RadioListTileApp extends StatelessWidget {
   const RadioListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const RadioListTileExample(),
@@ -33,7 +33,7 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
   Groceries? _groceryItem = Groceries.pickles;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('RadioListTile Sample')),
       body: Column(
@@ -41,7 +41,7 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
           RadioListTile<Groceries>(
             value: Groceries.pickles,
             groupValue: _groceryItem,
-            onChanged: (Groceries? value) {
+            onChanged: (final Groceries? value) {
               setState(() {
                 _groceryItem = value;
               });
@@ -52,7 +52,7 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
           RadioListTile<Groceries>(
             value: Groceries.tomato,
             groupValue: _groceryItem,
-            onChanged: (Groceries? value) {
+            onChanged: (final Groceries? value) {
               setState(() {
                 _groceryItem = value;
               });
@@ -64,7 +64,7 @@ class _RadioListTileExampleState extends State<RadioListTileExample> {
           RadioListTile<Groceries>(
             value: Groceries.lettuce,
             groupValue: _groceryItem,
-            onChanged: (Groceries? value) {
+            onChanged: (final Groceries? value) {
               setState(() {
                 _groceryItem = value;
               });

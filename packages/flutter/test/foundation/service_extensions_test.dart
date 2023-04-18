@@ -31,28 +31,28 @@ class TestServiceExtensionsBinding extends BindingBase
   @override
   @protected
   void registerServiceExtension({
-    required String name,
-    required ServiceExtensionCallback callback,
+    required final String name,
+    required final ServiceExtensionCallback callback,
   }) {
     expect(extensions.containsKey(name), isFalse);
     extensions[name] = callback;
   }
 
   @override
-  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+  void postEvent(final String eventKind, final Map<String, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
   }
 
-  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
+  List<Map<String, dynamic>> getEventsDispatched(final String eventKind) {
     return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
   }
 
-  Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(String extensionName) {
+  Iterable<Map<String, dynamic>> getServiceExtensionStateChangedEvents(final String extensionName) {
     return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
-      .where((Map<String, dynamic> event) => event['extension'] == extensionName);
+      .where((final Map<String, dynamic> event) => event['extension'] == extensionName);
   }
 
-  Future<Map<String, dynamic>> testExtension(String name, Map<String, String> arguments) {
+  Future<Map<String, dynamic>> testExtension(final String name, final Map<String, String> arguments) {
     expect(extensions.containsKey(name), isTrue);
     return extensions[name]!(arguments);
   }
@@ -100,7 +100,7 @@ class TestServiceExtensionsBinding extends BindingBase
 
 late TestServiceExtensionsBinding binding;
 
-Future<Map<String, dynamic>> hasReassemble(Future<Map<String, dynamic>> pendingResult) async {
+Future<Map<String, dynamic>> hasReassemble(final Future<Map<String, dynamic>> pendingResult) async {
   bool completed = false;
   pendingResult.whenComplete(() { completed = true; });
   expect(binding.frameScheduled, isFalse);
@@ -146,7 +146,7 @@ void main() {
     expect(binding.frameScheduled, isFalse);
 
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String? message, { int? wrapWidth }) {
+    debugPrint = (final String? message, { final int? wrapWidth }) {
       console.add(message);
     };
   });
@@ -552,20 +552,20 @@ void main() {
     bool completed;
 
     completed = false;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (final ByteData? message) async {
       expect(utf8.decode(message!.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
     });
     bool data;
-    data = await rootBundle.loadStructuredData<bool>('test', (String value) async {
+    data = await rootBundle.loadStructuredData<bool>('test', (final String value) async {
       expect(value, '\x00\x00\x00\x00\x00');
       return true;
     });
     expect(data, isTrue);
     expect(completed, isTrue);
     completed = false;
-    data = await rootBundle.loadStructuredData('test', (String value) async {
+    data = await rootBundle.loadStructuredData('test', (final String value) async {
       throw Error();
     });
     expect(data, isTrue);
@@ -573,7 +573,7 @@ void main() {
     result = await binding.testExtension(ServicesServiceExtensions.evict.name, <String, String>{'value': 'test'});
     expect(result, <String, String>{'value': ''});
     expect(completed, isFalse);
-    data = await rootBundle.loadStructuredData<bool>('test', (String value) async {
+    data = await rootBundle.loadStructuredData<bool>('test', (final String value) async {
       expect(value, '\x00\x00\x00\x00\x00');
       return false;
     });

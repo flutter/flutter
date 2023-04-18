@@ -8,8 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
-  testWidgets('Single-select ToggleButtons', (WidgetTester tester) async {
-    TextButton findButton(String text) {
+  testWidgets('Single-select ToggleButtons', (final WidgetTester tester) async {
+    TextButton findButton(final String text) {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
     await tester.pumpWidget(
@@ -43,8 +43,8 @@ void main() {
     expect(thirdButton.style!.backgroundColor!.resolve(enabled), const Color(0x00ffffff));
   });
 
-  testWidgets('Multi-select ToggleButtons', (WidgetTester tester) async {
-    TextButton findButton(String text) {
+  testWidgets('Multi-select ToggleButtons', (final WidgetTester tester) async {
+    TextButton findButton(final String text) {
       return tester.widget<TextButton>(find.widgetWithText(TextButton, text));
     }
     await tester.pumpWidget(
@@ -79,8 +79,8 @@ void main() {
     expect(thirdButton.style!.backgroundColor!.resolve(enabled), const Color(0xffa5d6a7));
   });
 
-  testWidgets('Icon-only ToggleButtons', (WidgetTester tester) async {
-    TextButton findButton(IconData iconData) {
+  testWidgets('Icon-only ToggleButtons', (final WidgetTester tester) async {
+    TextButton findButton(final IconData iconData) {
       return tester.widget<TextButton>(find.widgetWithIcon(TextButton, iconData));
     }
     await tester.pumpWidget(

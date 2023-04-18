@@ -17,7 +17,7 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   static const int _pair = 129;
 
   @override
-  void writeValue(WriteBuffer buffer, dynamic value) {
+  void writeValue(final WriteBuffer buffer, final dynamic value) {
     if (value is DateTime) {
       buffer.putUint8(_dateTime);
       buffer.putInt64(value.millisecondsSinceEpoch);
@@ -31,7 +31,7 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   }
 
   @override
-  dynamic readValueOfType(int type, ReadBuffer buffer) {
+  dynamic readValueOfType(final int type, final ReadBuffer buffer) {
     switch (type) {
     case _dateTime:
       return DateTime.fromMillisecondsSinceEpoch(buffer.getInt64());
@@ -42,7 +42,7 @@ class ExtendedStandardMessageCodec extends StandardMessageCodec {
   }
 }
 
-Future<TestStepResult> basicBinaryHandshake(ByteData? message) async {
+Future<TestStepResult> basicBinaryHandshake(final ByteData? message) async {
   const BasicMessageChannel<ByteData?> channel =
       BasicMessageChannel<ByteData?>(
     'binary-msg',
@@ -52,7 +52,7 @@ Future<TestStepResult> basicBinaryHandshake(ByteData? message) async {
       'Binary >${toString(message)}<', channel, message);
 }
 
-Future<TestStepResult> basicStringHandshake(String? message) async {
+Future<TestStepResult> basicStringHandshake(final String? message) async {
   const BasicMessageChannel<String?> channel = BasicMessageChannel<String?>(
     'string-msg',
     StringCodec(),
@@ -60,7 +60,7 @@ Future<TestStepResult> basicStringHandshake(String? message) async {
   return _basicMessageHandshake<String?>('String >$message<', channel, message);
 }
 
-Future<TestStepResult> basicJsonHandshake(dynamic message) async {
+Future<TestStepResult> basicJsonHandshake(final dynamic message) async {
   const BasicMessageChannel<dynamic> channel =
       BasicMessageChannel<dynamic>(
     'json-msg',
@@ -69,7 +69,7 @@ Future<TestStepResult> basicJsonHandshake(dynamic message) async {
   return _basicMessageHandshake<dynamic>('JSON >$message<', channel, message);
 }
 
-Future<TestStepResult> basicStandardHandshake(dynamic message) async {
+Future<TestStepResult> basicStandardHandshake(final dynamic message) async {
   const BasicMessageChannel<dynamic> channel =
       BasicMessageChannel<dynamic>(
     'std-msg',
@@ -79,7 +79,7 @@ Future<TestStepResult> basicStandardHandshake(dynamic message) async {
       'Standard >${toString(message)}<', channel, message);
 }
 
-Future<void> _basicBackgroundStandardEchoMain(List<Object> args) async {
+Future<void> _basicBackgroundStandardEchoMain(final List<Object> args) async {
   final SendPort sendPort = args[2] as SendPort;
   final Object message = args[1];
   final String name = 'Background Echo >${toString(message)}<';
@@ -104,7 +104,7 @@ Future<void> _basicBackgroundStandardEchoMain(List<Object> args) async {
   }
 }
 
-Future<TestStepResult> basicBackgroundStandardEcho(Object message) async {
+Future<TestStepResult> basicBackgroundStandardEcho(final Object message) async {
   final ReceivePort receivePort = ReceivePort();
   Isolate.spawn(_basicBackgroundStandardEchoMain, <Object>[
     ServicesBinding.rootIsolateToken!,
@@ -156,12 +156,12 @@ Future<TestStepResult> basicStandardMessageToUnknownChannel() async {
 /// Fails, if an error occurs, or if any message seen is not deeply equal to
 /// the original message.
 Future<TestStepResult> _basicMessageHandshake<T>(
-  String description,
-  BasicMessageChannel<T?> channel,
-  T message,
+  final String description,
+  final BasicMessageChannel<T?> channel,
+  final T message,
 ) async {
   final List<dynamic> received = <dynamic>[];
-  channel.setMessageHandler((T? message) async {
+  channel.setMessageHandler((final T? message) async {
     received.add(message);
     return message;
   });
@@ -184,8 +184,8 @@ Future<TestStepResult> _basicMessageHandshake<T>(
 
 /// Sends a message on a channel that no one listens on.
 Future<TestStepResult> _basicMessageToUnknownChannel<T>(
-  String description,
-  BasicMessageChannel<T?> channel,
+  final String description,
+  final BasicMessageChannel<T?> channel,
 ) async {
   dynamic messageEcho = nothing;
   dynamic error = nothing;
@@ -204,7 +204,7 @@ Future<TestStepResult> _basicMessageToUnknownChannel<T>(
   );
 }
 
-String toString(dynamic message) {
+String toString(final dynamic message) {
   if (message is ByteData) {
     return message.buffer
         .asUint8List(message.offsetInBytes, message.lengthInBytes)

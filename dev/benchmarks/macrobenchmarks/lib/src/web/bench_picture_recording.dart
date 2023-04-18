@@ -43,7 +43,7 @@ class BenchPictureRecording extends RawRecorder {
   }
 
   @override
-  void body(Profile profile) {
+  void body(final Profile profile) {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
     profile.record('recordPaintCommands', () {

@@ -8,16 +8,16 @@ import 'package:flutter_test/flutter_test.dart';
 class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
   @override
   DebugPrintCallback get debugPrintOverride => testPrint;
-  static void testPrint(String? message, { int? wrapWidth }) { print(message); }
+  static void testPrint(final String? message, { final int? wrapWidth }) { print(message); }
 }
 
-Future<void> helperFunction(WidgetTester tester) async {
+Future<void> helperFunction(final WidgetTester tester) async {
   await tester.pump();
 }
 
 void main() {
   TestTestBinding();
-  testWidgets('TestAsyncUtils - handling unguarded async helper functions', (WidgetTester tester) async {
+  testWidgets('TestAsyncUtils - handling unguarded async helper functions', (final WidgetTester tester) async {
     helperFunction(tester);
     helperFunction(tester);
     // this should fail

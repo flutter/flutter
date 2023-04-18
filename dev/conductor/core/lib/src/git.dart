@@ -21,10 +21,10 @@ class Git {
   final ProcessManager processManager;
 
   Future<String> getOutput(
-    List<String> args,
-    String explanation, {
-    required String workingDirectory,
-    bool allowFailures = false,
+    final List<String> args,
+    final String explanation, {
+    required final String workingDirectory,
+    final bool allowFailures = false,
   }) async {
     final ProcessResult result = await _run(args, workingDirectory);
     if (result.exitCode == 0) {
@@ -34,10 +34,10 @@ class Git {
   }
 
   Future<int> run(
-    List<String> args,
-    String explanation, {
-    bool allowNonZeroExitCode = false,
-    required String workingDirectory,
+    final List<String> args,
+    final String explanation, {
+    final bool allowNonZeroExitCode = false,
+    required final String workingDirectory,
   }) async {
     late final ProcessResult result;
     try {
@@ -51,7 +51,7 @@ class Git {
     return result.exitCode;
   }
 
-  Future<ProcessResult> _run(List<String> args, String workingDirectory) async {
+  Future<ProcessResult> _run(final List<String> args, final String workingDirectory) async {
     return processManager.run(
       <String>['git', ...args],
       workingDirectory: workingDirectory,
@@ -60,10 +60,10 @@ class Git {
   }
 
   Never _reportFailureAndExit(
-    List<String> args,
-    String workingDirectory,
-    ProcessResult result,
-    String explanation,
+    final List<String> args,
+    final String workingDirectory,
+    final ProcessResult result,
+    final String explanation,
   ) {
     final StringBuffer message = StringBuffer();
     if (result.exitCode != 0) {

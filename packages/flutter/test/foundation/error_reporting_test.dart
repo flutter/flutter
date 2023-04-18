@@ -46,7 +46,7 @@ Future<void> main() async {
 
   setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
-    debugPrint = (String? message, { int? wrapWidth }) {
+    debugPrint = (final String? message, { final int? wrapWidth }) {
       console.add(message);
     };
   });

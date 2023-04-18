@@ -12,7 +12,7 @@ class StepperExampleApp extends StatelessWidget {
   const StepperExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Stepper Sample')),
@@ -35,7 +35,7 @@ class _StepperExampleState extends State<StepperExample> {
   int _index = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stepper(
       currentStep: _index,
       onStepCancel: () {
@@ -52,7 +52,7 @@ class _StepperExampleState extends State<StepperExample> {
           });
         }
       },
-      onStepTapped: (int index) {
+      onStepTapped: (final int index) {
         setState(() {
           _index = index;
         });

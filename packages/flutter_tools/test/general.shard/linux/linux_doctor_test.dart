@@ -12,7 +12,7 @@ import '../../src/fake_process_manager.dart';
 
 // A command that will return typical-looking 'clang++ --version' output with
 // the given version number.
-FakeCommand _clangPresentCommand(String version) {
+FakeCommand _clangPresentCommand(final String version) {
   return FakeCommand(
     command: const <String>['clang++', '--version'],
     stdout: '''
@@ -26,7 +26,7 @@ InstalledDir: /usr/bin
 
 // A command that will return typical-looking 'cmake --version' output with the
 // given version number.
-FakeCommand _cmakePresentCommand(String version) {
+FakeCommand _cmakePresentCommand(final String version) {
   return FakeCommand(
     command: const <String>['cmake', '--version'],
     stdout: '''
@@ -39,7 +39,7 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 
 // A command that will return typical-looking 'ninja --version' output with the
 // given version number.
-FakeCommand _ninjaPresentCommand(String version) {
+FakeCommand _ninjaPresentCommand(final String version) {
   return FakeCommand(
     command: const <String>['ninja', '--version'],
     stdout: version,
@@ -48,7 +48,7 @@ FakeCommand _ninjaPresentCommand(String version) {
 
 // A command that will return typical-looking 'pkg-config --version' output with
 // the given version number.
-FakeCommand _pkgConfigPresentCommand(String version) {
+FakeCommand _pkgConfigPresentCommand(final String version) {
   return FakeCommand(
     command: const <String>['pkg-config', '--version'],
     stdout: version,
@@ -57,7 +57,7 @@ FakeCommand _pkgConfigPresentCommand(String version) {
 
 /// A command that returns either success or failure for a pkg-config query
 /// for [library], depending on [exists].
-FakeCommand _libraryCheckCommand(String library, {bool exists = true}) {
+FakeCommand _libraryCheckCommand(final String library, {final bool exists = true}) {
   return FakeCommand(
     command: <String>['pkg-config', '--exists', library],
     exitCode: exists ? 0 : 1,
@@ -84,14 +84,14 @@ List<FakeCommand> _gtkLibrariesMissingCommands() {
 }
 
 // A command that will failure when running '[binary] --version'.
-FakeCommand _missingBinaryCommand(String binary) {
+FakeCommand _missingBinaryCommand(final String binary) {
   return FakeCommand(
     command: <String>[binary, '--version'],
     exitCode: 1,
   );
 }
 
-FakeCommand _missingBinaryException(String binary) {
+FakeCommand _missingBinaryException(final String binary) {
   return FakeCommand(
     command: <String>[binary, '--version'],
     exitCode: 1,

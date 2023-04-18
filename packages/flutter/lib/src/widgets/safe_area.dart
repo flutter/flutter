@@ -88,7 +88,7 @@ class SafeArea extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     EdgeInsets padding = MediaQuery.paddingOf(context);
     // Bottom padding has been consumed - i.e. by the keyboard
@@ -115,7 +115,7 @@ class SafeArea extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
     properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));
@@ -183,7 +183,7 @@ class SliverSafeArea extends StatelessWidget {
   final Widget sliver;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final EdgeInsets padding = MediaQuery.paddingOf(context);
     return SliverPadding(
@@ -205,7 +205,7 @@ class SliverSafeArea extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
     properties.add(FlagProperty('top', value: top, ifTrue: 'avoid top padding'));

@@ -23,7 +23,7 @@ void main() {
       final LogsCommand command = LogsCommand();
       await expectLater(
         () => createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']),
-        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
+        throwsA(isA<ToolExit>().having((final ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
       );
     });
   });

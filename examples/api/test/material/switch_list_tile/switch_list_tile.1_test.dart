@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/switch_list_tile/switch_list_tile.1
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Switch aligns appropriately', (WidgetTester tester) async {
+  testWidgets('Switch aligns appropriately', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SwitchListTileApp(),
     );
@@ -33,7 +33,7 @@ void main() {
     expect(switchTopLeft - tileTopLeft, const Offset(716.0, 8.0));
   });
 
-  testWidgets('Switches can be checked', (WidgetTester tester) async {
+  testWidgets('Switches can be checked', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SwitchListTileApp(),
     );

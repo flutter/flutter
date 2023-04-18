@@ -68,7 +68,7 @@ class DeferredComponent {
   ///
   /// Providing null or empty list of `allLoadingUnits` will still change the assigned
   /// status, but will result in [loadingUnits] returning an empty set.
-  void assignLoadingUnits(List<LoadingUnit> allLoadingUnits) {
+  void assignLoadingUnits(final List<LoadingUnit> allLoadingUnits) {
     _assigned = true;
     _loadingUnits = <LoadingUnit>{};
     for (final String lib in libraries) {
@@ -140,7 +140,7 @@ class LoadingUnit {
 
   /// Returns true if the other loading unit has the same [id] and the same set of [libraries],
   /// ignoring order.
-  bool equalsIgnoringPath(LoadingUnit other) {
+  bool equalsIgnoringPath(final LoadingUnit other) {
     return other.id == id && other.libraries.toSet().containsAll(libraries);
   }
 
@@ -149,7 +149,7 @@ class LoadingUnit {
   ///
   /// This will read all existing loading units for every provided abi. If no abis are
   /// provided, loading units for all abis will be parsed.
-  static List<LoadingUnit> parseGeneratedLoadingUnits(Directory outputDir, Logger logger, {List<String>? abis}) {
+  static List<LoadingUnit> parseGeneratedLoadingUnits(final Directory outputDir, final Logger logger, {final List<String>? abis}) {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     final List<FileSystemEntity> files = outputDir.listSync(recursive: true);
     for (final FileSystemEntity fileEntity in files) {
@@ -177,7 +177,7 @@ class LoadingUnit {
   /// Parses loading units from a single loading unit manifest json file.
   ///
   /// Returns an empty list if the manifestFile does not exist or is invalid.
-  static List<LoadingUnit> parseLoadingUnitManifest(File manifestFile, Logger logger) {
+  static List<LoadingUnit> parseLoadingUnitManifest(final File manifestFile, final Logger logger) {
     if (!manifestFile.existsSync()) {
       return <LoadingUnit>[];
     }

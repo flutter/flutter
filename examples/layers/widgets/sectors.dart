@@ -29,7 +29,7 @@ class SectorAppState extends State<SectorApp> {
 
   List<double> wantedSectorSizes = <double>[];
   List<double> actualSectorSizes = <double>[];
-  double get currentTheta => wantedSectorSizes.fold<double>(0.0, (double total, double value) => total + value);
+  double get currentTheta => wantedSectorSizes.fold<double>(0.0, (final double total, final double value) => total + value);
 
   void addSector() {
     final double currentTheta = this.currentTheta;
@@ -70,7 +70,7 @@ class SectorAppState extends State<SectorApp> {
     }
   }
 
-  static RenderBoxToRenderSectorAdapter initSector(Color color) {
+  static RenderBoxToRenderSectorAdapter initSector(final Color color) {
     final RenderSectorRing ring = RenderSectorRing(padding: 1.0);
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
@@ -92,8 +92,8 @@ class SectorAppState extends State<SectorApp> {
     });
   }
 
-  void recursivelyDisposeChildren(RenderObject parent) {
-    parent.visitChildren((RenderObject child) {
+  void recursivelyDisposeChildren(final RenderObject parent) {
+    parent.visitChildren((final RenderObject child) {
       recursivelyDisposeChildren(child);
       child.dispose();
     });
@@ -172,7 +172,7 @@ class SectorAppState extends State<SectorApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(),
       title: 'Sector Layout',

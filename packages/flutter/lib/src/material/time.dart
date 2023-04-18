@@ -56,7 +56,7 @@ class TimeOfDay {
   ///
   /// The [hour] is set to the time's hour and the [minute] is set to the time's
   /// minute in the timezone of the given [DateTime].
-  TimeOfDay.fromDateTime(DateTime time)
+  TimeOfDay.fromDateTime(final DateTime time)
     : hour = time.hour,
       minute = time.minute;
 
@@ -76,7 +76,7 @@ class TimeOfDay {
   static const int minutesPerHour = 60;
 
   /// Returns a new TimeOfDay with the hour and/or minute replaced.
-  TimeOfDay replacing({ int? hour, int? minute }) {
+  TimeOfDay replacing({ final int? hour, final int? minute }) {
     assert(hour == null || (hour >= 0 && hour < hoursPerDay));
     assert(minute == null || (minute >= 0 && minute < minutesPerHour));
     return TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
@@ -102,7 +102,7 @@ class TimeOfDay {
   /// Returns the localized string representation of this time of day.
   ///
   /// This is a shortcut for [MaterialLocalizations.formatTimeOfDay].
-  String format(BuildContext context) {
+  String format(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -113,7 +113,7 @@ class TimeOfDay {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is TimeOfDay
         && other.hour == hour
         && other.minute == minute;
@@ -124,7 +124,7 @@ class TimeOfDay {
 
   @override
   String toString() {
-    String addLeadingZeroIfNeeded(int value) {
+    String addLeadingZeroIfNeeded(final int value) {
       if (value < 10) {
         return '0$value';
       }
@@ -145,7 +145,7 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
   /// Creates a [RestorableTimeOfDay].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableTimeOfDay(TimeOfDay defaultValue) : _defaultValue = defaultValue;
+  RestorableTimeOfDay(final TimeOfDay defaultValue) : _defaultValue = defaultValue;
 
   final TimeOfDay _defaultValue;
 
@@ -153,14 +153,14 @@ class RestorableTimeOfDay extends RestorableValue<TimeOfDay> {
   TimeOfDay createDefaultValue() => _defaultValue;
 
   @override
-  void didUpdateValue(TimeOfDay? oldValue) {
+  void didUpdateValue(final TimeOfDay? oldValue) {
     assert(debugIsSerializableForRestoration(value.hour));
     assert(debugIsSerializableForRestoration(value.minute));
     notifyListeners();
   }
 
   @override
-  TimeOfDay fromPrimitives(Object? data) {
+  TimeOfDay fromPrimitives(final Object? data) {
     final List<Object?> timeData = data! as List<Object?>;
     return TimeOfDay(
       minute: timeData[0]! as int,
@@ -238,7 +238,7 @@ enum HourFormat {
 }
 
 /// The [HourFormat] used for the given [TimeOfDayFormat].
-HourFormat hourFormat({ required TimeOfDayFormat of }) {
+HourFormat hourFormat({ required final TimeOfDayFormat of }) {
   switch (of) {
     case TimeOfDayFormat.h_colon_mm_space_a:
     case TimeOfDayFormat.a_space_h_colon_mm:

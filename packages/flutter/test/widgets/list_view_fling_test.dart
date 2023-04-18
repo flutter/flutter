@@ -9,12 +9,12 @@ const double kHeight = 10.0;
 const double kFlingOffset = kHeight * 20.0;
 
 void main() {
-  testWidgets("Flings don't stutter", (WidgetTester tester) async {
+  testWidgets("Flings don't stutter", (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView.builder(
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Container(height: kHeight);
           },
         ),

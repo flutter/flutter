@@ -6,13 +6,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SizeChangedLayoutNotification test', (WidgetTester tester) async {
+  testWidgets('SizeChangedLayoutNotification test', (final WidgetTester tester) async {
     bool notified = false;
 
     await tester.pumpWidget(
       Center(
         child: NotificationListener<LayoutChangedNotification>(
-          onNotification: (LayoutChangedNotification notification) {
+          onNotification: (final LayoutChangedNotification notification) {
             throw Exception('Should not reach this point.');
           },
           child: const SizeChangedLayoutNotifier(
@@ -28,7 +28,7 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: NotificationListener<LayoutChangedNotification>(
-          onNotification: (LayoutChangedNotification notification) {
+          onNotification: (final LayoutChangedNotification notification) {
             expect(notification, isA<SizeChangedLayoutNotification>());
             notified = true;
             return true;

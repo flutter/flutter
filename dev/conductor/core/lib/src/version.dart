@@ -81,7 +81,7 @@ class Version {
       // parse stable
       final List<int> parts = match
           .groups(<int>[1, 2, 3])
-          .map((String? s) => int.parse(s!))
+          .map((final String? s) => int.parse(s!))
           .toList();
       return Version(
         x: parts[0],
@@ -95,7 +95,7 @@ class Version {
     if (match != null) {
       // parse development
       final List<int> parts =
-          match.groups(<int>[1, 2, 3, 4, 5]).map((String? s) => int.parse(s!)).toList();
+          match.groups(<int>[1, 2, 3, 4, 5]).map((final String? s) => int.parse(s!)).toList();
       return Version(
         x: parts[0],
         y: parts[1],
@@ -112,7 +112,7 @@ class Version {
       final List<int> parts = match.groups(
         <int>[1, 2, 3, 4, 5, 6],
       ).map(
-        (String? s) => int.parse(s!),
+        (final String? s) => int.parse(s!),
       ).toList();
       return Version(
         x: parts[0],
@@ -149,8 +149,8 @@ class Version {
   // Returns a new version with the given [increment] part incremented.
   // NOTE new version must be of same type as previousVersion.
   factory Version.increment(
-    Version previousVersion,
-    String increment, {
+    final Version previousVersion,
+    final String increment, {
     VersionType? nextVersionType,
   }) {
     final int nextX = previousVersion.x;
@@ -200,7 +200,7 @@ class Version {
     );
   }
 
-  factory Version.fromCandidateBranch(String branchName) {
+  factory Version.fromCandidateBranch(final String branchName) {
     // Regular dev release.
     final RegExp pattern = RegExp(r'flutter-(\d+)\.(\d+)-candidate.(\d+)');
     final RegExpMatch? match = pattern.firstMatch(branchName);
@@ -255,7 +255,7 @@ class Version {
   ///
   /// Will throw a [ConductorException] if the version is not possible given the
   /// [candidateBranch] and [incrementLetter].
-  void ensureValid(String candidateBranch, ReleaseType releaseType) {
+  void ensureValid(final String candidateBranch, final ReleaseType releaseType) {
     final RegExpMatch? branchMatch = releaseCandidateBranchRegex.firstMatch(candidateBranch);
     if (branchMatch == null) {
       throw ConductorException(

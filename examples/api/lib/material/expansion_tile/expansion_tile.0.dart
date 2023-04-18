@@ -12,7 +12,7 @@ class ExpansionTileApp extends StatelessWidget {
   const ExpansionTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -34,7 +34,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
   bool _customTileExpanded = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         const ExpansionTile(
@@ -53,7 +53,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
           children: const <Widget>[
             ListTile(title: Text('This is tile number 2')),
           ],
-          onExpansionChanged: (bool expanded) {
+          onExpansionChanged: (final bool expanded) {
             setState(() {
               _customTileExpanded = expanded;
             });

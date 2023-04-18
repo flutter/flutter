@@ -12,7 +12,7 @@ import 'utils.dart';
 
 /// Given an [input] string, wraps the text at 80 characters and prepends each
 /// line with the [prefix] string. Use for generated comments.
-String _wrapString(String input) {
+String _wrapString(final String input) {
   return wrapString(input, prefix: '  /// ');
 }
 
@@ -79,7 +79,7 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
   /// Gets the generated definitions of LogicalKeyboardKeys.
   String get _logicalDefinitions {
     final OutputLines<int> lines = OutputLines<int>('Logical debug names', behavior: DeduplicateBehavior.kSkip);
-    void printKey(int flutterId, String constantName, String commentName, {String? otherComments}) {
+    void printKey(final int flutterId, final String constantName, final String commentName, {String? otherComments}) {
       final String firstComment = _wrapString('Represents the logical "$commentName" key on the keyboard.');
       otherComments ??= _wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
       lines.add(flutterId, '''
@@ -99,10 +99,10 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return lines.sortedJoin().trimRight();
   }
 
-  String? _otherComments(String name) {
+  String? _otherComments(final String name) {
     if (synonyms.containsKey(name)) {
       final Set<String> unionNames = synonyms[name]!.keys.map(
-        (LogicalKeyEntry entry) => entry.constantName).toSet();
+        (final LogicalKeyEntry entry) => entry.constantName).toSet();
       return _wrapString('This key represents the union of the keys '
               '$unionNames when comparing keys. This key will never be generated '
               'directly, its main use is in defining key maps.');
@@ -178,9 +178,9 @@ ${_wrapString(constant.description)}  ///
   }
 
   late final Map<String, SynonymKeyInfo> synonyms = Map<String, SynonymKeyInfo>.fromEntries(
-    LogicalKeyData.synonyms.entries.map((MapEntry<String, List<String>> synonymDefinition) {
+    LogicalKeyData.synonyms.entries.map((final MapEntry<String, List<String>> synonymDefinition) {
       final List<LogicalKeyEntry> entries = synonymDefinition.value.map(
-        (String name) => logicalData.entryByName(name)).toList();
+        (final String name) => logicalData.entryByName(name)).toList();
       return MapEntry<String, SynonymKeyInfo>(
         synonymDefinition.key,
         SynonymKeyInfo(

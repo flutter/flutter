@@ -32,7 +32,7 @@ abstract final class SystemSound {
   ///
   /// The web platform currently does not support playing sounds, so this call
   /// will yield no behavior on that platform.
-  static Future<void> play(SystemSoundType type) async {
+  static Future<void> play(final SystemSoundType type) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemSound.play',
       type.toString(),

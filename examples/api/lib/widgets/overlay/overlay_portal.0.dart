@@ -12,7 +12,7 @@ class OverlayPortalExampleApp extends StatelessWidget {
   const OverlayPortalExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OverlayPortal Example')),
@@ -33,14 +33,14 @@ class ClickableTooltipWidgetState extends State<ClickableTooltipWidget> {
   final OverlayPortalController _tooltipController = OverlayPortalController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextButton(
       onPressed: _tooltipController.toggle,
       child: DefaultTextStyle(
         style: DefaultTextStyle.of(context).style.copyWith(fontSize: 50),
         child: OverlayPortal(
           controller: _tooltipController,
-          overlayChildBuilder: (BuildContext context) {
+          overlayChildBuilder: (final BuildContext context) {
             return const Positioned(
               right: 50,
               bottom: 50,

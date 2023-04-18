@@ -112,7 +112,7 @@ class PrimaryScrollController extends InheritedWidget {
   /// [ScrollView.controller], or [ScrollView.primary] is set, this is method is
   /// not called by ScrollView as it will have determined whether or not to
   /// inherit the PrimaryScrollController.
-  static bool shouldInherit(BuildContext context, Axis scrollDirection) {
+  static bool shouldInherit(final BuildContext context, final Axis scrollDirection) {
     final PrimaryScrollController? result = context.findAncestorWidgetOfExactType<PrimaryScrollController>();
     if (result == null) {
       return false;
@@ -138,7 +138,7 @@ class PrimaryScrollController extends InheritedWidget {
   ///
   /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
   ///   asserts if no [PrimaryScrollController] ancestor is found.
-  static ScrollController? maybeOf(BuildContext context) {
+  static ScrollController? maybeOf(final BuildContext context) {
     final PrimaryScrollController? result = context.dependOnInheritedWidgetOfExactType<PrimaryScrollController>();
     return result?.controller;
   }
@@ -156,7 +156,7 @@ class PrimaryScrollController extends InheritedWidget {
   ///
   /// * [PrimaryScrollController.maybeOf], which is similar to this method, but
   ///   returns null if no [PrimaryScrollController] ancestor is found.
-  static ScrollController of(BuildContext context) {
+  static ScrollController of(final BuildContext context) {
     final ScrollController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
@@ -177,10 +177,10 @@ class PrimaryScrollController extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(PrimaryScrollController oldWidget) => controller != oldWidget.controller;
+  bool updateShouldNotify(final PrimaryScrollController oldWidget) => controller != oldWidget.controller;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
   }

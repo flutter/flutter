@@ -115,7 +115,7 @@ void main() {
       );
 
       final List<RenderObject> visitedChildren = <RenderObject>[];
-      void visitor(RenderObject child) {
+      void visitor(final RenderObject child) {
         visitedChildren.add(child);
       }
 

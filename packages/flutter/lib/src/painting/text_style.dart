@@ -497,9 +497,9 @@ class TextStyle with Diagnosticable {
     this.decorationStyle,
     this.decorationThickness,
     this.debugLabel,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    String? package,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final String? package,
     this.overflow,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
@@ -588,7 +588,7 @@ class TextStyle with Diagnosticable {
   /// prefixed with 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
   /// The package name should be provided by the `package` argument in the
   /// constructor.
-  List<String>? get fontFamilyFallback => _package == null ? _fontFamilyFallback : _fontFamilyFallback?.map((String str) => 'packages/$_package/$str').toList();
+  List<String>? get fontFamilyFallback => _package == null ? _fontFamilyFallback : _fontFamilyFallback?.map((final String str) => 'packages/$_package/$str').toList();
   final List<String>? _fontFamilyFallback;
 
   // This is stored in order to prefix the fontFamilies in _fontFamilyFallback
@@ -835,32 +835,32 @@ class TextStyle with Diagnosticable {
   /// [background] specified it will be given preference over any
   /// backgroundColor parameter.
   TextStyle copyWith({
-    bool? inherit,
-    Color? color,
-    Color? backgroundColor,
-    double? fontSize,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
-    double? letterSpacing,
-    double? wordSpacing,
-    TextBaseline? textBaseline,
-    double? height,
-    ui.TextLeadingDistribution? leadingDistribution,
-    Locale? locale,
-    Paint? foreground,
-    Paint? background,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-    TextDecoration? decoration,
-    Color? decorationColor,
-    TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    String? debugLabel,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    String? package,
-    TextOverflow? overflow,
+    final bool? inherit,
+    final Color? color,
+    final Color? backgroundColor,
+    final double? fontSize,
+    final FontWeight? fontWeight,
+    final FontStyle? fontStyle,
+    final double? letterSpacing,
+    final double? wordSpacing,
+    final TextBaseline? textBaseline,
+    final double? height,
+    final ui.TextLeadingDistribution? leadingDistribution,
+    final Locale? locale,
+    final Paint? foreground,
+    final Paint? background,
+    final List<ui.Shadow>? shadows,
+    final List<ui.FontFeature>? fontFeatures,
+    final List<ui.FontVariation>? fontVariations,
+    final TextDecoration? decoration,
+    final Color? decorationColor,
+    final TextDecorationStyle? decorationStyle,
+    final double? decorationThickness,
+    final String? debugLabel,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final String? package,
+    final TextOverflow? overflow,
   }) {
     assert(color == null || foreground == null, _kColorForegroundWarning);
     assert(backgroundColor == null || background == null, _kColorBackgroundWarning);
@@ -932,33 +932,33 @@ class TextStyle with Diagnosticable {
   /// will have no effect and if [background] is specified on this object, then
   /// applying [backgroundColor] here will have no effect either.
   TextStyle apply({
-    Color? color,
-    Color? backgroundColor,
-    TextDecoration? decoration,
-    Color? decorationColor,
-    TextDecorationStyle? decorationStyle,
-    double decorationThicknessFactor = 1.0,
-    double decorationThicknessDelta = 0.0,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double fontSizeFactor = 1.0,
-    double fontSizeDelta = 0.0,
-    int fontWeightDelta = 0,
-    FontStyle? fontStyle,
-    double letterSpacingFactor = 1.0,
-    double letterSpacingDelta = 0.0,
-    double wordSpacingFactor = 1.0,
-    double wordSpacingDelta = 0.0,
-    double heightFactor = 1.0,
-    double heightDelta = 0.0,
-    TextBaseline? textBaseline,
-    ui.TextLeadingDistribution? leadingDistribution,
-    Locale? locale,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-    String? package,
-    TextOverflow? overflow,
+    final Color? color,
+    final Color? backgroundColor,
+    final TextDecoration? decoration,
+    final Color? decorationColor,
+    final TextDecorationStyle? decorationStyle,
+    final double decorationThicknessFactor = 1.0,
+    final double decorationThicknessDelta = 0.0,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final double fontSizeFactor = 1.0,
+    final double fontSizeDelta = 0.0,
+    final int fontWeightDelta = 0,
+    final FontStyle? fontStyle,
+    final double letterSpacingFactor = 1.0,
+    final double letterSpacingDelta = 0.0,
+    final double wordSpacingFactor = 1.0,
+    final double wordSpacingDelta = 0.0,
+    final double heightFactor = 1.0,
+    final double heightDelta = 0.0,
+    final TextBaseline? textBaseline,
+    final ui.TextLeadingDistribution? leadingDistribution,
+    final Locale? locale,
+    final List<ui.Shadow>? shadows,
+    final List<ui.FontFeature>? fontFeatures,
+    final List<ui.FontVariation>? fontVariations,
+    final String? package,
+    final TextOverflow? overflow,
   }) {
     assert(fontSize != null || (fontSizeFactor == 1.0 && fontSizeDelta == 0.0));
     assert(fontWeight != null || fontWeightDelta == 0.0);
@@ -1025,7 +1025,7 @@ class TextStyle with Diagnosticable {
   /// Similarly, one of [backgroundColor] or [background] must be null, and if
   /// this or `other` has [background] specified it will be given preference
   /// over any backgroundColor parameter.
-  TextStyle merge(TextStyle? other) {
+  TextStyle merge(final TextStyle? other) {
     if (other == null) {
       return this;
     }
@@ -1093,7 +1093,7 @@ class TextStyle with Diagnosticable {
   /// If [background] is specified on either of `a` or `b`, both will be treated
   /// as if they have a [background] paint (creating a new [Paint] if necessary
   /// based on the [backgroundColor] property).
-  static TextStyle? lerp(TextStyle? a, TextStyle? b, double t) {
+  static TextStyle? lerp(final TextStyle? a, final TextStyle? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -1192,7 +1192,7 @@ class TextStyle with Diagnosticable {
         b.toDiagnosticsNode(name: 'to', style: DiagnosticsTreeStyle.singleLine),
         ErrorDescription(
           'The following fields are unspecified in both TextStyles:\n'
-          '${nullFields.map((String name) => '"$name"').join(', ')}.\n'
+          '${nullFields.map((final String name) => '"$name"').join(', ')}.\n'
           'When "inherit" changes during the transition, these fields may '
           'observe abrupt value changes as a result, causing "jump"s in the '
           'transition.'
@@ -1266,7 +1266,7 @@ class TextStyle with Diagnosticable {
   }
 
   /// The style information for text runs, encoded for use by `dart:ui`.
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
+  ui.TextStyle getTextStyle({ final double textScaleFactor = 1.0 }) {
     return ui.TextStyle(
       color: color,
       decoration: decoration,
@@ -1304,19 +1304,19 @@ class TextStyle with Diagnosticable {
   /// If the font size on this style isn't set, it will default to 14 logical
   /// pixels.
   ui.ParagraphStyle getParagraphStyle({
-    TextAlign? textAlign,
-    TextDirection? textDirection,
-    double textScaleFactor = 1.0,
-    String? ellipsis,
-    int? maxLines,
-    ui.TextHeightBehavior? textHeightBehavior,
-    Locale? locale,
-    String? fontFamily,
-    double? fontSize,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
-    double? height,
-    StrutStyle? strutStyle,
+    final TextAlign? textAlign,
+    final TextDirection? textDirection,
+    final double textScaleFactor = 1.0,
+    final String? ellipsis,
+    final int? maxLines,
+    final ui.TextHeightBehavior? textHeightBehavior,
+    final Locale? locale,
+    final String? fontFamily,
+    final double? fontSize,
+    final FontWeight? fontWeight,
+    final FontStyle? fontStyle,
+    final double? height,
+    final StrutStyle? strutStyle,
   }) {
     assert(maxLines == null || maxLines > 0);
     final ui.TextLeadingDistribution? leadingDistribution = this.leadingDistribution;
@@ -1355,7 +1355,7 @@ class TextStyle with Diagnosticable {
   /// See also:
   ///
   ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
-  RenderComparison compareTo(TextStyle other) {
+  RenderComparison compareTo(final TextStyle other) {
     if (identical(this, other)) {
       return RenderComparison.identical;
     }
@@ -1391,7 +1391,7 @@ class TextStyle with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -1470,7 +1470,7 @@ class TextStyle with Diagnosticable {
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties, { final String prefix = '' }) {
     super.debugFillProperties(properties);
     if (debugLabel != null) {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
@@ -1530,7 +1530,7 @@ class TextStyle with Diagnosticable {
       styles.add(DoubleProperty('${prefix}decorationThickness', decorationThickness, unit: 'x', defaultValue: null));
     }
 
-    final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
+    final bool styleSpecified = styles.any((final DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     properties.add(DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
     styles.forEach(properties.add);
 

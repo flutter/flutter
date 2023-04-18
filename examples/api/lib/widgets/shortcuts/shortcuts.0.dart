@@ -13,7 +13,7 @@ class ShortcutsExampleApp extends StatelessWidget {
   const ShortcutsExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Shortcuts Sample')),
@@ -44,7 +44,7 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
   int count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Shortcuts(
       shortcuts: const <ShortcutActivator, Intent>{
         SingleActivator(LogicalKeyboardKey.arrowUp): IncrementIntent(),
@@ -53,12 +53,12 @@ class _ShortcutsExampleState extends State<ShortcutsExample> {
       child: Actions(
         actions: <Type, Action<Intent>>{
           IncrementIntent: CallbackAction<IncrementIntent>(
-            onInvoke: (IncrementIntent intent) => setState(() {
+            onInvoke: (final IncrementIntent intent) => setState(() {
               count = count + 1;
             }),
           ),
           DecrementIntent: CallbackAction<DecrementIntent>(
-            onInvoke: (DecrementIntent intent) => setState(() {
+            onInvoke: (final DecrementIntent intent) => setState(() {
               count = count - 1;
             }),
           ),

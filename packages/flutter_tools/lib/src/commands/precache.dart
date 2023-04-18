@@ -13,11 +13,11 @@ import '../runner/flutter_command.dart';
 /// the use of device/artifact autodetection.
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand({
-    bool verboseHelp = false,
-    required Cache cache,
-    required Platform platform,
-    required Logger logger,
-    required FeatureFlags featureFlags,
+    final bool verboseHelp = false,
+    required final Cache cache,
+    required final Platform platform,
+    required final Logger logger,
+    required final FeatureFlags featureFlags,
   }) : _cache = cache,
        _platform = platform,
        _logger = logger,
@@ -102,7 +102,7 @@ class PrecacheCommand extends FlutterCommand {
   Set<String> _explicitArtifactSelections() {
     final Map<String, String> umbrellaForArtifact = _umbrellaForArtifactMap();
     final Set<String> selections = <String>{};
-    bool explicitlySelected(String name) => boolArg(name) && argResults!.wasParsed(name);
+    bool explicitlySelected(final String name) => boolArg(name) && argResults!.wasParsed(name);
     for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       final String? umbrellaName = umbrellaForArtifact[artifact.name];
       if (explicitlySelected(artifact.name) ||
@@ -115,7 +115,7 @@ class PrecacheCommand extends FlutterCommand {
 
   @override
   Future<void> validateCommand() {
-    _expandedArtifacts.forEach((String umbrellaName, List<String> childArtifactNames) {
+    _expandedArtifacts.forEach((final String umbrellaName, final List<String> childArtifactNames) {
       if (!argResults!.arguments.contains('--no-$umbrellaName')) {
         return;
       }

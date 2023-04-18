@@ -8,7 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TickerMode', (WidgetTester tester) async {
+  testWidgets('TickerMode', (final WidgetTester tester) async {
     const Widget widget = TickerMode(
       enabled: false,
       child: CircularProgressIndicator(),
@@ -34,11 +34,11 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('Navigation with TickerMode', (WidgetTester tester) async {
+  testWidgets('Navigation with TickerMode', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: const LinearProgressIndicator(),
       routes: <String, WidgetBuilder>{
-        '/test': (BuildContext context) => const Text('hello'),
+        '/test': (final BuildContext context) => const Text('hello'),
       },
     ));
     expect(tester.binding.transientCallbackCount, 1);
@@ -56,7 +56,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 1);
   });
 
-  testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
+  testWidgets('SingleTickerProviderStateMixin can handle not being used', (final WidgetTester tester) async {
     const Widget widget = BoringTickerTest();
     expect(widget.toString, isNot(throwsException));
 
@@ -66,7 +66,7 @@ void main() {
   });
 
   group('TickerProviderStateMixin assertion control test', () {
-    testWidgets('SingleTickerProviderStateMixin create multiple tickers', (WidgetTester tester) async {
+    testWidgets('SingleTickerProviderStateMixin create multiple tickers', (final WidgetTester tester) async {
       const Widget widget = _SingleTickerCreateMultipleTicker();
       await tester.pumpWidget(widget);
       final dynamic exception = tester.takeException();
@@ -96,7 +96,7 @@ void main() {
       ));
     });
 
-    testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
+    testWidgets('SingleTickerProviderStateMixin dispose while active', (final WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
@@ -136,7 +136,7 @@ void main() {
       }
     });
 
-    testWidgets('SingleTickerProviderStateMixin dispose while active', (WidgetTester tester) async {
+    testWidgets('SingleTickerProviderStateMixin dispose while active', (final WidgetTester tester) async {
       final GlobalKey<_SingleTickerTestState> key = GlobalKey<_SingleTickerTestState>();
       final Widget widget = _SingleTickerTest(key: key);
       await tester.pumpWidget(widget);
@@ -176,7 +176,7 @@ void main() {
       }
     });
 
-    testWidgets('TickerProviderStateMixin dispose while any ticker is active', (WidgetTester tester) async {
+    testWidgets('TickerProviderStateMixin dispose while any ticker is active', (final WidgetTester tester) async {
       final GlobalKey<_MultipleTickerTestState> key = GlobalKey<_MultipleTickerTestState>();
       final Widget widget = _MultipleTickerTest(key: key);
       await tester.pumpWidget(widget);
@@ -216,12 +216,12 @@ void main() {
     });
   });
 
-  testWidgets('SingleTickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
+  testWidgets('SingleTickerProviderStateMixin does not call State.toString', (final WidgetTester tester) async {
     await tester.pumpWidget(const _SingleTickerTest());
     expect(tester.state<_SingleTickerTestState>(find.byType(_SingleTickerTest)).toStringCount, 0);
   });
 
-  testWidgets('TickerProviderStateMixin does not call State.toString', (WidgetTester tester) async {
+  testWidgets('TickerProviderStateMixin does not call State.toString', (final WidgetTester tester) async {
     await tester.pumpWidget(const _MultipleTickerTest());
     expect(tester.state<_MultipleTickerTestState>(find.byType(_MultipleTickerTest)).toStringCount, 0);
   });
@@ -235,7 +235,7 @@ class BoringTickerTest extends StatefulWidget {
 
 class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }
 
 class _SingleTickerTest extends StatefulWidget {
@@ -258,14 +258,14 @@ class _SingleTickerTestState extends State<_SingleTickerTest> with SingleTickerP
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 
   int toStringCount = 0;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString({final DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     toStringCount += 1;
     return super.toString(minLevel: minLevel);
   }
@@ -290,14 +290,14 @@ class _MultipleTickerTestState extends State<_MultipleTickerTest> with TickerPro
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 
   int toStringCount = 0;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString({final DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     toStringCount += 1;
     return super.toString(minLevel: minLevel);
   }
@@ -325,7 +325,7 @@ class _SingleTickerCreateMultipleTickerState extends State<_SingleTickerCreateMu
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }

@@ -12,7 +12,7 @@ class SnackBarExampleApp extends StatelessWidget {
   const SnackBarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SnackBar Sample')),
@@ -28,7 +28,7 @@ class SnackBarExample extends StatelessWidget {
   const SnackBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ElevatedButton(
       child: const Text('Show Snackbar'),
       onPressed: () {

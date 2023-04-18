@@ -10,14 +10,14 @@ class TestPaintingContext implements PaintingContext {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-  void noSuchMethod(Invocation invocation) {
+  void noSuchMethod(final Invocation invocation) {
     invocations.add(invocation);
   }
 }
 
 void main() {
   group('AnimatedSize', () {
-    testWidgets('animates forwards then backwards with stable-sized children', (WidgetTester tester) async {
+    testWidgets('animates forwards then backwards with stable-sized children', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -87,7 +87,7 @@ void main() {
       expect(box.size.height, equals(100.0));
     });
 
-    testWidgets('clamps animated size to constraints', (WidgetTester tester) async {
+    testWidgets('clamps animated size to constraints', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: SizedBox (
@@ -132,12 +132,12 @@ void main() {
       expect(box.size.height, equals(100.0));
     });
 
-    testWidgets('tracks unstable child, then resumes animation when child stabilizes', (WidgetTester tester) async {
-      Future<void> pumpMillis(int millis) async {
+    testWidgets('tracks unstable child, then resumes animation when child stabilizes', (final WidgetTester tester) async {
+      Future<void> pumpMillis(final int millis) async {
         await tester.pump(Duration(milliseconds: millis));
       }
 
-      void verify({ double? size, RenderAnimatedSizeState? state }) {
+      void verify({ final double? size, final RenderAnimatedSizeState? state }) {
         assert(size != null || state != null);
         final RenderAnimatedSize box = tester.renderObject(find.byType(AnimatedSize));
         if (size != null) {
@@ -215,7 +215,7 @@ void main() {
       verify(size: 100.0, state: RenderAnimatedSizeState.stable);
     });
 
-    testWidgets('resyncs its animation controller', (WidgetTester tester) async {
+    testWidgets('resyncs its animation controller', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -246,7 +246,7 @@ void main() {
       expect(box.size.width, equals(150.0));
     });
 
-    testWidgets('does not run animation unnecessarily', (WidgetTester tester) async {
+    testWidgets('does not run animation unnecessarily', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -269,7 +269,7 @@ void main() {
       }
     });
 
-    testWidgets('can set and update clipBehavior', (WidgetTester tester) async {
+    testWidgets('can set and update clipBehavior', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const Center(
           child: AnimatedSize(
@@ -303,8 +303,8 @@ void main() {
       }
     });
 
-    testWidgets('works wrapped in IntrinsicHeight and Wrap', (WidgetTester tester) async {
-      Future<void> pumpWidget(Size size, [Duration? duration]) async {
+    testWidgets('works wrapped in IntrinsicHeight and Wrap', (final WidgetTester tester) async {
+      Future<void> pumpWidget(final Size size, [final Duration? duration]) async {
         return tester.pumpWidget(
           Center(
             child: IntrinsicHeight(
@@ -350,7 +350,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byType(IntrinsicHeight)).size, const Size(222, 222));
     });
 
-    testWidgets('re-attach with interrupted animation', (WidgetTester tester) async {
+    testWidgets('re-attach with interrupted animation', (final WidgetTester tester) async {
       const Key key1 = ValueKey<String>('key1');
       const Key key2 = ValueKey<String>('key2');
       late StateSetter setState;
@@ -366,7 +366,7 @@ void main() {
             child: AnimatedSize(
               duration: const Duration(seconds: 1),
               child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter stateSetter) {
+                builder: (final BuildContext context, final StateSetter stateSetter) {
                   setState = stateSetter;
                   return SizedBox.fromSize(size: childSize);
                 },

@@ -135,7 +135,7 @@ void main() {
   });
 
   test('Returns null if an error is caught resolving an image', () {
-    Future<ui.Codec> basicDecoder(ui.ImmutableBuffer bytes, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+    Future<ui.Codec> basicDecoder(final ui.ImmutableBuffer bytes, {final int? cacheWidth, final int? cacheHeight, final bool? allowUpscaling}) {
       return PaintingBinding.instance.instantiateImageCodecFromBuffer(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
     }
     final ErrorImageProvider errorImage = ErrorImageProvider();
@@ -144,7 +144,7 @@ void main() {
     final ImageStreamCompleter? result = imageCache.putIfAbsent(
       errorImage,
       () => errorImage.loadBuffer(errorImage, basicDecoder),
-      onError: (dynamic error, StackTrace? stackTrace) {
+      onError: (final dynamic error, final StackTrace? stackTrace) {
        caughtError = true;
       },
     );
@@ -180,7 +180,7 @@ void main() {
     })! as TestImageStreamCompleter;
 
     // Make the image seem live.
-    final ImageStreamListener listener = ImageStreamListener((_, __) {});
+    final ImageStreamListener listener = ImageStreamListener((final _, final __) {});
     completer1.addListener(listener);
 
     expect(imageCache.statusForKey(testImage).pending, true);
@@ -226,10 +226,10 @@ void main() {
     FailingTestImageProvider(1, 1, image: testImage)
         .resolve(ImageConfiguration.empty)
         .addListener(ImageStreamListener(
-          (ImageInfo image, bool synchronousCall) {
+          (final ImageInfo image, final bool synchronousCall) {
             fail('Image should not complete successfully');
            },
-          onError: (dynamic exception, StackTrace? stackTrace) {
+          onError: (final dynamic exception, final StackTrace? stackTrace) {
             final bool evictionResult = imageCache.evict(1);
             expect(evictionResult, isTrue);
           },
@@ -275,7 +275,7 @@ void main() {
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()..testSetImage(testImage);
     final TestImageStreamCompleter completer2 = TestImageStreamCompleter()..testSetImage(testImage2);
 
-    completer1.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+    completer1.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {}));
 
     final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
       return completer1;
@@ -402,7 +402,7 @@ void main() {
     expect(imageCache.statusForKey(testImage).live, true);
     expect(imageCache.statusForKey(testImage).keepAlive, false);
 
-    completer1.addListener(ImageStreamListener((_, __) {}));
+    completer1.addListener(ImageStreamListener((final _, final __) {}));
     imageCache.evict(testImage, includeLive: false);
     expect(imageCache.statusForKey(testImage).pending, false);
     expect(imageCache.statusForKey(testImage).live, true);
@@ -414,7 +414,7 @@ void main() {
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..testSetImage(testImage)
-      ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+      ..addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {}));
 
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, false);
@@ -430,7 +430,7 @@ void main() {
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..testSetImage(testImage)
-      ..addListener(ImageStreamListener((ImageInfo info, bool syncCall) {}));
+      ..addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {}));
 
     imageCache.putIfAbsent(testImage, () => completer1);
     expect(imageCache.statusForKey(testImage).pending, false);
@@ -446,7 +446,7 @@ void main() {
   test('Clearing liveImages removes callbacks', () async {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
 
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+    final ImageStreamListener listener = ImageStreamListener((final ImageInfo info, final bool syncCall) {});
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..testSetImage(testImage)
@@ -490,7 +490,7 @@ void main() {
     final ui.Image testImage = await createTestImage(width: 8, height: 8);
     const int testImageSize = 8 * 8 * 4;
 
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {});
+    final ImageStreamListener listener = ImageStreamListener((final ImageInfo info, final bool syncCall) {});
 
     final TestImageStreamCompleter completer1 = TestImageStreamCompleter()
       ..addListener(listener);
@@ -529,7 +529,7 @@ void main() {
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
     late ImageInfo imageInfo;
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+    final ImageStreamListener listener = ImageStreamListener((final ImageInfo info, final bool syncCall) {
       imageInfo = info;
     });
 
@@ -574,7 +574,7 @@ void main() {
     expect(testImage.debugGetOpenHandleStackTraces()!.length, 1);
 
     late ImageInfo imageInfo;
-    final ImageStreamListener listener = ImageStreamListener((ImageInfo info, bool syncCall) {
+    final ImageStreamListener listener = ImageStreamListener((final ImageInfo info, final bool syncCall) {
       imageInfo = info;
     });
 

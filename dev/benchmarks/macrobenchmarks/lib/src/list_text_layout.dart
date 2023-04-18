@@ -22,7 +22,7 @@ class ColumnOfTextState extends State<ColumnOfText> with SingleTickerProviderSta
       vsync: this,
       duration: const Duration(milliseconds: 300),
     )
-      ..addStatusListener((AnimationStatus status) {
+      ..addStatusListener((final AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           setState(() {
             _showText = !_showText;
@@ -42,7 +42,7 @@ class ColumnOfTextState extends State<ColumnOfText> with SingleTickerProviderSta
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: OverflowBox(
         alignment: Alignment.topCenter,
@@ -50,7 +50,7 @@ class ColumnOfTextState extends State<ColumnOfText> with SingleTickerProviderSta
         child: !_showText
             ? Container()
             : Column(
-                children: List<Widget>.generate(9, (int index) {
+                children: List<Widget>.generate(9, (final int index) {
                   return ListTile(
                     leading: CircleAvatar(
                       child: Text('G$index'),

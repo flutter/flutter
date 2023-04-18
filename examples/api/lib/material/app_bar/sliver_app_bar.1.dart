@@ -12,7 +12,7 @@ class AppBarApp extends StatelessWidget {
   const AppBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: SliverAppBarExample(),
     );
@@ -34,7 +34,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
 // [SliverAppBar]s are typically used in [CustomScrollView.slivers], which in
 // turn can be placed in a [Scaffold.body].
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
@@ -58,7 +58,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (final BuildContext context, final int index) {
                 return Container(
                   color: index.isOdd ? Colors.white : Colors.black12,
                   height: 100.0,
@@ -83,7 +83,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
                 children: <Widget>[
                   const Text('pinned'),
                   Switch(
-                    onChanged: (bool val) {
+                    onChanged: (final bool val) {
                       setState(() {
                         _pinned = val;
                       });
@@ -97,7 +97,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
                 children: <Widget>[
                   const Text('snap'),
                   Switch(
-                    onChanged: (bool val) {
+                    onChanged: (final bool val) {
                       setState(() {
                         _snap = val;
                         // Snapping only applies when the app bar is floating.
@@ -113,7 +113,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
                 children: <Widget>[
                   const Text('floating'),
                   Switch(
-                    onChanged: (bool val) {
+                    onChanged: (final bool val) {
                       setState(() {
                         _floating = val;
                         _snap = _snap && _floating;

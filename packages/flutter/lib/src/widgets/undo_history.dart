@@ -140,15 +140,15 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     }
   }
 
-  void _undoFromIntent(UndoTextIntent intent) {
+  void _undoFromIntent(final UndoTextIntent intent) {
     undo();
   }
 
-  void _redoFromIntent(RedoTextIntent intent) {
+  void _redoFromIntent(final RedoTextIntent intent) {
     redo();
   }
 
-  void _update(T? nextValue) {
+  void _update(final T? nextValue) {
     if (nextValue == null) {
       return;
     }
@@ -192,7 +192,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
   }
 
   @override
-  void handlePlatformUndo(UndoDirection direction) {
+  void handlePlatformUndo(final UndoDirection direction) {
     switch(direction) {
       case UndoDirection.undo:
         undo();
@@ -206,7 +206,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
     super.initState();
     _throttledPush = _throttle<T>(
       duration: _kThrottleDuration,
-      function: (T currentValue) {
+      function: (final T currentValue) {
         _stack.push(currentValue);
         _updateState();
       },
@@ -220,7 +220,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
   }
 
   @override
-  void didUpdateWidget(UndoHistory<T> oldWidget) {
+  void didUpdateWidget(final UndoHistory<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value != oldWidget.value) {
       _stack.clear();
@@ -253,7 +253,7 @@ class UndoHistoryState<T> extends State<UndoHistory<T>> with UndoManagerClient {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Actions(
       actions: <Type, Action<Intent>>{
         UndoTextIntent: Action<UndoTextIntent>.overridable(context: context, defaultAction: CallbackAction<UndoTextIntent>(onInvoke: _undoFromIntent)),
@@ -286,7 +286,7 @@ class UndoHistoryValue {
   String toString() => '${objectRuntimeType(this, 'UndoHistoryValue')}(canUndo: $canUndo, canRedo: $canRedo)';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -323,7 +323,7 @@ class UndoHistoryValue {
 ///   control of the underlying history using an [UndoHistoryController].
 class UndoHistoryController extends ValueNotifier<UndoHistoryValue> {
   /// Creates a controller for an [UndoHistory] widget.
-  UndoHistoryController({UndoHistoryValue? value}) : super(value ?? UndoHistoryValue.empty);
+  UndoHistoryController({final UndoHistoryValue? value}) : super(value ?? UndoHistoryValue.empty);
 
   /// Notifies listeners that [undo] has been called.
   final ChangeNotifier onUndo = ChangeNotifier();
@@ -378,7 +378,7 @@ class _UndoStack<T> {
   /// Add a new state change to the stack.
   ///
   /// Pushing identical objects will not create multiple entries.
-  void push(T value) {
+  void push(final T value) {
     if (_list.isEmpty) {
       _index = 0;
       _list.add(value);
@@ -463,13 +463,13 @@ typedef _Throttled<T> = Timer Function(T currentArg);
 ///
 /// Only works for functions that take exactly one argument and return void.
 _Throttled<T> _throttle<T>({
-  required Duration duration,
-  required _Throttleable<T> function,
+  required final Duration duration,
+  required final _Throttleable<T> function,
 }) {
   Timer? timer;
   late T arg;
 
-  return (T currentArg) {
+  return (final T currentArg) {
     arg = currentArg;
     if (timer != null && timer!.isActive) {
       return timer!;

@@ -492,7 +492,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   final bool windows;
 
   @override
-  void unzip(File file, Directory targetDirectory) {
+  void unzip(final File file, final Directory targetDirectory) {
     if (failures > 0) {
       failures -= 1;
       throw Exception();
@@ -502,7 +502,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   }
 
   @override
-  void unpack(File gzippedTarFile, Directory targetDirectory) {
+  void unpack(final File gzippedTarFile, final Directory targetDirectory) {
     if (failures > 0) {
       failures -= 1;
       throw Exception();

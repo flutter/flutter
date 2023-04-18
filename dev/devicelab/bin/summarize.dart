@@ -14,14 +14,14 @@ String kRawSummaryOpt = 'raw-summary';
 String kTabTableOpt = 'tsv-table';
 String kAsciiTableOpt = 'ascii-table';
 
-void _usage(String error) {
+void _usage(final String error) {
   stderr.writeln(error);
   stderr.writeln('Usage:\n');
   stderr.writeln(_argParser.usage);
   exitCode = 1;
 }
 
-Future<void> main(List<String> rawArgs) async {
+Future<void> main(final List<String> rawArgs) async {
   ArgResults args;
   try {
     args = _argParser.parse(rawArgs);

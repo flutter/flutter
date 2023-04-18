@@ -30,7 +30,7 @@ Version get xcodeRecommendedVersion => xcodeRequiredVersion;
 /// Usage: xcrun [options] <tool name> ... arguments ...
 /// ...
 /// --sdk <sdk name>            find the tool for the given SDK name.
-String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
+String getSDKNameForIOSEnvironmentType(final EnvironmentType environmentType) {
   return (environmentType == EnvironmentType.simulator)
       ? 'iphonesimulator'
       : 'iphoneos';
@@ -39,11 +39,11 @@ String getSDKNameForIOSEnvironmentType(EnvironmentType environmentType) {
 /// A utility class for interacting with Xcode command line tools.
 class Xcode {
   Xcode({
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final XcodeProjectInterpreter xcodeProjectInterpreter,
   })  : _platform = platform,
         _fileSystem = fileSystem,
         _xcodeProjectInterpreter = xcodeProjectInterpreter,
@@ -56,10 +56,10 @@ class Xcode {
   /// buffer logger, and test [XcodeProjectInterpreter].
   @visibleForTesting
   factory Xcode.test({
-    required ProcessManager processManager,
-    XcodeProjectInterpreter? xcodeProjectInterpreter,
+    required final ProcessManager processManager,
+    final XcodeProjectInterpreter? xcodeProjectInterpreter,
     Platform? platform,
-    FileSystem? fileSystem,
+    final FileSystem? fileSystem,
   }) {
     platform ??= FakePlatform(
       operatingSystem: 'macos',
@@ -165,22 +165,22 @@ class Xcode {
   /// See [XcodeProjectInterpreter.xcrunCommand].
   List<String> xcrunCommand() => _xcodeProjectInterpreter.xcrunCommand();
 
-  Future<RunResult> cc(List<String> args) => _run('cc', args);
+  Future<RunResult> cc(final List<String> args) => _run('cc', args);
 
-  Future<RunResult> clang(List<String> args) => _run('clang', args);
+  Future<RunResult> clang(final List<String> args) => _run('clang', args);
 
-  Future<RunResult> dsymutil(List<String> args) => _run('dsymutil', args);
+  Future<RunResult> dsymutil(final List<String> args) => _run('dsymutil', args);
 
-  Future<RunResult> strip(List<String> args) => _run('strip', args);
+  Future<RunResult> strip(final List<String> args) => _run('strip', args);
 
-  Future<RunResult> _run(String command, List<String> args) {
+  Future<RunResult> _run(final String command, final List<String> args) {
     return _processUtils.run(
       <String>[...xcrunCommand(), command, ...args],
       throwOnError: true,
     );
   }
 
-  Future<String> sdkLocation(EnvironmentType environmentType) async {
+  Future<String> sdkLocation(final EnvironmentType environmentType) async {
     final RunResult runResult = await _processUtils.run(
       <String>[...xcrunCommand(), '--sdk', getSDKNameForIOSEnvironmentType(environmentType), '--show-sdk-path'],
     );
@@ -200,7 +200,7 @@ class Xcode {
   }
 }
 
-EnvironmentType? environmentTypeFromSdkroot(String sdkroot, FileSystem fileSystem) {
+EnvironmentType? environmentTypeFromSdkroot(final String sdkroot, final FileSystem fileSystem) {
   // iPhoneSimulator.sdk or iPhoneOS.sdk
   final String sdkName = fileSystem.path.basename(sdkroot).toLowerCase();
   if (sdkName.contains('iphone')) {

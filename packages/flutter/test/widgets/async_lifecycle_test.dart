@@ -19,7 +19,7 @@ class InvalidOnInitLifecycleWidgetState extends State<InvalidOnInitLifecycleWidg
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }
@@ -35,24 +35,24 @@ class InvalidDidUpdateWidgetLifecycleWidget extends StatefulWidget {
 
 class InvalidDidUpdateWidgetLifecycleWidgetState extends State<InvalidDidUpdateWidgetLifecycleWidget> {
   @override
-  Future<void> didUpdateWidget(InvalidDidUpdateWidgetLifecycleWidget oldWidget) async {
+  Future<void> didUpdateWidget(final InvalidDidUpdateWidgetLifecycleWidget oldWidget) async {
     super.didUpdateWidget(oldWidget);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }
 
 void main() {
-  testWidgets('async onInit throws FlutterError', (WidgetTester tester) async {
+  testWidgets('async onInit throws FlutterError', (final WidgetTester tester) async {
     await tester.pumpWidget(const InvalidOnInitLifecycleWidget());
 
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('async didUpdateWidget throws FlutterError', (WidgetTester tester) async {
+  testWidgets('async didUpdateWidget throws FlutterError', (final WidgetTester tester) async {
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 1));
     await tester.pumpWidget(const InvalidDidUpdateWidgetLifecycleWidget(id: 2));
 

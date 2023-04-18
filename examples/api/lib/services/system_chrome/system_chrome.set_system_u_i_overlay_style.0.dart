@@ -15,7 +15,7 @@ class SystemOverlayStyleApp extends StatelessWidget {
   const SystemOverlayStyleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -53,7 +53,7 @@ class _SystemOverlayStyleExampleState extends State<SystemOverlayStyleExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('SystemUiOverlayStyle Sample'),

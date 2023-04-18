@@ -17,21 +17,21 @@ class _MockAnimationController extends AnimationController {
   int reverseCalls = 0;
 
   @override
-  TickerFuture forward({double? from}) {
+  TickerFuture forward({final double? from}) {
     forwardCalls++;
     return super.forward(from: from);
   }
 
   @override
-  TickerFuture reverse({double? from}) {
+  TickerFuture reverse({final double? from}) {
     reverseCalls++;
     return super.reverse(from: from);
   }
 }
 
 void main() {
-  Future<T> runFakeAsync<T>(Future<T> Function(FakeAsync time) f) async {
-    return FakeAsync().run((FakeAsync time) async {
+  Future<T> runFakeAsync<T>(final Future<T> Function(FakeAsync time) f) async {
+    return FakeAsync().run((final FakeAsync time) async {
       bool pump = true;
       final Future<T> future = f(time).whenComplete(() => pump = false);
       while (pump) {
@@ -43,7 +43,7 @@ void main() {
 
   group('Raw Magnifier', () {
     testWidgets('should render with correct focal point and decoration',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final Key appKey = UniqueKey();
       const Size magnifierSize = Size(100, 100);
       const Offset magnifierFocalPoint = Offset(50, 50);
@@ -118,8 +118,8 @@ void main() {
 
       testWidgets(
           'should immediately remove from overlay on no animation controller',
-          (WidgetTester tester) async {
-        await runFakeAsync((FakeAsync async) async {
+          (final WidgetTester tester) async {
+        await runFakeAsync((final FakeAsync async) async {
           const RawMagnifier testMagnifier = RawMagnifier(
             size: Size(100, 100),
           );
@@ -133,7 +133,7 @@ void main() {
 
           magnifierController.show(
             context: context,
-            builder: (BuildContext context) => testMagnifier,
+            builder: (final BuildContext context) => testMagnifier,
           );
 
           WidgetsBinding.instance.scheduleFrame();
@@ -150,8 +150,8 @@ void main() {
       });
 
       testWidgets('should update shown based on animation status',
-          (WidgetTester tester) async {
-        await runFakeAsync((FakeAsync async) async {
+          (final WidgetTester tester) async {
+        await runFakeAsync((final FakeAsync async) async {
           final MagnifierController magnifierController =
               MagnifierController(animationController: animationController);
 
@@ -168,7 +168,7 @@ void main() {
 
           magnifierController.show(
             context: context,
-            builder: (BuildContext context) => testMagnifier,
+            builder: (final BuildContext context) => testMagnifier,
           );
 
           WidgetsBinding.instance.scheduleFrame();
@@ -214,7 +214,7 @@ void main() {
     });
 
     group('show', () {
-      testWidgets('should insert below below widget', (WidgetTester tester) async {
+      testWidgets('should insert below below widget', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(
           home: Text('text'),
         ));
@@ -225,12 +225,12 @@ void main() {
         final Widget fakeBefore = Placeholder(key: UniqueKey());
 
         final OverlayEntry fakeBeforeOverlayEntry =
-            OverlayEntry(builder: (_) => fakeBefore);
+            OverlayEntry(builder: (final _) => fakeBefore);
 
         Overlay.of(context).insert(fakeBeforeOverlayEntry);
         magnifierController.show(
             context: context,
-            builder: (_) => fakeMagnifier,
+            builder: (final _) => fakeMagnifier,
             below: fakeBeforeOverlayEntry);
 
         WidgetsBinding.instance.scheduleFrame();
@@ -248,8 +248,8 @@ void main() {
       });
 
       testWidgets('should insert newly built widget without animating out if overlay != null',
-          (WidgetTester tester) async {
-        await runFakeAsync((FakeAsync async) async {
+          (final WidgetTester tester) async {
+        await runFakeAsync((final FakeAsync async) async {
           final _MockAnimationController animationController =
               _MockAnimationController();
 
@@ -269,7 +269,7 @@ void main() {
 
           magnifierController.show(
             context: context,
-            builder: (BuildContext context) => testMagnifier,
+            builder: (final BuildContext context) => testMagnifier,
           );
 
           WidgetsBinding.instance.scheduleFrame();
@@ -278,7 +278,7 @@ void main() {
           async.elapse(animationController.duration!);
           await tester.pumpAndSettle();
 
-          magnifierController.show(context: context, builder: (_) => testMagnifier2);
+          magnifierController.show(context: context, builder: (final _) => testMagnifier2);
 
           WidgetsBinding.instance.scheduleFrame();
           await tester.pump();

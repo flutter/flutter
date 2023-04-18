@@ -12,7 +12,7 @@ class CupertinoIndicatorApp extends StatelessWidget {
   const CupertinoIndicatorApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoIndicatorExample(),
@@ -24,7 +24,7 @@ class CupertinoIndicatorExample extends StatelessWidget {
   const CupertinoIndicatorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: Text('CupertinoActivityIndicator Sample'),

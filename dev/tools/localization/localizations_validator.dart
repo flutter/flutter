@@ -28,7 +28,7 @@ class ValidationError implements Exception {
 ///   description entry.
 ///
 /// Throws an exception upon failure.
-void validateEnglishLocalizations(File file) {
+void validateEnglishLocalizations(final File file) {
   final StringBuffer errorMessages = StringBuffer();
 
   if (!file.existsSync()) {
@@ -47,7 +47,7 @@ void validateEnglishLocalizations(File file) {
       continue;
     }
 
-    bool checkPluralResource(String suffix) {
+    bool checkPluralResource(final String suffix) {
       final int suffixIndex = resourceId.indexOf(suffix);
       return suffixIndex != -1 && bundle['@${resourceId.substring(0, suffixIndex)}'] != null;
     }
@@ -108,13 +108,13 @@ void validateEnglishLocalizations(File file) {
 ///    canonical list.
 /// 5. Removes the invalid mappings from this resource's locale.
 void removeUndefinedLocalizations(
-  Map<LocaleInfo, Map<String, String>> localeToResources,
+  final Map<LocaleInfo, Map<String, String>> localeToResources,
 ) {
   final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
   final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
 
-  localeToResources.forEach((LocaleInfo locale, Map<String, String> resources) {
-    bool isPluralVariation(String key) {
+  localeToResources.forEach((final LocaleInfo locale, final Map<String, String> resources) {
+    bool isPluralVariation(final String key) {
       final Match? pluralMatch = kPluralRegexp.firstMatch(key);
       if (pluralMatch == null) {
         return false;
@@ -124,11 +124,11 @@ void removeUndefinedLocalizations(
     }
 
     final Set<String> keys = Set<String>.from(
-        resources.keys.where((String key) => !isPluralVariation(key))
+        resources.keys.where((final String key) => !isPluralVariation(key))
     );
 
     final Set<String> invalidKeys = keys.difference(canonicalKeys);
-    resources.removeWhere((String key, String value) => invalidKeys.contains(key));
+    resources.removeWhere((final String key, final String value) => invalidKeys.contains(key));
   });
 }
 
@@ -142,9 +142,9 @@ void removeUndefinedLocalizations(
 ///
 /// If validation fails, throws an exception.
 void validateLocalizations(
-  Map<LocaleInfo, Map<String, String>> localeToResources,
-  Map<LocaleInfo, Map<String, dynamic>> localeToAttributes, {
-  bool removeUndefined = false,
+  final Map<LocaleInfo, Map<String, String>> localeToResources,
+  final Map<LocaleInfo, Map<String, dynamic>> localeToAttributes, {
+  final bool removeUndefined = false,
 }) {
   final Map<String, String> canonicalLocalizations = localeToResources[LocaleInfo.fromString('en')]!;
   final Set<String> canonicalKeys = Set<String>.from(canonicalLocalizations.keys);
@@ -158,7 +158,7 @@ void validateLocalizations(
     //
     // Many languages require only a subset of these variations, so we do not
     // require them so long as the "Other" variation exists.
-    bool isPluralVariation(String key) {
+    bool isPluralVariation(final String key) {
       final Match? pluralMatch = kPluralRegexp.firstMatch(key);
       if (pluralMatch == null) {
         return false;
@@ -168,7 +168,7 @@ void validateLocalizations(
     }
 
     final Set<String> keys = Set<String>.from(
-      resources.keys.where((String key) => !isPluralVariation(key))
+      resources.keys.where((final String key) => !isPluralVariation(key))
     );
 
     // Make sure keys are valid (i.e. they also exist in the canonical

@@ -13,7 +13,7 @@ const List<Widget> children = <Widget>[
   SizedBox(width: 200.0, height: 150.0),
 ];
 
-void expectRects(WidgetTester tester, List<Rect> expected) {
+void expectRects(final WidgetTester tester, final List<Rect> expected) {
   final Finder finder = find.byType(SizedBox);
   finder.precache();
   final List<Rect> actual = <Rect>[];
@@ -28,7 +28,7 @@ void expectRects(WidgetTester tester, List<Rect> expected) {
 
 void main() {
 
-  testWidgets('ListBody down', (WidgetTester tester) async {
+  testWidgets('ListBody down', (final WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
       children: <Widget>[ ListBody(children: children) ],
@@ -45,7 +45,7 @@ void main() {
     );
   });
 
-  testWidgets('ListBody up', (WidgetTester tester) async {
+  testWidgets('ListBody up', (final WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       direction: Axis.vertical,
       children: <Widget>[ ListBody(reverse: true, children: children) ],
@@ -62,7 +62,7 @@ void main() {
     );
   });
 
-  testWidgets('ListBody right', (WidgetTester tester) async {
+  testWidgets('ListBody right', (final WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
@@ -85,7 +85,7 @@ void main() {
     );
   });
 
-  testWidgets('ListBody left', (WidgetTester tester) async {
+  testWidgets('ListBody left', (final WidgetTester tester) async {
     await tester.pumpWidget(const Flex(
       textDirection: TextDirection.ltr,
       direction: Axis.horizontal,
@@ -108,10 +108,10 @@ void main() {
     );
   });
 
-  testWidgets('Limited space along main axis error', (WidgetTester tester) async {
+  testWidgets('Limited space along main axis error', (final WidgetTester tester) async {
     final FlutterExceptionHandler oldHandler = FlutterError.onError!;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+    FlutterError.onError = (final FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(
         const SizedBox(
@@ -141,10 +141,10 @@ void main() {
     ));
   });
 
-  testWidgets('Nested ListBody unbounded cross axis error', (WidgetTester tester) async {
+  testWidgets('Nested ListBody unbounded cross axis error', (final WidgetTester tester) async {
     final FlutterExceptionHandler oldHandler = FlutterError.onError!;
     final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
-    FlutterError.onError = (FlutterErrorDetails error) => errors.add(error);
+    FlutterError.onError = (final FlutterErrorDetails error) => errors.add(error);
     try {
       await tester.pumpWidget(
         const Flex(

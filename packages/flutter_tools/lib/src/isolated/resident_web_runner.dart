@@ -46,18 +46,18 @@ import 'devfs_web.dart';
 class DwdsWebRunnerFactory extends WebRunnerFactory {
   @override
   ResidentRunner createWebRunner(
-    FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required FlutterProject flutterProject,
-    required bool? ipv6,
-    required DebuggingOptions debuggingOptions,
-    UrlTunneller? urlTunneller,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required SystemClock systemClock,
-    required Usage usage,
-    bool machine = false,
+    final FlutterDevice device, {
+    final String? target,
+    required final bool stayResident,
+    required final FlutterProject flutterProject,
+    required final bool? ipv6,
+    required final DebuggingOptions debuggingOptions,
+    final UrlTunneller? urlTunneller,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final SystemClock systemClock,
+    required final Usage usage,
+    final bool machine = false,
   }) {
     return ResidentWebRunner(
       device,
@@ -82,19 +82,19 @@ const String kExitMessage = 'Failed to establish connection with the application
 
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(
-    FlutterDevice device, {
-    String? target,
-    bool stayResident = true,
-    bool machine = false,
+    final FlutterDevice device, {
+    final String? target,
+    final bool stayResident = true,
+    final bool machine = false,
     required this.flutterProject,
-    required bool? ipv6,
-    required DebuggingOptions debuggingOptions,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required SystemClock systemClock,
-    required Usage usage,
-    UrlTunneller? urlTunneller,
-    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
+    required final bool? ipv6,
+    required final DebuggingOptions debuggingOptions,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final SystemClock systemClock,
+    required final Usage usage,
+    final UrlTunneller? urlTunneller,
+    final ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _systemClock = systemClock,
@@ -204,7 +204,7 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp({bool details = true}) {
+  void printHelp({final bool details = true}) {
     if (details) {
       return printHelpDetails();
     }
@@ -230,10 +230,10 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool enableDevTools = false, // ignored, we don't yet support devtools for web
-    String? route,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool enableDevTools = false, // ignored, we don't yet support devtools for web
+    final String? route,
   }) async {
     firstBuildTime = DateTime.now();
     final ApplicationPackage? package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
@@ -368,10 +368,10 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
   @override
   Future<OperationResult> restart({
-    bool fullRestart = false,
-    bool? pause = false,
-    String? reason,
-    bool benchmarkMode = false,
+    final bool fullRestart = false,
+    final bool? pause = false,
+    final String? reason,
+    final bool benchmarkMode = false,
   }) async {
     final DateTime start = _systemClock.now();
     final Status status = _logger.startProgress(
@@ -455,7 +455,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   // Flutter web projects need to include a generated main entrypoint to call the
   // appropriate bootstrap method and inject plugins.
   // Keep this in sync with build_system/targets/web.dart.
-  Future<Uri> _generateEntrypoint(Uri mainUri, PackageConfig? packageConfig) async {
+  Future<Uri> _generateEntrypoint(final Uri mainUri, final PackageConfig? packageConfig) async {
     File? result = _generatedEntrypointDirectory?.childFile('web_entrypoint.dart');
     if (_generatedEntrypointDirectory == null) {
       _generatedEntrypointDirectory ??= _fileSystem.systemTempDirectory.createTempSync('flutter_tools.')
@@ -496,7 +496,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
     return result!.absolute.uri;
   }
 
-  Future<UpdateFSReport> _updateDevFS({bool fullRestart = false}) async {
+  Future<UpdateFSReport> _updateDevFS({final bool fullRestart = false}) async {
     final bool isFirstUpload = !assetBundle.wasBuiltOnce();
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
@@ -545,15 +545,15 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
 
   @override
   Future<int> attach({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
-    bool enableDevTools = false, // ignored, we don't yet support devtools for web
-    bool needsFullRestart = true,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool allowExistingDdsInstance = false,
+    final bool enableDevTools = false, // ignored, we don't yet support devtools for web
+    final bool needsFullRestart = true,
   }) async {
     if (_chromiumLauncher != null) {
       final Chromium chrome = await _chromiumLauncher!.connectedInstance;
-      final ChromeTab? chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+      final ChromeTab? chromeTab = await chrome.chromeConnection.getTab((final ChromeTab chromeTab) {
         return !chromeTab.url.startsWith('chrome-extension');
       }, retryFor: const Duration(seconds: 5));
       if (chromeTab == null) {
@@ -568,7 +568,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       _connectionResult = await webDevFS.connect(useDebugExtension);
       unawaited(_connectionResult!.debugConnection!.onDone.whenComplete(_cleanupAndExit));
 
-      void onLogEvent(vmservice.Event event)  {
+      void onLogEvent(final vmservice.Event event)  {
         final String message = processVmServiceMessage(event);
         _logger.printStatus(message);
       }
@@ -594,7 +594,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
         // thrown if we're not already subscribed.
       }
       await setUpVmService(
-        reloadSources: (String isolateId, {bool? force, bool? pause}) async {
+        reloadSources: (final String isolateId, {final bool? force, final bool? pause}) async {
           await restart(pause: pause);
         },
         device: device!.device,
@@ -615,7 +615,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
       } else {
         late StreamSubscription<void> resumeSub;
         resumeSub = _vmService.service.onDebugEvent
-            .listen((vmservice.Event event) {
+            .listen((final vmservice.Event event) {
           if (event.type == vmservice.EventKind.kResume) {
             _connectionResult!.appConnection!.runMain();
             resumeSub.cancel();
@@ -667,7 +667,7 @@ Please provide a valid TCP port (an integer between 0 and 65535, inclusive).
   }
 }
 
-Uri _httpUriFromWebsocketUri(Uri websocketUri) {
+Uri _httpUriFromWebsocketUri(final Uri websocketUri) {
   const String wsPath = '/ws';
   final String path = websocketUri.path;
   return websocketUri.replace(scheme: 'http', path: path.substring(0, path.length - wsPath.length));

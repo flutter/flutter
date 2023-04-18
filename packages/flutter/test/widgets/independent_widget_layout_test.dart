@@ -58,7 +58,7 @@ class OffscreenWidgetTree {
   final PipelineOwner pipelineOwner = PipelineOwner();
   RenderObjectToWidgetElement<RenderBox>? root;
 
-  void pumpWidget(Widget? app) {
+  void pumpWidget(final Widget? app) {
     root = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
@@ -112,7 +112,7 @@ class TriggerableState extends State<TriggerableWidget> {
   }
 
   @override
-  void didUpdateWidget(TriggerableWidget oldWidget) {
+  void didUpdateWidget(final TriggerableWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     widget.trigger.callback = fire;
   }
@@ -125,7 +125,7 @@ class TriggerableState extends State<TriggerableWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     widget.counter.count++;
     return Text('Bang $_count!', textDirection: TextDirection.ltr);
   }
@@ -158,7 +158,7 @@ class TestFocusableState extends State<TestFocusable> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Text('Test focus node', textDirection: TextDirection.ltr);
   }
 }
@@ -168,7 +168,7 @@ void main() {
   // of times a frame has been scheduled.
   ScheduledFrameTrackingBindings();
 
-  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (WidgetTester tester) async {
+  testWidgets('RenderObjectToWidgetAdapter.attachToRenderTree does not schedule frame', (final WidgetTester tester) async {
     expect(WidgetsBinding.instance, isA<ScheduledFrameTrackingBindings>());
     final ScheduledFrameTrackingPlatformDispatcher platformDispatcher = tester.platformDispatcher as ScheduledFrameTrackingPlatformDispatcher;
     platformDispatcher.resetScheduledFrameCount();
@@ -178,7 +178,7 @@ void main() {
     expect(platformDispatcher.scheduledFrameCount, isZero);
   });
 
-  testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
+  testWidgets('no crosstalk between widget build owners', (final WidgetTester tester) async {
     final Trigger trigger1 = Trigger();
     final Counter counter1 = Counter();
     final Trigger trigger2 = Trigger();
@@ -228,7 +228,7 @@ void main() {
     expect(counter2.count, equals(3));
   });
 
-  testWidgets('no crosstalk between focus nodes', (WidgetTester tester) async {
+  testWidgets('no crosstalk between focus nodes', (final WidgetTester tester) async {
     final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
     final FocusNode onscreenFocus = FocusNode();
     final FocusNode offscreenFocus = FocusNode();
@@ -251,7 +251,7 @@ void main() {
     expect(offscreenFocus.hasFocus, isTrue);
   });
 
-  testWidgets('able to tear down offscreen tree', (WidgetTester tester) async {
+  testWidgets('able to tear down offscreen tree', (final WidgetTester tester) async {
     final OffscreenWidgetTree tree = OffscreenWidgetTree(tester.view);
     final List<WidgetState> states = <WidgetState>[];
     tree.pumpWidget(SizedBox(child: TestStates(states: states)));
@@ -291,5 +291,5 @@ class TestStatesState extends State<TestStates> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }

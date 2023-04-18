@@ -13,7 +13,7 @@ void main() {
     kPostBackdropFilterRouteName,
     pageDelay: const Duration(seconds: 2),
     duration: const Duration(seconds: 10),
-    setupOps: (FlutterDriver driver) async {
+    setupOps: (final FlutterDriver driver) async {
       final SerializableFinder backdropFilterCheckbox = find.byValueKey('bdf-checkbox');
       await driver.tap(backdropFilterCheckbox);
       await Future<void>.delayed(const Duration(milliseconds: 500)); // BackdropFilter on

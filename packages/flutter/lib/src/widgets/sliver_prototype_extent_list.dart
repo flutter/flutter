@@ -89,13 +89,13 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// {@end-tool}
   SliverPrototypeExtentList.builder({
     super.key,
-    required NullableIndexedWidgetBuilder itemBuilder,
+    required final NullableIndexedWidgetBuilder itemBuilder,
     required this.prototypeItem,
-    ChildIndexGetter? findChildIndexCallback,
-    int? itemCount,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    final ChildIndexGetter? findChildIndexCallback,
+    final int? itemCount,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
   }) : super(delegate: SliverChildBuilderDelegate(
          itemBuilder,
          findChildIndexCallback: findChildIndexCallback,
@@ -133,11 +133,11 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   /// {@end-tool}
   SliverPrototypeExtentList.list({
     super.key,
-    required List<Widget> children,
+    required final List<Widget> children,
     required this.prototypeItem,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
   }) : super(delegate: SliverChildListDelegate(
          children,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
@@ -154,7 +154,7 @@ class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {
   final Widget prototypeItem;
 
   @override
-  RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context) {
+  RenderSliverMultiBoxAdaptor createRenderObject(final BuildContext context) {
     final _SliverPrototypeExtentListElement element = context as _SliverPrototypeExtentListElement;
     return _RenderSliverPrototypeExtentList(childManager: element);
   }
@@ -173,7 +173,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   static final Object _prototypeSlot = Object();
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object slot) {
+  void insertRenderObjectChild(covariant final RenderObject child, covariant final Object slot) {
     if (slot == _prototypeSlot) {
       assert(child is RenderBox);
       renderObject.child = child as RenderBox;
@@ -183,14 +183,14 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void didAdoptChild(RenderBox child) {
+  void didAdoptChild(final RenderBox child) {
     if (child != renderObject.child) {
       super.didAdoptChild(child);
     }
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, Object oldSlot, Object newSlot) {
+  void moveRenderObjectChild(final RenderBox child, final Object oldSlot, final Object newSlot) {
     if (newSlot == _prototypeSlot) {
       // There's only one prototype child so it cannot be moved.
       assert(false);
@@ -200,7 +200,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, Object slot) {
+  void removeRenderObjectChild(final RenderBox child, final Object slot) {
     if (renderObject.child == child) {
       renderObject.child = null;
     } else {
@@ -209,7 +209,7 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void visitChildren(ElementVisitor visitor) {
+  void visitChildren(final ElementVisitor visitor) {
     if (_prototype != null) {
       visitor(_prototype!);
     }
@@ -217,13 +217,13 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
   }
 
   @override
-  void mount(Element? parent, Object? newSlot) {
+  void mount(final Element? parent, final Object? newSlot) {
     super.mount(parent, newSlot);
     _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
   }
 
   @override
-  void update(SliverPrototypeExtentList newWidget) {
+  void update(final SliverPrototypeExtentList newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _prototype = updateChild(_prototype, (widget as SliverPrototypeExtentList).prototypeItem, _prototypeSlot);
@@ -232,12 +232,12 @@ class _SliverPrototypeExtentListElement extends SliverMultiBoxAdaptorElement {
 
 class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor {
   _RenderSliverPrototypeExtentList({
-    required _SliverPrototypeExtentListElement childManager,
+    required final _SliverPrototypeExtentListElement childManager,
   }) : super(childManager: childManager);
 
   RenderBox? _child;
   RenderBox? get child => _child;
-  set child(RenderBox? value) {
+  set child(final RenderBox? value) {
     if (_child != null) {
       dropChild(_child!);
     }
@@ -255,7 +255,7 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
     if (_child != null) {
       _child!.attach(owner);
@@ -279,7 +279,7 @@ class _RenderSliverPrototypeExtentList extends RenderSliverFixedExtentBoxAdaptor
   }
 
   @override
-  void visitChildren(RenderObjectVisitor visitor) {
+  void visitChildren(final RenderObjectVisitor visitor) {
     if (_child != null) {
       visitor(_child!);
     }

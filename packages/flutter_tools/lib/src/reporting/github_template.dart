@@ -22,9 +22,9 @@ import '../version.dart';
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
 class GitHubTemplateCreator {
   GitHubTemplateCreator({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FlutterProjectFactory flutterProjectFactory,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final FlutterProjectFactory flutterProjectFactory,
   }) : _fileSystem = fileSystem,
       _logger = logger,
       _flutterProjectFactory = flutterProjectFactory;
@@ -33,12 +33,12 @@ class GitHubTemplateCreator {
   final Logger _logger;
   final FlutterProjectFactory _flutterProjectFactory;
 
-  static String toolCrashSimilarIssuesURL(String errorString) {
+  static String toolCrashSimilarIssuesURL(final String errorString) {
     return 'https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}';
   }
 
   /// Restricts exception object strings to contain only information about tool internals.
-  static String sanitizedCrashException(Object error) {
+  static String sanitizedCrashException(final Object error) {
     if (error is ProcessException) {
       // Suppress args.
       return 'ProcessException: ${error.message} Command: ${error.executable}, OS error code: ${error.errorCode}';
@@ -76,10 +76,10 @@ class GitHubTemplateCreator {
   ///
   /// Shorten the URL, if possible.
   Future<String> toolCrashIssueTemplateGitHubURL(
-      String command,
-      Object error,
-      StackTrace stackTrace,
-      String doctorText
+      final String command,
+      final Object error,
+      final StackTrace stackTrace,
+      final String doctorText
     ) async {
     final String errorString = sanitizedCrashException(error);
     final String title = '[tool_crash] $errorString';

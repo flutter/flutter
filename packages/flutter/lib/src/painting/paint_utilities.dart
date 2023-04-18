@@ -20,7 +20,7 @@ import 'basic_types.dart';
 /// a negative `width`.
 ///
 /// The line is drawn using the provided `paint` on the provided `canvas`.
-void paintZigZag(Canvas canvas, Paint paint, Offset start, Offset end, int zigs, double width) {
+void paintZigZag(final Canvas canvas, final Paint paint, final Offset start, Offset end, final int zigs, final double width) {
   assert(zigs.isFinite);
   assert(zigs > 0);
   canvas.save();

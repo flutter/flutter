@@ -21,7 +21,7 @@ void main() async {
   await _testProject(HotReloadProject(indexHtml: indexHtmlNoFlutterJs), name: 'No flutter.js');
 }
 
-Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) async {
+Future<void> _testProject(final HotReloadProject project, {final String name = 'Default'}) async {
   late Directory tempDir;
   late FlutterRunTestDriver flutter;
 
@@ -47,7 +47,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
 
   testWithoutContext('$testName: newly added code executes during hot restart', () async {
     final Completer<void> completer = Completer<void>();
-    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+    final StreamSubscription<String> subscription = flutter.stdout.listen((final String line) {
       printOnFailure(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();
@@ -65,7 +65,7 @@ Future<void> _testProject(HotReloadProject project, {String name = 'Default'}) a
 
   testWithoutContext('$testName: newly added code executes during hot restart - canvaskit', () async {
     final Completer<void> completer = Completer<void>();
-    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+    final StreamSubscription<String> subscription = flutter.stdout.listen((final String line) {
       printOnFailure(line);
       if (line.contains('(((((RELOAD WORKED)))))')) {
         completer.complete();

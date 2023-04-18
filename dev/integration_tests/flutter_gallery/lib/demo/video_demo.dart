@@ -51,11 +51,11 @@ class VideoCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget fullScreenRoutePageBuilder(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
+      final BuildContext context,
+      final Animation<double> animation,
+      final Animation<double> secondaryAnimation,
     ) {
       return _buildFullScreenVideo();
     }
@@ -66,7 +66,7 @@ class VideoCard extends StatelessWidget {
         pageBuilder: fullScreenRoutePageBuilder,
       );
 
-      route.completed.then((void value) {
+      route.completed.then((final void value) {
         controller!.setVolume(0.0);
       });
 
@@ -122,7 +122,7 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (_initialized!) {
       return VideoPlayer(widget.controller!);
     }
@@ -172,7 +172,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       alignment: Alignment.bottomCenter,
       fit: StackFit.expand,
@@ -241,7 +241,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
   }
 
   @override
-  void didUpdateWidget(FadeAnimation oldWidget) {
+  void didUpdateWidget(final FadeAnimation oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.child != widget.child) {
       animationController.forward(from: 0.0);
@@ -255,7 +255,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return animationController.isAnimating
         ? Opacity(
             opacity: 1.0 - animationController.value,
@@ -318,7 +318,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
       return;
     }
     connectivitySubscription = connectivityStream().listen(
-      (ConnectivityResult connectivityResult) {
+      (final ConnectivityResult connectivityResult) {
         if (!mounted) {
           return;
         }
@@ -340,7 +340,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child!;
+  Widget build(final BuildContext context) => widget.child!;
 }
 
 class VideoDemo extends StatefulWidget {
@@ -382,7 +382,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   void initState() {
     super.initState();
 
-    Future<void> initController(VideoPlayerController controller, String name) async {
+    Future<void> initController(final VideoPlayerController controller, final String name) async {
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();
@@ -395,7 +395,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
 
     initController(butterflyController, 'butterfly');
     initController(beeController, 'bee');
-    isIOSSimulator().then((bool result) {
+    isIOSSimulator().then((final bool result) {
       isSupported = !result;
     });
   }
@@ -409,7 +409,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Videos'),

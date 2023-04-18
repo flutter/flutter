@@ -12,7 +12,7 @@ class DataTableExampleApp extends StatelessWidget {
   const DataTableExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('DataTable Sample')),
@@ -26,7 +26,7 @@ class DataTableExample extends StatelessWidget {
   const DataTableExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DataTable(
       columns: const <DataColumn>[
         DataColumn(

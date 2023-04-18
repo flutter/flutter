@@ -88,14 +88,14 @@ class TextSelectionToolbar extends StatelessWidget {
   static const double kToolbarContentDistanceBelow = kHandleSize - 2.0;
 
   // Build the default Android Material text selection menu toolbar.
-  static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
+  static Widget _defaultToolbarBuilder(final BuildContext context, final Widget child) {
     return _TextSelectionToolbarContainer(
       child: child,
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Incorporate the padding distance between the content and toolbar.
     final Offset anchorAbovePadded =
         anchorAbove - const Offset(0.0, _kToolbarContentDistance);
@@ -181,7 +181,7 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   }
 
   @override
-  void didUpdateWidget(_TextSelectionToolbarOverflowable oldWidget) {
+  void didUpdateWidget(final _TextSelectionToolbarOverflowable oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the children are changing at all, the current page should be reset.
     if (!listEquals(widget.children, oldWidget.children)) {
@@ -190,7 +190,7 @@ class _TextSelectionToolbarOverflowableState extends State<_TextSelectionToolbar
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
@@ -247,7 +247,7 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
   final TextDirection textDirection;
 
   @override
-  _TextSelectionToolbarTrailingEdgeAlignRenderBox createRenderObject(BuildContext context) {
+  _TextSelectionToolbarTrailingEdgeAlignRenderBox createRenderObject(final BuildContext context) {
     return _TextSelectionToolbarTrailingEdgeAlignRenderBox(
       overflowOpen: overflowOpen,
       textDirection: textDirection,
@@ -255,7 +255,7 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
   }
 
   @override
-  void updateRenderObject(BuildContext context, _TextSelectionToolbarTrailingEdgeAlignRenderBox renderObject) {
+  void updateRenderObject(final BuildContext context, final _TextSelectionToolbarTrailingEdgeAlignRenderBox renderObject) {
     renderObject
         ..overflowOpen = overflowOpen
         ..textDirection = textDirection;
@@ -264,8 +264,8 @@ class _TextSelectionToolbarTrailingEdgeAlign extends SingleChildRenderObjectWidg
 
 class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
   _TextSelectionToolbarTrailingEdgeAlignRenderBox({
-    required bool overflowOpen,
-    required TextDirection textDirection,
+    required final bool overflowOpen,
+    required final TextDirection textDirection,
   }) : _textDirection = textDirection,
        _overflowOpen = overflowOpen,
        super();
@@ -277,7 +277,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 
   bool _overflowOpen;
   bool get overflowOpen => _overflowOpen;
-  set overflowOpen(bool value) {
+  set overflowOpen(final bool value) {
     if (value == overflowOpen) {
       return;
     }
@@ -287,7 +287,7 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 
   TextDirection _textDirection;
   TextDirection get textDirection => _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (value == textDirection) {
       return;
     }
@@ -327,20 +327,20 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
 
   // Paint at the offset set in the parent data.
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
     context.paintChild(child!, childParentData.offset + offset);
   }
 
   // Include the parent data offset in the hit test.
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     // The x, y parameters have the top left of the node's box as the origin.
     final ToolbarItemsParentData childParentData = child!.parentData! as ToolbarItemsParentData;
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset transformed) {
+      hitTest: (final BoxHitTestResult result, final Offset transformed) {
         assert(transformed == position - childParentData.offset);
         return child!.hitTest(result, position: transformed);
       },
@@ -348,14 +348,14 @@ class _TextSelectionToolbarTrailingEdgeAlignRenderBox extends RenderProxyBox {
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! ToolbarItemsParentData) {
       child.parentData = ToolbarItemsParentData();
     }
   }
 
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+  void applyPaintTransform(final RenderObject child, final Matrix4 transform) {
     final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
     transform.translate(childParentData.offset.dx, childParentData.offset.dy);
     super.applyPaintTransform(child, transform);
@@ -375,7 +375,7 @@ class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
   final bool overflowOpen;
 
   @override
-  _RenderTextSelectionToolbarItemsLayout createRenderObject(BuildContext context) {
+  _RenderTextSelectionToolbarItemsLayout createRenderObject(final BuildContext context) {
     return _RenderTextSelectionToolbarItemsLayout(
       isAbove: isAbove,
       overflowOpen: overflowOpen,
@@ -383,7 +383,7 @@ class _TextSelectionToolbarItemsLayout extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderTextSelectionToolbarItemsLayout renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderTextSelectionToolbarItemsLayout renderObject) {
     renderObject
       ..isAbove = isAbove
       ..overflowOpen = overflowOpen;
@@ -398,20 +398,20 @@ class _TextSelectionToolbarItemsLayoutElement extends MultiChildRenderObjectElem
     super.widget,
   );
 
-  static bool _shouldPaint(Element child) {
+  static bool _shouldPaint(final Element child) {
     return (child.renderObject!.parentData! as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(final ElementVisitor visitor) {
     children.where(_shouldPaint).forEach(visitor);
   }
 }
 
 class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData> {
   _RenderTextSelectionToolbarItemsLayout({
-    required bool isAbove,
-    required bool overflowOpen,
+    required final bool isAbove,
+    required final bool overflowOpen,
   }) : _isAbove = isAbove,
        _overflowOpen = overflowOpen,
        super();
@@ -421,7 +421,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
   bool _isAbove;
   bool get isAbove => _isAbove;
-  set isAbove(bool value) {
+  set isAbove(final bool value) {
     if (value == isAbove) {
       return;
     }
@@ -431,7 +431,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
   bool _overflowOpen;
   bool get overflowOpen => _overflowOpen;
-  set overflowOpen(bool value) {
+  set overflowOpen(final bool value) {
     if (value == overflowOpen) {
       return;
     }
@@ -452,7 +452,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
     int i = -1;
     double width = 0.0;
-    visitChildren((RenderObject renderObjectChild) {
+    visitChildren((final RenderObject renderObjectChild) {
       i++;
 
       // No need to layout children inside the overflow menu when it's closed.
@@ -483,7 +483,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   }
 
   // Returns true when the child should be painted, false otherwise.
-  bool _shouldPaintChild(RenderObject renderObjectChild, int index) {
+  bool _shouldPaintChild(final RenderObject renderObjectChild, final int index) {
     // Paint the navButton when there is overflow.
     if (renderObjectChild == firstChild) {
       return _lastIndexThatFits != -1;
@@ -509,7 +509,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
     double fitWidth = 0.0;
     final RenderBox navButton = firstChild!;
     double overflowHeight = overflowOpen && !isAbove ? navButton.size.height : 0.0;
-    visitChildren((RenderObject renderObjectChild) {
+    visitChildren((final RenderObject renderObjectChild) {
       i++;
 
       final RenderBox child = renderObjectChild as RenderBox;
@@ -580,8 +580,8 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    visitChildren((RenderObject renderObjectChild) {
+  void paint(final PaintingContext context, final Offset offset) {
+    visitChildren((final RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (!childParentData.shouldPaint) {
@@ -593,14 +593,14 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! ToolbarItemsParentData) {
       child.parentData = ToolbarItemsParentData();
     }
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     RenderBox? child = lastChild;
     while (child != null) {
       // The x, y parameters have the top left of the node's box as the origin.
@@ -615,7 +615,7 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
+        hitTest: (final BoxHitTestResult result, final Offset transformed) {
           assert(transformed == position - childParentData.offset);
           return child!.hitTest(result, position: transformed);
         },
@@ -630,8 +630,8 @@ class _RenderTextSelectionToolbarItemsLayout extends RenderBox with ContainerRen
 
   // Visit only the children that should be painted.
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    visitChildren((RenderObject renderObjectChild) {
+  void visitChildrenForSemantics(final RenderObjectVisitor visitor) {
+    visitChildren((final RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
@@ -651,7 +651,7 @@ class _TextSelectionToolbarContainer extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       // This value was eyeballed to match the native text selection menu on
       // a Pixel 2 running Android 10.
@@ -678,7 +678,7 @@ class _TextSelectionToolbarOverflowButton extends StatelessWidget {
   final String? tooltip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       type: MaterialType.card,
       color: const Color(0x00000000),

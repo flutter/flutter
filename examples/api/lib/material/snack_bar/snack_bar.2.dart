@@ -14,7 +14,7 @@ class SnackBarExampleApp extends StatelessWidget {
   const SnackBarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -42,13 +42,13 @@ class _SnackBarExampleState extends State<SnackBarExample> {
   bool _longActionLabel = false;
   double _sliderValue = 0.25;
 
-  Padding _padRow(List<Widget> children) => Padding(
+  Padding _padRow(final List<Widget> children) => Padding(
         padding: const EdgeInsets.all(8.0),
         child: Row(children: children),
       );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 50.0),
       child: Column(
@@ -62,7 +62,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               Radio<SnackBarBehavior>(
                 value: SnackBarBehavior.fixed,
                 groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
+                onChanged: (final SnackBarBehavior? value) {
                   setState(() {
                     _snackBarBehavior = value;
                   });
@@ -72,7 +72,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               Radio<SnackBarBehavior>(
                 value: SnackBarBehavior.floating,
                 groupValue: _snackBarBehavior,
-                onChanged: (SnackBarBehavior? value) {
+                onChanged: (final SnackBarBehavior? value) {
                   setState(() {
                     _snackBarBehavior = value;
                   });
@@ -85,7 +85,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               const Text('Include Icon '),
               Switch(
                 value: _withIcon,
-                onChanged: (bool value) {
+                onChanged: (final bool value) {
                   setState(() {
                     _withIcon = !_withIcon;
                   });
@@ -98,7 +98,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               const Text('Include Action '),
               Switch(
                 value: _withAction,
-                onChanged: (bool value) {
+                onChanged: (final bool value) {
                   setState(() {
                     _withAction = !_withAction;
                   });
@@ -110,7 +110,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                 value: _longActionLabel,
                 onChanged: !_withAction
                     ? null
-                    : (bool value) {
+                    : (final bool value) {
                         setState(() {
                           _longActionLabel = !_longActionLabel;
                         });
@@ -125,7 +125,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
                 value: _multiLine,
                 onChanged: _snackBarBehavior == SnackBarBehavior.fixed
                     ? null
-                    : (bool value) {
+                    : (final bool value) {
                         setState(() {
                           _multiLine = !_multiLine;
                         });
@@ -141,7 +141,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
               label: _sliderValue.toStringAsFixed(2),
               onChanged: _snackBarBehavior == SnackBarBehavior.fixed
                   ? null
-                  : (double value) {
+                  : (final double value) {
                       setState(() {
                         _sliderValue = value;
                       });

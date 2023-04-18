@@ -15,11 +15,11 @@ class TestStatusTransitionWidget extends StatusTransitionWidget {
   final WidgetBuilder builder;
 
   @override
-  Widget build(BuildContext context) => builder(context);
+  Widget build(final BuildContext context) => builder(context);
 }
 
 void main() {
-  testWidgets('Status transition control test', (WidgetTester tester) async {
+  testWidgets('Status transition control test', (final WidgetTester tester) async {
     bool didBuild = false;
     final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 1),
@@ -28,7 +28,7 @@ void main() {
 
     await tester.pumpWidget(TestStatusTransitionWidget(
       animation: controller,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         expect(didBuild, isFalse);
         didBuild = true;
         return Container();
@@ -65,7 +65,7 @@ void main() {
 
     await tester.pumpWidget(TestStatusTransitionWidget(
       animation: anotherController,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         expect(didBuild, isFalse);
         didBuild = true;
         return Container();

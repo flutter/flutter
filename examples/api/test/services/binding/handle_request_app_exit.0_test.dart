@@ -6,7 +6,7 @@ import 'package:flutter_api_samples/services/binding/handle_request_app_exit.0.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Application Exit example', (WidgetTester tester) async {
+  testWidgets('Application Exit example', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ApplicationExitExample(),
     );

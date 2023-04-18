@@ -182,7 +182,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
   bool focused = false;
 
-  void _handleChanged(bool? selected) {
+  void _handleChanged(final bool? selected) {
     if (selected == null) {
       widget.onChanged!(null);
       return;
@@ -207,14 +207,14 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
   @override
   bool? get value => widget._selected;
 
-  void onFocusChange(bool value) {
+  void onFocusChange(final bool value) {
     if (focused != value) {
       focused = value;
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color effectiveActiveColor = widget.activeColor
       ?? CupertinoColors.activeBlue;
     final Color effectiveInactiveColor = widget.inactiveColor
@@ -256,7 +256,7 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 class _RadioPainter extends ToggleablePainter {
   bool? get value => _value;
   bool? _value;
-  set value(bool? value) {
+  set value(final bool? value) {
     if (_value == value) {
       return;
     }
@@ -266,7 +266,7 @@ class _RadioPainter extends ToggleablePainter {
 
   Color get fillColor => _fillColor!;
   Color? _fillColor;
-  set fillColor(Color value) {
+  set fillColor(final Color value) {
     if (value == _fillColor) {
       return;
     }
@@ -275,7 +275,7 @@ class _RadioPainter extends ToggleablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
 
     final Offset center = (Offset.zero & size).center;
 

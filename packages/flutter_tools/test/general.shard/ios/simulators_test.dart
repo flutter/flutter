@@ -1193,23 +1193,23 @@ flutter:
 
 class FakeIosProject extends Fake implements IosProject {
   @override
-  Future<String> productBundleIdentifier(BuildInfo? buildInfo) async => 'com.example.test';
+  Future<String> productBundleIdentifier(final BuildInfo? buildInfo) async => 'com.example.test';
 
   @override
-  Future<String> hostAppBundleName(BuildInfo? buildInfo) async => 'My Super Awesome App.app';
+  Future<String> hostAppBundleName(final BuildInfo? buildInfo) async => 'My Super Awesome App.app';
 }
 
 class FakeSimControl extends Fake implements SimControl {
   final List<LaunchRequest> requests = <LaunchRequest>[];
 
   @override
-  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String>? launchArgs ]) async {
+  Future<RunResult> launch(final String deviceId, final String appIdentifier, [ final List<String>? launchArgs ]) async {
     requests.add(LaunchRequest(deviceId, appIdentifier, launchArgs));
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
 
   @override
-  Future<RunResult> install(String deviceId, String appPath) async {
+  Future<RunResult> install(final String deviceId, final String appPath) async {
     return RunResult(ProcessResult(0, 0, '', ''), <String>['test']);
   }
 }

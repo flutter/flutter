@@ -26,13 +26,13 @@ import 'android_workflow.dart';
 ///   * [AndroidDevice], the type of discovered device.
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices({
-    required AndroidWorkflow androidWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
-    AndroidSdk? androidSdk,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required UserMessages userMessages,
+    required final AndroidWorkflow androidWorkflow,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    final AndroidSdk? androidSdk,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    required final UserMessages userMessages,
   }) : _androidWorkflow = androidWorkflow,
        _androidSdk = androidSdk,
        _processUtils = ProcessUtils(
@@ -62,7 +62,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _androidWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({ final Duration? timeout }) async {
     if (_doesNotHaveAdb()) {
       return <AndroidDevice>[];
     }
@@ -116,9 +116,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
   /// of devices and possible device issue diagnostics. Either argument can be null,
   /// in which case information for that parameter won't be populated.
   void _parseADBDeviceOutput(
-    String text, {
-    List<AndroidDevice>? devices,
-    List<String>? diagnostics,
+    final String text, {
+    final List<AndroidDevice>? devices,
+    final List<String>? diagnostics,
   }) {
     // Check for error messages from adb
     if (!text.contains('List of devices')) {

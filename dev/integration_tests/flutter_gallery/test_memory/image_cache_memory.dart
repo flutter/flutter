@@ -19,7 +19,7 @@ Future<void> main() async {
     child: ListView.builder(
       key: const Key('ImageList'),
       itemCount: numItems,
-      itemBuilder: (BuildContext context, int position) {
+      itemBuilder: (final BuildContext context, final int position) {
         return SizedBox(
           width: 200,
           height: 200,

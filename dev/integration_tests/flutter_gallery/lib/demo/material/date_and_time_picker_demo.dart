@@ -21,7 +21,7 @@ class _InputDropdown extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return InkWell(
       onTap: onPressed,
       child: InputDecorator(
@@ -59,7 +59,7 @@ class _DateTimePicker extends StatelessWidget {
   final ValueChanged<DateTime>? selectDate;
   final ValueChanged<TimeOfDay>? selectTime;
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(final BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate!,
@@ -71,7 +71,7 @@ class _DateTimePicker extends StatelessWidget {
     }
   }
 
-  Future<void> _selectTime(BuildContext context) async {
+  Future<void> _selectTime(final BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedTime!,
@@ -82,7 +82,7 @@ class _DateTimePicker extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextStyle? valueStyle = Theme.of(context).textTheme.titleLarge;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -128,7 +128,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   String? _activity = 'fishing';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Date and time pickers'),
@@ -159,12 +159,12 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                 labelText: 'From',
                 selectedDate: _fromDate,
                 selectedTime: _fromTime,
-                selectDate: (DateTime date) {
+                selectDate: (final DateTime date) {
                   setState(() {
                     _fromDate = date;
                   });
                 },
-                selectTime: (TimeOfDay time) {
+                selectTime: (final TimeOfDay time) {
                   setState(() {
                     _fromTime = time;
                   });
@@ -174,12 +174,12 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                 labelText: 'To',
                 selectedDate: _toDate,
                 selectedTime: _toTime,
-                selectDate: (DateTime date) {
+                selectDate: (final DateTime date) {
                   setState(() {
                     _toDate = date;
                   });
                 },
-                selectTime: (TimeOfDay time) {
+                selectTime: (final TimeOfDay time) {
                   setState(() {
                     _toTime = time;
                   });
@@ -195,12 +195,12 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
                 isEmpty: _activity == null,
                 child: DropdownButton<String>(
                   value: _activity,
-                  onChanged: (String? newValue) {
+                  onChanged: (final String? newValue) {
                     setState(() {
                       _activity = newValue;
                     });
                   },
-                  items: _allActivities.map<DropdownMenuItem<String>>((String value) {
+                  items: _allActivities.map<DropdownMenuItem<String>>((final String value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text(value),

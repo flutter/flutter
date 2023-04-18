@@ -155,7 +155,7 @@ void main() {
 }
 
 // Writes something that resembles the contents of Flutter's .gitignore file
-void writeGitignore(FileSystem fs, { bool mentionsPluginRegistrant = true }) {
+void writeGitignore(final FileSystem fs, { final bool mentionsPluginRegistrant = true }) {
   fs.file('.gitignore').createSync(recursive: true);
   fs.file('.gitignore')
       .writeAsStringSync('''
@@ -169,14 +169,14 @@ ${mentionsPluginRegistrant ? 'lib/generated_plugin_registrant.dart':'another_fil
 }
 
 // Creates an empty generated_plugin_registrant.dart file
-void writeGeneratedPluginRegistrant(FileSystem fs) {
+void writeGeneratedPluginRegistrant(final FileSystem fs) {
   final String path = fs.path.join('lib', 'generated_plugin_registrant.dart');
   fs.file(path).createSync(recursive: true);
 }
 
 // Adds a bunch of files to the filesystem
 // (taken from commands.shard/hermetic/build_web_test.dart)
-void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
+void setupFileSystemForEndToEndTest(final FileSystem fileSystem) {
   final List<String> dependencies = <String>[
     '.packages',
     fileSystem.path.join('web', 'index.html'),

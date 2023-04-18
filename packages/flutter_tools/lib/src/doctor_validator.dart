@@ -106,7 +106,7 @@ class GroupedValidator extends DoctorValidator {
     return _mergeValidationResults(results);
   }
 
-  ValidationResult _mergeValidationResults(List<ValidationResult> results) {
+  ValidationResult _mergeValidationResults(final List<ValidationResult> results) {
     assert(results.isNotEmpty, 'Validation results should not be empty');
     _subResults = results;
     ValidationType mergedType = results[0].type;
@@ -143,7 +143,7 @@ class ValidationResult {
   /// if no [messages] are hints or errors.
   const ValidationResult(this.type, this.messages, { this.statusInfo });
 
-  factory ValidationResult.crash(Object error, [StackTrace? stackTrace]) {
+  factory ValidationResult.crash(final Object error, [final StackTrace? stackTrace]) {
     return ValidationResult(ValidationType.crash, <ValidationMessage>[
       const ValidationMessage.error(
           'Due to an error, the doctor check did not complete. '
@@ -225,18 +225,18 @@ class ValidationMessage {
   ///
   /// The [contextUrl] may be supplied to link to external resources. This
   /// is displayed after the informative message in verbose modes.
-  const ValidationMessage(this.message, { this.contextUrl, String? piiStrippedMessage })
+  const ValidationMessage(this.message, { this.contextUrl, final String? piiStrippedMessage })
       : type = ValidationMessageType.information, piiStrippedMessage = piiStrippedMessage ?? message;
 
   /// Create a validation message with information for a failing validator.
-  const ValidationMessage.error(this.message, { String? piiStrippedMessage })
+  const ValidationMessage.error(this.message, { final String? piiStrippedMessage })
     : type = ValidationMessageType.error,
       piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
 
   /// Create a validation message with information for a partially failing
   /// validator.
-  const ValidationMessage.hint(this.message, { String? piiStrippedMessage })
+  const ValidationMessage.hint(this.message, { final String? piiStrippedMessage })
     : type = ValidationMessageType.hint,
       piiStrippedMessage = piiStrippedMessage ?? message,
       contextUrl = null;
@@ -279,7 +279,7 @@ class ValidationMessage {
   String toString() => message;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is ValidationMessage
         && other.message == message
         && other.type == type
@@ -298,7 +298,7 @@ class NoIdeValidator extends DoctorValidator {
     return ValidationResult(
       // Info hint to user they do not have a supported IDE installed
       ValidationType.notAvailable,
-      globals.userMessages.noIdeInstallationInfo.map((String ideInfo) => ValidationMessage(ideInfo)).toList(),
+      globals.userMessages.noIdeInstallationInfo.map((final String ideInfo) => ValidationMessage(ideInfo)).toList(),
       statusInfo: globals.userMessages.noIdeStatusInfo,
     );
   }

@@ -12,7 +12,7 @@ class PageStorageExampleApp extends StatelessWidget {
   const PageStorageExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: MyHomePage(),
     );
@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final PageStorageBucket _bucket = PageStorageBucket();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Persistence Example'),
@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentTab,
-        onTap: (int index) {
+        onTap: (final int index) {
           setState(() {
             currentTab = index;
           });
@@ -74,10 +74,10 @@ class ColorBoxPage extends StatelessWidget {
   const ColorBoxPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
       itemExtent: 250.0,
-      itemBuilder: (BuildContext context, int index) => Container(
+      itemBuilder: (final BuildContext context, final int index) => Container(
         padding: const EdgeInsets.all(10.0),
         child: Material(
           color: index.isEven ? Colors.cyan : Colors.deepOrange,

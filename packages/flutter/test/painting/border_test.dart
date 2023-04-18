@@ -9,7 +9,7 @@ class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-  void noSuchMethod(Invocation invocation) {
+  void noSuchMethod(final Invocation invocation) {
     invocations.add(invocation);
   }
 }
@@ -316,9 +316,9 @@ void main() {
     expect(nonUniformBorderDirectional.dimensions, const EdgeInsetsDirectional.fromSTEB(5, 5, 0, 20));
   });
 
-  testWidgets('Non-Uniform Border variations', (WidgetTester tester) async {
+  testWidgets('Non-Uniform Border variations', (final WidgetTester tester) async {
 
-    Widget buildWidget({ required BoxBorder border, BorderRadius? borderRadius, BoxShape boxShape = BoxShape.rectangle}) {
+    Widget buildWidget({ required final BoxBorder border, final BorderRadius? borderRadius, final BoxShape boxShape = BoxShape.rectangle}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: DecoratedBox(

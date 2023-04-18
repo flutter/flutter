@@ -23,7 +23,7 @@ Future<void> main() async {
   final Stopwatch watch = Stopwatch();
   int iterations = 0;
 
-  await benchmarkWidgets((WidgetTester tester) async {
+  await benchmarkWidgets((final WidgetTester tester) async {
     stocks.main();
     await tester.pump(); // Start startup animation
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation

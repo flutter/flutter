@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kOffset = Offset(0.0, -100.0);
 
 void main() {
-  testWidgets('Appbar Material 3 test', (WidgetTester tester) async {
+  testWidgets('Appbar Material 3 test', (final WidgetTester tester) async {
     await tester.pumpWidget(
      const example.AppBarApp()
     );
@@ -45,7 +45,7 @@ void main() {
   });
 }
 
-Material _getAppBarMaterial(WidgetTester tester) {
+Material _getAppBarMaterial(final WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(
       of: find.byType(AppBar),

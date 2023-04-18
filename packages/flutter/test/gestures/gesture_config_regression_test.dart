@@ -18,25 +18,25 @@ class NestedScrollableCase extends StatelessWidget {
   final TestResult testResult;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           SliverFixedExtentList(
             itemExtent: 50.0,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (final BuildContext context, final int index) {
                 return Container(
                   alignment: Alignment.center,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onVerticalDragDown: (DragDownDetails details) {
+                    onVerticalDragDown: (final DragDownDetails details) {
                       testResult.dragStarted = true;
                     },
-                    onVerticalDragUpdate: (DragUpdateDetails details){
+                    onVerticalDragUpdate: (final DragUpdateDetails details){
                       testResult.dragUpdate = true;
                     },
-                    onVerticalDragEnd: (_) {},
+                    onVerticalDragEnd: (final _) {},
                     child: Text('List Item $index', key: ValueKey<int>(index),
                     ),
                   ),
@@ -56,14 +56,14 @@ class NestedDraggableCase extends StatelessWidget {
   final TestResult testResult;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
           SliverFixedExtentList(
             itemExtent: 50.0,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (final BuildContext context, final int index) {
                 return Container(
                   alignment: Alignment.center,
                   child: Draggable<Object>(
@@ -73,10 +73,10 @@ class NestedDraggableCase extends StatelessWidget {
                     onDragStarted: () {
                       testResult.dragStarted = true;
                     },
-                    onDragUpdate: (DragUpdateDetails details){
+                    onDragUpdate: (final DragUpdateDetails details){
                       testResult.dragUpdate = true;
                     },
-                    onDragEnd: (_) {},
+                    onDragEnd: (final _) {},
                   ),
                 );
               },
@@ -89,7 +89,7 @@ class NestedDraggableCase extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (WidgetTester tester) async {
+  testWidgets('Scroll Views get the same ScrollConfiguration as GestureDetectors', (final WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 
@@ -112,7 +112,7 @@ void main() {
    expect(result.dragUpdate, true);
   });
 
-  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (WidgetTester tester) async {
+  testWidgets('Scroll Views get the same ScrollConfiguration as Draggables', (final WidgetTester tester) async {
     tester.view.gestureSettings = const ui.GestureSettings(physicalTouchSlop: 4);
     addTearDown(tester.view.reset);
 

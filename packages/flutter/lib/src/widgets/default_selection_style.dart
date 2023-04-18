@@ -68,12 +68,12 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// ```dart
   /// DefaultSelectionStyle style = DefaultSelectionStyle.of(context);
   /// ```
-  static DefaultSelectionStyle of(BuildContext context) {
+  static DefaultSelectionStyle of(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DefaultSelectionStyle>() ?? const DefaultSelectionStyle.fallback();
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return DefaultSelectionStyle(
       cursorColor: cursorColor,
       selectionColor: selectionColor,
@@ -82,7 +82,7 @@ class DefaultSelectionStyle extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(DefaultSelectionStyle oldWidget) {
+  bool updateShouldNotify(final DefaultSelectionStyle oldWidget) {
     return cursorColor != oldWidget.cursorColor ||
            selectionColor != oldWidget.selectionColor;
   }
@@ -92,7 +92,7 @@ class _NullWidget extends StatelessWidget {
   const _NullWidget();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     throw FlutterError(
       'A DefaultSelectionStyle constructed with DefaultSelectionStyle.fallback cannot be incorporated into the widget tree, '
       'it is meant only to provide a fallback value returned by DefaultSelectionStyle.of() '

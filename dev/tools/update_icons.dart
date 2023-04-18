@@ -173,7 +173,7 @@ const Set<String> _iconsMirroredWhenRTL = <String>{
   'wrap_text',
 };
 
-void main(List<String> args) {
+void main(final List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools') {
     Directory.current = Directory.current.parent.parent;
@@ -233,12 +233,12 @@ void main(List<String> args) {
     final SplayTreeMap<String, String> sortedNewTokenPairMap = SplayTreeMap<String, String>.of(newTokenPairMap);
     _regenerateCodepointsFile(oldCodepointsFile, sortedNewTokenPairMap);
 
-    sortedNewTokenPairMap.removeWhere((String key, String value) => oldTokenPairMap.containsKey(key));
+    sortedNewTokenPairMap.removeWhere((final String key, final String value) => oldTokenPairMap.containsKey(key));
     _generateIconDemo(File(_defaultDemoFilePath), sortedNewTokenPairMap);
   }
 }
 
-ArgResults _handleArguments(List<String> args) {
+ArgResults _handleArguments(final List<String> args) {
   final ArgParser argParser = ArgParser()
     ..addOption(_iconsPathOption,
         defaultsTo: _defaultIconsPath,
@@ -267,7 +267,7 @@ ArgResults _handleArguments(List<String> args) {
         defaultsTo: true,
         help: 'Whether to exit if safety checks fail (e.g. codepoints are missing or unstable')
     ..addFlag(_dryRunOption);
-  argParser.addFlag('help', abbr: 'h', negatable: false, callback: (bool help) {
+  argParser.addFlag('help', abbr: 'h', negatable: false, callback: (final bool help) {
     if (help) {
       print(argParser.usage);
       exit(1);
@@ -276,10 +276,10 @@ ArgResults _handleArguments(List<String> args) {
   return argParser.parse(args);
 }
 
-Map<String, String> stringToTokenPairMap(String codepointData) {
+Map<String, String> stringToTokenPairMap(final String codepointData) {
   final Iterable<String> cleanData = LineSplitter.split(codepointData)
-      .map((String line) => line.trim())
-      .where((String line) => line.isNotEmpty);
+      .map((final String line) => line.trim())
+      .where((final String line) => line.isNotEmpty);
 
   final Map<String, String> pairs = <String, String>{};
 
@@ -295,17 +295,17 @@ Map<String, String> stringToTokenPairMap(String codepointData) {
 }
 
 String _regenerateIconsFile(
-    String templateFileContents,
-    Map<String, String> tokenPairMap,
-    String fontFamily,
-    String className,
-    bool enforceSafetyChecks,
+    final String templateFileContents,
+    final Map<String, String> tokenPairMap,
+    final String fontFamily,
+    final String className,
+    final bool enforceSafetyChecks,
   ) {
   final List<Icon> newIcons = tokenPairMap.entries
-      .map((MapEntry<String, String> entry) =>
+      .map((final MapEntry<String, String> entry) =>
         Icon(entry, fontFamily: fontFamily, className: className))
       .toList();
-  newIcons.sort((Icon a, Icon b) => a._compareTo(b));
+  newIcons.sort((final Icon a, final Icon b) => a._compareTo(b));
 
   final StringBuffer buf = StringBuffer();
   bool generating = false;
@@ -319,15 +319,15 @@ String _regenerateIconsFile(
     if (line.contains(_beginPlatformAdaptiveGeneratedMark)) {
       generating = true;
       final List<String> platformAdaptiveDeclarations = <String>[];
-      _platformAdaptiveIdentifiers.forEach((String flutterId, List<String> ids) {
+      _platformAdaptiveIdentifiers.forEach((final String flutterId, final List<String> ids) {
         // Automatically finds and generates all icon declarations.
         for (final String style in <String>['', '_outlined', '_rounded', '_sharp']) {
           try {
             final Icon agnosticIcon = newIcons.firstWhere(
-                (Icon icon) => icon.id == '${ids[0]}$style',
+                (final Icon icon) => icon.id == '${ids[0]}$style',
                 orElse: () => throw ids[0]);
             final Icon iOSIcon = newIcons.firstWhere(
-                (Icon icon) => icon.id == '${ids[1]}$style',
+                (final Icon icon) => icon.id == '${ids[1]}$style',
                 orElse: () => throw ids[1]);
             platformAdaptiveDeclarations.add(
               agnosticIcon.platformAdaptiveDeclaration('$flutterId$style', iOSIcon),
@@ -355,7 +355,7 @@ String _regenerateIconsFile(
     // Generate for Icons
     if (line.contains(_beginGeneratedMark)) {
       generating = true;
-      final String iconDeclarationsString = newIcons.map((Icon icon) => icon.fullDeclaration).join();
+      final String iconDeclarationsString = newIcons.map((final Icon icon) => icon.fullDeclaration).join();
       buf.write(iconDeclarationsString);
     } else if (line.contains(_endGeneratedMark)) {
       generating = false;
@@ -366,7 +366,7 @@ String _regenerateIconsFile(
 }
 
 @visibleForTesting
-bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+bool testIsSuperset(final Map<String, String> newCodepoints, final Map<String, String> oldCodepoints) {
   final Set<String> newCodepointsSet = newCodepoints.keys.toSet();
   final Set<String> oldCodepointsSet = oldCodepoints.keys.toSet();
 
@@ -386,11 +386,11 @@ bool testIsSuperset(Map<String, String> newCodepoints, Map<String, String> oldCo
 }
 
 @visibleForTesting
-bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCodepoints) {
+bool testIsStable(final Map<String, String> newCodepoints, final Map<String, String> oldCodepoints) {
   final int oldCodepointsCount = oldCodepoints.length;
   final List<String> unstable = <String>[];
 
-  oldCodepoints.forEach((String key, String value) {
+  oldCodepoints.forEach((final String key, final String value) {
     if (newCodepoints.containsKey(key)) {
       if (value != newCodepoints[key]) {
         unstable.add(key);
@@ -407,15 +407,15 @@ bool testIsStable(Map<String, String> newCodepoints, Map<String, String> oldCode
   }
 }
 
-void _regenerateCodepointsFile(File oldCodepointsFile, Map<String, String> tokenPairMap) {
+void _regenerateCodepointsFile(final File oldCodepointsFile, final Map<String, String> tokenPairMap) {
   stderr.writeln('Regenerating old codepoints file ${oldCodepointsFile.path}');
 
   final StringBuffer buf = StringBuffer();
-  tokenPairMap.forEach((String key, String value) => buf.writeln('$key $value'));
+  tokenPairMap.forEach((final String key, final String value) => buf.writeln('$key $value'));
   oldCodepointsFile.writeAsStringSync(buf.toString());
 }
 
-void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
+void _generateIconDemo(final File demoFilePath, final Map<String, String> tokenPairMap) {
   if (tokenPairMap.isEmpty) {
     stderr.writeln('No new icons, skipping generating icon demo');
     return;
@@ -454,7 +454,7 @@ void _generateIconDemo(File demoFilePath, Map<String, String> tokenPairMap) {
 
 class Icon {
   // Parse tokenPair (e.g. {"6_ft_apart_outlined": "e004"}).
-  Icon(MapEntry<String, String> tokenPair, {
+  Icon(final MapEntry<String, String> tokenPair, {
     this.fontFamily = _defaultFontFamily,
     this.possibleStyleSuffixes = _defaultPossibleStyleSuffixes,
     this.className = _defaultClassName,
@@ -526,7 +526,7 @@ class Icon {
   $declaration
 ''';
 
-  String platformAdaptiveDeclaration(String fullFlutterId, Icon iOSIcon) => '''
+  String platformAdaptiveDeclaration(final String fullFlutterId, final Icon iOSIcon) => '''
 
   /// Platform-adaptive icon for $dartDoc and ${iOSIcon.dartDoc}.;
   IconData get $fullFlutterId => !_isCupertino() ? $className.$flutterId : $className.${iOSIcon.flutterId};
@@ -536,7 +536,7 @@ class Icon {
   String toString() => id;
 
   /// Analogous to [String.compareTo]
-  int _compareTo(Icon b) {
+  int _compareTo(final Icon b) {
     if (shortId == b.shortId) {
       // Sort a regular icon before its variants.
       return id.length - b.id.length;
@@ -544,7 +544,7 @@ class Icon {
     return shortId.compareTo(b.shortId);
   }
 
-  static String _removeLast(String string, String toReplace) {
+  static String _removeLast(final String string, final String toReplace) {
     return string.replaceAll(RegExp('$toReplace\$'), '');
   }
 

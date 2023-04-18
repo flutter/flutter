@@ -105,19 +105,19 @@ class BottomSheetThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   BottomSheetThemeData copyWith({
-    Color? backgroundColor,
-    Color? surfaceTintColor,
-    double? elevation,
-    Color? modalBackgroundColor,
-    Color? modalBarrierColor,
-    Color? shadowColor,
-    double? modalElevation,
-    ShapeBorder? shape,
-    bool? showDragHandle,
-    Color? dragHandleColor,
-    Size? dragHandleSize,
-    Clip? clipBehavior,
-    BoxConstraints? constraints,
+    final Color? backgroundColor,
+    final Color? surfaceTintColor,
+    final double? elevation,
+    final Color? modalBackgroundColor,
+    final Color? modalBarrierColor,
+    final Color? shadowColor,
+    final double? modalElevation,
+    final ShapeBorder? shape,
+    final bool? showDragHandle,
+    final Color? dragHandleColor,
+    final Size? dragHandleSize,
+    final Clip? clipBehavior,
+    final BoxConstraints? constraints,
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -141,7 +141,7 @@ class BottomSheetThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BottomSheetThemeData? lerp(BottomSheetThemeData? a, BottomSheetThemeData? b, double t) {
+  static BottomSheetThemeData? lerp(final BottomSheetThemeData? a, final BottomSheetThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -180,7 +180,7 @@ class BottomSheetThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -204,7 +204,7 @@ class BottomSheetThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('surfaceTintColor', surfaceTintColor, defaultValue: null));

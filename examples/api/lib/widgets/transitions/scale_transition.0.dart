@@ -12,7 +12,7 @@ class ScaleTransitionExampleApp extends StatelessWidget {
   const ScaleTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: ScaleTransitionExample(),
     );
@@ -45,7 +45,7 @@ class _ScaleTransitionExampleState extends State<ScaleTransitionExample> with Ti
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: ScaleTransition(

@@ -35,15 +35,15 @@ void main() {
   });
 
   // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
-  final Matcher isSanFranciscoDisplayFont = predicate((TextStyle s) {
+  final Matcher isSanFranciscoDisplayFont = predicate((final TextStyle s) {
     return s.fontFamily == '.SF UI Display';
   }, 'Uses SF Display font');
 
-  final Matcher isSanFranciscoTextFont = predicate((TextStyle s) {
+  final Matcher isSanFranciscoTextFont = predicate((final TextStyle s) {
     return s.fontFamily == '.SF UI Text';
   }, 'Uses SF Text font');
 
-  final Matcher isMacOSSanFranciscoMetaFont = predicate((TextStyle s) {
+  final Matcher isMacOSSanFranciscoMetaFont = predicate((final TextStyle s) {
     return s.fontFamily == '.AppleSystemUIFont';
   }, 'Uses macOS system meta-font');
 
@@ -89,7 +89,7 @@ void main() {
     }
   });
 
-  testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Typography implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     Typography.material2014(
       black: Typography.blackCupertino,
@@ -100,8 +100,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> nonDefaultPropertyNames = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.name!).toList();
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.name!).toList();
 
     expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
   });

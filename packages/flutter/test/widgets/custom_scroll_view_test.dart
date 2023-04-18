@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/96024
-  testWidgets('CustomScrollView.center update test 1', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center update test 1', (final WidgetTester tester) async {
     final Key centerKey = UniqueKey();
     late StateSetter setState;
     bool hasKey = false;
@@ -19,7 +19,7 @@ void main() {
           const SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
           StatefulBuilder(
             key: centerKey,
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               if (hasKey) {
                 return const SliverToBoxAdapter(
@@ -49,7 +49,7 @@ void main() {
     // Pass without throw.
   });
 
-  testWidgets('CustomScrollView.center update test 2', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center update test 2', (final WidgetTester tester) async {
     const List<Widget> slivers1 = <Widget>[
       SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
       SliverToBoxAdapter(key: Key('b'), child: SizedBox(height: 100.0)),
@@ -62,7 +62,7 @@ void main() {
       SliverToBoxAdapter(key: Key('a'), child: SizedBox(height: 100.0)),
     ];
 
-    Widget buildFrame(List<Widget> slivers, Key center) {
+    Widget buildFrame(final List<Widget> slivers, final Key center) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
@@ -81,7 +81,7 @@ void main() {
     // Pass without throw.
   });
 
-  testWidgets('CustomScrollView.center', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center', (final WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
@@ -103,7 +103,7 @@ void main() {
     );
   });
 
-  testWidgets('CustomScrollView.center', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.center', (final WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
@@ -135,7 +135,7 @@ void main() {
     );
   });
 
-  testWidgets('CustomScrollView.anchor', (WidgetTester tester) async {
+  testWidgets('CustomScrollView.anchor', (final WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(

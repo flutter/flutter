@@ -12,11 +12,11 @@ class RestorableValueExampleApp extends StatelessWidget {
   const RestorableValueExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return WidgetsApp(
       title: 'RestorableValue Sample',
       color: const Color(0xffffffff),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return const Center(
           child: RestorableValueExample(restorationId: 'main'),
         );
@@ -48,7 +48,7 @@ class _RestorableValueExampleState extends State<RestorableValueExample> with Re
   final RestorableInt _answer = RestorableInt(42);
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     // All restorable properties must be registered with the mixin. After
     // registration, the answer either has its old value restored or is
     // initialized to its default value.
@@ -71,7 +71,7 @@ class _RestorableValueExampleState extends State<RestorableValueExample> with Re
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return OutlinedButton(
       onPressed: _incrementAnswer,
       child: Text('${_answer.value}'),

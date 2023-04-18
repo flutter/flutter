@@ -12,7 +12,7 @@ class IconButtonExampleApp extends StatelessWidget {
   const IconButtonExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('IconButton Sample')),
@@ -35,7 +35,7 @@ class IconButtonExample extends StatefulWidget {
 
 class _IconButtonExampleState extends State<IconButtonExample> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[

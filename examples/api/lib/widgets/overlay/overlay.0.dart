@@ -12,7 +12,7 @@ class OverlayApp extends StatelessWidget {
   const OverlayApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: OverlayExample(),
     );
@@ -31,8 +31,8 @@ class _OverlayExampleState extends State<OverlayExample> {
   int currentPageIndex = 0;
 
   void createHighlightOverlay({
-    required AlignmentDirectional alignment,
-    required Color borderColor,
+    required final AlignmentDirectional alignment,
+    required final Color borderColor,
   }) {
     // Remove the existing OverlayEntry.
     removeHighlightOverlay();
@@ -41,7 +41,7 @@ class _OverlayExampleState extends State<OverlayExample> {
 
     overlayEntry = OverlayEntry(
       // Create a new OverlayEntry.
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         // Align is used to position the highlight overlay
         // relative to the NavigationBar destination.
         return SafeArea(
@@ -58,7 +58,7 @@ class _OverlayExampleState extends State<OverlayExample> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Text('Tap here for'),
-                  Builder(builder: (BuildContext context) {
+                  Builder(builder: (final BuildContext context) {
                     switch (currentPageIndex) {
                       case 0:
                         return const Column(
@@ -149,7 +149,7 @@ class _OverlayExampleState extends State<OverlayExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Overlay Sample'),

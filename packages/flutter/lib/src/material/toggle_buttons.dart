@@ -428,7 +428,7 @@ class ToggleButtons extends StatelessWidget {
 
   // Determines if this is the first child that is being laid out
   // by the render object, _not_ the order of the children in its list.
-  bool _isFirstButton(int index, int length, TextDirection textDirection) {
+  bool _isFirstButton(final int index, final int length, final TextDirection textDirection) {
     return index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
       (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
       || index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
@@ -437,7 +437,7 @@ class ToggleButtons extends StatelessWidget {
 
   // Determines if this is the last child that is being laid out
   // by the render object, _not_ the order of the children in its list.
-  bool _isLastButton(int index, int length, TextDirection textDirection) {
+  bool _isLastButton(final int index, final int length, final TextDirection textDirection) {
     return index == length - 1 && ((direction == Axis.horizontal && textDirection == TextDirection.ltr) ||
       (direction == Axis.vertical && verticalDirection == VerticalDirection.down))
       || index == 0 && ((direction == Axis.horizontal && textDirection == TextDirection.rtl) ||
@@ -445,10 +445,10 @@ class ToggleButtons extends StatelessWidget {
   }
 
   BorderRadius _getEdgeBorderRadius(
-    int index,
-    int length,
-    TextDirection textDirection,
-    ToggleButtonsThemeData toggleButtonsTheme,
+    final int index,
+    final int length,
+    final TextDirection textDirection,
+    final ToggleButtonsThemeData toggleButtonsTheme,
   ) {
     final BorderRadius resultingBorderRadius = borderRadius
       ?? toggleButtonsTheme.borderRadius
@@ -486,10 +486,10 @@ class ToggleButtons extends StatelessWidget {
   }
 
   BorderRadius _getClipBorderRadius(
-    int index,
-    int length,
-    TextDirection textDirection,
-    ToggleButtonsThemeData toggleButtonsTheme,
+    final int index,
+    final int length,
+    final TextDirection textDirection,
+    final ToggleButtonsThemeData toggleButtonsTheme,
   ) {
     final BorderRadius resultingBorderRadius = borderRadius
       ?? toggleButtonsTheme.borderRadius
@@ -534,9 +534,9 @@ class ToggleButtons extends StatelessWidget {
   }
 
   BorderSide _getLeadingBorderSide(
-    int index,
-    ThemeData theme,
-    ToggleButtonsThemeData toggleButtonsTheme,
+    final int index,
+    final ThemeData theme,
+    final ToggleButtonsThemeData toggleButtonsTheme,
   ) {
     if (!renderBorder) {
       return BorderSide.none;
@@ -570,9 +570,9 @@ class ToggleButtons extends StatelessWidget {
   }
 
   BorderSide _getBorderSide(
-    int index,
-    ThemeData theme,
-    ToggleButtonsThemeData toggleButtonsTheme,
+    final int index,
+    final ThemeData theme,
+    final ToggleButtonsThemeData toggleButtonsTheme,
   ) {
     if (!renderBorder) {
       return BorderSide.none;
@@ -606,9 +606,9 @@ class ToggleButtons extends StatelessWidget {
   }
 
   BorderSide _getTrailingBorderSide(
-    int index,
-    ThemeData theme,
-    ToggleButtonsThemeData toggleButtonsTheme,
+    final int index,
+    final ThemeData theme,
+    final ToggleButtonsThemeData toggleButtonsTheme,
   ) {
     if (!renderBorder) {
       return BorderSide.none;
@@ -646,7 +646,7 @@ class ToggleButtons extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(
       () {
         if (focusNodes != null) {
@@ -662,7 +662,7 @@ class ToggleButtons extends StatelessWidget {
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
-    final List<Widget> buttons = List<Widget>.generate(children.length, (int index) {
+    final List<Widget> buttons = List<Widget>.generate(children.length, (final int index) {
       final BorderRadius edgeBorderRadius = _getEdgeBorderRadius(index, children.length, textDirection, toggleButtonsTheme);
       final BorderRadius clipBorderRadius = _getClipBorderRadius(index, children.length, textDirection, toggleButtonsTheme);
 
@@ -811,7 +811,7 @@ class ToggleButtons extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('disabled',
       value: onPressed == null,
@@ -844,7 +844,7 @@ class _ResolveFillColor extends MaterialStateProperty<Color?> with Diagnosticabl
   final Color? primary;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (primary is MaterialStateProperty<Color>) {
       return MaterialStateProperty.resolveAs<Color?>(primary, states);
     }
@@ -859,7 +859,7 @@ class _DefaultFillColor extends MaterialStateProperty<Color> with Diagnosticable
   final ColorScheme colorScheme;
 
   @override
-  Color resolve(Set<MaterialState> states) {
+  Color resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
       return colorScheme.primary.withOpacity(0.12);
     }
@@ -890,7 +890,7 @@ class _ToggleButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   final Color? disabledColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (selected) {
       if (states.contains(MaterialState.hovered)) {
         return hoverColor ?? colorScheme?.primary.withOpacity(0.04);
@@ -974,7 +974,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   final VerticalDirection verticalDirection;
 
   @override
-  _SelectToggleButtonRenderObject createRenderObject(BuildContext context) => _SelectToggleButtonRenderObject(
+  _SelectToggleButtonRenderObject createRenderObject(final BuildContext context) => _SelectToggleButtonRenderObject(
     leadingBorderSide,
     borderSide,
     trailingBorderSide,
@@ -987,7 +987,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   );
 
   @override
-  void updateRenderObject(BuildContext context, _SelectToggleButtonRenderObject renderObject) {
+  void updateRenderObject(final BuildContext context, final _SelectToggleButtonRenderObject renderObject) {
     renderObject
       ..leadingBorderSide = leadingBorderSide
       ..borderSide  = borderSide
@@ -1012,12 +1012,12 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     this._direction,
     this._verticalDirection,
     this._textDirection, [
-    RenderBox? child,
+    final RenderBox? child,
   ]) : super(child);
 
   Axis get direction => _direction;
   Axis _direction;
-  set direction(Axis value) {
+  set direction(final Axis value) {
     if (_direction == value) {
       return;
     }
@@ -1027,7 +1027,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
   VerticalDirection get verticalDirection => _verticalDirection;
   VerticalDirection _verticalDirection;
-  set verticalDirection(VerticalDirection value) {
+  set verticalDirection(final VerticalDirection value) {
     if (_verticalDirection == value) {
       return;
     }
@@ -1038,7 +1038,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   // The width and color of the button's leading side border.
   BorderSide get leadingBorderSide => _leadingBorderSide;
   BorderSide _leadingBorderSide;
-  set leadingBorderSide(BorderSide value) {
+  set leadingBorderSide(final BorderSide value) {
     if (_leadingBorderSide == value) {
       return;
     }
@@ -1049,7 +1049,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   // The width and color of the button's top and bottom side borders.
   BorderSide get borderSide  => _borderSide;
   BorderSide _borderSide;
-  set borderSide(BorderSide value) {
+  set borderSide(final BorderSide value) {
     if (_borderSide == value) {
       return;
     }
@@ -1060,7 +1060,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   // The width and color of the button's trailing side border.
   BorderSide get trailingBorderSide => _trailingBorderSide;
   BorderSide _trailingBorderSide;
-  set trailingBorderSide(BorderSide value) {
+  set trailingBorderSide(final BorderSide value) {
     if (_trailingBorderSide == value) {
       return;
     }
@@ -1071,7 +1071,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   // The border radii of each corner of the button.
   BorderRadius get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
-  set borderRadius(BorderRadius value) {
+  set borderRadius(final BorderRadius value) {
     if (_borderRadius == value) {
       return;
     }
@@ -1082,7 +1082,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   // Whether or not this toggle button is the first button in the list.
   bool get isFirstButton => _isFirstButton;
   bool _isFirstButton;
-  set isFirstButton(bool value) {
+  set isFirstButton(final bool value) {
     if (_isFirstButton == value) {
       return;
     }
@@ -1093,7 +1093,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   // Whether or not this toggle button is the last button in the list.
   bool get isLastButton => _isLastButton;
   bool _isLastButton;
-  set isLastButton(bool value) {
+  set isLastButton(final bool value) {
     if (_isLastButton == value) {
       return;
     }
@@ -1104,7 +1104,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   // The direction in which text flows for this application.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (_textDirection == value) {
       return;
     }
@@ -1112,24 +1112,24 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  static double _maxHeight(RenderBox? box, double width) {
+  static double _maxHeight(final RenderBox? box, final double width) {
     return box == null ? 0.0 : box.getMaxIntrinsicHeight(width);
   }
 
-  static double _minHeight(RenderBox? box, double width) {
+  static double _minHeight(final RenderBox? box, final double width) {
     return box == null ? 0.0 : box.getMinIntrinsicHeight(width);
   }
 
-  static double _minWidth(RenderBox? box, double height) {
+  static double _minWidth(final RenderBox? box, final double height) {
     return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
   }
 
-  static double _maxWidth(RenderBox? box, double height) {
+  static double _maxWidth(final RenderBox? box, final double height) {
     return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(final TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
     return direction == Axis.horizontal
       ? child!.computeDistanceToActualBaseline(baseline)! + borderSide.width
@@ -1137,35 +1137,35 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return direction == Axis.horizontal
       ? borderSide.width * 2.0 + _maxHeight(child, width)
       : leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return direction == Axis.horizontal
         ? borderSide.width * 2.0 + _minHeight(child, width)
         : leadingBorderSide.width + _maxHeight(child, width) + trailingBorderSide.width;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     return direction == Axis.horizontal
       ? leadingBorderSide.width + _maxWidth(child, height) + trailingBorderSide.width
       : borderSide.width * 2.0 + _maxWidth(child, height);
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     return direction == Axis.horizontal
       ? leadingBorderSide.width + _minWidth(child, height) + trailingBorderSide.width
       : borderSide.width * 2.0 + _minWidth(child, height);
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
@@ -1199,7 +1199,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     }
   }
 
-  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  Size _computeSize({required final BoxConstraints constraints, required final ChildLayouter layoutChild}) {
     if (child == null) {
       if (direction == Axis.horizontal) {
         return constraints.constrain(Size(
@@ -1250,7 +1250,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     super.paint(context, offset);
     final Offset bottomRight = size.bottomRight(offset);
     final Rect outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
@@ -1493,23 +1493,23 @@ class _InputPadding extends SingleChildRenderObjectWidget {
   final Axis direction;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderInputPadding(minSize, direction);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderInputPadding renderObject) {
     renderObject.minSize = minSize;
     renderObject.direction = direction;
   }
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, this._direction, [RenderBox? child]) : super(child);
+  _RenderInputPadding(this._minSize, this._direction, [final RenderBox? child]) : super(child);
 
   Size get minSize => _minSize;
   Size _minSize;
-  set minSize(Size value) {
+  set minSize(final Size value) {
     if (_minSize == value) {
       return;
     }
@@ -1519,7 +1519,7 @@ class _RenderInputPadding extends RenderShiftedBox {
 
   Axis get direction => _direction;
   Axis _direction;
-  set direction(Axis value) {
+  set direction(final Axis value) {
     if (_direction == value) {
       return;
     }
@@ -1528,7 +1528,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     if (child != null) {
       return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
     }
@@ -1536,7 +1536,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     if (child != null) {
       return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
     }
@@ -1544,7 +1544,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     if (child != null) {
       return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
     }
@@ -1552,14 +1552,14 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     if (child != null) {
       return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
     }
     return 0.0;
   }
 
-  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  Size _computeSize({required final BoxConstraints constraints, required final ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
       final double height = math.max(childSize.width, minSize.width);
@@ -1570,7 +1570,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
@@ -1590,7 +1590,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(final BoxHitTestResult result, { required final Offset position }) {
     // The super.hitTest() method also checks hitTestChildren(). We don't
     // want that in this case because we've padded around the children per
     // tapTargetSize.
@@ -1608,7 +1608,7 @@ class _RenderInputPadding extends RenderShiftedBox {
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
-      hitTest: (BoxHitTestResult result, Offset position) {
+      hitTest: (final BoxHitTestResult result, final Offset position) {
         assert(position == center);
         return child!.hitTest(result, position: center);
       },

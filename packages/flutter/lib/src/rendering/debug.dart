@@ -248,7 +248,7 @@ bool debugDisablePhysicalShapeLayers = false;
 /// when building the scene.
 bool debugDisableOpacityLayers = false;
 
-void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
+void _debugDrawDoubleRect(final Canvas canvas, final Rect outerRect, final Rect innerRect, final Color color) {
   final Path path = Path()
     ..fillType = PathFillType.evenOdd
     ..addRect(outerRect)
@@ -262,7 +262,7 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 ///
 /// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
 /// true.
-void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double outlineWidth = 2.0 }) {
+void debugPaintPadding(final Canvas canvas, final Rect outerRect, final Rect? innerRect, { final double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {
       _debugDrawDoubleRect(canvas, outerRect, innerRect, const Color(0x900090FF));
@@ -287,7 +287,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double 
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSizesOverride = false }) {
+bool debugAssertAllRenderVarsUnset(final String reason, { final bool debugCheckIntrinsicSizesOverride = false }) {
   assert(() {
     if (debugPaintSizeEnabled ||
         debugPaintBaselinesEnabled ||
@@ -319,7 +319,7 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
 ///
 /// This is used by viewports during `performLayout` and `computeDryLayout`
 /// because bounded constraints are required in order to layout their children.
-bool debugCheckHasBoundedAxis(Axis axis, BoxConstraints constraints) {
+bool debugCheckHasBoundedAxis(final Axis axis, final BoxConstraints constraints) {
   assert(() {
     if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
       switch (axis) {

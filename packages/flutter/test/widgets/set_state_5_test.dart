@@ -21,13 +21,13 @@ class BadWidgetState extends State<BadWidget> {
   int _count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Text(_count.toString());
   }
 }
 
 void main() {
-  testWidgets('setState() catches being used inside a constructor', (WidgetTester tester) async {
+  testWidgets('setState() catches being used inside a constructor', (final WidgetTester tester) async {
     await tester.pumpWidget(const BadWidget());
     expect(tester.takeException(), isFlutterError);
   });

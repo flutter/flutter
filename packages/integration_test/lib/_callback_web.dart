@@ -44,7 +44,7 @@ class WebCallbackManager implements CallbackManager {
   ///
   /// See: https://www.w3.org/TR/webdriver/#screen-capture.
   @override
-  Future<Map<String, dynamic>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
+  Future<Map<String, dynamic>> takeScreenshot(final String screenshotName, [final Map<String, Object?>? args]) async {
     await _sendWebDriverCommand(WebDriverCommand.screenshot(screenshotName, args));
     return <String, dynamic>{
       'screenshotName': screenshotName,
@@ -58,7 +58,7 @@ class WebCallbackManager implements CallbackManager {
     // Noop on Web.
   }
 
-  Future<void> _sendWebDriverCommand(WebDriverCommand command) async {
+  Future<void> _sendWebDriverCommand(final WebDriverCommand command) async {
     try {
       _webDriverCommandPipe.complete(command);
       final bool awaitCommand = await _driverCommandComplete.future;
@@ -81,7 +81,7 @@ class WebCallbackManager implements CallbackManager {
   /// driver side.
   @override
   Future<Map<String, dynamic>> callback(
-      Map<String, String> params, IntegrationTestResults testRunner) async {
+      final Map<String, String> params, final IntegrationTestResults testRunner) async {
     final String command = params['command']!;
     Map<String, String> response;
     switch (command) {
@@ -101,7 +101,7 @@ class WebCallbackManager implements CallbackManager {
   }
 
   Future<Map<String, dynamic>> _requestDataWithMessage(
-      String extraMessage, IntegrationTestResults testRunner) async {
+      final String extraMessage, final IntegrationTestResults testRunner) async {
     Map<String, String> response;
     // Driver side tests' status is added as an extra message.
     final DriverTestMessage message =
@@ -142,7 +142,7 @@ class WebCallbackManager implements CallbackManager {
     };
   }
 
-  Future<Map<String, dynamic>> _requestData(IntegrationTestResults testRunner) async {
+  Future<Map<String, dynamic>> _requestData(final IntegrationTestResults testRunner) async {
     final bool allTestsPassed = await testRunner.allTestsPassed.future;
     final Map<String, String> response = <String, String>{
       'message': allTestsPassed

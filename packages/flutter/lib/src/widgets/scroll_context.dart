@@ -53,13 +53,13 @@ abstract class ScrollContext {
   /// prevent the user from accidentally interacting with the contents of the
   /// widget as it animates. The user will still be able to touch the widget,
   /// potentially stopping the animation.
-  void setIgnorePointer(bool value);
+  void setIgnorePointer(final bool value);
 
   /// Whether the user can drag the widget, for example to initiate a scroll.
-  void setCanDrag(bool value);
+  void setCanDrag(final bool value);
 
   /// Set the [SemanticsAction]s that should be expose to the semantics tree.
-  void setSemanticsActions(Set<SemanticsAction> actions);
+  void setSemanticsActions(final Set<SemanticsAction> actions);
 
   /// Called by the [ScrollPosition] whenever scrolling ends to persist the
   /// provided scroll `offset` for state restoration purposes.
@@ -67,5 +67,5 @@ abstract class ScrollContext {
   /// The [ScrollContext] may pass the value back to a [ScrollPosition] by
   /// calling [ScrollPosition.restoreOffset] at a later point in time or after
   /// the application has restarted to restore the scroll offset.
-  void saveOffset(double offset);
+  void saveOffset(final double offset);
 }

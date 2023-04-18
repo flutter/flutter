@@ -84,13 +84,13 @@ class CardTheme with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   CardTheme copyWith({
-    Clip? clipBehavior,
-    Color? color,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    double? elevation,
-    EdgeInsetsGeometry? margin,
-    ShapeBorder? shape,
+    final Clip? clipBehavior,
+    final Color? color,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final double? elevation,
+    final EdgeInsetsGeometry? margin,
+    final ShapeBorder? shape,
   }) {
     return CardTheme(
       clipBehavior: clipBehavior ?? this.clipBehavior,
@@ -104,7 +104,7 @@ class CardTheme with Diagnosticable {
   }
 
   /// The [ThemeData.cardTheme] property of the ambient [Theme].
-  static CardTheme of(BuildContext context) {
+  static CardTheme of(final BuildContext context) {
     return Theme.of(context).cardTheme;
   }
 
@@ -113,7 +113,7 @@ class CardTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static CardTheme lerp(CardTheme? a, CardTheme? b, double t) {
+  static CardTheme lerp(final CardTheme? a, final CardTheme? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -140,7 +140,7 @@ class CardTheme with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -158,7 +158,7 @@ class CardTheme with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: null));
     properties.add(ColorProperty('color', color, defaultValue: null));

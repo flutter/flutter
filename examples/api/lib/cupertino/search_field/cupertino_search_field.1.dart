@@ -12,7 +12,7 @@ class SearchTextFieldApp extends StatelessWidget {
   const SearchTextFieldApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: SearchTextFieldExample(),
@@ -31,7 +31,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
   String text = '';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoSearchTextField Sample'),
@@ -44,7 +44,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: SearchTextField(
-                fieldValue: (String value) {
+                fieldValue: (final String value) {
                   setState(() {
                     text = value;
                   });
@@ -67,12 +67,12 @@ class SearchTextField extends StatelessWidget {
   final ValueChanged<String> fieldValue;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoSearchTextField(
-      onChanged: (String value) {
+      onChanged: (final String value) {
         fieldValue('The text has changed to: $value');
       },
-      onSubmitted: (String value) {
+      onSubmitted: (final String value) {
         fieldValue('Submitted text: $value');
       },
     );

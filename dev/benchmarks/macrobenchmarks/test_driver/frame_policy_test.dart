@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:integration_test/integration_test_driver.dart' as driver;
 
 Future<void> main() => driver.integrationDriver(
-  responseDataCallback: (Map<String, dynamic>? data) async {
+  responseDataCallback: (final Map<String, dynamic>? data) async {
     final Map<String, dynamic> benchmarkLiveResult =
         data?['benchmarkLive'] as Map<String,dynamic>;
     final Map<String, dynamic> fullyLiveResult =

@@ -80,7 +80,7 @@ mhBKvYQc85gja0s1c+1VXA==
 
 class MyHttpOverrides extends HttpOverrides {
   @override
-  HttpClient createHttpClient(SecurityContext? context) {
+  HttpClient createHttpClient(final SecurityContext? context) {
     return super.createHttpClient(
         (context ?? SecurityContext())..setTrustedCertificatesBytes(certificate.codeUnits),
     );
@@ -102,7 +102,7 @@ Future<void> main() async {
   // Initializes bindings before using any platform channels.
   WidgetsFlutterBinding.ensureInitialized();
   final ByteData byteData = await rootBundle.load('images/coast.jpg');
-  httpServer.listen((HttpRequest request) async {
+  httpServer.listen((final HttpRequest request) async {
     const int chunk_size = 2048;
     int offset = byteData.offsetInBytes;
     while (offset < byteData.lengthInBytes) {
@@ -128,7 +128,7 @@ class MyApp extends StatelessWidget {
   final int port;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -161,10 +161,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     return Image.network(
         'https://localhost:${widget.port}/${_counter * IMAGES + index}',
         frameBuilder: (
-          BuildContext context,
-          Widget child,
-          int? frame,
-          bool wasSynchronouslyLoaded,
+          final BuildContext context,
+          final Widget child,
+          final int? frame,
+          final bool wasSynchronouslyLoaded,
         ) {
           if (frame == 0 && !completer.isCompleted) {
             completer.complete(true);
@@ -175,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<AnimationController> controllers = <AnimationController>[
       for (int i = 0; i < IMAGES; i++)
         AnimationController(
@@ -188,10 +188,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         Completer<bool>(),
     ];
     final List<Future<bool>> futures = completers.map(
-      (Completer<bool> completer) => completer.future,
+      (final Completer<bool> completer) => completer.future,
     ).toList();
     final DateTime started = DateTime.now();
-    Future.wait(futures).then((_) {
+    Future.wait(futures).then((final _) {
       debugPrint(
         '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.',
       );
@@ -224,9 +224,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   List<Widget> createImageList(
-    int count,
-    List<Completer<bool>> completers,
-    List<AnimationController> controllers,
+    final int count,
+    final List<Completer<bool>> completers,
+    final List<AnimationController> controllers,
   ) {
     final List<Widget> list = <Widget>[];
     for (int i = 0; i < count; i++) {

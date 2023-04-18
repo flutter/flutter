@@ -17,7 +17,7 @@ class OnTapPage extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Page $id')),
       body: GestureDetector(
@@ -32,15 +32,15 @@ class OnTapPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
+  testWidgets('Push and Pop should send platform messages', (final WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => OnTapPage(
+      '/': (final BuildContext context) => OnTapPage(
           id: '/',
           onTap: () {
             Navigator.pushNamed(context, '/A');
           },
         ),
-      '/A': (BuildContext context) => OnTapPage(
+      '/A': (final BuildContext context) => OnTapPage(
           id: 'A',
           onTap: () {
             Navigator.pop(context);
@@ -50,7 +50,7 @@ void main() {
 
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -107,9 +107,9 @@ void main() {
     );
   });
 
-  testWidgets('Navigator does not report route name by default', (WidgetTester tester) async {
+  testWidgets('Navigator does not report route name by default', (final WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -120,7 +120,7 @@ void main() {
         pages: const <Page<void>>[
           TestPage(name: '/'),
         ],
-        onPopPage: (Route<void> route, void result) => false,
+        onPopPage: (final Route<void> route, final void result) => false,
       ),
     ));
 
@@ -133,7 +133,7 @@ void main() {
           TestPage(name: '/'),
           TestPage(name: '/abc'),
         ],
-        onPopPage: (Route<void> route, void result) => false,
+        onPopPage: (final Route<void> route, final void result) => false,
       ),
     ));
 
@@ -141,26 +141,26 @@ void main() {
     expect(log, hasLength(0));
   });
 
-  testWidgets('Replace should send platform messages', (WidgetTester tester) async {
+  testWidgets('Replace should send platform messages', (final WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => OnTapPage(
+      '/': (final BuildContext context) => OnTapPage(
           id: '/',
           onTap: () {
             Navigator.pushNamed(context, '/A');
           },
         ),
-      '/A': (BuildContext context) => OnTapPage(
+      '/A': (final BuildContext context) => OnTapPage(
           id: 'A',
           onTap: () {
             Navigator.pushReplacementNamed(context, '/B');
           },
         ),
-      '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
+      '/B': (final BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
     final List<MethodCall> log = <MethodCall>[];
 
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -217,9 +217,9 @@ void main() {
     );
   });
 
-  testWidgets('Nameless routes should send platform messages', (WidgetTester tester) async {
+  testWidgets('Nameless routes should send platform messages', (final WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -227,13 +227,13 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       initialRoute: '/home',
       routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) {
+        '/home': (final BuildContext context) {
           return OnTapPage(
             id: 'Home',
             onTap: () {
               // Create a route with no name.
               final Route<void> route = MaterialPageRoute<void>(
-                builder: (BuildContext context) => const Text('Nameless Route'),
+                builder: (final BuildContext context) => const Text('Nameless Route'),
               );
               Navigator.push<void>(context, route);
             },
@@ -261,9 +261,9 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('PlatformRouteInformationProvider reports URL', (WidgetTester tester) async {
+  testWidgets('PlatformRouteInformationProvider reports URL', (final WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -275,7 +275,7 @@ void main() {
     );
     final SimpleRouterDelegate delegate = SimpleRouterDelegate(
       reportConfiguration: true,
-      builder: (BuildContext context, RouteInformation information) {
+      builder: (final BuildContext context, final RouteInformation information) {
         return Text(information.location!);
       },
     );
@@ -323,12 +323,12 @@ class SimpleRouteInformationParser extends RouteInformationParser<RouteInformati
   SimpleRouteInformationParser();
 
   @override
-  Future<RouteInformation> parseRouteInformation(RouteInformation information) {
+  Future<RouteInformation> parseRouteInformation(final RouteInformation information) {
     return SynchronousFuture<RouteInformation>(information);
   }
 
   @override
-  RouteInformation restoreRouteInformation(RouteInformation configuration) {
+  RouteInformation restoreRouteInformation(final RouteInformation configuration) {
     return configuration;
   }
 }
@@ -342,7 +342,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
 
   RouteInformation get routeInformation => _routeInformation;
   late RouteInformation _routeInformation;
-  set routeInformation(RouteInformation newValue) {
+  set routeInformation(final RouteInformation newValue) {
     _routeInformation = newValue;
     notifyListeners();
   }
@@ -360,7 +360,7 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
   }
 
   @override
-  Future<void> setNewRoutePath(RouteInformation configuration) {
+  Future<void> setNewRoutePath(final RouteInformation configuration) {
     _routeInformation = configuration;
     return SynchronousFuture<void>(null);
   }
@@ -374,17 +374,17 @@ class SimpleRouterDelegate extends RouterDelegate<RouteInformation> with ChangeN
   }
 
   @override
-  Widget build(BuildContext context) => builder(context, routeInformation);
+  Widget build(final BuildContext context) => builder(context, routeInformation);
 }
 
 class TestPage extends Page<void> {
   const TestPage({super.key, super.name});
 
   @override
-  Route<void> createRoute(BuildContext context) {
+  Route<void> createRoute(final BuildContext context) {
     return PageRouteBuilder<void>(
       settings: this,
-      pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) => const Placeholder(),
+      pageBuilder: (final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) => const Placeholder(),
     );
   }
 }

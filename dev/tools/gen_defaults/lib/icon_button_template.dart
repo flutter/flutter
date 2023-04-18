@@ -226,7 +226,7 @@ class IconButtonTemplate extends TokenTemplate {
     return ''' null''';
   }
 
-  String _elevationColor(String token) {
+  String _elevationColor(final String token) {
     if (tokens.containsKey(token)) {
       return 'MaterialStatePropertyAll<Color>(${color(token)})';
     } else {

@@ -25,7 +25,7 @@ void main() {
 
     testWithoutContext('signal handler runs', () async {
       final Completer<void> completer = Completer<void>();
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         expect(s, signalUnderTest);
         completer.complete();
       });
@@ -39,12 +39,12 @@ void main() {
 
       bool first = false;
 
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         expect(s, signalUnderTest);
         first = true;
       });
 
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         expect(s, signalUnderTest);
         expect(first, isTrue);
         completer.complete();
@@ -57,7 +57,7 @@ void main() {
     testWithoutContext('signal handlers do not cause concurrent modification errors when removing handlers in a signal callback', () async {
       final Completer<void> completer = Completer<void>();
       late Object token;
-      Future<void> handle(ProcessSignal s) async {
+      Future<void> handle(final ProcessSignal s) async {
         expect(s, signalUnderTest);
         expect(await signals.removeHandler(signalUnderTest, token), true);
         completer.complete();
@@ -71,14 +71,14 @@ void main() {
 
     testWithoutContext('signal handler error goes on error stream', () async {
       final Exception exn = Exception('Error');
-      signals.addHandler(signalUnderTest, (ProcessSignal s) async {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) async {
         throw exn;
       });
 
       final Completer<void> completer = Completer<void>();
       final List<Object> errList = <Object>[];
       final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
+        (final Object err) {
           errList.add(err);
           completer.complete();
         },
@@ -93,7 +93,7 @@ void main() {
     testWithoutContext('removed signal handler does not run', () async {
       final Object token = signals.addHandler(
         signalUnderTest,
-        (ProcessSignal s) async {
+        (final ProcessSignal s) async {
           fail('Signal handler should have been removed.');
         },
       );
@@ -102,7 +102,7 @@ void main() {
 
       final List<Object> errList = <Object>[];
       final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
+        (final Object err) {
           errList.add(err);
         },
       );
@@ -115,14 +115,14 @@ void main() {
 
     testWithoutContext('non-removed signal handler still runs', () async {
       final Completer<void> completer = Completer<void>();
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         expect(s, signalUnderTest);
         completer.complete();
       });
 
       final Object token = signals.addHandler(
         signalUnderTest,
-        (ProcessSignal s) async {
+        (final ProcessSignal s) async {
           fail('Signal handler should have been removed.');
         },
       );
@@ -130,7 +130,7 @@ void main() {
 
       final List<Object> errList = <Object>[];
       final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
+        (final Object err) {
           errList.add(err);
         },
       );
@@ -146,18 +146,18 @@ void main() {
       final ProcessSignal otherSignal = ProcessSignal(mockSignal2);
 
       final Completer<void> completer = Completer<void>();
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         expect(s, signalUnderTest);
         completer.complete();
       });
 
-      signals.addHandler(otherSignal, (ProcessSignal s) async {
+      signals.addHandler(otherSignal, (final ProcessSignal s) async {
         fail('Wrong signal!.');
       });
 
       final List<Object> errList = <Object>[];
       final StreamSubscription<Object> errSub = signals.errors.listen(
-        (Object err) {
+        (final Object err) {
           errList.add(err);
         },
       );
@@ -176,7 +176,7 @@ void main() {
       bool first = false;
       bool second = false;
 
-      setExitFunctionForTests((int exitCode) {
+      setExitFunctionForTests((final int exitCode) {
         // Both handlers have run before exit is called.
         expect(first, isTrue);
         expect(second, isTrue);
@@ -185,14 +185,14 @@ void main() {
         completer.complete();
       });
 
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         expect(s, signalUnderTest);
         expect(first, isFalse);
         expect(second, isFalse);
         first = true;
       });
 
-      signals.addHandler(signalUnderTest, (ProcessSignal s) {
+      signals.addHandler(signalUnderTest, (final ProcessSignal s) {
         expect(s, signalUnderTest);
         expect(first, isTrue);
         expect(second, isFalse);

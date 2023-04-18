@@ -22,7 +22,7 @@ void main() {
     final BoxPainter painter = decoration.createBoxPainter();
     const Size size = Size(1000.0, 1000.0);
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         painter.paint(
           canvas,
           Offset.zero,
@@ -35,7 +35,7 @@ void main() {
     expect(decoration.hitTest(size, const Offset(10.0, 10.0), textDirection: TextDirection.rtl), isTrue);
     expect(decoration.hitTest(size, const Offset(990.0, 10.0), textDirection: TextDirection.rtl), isFalse);
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         painter.paint(
           canvas,
           Offset.zero,
@@ -64,7 +64,7 @@ void main() {
     final BoxPainter painter = decoration.createBoxPainter();
     const Size size = Size(1000.0, 1000.0);
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         painter.paint(
           canvas,
           Offset.zero,

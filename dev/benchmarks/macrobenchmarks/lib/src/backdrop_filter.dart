@@ -32,8 +32,8 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
   }
 
   @override
-  Widget build(BuildContext context) {
-    Widget addBlur(Widget child, bool shouldBlur) {
+  Widget build(final BuildContext context) {
+    Widget addBlur(final Widget child, final bool shouldBlur) {
       if (shouldBlur) {
         return ClipRect(
           child: BackdropFilter(
@@ -51,16 +51,16 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
       child: const Text('txt'),
     ), _blurTexts);
 
-    Widget col(Widget w, int numRows) {
+    Widget col(final Widget w, final int numRows) {
       return Column(
-          children: List<Widget>.generate(numRows, (int i) => w),
+          children: List<Widget>.generate(numRows, (final int i) => w),
       );
     }
 
-    Widget grid(Widget w, int numRows, int numCols) {
+    Widget grid(final Widget w, final int numRows, final int numCols) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List<Widget>.generate(numCols, (int i) => col(w, numRows)),
+        children: List<Widget>.generate(numCols, (final int i) => col(w, numRows)),
       );
     }
 
@@ -77,7 +77,7 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                     child: Center(
                       child: AnimatedBuilder(
                           animation: animation,
-                          builder: (BuildContext c, Widget? w) {
+                          builder: (final BuildContext c, final Widget? w) {
                             final int val = (animation.value * 255).round();
                             return Container(
                                 width: 50,
@@ -99,13 +99,13 @@ class _BackdropFilterPageState extends State<BackdropFilterPage> with TickerProv
                     const Text('Backdrop per txt:'),
                     Checkbox(
                       value: _blurTexts,
-                      onChanged: (bool? v) => setState(() { _blurTexts = v ?? false; }),
+                      onChanged: (final bool? v) => setState(() { _blurTexts = v ?? false; }),
                     ),
                     const SizedBox(width: 10),
                     const Text('Backdrop grid:'),
                     Checkbox(
                       value: _blurGroup,
-                      onChanged: (bool? v) => setState(() { _blurGroup = v ?? false; }),
+                      onChanged: (final bool? v) => setState(() { _blurGroup = v ?? false; }),
                     ),
                   ],
                 ),

@@ -54,7 +54,7 @@ class Form extends StatefulWidget {
     required this.child,
     this.onWillPop,
     this.onChanged,
-    AutovalidateMode? autovalidateMode,
+    final AutovalidateMode? autovalidateMode,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
   /// Returns the [FormState] of the closest [Form] widget which encloses the
@@ -74,7 +74,7 @@ class Form extends StatefulWidget {
   ///
   /// * [Form.of], which is similar to this method, but asserts if no [Form]
   ///   ancestor is found.
-  static FormState? maybeOf(BuildContext context) {
+  static FormState? maybeOf(final BuildContext context) {
     final _FormScope? scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
@@ -99,7 +99,7 @@ class Form extends StatefulWidget {
   ///
   /// * [Form.maybeOf], which is similar to this method, but returns null if no
   ///   [Form] ancestor is found.
-  static FormState of(BuildContext context) {
+  static FormState of(final BuildContext context) {
     final FormState? formState = maybeOf(context);
     assert(() {
       if (formState == null) {
@@ -169,7 +169,7 @@ class FormState extends State<Form> {
     widget.onChanged?.call();
 
     _hasInteractedByUser = _fields
-        .any((FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
+        .any((final FormFieldState<dynamic> field) => field._hasInteractedByUser.value);
     _forceRebuild();
   }
 
@@ -179,16 +179,16 @@ class FormState extends State<Form> {
     });
   }
 
-  void _register(FormFieldState<dynamic> field) {
+  void _register(final FormFieldState<dynamic> field) {
     _fields.add(field);
   }
 
-  void _unregister(FormFieldState<dynamic> field) {
+  void _unregister(final FormFieldState<dynamic> field) {
     _fields.remove(field);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     switch (widget.autovalidateMode) {
       case AutovalidateMode.always:
         _validate();
@@ -268,8 +268,8 @@ class FormState extends State<Form> {
 class _FormScope extends InheritedWidget {
   const _FormScope({
     required super.child,
-    required FormState formState,
-    required int generation,
+    required final FormState formState,
+    required final int generation,
   }) : _formState = formState,
        _generation = generation;
 
@@ -283,7 +283,7 @@ class _FormScope extends InheritedWidget {
   Form get form => _formState.widget;
 
   @override
-  bool updateShouldNotify(_FormScope old) => _generation != old._generation;
+  bool updateShouldNotify(final _FormScope old) => _generation != old._generation;
 }
 
 /// Signature for validating a form field.
@@ -336,7 +336,7 @@ class FormField<T> extends StatefulWidget {
     this.validator,
     this.initialValue,
     this.enabled = true,
-    AutovalidateMode? autovalidateMode,
+    final AutovalidateMode? autovalidateMode,
     this.restorationId,
   }) : autovalidateMode = autovalidateMode ?? AutovalidateMode.disabled;
 
@@ -474,7 +474,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// Triggers the [Form.onChanged] callback and, if [Form.autovalidateMode] is
   /// [AutovalidateMode.always] or [AutovalidateMode.onUserInteraction],
   /// revalidates all the fields of the form.
-  void didChange(T? value) {
+  void didChange(final T? value) {
     setState(() {
       _value = value;
       _hasInteractedByUser.value = true;
@@ -491,7 +491,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   /// `setState` is called.
   @protected
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
-  void setValue(T? value) {
+  void setValue(final T? value) {
     _value = value;
   }
 
@@ -499,7 +499,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   String? get restorationId => widget.restorationId;
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(_errorText, 'error_text');
     registerForRestoration(_hasInteractedByUser, 'has_interacted_by_user');
   }
@@ -511,7 +511,7 @@ class FormFieldState<T> extends State<FormField<T>> with RestorationMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (widget.enabled) {
       switch (widget.autovalidateMode) {
         case AutovalidateMode.always:

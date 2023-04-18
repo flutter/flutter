@@ -13,7 +13,7 @@ PopupMenuThemeData _popupMenuThemeM2() {
     shape: const BeveledRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
     elevation: 12.0,
     textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
+    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
@@ -29,13 +29,13 @@ PopupMenuThemeData _popupMenuThemeM3() {
     elevation: 12.0,
     shadowColor: const Color(0xff00ff00),
     surfaceTintColor: const Color(0xff00ff00),
-    labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    labelTextStyle: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
       }
       return const TextStyle(color: Color(0xfff12099), fontSize: 17.0);
     }),
-    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
+    mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.contextMenu;
       }
@@ -69,19 +69,19 @@ void main() {
     expect(popupMenuTheme.mouseCursor, null);
   });
 
-  testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default PopupMenuThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('PopupMenuThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
      PopupMenuThemeData(
       color: const Color(0xFFFFFFFF),
@@ -90,7 +90,7 @@ void main() {
       shadowColor: const Color(0xff00ff00),
       surfaceTintColor: const Color(0xff00ff00),
       textStyle: const TextStyle(color: Color(0xffffffff)),
-      labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+      labelTextStyle: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return const TextStyle(color: Color(0xfff99ff0), fontSize: 12.0);
         }
@@ -100,8 +100,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -116,7 +116,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no PopupMenuThemeData returns defaults', (final WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key enabledPopupItemKey = UniqueKey();
@@ -135,7 +135,7 @@ void main() {
               padding: const EdgeInsets.all(8.0),
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
-                itemBuilder: (BuildContext context) {
+                itemBuilder: (final BuildContext context) {
                   return <PopupMenuEntry<void>>[
                     PopupMenuItem<void>(
                       key: enabledPopupItemKey,
@@ -217,7 +217,7 @@ void main() {
     );
   });
 
-  testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
+  testWidgets('Popup menu uses values from PopupMenuThemeData', (final WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM3();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -236,7 +236,7 @@ void main() {
               // it easier to test.
               padding: EdgeInsets.zero,
               key: popupButtonKey,
-              itemBuilder: (BuildContext context) {
+              itemBuilder: (final BuildContext context) {
                 return <PopupMenuEntry<Object>>[
                   PopupMenuItem<Object>(
                     key: disabledPopupItemKey,
@@ -315,7 +315,7 @@ void main() {
     );
   });
 
-  testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('Popup menu widget properties take priority over theme', (final WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM3();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -344,7 +344,7 @@ void main() {
               surfaceTintColor: surfaceTintColor,
               color: color,
               shape: shape,
-              itemBuilder: (BuildContext context) {
+              itemBuilder: (final BuildContext context) {
                 return <PopupMenuEntry<void>>[
                   PopupMenuItem<void>(
                     key: popupItemKey,
@@ -403,7 +403,7 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
+    testWidgets('Passing no PopupMenuThemeData returns defaults', (final WidgetTester tester) async {
      final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
       final Key enabledPopupItemKey = UniqueKey();
@@ -422,7 +422,7 @@ void main() {
               padding: const EdgeInsets.all(8.0),
                 child: PopupMenuButton<void>(
                   key: popupButtonKey,
-                  itemBuilder: (BuildContext context) {
+                  itemBuilder: (final BuildContext context) {
                     return <PopupMenuEntry<void>>[
                       PopupMenuItem<void>(
                         key: enabledPopupItemKey,
@@ -502,7 +502,7 @@ void main() {
       );
     });
 
-    testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
+    testWidgets('Popup menu uses values from PopupMenuThemeData', (final WidgetTester tester) async {
       final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM2();
       final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
@@ -521,7 +521,7 @@ void main() {
                 // it easier to test.
                 padding: EdgeInsets.zero,
                 key: popupButtonKey,
-                itemBuilder: (BuildContext context) {
+                itemBuilder: (final BuildContext context) {
                   return <PopupMenuEntry<Object>>[
                     PopupMenuItem<Object>(
                       key: disabledPopupItemKey,
@@ -588,7 +588,7 @@ void main() {
       );
     });
 
-    testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
+    testWidgets('Popup menu widget properties take priority over theme', (final WidgetTester tester) async {
       final PopupMenuThemeData popupMenuTheme = _popupMenuThemeM2();
       final Key popupButtonKey = UniqueKey();
       final Key popupButtonApp = UniqueKey();
@@ -617,7 +617,7 @@ void main() {
                 surfaceTintColor: surfaceTintColor,
                 color: color,
                 shape: shape,
-                itemBuilder: (BuildContext context) {
+                itemBuilder: (final BuildContext context) {
                   return <PopupMenuEntry<void>>[
                     PopupMenuItem<void>(
                       key: popupItemKey,

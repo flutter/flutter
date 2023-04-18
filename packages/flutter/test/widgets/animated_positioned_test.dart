@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedPositioned.fromRect control test', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned.fromRect control test', (final WidgetTester tester) async {
     final AnimatedPositioned positioned = AnimatedPositioned.fromRect(
       rect: const Rect.fromLTWH(7.0, 5.0, 12.0, 16.0),
       duration: const Duration(milliseconds: 200),
@@ -20,7 +20,7 @@ void main() {
     expect(positioned, hasOneLineDescription);
   });
 
-  testWidgets('AnimatedPositioned - basics (VISUAL)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned - basics (VISUAL)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -102,7 +102,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimatedPositionedDirectional - basics (LTR)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - basics (LTR)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -188,7 +188,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimatedPositionedDirectional - basics (RTL)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - basics (RTL)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -274,7 +274,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimatedPositioned - interrupted animation (VISUAL)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned - interrupted animation (VISUAL)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -357,7 +357,7 @@ void main() {
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
   });
 
-  testWidgets('AnimatedPositioned - switching variables (VISUAL)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned - switching variables (VISUAL)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -416,7 +416,7 @@ void main() {
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
   });
 
-  testWidgets('AnimatedPositionedDirectional - interrupted animation (LTR)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - interrupted animation (LTR)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -505,7 +505,7 @@ void main() {
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
   });
 
-  testWidgets('AnimatedPositionedDirectional - switching variables (LTR)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - switching variables (LTR)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -568,7 +568,7 @@ void main() {
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
   });
 
-  testWidgets('AnimatedPositionedDirectional - interrupted animation (RTL)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - interrupted animation (RTL)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;
@@ -657,7 +657,7 @@ void main() {
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(600.0, 200.0)));
   });
 
-  testWidgets('AnimatedPositionedDirectional - switching variables (RTL)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - switching variables (RTL)', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     RenderBox box;

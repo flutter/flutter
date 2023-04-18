@@ -21,16 +21,16 @@ import 'flutter_test_adapter.dart';
 /// adapters.
 class DapServer {
   DapServer(
-    Stream<List<int>> input,
-    StreamSink<List<int>> output, {
-    required FileSystem fileSystem,
-    required Platform platform,
+    final Stream<List<int>> input,
+    final StreamSink<List<int>> output, {
+    required final FileSystem fileSystem,
+    required final Platform platform,
     this.ipv6 = false,
     this.enableDds = true,
     this.enableAuthCodes = true,
-    bool test = false,
+    final bool test = false,
     this.logger,
-    void Function(Object? e)? onError,
+    final void Function(Object? e)? onError,
   }) : channel = ByteStreamServerChannel(input, output, logger) {
     adapter = test
         ? FlutterTestDebugAdapter(

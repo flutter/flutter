@@ -17,7 +17,7 @@ class TooltipDemo extends StatelessWidget {
   static const String routeName = '/material/tooltips';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +25,7 @@ class TooltipDemo extends StatelessWidget {
         actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
       ),
       body: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return SafeArea(
             top: false,
             bottom: false,
@@ -60,7 +60,7 @@ class TooltipDemo extends StatelessWidget {
                   ),
                 ),
               ]
-              .map<Widget>((Widget widget) {
+              .map<Widget>((final Widget widget) {
                 return Padding(
                   padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
                   child: widget,

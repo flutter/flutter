@@ -616,7 +616,7 @@ exit code: 66
         context: PubContext.flutterTests,
       ),
       throwsA(isA<ToolExit>()
-          .having((ToolExit error) => error.message, 'message', null)),
+          .having((final ToolExit error) => error.message, 'message', null)),
     );
     expect(logger.statusText, isEmpty);
     expect(logger.traceText, contains(toolExitMessage));
@@ -688,12 +688,12 @@ exit code: 66
       throwsA(
         isA<ProcessException>()
             .having(
-              (ProcessException error) => error.message,
+              (final ProcessException error) => error.message,
               'message',
               contains('Working directory: "/" (exists)'),
             )
             .having(
-              (ProcessException error) => error.message,
+              (final ProcessException error) => error.message,
               'message',
               contains('"PUB_ENVIRONMENT": "flutter_cli:flutter_tests"'),
             ),

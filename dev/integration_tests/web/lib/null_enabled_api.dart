@@ -4,6 +4,6 @@
 
 // @dart = 2.12
 
-void methodThatAcceptsNonNull(int x) {
+void methodThatAcceptsNonNull(final int x) {
   print(x + 2);
 }

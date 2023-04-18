@@ -85,17 +85,17 @@ class SearchBarThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SearchBarThemeData copyWith({
-    MaterialStateProperty<double?>? elevation,
-    MaterialStateProperty<Color?>? backgroundColor,
-    MaterialStateProperty<Color?>? shadowColor,
-    MaterialStateProperty<Color?>? surfaceTintColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    MaterialStateProperty<BorderSide?>? side,
-    MaterialStateProperty<OutlinedBorder?>? shape,
-    MaterialStateProperty<EdgeInsetsGeometry?>? padding,
-    MaterialStateProperty<TextStyle?>? textStyle,
-    MaterialStateProperty<TextStyle?>? hintStyle,
-    BoxConstraints? constraints,
+    final MaterialStateProperty<double?>? elevation,
+    final MaterialStateProperty<Color?>? backgroundColor,
+    final MaterialStateProperty<Color?>? shadowColor,
+    final MaterialStateProperty<Color?>? surfaceTintColor,
+    final MaterialStateProperty<Color?>? overlayColor,
+    final MaterialStateProperty<BorderSide?>? side,
+    final MaterialStateProperty<OutlinedBorder?>? shape,
+    final MaterialStateProperty<EdgeInsetsGeometry?>? padding,
+    final MaterialStateProperty<TextStyle?>? textStyle,
+    final MaterialStateProperty<TextStyle?>? hintStyle,
+    final BoxConstraints? constraints,
   }) {
     return SearchBarThemeData(
       elevation: elevation ?? this.elevation,
@@ -115,7 +115,7 @@ class SearchBarThemeData with Diagnosticable {
   /// Linearly interpolate between two [SearchBarThemeData]s.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static SearchBarThemeData? lerp(SearchBarThemeData? a, SearchBarThemeData? b, double t) {
+  static SearchBarThemeData? lerp(final SearchBarThemeData? a, final SearchBarThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -150,7 +150,7 @@ class SearchBarThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -172,7 +172,7 @@ class SearchBarThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<double?>>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('backgroundColor', backgroundColor, defaultValue: null));
@@ -188,7 +188,7 @@ class SearchBarThemeData with Diagnosticable {
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
-  static MaterialStateProperty<BorderSide?>? _lerpSides(MaterialStateProperty<BorderSide?>? a, MaterialStateProperty<BorderSide?>? b, double t) {
+  static MaterialStateProperty<BorderSide?>? _lerpSides(final MaterialStateProperty<BorderSide?>? a, final MaterialStateProperty<BorderSide?>? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -204,7 +204,7 @@ class _LerpSides implements MaterialStateProperty<BorderSide?> {
   final double t;
 
   @override
-  BorderSide? resolve(Set<MaterialState> states) {
+  BorderSide? resolve(final Set<MaterialState> states) {
     final BorderSide? resolvedA = a?.resolve(states);
     final BorderSide? resolvedB = b?.resolve(states);
     if (identical(resolvedA, resolvedB)) {
@@ -252,11 +252,11 @@ class SearchBarTheme extends InheritedWidget {
   /// ```dart
   /// SearchBarThemeData theme = SearchBarTheme.of(context);
   /// ```
-  static SearchBarThemeData of(BuildContext context) {
+  static SearchBarThemeData of(final BuildContext context) {
     final SearchBarTheme? searchBarTheme = context.dependOnInheritedWidgetOfExactType<SearchBarTheme>();
     return searchBarTheme?.data ?? Theme.of(context).searchBarTheme;
   }
 
   @override
-  bool updateShouldNotify(SearchBarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final SearchBarTheme oldWidget) => data != oldWidget.data;
 }

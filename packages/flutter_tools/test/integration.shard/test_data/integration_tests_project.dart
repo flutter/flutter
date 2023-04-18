@@ -48,7 +48,7 @@ class IntegrationTestsProject extends Project implements TestsProject {
   ''';
 
   @override
-  Future<void> setUpIn(Directory dir) {
+  Future<void> setUpIn(final Directory dir) {
     this.dir = dir;
     writeFile(testFilePath, testContent);
     return super.setUpIn(dir);

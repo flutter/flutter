@@ -62,9 +62,9 @@ class ContextMenuButtonItem {
   /// Creates a new [ContextMenuButtonItem] with the provided parameters
   /// overridden.
   ContextMenuButtonItem copyWith({
-    VoidCallback? onPressed,
-    ContextMenuButtonType? type,
-    String? label,
+    final VoidCallback? onPressed,
+    final ContextMenuButtonType? type,
+    final String? label,
   }) {
     return ContextMenuButtonItem(
       onPressed: onPressed ?? this.onPressed,
@@ -74,7 +74,7 @@ class ContextMenuButtonItem {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

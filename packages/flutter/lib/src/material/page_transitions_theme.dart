@@ -16,7 +16,7 @@ import 'theme.dart';
 // Android O.
 class _FadeUpwardsPageTransition extends StatelessWidget {
   _FadeUpwardsPageTransition({
-    required Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
+    required final Animation<double> routeAnimation, // The route's linear 0.0 - 1.0 animation.
     required this.child,
   }) : _positionAnimation = routeAnimation.drive(_bottomUpTween.chain(_fastOutSlowInTween)),
        _opacityAnimation = routeAnimation.drive(_easeInTween);
@@ -34,7 +34,7 @@ class _FadeUpwardsPageTransition extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SlideTransition(
       position: _positionAnimation,
       // TODO(ianh): tell the transform to be un-transformed for hit testing
@@ -81,9 +81,9 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         final Size size = constraints.biggest;
 
         final CurvedAnimation primaryAnimation = CurvedAnimation(
@@ -111,7 +111,7 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
 
         return AnimatedBuilder(
           animation: animation,
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return Container(
               color: Colors.black.withOpacity(opacityAnimation.value),
               alignment: Alignment.bottomLeft,
@@ -133,7 +133,7 @@ class _OpenUpwardsPageTransition extends StatelessWidget {
               translation: primaryTranslationAnimation.value,
               child: child,
             ),
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return FractionalTranslation(
                 translation: secondaryTranslationAnimation.value,
                 child: child,
@@ -223,13 +223,13 @@ class _ZoomPageTransition extends StatelessWidget {
   final bool allowEnterRouteSnapshotting;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DualTransitionBuilder(
       animation: animation,
       forwardBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Widget? child,
+        final BuildContext context,
+        final Animation<double> animation,
+        final Widget? child,
       ) {
         return _ZoomEnterTransition(
           animation: animation,
@@ -238,9 +238,9 @@ class _ZoomPageTransition extends StatelessWidget {
         );
       },
       reverseBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Widget? child,
+        final BuildContext context,
+        final Animation<double> animation,
+        final Widget? child,
       ) {
         return _ZoomExitTransition(
           animation: animation,
@@ -252,9 +252,9 @@ class _ZoomPageTransition extends StatelessWidget {
       child: DualTransitionBuilder(
         animation: ReverseAnimation(secondaryAnimation),
         forwardBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
+          final BuildContext context,
+          final Animation<double> animation,
+          final Widget? child,
         ) {
           return _ZoomEnterTransition(
             animation: animation,
@@ -264,9 +264,9 @@ class _ZoomPageTransition extends StatelessWidget {
           );
         },
         reverseBuilder: (
-          BuildContext context,
-          Animation<double> animation,
-          Widget? child,
+          final BuildContext context,
+          final Animation<double> animation,
+          final Widget? child,
         ) {
           return _ZoomExitTransition(
             animation: animation,
@@ -353,7 +353,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   }
 
   @override
-  void didUpdateWidget(covariant _ZoomEnterTransition oldWidget) {
+  void didUpdateWidget(covariant final _ZoomEnterTransition oldWidget) {
     if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
       oldWidget.animation.removeListener(onAnimationValueChange);
       oldWidget.animation.removeStatusListener(onAnimationStatusChange);
@@ -378,7 +378,7 @@ class _ZoomEnterTransitionState extends State<_ZoomEnterTransition> with _ZoomTr
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SnapshotWidget(
       painter: delegate,
       controller: controller,
@@ -456,7 +456,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 
   @override
-  void didUpdateWidget(covariant _ZoomExitTransition oldWidget) {
+  void didUpdateWidget(covariant final _ZoomExitTransition oldWidget) {
     if (oldWidget.reverse != widget.reverse || oldWidget.animation != widget.animation) {
       oldWidget.animation.removeListener(onAnimationValueChange);
       oldWidget.animation.removeStatusListener(onAnimationStatusChange);
@@ -481,7 +481,7 @@ class _ZoomExitTransitionState extends State<_ZoomExitTransition> with _ZoomTran
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SnapshotWidget(
       painter: delegate,
       controller: controller,
@@ -522,11 +522,11 @@ abstract class PageTransitionsBuilder {
   /// and delegates to this method with a [PageTransitionsBuilder] based
   /// on the theme's [ThemeData.platform].
   Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
+    final PageRoute<T> route,
+    final BuildContext context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
+    final Widget child,
   );
 }
 
@@ -551,11 +551,11 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T>? route,
-    BuildContext? context,
-    Animation<double> animation,
-    Animation<double>? secondaryAnimation,
-    Widget child,
+    final PageRoute<T>? route,
+    final BuildContext? context,
+    final Animation<double> animation,
+    final Animation<double>? secondaryAnimation,
+    final Widget child,
   ) {
     return _FadeUpwardsPageTransition(routeAnimation: animation, child: child);
   }
@@ -580,11 +580,11 @@ class OpenUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T>? route,
-    BuildContext? context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
+    final PageRoute<T>? route,
+    final BuildContext? context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
+    final Widget child,
   ) {
     return _OpenUpwardsPageTransition(
       animation: animation,
@@ -651,11 +651,11 @@ class ZoomPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T>? route,
-    BuildContext? context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget? child,
+    final PageRoute<T>? route,
+    final BuildContext? context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
+    final Widget? child,
   ) {
     return _ZoomPageTransition(
       animation: animation,
@@ -684,11 +684,11 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 
   @override
   Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
+    final PageRoute<T> route,
+    final BuildContext context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
+    final Widget child,
   ) {
     return CupertinoRouteTransitionMixin.buildPageTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
@@ -729,7 +729,7 @@ class PageTransitionsTheme with Diagnosticable {
   /// By default the list of builders is: [ZoomPageTransitionsBuilder]
   /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
   /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
-  const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
+  const PageTransitionsTheme({ final Map<TargetPlatform, PageTransitionsBuilder> builders = _defaultBuilders }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: ZoomPageTransitionsBuilder(),
@@ -747,11 +747,11 @@ class PageTransitionsTheme with Diagnosticable {
   ///
   /// [MaterialPageRoute.buildTransitions] delegates to this method.
   Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
+    final PageRoute<T> route,
+    final BuildContext context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
+    final Widget child,
   ) {
     TargetPlatform platform = Theme.of(context).platform;
 
@@ -766,12 +766,12 @@ class PageTransitionsTheme with Diagnosticable {
 
   // Map the builders to a list with one PageTransitionsBuilder per platform for
   // the operator == overload.
-  List<PageTransitionsBuilder?> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
-    return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();
+  List<PageTransitionsBuilder?> _all(final Map<TargetPlatform, PageTransitionsBuilder> builders) {
+    return TargetPlatform.values.map((final TargetPlatform platform) => builders[platform]).toList();
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -789,7 +789,7 @@ class PageTransitionsTheme with Diagnosticable {
   int get hashCode => Object.hashAll(_all(builders));
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
       DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>>(
@@ -802,7 +802,7 @@ class PageTransitionsTheme with Diagnosticable {
 }
 
 // Take an image and draw it centered and scaled. The image is already scaled by the [pixelRatio].
-void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double scale, double opacity, double pixelRatio) {
+void _drawImageScaledAndCentered(final PaintingContext context, final ui.Image image, final double scale, final double opacity, final double pixelRatio) {
   if (scale <= 0.0 || opacity <= 0.0) {
     return;
   }
@@ -819,7 +819,7 @@ void _drawImageScaledAndCentered(PaintingContext context, ui.Image image, double
   context.canvas.drawImageRect(image, Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()), dst, paint);
 }
 
-void _updateScaledTransform(Matrix4 transform, double scale, Size size) {
+void _updateScaledTransform(final Matrix4 transform, final double scale, final Size size) {
   transform.setIdentity();
   if (scale == 1.0) {
     return;
@@ -853,7 +853,7 @@ mixin _ZoomTransitionBase {
       }
   }
 
-  void onAnimationStatusChange(AnimationStatus status) {
+  void onAnimationStatusChange(final AnimationStatus status) {
     switch (status) {
       case AnimationStatus.dismissed:
       case AnimationStatus.completed:
@@ -878,7 +878,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
     fade.addListener(notifyListeners);
   }
 
-  void _onStatusChange(_) {
+  void _onStatusChange(final _) {
     notifyListeners();
   }
 
@@ -891,7 +891,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   final LayerHandle<OpacityLayer> _opacityHandle = LayerHandle<OpacityLayer>();
   final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
-  void _drawScrim(PaintingContext context, Offset offset, Size size) {
+  void _drawScrim(final PaintingContext context, final Offset offset, final Size size) {
     double scrimOpacity = 0.0;
     // The transition's scrim opacity only increases on the forward transition.
     // In the reverse transition, the opacity should always be 0.0.
@@ -916,7 +916,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   }
 
   @override
-  void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
+  void paint(final PaintingContext context, final ui.Offset offset, final Size size, final PaintingContextCallback painter) {
     switch (animation.status) {
       case AnimationStatus.completed:
       case AnimationStatus.dismissed:
@@ -927,13 +927,13 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
 
     _drawScrim(context, offset, size);
     _updateScaledTransform(_transform, scale.value, size);
-    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (final PaintingContext context, final Offset offset) {
       _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
     }, oldLayer: _transformHandler.layer);
   }
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+  void paintSnapshot(final PaintingContext context, final Offset offset, final Size size, final ui.Image image, final Size sourceSize, final double pixelRatio) {
     _drawScrim(context, offset, size);
     _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
@@ -950,7 +950,7 @@ class _ZoomEnterTransitionPainter extends SnapshotPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ZoomEnterTransitionPainter oldDelegate) {
+  bool shouldRepaint(covariant final _ZoomEnterTransitionPainter oldDelegate) {
     return oldDelegate.reverse != reverse
       || oldDelegate.animation.value != animation.value
       || oldDelegate.scale.value != scale.value
@@ -970,7 +970,7 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     animation.addStatusListener(_onStatusChange);
   }
 
-  void _onStatusChange(_) {
+  void _onStatusChange(final _) {
     notifyListeners();
   }
 
@@ -983,12 +983,12 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
   final LayerHandle<TransformLayer> _transformHandler = LayerHandle<TransformLayer>();
 
   @override
-  void paintSnapshot(PaintingContext context, Offset offset, Size size, ui.Image image, Size sourceSize, double pixelRatio) {
+  void paintSnapshot(final PaintingContext context, final Offset offset, final Size size, final ui.Image image, final Size sourceSize, final double pixelRatio) {
     _drawImageScaledAndCentered(context, image, scale.value, fade.value, pixelRatio);
   }
 
   @override
-  void paint(PaintingContext context, ui.Offset offset, Size size, PaintingContextCallback painter) {
+  void paint(final PaintingContext context, final ui.Offset offset, final Size size, final PaintingContextCallback painter) {
     switch (animation.status) {
       case AnimationStatus.completed:
       case AnimationStatus.dismissed:
@@ -999,13 +999,13 @@ class _ZoomExitTransitionPainter extends SnapshotPainter {
     }
 
     _updateScaledTransform(_transform, scale.value, size);
-    _transformHandler.layer = context.pushTransform(true, offset, _transform, (PaintingContext context, Offset offset) {
+    _transformHandler.layer = context.pushTransform(true, offset, _transform, (final PaintingContext context, final Offset offset) {
       _opacityHandle.layer = context.pushOpacity(offset, (fade.value * 255).round(), painter, oldLayer: _opacityHandle.layer);
     }, oldLayer: _transformHandler.layer);
   }
 
   @override
-  bool shouldRepaint(covariant _ZoomExitTransitionPainter oldDelegate) {
+  bool shouldRepaint(covariant final _ZoomExitTransitionPainter oldDelegate) {
     return oldDelegate.reverse != reverse
       || oldDelegate.fade.value != fade.value
       || oldDelegate.scale.value != scale.value;

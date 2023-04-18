@@ -13,7 +13,7 @@ import 'language_subtag_registry.dart';
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
 
-int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
+int sortFilesByPath (final FileSystemEntity a, final FileSystemEntity b) {
   return a.path.compareTo(b.path);
 }
 
@@ -36,7 +36,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   ///
   /// When `deriveScriptCode` is true, if [scriptCode] was unspecified, it will
   /// be derived from the [languageCode] and [countryCode] if possible.
-  factory LocaleInfo.fromString(String locale, { bool deriveScriptCode = false }) {
+  factory LocaleInfo.fromString(final String locale, { final bool deriveScriptCode = false }) {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
     final String languageCode = codes[0];
@@ -117,12 +117,12 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   String camelCase() {
     return originalString
       .split('_')
-      .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
+      .map<String>((final String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
       .join();
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is LocaleInfo
         && other.originalString == originalString;
   }
@@ -136,7 +136,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 
   @override
-  int compareTo(LocaleInfo other) {
+  int compareTo(final LocaleInfo other) {
     return originalString.compareTo(other.originalString);
   }
 }
@@ -144,10 +144,10 @@ class LocaleInfo implements Comparable<LocaleInfo> {
 /// Parse the data for a locale from a file, and store it in the [attributes]
 /// and [resources] keys.
 void loadMatchingArbsIntoBundleMaps({
-  required Directory directory,
-  required RegExp filenamePattern,
-  required Map<LocaleInfo, Map<String, String>> localeToResources,
-  required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
+  required final Directory directory,
+  required final RegExp filenamePattern,
+  required final Map<LocaleInfo, Map<String, String>> localeToResources,
+  required final Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
 }) {
 
   /// Set that holds the locales that were assumed from the existing locales.
@@ -165,7 +165,7 @@ void loadMatchingArbsIntoBundleMaps({
       final File arbFile = File(entityPath);
 
       // Helper method to fill the maps with the correct data from file.
-      void populateResources(LocaleInfo locale, File file) {
+      void populateResources(final LocaleInfo locale, final File file) {
         final Map<String, String> resources = localeToResources[locale]!;
         final Map<String, dynamic> attributes = localeToResourceAttributes[locale]!;
         final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -207,12 +207,12 @@ void loadMatchingArbsIntoBundleMaps({
   }
 }
 
-void exitWithError(String errorMessage) {
+void exitWithError(final String errorMessage) {
   stderr.writeln('fatal: $errorMessage');
   exit(1);
 }
 
-void checkCwdIsRepoRoot(String commandName) {
+void checkCwdIsRepoRoot(final String commandName) {
   final bool isRepoRoot = Directory('.git').existsSync();
 
   if (!isRepoRoot) {
@@ -223,7 +223,7 @@ void checkCwdIsRepoRoot(String commandName) {
   }
 }
 
-GeneratorOptions parseArgs(List<String> rawArgs) {
+GeneratorOptions parseArgs(final List<String> rawArgs) {
   final argslib.ArgParser argParser = argslib.ArgParser()
     ..addFlag(
       'help',
@@ -288,7 +288,7 @@ class GeneratorOptions {
 }
 
 // See also //master/tools/gen_locale.dart in the engine repo.
-Map<String, List<String>> _parseSection(String section) {
+Map<String, List<String>> _parseSection(final String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
@@ -354,7 +354,7 @@ void precacheLanguageAndRegionTags() {
   }
 }
 
-String describeLocale(String tag) {
+String describeLocale(final String tag) {
   final List<String> subtags = tag.split('_');
   assert(subtags.isNotEmpty);
   assert(_languages.containsKey(subtags[0]));
@@ -382,9 +382,9 @@ String describeLocale(String tag) {
 
 /// Writes the header of each class which corresponds to a locale.
 String generateClassDeclaration(
-  LocaleInfo locale,
-  String classNamePrefix,
-  String superClass,
+  final LocaleInfo locale,
+  final String classNamePrefix,
+  final String superClass,
 ) {
   final String camelCaseName = locale.camelCase();
   return '''
@@ -416,7 +416,7 @@ class $classNamePrefix$camelCaseName extends $superClass {''';
 /// foo$bar = 'foo\$bar'
 /// ```
 String generateString(String value) {
-  if (<String>['\n', '\f', '\t', '\r', '\b'].every((String pattern) => !value.contains(pattern))) {
+  if (<String>['\n', '\f', '\t', '\r', '\b'].every((final String pattern) => !value.contains(pattern))) {
     final bool hasDollar = value.contains(r'$');
     final bool hasBackslash = value.contains(r'\');
     final bool hasQuote = value.contains("'");
@@ -458,11 +458,11 @@ String generateString(String value) {
 /// Only used to generate localization strings for the Kannada locale ('kn') because
 /// some of the localized strings contain characters that can crash Emacs on Linux.
 /// See packages/flutter_localizations/lib/src/l10n/README for more information.
-String generateEncodedString(String? locale, String value) {
-  if (locale != 'kn' || value.runes.every((int code) => code <= 0xFF)) {
+String generateEncodedString(final String? locale, final String value) {
+  if (locale != 'kn' || value.runes.every((final int code) => code <= 0xFF)) {
     return generateString(value);
   }
 
-  final String unicodeEscapes = value.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
+  final String unicodeEscapes = value.runes.map((final int code) => '\\u{${code.toRadixString(16)}}').join();
   return "'$unicodeEscapes'";
 }

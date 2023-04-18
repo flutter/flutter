@@ -21,15 +21,15 @@ void main() {
     imageCache.clear();
   });
 
-  T findPhysics<T extends ScrollPhysics>(WidgetTester tester) {
+  T findPhysics<T extends ScrollPhysics>(final WidgetTester tester) {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position.physics as T;
   }
 
-  ScrollMetrics findMetrics(WidgetTester tester) {
+  ScrollMetrics findMetrics(final WidgetTester tester) {
     return Scrollable.of(find.byType(TestWidget).evaluate().first).position;
   }
 
-  testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if widget is not in scrollable', (final WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
@@ -56,7 +56,7 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is not scrolling', (final WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -92,7 +92,7 @@ void main() {
     expect(findPhysics<RecordingPhysics>(tester).velocities, <double>[0]);
   });
 
-  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not delay if in scrollable that is scrolling slowly', (final WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(Directionality(
@@ -100,7 +100,7 @@ void main() {
       child: ListView.builder(
         physics: RecordingPhysics(),
         controller: scrollController,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           keys.add(GlobalKey<TestWidgetState>());
           return TestWidget(keys.last);
         },
@@ -149,7 +149,7 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast', (final WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(Directionality(
@@ -157,7 +157,7 @@ void main() {
       child: ListView.builder(
         physics: RecordingPhysics(),
         controller: scrollController,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           keys.add(GlobalKey<TestWidgetState>());
           return TestWidget(keys.last);
         },
@@ -216,7 +216,7 @@ void main() {
     expect(imageCache.currentSize, 1);
   });
 
-  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider delays if in scrollable that is scrolling fast and fizzles if disposed', (final WidgetTester tester) async {
     final List<GlobalKey<TestWidgetState>> keys = <GlobalKey<TestWidgetState>>[];
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(Directionality(
@@ -224,7 +224,7 @@ void main() {
       child: ListView.builder(
         physics: RecordingPhysics(),
         controller: scrollController,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           keys.add(GlobalKey<TestWidgetState>());
           return TestWidget(keys.last);
         },
@@ -285,7 +285,7 @@ void main() {
     expect(imageCache.currentSize, 0);
   });
 
-  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider resolves from ImageCache and does not set completer twice', (final WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(Directionality(
@@ -333,7 +333,7 @@ void main() {
     expect(stream.completer, null);
   });
 
-  testWidgets('ScrollAwareImageProvider does not block LRU updates to image cache', (WidgetTester tester) async {
+  testWidgets('ScrollAwareImageProvider does not block LRU updates to image cache', (final WidgetTester tester) async {
     final int oldSize = imageCache.maximumSize;
     imageCache.maximumSize = 1;
 
@@ -399,7 +399,7 @@ void main() {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget(Key? key) : super(key: key);
+  const TestWidget(final Key? key) : super(key: key);
 
   @override
   State<TestWidget> createState() => TestWidgetState();
@@ -407,7 +407,7 @@ class TestWidget extends StatefulWidget {
 
 class TestWidgetState extends State<TestWidget> {
   @override
-  Widget build(BuildContext context) => const SizedBox(height: 50);
+  Widget build(final BuildContext context) => const SizedBox(height: 50);
 }
 
 class RecordingPhysics extends ScrollPhysics {
@@ -416,12 +416,12 @@ class RecordingPhysics extends ScrollPhysics {
   final List<double> velocities = <double>[];
 
   @override
-  RecordingPhysics applyTo(ScrollPhysics? ancestor) {
+  RecordingPhysics applyTo(final ScrollPhysics? ancestor) {
     return RecordingPhysics(parent: buildParent(ancestor));
   }
 
   @override
-  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+  bool recommendDeferredLoading(final double velocity, final ScrollMetrics metrics, final BuildContext context) {
     velocities.add(velocity);
     return super.recommendDeferredLoading(velocity, metrics, context);
   }
@@ -436,12 +436,12 @@ class ControllablePhysics extends ScrollPhysics {
   bool recommendDeferredLoadingValue = false;
 
   @override
-  ControllablePhysics applyTo(ScrollPhysics? ancestor) {
+  ControllablePhysics applyTo(final ScrollPhysics? ancestor) {
     return ControllablePhysics(parent: buildParent(ancestor));
   }
 
   @override
-  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+  bool recommendDeferredLoading(final double velocity, final ScrollMetrics metrics, final BuildContext context) {
     return recommendDeferredLoadingValue;
   }
 }

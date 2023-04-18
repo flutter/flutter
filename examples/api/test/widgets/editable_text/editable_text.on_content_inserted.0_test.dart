@@ -10,7 +10,7 @@ import 'package:flutter_api_samples/widgets/editable_text/editable_text.on_conte
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Image.memory displays inserted content', (WidgetTester tester) async {
+  testWidgets('Image.memory displays inserted content', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.KeyboardInsertedContentApp(),
     );
@@ -47,7 +47,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-            (ByteData? _) {},
+            (final ByteData? _) {},
       );
     } catch (_) {}
 

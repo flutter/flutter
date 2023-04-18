@@ -55,7 +55,7 @@ void main() {
   });
 
 
-  void createSampleProject(Directory directory, { bool brokenCode = false }) {
+  void createSampleProject(final Directory directory, { final bool brokenCode = false }) {
     final File pubspecFile = fileSystem.file(fileSystem.path.join(directory.path, 'pubspec.yaml'));
     pubspecFile.writeAsStringSync('''
   name: foo_project
@@ -103,8 +103,8 @@ void main() {
       );
 
       int errorCount = 0;
-      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-      server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
+      final Future<bool> onDone = server.onAnalyzing.where((final bool analyzing) => analyzing == false).first;
+      server.onErrors.listen((final FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
       await server.start();
       await onDone;
@@ -144,8 +144,8 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server.onErrors.listen((FileAnalysisErrors errors) {
+    final Future<bool> onDone = server.onAnalyzing.where((final bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((final FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
 
@@ -172,8 +172,8 @@ void main() {
     );
 
     int errorCount = 0;
-    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server.onErrors.listen((FileAnalysisErrors errors) {
+    final Future<bool> onDone = server.onAnalyzing.where((final bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((final FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
     await server.start();
@@ -301,7 +301,7 @@ void main() {
       suppressAnalytics: true,
     );
 
-    await FakeAsync().run((FakeAsync time) async {
+    await FakeAsync().run((final FakeAsync time) async {
       final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
       commandRunner.addCommand(command);
       unawaited(commandRunner.run(<String>['analyze', '--watch']));
@@ -356,7 +356,7 @@ void main() {
       suppressAnalytics: true,
     );
 
-    await FakeAsync().run((FakeAsync time) async {
+    await FakeAsync().run((final FakeAsync time) async {
       final TestFlutterCommandRunner commandRunner = TestFlutterCommandRunner();
       commandRunner.addCommand(command);
       unawaited(commandRunner.run(<String>['analyze', '--watch']));

@@ -12,7 +12,7 @@ class DatePickerApp extends StatelessWidget {
   const DatePickerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       restorationScopeId: 'app',
@@ -42,7 +42,7 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
   late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture =
       RestorableRouteFuture<DateTimeRange?>(
     onComplete: _selectDateRange,
-    onPresent: (NavigatorState navigator, Object? arguments) {
+    onPresent: (final NavigatorState navigator, final Object? arguments) {
       return navigator.restorablePush(_dateRangePickerRoute, arguments: <String, dynamic>{
         'initialStartDate': _startDate.value?.millisecondsSinceEpoch,
         'initialEndDate': _endDate.value?.millisecondsSinceEpoch,
@@ -50,7 +50,7 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
     },
   );
 
-  void _selectDateRange(DateTimeRange? newSelectedDate) {
+  void _selectDateRange(final DateTimeRange? newSelectedDate) {
     if (newSelectedDate != null) {
       setState(() {
         _startDate.value = newSelectedDate.start;
@@ -60,7 +60,7 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(_startDate, 'start_date');
     registerForRestoration(_endDate, 'end_date');
     registerForRestoration(_restorableDateRangePickerRouteFuture, 'date_picker_route_future');
@@ -68,12 +68,12 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
 
   @pragma('vm:entry-point')
   static Route<DateTimeRange?> _dateRangePickerRoute(
-    BuildContext context,
-    Object? arguments,
+    final BuildContext context,
+    final Object? arguments,
   ) {
     return DialogRoute<DateTimeRange?>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return DateRangePickerDialog(
           restorationId: 'date_picker_dialog',
           initialDateRange: _initialDateTimeRange(arguments! as Map<dynamic, dynamic>),
@@ -85,7 +85,7 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
     );
   }
 
-  static DateTimeRange? _initialDateTimeRange(Map<dynamic, dynamic> arguments) {
+  static DateTimeRange? _initialDateTimeRange(final Map<dynamic, dynamic> arguments) {
     if (arguments['initialStartDate'] != null && arguments['initialEndDate'] != null) {
       return DateTimeRange(
         start: DateTime.fromMillisecondsSinceEpoch(arguments['initialStartDate'] as int),
@@ -97,7 +97,7 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: OutlinedButton(

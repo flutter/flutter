@@ -150,7 +150,7 @@ void main() {
   });
 }
 
-int testGetMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+int testGetMaxChildIndexForScrollOffset(final double scrollOffset, final double itemExtent) {
   final TestRenderSliverFixedExtentBoxAdaptor renderSliver = TestRenderSliverFixedExtentBoxAdaptor();
   return renderSliver.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
 }
@@ -174,7 +174,7 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int? _currentlyUpdatingChildIndex;
 
   @override
-  void createChild(int index, { required RenderBox? after }) {
+  void createChild(final int index, { required final RenderBox? after }) {
     if (index < 0 || index >= children.length) {
       return;
     }
@@ -187,17 +187,17 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   }
 
   @override
-  void removeChild(RenderBox child) {
+  void removeChild(final RenderBox child) {
     _renderObject!.remove(child);
   }
 
   @override
   double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int? firstIndex,
-    int? lastIndex,
-    double? leadingScrollOffset,
-    double? trailingScrollOffset,
+    final SliverConstraints constraints, {
+    final int? firstIndex,
+    final int? lastIndex,
+    final double? leadingScrollOffset,
+    final double? trailingScrollOffset,
   }) {
     assert(lastIndex! >= firstIndex!);
     return children.length * (trailingScrollOffset! - leadingScrollOffset!) / (lastIndex! - firstIndex! + 1);
@@ -207,14 +207,14 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   int get childCount => children.length;
 
   @override
-  void didAdoptChild(RenderBox child) {
+  void didAdoptChild(final RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData! as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
   @override
-  void setDidUnderflow(bool value) { }
+  void setDidUnderflow(final bool value) { }
 }
 
 class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAdaptor {
@@ -222,7 +222,7 @@ class TestRenderSliverFixedExtentBoxAdaptor extends RenderSliverFixedExtentBoxAd
     :super(childManager: TestRenderSliverBoxChildManager(children: <RenderBox>[]));
 
   @override
-  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
+  int getMaxChildIndexForScrollOffset(final double scrollOffset, final double itemExtent) {
     return super.getMaxChildIndexForScrollOffset(scrollOffset, itemExtent);
   }
 

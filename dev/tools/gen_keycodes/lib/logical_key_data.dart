@@ -11,7 +11,7 @@ import 'constants.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-bool _isControlCharacter(int codeUnit) {
+bool _isControlCharacter(final int codeUnit) {
   return (codeUnit <= 0x1f && codeUnit >= 0x00) || (codeUnit >= 0x7f && codeUnit <= 0x9f);
 }
 
@@ -25,7 +25,7 @@ class _ModifierPair {
 
 // Return map[key1][key2] as a non-nullable List<T>, where both map[key1] or
 // map[key1][key2] might be null.
-List<T> _getGrandchildList<T>(Map<String, dynamic> map, String key1, String key2) {
+List<T> _getGrandchildList<T>(final Map<String, dynamic> map, final String key1, final String key2) {
   final dynamic value = (map[key1] as Map<String, dynamic>?)?[key2];
   final List<dynamic>? dynamicNullableList = value as List<dynamic>?;
   final List<dynamic> dynamicList = dynamicNullableList ?? <dynamic>[];
@@ -40,18 +40,18 @@ List<T> _getGrandchildList<T>(Map<String, dynamic> map, String key1, String key2
 /// [LogicalKeyData.fromJson] constructor and [toJson] method, respectively.
 class LogicalKeyData {
   factory LogicalKeyData(
-    String chromiumKeys,
-    String gtkKeyCodeHeader,
-    String gtkNameMap,
-    String windowsKeyCodeHeader,
-    String windowsNameMap,
-    String androidKeyCodeHeader,
-    String androidNameMap,
-    String macosLogicalToPhysical,
-    String iosLogicalToPhysical,
-    String glfwHeaderFile,
-    String glfwNameMap,
-    PhysicalKeyData physicalKeyData,
+    final String chromiumKeys,
+    final String gtkKeyCodeHeader,
+    final String gtkNameMap,
+    final String windowsKeyCodeHeader,
+    final String windowsNameMap,
+    final String androidKeyCodeHeader,
+    final String androidNameMap,
+    final String macosLogicalToPhysical,
+    final String iosLogicalToPhysical,
+    final String glfwHeaderFile,
+    final String glfwNameMap,
+    final PhysicalKeyData physicalKeyData,
   ) {
     final Map<String, LogicalKeyEntry> data = _readKeyEntries(chromiumKeys);
     _readWindowsKeyCodes(data, windowsKeyCodeHeader, parseMapOfListOfString(windowsNameMap));
@@ -63,7 +63,7 @@ class LogicalKeyData {
     _readGlfwKeyCodes(data, glfwHeaderFile, parseMapOfListOfString(glfwNameMap));
     // Sort entries by value
     final List<MapEntry<String, LogicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
-      (MapEntry<String, LogicalKeyEntry> a, MapEntry<String, LogicalKeyEntry> b) =>
+      (final MapEntry<String, LogicalKeyEntry> a, final MapEntry<String, LogicalKeyEntry> b) =>
         LogicalKeyEntry.compareByValue(a.value, b.value),
     );
     data
@@ -73,9 +73,9 @@ class LogicalKeyData {
   }
 
   /// Parses the given JSON data and populates the data structure from it.
-  factory LogicalKeyData.fromJson(Map<String, dynamic> contentMap) {
+  factory LogicalKeyData.fromJson(final Map<String, dynamic> contentMap) {
     final Map<String, LogicalKeyEntry> data = <String, LogicalKeyEntry>{};
-    data.addEntries(contentMap.values.map((dynamic value) {
+    data.addEntries(contentMap.values.map((final dynamic value) {
       final LogicalKeyEntry entry = LogicalKeyEntry.fromJsonMapEntry(value as Map<String, dynamic>);
       return MapEntry<String, LogicalKeyEntry>(entry.name, entry);
     }));
@@ -101,7 +101,7 @@ class LogicalKeyData {
   /// Find an entry from name.
   ///
   /// Asserts if the name is not found.
-  LogicalKeyEntry entryByName(String name) {
+  LogicalKeyEntry entryByName(final String name) {
     assert(_data.containsKey(name),
         'Unable to find logical entry by name $name.');
     return _data[name]!;
@@ -175,21 +175,21 @@ class LogicalKeyData {
       }
     }
     return Map<String, LogicalKeyEntry>.fromEntries(
-      dataByValue.values.map((LogicalKeyEntry entry) =>
+      dataByValue.values.map((final LogicalKeyEntry entry) =>
         MapEntry<String, LogicalKeyEntry>(entry.name, entry),
       ),
     );
   }
 
   static void _readMacOsKeyCodes(
-    Map<String, LogicalKeyEntry> data,
-    PhysicalKeyData physicalKeyData,
-    Map<String, List<String>> logicalToPhysical,
+    final Map<String, LogicalKeyEntry> data,
+    final PhysicalKeyData physicalKeyData,
+    final Map<String, List<String>> logicalToPhysical,
   ) {
     final Map<String, String> physicalToLogical = reverseMapOfListOfString(logicalToPhysical,
-        (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for macOS'); });
+        (final String logicalKeyName, final String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for macOS'); });
 
-    physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
+    physicalToLogical.forEach((final String physicalKeyName, final String logicalKeyName) {
       final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
       assert(physicalEntry.macOSScanCode != null,
         'Physical entry $physicalKeyName does not have a macOSScanCode.');
@@ -202,14 +202,14 @@ class LogicalKeyData {
   }
 
   static void _readIosKeyCodes(
-    Map<String, LogicalKeyEntry> data,
-    PhysicalKeyData physicalKeyData,
-    Map<String, List<String>> logicalToPhysical,
+    final Map<String, LogicalKeyEntry> data,
+    final PhysicalKeyData physicalKeyData,
+    final Map<String, List<String>> logicalToPhysical,
   ) {
     final Map<String, String> physicalToLogical = reverseMapOfListOfString(logicalToPhysical,
-        (String logicalKeyName, String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for iOS'); });
+        (final String logicalKeyName, final String physicalKeyName) { print('Duplicate logical key name $logicalKeyName for iOS'); });
 
-    physicalToLogical.forEach((String physicalKeyName, String logicalKeyName) {
+    physicalToLogical.forEach((final String physicalKeyName, final String logicalKeyName) {
       final PhysicalKeyEntry physicalEntry = physicalKeyData.entryByName(physicalKeyName);
       assert(physicalEntry.iOSScanCode != null,
         'Physical entry $physicalKeyName does not have an iosScanCode.');
@@ -226,14 +226,14 @@ class LogicalKeyData {
   /// Lines in this file look like this (without the ///):
   ///  /** Space key. */
   ///  #define GDK_KEY_space 0x020
-  static void _readGtkKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameToGtkName) {
+  static void _readGtkKeyCodes(final Map<String, LogicalKeyEntry> data, final String headerFile, final Map<String, List<String>> nameToGtkName) {
     final RegExp definedCodes = RegExp(
       r'#define '
       r'GDK_KEY_(?<name>[a-zA-Z0-9_]+)\s*'
       r'0x(?<value>[0-9a-f]+),?',
     );
     final Map<String, String> gtkNameToFlutterName = reverseMapOfListOfString(nameToGtkName,
-        (String flutterName, String gtkName) { print('Duplicate GTK logical name $gtkName'); });
+        (final String flutterName, final String gtkName) { print('Duplicate GTK logical name $gtkName'); });
 
     for (final RegExpMatch match in definedCodes.allMatches(headerFile)) {
       final String gtkName = match.namedGroup('name')!;
@@ -255,11 +255,11 @@ class LogicalKeyData {
     }
   }
 
-  static void _readWindowsKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+  static void _readWindowsKeyCodes(final Map<String, LogicalKeyEntry> data, final String headerFile, final Map<String, List<String>> nameMap) {
     // The mapping from the Flutter name (e.g. "enter") to the Windows name (e.g.
     // "RETURN").
     final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
-        (String flutterName, String windowsName) { print('Duplicate Windows logical name $windowsName'); });
+        (final String flutterName, final String windowsName) { print('Duplicate Windows logical name $windowsName'); });
 
     final RegExp definedCodes = RegExp(
       r'define '
@@ -293,13 +293,13 @@ class LogicalKeyData {
   /// Lines in this file look like this (without the ///):
   ///  /** Left Control modifier key. */
   ///  AKEYCODE_CTRL_LEFT       = 113,
-  static void _readAndroidKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+  static void _readAndroidKeyCodes(final Map<String, LogicalKeyEntry> data, String headerFile, final Map<String, List<String>> nameMap) {
     final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
-        (String flutterName, String androidName) { print('Duplicate Android logical name $androidName'); });
+        (final String flutterName, final String androidName) { print('Duplicate Android logical name $androidName'); });
 
     final RegExp enumBlock = RegExp(r'enum\s*\{(.*)\};', multiLine: true);
     // Eliminate everything outside of the enum block.
-    headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1)!);
+    headerFile = headerFile.replaceAllMapped(enumBlock, (final Match match) => match.group(1)!);
     final RegExp enumEntry = RegExp(
       r'AKEYCODE_(?<name>[A-Z0-9_]+)\s*'
       r'=\s*'
@@ -324,7 +324,7 @@ class LogicalKeyData {
     }
   }
 
-  static void _readFuchsiaKeyCodes(Map<String, LogicalKeyEntry> data, PhysicalKeyData physicalData) {
+  static void _readFuchsiaKeyCodes(final Map<String, LogicalKeyEntry> data, final PhysicalKeyData physicalData) {
     for (final LogicalKeyEntry entry in data.values) {
       final int? value = (() {
         if (entry.value == 0) {
@@ -352,9 +352,9 @@ class LogicalKeyData {
   ///  /** Space key. */
   ///  #define GLFW_KEY_SPACE              32,
   ///  #define GLFW_KEY_LAST               GLFW_KEY_MENU
-  static void _readGlfwKeyCodes(Map<String, LogicalKeyEntry> data, String headerFile, Map<String, List<String>> nameMap) {
+  static void _readGlfwKeyCodes(final Map<String, LogicalKeyEntry> data, final String headerFile, final Map<String, List<String>> nameMap) {
     final Map<String, String> nameToFlutterName  = reverseMapOfListOfString(nameMap,
-        (String flutterName, String glfwName) { print('Duplicate GLFW logical name $glfwName'); });
+        (final String flutterName, final String glfwName) { print('Duplicate GLFW logical name $glfwName'); });
 
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
     final RegExp definedCodes = RegExp(
@@ -369,7 +369,7 @@ class LogicalKeyData {
       replaced[name] = int.tryParse(value) ?? value.replaceAll('GLFW_KEY_', '');
     }
     final Map<String, int> glfwNameToKeyCode = <String, int>{};
-    replaced.forEach((String key, dynamic value) {
+    replaced.forEach((final String key, final dynamic value) {
       // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
       if (value is String) {
         glfwNameToKeyCode[key] = replaced[value] as int;
@@ -378,7 +378,7 @@ class LogicalKeyData {
       }
     });
 
-    glfwNameToKeyCode.forEach((String glfwName, int value) {
+    glfwNameToKeyCode.forEach((final String glfwName, final int value) {
       final String? name = nameToFlutterName[glfwName];
       if (name == null) {
         return;
@@ -400,7 +400,7 @@ class LogicalKeyData {
   // Map Web key to the pair of key names
   static final Map<String, _ModifierPair> _chromeModifiers = () {
     final String rawJson = File(path.join(dataRoot, 'chromium_modifiers.json',)).readAsStringSync();
-    return (json.decode(rawJson) as Map<String, dynamic>).map((String key, dynamic value) {
+    return (json.decode(rawJson) as Map<String, dynamic>).map((final String key, final dynamic value) {
       final List<dynamic> pair = value as List<dynamic>;
       return MapEntry<String, _ModifierPair>(key, _ModifierPair(pair[0] as String, pair[1] as String));
     });
@@ -421,7 +421,7 @@ class LogicalKeyData {
   static final Map<String, List<String>> synonyms = (() {
     final String synonymKeys = File(path.join(dataRoot, 'synonyms.json',)).readAsStringSync();
     final Map<String, dynamic> dynamicSynonym = json.decode(synonymKeys) as Map<String, dynamic>;
-    return dynamicSynonym.map((String name, dynamic values) {
+    return dynamicSynonym.map((final String name, final dynamic values) {
       // The keygen and algorithm of macOS relies on synonyms being pairs.
       // See siblingKeyMap in macos_code_gen.dart.
       final List<String> names = (values as List<dynamic>).whereType<String>().toList();
@@ -430,7 +430,7 @@ class LogicalKeyData {
     });
   })();
 
-  static int _sourceToPlane(String source, bool isPrintable) {
+  static int _sourceToPlane(final String source, final bool isPrintable) {
     if (isPrintable) {
       return kUnicodePlane.value;
     }
@@ -473,9 +473,9 @@ class LogicalKeyEntry {
         glfwValues = <int>[];
 
   LogicalKeyEntry.fromName({
-    required int value,
-    required String name,
-    String? keyLabel,
+    required final int value,
+    required final String name,
+    final String? keyLabel,
   })  : this(
           value: value,
           name: name,
@@ -483,7 +483,7 @@ class LogicalKeyEntry {
         );
 
   /// Populates the key from a JSON map.
-  LogicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map)
+  LogicalKeyEntry.fromJsonMapEntry(final Map<String, dynamic> map)
     : value = map['value'] as int,
       name = map['name'] as String,
       webNames = _getGrandchildList<String>(map, 'names', 'web'),
@@ -616,7 +616,7 @@ class LogicalKeyEntry {
   /// the name from the various different names available, making sure that the
   /// name isn't a Dart reserved word (if it is, then it adds the word "Key" to
   /// the end of the name).
-  static String computeName(String rawName) {
+  static String computeName(final String rawName) {
     final String result = rawName.replaceAll('PinP', 'PInP');
     if (kDartReservedWords.contains(result)) {
       return '${result}Key';
@@ -626,26 +626,26 @@ class LogicalKeyEntry {
 
   /// Takes the [name] and converts it from lower camel case to capitalized
   /// separate words (e.g. "wakeUp" converts to "Wake Up").
-  static String computeCommentName(String name) {
+  static String computeCommentName(final String name) {
     final String replaced = name.replaceAllMapped(
-      RegExp(r'(Digit|Numpad|Lang|Button|Left|Right)([0-9]+)'), (Match match) => '${match.group(1)} ${match.group(2)}',
+      RegExp(r'(Digit|Numpad|Lang|Button|Left|Right)([0-9]+)'), (final Match match) => '${match.group(1)} ${match.group(2)}',
     );
     return replaced
       // 'fooBar' => 'foo Bar', 'fooBAR' => 'foo BAR'
-      .replaceAllMapped(RegExp(r'([^A-Z])([A-Z])'), (Match match) => '${match.group(1)} ${match.group(2)}')
+      .replaceAllMapped(RegExp(r'([^A-Z])([A-Z])'), (final Match match) => '${match.group(1)} ${match.group(2)}')
       // 'ABCDoo' => 'ABC Doo'
-      .replaceAllMapped(RegExp(r'([A-Z])([A-Z])([a-z])'), (Match match) => '${match.group(1)} ${match.group(2)}${match.group(3)}')
+      .replaceAllMapped(RegExp(r'([A-Z])([A-Z])([a-z])'), (final Match match) => '${match.group(1)} ${match.group(2)}${match.group(3)}')
       // 'AB1' => 'AB 1', 'F1' => 'F1'
-      .replaceAllMapped(RegExp(r'([A-Z]{2,})([0-9])'), (Match match) => '${match.group(1)} ${match.group(2)}')
+      .replaceAllMapped(RegExp(r'([A-Z]{2,})([0-9])'), (final Match match) => '${match.group(1)} ${match.group(2)}')
       // 'Foo1' => 'Foo 1'
-      .replaceAllMapped(RegExp(r'([a-z])([0-9])'), (Match match) => '${match.group(1)} ${match.group(2)}')
+      .replaceAllMapped(RegExp(r'([a-z])([0-9])'), (final Match match) => '${match.group(1)} ${match.group(2)}')
       .trim();
   }
 
-  static String computeConstantName(String commentName) {
+  static String computeConstantName(final String commentName) {
     // Convert the first word in the comment name.
     final String lowerCamelSpace = commentName.replaceFirstMapped(RegExp(r'^[^ ]+'),
-      (Match match) => match[0]!.toLowerCase(),
+      (final Match match) => match[0]!.toLowerCase(),
     );
     final String result = lowerCamelSpace.replaceAll(' ', '');
     if (kDartReservedWords.contains(result)) {
@@ -654,6 +654,6 @@ class LogicalKeyEntry {
     return result;
   }
 
-  static int compareByValue(LogicalKeyEntry a, LogicalKeyEntry b) =>
+  static int compareByValue(final LogicalKeyEntry a, final LogicalKeyEntry b) =>
       a.value.compareTo(b.value);
 }

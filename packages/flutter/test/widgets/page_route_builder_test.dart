@@ -14,7 +14,7 @@ class TestPage extends StatelessWidget {
   const TestPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Test',
       theme: ThemeData(
@@ -37,14 +37,14 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).push(PageRouteBuilder<void>(
       barrierColor: Colors.black54,
       opaque: false,
-      pageBuilder: (BuildContext context, _, __) {
+      pageBuilder: (final BuildContext context, final _, final __) {
         return const ModalPage();
       },
     ));
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: const Center(
         child: Text('Test Home'),
@@ -61,7 +61,7 @@ class ModalPage extends StatelessWidget {
   const ModalPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       type: MaterialType.transparency,
       child: SafeArea(
@@ -90,7 +90,7 @@ class ModalPage extends StatelessWidget {
 }
 
 void main() {
-  testWidgets('Barriers show when using PageRouteBuilder', (WidgetTester tester) async {
+  testWidgets('Barriers show when using PageRouteBuilder', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestPage());
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();

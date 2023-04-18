@@ -11,7 +11,7 @@ class LogoScreen extends StatelessWidget {
   static const String _testSentinel = 'Running deferred code';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     print(_testSentinel);
     return Container(
       padding: const EdgeInsets.all(25),

@@ -33,13 +33,13 @@ void main() {
   test('obtainKey errors will be caught', () async {
     final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
     final Completer<bool> caughtError = Completer<bool>();
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       caughtError.complete(false);
     };
     final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-    stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+    stream.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {
       caughtError.complete(false);
-    }, onError: (dynamic error, StackTrace? stackTrace) {
+    }, onError: (final dynamic error, final StackTrace? stackTrace) {
       caughtError.complete(true);
     }));
     expect(await caughtError.future, true);
@@ -48,7 +48,7 @@ void main() {
   test('obtainKey errors will be caught - check location', () async {
     final ImageProvider imageProvider = ObtainKeyErrorImageProvider();
     final Completer<bool> caughtError = Completer<bool>();
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       caughtError.complete(true);
     };
     await imageProvider.obtainCacheStatus(configuration: ImageConfiguration.empty);
@@ -58,7 +58,7 @@ void main() {
 
   test('File image with empty file throws expected error and evicts from cache', () async {
     final Completer<StateError> error = Completer<StateError>();
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       error.complete(details.exception as StateError);
     };
     final MemoryFileSystem fs = MemoryFileSystem();
@@ -80,21 +80,21 @@ void main() {
 
   test('File image with empty file throws expected error (load)', () async {
     final Completer<StateError> error = Completer<StateError>();
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       error.complete(details.exception as StateError);
     };
     final MemoryFileSystem fs = MemoryFileSystem();
     final File file = fs.file('/empty.png')..createSync(recursive: true);
     final FileImage provider = FileImage(file);
 
-    expect(provider.loadBuffer(provider, (ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+    expect(provider.loadBuffer(provider, (final ImmutableBuffer buffer, {final int? cacheWidth, final int? cacheHeight, final bool? allowUpscaling}) async {
       return Future<Codec>.value(FakeCodec());
     }), isA<MultiFrameImageStreamCompleter>());
 
     expect(await error.future, isStateError);
   });
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(final ImmutableBuffer buffer, {final int? cacheWidth, final int? cacheHeight, final bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
@@ -139,7 +139,7 @@ void main() {
 
   test('File image throws error when given a real but non-image file', () async {
     final Completer<Exception> error = Completer<Exception>();
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       error.complete(details.exception as Exception);
     };
     final FileImage provider = FileImage(File('pubspec.yaml'));
@@ -153,7 +153,7 @@ void main() {
     expect(imageCache.pendingImageCount, 1);
 
     expect(await error.future, isException
-      .having((Exception exception) => exception.toString(), 'toString', contains('Invalid image data')));
+      .having((final Exception exception) => exception.toString(), 'toString', contains('Invalid image data')));
 
     // Invalid images are marked as pending so that we do not attempt to reload them.
     expect(imageCache.statusForKey(provider).untracked, false);
@@ -179,7 +179,7 @@ class FakeCodec implements Codec {
 
 class _TestAssetBundle extends CachingAssetBundle {
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(final String key) async {
     return Uint8List.fromList(kBlueSquarePng).buffer.asByteData();
   }
 }

@@ -9,8 +9,8 @@ import 'package:flutter_api_samples/widgets/text_magnifier/text_magnifier.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 List<TextSelectionPoint> _globalize(
-    Iterable<TextSelectionPoint> points, RenderBox box) {
-  return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+    final Iterable<TextSelectionPoint> points, final RenderBox box) {
+  return points.map<TextSelectionPoint>((final TextSelectionPoint point) {
     return TextSelectionPoint(
       box.localToGlobal(point.point),
       point.direction,
@@ -18,7 +18,7 @@ List<TextSelectionPoint> _globalize(
   }).toList();
 }
 
-RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester tester) {
+RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(final WidgetTester tester) {
   return (tester.state(find.byType(TextField))
           as TextSelectionGestureDetectorBuilderDelegate)
       .editableTextKey
@@ -26,14 +26,14 @@ RenderEditable _findRenderEditable<T extends State<StatefulWidget>>(WidgetTester
       .renderEditable;
 }
 
-Offset _textOffsetToPosition<T extends State<StatefulWidget>>(WidgetTester tester, int offset) {
+Offset _textOffsetToPosition<T extends State<StatefulWidget>>(final WidgetTester tester, final int offset) {
   final RenderEditable renderEditable = _findRenderEditable(tester);
 
   final List<TextSelectionPoint> endpoints = renderEditable
       .getEndpointsForSelection(
         TextSelection.collapsed(offset: offset),
       )
-      .map<TextSelectionPoint>((TextSelectionPoint point) => TextSelectionPoint(
+      .map<TextSelectionPoint>((final TextSelectionPoint point) => TextSelectionPoint(
             renderEditable.localToGlobal(point.point),
             point.direction,
           ))
@@ -46,7 +46,7 @@ void main() {
   const Duration durationBetweenActions = Duration(milliseconds: 20);
   const String defaultText = 'I am a magnifier, fear me!';
 
-  Future<void> showMagnifier(WidgetTester tester, String characterToTapOn) async {
+  Future<void> showMagnifier(final WidgetTester tester, final String characterToTapOn) async {
     final Offset tapOffset = _textOffsetToPosition(tester, defaultText.indexOf(characterToTapOn));
 
     // Double tap 'Magnifier' word to show the selection handles.
@@ -83,7 +83,7 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('should show custom magnifier on drag', (WidgetTester tester) async {
+  testWidgets('should show custom magnifier on drag', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.TextMagnifierExampleApp(text: defaultText));
 
     await showMagnifier(tester, 'e');
@@ -97,7 +97,7 @@ void main() {
 
 
   for (final TextDirection textDirection in TextDirection.values) {
-    testWidgets('should show custom magnifier in $textDirection', (WidgetTester tester) async {
+    testWidgets('should show custom magnifier in $textDirection', (final WidgetTester tester) async {
       final String text = textDirection == TextDirection.rtl ? 'أثارت زر' : defaultText;
       final String textToTapOn = textDirection == TextDirection.rtl ? 'ت' : 'e';
 

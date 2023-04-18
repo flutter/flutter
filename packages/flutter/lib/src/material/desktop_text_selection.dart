@@ -24,7 +24,7 @@ class _DesktopTextSelectionHandleControls extends DesktopTextSelectionControls w
 class DesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
-  Size getHandleSize(double textLineHeight) {
+  Size getHandleSize(final double textLineHeight) {
     return Size.zero;
   }
 
@@ -35,14 +35,14 @@ class DesktopTextSelectionControls extends TextSelectionControls {
   )
   @override
   Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
+    final BuildContext context,
+    final Rect globalEditableRegion,
+    final double textLineHeight,
+    final Offset selectionMidpoint,
+    final List<TextSelectionPoint> endpoints,
+    final TextSelectionDelegate delegate,
+    final ClipboardStatusNotifier? clipboardStatus,
+    final Offset? lastSecondaryTapDownPosition,
   ) {
     return _DesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
@@ -60,13 +60,13 @@ class DesktopTextSelectionControls extends TextSelectionControls {
 
   /// Builds the text selection handles, but desktop has none.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(final BuildContext context, final TextSelectionHandleType type, final double textLineHeight, [final VoidCallback? onTap]) {
     return const SizedBox.shrink();
   }
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(final TextSelectionHandleType type, final double textLineHeight) {
     return Offset.zero;
   }
 
@@ -75,7 +75,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
-  bool canSelectAll(TextSelectionDelegate delegate) {
+  bool canSelectAll(final TextSelectionDelegate delegate) {
     // Allow SelectAll when selection is not collapsed, unless everything has
     // already been selected. Same behavior as Android.
     final TextEditingValue value = delegate.textEditingValue;
@@ -89,7 +89,7 @@ class DesktopTextSelectionControls extends TextSelectionControls {
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
-  void handleSelectAll(TextSelectionDelegate delegate) {
+  void handleSelectAll(final TextSelectionDelegate delegate) {
     super.handleSelectAll(delegate);
     delegate.hideToolbar();
   }
@@ -152,7 +152,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
   }
 
   @override
-  void didUpdateWidget(_DesktopTextSelectionControlsToolbar oldWidget) {
+  void didUpdateWidget(final _DesktopTextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.clipboardStatus != widget.clipboardStatus) {
       oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
@@ -167,7 +167,7 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMediaQuery(context));
 
@@ -189,8 +189,8 @@ class _DesktopTextSelectionControlsToolbarState extends State<_DesktopTextSelect
     final List<Widget> items = <Widget>[];
 
     void addToolbarButton(
-      String text,
-      VoidCallback onPressed,
+      final String text,
+      final VoidCallback onPressed,
     ) {
       items.add(DesktopTextSelectionToolbarButton.text(
         context: context,

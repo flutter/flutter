@@ -58,14 +58,14 @@ class BenchTextOutOfPictureBounds extends SceneBuilderRecorder {
   late List<Paragraph> multiLineParagraphs;
 
   @override
-  void onDrawFrame(SceneBuilder sceneBuilder) {
+  void onDrawFrame(final SceneBuilder sceneBuilder) {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Size viewSize = view.physicalSize;
     const double padding = 10.0;
 
     // Fills a single cell with random text.
-    void fillCellWithText(List<Paragraph> textSource) {
+    void fillCellWithText(final List<Paragraph> textSource) {
       canvas.save();
       double topOffset = 0;
       while (topOffset < viewSize.height) {

@@ -12,7 +12,7 @@ class PhysicalShapeApp extends StatelessWidget {
   const PhysicalShapeApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -28,7 +28,7 @@ class PhysicalShapeExample extends StatelessWidget {
   const PhysicalShapeExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return PhysicalShape(
       elevation: 5.0,
       clipper: ShapeBorderClipper(

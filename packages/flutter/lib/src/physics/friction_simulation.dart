@@ -13,11 +13,11 @@ export 'tolerance.dart' show Tolerance;
 /// Numerically determine the input value which produces output value [target]
 /// for a function [f], given its first-derivative [df].
 double _newtonsMethod({
-  required double initialGuess,
-  required double target,
-  required double Function(double) f,
-  required double Function(double) df,
-  required int iterations
+  required final double initialGuess,
+  required final double target,
+  required final double Function(double) f,
+  required final double Function(double) df,
+  required final int iterations
 }) {
   double guess = initialGuess;
   for (int i = 0; i < iterations; i++) {
@@ -38,11 +38,11 @@ class FrictionSimulation extends Simulation {
   /// length units as used for [x]; and the initial velocity _dx₀_, in the same
   /// velocity units as used for [dx].
   FrictionSimulation(
-    double drag,
-    double position,
-    double velocity, {
+    final double drag,
+    final double position,
+    final double velocity, {
     super.tolerance,
-    double constantDeceleration = 0
+    final double constantDeceleration = 0
   }) : _drag = drag,
        _dragLog = math.log(drag),
        _x = position,
@@ -52,7 +52,7 @@ class FrictionSimulation extends Simulation {
         initialGuess: 0,
         target: 0,
         f: dx,
-        df: (double time) => (_v * math.pow(_drag, time) * _dragLog) - _constantDeceleration,
+        df: (final double time) => (_v * math.pow(_drag, time) * _dragLog) - _constantDeceleration,
         iterations: 10
       );
     }
@@ -68,7 +68,7 @@ class FrictionSimulation extends Simulation {
   /// of the start velocity must be greater than the magnitude of the end
   /// velocity, and the velocities must be in the direction appropriate for the
   /// particle to start from the start position and reach the end position.
-  factory FrictionSimulation.through(double startPosition, double endPosition, double startVelocity, double endVelocity) {
+  factory FrictionSimulation.through(final double startPosition, final double endPosition, final double startVelocity, final double endVelocity) {
     assert(startVelocity == 0.0 || endVelocity == 0.0 || startVelocity.sign == endVelocity.sign);
     assert(startVelocity.abs() >= endVelocity.abs());
     assert((endPosition - startPosition).sign == startVelocity.sign);
@@ -98,12 +98,12 @@ class FrictionSimulation extends Simulation {
   // or (log(v1) - log(v0)) / log(D), given v = v0 * D^t per the dx() function below.
   // Solving for D given x(time) is trickier. Algebra courtesy of Wolfram Alpha:
   // x1 = x0 + (v0 * D^((log(v1) - log(v0)) / log(D))) / log(D) - v0 / log(D), find D
-  static double _dragFor(double startPosition, double endPosition, double startVelocity, double endVelocity) {
+  static double _dragFor(final double startPosition, final double endPosition, final double startVelocity, final double endVelocity) {
     return math.pow(math.e, (startVelocity - endVelocity) / (startPosition - endPosition)) as double;
   }
 
   @override
-  double x(double time) {
+  double x(final double time) {
     if (time > _finalTime) {
       return finalX;
     }
@@ -111,7 +111,7 @@ class FrictionSimulation extends Simulation {
   }
 
   @override
-  double dx(double time) {
+  double dx(final double time) {
     if (time > _finalTime) {
       return 0;
     }
@@ -129,7 +129,7 @@ class FrictionSimulation extends Simulation {
   /// The time at which the value of `x(time)` will equal [x].
   ///
   /// Returns `double.infinity` if the simulation will never reach [x].
-  double timeAtX(double x) {
+  double timeAtX(final double x) {
     if (x == _x) {
       return 0.0;
     }
@@ -146,7 +146,7 @@ class FrictionSimulation extends Simulation {
   }
 
   @override
-  bool isDone(double time) {
+  bool isDone(final double time) {
     return dx(time).abs() < tolerance.velocity;
   }
 
@@ -179,12 +179,12 @@ class BoundedFrictionSimulation extends FrictionSimulation {
   final double _maxX;
 
   @override
-  double x(double time) {
+  double x(final double time) {
     return clampDouble(super.x(time), _minX, _maxX);
   }
 
   @override
-  bool isDone(double time) {
+  bool isDone(final double time) {
     return super.isDone(time) ||
       (x(time) - _minX).abs() < tolerance.distance ||
       (x(time) - _maxX).abs() < tolerance.distance;

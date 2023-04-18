@@ -8,21 +8,21 @@ import 'package:flutter_test/flutter_test.dart';
 class MyNotification extends Notification { }
 
 void main() {
-  testWidgets('Notification basics - toString', (WidgetTester tester) async {
+  testWidgets('Notification basics - toString', (final WidgetTester tester) async {
     expect(MyNotification(), hasOneLineDescription);
   });
 
-  testWidgets('Notification basics - dispatch', (WidgetTester tester) async {
+  testWidgets('Notification basics - dispatch', (final WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
-      onNotification: (MyNotification value) {
+      onNotification: (final MyNotification value) {
         log.add('a');
         log.add(value);
         return true;
       },
       child: NotificationListener<MyNotification>(
-        onNotification: (MyNotification value) {
+        onNotification: (final MyNotification value) {
           log.add('b');
           log.add(value);
           return false;
@@ -36,17 +36,17 @@ void main() {
     expect(log, <dynamic>['b', notification, 'a', notification]);
   });
 
-  testWidgets('Notification basics - cancel', (WidgetTester tester) async {
+  testWidgets('Notification basics - cancel', (final WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
-      onNotification: (MyNotification value) {
+      onNotification: (final MyNotification value) {
         log.add('a - error');
         log.add(value);
         return true;
       },
       child: NotificationListener<MyNotification>(
-        onNotification: (MyNotification value) {
+        onNotification: (final MyNotification value) {
           log.add('b');
           log.add(value);
           return true;
@@ -60,16 +60,16 @@ void main() {
     expect(log, <dynamic>['b', notification]);
   });
 
-  testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
+  testWidgets('Notification basics - listener null return value', (final WidgetTester tester) async {
     final List<Type> log = <Type>[];
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(NotificationListener<MyNotification>(
-      onNotification: (MyNotification value) {
+      onNotification: (final MyNotification value) {
         log.add(value.runtimeType);
         return false;
       },
       child: NotificationListener<MyNotification>(
-        onNotification: (MyNotification value) => false,
+        onNotification: (final MyNotification value) => false,
         child: Container(key: key),
       ),
     ));

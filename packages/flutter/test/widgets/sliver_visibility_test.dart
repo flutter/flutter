@@ -24,18 +24,18 @@ class _TestStateState extends State<TestState> {
     widget.log.add('created new state');
   }
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }
 
 void main() {
-  testWidgets('SliverVisibility', (WidgetTester tester) async {
+  testWidgets('SliverVisibility', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<String> log = <String>[];
     const Key anchor = Key('drag');
 
-    Widget boilerPlate(Widget sliver) {
+    Widget boilerPlate(final Widget sliver) {
       return Localizations(
         locale: const Locale('en', 'us'),
         delegates: const <LocalizationsDelegate<dynamic>>[
@@ -58,7 +58,7 @@ void main() {
           log.add('tap');
         },
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             final bool animating = TickerMode.of(context);
             return TestState(
               key: anchor,

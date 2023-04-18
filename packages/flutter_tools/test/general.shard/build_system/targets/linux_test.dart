@@ -232,7 +232,7 @@ void main() {
   });
 }
 
-void setUpCacheDirectory(FileSystem fileSystem, Artifacts artifacts) {
+void setUpCacheDirectory(final FileSystem fileSystem, final Artifacts artifacts) {
   final String desktopPathForX64 = artifacts.getArtifactPath(Artifact.linuxDesktopPath, platform: TargetPlatform.linux_x64, mode: BuildMode.debug);
   final String desktopPathForArm64 = artifacts.getArtifactPath(Artifact.linuxDesktopPath, platform: TargetPlatform.linux_arm64, mode: BuildMode.debug);
   fileSystem.file('$desktopPathForX64/unrelated-stuff').createSync(recursive: true);

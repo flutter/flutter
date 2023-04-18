@@ -12,7 +12,7 @@ class SwitchApp extends StatelessWidget {
   const SwitchApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -37,7 +37,7 @@ class _SwitchExampleState extends State<SwitchExample> {
   bool light1 = true;
 
   final MaterialStateProperty<Icon?> thumbIcon = MaterialStateProperty.resolveWith<Icon?>(
-    (Set<MaterialState> states) {
+    (final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return const Icon(Icons.check);
       }
@@ -46,13 +46,13 @@ class _SwitchExampleState extends State<SwitchExample> {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Switch(
           value: light0,
-          onChanged: (bool value) {
+          onChanged: (final bool value) {
             setState(() {
               light0 = value;
             });
@@ -61,7 +61,7 @@ class _SwitchExampleState extends State<SwitchExample> {
         Switch(
           thumbIcon: thumbIcon,
           value: light1,
-          onChanged: (bool value) {
+          onChanged: (final bool value) {
             setState(() {
               light1 = value;
             });

@@ -7,7 +7,7 @@ import 'dart:ui' show Color, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
-double _getHue(double red, double green, double blue, double max, double delta) {
+double _getHue(final double red, final double green, final double blue, final double max, final double delta) {
   late double hue;
   if (max == 0.0) {
     hue = 0.0;
@@ -25,11 +25,11 @@ double _getHue(double red, double green, double blue, double max, double delta) 
 }
 
 Color _colorFromHue(
-  double alpha,
-  double hue,
-  double chroma,
-  double secondary,
-  double match,
+  final double alpha,
+  final double hue,
+  final double chroma,
+  final double secondary,
+  final double match,
 ) {
   double red;
   double green;
@@ -102,7 +102,7 @@ class HSVColor {
   ///
   /// This constructor does not necessarily round-trip with [toColor] because
   /// of floating point imprecision.
-  factory HSVColor.fromColor(Color color) {
+  factory HSVColor.fromColor(final Color color) {
     final double red = color.red / 0xFF;
     final double green = color.green / 0xFF;
     final double blue = color.blue / 0xFF;
@@ -142,25 +142,25 @@ class HSVColor {
 
   /// Returns a copy of this color with the [alpha] parameter replaced with the
   /// given value.
-  HSVColor withAlpha(double alpha) {
+  HSVColor withAlpha(final double alpha) {
     return HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
   /// Returns a copy of this color with the [hue] parameter replaced with the
   /// given value.
-  HSVColor withHue(double hue) {
+  HSVColor withHue(final double hue) {
     return HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
   /// Returns a copy of this color with the [saturation] parameter replaced with
   /// the given value.
-  HSVColor withSaturation(double saturation) {
+  HSVColor withSaturation(final double saturation) {
     return HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
   /// Returns a copy of this color with the [value] parameter replaced with the
   /// given value.
-  HSVColor withValue(double value) {
+  HSVColor withValue(final double value) {
     return HSVColor.fromAHSV(alpha, hue, saturation, value);
   }
 
@@ -173,7 +173,7 @@ class HSVColor {
     return _colorFromHue(alpha, hue, chroma, secondary, match);
   }
 
-  HSVColor _scaleAlpha(double factor) {
+  HSVColor _scaleAlpha(final double factor) {
     return withAlpha(alpha * factor);
   }
 
@@ -193,7 +193,7 @@ class HSVColor {
   /// {@macro dart.ui.shadow.lerp}
   ///
   /// Values outside of the valid range for each channel will be clamped.
-  static HSVColor? lerp(HSVColor? a, HSVColor? b, double t) {
+  static HSVColor? lerp(final HSVColor? a, final HSVColor? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -212,7 +212,7 @@ class HSVColor {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -270,7 +270,7 @@ class HSLColor {
   ///
   /// This constructor does not necessarily round-trip with [toColor] because
   /// of floating point imprecision.
-  factory HSLColor.fromColor(Color color) {
+  factory HSLColor.fromColor(final Color color) {
     final double red = color.red / 0xFF;
     final double green = color.green / 0xFF;
     final double blue = color.blue / 0xFF;
@@ -315,25 +315,25 @@ class HSLColor {
 
   /// Returns a copy of this color with the alpha parameter replaced with the
   /// given value.
-  HSLColor withAlpha(double alpha) {
+  HSLColor withAlpha(final double alpha) {
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
   /// Returns a copy of this color with the [hue] parameter replaced with the
   /// given value.
-  HSLColor withHue(double hue) {
+  HSLColor withHue(final double hue) {
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
   /// Returns a copy of this color with the [saturation] parameter replaced with
   /// the given value.
-  HSLColor withSaturation(double saturation) {
+  HSLColor withSaturation(final double saturation) {
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
   /// Returns a copy of this color with the [lightness] parameter replaced with
   /// the given value.
-  HSLColor withLightness(double lightness) {
+  HSLColor withLightness(final double lightness) {
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
@@ -346,7 +346,7 @@ class HSLColor {
     return _colorFromHue(alpha, hue, chroma, secondary, match);
   }
 
-  HSLColor _scaleAlpha(double factor) {
+  HSLColor _scaleAlpha(final double factor) {
     return withAlpha(alpha * factor);
   }
 
@@ -376,7 +376,7 @@ class HSLColor {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static HSLColor? lerp(HSLColor? a, HSLColor? b, double t) {
+  static HSLColor? lerp(final HSLColor? a, final HSLColor? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -395,7 +395,7 @@ class HSLColor {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -437,10 +437,10 @@ class ColorSwatch<T> extends Color {
   final Map<T, Color> _swatch;
 
   /// Returns an element of the swatch table.
-  Color? operator [](T index) => _swatch[index];
+  Color? operator [](final T index) => _swatch[index];
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -478,18 +478,18 @@ class ColorSwatch<T> extends Color {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static ColorSwatch<T>? lerp<T>(ColorSwatch<T>? a, ColorSwatch<T>? b, double t) {
+  static ColorSwatch<T>? lerp<T>(final ColorSwatch<T>? a, final ColorSwatch<T>? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
     final Map<T, Color> swatch;
     if (b == null) {
-      swatch = a!._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
+      swatch = a!._swatch.map((final T key, final Color color) => MapEntry<T, Color>(key, Color.lerp(color, null, t)!));
     } else {
       if (a == null) {
-        swatch = b._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(null, color, t)!));
+        swatch = b._swatch.map((final T key, final Color color) => MapEntry<T, Color>(key, Color.lerp(null, color, t)!));
       } else {
-        swatch = a._swatch.map((T key, Color color) => MapEntry<T, Color>(key, Color.lerp(color, b[key], t)!));
+        swatch = a._swatch.map((final T key, final Color color) => MapEntry<T, Color>(key, Color.lerp(color, b[key], t)!));
       }
     }
     return ColorSwatch<T>(Color.lerp(a, b, t)!.value, swatch);
@@ -511,7 +511,7 @@ class ColorProperty extends DiagnosticsProperty<Color> {
   });
 
   @override
-  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+  Map<String, Object?> toJsonMap(final DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
       json['valueProperties'] = <String, Object>{

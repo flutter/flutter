@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/scrollbar/cupertino_scrollbar.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('List view displays CupertinoScrollbar', (WidgetTester tester) async {
+  testWidgets('List view displays CupertinoScrollbar', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ScrollbarApp(),
     );

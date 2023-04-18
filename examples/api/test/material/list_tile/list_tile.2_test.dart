@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/list_tile/list_tile.2.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTile leading and trailing widgets are aligned appropriately', (WidgetTester tester) async {
+  testWidgets('ListTile leading and trailing widgets are aligned appropriately', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListTileApp(),
     );

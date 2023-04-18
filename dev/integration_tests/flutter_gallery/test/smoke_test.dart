@@ -26,7 +26,7 @@ int toStringErrors = 0;
 // If you change navigation behavior in the Gallery or in the framework, make
 // sure all 3 are covered.
 
-void reportToStringError(String name, String route, int lineNumber, List<String> lines, String message) {
+void reportToStringError(final String name, final String route, final int lineNumber, final List<String> lines, final String message) {
   // If you're on line 12, then it has index 11.
   // If you want 1 line before and 1 line after, then you want lines with index 10, 11, and 12.
   // That's (lineNumber-1)-margin .. (lineNumber-1)+margin, or lineNumber-(margin+1) .. lineNumber+(margin-1)
@@ -37,7 +37,7 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
   toStringErrors += 1;
 }
 
-void verifyToStringOutput(String name, String route, String testString) {
+void verifyToStringOutput(final String name, final String route, final String testString) {
   int lineNumber = 0;
   final List<String> lines = testString.split('\n');
   if (!testString.endsWith('\n')) {
@@ -55,7 +55,7 @@ void verifyToStringOutput(String name, String route, String testString) {
   }
 }
 
-Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
+Future<void> smokeDemo(final WidgetTester tester, final GalleryDemo demo) async {
   // Don't use pumpUntilNoTransientCallbacks in this function, because some of
   // the smoketests have infinitely-running animations (e.g. the progress
   // indicators demo).
@@ -104,7 +104,7 @@ Future<void> smokeDemo(WidgetTester tester, GalleryDemo demo) async {
   await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
 }
 
-Future<void> smokeOptionsPage(WidgetTester tester) async {
+Future<void> smokeOptionsPage(final WidgetTester tester) async {
   final Finder showOptionsPageButton = find.byTooltip('Toggle options page');
 
   // Show the options page
@@ -143,7 +143,7 @@ Future<void> smokeOptionsPage(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> smokeGallery(WidgetTester tester) async {
+Future<void> smokeGallery(final WidgetTester tester) async {
   bool sendFeedbackButtonPressed = false;
 
   await tester.pumpWidget(
@@ -184,7 +184,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.macOS }),
   );
 
-  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
+  testWidgets('Flutter Gallery app smoke test with semantics', (final WidgetTester tester) async {
     final SemanticsHandle handle = SemanticsBinding.instance.ensureSemantics();
     await smokeGallery(tester);
     handle.dispose();

@@ -12,7 +12,7 @@ class CupertinoProgressIndicatorDemo extends StatelessWidget {
   static const String routeName = '/cupertino/progress_indicator';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         // We're specifying a back label here because the previous page is a

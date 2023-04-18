@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Leaf extends StatefulWidget {
-  const Leaf({ required Key key, required this.child }) : super(key: key);
+  const Leaf({ required final Key key, required this.child }) : super(key: key);
   final Widget child;
   @override
   State<Leaf> createState() => _LeafState();
@@ -25,7 +25,7 @@ class _LeafState extends State<Leaf> {
     super.deactivate();
   }
 
-  void setKeepAlive(bool value) {
+  void setKeepAlive(final bool value) {
     _keepAlive = value;
     if (_keepAlive) {
       if (_handle == null) {
@@ -39,7 +39,7 @@ class _LeafState extends State<Leaf> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (_keepAlive && _handle == null) {
       _handle = KeepAliveHandle();
       KeepAliveNotification(_handle!).dispatch(context);
@@ -48,10 +48,10 @@ class _LeafState extends State<Leaf> {
   }
 }
 
-List<Widget> generateList(Widget child, { required bool impliedMode }) {
+List<Widget> generateList(final Widget child, { required final bool impliedMode }) {
   return List<Widget>.generate(
     100,
-    (int index) {
+    (final int index) {
       final Widget result = Leaf(
         key: GlobalObjectKey<_LeafState>(index),
         child: child,
@@ -65,8 +65,8 @@ List<Widget> generateList(Widget child, { required bool impliedMode }) {
   );
 }
 
-void tests({ required bool impliedMode }) {
-  testWidgets('AutomaticKeepAlive with ListView with itemExtent', (WidgetTester tester) async {
+void tests({ required final bool impliedMode }) {
+  testWidgets('AutomaticKeepAlive with ListView with itemExtent', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -114,7 +114,7 @@ void tests({ required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with ListView without itemExtent', (WidgetTester tester) async {
+  testWidgets('AutomaticKeepAlive with ListView without itemExtent', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -164,7 +164,7 @@ void tests({ required bool impliedMode }) {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(90), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with GridView', (WidgetTester tester) async {
+  testWidgets('AutomaticKeepAlive with GridView', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -221,7 +221,7 @@ void main() {
   group('Explicit automatic keep-alive', () { tests(impliedMode: false); });
   group('Implied automatic keep-alive', () { tests(impliedMode: true); });
 
-  testWidgets('AutomaticKeepAlive double', (WidgetTester tester) async {
+  testWidgets('AutomaticKeepAlive double', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -305,7 +305,7 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(3)), findsOneWidget);
   });
 
-  testWidgets('AutomaticKeepAlive double 2', (WidgetTester tester) async {
+  testWidgets('AutomaticKeepAlive double 2', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -473,14 +473,14 @@ void main() {
     expect(find.byKey(const GlobalObjectKey<_LeafState>(0), skipOffstage: false), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState', (WidgetTester tester) async {
+  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState', (final WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
         dragStartBehavior: DragStartBehavior.down,
         addSemanticIndexes: false,
         itemCount: 50,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           if (index == 0) {
             return const _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(0),
@@ -508,13 +508,13 @@ void main() {
     expect(find.text('FooBar 2'), findsNothing);
   });
 
-  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope', (WidgetTester tester) async {
+  testWidgets('AutomaticKeepAlive with keepAlive set to true before initState and widget goes out of scope', (final WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
         addSemanticIndexes: false,
         itemCount: 250,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           if (index.isEven) {
             return _AlwaysKeepAlive(
               key: GlobalObjectKey<_AlwaysKeepAliveState>(index),
@@ -547,7 +547,7 @@ void main() {
     expect(find.text('FooBar 73'), findsOneWidget);
   });
 
-  testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (WidgetTester tester) async {
+  testWidgets('AutomaticKeepAlive with SliverKeepAliveWidget', (final WidgetTester tester) async {
     // We're just doing a basic test here to make sure that the functionality of
     // RenderSliverWithKeepAliveMixin doesn't get regressed or deleted. As testing
     // the full functionality would be cumbersome.
@@ -558,13 +558,13 @@ void main() {
     expect(alternate.children.length, 1);
   });
 
-  testWidgets('Keep alive Listenable has its listener removed once called', (WidgetTester tester) async {
+  testWidgets('Keep alive Listenable has its listener removed once called', (final WidgetTester tester) async {
     final LeakCheckerHandle handle = LeakCheckerHandle();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: ListView.builder(
         itemCount: 1,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return const KeepAliveListenableLeakChecker(key: GlobalObjectKey<_KeepAliveListenableLeakCheckerState>(0));
         },
       ),
@@ -580,7 +580,7 @@ void main() {
 }
 
 class _AlwaysKeepAlive extends StatefulWidget {
-  const _AlwaysKeepAlive({ required Key key }) : super(key: key);
+  const _AlwaysKeepAlive({ required final Key key }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _AlwaysKeepAliveState();
@@ -591,7 +591,7 @@ class _AlwaysKeepAliveState extends State<_AlwaysKeepAlive> with AutomaticKeepAl
   bool get wantKeepAlive => true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     return const SizedBox(
       height: 48.0,
@@ -609,7 +609,7 @@ class AlwaysKeepAliveRenderBoxState extends State<_AlwaysKeepAlive> with Automat
   bool get wantKeepAlive => true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     return const SizedBox(
       height: 48.0,
@@ -632,7 +632,7 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
     RenderSliverWithKeepAliveMixin {
 
   RenderSliverMultiBoxAdaptorAlt({
-    RenderSliverBoxChildManager? childManager,
+    final RenderSliverBoxChildManager? childManager,
   }) : _childManager = childManager;
 
   @protected
@@ -641,12 +641,12 @@ class RenderSliverMultiBoxAdaptorAlt extends RenderSliver with
 
   final List<RenderBox> children = <RenderBox>[];
 
-  void insert(RenderBox child, { RenderBox? after }) {
+  void insert(final RenderBox child, { final RenderBox? after }) {
     children.add(child);
   }
 
   @override
-  void visitChildren(RenderObjectVisitor visitor) {
+  void visitChildren(final RenderObjectVisitor visitor) {
     children.forEach(visitor);
   }
 
@@ -667,12 +667,12 @@ class KeepAliveListenableLeakChecker extends StatefulWidget {
 }
 
 class _KeepAliveListenableLeakCheckerState extends State<KeepAliveListenableLeakChecker> {
-  void dispatch(Listenable handle) {
+  void dispatch(final Listenable handle) {
     KeepAliveNotification(handle).dispatch(context);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Placeholder();
   }
 }

@@ -250,7 +250,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
   bool _tapped = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextStyle titleTextStyle =
         widget._type == _CupertinoListTileType.base || widget.subtitle == null
             ? CupertinoTheme.of(context).textTheme.textStyle
@@ -380,7 +380,7 @@ class _CupertinoListTileState extends State<CupertinoListTile> {
     }
 
     return GestureDetector(
-      onTapDown: (_) => setState(() { _tapped = true; }),
+      onTapDown: (final _) => setState(() { _tapped = true; }),
       onTapCancel: () => setState(() { _tapped = false; }),
       onTap: () async {
         await widget.onTap!();
@@ -405,7 +405,7 @@ class CupertinoListTileChevron extends StatelessWidget {
   const CupertinoListTileChevron({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Icon(
       CupertinoIcons.right_chevron,
       size: CupertinoTheme.of(context).textTheme.textStyle.fontSize,

@@ -55,7 +55,7 @@ abstract class AnalyzeBase {
   /// Called by [AnalyzeCommand] to start the analysis process.
   Future<void> analyze();
 
-  void dumpErrors(Iterable<String> errors) {
+  void dumpErrors(final Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
         final RandomAccessFile resultsFile = fileSystem.file(argResults['write']).openSync(mode: FileMode.write);
@@ -71,7 +71,7 @@ abstract class AnalyzeBase {
     }
   }
 
-  void writeBenchmark(Stopwatch stopwatch, int errorCount) {
+  void writeBenchmark(final Stopwatch stopwatch, final int errorCount) {
     const String benchmarkOut = 'analysis_benchmark.json';
     final Map<String, dynamic> data = <String, dynamic>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
@@ -94,10 +94,10 @@ abstract class AnalyzeBase {
 
   /// Generate an analysis summary for both [AnalyzeOnce], [AnalyzeContinuously].
   static String generateErrorsMessage({
-    required int issueCount,
-    int? issueDiff,
-    int? files,
-    required String seconds,
+    required final int issueCount,
+    final int? issueDiff,
+    final int? files,
+    required final String seconds,
   }) {
     final StringBuffer errorsMessage = StringBuffer(issueCount > 0
       ? '$issueCount ${pluralize('issue', issueCount)} found.'
@@ -126,12 +126,12 @@ class PackageDependency {
   // of places that ask for that target (.packages or pubspec.yaml files)
   Map<String, List<String>> values = <String, List<String>>{};
   String? canonicalSource;
-  void addCanonicalCase(String packagePath, String pubSpecYamlPath) {
+  void addCanonicalCase(final String packagePath, final String pubSpecYamlPath) {
     assert(canonicalSource == null);
     add(packagePath, pubSpecYamlPath);
     canonicalSource = pubSpecYamlPath;
   }
-  void add(String packagePath, String sourcePath) {
+  void add(final String packagePath, final String sourcePath) {
     values.putIfAbsent(packagePath, () => <String>[]).add(sourcePath);
   }
   bool get hasConflict => values.length > 1;
@@ -148,10 +148,10 @@ class PackageDependency {
     }
     return false;
   }
-  void describeConflict(StringBuffer result) {
+  void describeConflict(final StringBuffer result) {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
-    targets.sort((String a, String b) => values[b]!.length.compareTo(values[a]!.length));
+    targets.sort((final String a, final String b) => values[b]!.length.compareTo(values[a]!.length));
     for (final String target in targets) {
       final List<String> targetList = values[target]!;
       final int count = targetList.length;
@@ -179,12 +179,12 @@ class PackageDependencyTracker {
   // involved (sources and targets).
   Map<String, PackageDependency> packages = <String, PackageDependency>{};
 
-  PackageDependency getPackageDependency(String packageName) {
+  PackageDependency getPackageDependency(final String packageName) {
     return packages.putIfAbsent(packageName, () => PackageDependency());
   }
 
   /// Read the .packages file in [directory] and add referenced packages to [dependencies].
-  void addDependenciesFromPackagesFileIn(Directory directory) {
+  void addDependenciesFromPackagesFileIn(final Directory directory) {
     final String dotPackagesPath = globals.fs.path.join(directory.path, '.packages');
     final File dotPackages = globals.fs.file(dotPackagesPath);
     if (dotPackages.existsSync()) {
@@ -192,7 +192,7 @@ class PackageDependencyTracker {
       final Iterable<String> lines = dotPackages
         .readAsStringSync()
         .split('\n')
-        .where((String line) => !line.startsWith(RegExp(r'^ *#')));
+        .where((final String line) => !line.startsWith(RegExp(r'^ *#')));
       for (final String line in lines) {
         final int colon = line.indexOf(':');
         if (colon > 0) {
@@ -209,15 +209,15 @@ class PackageDependencyTracker {
     }
   }
 
-  void addCanonicalCase(String packageName, String packagePath, String pubSpecYamlPath) {
+  void addCanonicalCase(final String packageName, final String packagePath, final String pubSpecYamlPath) {
     getPackageDependency(packageName).addCanonicalCase(packagePath, pubSpecYamlPath);
   }
 
-  void add(String packageName, String packagePath, String dotPackagesPath) {
+  void add(final String packageName, final String packagePath, final String dotPackagesPath) {
     getPackageDependency(packageName).add(packagePath, dotPackagesPath);
   }
 
-  void checkForConflictingDependencies(Iterable<Directory> pubSpecDirectories, PackageDependencyTracker dependencies) {
+  void checkForConflictingDependencies(final Iterable<Directory> pubSpecDirectories, final PackageDependencyTracker dependencies) {
     for (final Directory directory in pubSpecDirectories) {
       final String pubSpecYamlPath = globals.fs.path.join(directory.path, 'pubspec.yaml');
       final File pubSpecYamlFile = globals.fs.file(pubSpecYamlPath);
@@ -262,17 +262,17 @@ class PackageDependencyTracker {
   }
 
   bool get hasConflicts {
-    return packages.values.any((PackageDependency dependency) => dependency.hasConflict);
+    return packages.values.any((final PackageDependency dependency) => dependency.hasConflict);
   }
 
   bool get hasConflictsAffectingFlutterRepo {
-    return packages.values.any((PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo);
+    return packages.values.any((final PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo);
   }
 
   String generateConflictReport() {
     assert(hasConflicts);
     final StringBuffer result = StringBuffer();
-    packages.forEach((String package, PackageDependency dependency) {
+    packages.forEach((final String package, final PackageDependency dependency) {
       if (dependency.hasConflict) {
         result.writeln('Package "$package" has conflicts:');
         dependency.describeConflict(result);
@@ -283,7 +283,7 @@ class PackageDependencyTracker {
 
   Map<String, String> asPackageMap() {
     final Map<String, String> result = <String, String>{};
-    packages.forEach((String package, PackageDependency dependency) {
+    packages.forEach((final String package, final PackageDependency dependency) {
       result[package] = dependency.target;
     });
     return result;
@@ -291,9 +291,9 @@ class PackageDependencyTracker {
 }
 
 /// Find directories or files from argResults.rest.
-Set<String> findDirectories(ArgResults argResults, FileSystem fileSystem) {
+Set<String> findDirectories(final ArgResults argResults, final FileSystem fileSystem) {
   final Set<String> items = Set<String>.of(argResults.rest
-      .map<String>((String path) => fileSystem.path.canonicalize(path)));
+      .map<String>((final String path) => fileSystem.path.canonicalize(path)));
   if (items.isNotEmpty) {
     for (final String item in items) {
       final FileSystemEntityType type = fileSystem.typeSync(item);

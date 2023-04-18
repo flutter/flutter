@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 const int kTargetLineCount = 60 * 1024;
 
 /// Make `n` copies of flutter_gallery.
-void main(List<String> args) {
+void main(final List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools') {
     Directory.current = Directory.current.parent.parent;
@@ -95,7 +95,7 @@ void main(List<String> args) {
 }
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
-void _createEntry(File mainFile, int copies) {
+void _createEntry(final File mainFile, final int copies) {
   final StringBuffer imports = StringBuffer();
 
   for (int i = 1; i < copies; i++) {
@@ -121,7 +121,7 @@ void main() {
   mainFile.writeAsStringSync(contents);
 }
 
-void _copyGallery(Directory galleryDir, int index) {
+void _copyGallery(final Directory galleryDir, final int index) {
   final Directory lib = _dir(galleryDir, 'lib');
   final Directory dest = _dir(lib, 'gallery_$index');
   dest.createSync();
@@ -132,7 +132,7 @@ void _copyGallery(Directory galleryDir, int index) {
   _file(dest, 'main.dart').writeAsBytesSync(_file(lib, 'main.dart').readAsBytesSync());
 }
 
-void _copy(Directory source, Directory target) {
+void _copy(final Directory source, final Directory target) {
   if (!target.existsSync()) {
     target.createSync(recursive: true);
   }
@@ -155,9 +155,9 @@ void _copy(Directory source, Directory target) {
   }
 }
 
-Directory _dir(Directory parent, String name) => Directory(path.join(parent.path, name));
-File _file(Directory parent, String name) => File(path.join(parent.path, name));
-String _normalize(String filePath) => path.normalize(path.absolute(filePath));
+Directory _dir(final Directory parent, final String name) => Directory(path.join(parent.path, name));
+File _file(final Directory parent, final String name) => File(path.join(parent.path, name));
+String _normalize(final String filePath) => path.normalize(path.absolute(filePath));
 
 class SourceStats {
   int files = 0;
@@ -167,7 +167,7 @@ class SourceStats {
   String toString() => '${_comma(files).padLeft(3)} files, ${_comma(lines).padLeft(6)} lines';
 }
 
-SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {
+SourceStats getStatsFor(final Directory dir, [SourceStats? stats]) {
   stats ??= SourceStats();
 
   for (final FileSystemEntity entity in dir.listSync(followLinks: false)) {
@@ -183,7 +183,7 @@ SourceStats getStatsFor(Directory dir, [SourceStats? stats]) {
   return stats;
 }
 
-int _lineCount(File file) {
+int _lineCount(final File file) {
   return file.readAsLinesSync().where((String line) {
     line = line.trim();
     if (line.isEmpty || line.startsWith('//')) {
@@ -193,7 +193,7 @@ int _lineCount(File file) {
   }).length;
 }
 
-String _comma(int count) {
+String _comma(final int count) {
   final String str = count.toString();
   if (str.length > 3) {
     return '${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';

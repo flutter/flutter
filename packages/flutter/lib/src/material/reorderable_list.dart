@@ -60,7 +60,7 @@ class ReorderableListView extends StatefulWidget {
   ///     list where the items are built as needed when scrolling the list.
   ReorderableListView({
     super.key,
-    required List<Widget> children,
+    required final List<Widget> children,
     required this.onReorder,
     this.onReorderStart,
     this.onReorderEnd,
@@ -89,10 +89,10 @@ class ReorderableListView extends StatefulWidget {
          'You can only pass itemExtent or prototypeItem, not both',
        ),
        assert(
-         children.every((Widget w) => w.key != null),
+         children.every((final Widget w) => w.key != null),
          'All children of this widget must have a key.',
        ),
-       itemBuilder = ((BuildContext context, int index) => children[index]),
+       itemBuilder = ((final BuildContext context, final int index) => children[index]),
        itemCount = children.length;
 
   /// Creates a reorderable list from widget items that are created on demand.
@@ -269,7 +269,7 @@ class ReorderableListView extends StatefulWidget {
 }
 
 class _ReorderableListViewState extends State<ReorderableListView> {
-  Widget _itemBuilder(BuildContext context, int index) {
+  Widget _itemBuilder(final BuildContext context, final int index) {
     final Widget item = widget.itemBuilder(context, index);
     assert(() {
       if (item.key == null) {
@@ -347,10 +347,10 @@ class _ReorderableListViewState extends State<ReorderableListView> {
     );
   }
 
-  Widget _proxyDecorator(Widget child, int index, Animation<double> animation) {
+  Widget _proxyDecorator(final Widget child, final int index, final Animation<double> animation) {
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         final double animValue = Curves.easeInOut.transform(animation.value);
         final double elevation = lerpDouble(0, 6, animValue)!;
         return Material(
@@ -363,7 +363,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasOverlay(context));
 
@@ -459,7 +459,7 @@ class _ReorderableListViewChildGlobalKey extends GlobalObjectKey {
   final State state;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

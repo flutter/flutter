@@ -12,7 +12,7 @@ class AlignTransitionExampleApp extends StatelessWidget {
   const AlignTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: AlignTransitionExample(),
     );
@@ -52,7 +52,7 @@ class _AlignTransitionExampleState extends State<AlignTransitionExample> with Ti
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.white,
       child: AlignTransition(

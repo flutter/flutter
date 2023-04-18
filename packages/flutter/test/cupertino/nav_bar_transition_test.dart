@@ -13,19 +13,19 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<void> startTransitionBetween(
-  WidgetTester tester, {
-  Widget? from,
-  Widget? to,
-  String? fromTitle,
-  String? toTitle,
-  TextDirection textDirection = TextDirection.ltr,
-  CupertinoThemeData? theme,
-  double textScale = 1.0,
+  final WidgetTester tester, {
+  final Widget? from,
+  final Widget? to,
+  final String? fromTitle,
+  final String? toTitle,
+  final TextDirection textDirection = TextDirection.ltr,
+  final CupertinoThemeData? theme,
+  final double textScale = 1.0,
 }) async {
   await tester.pumpWidget(
     CupertinoApp(
       theme: theme,
-      builder: (BuildContext context, Widget? navigator) {
+      builder: (final BuildContext context, final Widget? navigator) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaleFactor: textScale),
           child: Directionality(
@@ -42,7 +42,7 @@ Future<void> startTransitionBetween(
       .state<NavigatorState>(find.byType(Navigator))
       .push(CupertinoPageRoute<void>(
         title: fromTitle,
-        builder: (BuildContext context) => scaffoldForNavBar(from)!,
+        builder: (final BuildContext context) => scaffoldForNavBar(from)!,
       ));
 
   await tester.pump();
@@ -52,13 +52,13 @@ Future<void> startTransitionBetween(
       .state<NavigatorState>(find.byType(Navigator))
       .push(CupertinoPageRoute<void>(
         title: toTitle,
-        builder: (BuildContext context) => scaffoldForNavBar(to)!,
+        builder: (final BuildContext context) => scaffoldForNavBar(to)!,
       ));
 
   await tester.pump();
 }
 
-CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
+CupertinoPageScaffold? scaffoldForNavBar(final Widget? navBar) {
   if (navBar is CupertinoNavigationBar || navBar == null) {
     return CupertinoPageScaffold(
       navigationBar: navBar as CupertinoNavigationBar? ?? const CupertinoNavigationBar(),
@@ -81,9 +81,9 @@ CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
   return null;
 }
 
-Finder flying(WidgetTester tester, Finder finder) {
+Finder flying(final WidgetTester tester, final Finder finder) {
   final ContainerRenderObjectMixin<RenderBox, StackParentData> theater = tester.renderObject(find.byType(Overlay));
-  final Finder lastOverlayFinder = find.byElementPredicate((Element element) {
+  final Finder lastOverlayFinder = find.byElementPredicate((final Element element) {
     return element is RenderObjectElement && element.renderObject == theater.lastChild;
   });
 
@@ -91,7 +91,7 @@ Finder flying(WidgetTester tester, Finder finder) {
     find.descendant(
       of: lastOverlayFinder,
       matching: find.byWidgetPredicate(
-        (Widget widget) =>
+        (final Widget widget) =>
             widget.runtimeType.toString() == '_NavigationBarTransition',
       ),
     ).evaluate().length == 1,
@@ -104,7 +104,7 @@ Finder flying(WidgetTester tester, Finder finder) {
   );
 }
 
-void checkBackgroundBoxHeight(WidgetTester tester, double height) {
+void checkBackgroundBoxHeight(final WidgetTester tester, final double height) {
   final Widget transitionBackgroundBox =
       tester.widget<Stack>(flying(tester, find.byType(Stack))).children[0];
   expect(
@@ -118,7 +118,7 @@ void checkBackgroundBoxHeight(WidgetTester tester, double height) {
   );
 }
 
-void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
+void checkOpacity(final WidgetTester tester, final Finder finder, final double opacity) {
   expect(
     tester.firstRenderObject<RenderAnimatedOpacity>(
       find.ancestor(
@@ -131,7 +131,7 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
 }
 
 void main() {
-  testWidgets('Bottom middle moves between middle and back label', (WidgetTester tester) async {
+  testWidgets('Bottom middle moves between middle and back label', (final WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -153,7 +153,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom middle moves between middle and back label RTL', (WidgetTester tester) async {
+  testWidgets('Bottom middle moves between middle and back label RTL', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -174,7 +174,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom middle never changes size during the animation', (WidgetTester tester) async {
+  testWidgets('Bottom middle never changes size during the animation', (final WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
     addTearDown(() async {
       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
@@ -195,7 +195,7 @@ void main() {
     }
   });
 
-  testWidgets('Bottom middle and top back label transitions their font', (WidgetTester tester) async {
+  testWidgets('Bottom middle and top back label transitions their font', (final WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -239,7 +239,7 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
-  testWidgets('Font transitions respect themes', (WidgetTester tester) async {
+  testWidgets('Font transitions respect themes', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -287,7 +287,7 @@ void main() {
     checkOpacity(tester, flying(tester, find.text('Page 1')).last, 0.5292819738388062);
   });
 
-  testWidgets('Fullscreen dialogs do not create heroes', (WidgetTester tester) async {
+  testWidgets('Fullscreen dialogs do not create heroes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Placeholder(),
@@ -298,7 +298,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 1',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (final BuildContext context) => scaffoldForNavBar(null)!,
         ));
 
     await tester.pump();
@@ -309,7 +309,7 @@ void main() {
         .push(CupertinoPageRoute<void>(
           title: 'Page 2',
           fullscreenDialog: true,
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (final BuildContext context) => scaffoldForNavBar(null)!,
         ));
 
     await tester.pump();
@@ -321,7 +321,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
 
-  testWidgets('Turning off transition works', (WidgetTester tester) async {
+  testWidgets('Turning off transition works', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoNavigationBar(
@@ -345,7 +345,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 2')), throwsAssertionError);
   });
 
-  testWidgets('Popping mid-transition is symmetrical', (WidgetTester tester) async {
+  testWidgets('Popping mid-transition is symmetrical', (final WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -386,7 +386,7 @@ void main() {
     checkColorAndPositionAt50ms();
   });
 
-  testWidgets('Popping mid-transition is symmetrical RTL', (WidgetTester tester) async {
+  testWidgets('Popping mid-transition is symmetrical RTL', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -431,7 +431,7 @@ void main() {
     checkColorAndPositionAt50ms();
   });
 
-  testWidgets('There should be no global keys in the hero flight', (WidgetTester tester) async {
+  testWidgets('There should be no global keys in the hero flight', (final WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     // Be mid-transition.
@@ -440,13 +440,13 @@ void main() {
     expect(
       flying(
         tester,
-        find.byWidgetPredicate((Widget widget) => widget.key != null),
+        find.byWidgetPredicate((final Widget widget) => widget.key != null),
       ),
       findsNothing,
     );
   });
 
-  testWidgets('DartPerformanceMode is latency mid-animation', (WidgetTester tester) async {
+  testWidgets('DartPerformanceMode is latency mid-animation', (final WidgetTester tester) async {
     DartPerformanceMode? mode;
 
     // before the animation starts, no requests are active.
@@ -466,7 +466,7 @@ void main() {
     expect(mode, isNull);
   });
 
-  testWidgets('Multiple nav bars tags do not conflict if in different navigators', (WidgetTester tester) async {
+  testWidgets('Multiple nav bars tags do not conflict if in different navigators', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
@@ -482,9 +482,9 @@ void main() {
               ),
             ],
           ),
-          tabBuilder: (BuildContext context, int tab) {
+          tabBuilder: (final BuildContext context, final int tab) {
             return CupertinoTabView(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return CupertinoPageScaffold(
                   navigationBar: CupertinoNavigationBar(
                     middle: Text('Tab ${tab + 1} Page 1'),
@@ -495,7 +495,7 @@ void main() {
                       onPressed: () {
                         Navigator.push<void>(context, CupertinoPageRoute<void>(
                           title: 'Tab ${tab + 1} Page 2',
-                          builder: (BuildContext context) {
+                          builder: (final BuildContext context) {
                             return const CupertinoPageScaffold(
                               navigationBar: CupertinoNavigationBar(),
                               child: Placeholder(),
@@ -541,7 +541,7 @@ void main() {
     expect(find.text('Tab 1 Page 2', skipOffstage: false), findsNothing);
   });
 
-  testWidgets('Transition box grows to large title size', (WidgetTester tester) async {
+  testWidgets('Transition box grows to large title size', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -565,7 +565,7 @@ void main() {
     checkBackgroundBoxHeight(tester, 84.33018499612808);
   });
 
-  testWidgets('Large transition box shrinks to standard nav bar size', (WidgetTester tester) async {
+  testWidgets('Large transition box shrinks to standard nav bar size', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -589,7 +589,7 @@ void main() {
     checkBackgroundBoxHeight(tester, 55.66981500387192);
   });
 
-  testWidgets('Hero flight removed at the end of page transition', (WidgetTester tester) async {
+  testWidgets('Hero flight removed at the end of page transition', (final WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -604,7 +604,7 @@ void main() {
     expect(() => flying(tester, find.text('Page 1')), throwsAssertionError);
   });
 
-  testWidgets('Exact widget is reused to build inside the transition', (WidgetTester tester) async {
+  testWidgets('Exact widget is reused to build inside the transition', (final WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -620,7 +620,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
-  testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (WidgetTester tester) async {
+  testWidgets('Middle is not shown if alwaysShowMiddle is false and the nav bar is expanded', (final WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     await startTransitionBetween(
       tester,
@@ -637,7 +637,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsNothing);
   });
 
-  testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (WidgetTester tester) async {
+  testWidgets('Middle is shown if alwaysShowMiddle is false but the nav bar is collapsed', (final WidgetTester tester) async {
     const Widget userMiddle = Placeholder();
     final ScrollController scrollController = ScrollController();
 
@@ -676,7 +676,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 2',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (final BuildContext context) => scaffoldForNavBar(null)!,
         ));
 
     await tester.pump();
@@ -685,7 +685,7 @@ void main() {
     expect(flying(tester, find.byWidget(userMiddle)), findsOneWidget);
   });
 
-  testWidgets('First appearance of back chevron fades in from the right', (WidgetTester tester) async {
+  testWidgets('First appearance of back chevron fades in from the right', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: scaffoldForNavBar(null),
@@ -696,7 +696,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 1',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (final BuildContext context) => scaffoldForNavBar(null)!,
         ));
 
     await tester.pump();
@@ -718,10 +718,10 @@ void main() {
     expect(tester.getTopLeft(backChevron), const Offset(31.055883467197418, 7.0));
   });
 
-  testWidgets('First appearance of back chevron fades in from the left in RTL', (WidgetTester tester) async {
+  testWidgets('First appearance of back chevron fades in from the left in RTL', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        builder: (BuildContext context, Widget? navigator) {
+        builder: (final BuildContext context, final Widget? navigator) {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: navigator!,
@@ -735,7 +735,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 1',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (final BuildContext context) => scaffoldForNavBar(null)!,
         ));
 
     await tester.pump();
@@ -764,7 +764,7 @@ void main() {
     );
   });
 
-  testWidgets('Back chevron fades out and in when both pages have it', (WidgetTester tester) async {
+  testWidgets('Back chevron fades out and in when both pages have it', (final WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1');
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -790,7 +790,7 @@ void main() {
     expect(tester.getTopLeft(backChevrons.last), const Offset(14.0, 7.0));
   });
 
-  testWidgets('Bottom middle just fades if top page has a custom leading', (WidgetTester tester) async {
+  testWidgets('Bottom middle just fades if top page has a custom leading', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -821,7 +821,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom leading fades in place', (WidgetTester tester) async {
+  testWidgets('Bottom leading fades in place', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(leading: Text('custom')),
@@ -847,7 +847,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom trailing fades in place', (WidgetTester tester) async {
+  testWidgets('Bottom trailing fades in place', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(trailing: Text('custom')),
@@ -873,7 +873,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom back label fades and slides to the left', (WidgetTester tester) async {
+  testWidgets('Bottom back label fades and slides to the left', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -885,7 +885,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 3',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (final BuildContext context) => scaffoldForNavBar(null)!,
         ));
 
     await tester.pump();
@@ -909,7 +909,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom back label fades and slides to the right in RTL', (WidgetTester tester) async {
+  testWidgets('Bottom back label fades and slides to the right in RTL', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -922,7 +922,7 @@ void main() {
         .state<NavigatorState>(find.byType(Navigator))
         .push(CupertinoPageRoute<void>(
           title: 'Page 3',
-          builder: (BuildContext context) => scaffoldForNavBar(null)!,
+          builder: (final BuildContext context) => scaffoldForNavBar(null)!,
         ));
 
     await tester.pump();
@@ -947,7 +947,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom large title moves to top back label', (WidgetTester tester) async {
+  testWidgets('Bottom large title moves to top back label', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -985,7 +985,7 @@ void main() {
     );
   });
 
-  testWidgets('Long title turns into the word back mid transition', (WidgetTester tester) async {
+  testWidgets('Long title turns into the word back mid transition', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1023,7 +1023,7 @@ void main() {
     );
   });
 
-  testWidgets('Bottom large title and top back label transitions their font', (WidgetTester tester) async {
+  testWidgets('Bottom large title and top back label transitions their font', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       from: const CupertinoSliverNavigationBar(),
@@ -1062,7 +1062,7 @@ void main() {
     expect(topBackLabel.text.style!.letterSpacing, moreOrLessEquals(-0.2259759941697121));
   });
 
-  testWidgets('Top middle fades in and slides in from the right', (WidgetTester tester) async {
+  testWidgets('Top middle fades in and slides in from the right', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1087,7 +1087,7 @@ void main() {
     );
   });
 
-  testWidgets('Top middle never changes size during the animation', (WidgetTester tester) async {
+  testWidgets('Top middle never changes size during the animation', (final WidgetTester tester) async {
     await tester.binding.setSurfaceSize(const Size(1080.0 / 2.75, 600));
     addTearDown(() async {
       await tester.binding.setSurfaceSize(const Size(800.0, 600.0));
@@ -1111,7 +1111,7 @@ void main() {
     }
   });
 
-  testWidgets('Top middle fades in and slides in from the left in RTL', (WidgetTester tester) async {
+  testWidgets('Top middle fades in and slides in from the left in RTL', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       toTitle: 'Page 2',
@@ -1137,7 +1137,7 @@ void main() {
     );
   });
 
-  testWidgets('Top large title fades in and slides in from the right', (WidgetTester tester) async {
+  testWidgets('Top large title fades in and slides in from the right', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1163,7 +1163,7 @@ void main() {
     );
   });
 
-  testWidgets('Top large title fades in and slides in from the left in RTL', (WidgetTester tester) async {
+  testWidgets('Top large title fades in and slides in from the left in RTL', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       to: const CupertinoSliverNavigationBar(),
@@ -1190,19 +1190,19 @@ void main() {
     );
   });
 
-  testWidgets('Components are not unnecessarily rebuilt during transitions', (WidgetTester tester) async {
+  testWidgets('Components are not unnecessarily rebuilt during transitions', (final WidgetTester tester) async {
     int bottomBuildTimes = 0;
     int topBuildTimes = 0;
     await startTransitionBetween(
       tester,
       from: CupertinoNavigationBar(
-        middle: Builder(builder: (BuildContext context) {
+        middle: Builder(builder: (final BuildContext context) {
           bottomBuildTimes++;
           return const Text('Page 1');
         }),
       ),
       to: CupertinoSliverNavigationBar(
-        largeTitle: Builder(builder: (BuildContext context) {
+        largeTitle: Builder(builder: (final BuildContext context) {
           topBuildTimes++;
           return const Text('Page 2');
         }),
@@ -1235,7 +1235,7 @@ void main() {
     expect(topBuildTimes, 3);
   });
 
-  testWidgets('Back swipe gesture transitions', (WidgetTester tester) async {
+  testWidgets('Back swipe gesture transitions', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',
@@ -1289,7 +1289,7 @@ void main() {
     expect(find.text('Page 1'), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0 on transition', (WidgetTester tester) async {
+  testWidgets('textScaleFactor is set to 1.0 on transition', (final WidgetTester tester) async {
     await startTransitionBetween(tester, fromTitle: 'Page 1', textScale: 99);
 
     await tester.pump(const Duration(milliseconds: 50));
@@ -1297,7 +1297,7 @@ void main() {
     expect(tester.firstWidget<RichText>(flying(tester, find.byType(RichText))).textScaleFactor, 1);
   });
 
-  testWidgets('Back swipe gesture cancels properly with transition', (WidgetTester tester) async {
+  testWidgets('Back swipe gesture cancels properly with transition', (final WidgetTester tester) async {
     await startTransitionBetween(
       tester,
       fromTitle: 'Page 1',

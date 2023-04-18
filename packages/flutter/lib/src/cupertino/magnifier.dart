@@ -117,7 +117,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   }
 
   @override
-  void didUpdateWidget(CupertinoTextMagnifier oldWidget) {
+  void didUpdateWidget(final CupertinoTextMagnifier oldWidget) {
     if (oldWidget.magnifierInfo != widget.magnifierInfo) {
       oldWidget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
       widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
@@ -202,7 +202,7 @@ class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedPositioned(
       duration: CupertinoTextMagnifier._kDragAnimationDuration,
       curve: widget.animationCurve,
@@ -294,7 +294,7 @@ class CupertinoMagnifier extends StatelessWidget {
   final Offset additionalFocalPointOffset;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Offset focalPointOffset =
         Offset(0, (kDefaultSize.height / 2) - kMagnifierAboveFocalPoint);
     focalPointOffset.scale(1, inOutAnimation?.value ?? 1);

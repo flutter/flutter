@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -41,7 +41,7 @@ class MyHomePage extends StatefulWidget {
 
 class Sky extends CustomPainter {
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Rect rect = Offset.zero & size;
     const RadialGradient gradient = RadialGradient(
       center: Alignment(0.7, -0.6),
@@ -57,7 +57,7 @@ class Sky extends CustomPainter {
 
   @override
   SemanticsBuilderCallback get semanticsBuilder {
-    return (Size size) {
+    return (final Size size) {
       // Annotate a rectangle containing the picture of the sun
       // with the label "Sun". When text to speech feature is enabled on the
       // device, a user will be able to locate the sun on this picture by
@@ -83,14 +83,14 @@ class Sky extends CustomPainter {
   // from the constructor) then we would return true if any
   // of them differed from the same fields on the oldDelegate.
   @override
-  bool shouldRepaint(Sky oldDelegate) => false;
+  bool shouldRepaint(final Sky oldDelegate) => false;
   @override
-  bool shouldRebuildSemantics(Sky oldDelegate) => false;
+  bool shouldRebuildSemantics(final Sky oldDelegate) => false;
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title ?? ''),

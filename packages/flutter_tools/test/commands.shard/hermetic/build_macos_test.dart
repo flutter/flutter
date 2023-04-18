@@ -29,7 +29,7 @@ import '../../src/test_flutter_command_runner.dart';
 
 class FakeXcodeProjectInterpreterWithProfile extends FakeXcodeProjectInterpreter {
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, { String? projectFilename }) async {
+  Future<XcodeProjectInfo> getInfo(final String projectPath, { final String? projectFilename }) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Profile', 'Release'],
@@ -93,7 +93,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function()? onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler(final String configuration, { final bool verbose = false, final void Function()? onRun }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fileSystem.currentDirectory);
     final Directory flutterBuildDir = fileSystem.directory(getMacOSBuildDirectory());
     return FakeCommand(
@@ -513,7 +513,7 @@ STDERR STUFF
 
     fileSystem.file('build/macos/Build/Products/Release/Runner.app/App')
       ..createSync(recursive: true)
-      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+      ..writeAsBytesSync(List<int>.generate(10000, (final int index) => 0));
 
     await createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--no-pub', '--analyze-size']

@@ -57,7 +57,7 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final OutlinedBorder effectiveBorder = widget.border ?? const RoundedRectangleBorder();
     return ListenableBuilder(
       listenable: _focusNode,
@@ -67,7 +67,7 @@ class _FocusListenerContainerState extends State<FocusListenerContainer> {
         canRequestFocus: false,
         child: widget.child,
       ),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return Container(
           padding: widget.padding,
           decoration: ShapeDecoration(
@@ -96,7 +96,7 @@ class _MyFieldState extends State<MyField> {
   final TextEditingController controller = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       children: <Widget>[
         Expanded(child: Text(widget.label)),
@@ -118,7 +118,7 @@ class ListenableBuilderExample extends StatelessWidget {
   const ListenableBuilderExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ListenableBuilder Example')),

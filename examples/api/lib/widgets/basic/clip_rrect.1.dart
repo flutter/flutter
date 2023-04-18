@@ -12,7 +12,7 @@ class ClipRRectApp extends StatelessWidget {
   const ClipRRectApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ClipRRect Sample')),
@@ -26,7 +26,7 @@ class ClipRRectExample extends StatelessWidget {
   const ClipRRectExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(40.0),
       constraints: const BoxConstraints.expand(),
@@ -52,7 +52,7 @@ class _FakedImage extends StatelessWidget {
   const _FakedImage();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       // Set constraints as if it were a 400x400 image
       constraints: BoxConstraints.tight(const Size(400, 400)),

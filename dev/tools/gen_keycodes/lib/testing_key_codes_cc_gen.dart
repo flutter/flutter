@@ -9,7 +9,7 @@ import 'logical_key_data.dart';
 import 'physical_key_data.dart';
 import 'utils.dart';
 
-String _toUpperCamel(String lowerCamel) {
+String _toUpperCamel(final String lowerCamel) {
   return lowerCamel.substring(0, 1).toUpperCase() + lowerCamel.substring(1);
 }
 

@@ -52,7 +52,7 @@ class AndroidStudio {
     _initAndValidate();
   }
 
-  static AndroidStudio? fromMacOSBundle(String bundlePath) {
+  static AndroidStudio? fromMacOSBundle(final String bundlePath) {
     final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
     final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
     final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
@@ -102,7 +102,7 @@ class AndroidStudio {
     return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
   }
 
-  static AndroidStudio? fromHomeDot(Directory homeDotDir) {
+  static AndroidStudio? fromHomeDot(final Directory homeDotDir) {
     final Match? versionMatch =
         _dotHomeStudioVersionMatcher.firstMatch(homeDotDir.basename);
     if (versionMatch?.groupCount != 2) {
@@ -261,7 +261,7 @@ the configured path by running this command: flutter config --android-studio-dir
       return null;
     }
     AndroidStudio? newest;
-    for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
+    for (final AndroidStudio studio in studios.where((final AndroidStudio s) => s.isValid)) {
       if (newest == null) {
         newest = studio;
         continue;
@@ -288,7 +288,7 @@ the configured path by running this command: flutter config --android-studio-dir
   static List<AndroidStudio> _allMacOS() {
     final List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
 
-    void checkForStudio(String path) {
+    void checkForStudio(final String path) {
       if (!globals.fs.isDirectorySync(path)) {
         return;
       }
@@ -327,7 +327,7 @@ the configured path by running this command: flutter config --android-studio-dir
         configuredStudio = configuredStudio.parent;
       }
       if (!candidatePaths
-          .any((FileSystemEntity e) => e.path == configuredStudio.path)) {
+          .any((final FileSystemEntity e) => e.path == configuredStudio.path)) {
         candidatePaths.add(configuredStudio);
       }
     }
@@ -346,13 +346,13 @@ the configured path by running this command: flutter config --android-studio-dir
     }
     for (final String studioPath in LineSplitter.split(spotlightQueryResult)) {
       final Directory appBundle = globals.fs.directory(studioPath);
-      if (!candidatePaths.any((FileSystemEntity e) => e.path == studioPath)) {
+      if (!candidatePaths.any((final FileSystemEntity e) => e.path == studioPath)) {
         candidatePaths.add(appBundle);
       }
     }
 
     return candidatePaths
-        .map<AndroidStudio?>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio?>((final FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .whereType<AndroidStudio>()
         .toList();
   }
@@ -360,8 +360,8 @@ the configured path by running this command: flutter config --android-studio-dir
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool alreadyFoundStudioAt(String path, { Version? newerThan }) {
-      return studios.any((AndroidStudio studio) {
+    bool alreadyFoundStudioAt(final String path, { final Version? newerThan }) {
+      return studios.any((final AndroidStudio studio) {
         if (studio.directory != path) {
           return false;
         }
@@ -399,14 +399,14 @@ the configured path by running this command: flutter config --android-studio-dir
       for (final Directory baseDir in directoriesToSearch) {
         final Iterable<Directory> directories =
             baseDir.listSync(followLinks: false).whereType<Directory>();
-        entities.addAll(directories.where((Directory directory) =>
+        entities.addAll(directories.where((final Directory directory) =>
             _dotHomeStudioVersionMatcher.hasMatch(directory.basename)));
       }
 
       for (final Directory entity in entities) {
         final AndroidStudio? studio = AndroidStudio.fromHomeDot(entity);
         if (studio != null && !alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
-          studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+          studios.removeWhere((final AndroidStudio other) => other.directory == studio.directory);
           studios.add(studio);
         }
       }
@@ -420,7 +420,7 @@ the configured path by running this command: flutter config --android-studio-dir
       }
       for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
         final String name  = globals.fs.path.basename(dir.path);
-        AndroidStudioValidator.idToTitle.forEach((String id, String title) {
+        AndroidStudioValidator.idToTitle.forEach((final String id, final String title) {
           if (name.startsWith(id)) {
             final String version = name.substring(id.length);
             String? installPath;
@@ -437,7 +437,7 @@ the configured path by running this command: flutter config --android-studio-dir
                 studioAppName: title,
               );
               if (!alreadyFoundStudioAt(studio.directory, newerThan: studio.version)) {
-                studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+                studios.removeWhere((final AndroidStudio other) => other.directory == studio.directory);
                 studios.add(studio);
               }
             }
@@ -453,7 +453,7 @@ the configured path by running this command: flutter config --android-studio-dir
     }
 
     if (globals.platform.isLinux) {
-      void checkWellKnownPath(String path) {
+      void checkWellKnownPath(final String path) {
         if (globals.fs.isDirectorySync(path) && !alreadyFoundStudioAt(path)) {
           studios.add(AndroidStudio(path));
         }
@@ -466,7 +466,7 @@ the configured path by running this command: flutter config --android-studio-dir
     return studios;
   }
 
-  static String? extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
+  static String? extractStudioPlistValueWithMatcher(final String plistValue, final RegExp keyMatcher) {
     return keyMatcher.stringMatch(plistValue)?.split('=').last.trim().replaceAll('"', '');
   }
 

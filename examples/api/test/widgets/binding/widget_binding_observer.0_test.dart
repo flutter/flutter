@@ -9,12 +9,12 @@ import 'package:flutter_api_samples/widgets/binding/widget_binding_observer.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('App tracks lifecycle states', (WidgetTester tester) async {
-    Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+  testWidgets('App tracks lifecycle states', (final WidgetTester tester) async {
+    Future<void> setAppLifeCycleState(final AppLifecycleState state) async {
       final ByteData? message =
           const StringCodec().encodeMessage(state.toString());
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-          'flutter/lifecycle', message, (_) {});
+          'flutter/lifecycle', message, (final _) {});
     }
 
     await tester.pumpWidget(

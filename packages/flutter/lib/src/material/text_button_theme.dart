@@ -48,7 +48,7 @@ class TextButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two text button themes.
-  static TextButtonThemeData? lerp(TextButtonThemeData? a, TextButtonThemeData? b, double t) {
+  static TextButtonThemeData? lerp(final TextButtonThemeData? a, final TextButtonThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -61,7 +61,7 @@ class TextButtonThemeData with Diagnosticable {
   int get hashCode => style.hashCode;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -72,7 +72,7 @@ class TextButtonThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
   }
@@ -112,16 +112,16 @@ class TextButtonTheme extends InheritedTheme {
   /// ```dart
   /// TextButtonThemeData theme = TextButtonTheme.of(context);
   /// ```
-  static TextButtonThemeData of(BuildContext context) {
+  static TextButtonThemeData of(final BuildContext context) {
     final TextButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<TextButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).textButtonTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return TextButtonTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(TextButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final TextButtonTheme oldWidget) => data != oldWidget.data;
 }

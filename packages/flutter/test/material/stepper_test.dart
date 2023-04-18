@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
+  testWidgets('Material3 has sentence case labels', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true),
         home: Material(
           child: Stepper(
-            onStepTapped: (int i) {},
+            onStepTapped: (final int i) {},
             steps: const <Step>[
               Step(
                 title: Text('Step 1'),
@@ -38,14 +38,14 @@ void main() {
     expect(find.text('Cancel'), findsWidgets);
   });
 
-  testWidgets('Stepper tap callback test', (WidgetTester tester) async {
+  testWidgets('Stepper tap callback test', (final WidgetTester tester) async {
     int index = 0;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Stepper(
-            onStepTapped: (int i) {
+            onStepTapped: (final int i) {
               index = i;
             },
             steps: const <Step>[
@@ -72,7 +72,7 @@ void main() {
     expect(index, 1);
   });
 
-  testWidgets('Stepper expansion test', (WidgetTester tester) async {
+  testWidgets('Stepper expansion test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -139,7 +139,7 @@ void main() {
     expect(box.size.height, 432.0);
   });
 
-  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+  testWidgets('Stepper horizontal size test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -165,7 +165,7 @@ void main() {
     expect(box.size.height, 600.0);
   });
 
-  testWidgets('Stepper visibility test', (WidgetTester tester) async {
+  testWidgets('Stepper visibility test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -214,7 +214,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('Stepper button test', (WidgetTester tester) async {
+  testWidgets('Stepper button test', (final WidgetTester tester) async {
     bool continuePressed = false;
     bool cancelPressed = false;
 
@@ -257,14 +257,14 @@ void main() {
     expect(cancelPressed, isTrue);
   });
 
-  testWidgets('Stepper disabled step test', (WidgetTester tester) async {
+  testWidgets('Stepper disabled step test', (final WidgetTester tester) async {
     int index = 0;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Stepper(
-            onStepTapped: (int i) {
+            onStepTapped: (final int i) {
               index = i;
             },
             steps: const <Step>[
@@ -293,7 +293,7 @@ void main() {
     expect(index, 0);
   });
 
-  testWidgets('Stepper scroll test', (WidgetTester tester) async {
+  testWidgets('Stepper scroll test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -367,7 +367,7 @@ void main() {
     expect(scrollableState.position.pixels, greaterThan(0.0));
   });
 
-  testWidgets('Stepper index test', (WidgetTester tester) async {
+  testWidgets('Stepper index test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -400,7 +400,7 @@ void main() {
     expect(find.text('2'), findsOneWidget);
   });
 
-  testWidgets('Stepper custom controls test', (WidgetTester tester) async {
+  testWidgets('Stepper custom controls test', (final WidgetTester tester) async {
     bool continuePressed = false;
     void setContinue() {
       continuePressed = true;
@@ -411,7 +411,7 @@ void main() {
       canceledPressed = true;
     }
 
-    Widget builder(BuildContext context, ControlsDetails details) {
+    Widget builder(final BuildContext context, final ControlsDetails details) {
       return Container(
         margin: const EdgeInsets.only(top: 16.0),
         child: ConstrainedBox(
@@ -479,7 +479,7 @@ void main() {
     expect(continuePressed, isTrue);
   });
 
-testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async {
+testWidgets('Stepper custom indexed controls test', (final WidgetTester tester) async {
 
     int currentStep = 0;
     void setContinue() {
@@ -490,7 +490,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       currentStep -= 1;
     }
 
-    Widget builder(BuildContext context, ControlsDetails details) {
+    Widget builder(final BuildContext context, final ControlsDetails details) {
       // For the purposes of testing, only render something for the active
       // step.
       if (!details.isActive) {
@@ -525,7 +525,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         home: Center(
           child: Material(
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Stepper(
                   currentStep: currentStep,
                   controlsBuilder: builder,
@@ -574,7 +574,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(find.text('Continue to 2'), findsNWidgets(1));
   });
 
-  testWidgets('Stepper error test', (WidgetTester tester) async {
+  testWidgets('Stepper error test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -599,10 +599,10 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(find.text('!'), findsOneWidget);
   });
 
-  testWidgets('Nested stepper error test', (WidgetTester tester) async {
+  testWidgets('Nested stepper error test', (final WidgetTester tester) async {
     late FlutterErrorDetails errorDetails;
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       errorDetails = details;
     };
     try {
@@ -647,7 +647,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
     final String errorMessage = lines.takeWhile(
-      (String line) => line != '',
+      (final String line) => line != '',
     ).join('\n');
     expect(errorMessage.length, lessThan(fullErrorMessage.length));
     expect(errorMessage, startsWith(
@@ -666,7 +666,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
   });
 
   ///https://github.com/flutter/flutter/issues/16920
-  testWidgets('Stepper icons size test', (WidgetTester tester) async {
+  testWidgets('Stepper icons size test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -695,7 +695,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(renderObject.size, equals(const Size.square(18.0)));
   });
 
-  testWidgets('Stepper physics scroll error test', (WidgetTester tester) async {
+  testWidgets('Stepper physics scroll error test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -728,7 +728,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(find.text('Text After Stepper'), findsNothing);
   });
 
-  testWidgets("Vertical Stepper can't be focused when disabled.", (WidgetTester tester) async {
+  testWidgets("Vertical Stepper can't be focused when disabled.", (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -752,7 +752,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(disabledNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets("Horizontal Stepper can't be focused when disabled.", (WidgetTester tester) async {
+  testWidgets("Horizontal Stepper can't be focused when disabled.", (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -777,7 +777,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(disabledNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('Stepper header title should not overflow', (WidgetTester tester) async {
+  testWidgets('Stepper header title should not overflow', (final WidgetTester tester) async {
     const String longText =
         'A long long long long long long long long long long long long text';
 
@@ -803,7 +803,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Stepper header subtitle should not overflow', (WidgetTester tester) async {
+  testWidgets('Stepper header subtitle should not overflow', (final WidgetTester tester) async {
     const String longText =
         'A long long long long long long long long long long long long text';
 
@@ -830,8 +830,8 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Stepper enabled button styles', (WidgetTester tester) async {
-    Widget buildFrame(ThemeData theme) {
+  testWidgets('Stepper enabled button styles', (final WidgetTester tester) async {
+    Widget buildFrame(final ThemeData theme) {
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -850,7 +850,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       );
     }
 
-    Material buttonMaterial(String label) {
+    Material buttonMaterial(final String label) {
       return tester.widget<Material>(
         find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
@@ -886,8 +886,8 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(tester.getRect(find.widgetWithText(TextButton, 'CANCEL')), cancelButtonRect);
   });
 
-  testWidgets('Stepper disabled button styles', (WidgetTester tester) async {
-    Widget buildFrame(ThemeData theme) {
+  testWidgets('Stepper disabled button styles', (final WidgetTester tester) async {
+    Widget buildFrame(final ThemeData theme) {
       return MaterialApp(
         theme: theme,
         home: Material(
@@ -904,7 +904,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       );
     }
 
-    Material buttonMaterial(String label) {
+    Material buttonMaterial(final String label) {
       return tester.widget<Material>(
         find.descendant(of: find.widgetWithText(TextButton, label), matching: find.byType(Material)),
       );
@@ -928,7 +928,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(buttonMaterial('CANCEL').textStyle!.color!.value, 0x61ffffff);
   });
 
-  testWidgets('Vertical and Horizontal Stepper physics test', (WidgetTester tester) async {
+  testWidgets('Vertical and Horizontal Stepper physics test', (final WidgetTester tester) async {
     const ScrollPhysics physics = NeverScrollableScrollPhysics();
 
     for(final StepperType type in StepperType.values) {
@@ -957,9 +957,9 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     }
   });
 
-  testWidgets('Stepper horizontal size test', (WidgetTester tester) async {
+  testWidgets('Stepper horizontal size test', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/77732
-    Widget buildFrame({ bool isActive = true, Brightness? brightness }) {
+    Widget buildFrame({ final bool isActive = true, final Brightness? brightness }) {
       return MaterialApp(
         theme: brightness == Brightness.dark ? ThemeData.dark() : ThemeData.light(),
         home: Scaffold(
@@ -1002,7 +1002,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(circleFillColor(), dark.background);
   });
 
-  testWidgets('Stepper custom elevation', (WidgetTester tester) async {
+  testWidgets('Stepper custom elevation', (final WidgetTester tester) async {
      const double elevation = 4.0;
 
      await tester.pumpWidget(
@@ -1036,7 +1036,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
      expect(material.elevation, elevation);
    });
 
-   testWidgets('Stepper with default elevation', (WidgetTester tester) async {
+   testWidgets('Stepper with default elevation', (final WidgetTester tester) async {
 
      await tester.pumpWidget(
        MaterialApp(
@@ -1068,7 +1068,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
      expect(material.elevation, 2.0);
    });
 
-  testWidgets('Stepper horizontal preserves state', (WidgetTester tester) async {
+  testWidgets('Stepper horizontal preserves state', (final WidgetTester tester) async {
     const Color untappedColor = Colors.blue;
     const Color tappedColor = Colors.red;
     int index = 0;
@@ -1079,9 +1079,9 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
           body: Center(
             // Must break this out into its own widget purely to be able to call `setState()`
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Stepper(
-                  onStepTapped: (int i) => setState(() => index = i),
+                  onStepTapped: (final int i) => setState(() => index = i),
                   currentStep: index,
                   type: StepperType.horizontal,
                   steps: const <Step>[
@@ -1139,7 +1139,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     // The color should still be `tappedColor`
     expect(getColor(), tappedColor);
   });
-       testWidgets('Stepper custom margin', (WidgetTester tester) async {
+       testWidgets('Stepper custom margin', (final WidgetTester tester) async {
 
       const EdgeInsetsGeometry margin = EdgeInsetsDirectional.only(
         bottom: 20,
@@ -1176,7 +1176,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
      expect(material.margin, equals(margin));
    });
 
-  testWidgets('Stepper with Alternative Label', (WidgetTester tester) async {
+  testWidgets('Stepper with Alternative Label', (final WidgetTester tester) async {
     int index = 0;
     late TextStyle bodyLargeStyle;
     late TextStyle bodyMediumStyle;
@@ -1186,14 +1186,14 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       MaterialApp(
         home: Material(
           child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
             bodyLargeStyle = Theme.of(context).textTheme.bodyText1!;
             bodyMediumStyle = Theme.of(context).textTheme.bodyText2!;
             bodySmallStyle = Theme.of(context).textTheme.caption!;
             return Stepper(
               type: StepperType.horizontal,
               currentStep: index,
-              onStepTapped: (int i) {
+              onStepTapped: (final int i) {
                 setState(() {
                   index = i;
                 });
@@ -1260,7 +1260,7 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(bodyMediumStyle, nextLabelTextWidget.style);
   });
 
-  testWidgets('Stepper Connector Style', (WidgetTester tester) async {
+  testWidgets('Stepper Connector Style', (final WidgetTester tester) async {
     const Color selectedColor = Colors.black;
     const Color disabledColor = Colors.white;
     int index = 0;
@@ -1270,14 +1270,14 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
         home: Scaffold(
           body: Center(
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Stepper(
                   type: StepperType.horizontal,
-                  connectorColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) =>
+                  connectorColor: MaterialStateProperty.resolveWith<Color>((final Set<MaterialState> states) =>
                   states.contains(MaterialState.selected)
                     ? selectedColor
                     : disabledColor),
-                  onStepTapped: (int i) => setState(() => index = i),
+                  onStepTapped: (final int i) => setState(() => index = i),
                   currentStep: index,
                   steps: <Step>[
                     Step(
@@ -1299,11 +1299,11 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
       )
     );
 
-    Color? circleColor(String circleText) => (tester.widget<AnimatedContainer>(
+    Color? circleColor(final String circleText) => (tester.widget<AnimatedContainer>(
       find.widgetWithText(AnimatedContainer, circleText),
     ).decoration as BoxDecoration?)?.color;
 
-    Color? lineColor(String keyStep) => tester.widget<Container>(find.byKey(Key(keyStep))).color;
+    Color? lineColor(final String keyStep) => tester.widget<Container>(find.byKey(Key(keyStep))).color;
 
     // Step 1
     // check if I'm in step 1
@@ -1329,12 +1329,12 @@ testWidgets('Stepper custom indexed controls test', (WidgetTester tester) async 
     expect(lineColor('line0'), selectedColor);
   });
 
-  testWidgets('Stepper stepIconBuilder test', (WidgetTester tester) async {
+  testWidgets('Stepper stepIconBuilder test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: Stepper(
-            stepIconBuilder: (int index, StepState state) {
+            stepIconBuilder: (final int index, final StepState state) {
               if (state == StepState.complete) {
                 return const FlutterLogo(size: 18);
               }
@@ -1393,7 +1393,7 @@ class _TappableColorWidgetState extends State<_TappableColorWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         setState((){

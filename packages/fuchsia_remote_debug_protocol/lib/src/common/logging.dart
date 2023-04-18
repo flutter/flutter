@@ -50,7 +50,7 @@ typedef LoggingFunction = void Function(LogMessage log);
 ///   '[${log.levelName}]::${log.tag}--${log.time}: ${log.message}'
 ///
 /// Exits with status code 1 if the `log` is [LoggingLevel.severe].
-void defaultLoggingFunction(LogMessage log) {
+void defaultLoggingFunction(final LogMessage log) {
   // ignore: avoid_print
   print('[${log.levelName}]::${log.tag}--${log.time}: ${log.message}');
   if (log.level == LoggingLevel.severe) {
@@ -122,26 +122,26 @@ class Logger {
   /// Logs a [LoggingLevel.severe] level `message`.
   ///
   /// Severe messages are always logged, regardless of what level is set.
-  void severe(String message) {
+  void severe(final String message) {
     loggingFunction(LogMessage(message, tag, LoggingLevel.severe));
   }
 
   /// Logs a [LoggingLevel.warning] level `message`.
-  void warning(String message) {
+  void warning(final String message) {
     if (globalLevel.index >= LoggingLevel.warning.index) {
       loggingFunction(LogMessage(message, tag, LoggingLevel.warning));
     }
   }
 
   /// Logs a [LoggingLevel.info] level `message`.
-  void info(String message) {
+  void info(final String message) {
     if (globalLevel.index >= LoggingLevel.info.index) {
       loggingFunction(LogMessage(message, tag, LoggingLevel.info));
     }
   }
 
   /// Logs a [LoggingLevel.fine] level `message`.
-  void fine(String message) {
+  void fine(final String message) {
     if (globalLevel.index >= LoggingLevel.fine.index) {
       loggingFunction(LogMessage(message, tag, LoggingLevel.fine));
     }

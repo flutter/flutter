@@ -12,7 +12,7 @@ class AnimatedFractionallySizedBoxExampleApp extends StatelessWidget {
   const AnimatedFractionallySizedBoxExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedFractionallySizedBox Sample')),
@@ -33,7 +33,7 @@ class _AnimatedFractionallySizedBoxExampleState extends State<AnimatedFractional
   bool selected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         setState(() {

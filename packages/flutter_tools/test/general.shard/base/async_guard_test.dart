@@ -37,10 +37,10 @@ Future<void> syncAndAsyncError() {
   throw _CustomException('Sync Doom');
 }
 
-Future<void> delayedThrow(FakeAsync time) {
+Future<void> delayedThrow(final FakeAsync time) {
   final Future<void> result =
     Future<void>.delayed(const Duration(milliseconds: 10))
-      .then((_) async {
+      .then((final _) async {
         throw _CustomException('Delayed Doom');
       });
   time.elapse(const Duration(seconds: 1));
@@ -60,11 +60,11 @@ void main() {
     caughtByHandler = false;
     zone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (
-        Zone self,
-        ZoneDelegate parent,
-        Zone zone,
-        Object error,
-        StackTrace stackTrace,
+        final Zone self,
+        final ZoneDelegate parent,
+        final Zone zone,
+        final Object error,
+        final StackTrace stackTrace,
       ) {
         caughtByZone = true;
         if (!caughtInZone.isCompleted) {
@@ -161,12 +161,12 @@ void main() {
     bool caughtByCatchError = false;
 
     final Completer<void> completer = Completer<void>();
-    await FakeAsync().run((FakeAsync time) {
+    await FakeAsync().run((final FakeAsync time) {
       unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(() => delayedThrow(time))
           .then(
-            (Object? obj) => obj,
-            onError: (Object e, StackTrace s) {
+            (final Object? obj) => obj,
+            onError: (final Object e, final StackTrace s) {
               caughtByCatchError = true;
             },
           );
@@ -178,7 +178,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, (Object e, StackTrace s) {
+      }, (final Object e, final StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);
@@ -200,11 +200,11 @@ void main() {
     bool caughtByOnError = false;
 
     final Completer<void> completer = Completer<void>();
-    await FakeAsync().run((FakeAsync time) {
+    await FakeAsync().run((final FakeAsync time) {
       unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(
           () => delayedThrow(time),
-          onError: (Object e, StackTrace s) {
+          onError: (final Object e, final StackTrace s) {
             caughtByOnError = true;
           },
         );
@@ -216,7 +216,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, (Object e, StackTrace s) {
+      }, (final Object e, final StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);
@@ -238,11 +238,11 @@ void main() {
     bool caughtByOnError = false;
 
     final Completer<void> completer = Completer<void>();
-    await FakeAsync().run((FakeAsync time) {
+    await FakeAsync().run((final FakeAsync time) {
       unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(
           () => delayedThrow(time),
-          onError: (Object e) {
+          onError: (final Object e) {
             caughtByOnError = true;
           },
         );
@@ -254,7 +254,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, (Object e, StackTrace s) {
+      }, (final Object e, final StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);
@@ -277,11 +277,11 @@ void main() {
     bool nonNullStackTrace = false;
 
     final Completer<void> completer = Completer<void>();
-    await FakeAsync().run((FakeAsync time) {
+    await FakeAsync().run((final FakeAsync time) {
       unawaited(runZonedGuarded(() async {
         final Future<void> f = asyncGuard<void>(
           () => delayedThrow(time),
-          onError: (Object e, [StackTrace? s]) {
+          onError: (final Object e, [final StackTrace? s]) {
             caughtByOnError = true;
             nonNullStackTrace = s != null;
           },
@@ -294,7 +294,7 @@ void main() {
         if (!completer.isCompleted) {
           completer.complete(null);
         }
-      }, (Object e, StackTrace s) {
+      }, (final Object e, final StackTrace s) {
         caughtByZone = true;
         if (!completer.isCompleted) {
           completer.complete(null);

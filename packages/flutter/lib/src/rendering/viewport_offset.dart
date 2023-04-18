@@ -68,7 +68,7 @@ enum ScrollDirection {
 /// Specifically, returns [ScrollDirection.reverse] for [ScrollDirection.forward]
 /// (and vice versa) and returns [ScrollDirection.idle] for
 /// [ScrollDirection.idle].
-ScrollDirection flipScrollDirection(ScrollDirection direction) {
+ScrollDirection flipScrollDirection(final ScrollDirection direction) {
   switch (direction) {
     case ScrollDirection.idle:
       return ScrollDirection.idle;
@@ -103,7 +103,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// The [pixels] value does not change unless the viewport issues a
   /// correction.
-  factory ViewportOffset.fixed(double value) = _FixedViewportOffset;
+  factory ViewportOffset.fixed(final double value) = _FixedViewportOffset;
 
   /// Creates a viewport offset with a [pixels] value of 0.0.
   ///
@@ -148,7 +148,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// dimensions unconditionally?"; if the new dimensions change the
   /// [ViewportOffset]'s actual [pixels] value, then the viewport will need to
   /// be laid out again.)
-  bool applyViewportDimension(double viewportDimension);
+  bool applyViewportDimension(final double viewportDimension);
 
   /// Called when the viewport's content extents are established.
   ///
@@ -175,7 +175,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// even if the values have not changed. It may be called many times if the
   /// scroll offset is corrected (if this returns false). This is always called
   /// after [applyViewportDimension], if that method is called.
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent);
+  bool applyContentDimensions(final double minScrollExtent, final double maxScrollExtent);
 
   /// Apply a layout-time correction to the scroll offset.
   ///
@@ -189,7 +189,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   ///  * [jumpTo], for also changing the scroll position when not in layout.
   ///    [jumpTo] applies the change immediately and notifies its listeners.
-  void correctBy(double correction);
+  void correctBy(final double correction);
 
   /// Jumps [pixels] from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
@@ -198,7 +198,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   ///  * [correctBy], for changing the current offset in the middle of layout
   ///    and that defers the notification of its listeners until after layout.
-  void jumpTo(double pixels);
+  void jumpTo(final double pixels);
 
   /// Animates [pixels] from its current value to the given value.
   ///
@@ -208,9 +208,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
   Future<void> animateTo(
-    double to, {
-    required Duration duration,
-    required Curve curve,
+    final double to, {
+    required final Duration duration,
+    required final Curve curve,
   });
 
   /// Calls [jumpTo] if duration is null or [Duration.zero], otherwise
@@ -221,10 +221,10 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// like [ScrollPosition] handle it by adjusting [to] to prevent over or
   /// underscroll.
   Future<void> moveTo(
-    double to, {
-    Duration? duration,
-    Curve? curve,
-    bool? clamp,
+    final double to, {
+    final Duration? duration,
+    final Curve? curve,
+    final bool? clamp,
   }) {
     if (duration == null || duration == Duration.zero) {
       jumpTo(to);
@@ -276,7 +276,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.debugFillDescription(description)`.
   @mustCallSuper
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     if (hasPixels) {
       description.add('offset: ${pixels.toStringAsFixed(1)}');
     }
@@ -296,26 +296,26 @@ class _FixedViewportOffset extends ViewportOffset {
   bool get hasPixels => true;
 
   @override
-  bool applyViewportDimension(double viewportDimension) => true;
+  bool applyViewportDimension(final double viewportDimension) => true;
 
   @override
-  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
+  bool applyContentDimensions(final double minScrollExtent, final double maxScrollExtent) => true;
 
   @override
-  void correctBy(double correction) {
+  void correctBy(final double correction) {
     _pixels += correction;
   }
 
   @override
-  void jumpTo(double pixels) {
+  void jumpTo(final double pixels) {
     // Do nothing, viewport is fixed.
   }
 
   @override
   Future<void> animateTo(
-    double to, {
-    required Duration duration,
-    required Curve curve,
+    final double to, {
+    required final Duration duration,
+    required final Curve curve,
   }) async { }
 
   @override

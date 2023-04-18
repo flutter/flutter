@@ -20,7 +20,7 @@ void main() {
     );
   });
 
-  testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - no theme, default size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: ImageIcon(image),
@@ -32,7 +32,7 @@ void main() {
     expect(find.byType(Image), findsOneWidget);
   });
 
-  testWidgets('Icon opacity', (WidgetTester tester) async {
+  testWidgets('Icon opacity', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: IconTheme(
@@ -45,7 +45,7 @@ void main() {
     expect(tester.widget<Image>(find.byType(Image)).color!.alpha, equals(128));
   });
 
-  testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - no theme, explicit size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: ImageIcon(
@@ -59,7 +59,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(96.0)));
   });
 
-  testWidgets('ImageIcon sizing - sized theme', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sized theme', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: IconTheme(
@@ -73,7 +73,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(36.0)));
   });
 
-  testWidgets('ImageIcon sizing - sized theme, explicit size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sized theme, explicit size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: IconTheme(
@@ -90,7 +90,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
-  testWidgets('ImageIcon sizing - sizeless theme, default size', (WidgetTester tester) async {
+  testWidgets('ImageIcon sizing - sizeless theme, default size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: IconTheme(
@@ -104,7 +104,7 @@ void main() {
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
-  testWidgets('ImageIcon has semantics data', (WidgetTester tester) async {
+  testWidgets('ImageIcon has semantics data', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       const Directionality(

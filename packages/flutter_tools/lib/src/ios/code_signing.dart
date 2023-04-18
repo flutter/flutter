@@ -97,12 +97,12 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-z
 /// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
 Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
-  required Map<String, String> buildSettings,
-  required ProcessManager processManager,
-  required Platform platform,
-  required Logger logger,
-  required Config config,
-  required Terminal terminal,
+  required final Map<String, String> buildSettings,
+  required final ProcessManager processManager,
+  required final Platform platform,
+  required final Logger logger,
+  required final Config config,
+  required final Terminal terminal,
 }) async {
   // If the user already has it set in the project build settings itself,
   // continue with that.
@@ -137,11 +137,11 @@ Future<Map<String, String>?> getCodeSigningIdentityDevelopmentTeamBuildSetting({
 }
 
 Future<String?> getCodeSigningIdentityDevelopmentTeam({
-  required ProcessManager processManager,
-  required Platform platform,
-  required Logger logger,
-  required Config config,
-  required Terminal terminal,
+  required final ProcessManager processManager,
+  required final Platform platform,
+  required final Logger logger,
+  required final Config config,
+  required final Terminal terminal,
 }) async =>
     _getCodeSigningIdentityDevelopmentTeam(
       processManager: processManager,
@@ -153,12 +153,12 @@ Future<String?> getCodeSigningIdentityDevelopmentTeam({
 
 /// Set [shouldExitOnNoCerts] to show instructions for how to add a cert when none are found, then [toolExit].
 Future<String?> _getCodeSigningIdentityDevelopmentTeam({
-  required ProcessManager processManager,
-  required Platform platform,
-  required Logger logger,
-  required Config config,
-  required Terminal terminal,
-  bool shouldExitOnNoCerts = false,
+  required final ProcessManager processManager,
+  required final Platform platform,
+  required final Logger logger,
+  required final Config config,
+  required final Terminal terminal,
+  final bool shouldExitOnNoCerts = false,
 }) async {
   if (!platform.isMacOS) {
     return null;
@@ -188,7 +188,7 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
 
   final List<String> validCodeSigningIdentities = findIdentityStdout
       .split('\n')
-      .map<String?>((String outputLine) {
+      .map<String?>((final String outputLine) {
         return _securityFindIdentityDeveloperIdentityExtractionPattern
             .firstMatch(outputLine)
             ?.group(1);
@@ -247,11 +247,11 @@ Future<String?> _getCodeSigningIdentityDevelopmentTeam({
 
 /// Set [shouldExitOnNoCerts] to show instructions for how to add a cert when none are found, then [toolExit].
 Future<String?> _chooseSigningIdentity(
-  List<String> validCodeSigningIdentities,
-  Logger logger,
-  Config config,
-  Terminal terminal,
-  bool shouldExitOnNoCerts,
+  final List<String> validCodeSigningIdentities,
+  final Logger logger,
+  final Config config,
+  final Terminal terminal,
+  final bool shouldExitOnNoCerts,
 ) async {
   // The user has no valid code signing identities.
   if (validCodeSigningIdentities.isEmpty) {
@@ -296,7 +296,7 @@ Future<String?> _chooseSigningIdentity(
     logger.printStatus('  a) Abort', emphasis: true);
 
     final String choice = await terminal.promptForCharInput(
-      List<String>.generate(count, (int number) => '${number + 1}')
+      List<String>.generate(count, (final int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
@@ -317,4 +317,4 @@ Future<String?> _chooseSigningIdentity(
 }
 
 /// Returns true if s is a not empty string.
-bool _isNotEmpty(String? s) => s != null && s.isNotEmpty;
+bool _isNotEmpty(final String? s) => s != null && s.isNotEmpty;

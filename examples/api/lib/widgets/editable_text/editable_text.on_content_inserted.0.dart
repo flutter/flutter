@@ -14,7 +14,7 @@ class KeyboardInsertedContentApp extends StatelessWidget {
   const KeyboardInsertedContentApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: KeyboardInsertedContentDemo(),
     );
@@ -39,7 +39,7 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Keyboard Inserted Content Sample')),
       body: Column(
@@ -50,7 +50,7 @@ class _KeyboardInsertedContentDemoState extends State<KeyboardInsertedContentDem
             controller: _controller,
             contentInsertionConfiguration: ContentInsertionConfiguration(
               allowedMimeTypes: const <String>['image/png', 'image/gif'],
-              onContentInserted: (KeyboardInsertedContent data) async {
+              onContentInserted: (final KeyboardInsertedContent data) async {
                 if (data.data != null) {
                   setState(() {
                     bytes = data.data;

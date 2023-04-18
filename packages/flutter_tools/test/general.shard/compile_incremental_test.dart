@@ -473,13 +473,13 @@ void main() {
 }
 
 Future<void> _recompile(
-  StdoutHandler stdoutHandler,
-  ResidentCompiler generator,
-  MemoryIOSink frontendServerStdIn,
-  String mockCompilerOutput, {
-  bool suppressErrors = false,
+  final StdoutHandler stdoutHandler,
+  final ResidentCompiler generator,
+  final MemoryIOSink frontendServerStdIn,
+  final String mockCompilerOutput, {
+  final bool suppressErrors = false,
   Uri? mainUri,
-  String expectedMainUri = '/path/to/main.dart',
+  final String expectedMainUri = '/path/to/main.dart',
   List<Uri>? updatedUris,
   List<String>? expectedUpdatedUris,
 }) async {
@@ -517,9 +517,9 @@ Future<void> _recompile(
 }
 
 Future<void> _accept(
-  ResidentCompiler generator,
-  MemoryIOSink frontendServerStdIn,
-  String expected,
+  final ResidentCompiler generator,
+  final MemoryIOSink frontendServerStdIn,
+  final String expected,
 ) async {
   generator.accept();
   final String commands = frontendServerStdIn.getAndClear();
@@ -528,11 +528,11 @@ Future<void> _accept(
 }
 
 Future<void> _reject(
-  StdoutHandler stdoutHandler,
-  ResidentCompiler generator,
-  MemoryIOSink frontendServerStdIn,
-  String mockCompilerOutput,
-  String expected,
+  final StdoutHandler stdoutHandler,
+  final ResidentCompiler generator,
+  final MemoryIOSink frontendServerStdIn,
+  final String mockCompilerOutput,
+  final String expected,
 ) async {
   // Put content into the output stream after generator.recompile gets
   // going few lines below, resets completer.

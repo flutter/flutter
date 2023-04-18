@@ -55,14 +55,14 @@ class FractionalOffset extends Alignment {
   /// Creates a fractional offset.
   ///
   /// The [dx] and [dy] arguments must not be null.
-  const FractionalOffset(double dx, double dy)
+  const FractionalOffset(final double dx, final double dy)
     : super(dx * 2.0 - 1.0, dy * 2.0 - 1.0);
 
   /// Creates a fractional offset from a specific offset and size.
   ///
   /// The returned [FractionalOffset] describes the position of the
   /// [Offset] in the [Size], as a fraction of the [Size].
-  factory FractionalOffset.fromOffsetAndSize(Offset offset, Size size) {
+  factory FractionalOffset.fromOffsetAndSize(final Offset offset, final Size size) {
     return FractionalOffset(
       offset.dx / size.width,
       offset.dy / size.height,
@@ -78,7 +78,7 @@ class FractionalOffset extends Alignment {
   ///
   /// The returned [FractionalOffset] describes the position of the
   /// [Offset] in the [Rect], as a fraction of the [Rect].
-  factory FractionalOffset.fromOffsetAndRect(Offset offset, Rect rect) {
+  factory FractionalOffset.fromOffsetAndRect(final Offset offset, final Rect rect) {
     return FractionalOffset.fromOffsetAndSize(
       offset - rect.topLeft,
       rect.size,
@@ -130,7 +130,7 @@ class FractionalOffset extends Alignment {
   static const FractionalOffset bottomRight = FractionalOffset(1.0, 1.0);
 
   @override
-  Alignment operator -(Alignment other) {
+  Alignment operator -(final Alignment other) {
     if (other is! FractionalOffset) {
       return super - other;
     }
@@ -138,7 +138,7 @@ class FractionalOffset extends Alignment {
   }
 
   @override
-  Alignment operator +(Alignment other) {
+  Alignment operator +(final Alignment other) {
     if (other is! FractionalOffset) {
       return super + other;
     }
@@ -151,22 +151,22 @@ class FractionalOffset extends Alignment {
   }
 
   @override
-  FractionalOffset operator *(double other) {
+  FractionalOffset operator *(final double other) {
     return FractionalOffset(dx * other, dy * other);
   }
 
   @override
-  FractionalOffset operator /(double other) {
+  FractionalOffset operator /(final double other) {
     return FractionalOffset(dx / other, dy / other);
   }
 
   @override
-  FractionalOffset operator ~/(double other) {
+  FractionalOffset operator ~/(final double other) {
     return FractionalOffset((dx ~/ other).toDouble(), (dy ~/ other).toDouble());
   }
 
   @override
-  FractionalOffset operator %(double other) {
+  FractionalOffset operator %(final double other) {
     return FractionalOffset(dx % other, dy % other);
   }
 
@@ -175,7 +175,7 @@ class FractionalOffset extends Alignment {
   /// If either is null, this function interpolates from [FractionalOffset.center].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static FractionalOffset? lerp(FractionalOffset? a, FractionalOffset? b, double t) {
+  static FractionalOffset? lerp(final FractionalOffset? a, final FractionalOffset? b, final double t) {
     if (identical(a, b)) {
       return a;
     }

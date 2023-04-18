@@ -11,7 +11,7 @@ class _PageSelector extends StatelessWidget {
 
   final List<Icon>? icons;
 
-  void _handleArrowButtonPress(BuildContext context, int delta) {
+  void _handleArrowButtonPress(final BuildContext context, final int delta) {
     final TabController controller = DefaultTabController.of(context);
     if (!controller.indexIsChanging) {
       controller.animateTo((controller.index + delta).clamp(0, icons!.length - 1));
@@ -19,7 +19,7 @@ class _PageSelector extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TabController? controller = DefaultTabController.maybeOf(context);
     final Color color = Theme.of(context).colorScheme.secondary;
     return SafeArea(
@@ -55,7 +55,7 @@ class _PageSelector extends StatelessWidget {
                 color: color,
               ),
               child: TabBarView(
-                children: icons!.map<Widget>((Icon icon) {
+                children: icons!.map<Widget>((final Icon icon) {
                   return Container(
                     padding: const EdgeInsets.all(12.0),
                     child: Card(
@@ -88,7 +88,7 @@ class PageSelectorDemo extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Page selector'),

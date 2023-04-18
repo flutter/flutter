@@ -12,7 +12,7 @@ class UnfocusExampleApp extends StatelessWidget {
   const UnfocusExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: UnfocusExample(),
     );
@@ -30,7 +30,7 @@ class _UnfocusExampleState extends State<UnfocusExample> {
   UnfocusDisposition disposition = UnfocusDisposition.scope;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: ColoredBox(
         color: Colors.white,
@@ -38,7 +38,7 @@ class _UnfocusExampleState extends State<UnfocusExample> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Wrap(
-              children: List<Widget>.generate(4, (int index) {
+              children: List<Widget>.generate(4, (final int index) {
                 return const SizedBox(
                   width: 200,
                   child: Padding(
@@ -53,13 +53,13 @@ class _UnfocusExampleState extends State<UnfocusExample> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                ...List<Widget>.generate(UnfocusDisposition.values.length, (int index) {
+                ...List<Widget>.generate(UnfocusDisposition.values.length, (final int index) {
                   return Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Radio<UnfocusDisposition>(
                         groupValue: disposition,
-                        onChanged: (UnfocusDisposition? value) {
+                        onChanged: (final UnfocusDisposition? value) {
                           setState(() {
                             if (value != null) {
                               disposition = value;

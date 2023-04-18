@@ -20,7 +20,7 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [ List<int>? binary ]) {
+  void send(final Map<String, dynamic> message, [ final List<int>? binary ]) {
     outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
@@ -71,7 +71,7 @@ void main() {
       await pumpEventQueue();
       await daemonConnection.dispose();
 
-      expect((await events).map((DaemonEventData event) => event.data).toList(), <dynamic>['1', null, 3]);
+      expect((await events).map((final DaemonEventData event) => event.data).toList(), <dynamic>['1', null, 3]);
     });
   });
 
@@ -178,13 +178,13 @@ void main() {
   });
 
   group('DaemonInputStreamConverter', () {
-    Map<String, Object?> testCommand(int id, [int? binarySize]) => <String, Object?>{
+    Map<String, Object?> testCommand(final int id, [final int? binarySize]) => <String, Object?>{
       'id': id,
       'method': 'test',
       if (binarySize != null)
         '_binaryLength': binarySize,
     };
-    List<int> testCommandBinary(int id, [int? binarySize]) => utf8.encode('[${json.encode(testCommand(id, binarySize))}]\n');
+    List<int> testCommandBinary(final int id, [final int? binarySize]) => utf8.encode('[${json.encode(testCommand(id, binarySize))}]\n');
 
     testWithoutContext('can parse a single message', () async {
       final Stream<List<int>> inputStream = Stream<List<int>>.fromIterable(<List<int>>[
@@ -368,7 +368,7 @@ void main() {
     testWithoutContext('handles sending to a closed sink', () async {
       // Unless the stream is listened to, the call to .close() will never
       // complete
-      outputStream.stream.listen((List<int> _) {});
+      outputStream.stream.listen((final List<int> _) {});
       await outputStream.sink.close();
       daemonStreams.send(testCommand);
       expect(
@@ -387,13 +387,13 @@ class _DaemonMessageAndBinary {
   final List<int>? binary;
 }
 
-Future<List<_DaemonMessageAndBinary>> _readAllBinaries(Stream<DaemonMessage> inputStream) async {
+Future<List<_DaemonMessageAndBinary>> _readAllBinaries(final Stream<DaemonMessage> inputStream) async {
   final StreamIterator<DaemonMessage> iterator = StreamIterator<DaemonMessage>(inputStream);
   final List<_DaemonMessageAndBinary> outputs = <_DaemonMessageAndBinary>[];
   while (await iterator.moveNext()) {
     List<int>? binary;
     if (iterator.current.binary != null) {
-      binary = await iterator.current.binary!.reduce((List<int> a, List<int> b) => a + b);
+      binary = await iterator.current.binary!.reduce((final List<int> a, final List<int> b) => a + b);
     }
     outputs.add(_DaemonMessageAndBinary(iterator.current, binary));
   }

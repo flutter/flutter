@@ -19,7 +19,7 @@ import 'binding.dart';
 /// This function differs from [ui.decodeImageFromList] in that it defers to
 /// [PaintingBinding.instantiateImageCodec], and therefore can be mocked in
 /// tests.
-Future<ui.Image> decodeImageFromList(Uint8List bytes) async {
+Future<ui.Image> decodeImageFromList(final Uint8List bytes) async {
   final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
   return frameInfo.image;

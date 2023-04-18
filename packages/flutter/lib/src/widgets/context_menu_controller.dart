@@ -44,9 +44,9 @@ class ContextMenuController {
   /// Since there can only be one shown context menu at a time, calling this
   /// will also remove any other context menu that is visible.
   void show({
-    required BuildContext context,
-    required WidgetBuilder contextMenuBuilder,
-    Widget? debugRequiredFor,
+    required final BuildContext context,
+    required final WidgetBuilder contextMenuBuilder,
+    final Widget? debugRequiredFor,
   }) {
     removeAny();
     final OverlayState overlayState = Overlay.of(
@@ -60,7 +60,7 @@ class ContextMenuController {
     );
 
     _menuOverlayEntry = OverlayEntry(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return capturedThemes.wrap(contextMenuBuilder(context));
       },
     );

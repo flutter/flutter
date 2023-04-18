@@ -26,16 +26,16 @@ class SnapshotType {
 /// Interface to the gen_snapshot command-line tool.
 class GenSnapshot {
   GenSnapshot({
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required Logger logger,
+    required final Artifacts artifacts,
+    required final ProcessManager processManager,
+    required final Logger logger,
   }) : _artifacts = artifacts,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
 
   final Artifacts _artifacts;
   final ProcessUtils _processUtils;
 
-  String getSnapshotterPath(SnapshotType snapshotType) {
+  String getSnapshotterPath(final SnapshotType snapshotType) {
     return _artifacts.getArtifactPath(
         Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
   }
@@ -52,9 +52,9 @@ class GenSnapshot {
   };
 
   Future<int> run({
-    required SnapshotType snapshotType,
-    DarwinArch? darwinArch,
-    Iterable<String> additionalArgs = const <String>[],
+    required final SnapshotType snapshotType,
+    final DarwinArch? darwinArch,
+    final Iterable<String> additionalArgs = const <String>[],
   }) {
     assert(darwinArch != DarwinArch.armv7);
     assert(snapshotType.platform != TargetPlatform.ios || darwinArch != null);
@@ -74,7 +74,7 @@ class GenSnapshot {
 
     return _processUtils.stream(
       <String>[snapshotterPath, ...args],
-      mapFunction: (String line) =>  kIgnoredWarnings.contains(line) ? null : line,
+      mapFunction: (final String line) =>  kIgnoredWarnings.contains(line) ? null : line,
     );
   }
 }
@@ -82,11 +82,11 @@ class GenSnapshot {
 class AOTSnapshotter {
   AOTSnapshotter({
     this.reportTimings = false,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Xcode xcode,
-    required ProcessManager processManager,
-    required Artifacts artifacts,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Xcode xcode,
+    required final ProcessManager processManager,
+    required final Artifacts artifacts,
   }) : _logger = logger,
       _fileSystem = fileSystem,
       _xcode = xcode,
@@ -108,16 +108,16 @@ class AOTSnapshotter {
 
   /// Builds an architecture-specific ahead-of-time compiled snapshot of the specified script.
   Future<int> build({
-    required TargetPlatform platform,
-    required BuildMode buildMode,
-    required String mainPath,
-    required String outputPath,
-    DarwinArch? darwinArch,
-    String? sdkRoot,
-    List<String> extraGenSnapshotOptions = const <String>[],
-    String? splitDebugInfo,
-    required bool dartObfuscation,
-    bool quiet = false,
+    required final TargetPlatform platform,
+    required final BuildMode buildMode,
+    required final String mainPath,
+    required final String outputPath,
+    final DarwinArch? darwinArch,
+    final String? sdkRoot,
+    final List<String> extraGenSnapshotOptions = const <String>[],
+    final String? splitDebugInfo,
+    required final bool dartObfuscation,
+    final bool quiet = false,
   }) async {
     assert(platform != TargetPlatform.ios || darwinArch != null);
 
@@ -250,14 +250,14 @@ class AOTSnapshotter {
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
   Future<int> _buildFramework({
-    required DarwinArch appleArch,
-    required bool isIOS,
-    String? sdkRoot,
-    required String assemblyPath,
-    required String outputPath,
-    required bool quiet,
-    required bool stripAfterBuild,
-    required bool extractAppleDebugSymbols
+    required final DarwinArch appleArch,
+    required final bool isIOS,
+    final String? sdkRoot,
+    required final String assemblyPath,
+    required final String outputPath,
+    required final bool quiet,
+    required final bool stripAfterBuild,
+    required final bool extractAppleDebugSymbols
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     if (!quiet) {
@@ -334,7 +334,7 @@ class AOTSnapshotter {
     return 0;
   }
 
-  bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
+  bool _isValidAotPlatform(final TargetPlatform platform, final BuildMode buildMode) {
     if (buildMode == BuildMode.debug) {
       return false;
     }

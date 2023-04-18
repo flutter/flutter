@@ -15,7 +15,7 @@ bool get isFirefox => window.navigator.userAgent.toLowerCase().contains('firefox
 /// `<flt-glass-pane>` element. Otherwise, looks under `<flt-glass-pane>`
 /// without penetrating the shadow DOM. In the latter case, if the application
 /// creates platform views, this will also find platform view elements.
-List<Node> findElements(String selector) {
+List<Node> findElements(final String selector) {
   final Element? glassPane = document.querySelector('flt-glass-pane');
   if (glassPane == null) {
     fail(

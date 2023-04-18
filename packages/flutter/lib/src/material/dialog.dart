@@ -213,7 +213,7 @@ class Dialog extends StatelessWidget {
   final bool _fullscreen;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
     final EdgeInsets effectivePadding = MediaQuery.viewInsetsOf(context) + (insetPadding ?? EdgeInsets.zero);
@@ -635,7 +635,7 @@ class AlertDialog extends StatelessWidget {
   final bool scrollable;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
@@ -881,7 +881,7 @@ class SimpleDialogOption extends StatelessWidget {
   final EdgeInsets? padding;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return InkWell(
       onTap: onPressed,
       child: Padding(
@@ -1069,7 +1069,7 @@ class SimpleDialog extends StatelessWidget {
   final AlignmentGeometry? alignment;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
 
@@ -1167,7 +1167,7 @@ class SimpleDialog extends StatelessWidget {
   }
 }
 
-Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+Widget _buildMaterialDialogTransitions(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation, final Widget child) {
   return FadeTransition(
     opacity: CurvedAnimation(
       parent: animation,
@@ -1272,16 +1272,16 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 ///  * <https://material.io/design/components/dialogs.html>
 ///  * <https://m3.material.io/components/dialogs>
 Future<T?> showDialog<T>({
-  required BuildContext context,
-  required WidgetBuilder builder,
-  bool barrierDismissible = true,
-  Color? barrierColor = Colors.black54,
-  String? barrierLabel,
-  bool useSafeArea = true,
-  bool useRootNavigator = true,
-  RouteSettings? routeSettings,
-  Offset? anchorPoint,
-  TraversalEdgeBehavior? traversalEdgeBehavior,
+  required final BuildContext context,
+  required final WidgetBuilder builder,
+  final bool barrierDismissible = true,
+  final Color? barrierColor = Colors.black54,
+  final String? barrierLabel,
+  final bool useSafeArea = true,
+  final bool useRootNavigator = true,
+  final RouteSettings? routeSettings,
+  final Offset? anchorPoint,
+  final TraversalEdgeBehavior? traversalEdgeBehavior,
 }) {
   assert(_debugIsActive(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1308,7 +1308,7 @@ Future<T?> showDialog<T>({
   ));
 }
 
-bool _debugIsActive(BuildContext context) {
+bool _debugIsActive(final BuildContext context) {
   if (context is Element && !context.debugIsActive) {
     throw FlutterError.fromParts(<DiagnosticsNode>[
       ErrorSummary('This BuildContext is no longer valid.'),
@@ -1374,18 +1374,18 @@ class DialogRoute<T> extends RawDialogRoute<T> {
   /// modal barrier color, and modal barrier behavior (dialog is dismissible
   /// with a tap on the barrier).
   DialogRoute({
-    required BuildContext context,
-    required WidgetBuilder builder,
-    CapturedThemes? themes,
+    required final BuildContext context,
+    required final WidgetBuilder builder,
+    final CapturedThemes? themes,
     super.barrierColor = Colors.black54,
     super.barrierDismissible,
-    String? barrierLabel,
-    bool useSafeArea = true,
+    final String? barrierLabel,
+    final bool useSafeArea = true,
     super.settings,
     super.anchorPoint,
     super.traversalEdgeBehavior,
   }) : super(
-         pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+         pageBuilder: (final BuildContext buildContext, final Animation<double> animation, final Animation<double> secondaryAnimation) {
            final Widget pageChild = Builder(builder: builder);
            Widget dialog = themes?.wrap(pageChild) ?? pageChild;
            if (useSafeArea) {
@@ -1399,7 +1399,7 @@ class DialogRoute<T> extends RawDialogRoute<T> {
        );
 }
 
-double _paddingScaleFactor(double textScaleFactor) {
+double _paddingScaleFactor(final double textScaleFactor) {
   final double clampedTextScaleFactor = clampDouble(textScaleFactor, 1.0, 2.0);
   // The final padding scale factor is clamped between 1/3 and 1. For example,
   // a non-scaled padding of 24 will produce a padding between 24 and 8.

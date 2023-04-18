@@ -14,19 +14,19 @@ void main() {
     test('can send string message and get reply', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch',
-        (ByteData? message) async => string.encodeMessage('${string.decodeMessage(message)!} world'),
+        (final ByteData? message) async => string.encodeMessage('${string.decodeMessage(message)!} world'),
       );
       final String? reply = await channel.send('hello');
       expect(reply, equals('hello world'));
     });
 
     test('can receive string message and send reply', () async {
-      channel.setMessageHandler((String? message) async => '${message!} world');
+      channel.setMessageHandler((final String? message) async => '${message!} world');
       String? reply;
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'ch',
         const StringCodec().encodeMessage('hello'),
-        (ByteData? replyBinary) {
+        (final ByteData? replyBinary) {
           reply = string.decodeMessage(replyBinary);
         },
       );
@@ -48,7 +48,7 @@ void main() {
     test('can invoke method and get result', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
-        (ByteData? message) async {
+        (final ByteData? message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>['${methodCall['args']} world']);
@@ -64,7 +64,7 @@ void main() {
     test('can invoke list method and get result', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
-        (ByteData? message) async {
+        (final ByteData? message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[<String>['${methodCall['args']}', 'world']]);
@@ -80,7 +80,7 @@ void main() {
     test('can invoke list method and get null result', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
-        (ByteData? message) async {
+        (final ByteData? message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
@@ -95,7 +95,7 @@ void main() {
     test('can invoke map method and get result', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
-        (ByteData? message) async {
+        (final ByteData? message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[<String, String>{'${methodCall['args']}': 'world'}]);
@@ -111,7 +111,7 @@ void main() {
     test('can invoke map method and get null result', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
-        (ByteData? message) async {
+        (final ByteData? message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
@@ -126,7 +126,7 @@ void main() {
     test('can invoke method and get error', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
-        (ByteData? message) async {
+        (final ByteData? message) async {
           return jsonMessage.encodeMessage(<dynamic>[
             'bad',
             'Something happened',
@@ -138,9 +138,9 @@ void main() {
         () => channel.invokeMethod<dynamic>('sayHello', 'hello'),
         throwsA(
           isA<PlatformException>()
-            .having((PlatformException e) => e.code, 'code', equals('bad'))
-            .having((PlatformException e) => e.message, 'message', equals('Something happened'))
-            .having((PlatformException e) => e.details, 'details', equals(<String, dynamic>{'a': 42, 'b': 3.14})),
+            .having((final PlatformException e) => e.code, 'code', equals('bad'))
+            .having((final PlatformException e) => e.message, 'message', equals('Something happened'))
+            .having((final PlatformException e) => e.details, 'details', equals(<String, dynamic>{'a': 42, 'b': 3.14})),
         ),
       );
     });
@@ -148,13 +148,13 @@ void main() {
     test('can invoke unimplemented method', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
-        (ByteData? message) async => null,
+        (final ByteData? message) async => null,
       );
       expect(
         () => channel.invokeMethod<void>('sayHello', 'hello'),
         throwsA(
           isA<MissingPluginException>()
-            .having((MissingPluginException e) => e.message, 'message', allOf(
+            .having((final MissingPluginException e) => e.message, 'message', allOf(
               contains('sayHello'),
               contains('ch7'),
             )),
@@ -165,7 +165,7 @@ void main() {
     test('can invoke unimplemented method (optional)', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch8',
-        (ByteData? message) async => null,
+        (final ByteData? message) async => null,
       );
       final String? result = await optionalMethodChannel.invokeMethod<String>('sayHello', 'hello');
       expect(result, isNull);
@@ -175,7 +175,7 @@ void main() {
       channel.setMethodCallHandler(null);
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (final ByteData? result) {
         envelope = result;
       });
       await null; // just in case there's something async happening
@@ -185,7 +185,7 @@ void main() {
     test('can handle method call with no registered plugin (setting after)', () async {
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (final ByteData? result) {
         envelope = result;
       });
       channel.setMethodCallHandler(null);
@@ -194,67 +194,67 @@ void main() {
     });
 
     test('can handle method call of unimplemented method', () async {
-      channel.setMethodCallHandler((MethodCall call) async {
+      channel.setMethodCallHandler((final MethodCall call) async {
         throw MissingPluginException();
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (final ByteData? result) {
         envelope = result;
       });
       expect(envelope, isNull);
     });
 
     test('can handle method call with successful result', () async {
-      channel.setMethodCallHandler((MethodCall call) async => '${call.arguments}, world');
+      channel.setMethodCallHandler((final MethodCall call) async => '${call.arguments}, world');
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (final ByteData? result) {
         envelope = result;
       });
       expect(jsonMethod.decodeEnvelope(envelope!), equals('hello, world'));
     });
 
     test('can handle method call with expressive error result', () async {
-      channel.setMethodCallHandler((MethodCall call) async {
+      channel.setMethodCallHandler((final MethodCall call) async {
         throw PlatformException(code: 'bad', message: 'sayHello failed');
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (final ByteData? result) {
         envelope = result;
       });
       expect(
         () => jsonMethod.decodeEnvelope(envelope!),
         throwsA(
           isA<PlatformException>()
-            .having((PlatformException e) => e.code, 'code', equals('bad'))
-            .having((PlatformException e) => e.message, 'message', equals('sayHello failed')),
+            .having((final PlatformException e) => e.code, 'code', equals('bad'))
+            .having((final PlatformException e) => e.message, 'message', equals('sayHello failed')),
         ),
       );
     });
 
     test('can handle method call with other error result', () async {
-      channel.setMethodCallHandler((MethodCall call) async {
+      channel.setMethodCallHandler((final MethodCall call) async {
         throw ArgumentError('bad');
       });
       final ByteData call = jsonMethod.encodeMethodCall(const MethodCall('sayHello', 'hello'));
       ByteData? envelope;
-      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (ByteData? result) {
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage('ch7', call, (final ByteData? result) {
         envelope = result;
       });
       expect(
         () => jsonMethod.decodeEnvelope(envelope!),
         throwsA(
           isA<PlatformException>()
-            .having((PlatformException e) => e.code, 'code', equals('error'))
-            .having((PlatformException e) => e.message, 'message', equals('Invalid argument(s): bad')),
+            .having((final PlatformException e) => e.code, 'code', equals('error'))
+            .having((final PlatformException e) => e.message, 'message', equals('Invalid argument(s): bad')),
         ),
       );
     });
 
     test('can check the mock handler', () async {
-      Future<dynamic> handler(MethodCall call) => Future<dynamic>.value();
+      Future<dynamic> handler(final MethodCall call) => Future<dynamic>.value();
 
       const MethodChannel channel = MethodChannel('test_handler');
       expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.checkMockMessageHandler(channel.name, null), true);
@@ -273,12 +273,12 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
         channel,
         MockStreamHandler.inline(
-          onListen: (Object? arguments, MockStreamHandlerEventSink events) {
+          onListen: (final Object? arguments, final MockStreamHandlerEventSink events) {
             events.success('${arguments}1');
             events.success('${arguments}2');
             events.endOfStream();
           },
-          onCancel: (Object? arguments) {
+          onCancel: (final Object? arguments) {
             canceled = true;
           },
         ),
@@ -293,7 +293,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockStreamHandler(
         channel,
         MockStreamHandler.inline(
-          onListen: (Object? arguments, MockStreamHandlerEventSink events) {
+          onListen: (final Object? arguments, final MockStreamHandlerEventSink events) {
             events.error(code: '404', message: 'Not Found.', details: arguments);
           },
         ),

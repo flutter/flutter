@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics 8 - Merging with reset', (WidgetTester tester) async {
+  testWidgets('Semantics 8 - Merging with reset', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

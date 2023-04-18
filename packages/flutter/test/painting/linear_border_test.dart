@@ -13,7 +13,7 @@ const BorderSide borderSide = BorderSide(width: 4, color: Color(0x0f00ff00));
 
 // Test points for rectangular filled paths based on a BorderSide with width 4 and
 // a 100x100 bounding rectangle (canvasRect).
-List<Offset> rectIncludes(Rect r) {
+List<Offset> rectIncludes(final Rect r) {
   return <Offset>[r.topLeft, r.topRight, r.bottomLeft, r.bottomRight, r.center];
 }
 final List<Offset> leftRectIncludes = rectIncludes(const Rect.fromLTWH(0, 0, 4, 100));
@@ -29,7 +29,7 @@ void main() {
   });
 
   test('LinearBorder defaults', () {
-    void expectEmptyBorder(LinearBorder border) {
+    void expectEmptyBorder(final LinearBorder border) {
       expect(border.side, BorderSide.none);
       expect(border.dimensions, EdgeInsets.zero);
       expect(border.preferPaintInterior, false);
@@ -111,7 +111,7 @@ void main() {
   test('LinearBorder.start()', () {
     final LinearBorder border = LinearBorder.start(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (final Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: leftRectIncludes,
@@ -120,7 +120,7 @@ void main() {
         ),
     );
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
+      (final Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
       paints
         ..path(
           includes: rightRectIncludes,
@@ -133,7 +133,7 @@ void main() {
   test('LinearBorder.end()', () {
     final LinearBorder border = LinearBorder.end(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (final Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: rightRectIncludes,
@@ -142,7 +142,7 @@ void main() {
         ),
     );
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
+      (final Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.rtl),
       paints
         ..path(
           includes: leftRectIncludes,
@@ -155,7 +155,7 @@ void main() {
   test('LinearBorder.top()', () {
     final LinearBorder border = LinearBorder.top(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (final Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: topRectIncludes,
@@ -168,7 +168,7 @@ void main() {
   test('LinearBorder.bottom()', () {
     final LinearBorder border = LinearBorder.bottom(side: borderSide);
     expect(
-      (Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
+      (final Canvas canvas) => border.paint(canvas, canvasRect, textDirection: TextDirection.ltr),
       paints
         ..path(
           includes: bottomRectIncludes,

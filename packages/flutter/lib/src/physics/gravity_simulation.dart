@@ -66,10 +66,10 @@ class GravitySimulation extends Simulation {
   /// L/T² respectively. The same units of velocity are used for the velocity
   /// obtained from [dx].
   GravitySimulation(
-    double acceleration,
-    double distance,
-    double endDistance,
-    double velocity,
+    final double acceleration,
+    final double distance,
+    final double endDistance,
+    final double velocity,
   ) : assert(endDistance >= 0),
       _a = acceleration,
       _x = distance,
@@ -82,13 +82,13 @@ class GravitySimulation extends Simulation {
   final double _end;
 
   @override
-  double x(double time) => _x + _v * time + 0.5 * _a * time * time;
+  double x(final double time) => _x + _v * time + 0.5 * _a * time * time;
 
   @override
-  double dx(double time) => _v + time * _a;
+  double dx(final double time) => _v + time * _a;
 
   @override
-  bool isDone(double time) => x(time).abs() >= _end;
+  bool isDone(final double time) => x(time).abs() >= _end;
 
   @override
   String toString() => '${objectRuntimeType(this, 'GravitySimulation')}(g: ${_a.toStringAsFixed(1)}, x₀: ${_x.toStringAsFixed(1)}, dx₀: ${_v.toStringAsFixed(1)}, xₘₐₓ: ±${_end.toStringAsFixed(1)})';

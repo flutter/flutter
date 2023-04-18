@@ -64,7 +64,7 @@ void main() {
     final Random random = Random();
     for (int i = 0; i < 250; i += 1) {
       // Expect some equal elements.
-      final List<int> list = List<int>.generate(i, (int j) => random.nextInt(i));
+      final List<int> list = List<int>.generate(i, (final int j) => random.nextInt(i));
       mergeSort(list);
       for (int j = 1; j < i; j++) {
         expect(list[j - 1], lessThanOrEqualTo(list[j]));
@@ -83,7 +83,7 @@ void main() {
       // part of the objects are still in order.
       final List<OrderedComparable> list = List<OrderedComparable>.generate(
         size,
-        (int i) => OrderedComparable(random.nextInt(size >> 2), i),
+        (final int i) => OrderedComparable(random.nextInt(size >> 2), i),
       );
       mergeSort(list);
       OrderedComparable prev = list[0];
@@ -103,7 +103,7 @@ void main() {
         list,
         start: min,
         end: max,
-        compare: (OrderedComparable a, OrderedComparable b) => b.compareTo(a),
+        compare: (final OrderedComparable a, final OrderedComparable b) => b.compareTo(a),
       );
       prev = list[min];
       for (int i = min + 1; i < max; i++) {
@@ -123,7 +123,7 @@ void main() {
   test('MergeSortSpecialCases', () {
     for (final int size in <int>[511, 512, 513]) {
       // All equal.
-      final List<OrderedComparable> list = List<OrderedComparable>.generate(size, (int i) => OrderedComparable(0, i));
+      final List<OrderedComparable> list = List<OrderedComparable>.generate(size, (final int i) => OrderedComparable(0, i));
       mergeSort(list);
       for (int i = 0; i < size; i++) {
         expect(list[i].order, equals(i));
@@ -168,7 +168,7 @@ class OrderedComparable implements Comparable<OrderedComparable> {
   final int id;
   final int order;
   @override
-  int compareTo(OrderedComparable other) => id - other.id;
+  int compareTo(final OrderedComparable other) => id - other.id;
   @override
   String toString() => 'OverrideComparable[$id,$order]';
 }

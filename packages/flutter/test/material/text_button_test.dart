@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('TextButton, TextButton.icon defaults', (WidgetTester tester) async {
+  testWidgets('TextButton, TextButton.icon defaults', (final WidgetTester tester) async {
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
     final bool material3 = theme.useMaterial3;
@@ -63,7 +63,7 @@ void main() {
     // Material 3 uses the InkSparkle which uses a shader, so we can't capture
     // the effect with paint methods.
     if (!material3) {
-      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+      final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((final RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
       expect(inkFeatures, paints..circle(color: colorScheme.primary.withOpacity(0.12)));
     }
 
@@ -156,7 +156,7 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default TextButton meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('Default TextButton meets a11y contrast guidelines', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -203,10 +203,10 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('TextButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('TextButton with colored theme meets a11y contrast guidelines', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    Color getTextColor(Set<MaterialState> states) {
+    Color getTextColor(final Set<MaterialState> states) {
       final Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
         MaterialState.hovered,
@@ -229,7 +229,7 @@ void main() {
                 ),
               ),
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return TextButton(
                     onPressed: () {},
                     focusNode: focusNode,
@@ -270,7 +270,7 @@ void main() {
     skip: isBrowser, // https://github.com/flutter/flutter/issues/44115
   );
 
-  testWidgets('TextButton uses stateful color for text color in different states', (WidgetTester tester) async {
+  testWidgets('TextButton uses stateful color for text color in different states', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     const Color pressedColor = Color(0x00000001);
@@ -278,7 +278,7 @@ void main() {
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
 
-    Color getTextColor(Set<MaterialState> states) {
+    Color getTextColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return pressedColor;
       }
@@ -337,7 +337,7 @@ void main() {
     expect(textColor(), pressedColor);
   });
 
-  testWidgets('TextButton uses stateful color for icon color in different states', (WidgetTester tester) async {
+  testWidgets('TextButton uses stateful color for icon color in different states', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
@@ -346,7 +346,7 @@ void main() {
     const Color focusedColor = Color(0x00000003);
     const Color defaultColor = Color(0x00000004);
 
-    Color getTextColor(Set<MaterialState> states) {
+    Color getTextColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return pressedColor;
       }
@@ -404,7 +404,7 @@ void main() {
     expect(iconColor(), pressedColor);
   });
 
-  testWidgets('TextButton has no clip by default', (WidgetTester tester) async {
+  testWidgets('TextButton has no clip by default', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -421,10 +421,10 @@ void main() {
     );
   });
 
-  testWidgets('Does TextButton work with hover', (WidgetTester tester) async {
+  testWidgets('Does TextButton work with hover', (final WidgetTester tester) async {
     const Color hoverColor = Color(0xff001122);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(final Set<MaterialState> states) {
       return states.contains(MaterialState.hovered) ? hoverColor : null;
     }
 
@@ -446,14 +446,14 @@ void main() {
     await gesture.moveTo(tester.getCenter(find.byType(TextButton)));
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((final RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: hoverColor));
   });
 
-  testWidgets('Does TextButton work with focus', (WidgetTester tester) async {
+  testWidgets('Does TextButton work with focus', (final WidgetTester tester) async {
     const Color focusColor = Color(0xff001122);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(final Set<MaterialState> states) {
       return states.contains(MaterialState.focused) ? focusColor : null;
     }
 
@@ -476,11 +476,11 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((final RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor));
   });
 
-  testWidgets('Does TextButton contribute semantics', (WidgetTester tester) async {
+  testWidgets('Does TextButton contribute semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -525,7 +525,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Does TextButton scale with font scale changes', (WidgetTester tester) async {
+  testWidgets('Does TextButton scale with font scale changes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         // Force Material 2 typography.
@@ -595,8 +595,8 @@ void main() {
     expect(tester.getSize(find.byType(Text)), const Size(126.0, 42.0));
   }, skip: kIsWeb && !isCanvasKit); // https://github.com/flutter/flutter/issues/61016
 
-  testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
-    Widget buildFrame(MaterialTapTargetSize tapTargetSize, Key key) {
+  testWidgets('TextButton size is configurable by ThemeData.materialTapTargetSize', (final WidgetTester tester) async {
+    Widget buildFrame(final MaterialTapTargetSize tapTargetSize, final Key key) {
       return Theme(
         data: ThemeData(materialTapTargetSize: tapTargetSize),
         child: Directionality(
@@ -622,11 +622,11 @@ void main() {
     expect(tester.getSize(find.byKey(key2)), const Size(66.0, 36.0));
   });
 
-  testWidgets('TextButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgets('TextButton onPressed and onLongPress callbacks are correctly called when non-null', (final WidgetTester tester) async {
     bool wasPressed;
     Finder textButton;
 
-    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
+    Widget buildFrame({ final VoidCallback? onPressed, final VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: TextButton(
@@ -665,7 +665,7 @@ void main() {
     expect(tester.widget<TextButton>(textButton).enabled, false);
   });
 
-  testWidgets('TextButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgets('TextButton onPressed and onLongPress callbacks are distinctly recognized', (final WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -696,7 +696,7 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
-  testWidgets("TextButton response doesn't hover when disabled", (WidgetTester tester) async {
+  testWidgets("TextButton response doesn't hover when disabled", (final WidgetTester tester) async {
     FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'TextButton Focus');
     final GlobalKey childKey = GlobalKey();
@@ -711,7 +711,7 @@ void main() {
             autofocus: true,
             onPressed: () {},
             onLongPress: () {},
-            onHover: (bool value) { hovering = value; },
+            onHover: (final bool value) { hovering = value; },
             focusNode: focusNode,
             child: SizedBox(key: childKey),
           ),
@@ -734,7 +734,7 @@ void main() {
           height: 100,
           child: TextButton(
             focusNode: focusNode,
-            onHover: (bool value) { hovering = value; },
+            onHover: (final bool value) { hovering = value; },
             onPressed: null,
             child: SizedBox(key: childKey),
           ),
@@ -746,11 +746,11 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('disabled and hovered TextButton responds to mouse-exit', (WidgetTester tester) async {
+  testWidgets('disabled and hovered TextButton responds to mouse-exit', (final WidgetTester tester) async {
     int onHoverCount = 0;
     late bool hover;
 
-    Widget buildFrame({ required bool enabled }) {
+    Widget buildFrame({ required final bool enabled }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -759,7 +759,7 @@ void main() {
             height: 100,
             child: TextButton(
               onPressed: enabled ? () { } : null,
-              onHover: (bool value) {
+              onHover: (final bool value) {
                 onHoverCount += 1;
                 hover = value;
               },
@@ -808,7 +808,7 @@ void main() {
     expect(hover, false);
   });
 
-  testWidgets('Can set TextButton focus and Can set unFocus.', (WidgetTester tester) async {
+  testWidgets('Can set TextButton focus and Can set unFocus.', (final WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'TextButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -816,7 +816,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           focusNode: node,
-          onFocusChange: (bool focused) => gotFocus = focused,
+          onFocusChange: (final bool focused) => gotFocus = focused,
           onPressed: () {  },
           child: const SizedBox(),
         ),
@@ -837,7 +837,7 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
-  testWidgets('When TextButton disable, Can not set TextButton focus.', (WidgetTester tester) async {
+  testWidgets('When TextButton disable, Can not set TextButton focus.', (final WidgetTester tester) async {
     final FocusNode node = FocusNode(debugLabel: 'TextButton Focus');
     bool gotFocus = false;
     await tester.pumpWidget(
@@ -845,7 +845,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: TextButton(
           focusNode: node,
-          onFocusChange: (bool focused) => gotFocus = focused,
+          onFocusChange: (final bool focused) => gotFocus = focused,
           onPressed: null,
           child: const SizedBox(),
         ),
@@ -860,11 +860,11 @@ void main() {
     expect(node.hasFocus, isFalse);
   });
 
-  testWidgets('TextButton responds to density changes.', (WidgetTester tester) async {
+  testWidgets('TextButton responds to density changes.', (final WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
-    Future<void> buildTest(VisualDensity visualDensity, { bool useText = false }) async {
+    Future<void> buildTest(final VisualDensity visualDensity, { final bool useText = false }) async {
       return tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(textTheme: Typography.englishLike2014),
@@ -976,13 +976,13 @@ void main() {
       4: 4,
     };
 
-    Rect globalBounds(RenderBox renderBox) {
+    Rect globalBounds(final RenderBox renderBox) {
       final Offset topLeft = renderBox.localToGlobal(Offset.zero);
       return topLeft & renderBox.size;
     }
 
     /// Computes the padding between two [Rect]s, one inside the other.
-    EdgeInsets paddingBetween({ required Rect parent, required Rect child }) {
+    EdgeInsets paddingBetween({ required final Rect parent, required final Rect child }) {
       assert (parent.intersect(child) == child);
       return EdgeInsets.fromLTRB(
         child.left - parent.left,
@@ -1003,7 +1003,7 @@ void main() {
               'RTL',
           ].join(', ');
 
-          testWidgets(testName, (WidgetTester tester) async {
+          testWidgets(testName, (final WidgetTester tester) async {
             await tester.pumpWidget(
               MaterialApp(
                 theme: ThemeData(
@@ -1016,7 +1016,7 @@ void main() {
                   ),
                 ),
                 home: Builder(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return MediaQuery(
                       data: MediaQuery.of(context).copyWith(
                         textScaleFactor: textScaleFactor,
@@ -1091,7 +1091,7 @@ void main() {
               find.descendant(
                 of: find.byKey(buttonKey),
                 matching: find.byWidgetPredicate(
-                  (Widget widget) => widget is InkResponse,
+                  (final Widget widget) => widget is InkResponse,
                 ),
               ),
             );
@@ -1140,7 +1140,7 @@ void main() {
               find.descendant(
                 of: find.byKey(labelKey),
                 matching: find.byElementPredicate(
-                  (Element element) => element.widget is RichText,
+                  (final Element element) => element.widget is RichText,
                 ),
               ),
             );
@@ -1153,12 +1153,12 @@ void main() {
     }
   });
 
-  testWidgets('Override TextButton default padding', (WidgetTester tester) async {
+  testWidgets('Override TextButton default padding', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return MediaQuery(
               data: MediaQuery.of(context).copyWith(
                 textScaleFactor: 2,
@@ -1187,7 +1187,7 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.all(22));
   });
 
-  testWidgets('M3 TextButton has correct default padding', (WidgetTester tester) async {
+  testWidgets('M3 TextButton has correct default padding', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1213,7 +1213,7 @@ void main() {
     expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 12,vertical: 8));
   });
 
-  testWidgets('M3 TextButton.icon has correct default padding', (WidgetTester tester) async {
+  testWidgets('M3 TextButton.icon has correct default padding', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1240,7 +1240,7 @@ void main() {
    expect(paddingWidget.padding, const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8));
   });
 
-  testWidgets('Fixed size TextButtons', (WidgetTester tester) async {
+  testWidgets('Fixed size TextButtons', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1273,8 +1273,8 @@ void main() {
     expect(tester.getSize(find.widgetWithText(TextButton, 'wx200')).height, 200);
   });
 
-  testWidgets('TextButton with NoSplash splashFactory paints nothing', (WidgetTester tester) async {
-    Widget buildFrame({ InteractiveInkFeatureFactory? splashFactory }) {
+  testWidgets('TextButton with NoSplash splashFactory paints nothing', (final WidgetTester tester) async {
+    Widget buildFrame({ final InteractiveInkFeatureFactory? splashFactory }) {
       return MaterialApp(
         home: Scaffold(
           body: Center(
@@ -1313,7 +1313,7 @@ void main() {
     }
   });
 
-  testWidgets('TextButton uses InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+  testWidgets('TextButton uses InkSparkle only for Android non-web when useMaterial3 is true', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -1340,7 +1340,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('TextButton uses InkRipple when useMaterial3 is false', (WidgetTester tester) async {
+  testWidgets('TextButton uses InkRipple when useMaterial3 is false', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
 
     await tester.pumpWidget(
@@ -1362,7 +1362,7 @@ void main() {
     expect(buttonInkWell.splashFactory, equals(InkRipple.splashFactory));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('TextButton.icon does not overflow', (WidgetTester tester) async {
+  testWidgets('TextButton.icon does not overflow', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/77815
     await tester.pumpWidget(
       MaterialApp(
@@ -1383,7 +1383,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('TextButton.icon icon,label layout', (WidgetTester tester) async {
+  testWidgets('TextButton.icon icon,label layout', (final WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final Key iconKey = UniqueKey();
     final Key labelKey = UniqueKey();
@@ -1420,7 +1420,7 @@ void main() {
     expect(tester.getRect(find.byKey(labelKey)), const Rect.fromLTRB(104.0, 0.0, 154.0, 100.0));
   });
 
-  testWidgets('TextButton maximumSize', (WidgetTester tester) async {
+  testWidgets('TextButton maximumSize', (final WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
 
@@ -1462,7 +1462,7 @@ void main() {
     expect(tester.getSize(find.byKey(key1)), const Size(104.0, 128.0));
   });
 
-  testWidgets('Fixed size TextButton, same as minimumSize == maximumSize', (WidgetTester tester) async {
+  testWidgets('Fixed size TextButton, same as minimumSize == maximumSize', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1492,7 +1492,7 @@ void main() {
     expect(tester.getSize(find.widgetWithText(TextButton, '200,200')), const Size(200, 200));
   });
 
-  testWidgets('TextButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('TextButton changes mouse cursor when hovered', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -1570,7 +1570,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('TextButton.styleFrom can be used to set foreground and background colors', (WidgetTester tester) async {
+  testWidgets('TextButton.styleFrom can be used to set foreground and background colors', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -1594,7 +1594,7 @@ void main() {
     expect(material.textStyle!.color, Colors.white);
   });
 
-  Future<void> testStatesController(Widget? icon, WidgetTester tester) async {
+  Future<void> testStatesController(final Widget? icon, final WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
@@ -1700,15 +1700,15 @@ void main() {
     await gesture.removePointer();
   }
 
-  testWidgets('TextButton statesController', (WidgetTester tester) async {
+  testWidgets('TextButton statesController', (final WidgetTester tester) async {
     testStatesController(null, tester);
   });
 
-  testWidgets('TextButton.icon statesController', (WidgetTester tester) async {
+  testWidgets('TextButton.icon statesController', (final WidgetTester tester) async {
     testStatesController(const Icon(Icons.add), tester);
   });
 
-  testWidgets('Disabled TextButton statesController', (WidgetTester tester) async {
+  testWidgets('Disabled TextButton statesController', (final WidgetTester tester) async {
     int count = 0;
     void valueChanged() {
       count += 1;
@@ -1731,7 +1731,7 @@ void main() {
     expect(count, 1);
   });
 
-  testWidgets('icon color can be different from the text color', (WidgetTester tester) async {
+  testWidgets('icon color can be different from the text color', (final WidgetTester tester) async {
     final Key iconButtonKey = UniqueKey();
     const ColorScheme colorScheme = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: colorScheme);
@@ -1788,7 +1788,7 @@ void main() {
   });
 }
 
-TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+TextStyle? _iconStyle(final WidgetTester tester, final IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
     find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
   );

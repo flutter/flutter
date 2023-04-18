@@ -12,7 +12,7 @@ class DialogExampleApp extends StatelessWidget {
   const DialogExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Dialog Sample')),
@@ -28,14 +28,14 @@ class DialogExample extends StatelessWidget {
   const DialogExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         TextButton(
           onPressed: () => showDialog<String>(
             context: context,
-            builder: (BuildContext context) => Dialog(
+            builder: (final BuildContext context) => Dialog(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -61,7 +61,7 @@ class DialogExample extends StatelessWidget {
         TextButton(
           onPressed: () => showDialog<String>(
             context: context,
-            builder: (BuildContext context) => Dialog.fullscreen(
+            builder: (final BuildContext context) => Dialog.fullscreen(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,

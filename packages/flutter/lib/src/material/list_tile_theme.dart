@@ -126,26 +126,26 @@ class ListTileThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ListTileThemeData copyWith({
-    bool? dense,
-    ShapeBorder? shape,
-    ListTileStyle? style,
-    Color? selectedColor,
-    Color? iconColor,
-    Color? textColor,
-    TextStyle? titleTextStyle,
-    TextStyle? subtitleTextStyle,
-    TextStyle? leadingAndTrailingTextStyle,
-    EdgeInsetsGeometry? contentPadding,
-    Color? tileColor,
-    Color? selectedTileColor,
-    double? horizontalTitleGap,
-    double? minVerticalPadding,
-    double? minLeadingWidth,
-    bool? enableFeedback,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    bool? isThreeLine,
-    VisualDensity? visualDensity,
-    ListTileTitleAlignment? titleAlignment,
+    final bool? dense,
+    final ShapeBorder? shape,
+    final ListTileStyle? style,
+    final Color? selectedColor,
+    final Color? iconColor,
+    final Color? textColor,
+    final TextStyle? titleTextStyle,
+    final TextStyle? subtitleTextStyle,
+    final TextStyle? leadingAndTrailingTextStyle,
+    final EdgeInsetsGeometry? contentPadding,
+    final Color? tileColor,
+    final Color? selectedTileColor,
+    final double? horizontalTitleGap,
+    final double? minVerticalPadding,
+    final double? minLeadingWidth,
+    final bool? enableFeedback,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final bool? isThreeLine,
+    final VisualDensity? visualDensity,
+    final ListTileTitleAlignment? titleAlignment,
   }) {
     return ListTileThemeData(
       dense: dense ?? this.dense,
@@ -171,7 +171,7 @@ class ListTileThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between ListTileThemeData objects.
-  static ListTileThemeData? lerp(ListTileThemeData? a, ListTileThemeData? b, double t) {
+  static ListTileThemeData? lerp(final ListTileThemeData? a, final ListTileThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -222,7 +222,7 @@ class ListTileThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -252,7 +252,7 @@ class ListTileThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('dense', dense, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
@@ -292,21 +292,21 @@ class ListTileTheme extends InheritedTheme {
   /// redundant (are now obsolete) and will be deprecated in a future update.
   const ListTileTheme({
     super.key,
-    ListTileThemeData? data,
-    bool? dense,
-    ShapeBorder? shape,
-    ListTileStyle? style,
-    Color? selectedColor,
-    Color? iconColor,
-    Color? textColor,
-    EdgeInsetsGeometry? contentPadding,
-    Color? tileColor,
-    Color? selectedTileColor,
-    bool? enableFeedback,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    double? horizontalTitleGap,
-    double? minVerticalPadding,
-    double? minLeadingWidth,
+    final ListTileThemeData? data,
+    final bool? dense,
+    final ShapeBorder? shape,
+    final ListTileStyle? style,
+    final Color? selectedColor,
+    final Color? iconColor,
+    final Color? textColor,
+    final EdgeInsetsGeometry? contentPadding,
+    final Color? tileColor,
+    final Color? selectedTileColor,
+    final bool? enableFeedback,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final double? horizontalTitleGap,
+    final double? minVerticalPadding,
+    final double? minLeadingWidth,
     required super.child,
   }) : assert(
          data == null ||
@@ -463,7 +463,7 @@ class ListTileTheme extends InheritedTheme {
   /// ```dart
   /// ListTileThemeData theme = ListTileTheme.of(context);
   /// ```
-  static ListTileThemeData of(BuildContext context) {
+  static ListTileThemeData of(final BuildContext context) {
     final ListTileTheme? result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
     return result?.data ?? Theme.of(context).listTileTheme;
   }
@@ -473,30 +473,30 @@ class ListTileTheme extends InheritedTheme {
   ///
   /// The [child] argument must not be null.
   static Widget merge({
-    Key? key,
-    bool? dense,
-    ShapeBorder? shape,
-    ListTileStyle? style,
-    Color? selectedColor,
-    Color? iconColor,
-    Color? textColor,
-    TextStyle? titleTextStyle,
-    TextStyle? subtitleTextStyle,
-    TextStyle? leadingAndTrailingTextStyle,
-    EdgeInsetsGeometry? contentPadding,
-    Color? tileColor,
-    Color? selectedTileColor,
-    bool? enableFeedback,
-    double? horizontalTitleGap,
-    double? minVerticalPadding,
-    double? minLeadingWidth,
-    ListTileTitleAlignment? titleAlignment,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    VisualDensity? visualDensity,
-    required Widget child,
+    final Key? key,
+    final bool? dense,
+    final ShapeBorder? shape,
+    final ListTileStyle? style,
+    final Color? selectedColor,
+    final Color? iconColor,
+    final Color? textColor,
+    final TextStyle? titleTextStyle,
+    final TextStyle? subtitleTextStyle,
+    final TextStyle? leadingAndTrailingTextStyle,
+    final EdgeInsetsGeometry? contentPadding,
+    final Color? tileColor,
+    final Color? selectedTileColor,
+    final bool? enableFeedback,
+    final double? horizontalTitleGap,
+    final double? minVerticalPadding,
+    final double? minLeadingWidth,
+    final ListTileTitleAlignment? titleAlignment,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final VisualDensity? visualDensity,
+    required final Widget child,
   }) {
     return Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         final ListTileThemeData parent = ListTileTheme.of(context);
         return ListTileTheme(
           key: key,
@@ -528,7 +528,7 @@ class ListTileTheme extends InheritedTheme {
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return ListTileTheme(
       data: ListTileThemeData(
         dense: dense,
@@ -550,5 +550,5 @@ class ListTileTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(ListTileTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ListTileTheme oldWidget) => data != oldWidget.data;
 }

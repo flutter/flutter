@@ -144,7 +144,7 @@ enum Setup {
   blur,
 }
 
-void run(Setup setup) {
+void run(final Setup setup) {
   runApp(MyApp(setup));
 }
 
@@ -154,7 +154,7 @@ class MyApp extends StatelessWidget {
   final Setup _setup;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Wide Gamut Test',
       theme: ThemeData(
@@ -171,7 +171,7 @@ class _SaveLayerDrawer extends CustomPainter {
   final ui.Image? _image;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     if (_image != null) {
       final Rect imageRect = Rect.fromCenter(
           center: Offset.zero,
@@ -193,7 +193,7 @@ class _SaveLayerDrawer extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant final CustomPainter oldDelegate) => true;
 }
 
 Future<ui.Image> _loadImage() async {
@@ -221,7 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     if (widget.setup == Setup.canvasSaveLayer) {
-      _loadImage().then((ui.Image? value) {
+      _loadImage().then((final ui.Image? value) {
         setState(() {
           _image = value;
         });
@@ -231,7 +231,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     late Widget imageWidget;
     switch (widget.setup) {
       case Setup.none:

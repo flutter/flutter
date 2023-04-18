@@ -103,7 +103,7 @@ void main() {
 
 
       group('supportsRestartRequest', () {
-        void testRestartSupport(bool supportsRestart) {
+        void testRestartSupport(final bool supportsRestart) {
           test('notifies client for supportsRestart: $supportsRestart', () async {
             final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
               fileSystem: MemoryFileSystem.test(style: fsStyle),
@@ -119,11 +119,11 @@ void main() {
             // Listen for a Capabilities event that modifies 'supportsRestartRequest'.
             final Future<CapabilitiesEventBody> capabilitiesUpdate = adapter
                 .dapToClientMessages
-                .where((Map<String, Object?> message) => message['event'] == 'capabilities')
-                .map((Map<String, Object?> message) => message['body'] as Map<String, Object?>?)
-                .where((Map<String, Object?>? body) => body != null).cast<Map<String, Object?>>()
+                .where((final Map<String, Object?> message) => message['event'] == 'capabilities')
+                .map((final Map<String, Object?> message) => message['body'] as Map<String, Object?>?)
+                .where((final Map<String, Object?>? body) => body != null).cast<Map<String, Object?>>()
                 .map(CapabilitiesEventBody.fromJson)
-                .firstWhere((CapabilitiesEventBody body) => body.capabilities.supportsRestartRequest != null);
+                .firstWhere((final CapabilitiesEventBody body) => body.capabilities.supportsRestartRequest != null);
 
             await adapter.configurationDoneRequest(MockRequest(), null, () {});
             final Completer<void> launchCompleter = Completer<void>();
@@ -190,7 +190,7 @@ void main() {
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),
           platform: platform,
-          preAppStart: (MockFlutterDebugAdapter adapter) {
+          preAppStart: (final MockFlutterDebugAdapter adapter) {
             adapter.simulateRawStdout('Waiting for connection from Dart debug extension…');
           }
         );
@@ -204,15 +204,15 @@ void main() {
         // Begin listening for progress events up until `progressEnd` (but don't await yet).
         final Future<List<List<Object?>>> progressEventsFuture =
             adapter.dapToClientProgressEvents
-              .takeWhile((Map<String, Object?> message) => message['event'] != 'progressEnd')
-              .map((Map<String, Object?> message) => <Object?>[message['event'], (message['body']! as Map<String, Object?>)['message']])
+              .takeWhile((final Map<String, Object?> message) => message['event'] != 'progressEnd')
+              .map((final Map<String, Object?> message) => <Object?>[message['event'], (message['body']! as Map<String, Object?>)['message']])
               .toList();
 
         // Initialize with progress support.
         await adapter.initializeRequest(
           MockRequest(),
           InitializeRequestArguments(adapterID: 'test', supportsProgressReporting: true, ),
-          (_) {},
+          (final _) {},
         );
         await adapter.configurationDoneRequest(MockRequest(), null, () {});
         await adapter.launchRequest(MockRequest(), args, responseCompleter.complete);
@@ -331,7 +331,7 @@ void main() {
         // Start listening for the forwarded event (don't await it yet, it won't
         // be triggered until the call below).
         final Future<Map<String, Object?>> forwardedEvent = adapter.dapToClientMessages
-            .firstWhere((Map<String, Object?> data) => data['event'] == 'flutter.forwardedEvent');
+            .firstWhere((final Map<String, Object?> data) => data['event'] == 'flutter.forwardedEvent');
 
         // Simulate Flutter asking for a URL to be launched.
         adapter.simulateStdoutMessage(<String, Object?>{
@@ -364,7 +364,7 @@ void main() {
 
         // Pretend to be the client, handling any reverse-requests for exposeUrl
         // and mapping the host to 'mapped-host'.
-        adapter.exposeUrlHandler = (String url) => Uri.parse(url).replace(host: 'mapped-host').toString();
+        adapter.exposeUrlHandler = (final String url) => Uri.parse(url).replace(host: 'mapped-host').toString();
 
         // Simulate Flutter asking for a URL to be exposed.
         const int requestId = 12345;
@@ -379,7 +379,7 @@ void main() {
         // Allow the handler to be processed.
         await pumpEventQueue(times: 5000);
 
-        final Map<String, Object?> message = adapter.dapToFlutterMessages.singleWhere((Map<String, Object?> data) => data['id'] == requestId);
+        final Map<String, Object?> message = adapter.dapToFlutterMessages.singleWhere((final Map<String, Object?> data) => data['id'] == requestId);
         expect(message['result'], 'http://mapped-host:123/');
       });
     });

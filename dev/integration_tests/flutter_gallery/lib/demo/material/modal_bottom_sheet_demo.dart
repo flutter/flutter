@@ -12,7 +12,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
   static const String routeName = '/material/modal-bottom-sheet';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modal bottom sheet'),
@@ -22,7 +22,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
         child: ElevatedButton(
           child: const Text('SHOW BOTTOM SHEET'),
           onPressed: () {
-            showModalBottomSheet<void>(context: context, builder: (BuildContext context) {
+            showModalBottomSheet<void>(context: context, builder: (final BuildContext context) {
               return Padding(
                 padding: const EdgeInsets.all(32.0),
                 child: Text('This is the modal bottom sheet. Slide down to dismiss.',

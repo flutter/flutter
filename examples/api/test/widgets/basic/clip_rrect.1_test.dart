@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/basic/clip_rrect.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ClipRRect fits to its child', (WidgetTester tester) async {
+  testWidgets('ClipRRect fits to its child', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ClipRRectApp(),
     );

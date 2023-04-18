@@ -9,7 +9,7 @@ import 'watcher.dart';
 
 /// Prints JSON events when running a test in --machine mode.
 class EventPrinter extends TestWatcher {
-  EventPrinter({required StringSink out, TestWatcher? parent})
+  EventPrinter({required final StringSink out, final TestWatcher? parent})
     : _out = out,
       _parent = parent;
 
@@ -17,7 +17,7 @@ class EventPrinter extends TestWatcher {
   final TestWatcher? _parent;
 
   @override
-  void handleStartedDevice(Uri? vmServiceUri) {
+  void handleStartedDevice(final Uri? vmServiceUri) {
     _sendEvent('test.startedProcess',
         <String, dynamic>{
           'vmServiceUri': vmServiceUri?.toString(),
@@ -29,21 +29,21 @@ class EventPrinter extends TestWatcher {
   }
 
   @override
-  Future<void> handleTestCrashed(TestDevice testDevice) async {
+  Future<void> handleTestCrashed(final TestDevice testDevice) async {
     return _parent?.handleTestCrashed(testDevice);
   }
 
   @override
-  Future<void> handleTestTimedOut(TestDevice testDevice) async {
+  Future<void> handleTestTimedOut(final TestDevice testDevice) async {
     return _parent?.handleTestTimedOut(testDevice);
   }
 
   @override
-  Future<void> handleFinishedTest(TestDevice testDevice) async {
+  Future<void> handleFinishedTest(final TestDevice testDevice) async {
     return _parent?.handleFinishedTest(testDevice);
   }
 
-  void _sendEvent(String name, [ dynamic params ]) {
+  void _sendEvent(final String name, [ final dynamic params ]) {
     final Map<String, dynamic> map = <String, dynamic>{'event': name};
     if (params != null) {
       map['params'] = params;
@@ -51,12 +51,12 @@ class EventPrinter extends TestWatcher {
     _send(map);
   }
 
-  void _send(Map<String, dynamic> command) {
+  void _send(final Map<String, dynamic> command) {
     final String encoded = json.encode(command, toEncodable: _jsonEncodeObject);
     _out.writeln('\n[$encoded]');
   }
 
-  dynamic _jsonEncodeObject(dynamic object) {
+  dynamic _jsonEncodeObject(final dynamic object) {
     if (object is Uri) {
       return object.toString();
     }

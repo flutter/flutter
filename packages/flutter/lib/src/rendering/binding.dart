@@ -64,7 +64,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.invertOversizedImages.name,
         getter: () async => debugInvertOversizedImages,
-        setter: (bool value) async {
+        setter: (final bool value) async {
           if (debugInvertOversizedImages != value) {
             debugInvertOversizedImages = value;
             return _forceRepaint();
@@ -75,7 +75,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugPaint.name,
         getter: () async => debugPaintSizeEnabled,
-        setter: (bool value) {
+        setter: (final bool value) {
           if (debugPaintSizeEnabled == value) {
             return Future<void>.value();
           }
@@ -86,7 +86,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugPaintBaselinesEnabled.name,
         getter: () async => debugPaintBaselinesEnabled,
-        setter: (bool value) {
+        setter: (final bool value) {
           if (debugPaintBaselinesEnabled == value) {
             return Future<void>.value();
           }
@@ -97,7 +97,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.repaintRainbow.name,
         getter: () async => debugRepaintRainbowEnabled,
-        setter: (bool value) {
+        setter: (final bool value) {
           final bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
           if (repaint) {
@@ -108,7 +108,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       );
       registerServiceExtension(
         name: RenderingServiceExtensions.debugDumpLayerTree.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           final String data = RendererBinding.instance.renderView.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.';
           return <String, Object>{
             'data': data,
@@ -118,7 +118,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugDisableClipLayers.name,
         getter: () async => debugDisableClipLayers,
-        setter: (bool value) {
+        setter: (final bool value) {
           if (debugDisableClipLayers == value) {
             return Future<void>.value();
           }
@@ -129,7 +129,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name,
         getter: () async => debugDisablePhysicalShapeLayers,
-        setter: (bool value) {
+        setter: (final bool value) {
           if (debugDisablePhysicalShapeLayers == value) {
             return Future<void>.value();
           }
@@ -140,7 +140,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.debugDisableOpacityLayers.name,
         getter: () async => debugDisableOpacityLayers,
-        setter: (bool value) {
+        setter: (final bool value) {
           if (debugDisableOpacityLayers == value) {
             return Future<void>.value();
           }
@@ -155,7 +155,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // these service extensions work in debug or profile mode
       registerServiceExtension(
         name: RenderingServiceExtensions.debugDumpRenderTree.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           final String data = RendererBinding.instance.renderView.toStringDeep();
           return <String, Object>{
             'data': data,
@@ -164,7 +164,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       );
       registerServiceExtension(
         name: RenderingServiceExtensions.debugDumpSemanticsTreeInTraversalOrder.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           return <String, Object>{
             'data': _generateSemanticsTree(DebugSemanticsDumpOrder.traversalOrder),
           };
@@ -172,7 +172,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       );
       registerServiceExtension(
         name: RenderingServiceExtensions.debugDumpSemanticsTreeInInverseHitTestOrder.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           return <String, Object>{
             'data': _generateSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest),
           };
@@ -181,7 +181,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.profileRenderObjectPaints.name,
         getter: () async => debugProfilePaintsEnabled,
-        setter: (bool value) async {
+        setter: (final bool value) async {
           if (debugProfilePaintsEnabled != value) {
             debugProfilePaintsEnabled = value;
           }
@@ -190,7 +190,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       registerBoolServiceExtension(
         name: RenderingServiceExtensions.profileRenderObjectLayouts.name,
         getter: () async => debugProfileLayoutsEnabled,
-        setter: (bool value) async {
+        setter: (final bool value) async {
           if (debugProfileLayoutsEnabled != value) {
             debugProfileLayoutsEnabled = value;
           }
@@ -231,7 +231,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   RenderView get renderView => _pipelineOwner.rootNode! as RenderView;
   /// Sets the given [RenderView] object (which must not be null), and its tree, to
   /// be the new render tree to display. The previous tree, if any, is detached.
-  set renderView(RenderView value) {
+  set renderView(final RenderView value) {
     _pipelineOwner.rootNode = value;
   }
 
@@ -313,13 +313,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   ///
   /// Used by testing framework to reinitialize the mouse tracker between tests.
   @visibleForTesting
-  void initMouseTracker([MouseTracker? tracker]) {
+  void initMouseTracker([final MouseTracker? tracker]) {
     _mouseTracker?.dispose();
     _mouseTracker = tracker ?? MouseTracker();
   }
 
   @override // from GestureBinding
-  void dispatchEvent(PointerEvent event, HitTestResult? hitTestResult) {
+  void dispatchEvent(final PointerEvent event, final HitTestResult? hitTestResult) {
     _mouseTracker!.updateWithEvent(
       event,
       // Enter and exit events should be triggered with or without buttons
@@ -332,7 +332,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   @override
-  void performSemanticsAction(SemanticsActionEvent action) {
+  void performSemanticsAction(final SemanticsActionEvent action) {
     _pipelineOwner.semanticsOwner?.performAction(action.nodeId, action.type, action.arguments);
   }
 
@@ -340,7 +340,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     renderView.scheduleInitialSemantics();
   }
 
-  void _handleSemanticsUpdate(ui.SemanticsUpdate update) {
+  void _handleSemanticsUpdate(final ui.SemanticsUpdate update) {
     renderView.updateSemantics(update);
   }
 
@@ -348,13 +348,13 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     renderView.clearSemantics();
   }
 
-  void _handleWebFirstFrame(Duration _) {
+  void _handleWebFirstFrame(final Duration _) {
     assert(kIsWeb);
     const MethodChannel methodChannel = MethodChannel('flutter/service_worker');
     methodChannel.invokeMethod<void>('first-frame');
   }
 
-  void _handlePersistentFrameCallback(Duration timeStamp) {
+  void _handlePersistentFrameCallback(final Duration timeStamp) {
     drawFrame();
     _scheduleMouseTrackerUpdate();
   }
@@ -366,7 +366,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       _debugMouseTrackerUpdateScheduled = true;
       return true;
     }());
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((final Duration duration) {
       assert(_debugMouseTrackerUpdateScheduled);
       assert(() {
         _debugMouseTrackerUpdateScheduled = false;
@@ -519,14 +519,14 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   }
 
   @override
-  void hitTest(HitTestResult result, Offset position) {
+  void hitTest(final HitTestResult result, final Offset position) {
     renderView.hitTest(result, position: position);
     super.hitTest(result, position);
   }
 
   Future<void> _forceRepaint() {
     late RenderObjectVisitor visitor;
-    visitor = (RenderObject child) {
+    visitor = (final RenderObject child) {
       child.markNeedsPaint();
       child.visitChildren(visitor);
     };
@@ -551,11 +551,11 @@ void debugDumpLayerTree() {
 ///
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
-void debugDumpSemanticsTree([DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder]) {
+void debugDumpSemanticsTree([final DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder]) {
   debugPrint(_generateSemanticsTree(childOrder));
 }
 
-String _generateSemanticsTree(DebugSemanticsDumpOrder childOrder) {
+String _generateSemanticsTree(final DebugSemanticsDumpOrder childOrder) {
   final String? tree = RendererBinding.instance.renderView.debugSemantics?.toStringDeep(childOrder: childOrder);
   if (tree != null) {
     return tree;
@@ -592,7 +592,7 @@ class RenderingFlutterBinding extends BindingBase with GestureBinding, Scheduler
   ///
   /// This binding does not automatically schedule any frames. Callers are
   /// responsible for deciding when to first call [scheduleFrame].
-  RenderingFlutterBinding({ RenderBox? root }) {
+  RenderingFlutterBinding({ final RenderBox? root }) {
     renderView.child = root;
   }
 

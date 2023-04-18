@@ -87,7 +87,7 @@ class PackagesTestCommand extends FlutterCommand {
 }
 
 class PackagesForwardCommand extends FlutterCommand {
-  PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
+  PackagesForwardCommand(this._commandName, this._description, {final bool requiresPubspec = false}) {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }
@@ -118,7 +118,7 @@ class PackagesForwardCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final List<String> subArgs = argResults!.rest.toList()
-      ..removeWhere((String arg) => arg == '--');
+      ..removeWhere((final String arg) => arg == '--');
     await pub.interactively(
       <String>[ _commandName, ...subArgs],
       context: context,
@@ -297,7 +297,7 @@ class PackagesGetCommand extends FlutterCommand {
     }
     final String? relativeTarget = target == null ? null : globals.fs.path.relative(target);
 
-    final List<String> subArgs = rest.toList()..removeWhere((String arg) => arg == '--');
+    final List<String> subArgs = rest.toList()..removeWhere((final String arg) => arg == '--');
     final Stopwatch timer = Stopwatch()..start();
     try {
       await pub.interactively(

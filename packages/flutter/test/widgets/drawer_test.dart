@@ -13,13 +13,13 @@ import 'semantics_tester.dart';
 
 void main() {
 
-  testWidgets('Drawer control test', (WidgetTester tester) async {
+  testWidgets('Drawer control test', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     late BuildContext savedContext;
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             savedContext = context;
             return Scaffold(
               key: scaffoldKey,
@@ -44,7 +44,7 @@ void main() {
     expect(find.text('drawer'), findsNothing);
   });
 
-  testWidgets('Drawer tap test', (WidgetTester tester) async {
+  testWidgets('Drawer tap test', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -76,7 +76,7 @@ void main() {
     expect(find.text('drawer'), findsNothing);
   });
 
-  testWidgets('Drawer hover test', (WidgetTester tester) async {
+  testWidgets('Drawer hover test', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<String> logs = <String>[];
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -91,9 +91,9 @@ void main() {
           body: Align(
             alignment: Alignment.topLeft,
             child: MouseRegion(
-              onEnter: (_) { logs.add('enter'); },
-              onHover: (_) { logs.add('hover'); },
-              onExit: (_) { logs.add('exit'); },
+              onEnter: (final _) { logs.add('enter'); },
+              onHover: (final _) { logs.add('hover'); },
+              onExit: (final _) { logs.add('exit'); },
               child: const SizedBox(width: 10, height: 10),
             ),
           ),
@@ -146,7 +146,7 @@ void main() {
     logs.clear();
   });
 
-  testWidgets('Drawer drag cancel resume (LTR)', (WidgetTester tester) async {
+  testWidgets('Drawer drag cancel resume (LTR)', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -197,7 +197,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Drawer drag cancel resume (RTL)', (WidgetTester tester) async {
+  testWidgets('Drawer drag cancel resume (RTL)', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -251,14 +251,14 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Drawer navigator back button', (WidgetTester tester) async {
+  testWidgets('Drawer navigator back button', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool buttonPressed = false;
 
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Scaffold(
               key: scaffoldKey,
               drawer: Drawer(
@@ -299,14 +299,14 @@ void main() {
     expect(buttonPressed, equals(true));
   });
 
-  testWidgets('Dismissible ModalBarrier includes button in semantic tree', (WidgetTester tester) async {
+  testWidgets('Dismissible ModalBarrier includes button in semantic tree', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(),
@@ -326,14 +326,14 @@ void main() {
     semantics.dispose();
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (WidgetTester tester) async {
+  testWidgets('Dismissible ModalBarrier is hidden on Android (back button is used to dismiss)', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(),
@@ -354,14 +354,14 @@ void main() {
     semantics.dispose();
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('Drawer contains route semantics flags', (WidgetTester tester) async {
+  testWidgets('Drawer contains route semantics flags', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Scaffold(
               key: scaffoldKey,
               drawer: const Drawer(),

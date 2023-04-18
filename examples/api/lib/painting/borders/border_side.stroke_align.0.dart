@@ -12,7 +12,7 @@ class StrokeAlignApp extends StatelessWidget {
   const StrokeAlignApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(home: StrokeAlignExample());
   }
 }
@@ -50,7 +50,7 @@ class _StrokeAlignExampleState extends State<StrokeAlignExample> with TickerProv
   static const Color borderColor = Color(0x8000b4fc);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Center(
         child: Column(
@@ -189,7 +189,7 @@ class BorderedBox extends StatelessWidget {
   final ShapeBorder shape;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       width: 100,
       height: 50,

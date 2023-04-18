@@ -18,15 +18,15 @@ const String kGithubClient = 'github-client';
 const String kMirrorRemote = 'mirror-remote';
 const String kUpstreamRemote = 'upstream-remote';
 
-Future<void> main(List<String> args) {
+Future<void> main(final List<String> args) {
   return run(args);
 }
 
 @visibleForTesting
 Future<void> run(
-  List<String> args, {
-  FileSystem fs = const LocalFileSystem(),
-  ProcessManager processManager = const LocalProcessManager(),
+  final List<String> args, {
+  final FileSystem fs = const LocalFileSystem(),
+  final ProcessManager processManager = const LocalProcessManager(),
 }) async {
   final ArgParser parser = ArgParser();
   parser.addOption(
@@ -95,7 +95,7 @@ ${parser.usage}
   ).roll();
 }
 
-String _parseOrgName(String remoteUrl) {
+String _parseOrgName(final String remoteUrl) {
   final RegExp pattern = RegExp(r'^https:\/\/github\.com\/(.*)\/');
   final RegExpMatch? match = pattern.firstMatch(remoteUrl);
   if (match == null) {
@@ -143,6 +143,6 @@ Directory get _localFlutterRoot {
 }
 
 @visibleForTesting
-void validateTokenFile(String filePath, [FileSystem fs = const LocalFileSystem()]) {
+void validateTokenFile(final String filePath, [final FileSystem fs = const LocalFileSystem()]) {
 
 }

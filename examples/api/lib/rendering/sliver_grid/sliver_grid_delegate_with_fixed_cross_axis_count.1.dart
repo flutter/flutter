@@ -12,7 +12,7 @@ class SliverGridDelegateWithFixedCrossAxisCountExampleApp extends StatelessWidge
   const SliverGridDelegateWithFixedCrossAxisCountExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverGridDelegateWithFixedCrossAxisCount Sample')),
@@ -26,14 +26,14 @@ class SliverGridDelegateWithFixedCrossAxisCountExample extends StatelessWidget {
   const SliverGridDelegateWithFixedCrossAxisCountExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GridView(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
         mainAxisExtent: 150.0,
       ),
-      children: List<Widget>.generate(20, (int i) {
-        return Builder(builder: (BuildContext context) {
+      children: List<Widget>.generate(20, (final int i) {
+        return Builder(builder: (final BuildContext context) {
           return Text('$i');
         });
       }),

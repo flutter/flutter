@@ -14,7 +14,7 @@ class _CustomEndDrawerIcon extends StatelessWidget {
   const _CustomEndDrawerIcon();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final MaterialLocalizations localization = MaterialLocalizations.of(context);
     return Icon(
       Icons.more_horiz,
@@ -27,7 +27,7 @@ class _CustomDrawerIcon extends StatelessWidget {
   const _CustomDrawerIcon();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final MaterialLocalizations localization = MaterialLocalizations.of(context);
     return Icon(
       Icons.segment,
@@ -40,19 +40,19 @@ class ActionIconThemeExampleApp extends StatelessWidget {
   const ActionIconThemeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
         actionIconTheme: ActionIconThemeData(
-          backButtonIconBuilder: (BuildContext context) {
+          backButtonIconBuilder: (final BuildContext context) {
             return const Icon(Icons.arrow_back_ios_new_rounded);
           },
-          drawerButtonIconBuilder: (BuildContext context) {
+          drawerButtonIconBuilder: (final BuildContext context) {
             return const _CustomDrawerIcon();
           },
-          endDrawerButtonIconBuilder: (BuildContext context) {
+          endDrawerButtonIconBuilder: (final BuildContext context) {
             return const _CustomEndDrawerIcon();
           },
         ),
@@ -68,7 +68,7 @@ class MyHomePage extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -85,11 +85,11 @@ class NextPageButton extends StatelessWidget {
   const NextPageButton({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () {
         Navigator.of(context).push(
-          MaterialPageRoute<MySecondPage>(builder: (BuildContext context) {
+          MaterialPageRoute<MySecondPage>(builder: (final BuildContext context) {
             return const MySecondPage();
           }),
         );
@@ -104,7 +104,7 @@ class MySecondPage extends StatelessWidget {
   const MySecondPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Second page'),

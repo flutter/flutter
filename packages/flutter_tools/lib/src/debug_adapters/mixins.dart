@@ -18,7 +18,7 @@ mixin PidTracker {
   final Set<int> pidsToTerminate = <int>{};
 
   /// Terminates all processes with the PIDs registered in [pidsToTerminate].
-  void terminatePids(ProcessSignal signal) {
+  void terminatePids(final ProcessSignal signal) {
     pidsToTerminate.forEach(signal.send);
   }
 }

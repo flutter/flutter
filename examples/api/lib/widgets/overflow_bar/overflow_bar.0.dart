@@ -12,7 +12,7 @@ class OverflowBarExampleApp extends StatelessWidget {
   const OverflowBarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OverflowBar Sample')),
@@ -28,7 +28,7 @@ class OverflowBarExample extends StatelessWidget {
   const OverflowBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(16),

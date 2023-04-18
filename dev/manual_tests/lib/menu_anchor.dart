@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
   bool _funkyTheme = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     MenuThemeData menuTheme = MenuTheme.of(context);
     MenuBarThemeData menuBarTheme = MenuBarTheme.of(context);
@@ -114,37 +114,37 @@ class _HomeState extends State<Home> {
                       funkyTheme: _funkyTheme,
                       extraPadding: _extraPadding,
                       textDirection: _textDirection,
-                      onDensityChanged: (VisualDensity value) {
+                      onDensityChanged: (final VisualDensity value) {
                         setState(() {
                           _density = value;
                         });
                       },
-                      onTextDirectionChanged: (TextDirection value) {
+                      onTextDirectionChanged: (final TextDirection value) {
                         setState(() {
                           _textDirection = value;
                         });
                       },
-                      onExtraPaddingChanged: (double value) {
+                      onExtraPaddingChanged: (final double value) {
                         setState(() {
                           _extraPadding = value;
                         });
                       },
-                      onAddItemChanged: (bool value) {
+                      onAddItemChanged: (final bool value) {
                         setState(() {
                           _addItem = value;
                         });
                       },
-                      onAcceleratorsChanged: (bool value) {
+                      onAcceleratorsChanged: (final bool value) {
                         setState(() {
                           _accelerators = value;
                         });
                       },
-                      onTransparentChanged: (bool value) {
+                      onTransparentChanged: (final bool value) {
                         setState(() {
                           _transparent = value;
                         });
                       },
-                      onFunkyThemeChanged: (bool value) {
+                      onFunkyThemeChanged: (final bool value) {
                         setState(() {
                           _funkyTheme = value;
                         });
@@ -210,7 +210,7 @@ class _ControlsState extends State<_Controls> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: SingleChildScrollView(
         child: Column(
@@ -236,7 +236,7 @@ class _ControlsState extends State<_Controls> {
                   child: MenuAcceleratorLabel(TestMenu.standaloneMenu2.label),
                 ),
               ],
-              builder: (BuildContext context, MenuController controller, Widget? child) {
+              builder: (final BuildContext context, final MenuController controller, final Widget? child) {
                 return TextButton(
                   focusNode: _focusNode,
                   onPressed: () {
@@ -261,7 +261,7 @@ class _ControlsState extends State<_Controls> {
                     value: widget.extraPadding,
                     max: 40,
                     divisions: 20,
-                    onChanged: (double value) {
+                    onChanged: (final double value) {
                       widget.onExtraPaddingChanged(value);
                     },
                   ),
@@ -271,7 +271,7 @@ class _ControlsState extends State<_Controls> {
                     max: 4,
                     min: -4,
                     divisions: 12,
-                    onChanged: (double value) {
+                    onChanged: (final double value) {
                       widget.onDensityChanged(
                         VisualDensity(
                           horizontal: value,
@@ -286,7 +286,7 @@ class _ControlsState extends State<_Controls> {
                     max: 4,
                     min: -4,
                     divisions: 12,
-                    onChanged: (double value) {
+                    onChanged: (final double value) {
                       widget.onDensityChanged(
                         VisualDensity(
                           horizontal: widget.density.horizontal,
@@ -306,7 +306,7 @@ class _ControlsState extends State<_Controls> {
                   children: <Widget>[
                     Checkbox(
                       value: widget.textDirection == TextDirection.rtl,
-                      onChanged: (bool? value) {
+                      onChanged: (final bool? value) {
                         if (value ?? false) {
                           widget.onTextDirectionChanged(TextDirection.rtl);
                         } else {
@@ -322,7 +322,7 @@ class _ControlsState extends State<_Controls> {
                   children: <Widget>[
                     Checkbox(
                       value: widget.addItem,
-                      onChanged: (bool? value) {
+                      onChanged: (final bool? value) {
                         if (value ?? false) {
                           widget.onAddItemChanged(true);
                         } else {
@@ -338,7 +338,7 @@ class _ControlsState extends State<_Controls> {
                   children: <Widget>[
                     Checkbox(
                       value: widget.accelerators,
-                      onChanged: (bool? value) {
+                      onChanged: (final bool? value) {
                         if (value ?? false) {
                           widget.onAcceleratorsChanged(true);
                         } else {
@@ -354,7 +354,7 @@ class _ControlsState extends State<_Controls> {
                   children: <Widget>[
                     Checkbox(
                       value: widget.transparent,
-                      onChanged: (bool? value) {
+                      onChanged: (final bool? value) {
                         if (value ?? false) {
                           widget.onTransparentChanged(true);
                         } else {
@@ -370,7 +370,7 @@ class _ControlsState extends State<_Controls> {
                   children: <Widget>[
                     Checkbox(
                       value: widget.funkyTheme,
-                      onChanged: (bool? value) {
+                      onChanged: (final bool? value) {
                         if (value ?? false) {
                           widget.onFunkyThemeChanged(true);
                         } else {
@@ -389,7 +389,7 @@ class _ControlsState extends State<_Controls> {
     );
   }
 
-  void _itemSelected(TestMenu item) {
+  void _itemSelected(final TestMenu item) {
     debugPrint('App: Selected item ${item.label}');
   }
 }
@@ -412,7 +412,7 @@ class _ControlSlider extends StatelessWidget {
   final int? divisions;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
@@ -456,26 +456,26 @@ class _TestMenusState extends State<_TestMenus> {
   TestMenu? radioValue;
   ShortcutRegistryEntry? _shortcutsEntry;
 
-  void _itemSelected(TestMenu item) {
+  void _itemSelected(final TestMenu item) {
     debugPrint('App: Selected item ${item.label}');
   }
 
-  void _openItem(TestMenu item) {
+  void _openItem(final TestMenu item) {
     debugPrint('App: Opened item ${item.label}');
   }
 
-  void _closeItem(TestMenu item) {
+  void _closeItem(final TestMenu item) {
     debugPrint('App: Closed item ${item.label}');
   }
 
-  void _setRadio(TestMenu? item) {
+  void _setRadio(final TestMenu? item) {
     debugPrint('App: Set Radio item ${item?.label}');
     setState(() {
       radioValue = item;
     });
   }
 
-  void _setCheck(TestMenu item) {
+  void _setCheck(final TestMenu item) {
     debugPrint('App: Set Checkbox item ${item.label}');
     setState(() {
       switch (checkboxState) {
@@ -536,7 +536,7 @@ class _TestMenusState extends State<_TestMenus> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       children: <Widget>[
         Expanded(
@@ -546,7 +546,7 @@ class _TestMenusState extends State<_TestMenus> {
               onPressed: _itemSelected,
               onOpen: _openItem,
               onClose: _closeItem,
-              onCheckboxChanged: (TestMenu menu, bool? value) {
+              onCheckboxChanged: (final TestMenu menu, final bool? value) {
                 _setCheck(menu);
               },
               onRadioChanged: _setRadio,
@@ -565,22 +565,22 @@ class _TestMenusState extends State<_TestMenus> {
 }
 
 List<Widget> createTestMenus({
-  void Function(TestMenu)? onPressed,
-  void Function(TestMenu, bool?)? onCheckboxChanged,
-  void Function(TestMenu?)? onRadioChanged,
-  void Function(TestMenu)? onOpen,
-  void Function(TestMenu)? onClose,
-  Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
-  bool? checkboxValue,
-  TestMenu? radioValue,
-  MenuController? menuController,
-  TextEditingController? textEditingController,
-  bool includeExtraGroups = false,
-  bool accelerators = false,
+  final void Function(TestMenu)? onPressed,
+  final void Function(TestMenu, bool?)? onCheckboxChanged,
+  final void Function(TestMenu?)? onRadioChanged,
+  final void Function(TestMenu)? onOpen,
+  final void Function(TestMenu)? onClose,
+  final Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
+  final bool? checkboxValue,
+  final TestMenu? radioValue,
+  final MenuController? menuController,
+  final TextEditingController? textEditingController,
+  final bool includeExtraGroups = false,
+  final bool accelerators = false,
 }) {
   Widget submenuButton(
-    TestMenu menu, {
-    required List<Widget> menuChildren,
+    final TestMenu menu, {
+    required final List<Widget> menuChildren,
   }) {
     return SubmenuButton(
       onOpen: onOpen != null ? () => onOpen(menu) : null,
@@ -591,11 +591,11 @@ List<Widget> createTestMenus({
   }
 
   Widget menuItemButton(
-    TestMenu menu, {
-    bool enabled = true,
-    Widget? leadingIcon,
-    Widget? trailingIcon,
-    Key? key,
+    final TestMenu menu, {
+    final bool enabled = true,
+    final Widget? leadingIcon,
+    final Widget? trailingIcon,
+    final Key? key,
   }) {
     return MenuItemButton(
       key: key,
@@ -608,18 +608,18 @@ List<Widget> createTestMenus({
   }
 
   Widget checkboxMenuButton(
-    TestMenu menu, {
-    bool enabled = true,
-    bool tristate = false,
-    Widget? leadingIcon,
-    Widget? trailingIcon,
-    Key? key,
+    final TestMenu menu, {
+    final bool enabled = true,
+    final bool tristate = false,
+    final Widget? leadingIcon,
+    final Widget? trailingIcon,
+    final Key? key,
   }) {
     return CheckboxMenuButton(
       key: key,
       value: checkboxValue,
       tristate: tristate,
-      onChanged: enabled && onCheckboxChanged != null ? (bool? value) => onCheckboxChanged(menu, value) : null,
+      onChanged: enabled && onCheckboxChanged != null ? (final bool? value) => onCheckboxChanged(menu, value) : null,
       shortcut: menu.shortcut,
       trailingIcon: trailingIcon,
       child: accelerators ? MenuAcceleratorLabel(menu.acceleratorLabel) : Text(menu.label),
@@ -627,12 +627,12 @@ List<Widget> createTestMenus({
   }
 
   Widget radioMenuButton(
-    TestMenu menu, {
-    bool enabled = true,
-    bool toggleable = false,
-    Widget? leadingIcon,
-    Widget? trailingIcon,
-    Key? key,
+    final TestMenu menu, {
+    final bool enabled = true,
+    final bool toggleable = false,
+    final Widget? leadingIcon,
+    final Widget? trailingIcon,
+    final Key? key,
   }) {
     return RadioMenuButton<TestMenu>(
       key: key,
@@ -719,7 +719,7 @@ List<Widget> createTestMenus({
             width: 200,
             child: TextField(
               controller: textEditingController,
-              onSubmitted: (String value) {
+              onSubmitted: (final String value) {
                 debugPrint('String $value submitted.');
               },
             ),
@@ -780,7 +780,7 @@ enum TestMenu {
   String get label => MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel);
   int get acceleratorIndex {
     int index = -1;
-    MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel, setIndex: (int i) => index = i);
+    MenuAcceleratorLabel.stripAcceleratorMarkers(acceleratorLabel, setIndex: (final int i) => index = i);
     return index;
   }
 }

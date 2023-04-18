@@ -32,7 +32,7 @@ class ExpandingBottomSheet extends StatefulWidget {
   @override
   ExpandingBottomSheetState createState() => ExpandingBottomSheetState();
 
-  static ExpandingBottomSheetState? of(BuildContext context, {bool isNullOk = false}) {
+  static ExpandingBottomSheetState? of(final BuildContext context, {final bool isNullOk = false}) {
     final ExpandingBottomSheetState? result = context.findAncestorStateOfType<ExpandingBottomSheetState>();
     if (isNullOk || result != null) {
       return result;
@@ -48,11 +48,11 @@ class ExpandingBottomSheet extends StatefulWidget {
 // curve formula. It's quintic, not cubic. But it _can_ be expressed as one
 // curve followed by another, which we do here.
 Animation<T> _getEmphasizedEasingAnimation<T>({
-  required T begin,
-  required T peak,
-  required T end,
-  required bool isForward,
-  required Animation<double> parent,
+  required final T begin,
+  required final T peak,
+  required final T end,
+  required final bool isForward,
+  required final Animation<double> parent,
 }) {
   Curve firstCurve;
   Curve secondCurve;
@@ -93,7 +93,7 @@ Animation<T> _getEmphasizedEasingAnimation<T>({
 
 // Calculates the value where two double Animations should be joined. Used by
 // callers of _getEmphasisedEasing<double>().
-double _getPeakPoint({required double begin, required double end}) {
+double _getPeakPoint({required final double begin, required final double end}) {
   return begin + (end - begin) * _kPeakVelocityProgress;
 }
 
@@ -131,7 +131,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
     super.dispose();
   }
 
-  Animation<double> _getWidthAnimation(double screenWidth) {
+  Animation<double> _getWidthAnimation(final double screenWidth) {
     if (_controller.status == AnimationStatus.forward) {
       // Opening animation
       return Tween<double>(begin: _width, end: screenWidth).animate(
@@ -152,7 +152,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
     }
   }
 
-  Animation<double> _getHeightAnimation(double screenHeight) {
+  Animation<double> _getHeightAnimation(final double screenHeight) {
     if (_controller.status == AnimationStatus.forward) {
       // Opening animation
 
@@ -221,7 +221,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
 
   // Returns the correct width of the ExpandingBottomSheet based on the number of
   // products in the cart.
-  double _widthFor(int numProducts) {
+  double _widthFor(final int numProducts) {
     switch (numProducts) {
       case 0:
         return _kWidthForCartIcon;
@@ -259,7 +259,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   // Changes the padding between the start edge of the Material and the cart icon
   // based on the number of products in the cart (padding increases when > 0
   // products.)
-  EdgeInsetsDirectional _cartPaddingFor(int numProducts) {
+  EdgeInsetsDirectional _cartPaddingFor(final int numProducts) {
     return (numProducts == 0)
       ? const EdgeInsetsDirectional.only(start: 20.0, end: 8.0)
       : const EdgeInsetsDirectional.only(start: 32.0, end: 8.0);
@@ -267,7 +267,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
 
   bool get _cartIsVisible => _thumbnailOpacityAnimation.value == 0.0;
 
-  Widget _buildThumbnails(int numProducts) {
+  Widget _buildThumbnails(final int numProducts) {
     return ExcludeSemantics(
       child: Opacity(
         opacity: _thumbnailOpacityAnimation.value,
@@ -303,7 +303,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
     );
   }
 
-  Widget _buildCart(BuildContext context, Widget? child) {
+  Widget _buildCart(final BuildContext context, final Widget? child) {
     // numProducts is the number of different products in the cart (does not
     // include multiples of the same product).
     final AppStateModel model = ScopedModel.of<AppStateModel>(context);
@@ -344,7 +344,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   }
 
   // Builder for the hide and reveal animation when the backdrop opens and closes
-  Widget _buildSlideAnimation(BuildContext context, Widget? child) {
+  Widget _buildSlideAnimation(final BuildContext context, final Widget? child) {
     _slideAnimation = _getEmphasizedEasingAnimation(
       begin: const Offset(1.0, 0.0),
       peak: const Offset(_kPeakVelocityProgress, 0.0),
@@ -372,7 +372,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedSize(
       key: _expandingBottomSheetKey,
       duration: const Duration(milliseconds: 225),
@@ -387,7 +387,7 @@ class ExpandingBottomSheetState extends State<ExpandingBottomSheet> with TickerP
             behavior: HitTestBehavior.opaque,
             onTap: open,
             child: ScopedModelDescendant<AppStateModel>(
-              builder: (BuildContext context, Widget? child, AppStateModel model) {
+              builder: (final BuildContext context, final Widget? child, final AppStateModel model) {
                 return AnimatedBuilder(
                   builder: _buildCart,
                   animation: _controller,
@@ -429,17 +429,17 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
     _internalList = List<int>.from(_list.list);
   }
 
-  Product _productWithId(int productId) {
+  Product _productWithId(final int productId) {
     final AppStateModel model = ScopedModel.of<AppStateModel>(context);
     final Product product = model.getProductById(productId);
     return product;
   }
 
-  Widget _buildRemovedThumbnail(int item, BuildContext context, Animation<double> animation) {
+  Widget _buildRemovedThumbnail(final int item, final BuildContext context, final Animation<double> animation) {
     return ProductThumbnail(animation, animation, _productWithId(item));
   }
 
-  Widget _buildThumbnail(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildThumbnail(final BuildContext context, final int index, final Animation<double> animation) {
     final Animation<double> thumbnailSize = Tween<double>(begin: 0.8, end: 1.0).animate(
       CurvedAnimation(
         curve: const Interval(0.33, 1.0, curve: Curves.easeIn),
@@ -502,10 +502,10 @@ class _ProductThumbnailRowState extends State<ProductThumbnailRow> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     _updateLists();
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget? child, AppStateModel model) => _buildAnimatedList(),
+      builder: (final BuildContext context, final Widget? child, final AppStateModel model) => _buildAnimatedList(),
     );
   }
 }
@@ -517,7 +517,7 @@ class ExtraProductsNumber extends StatelessWidget {
   // more than three products in the cart. This calculates overflow products,
   // including their duplicates (but not duplicates of products shown as
   // thumbnails).
-  int _calculateOverflow(AppStateModel model) {
+  int _calculateOverflow(final AppStateModel model) {
     final Map<int, int> productMap = model.productsInCart;
     // List created to be able to access products by index instead of ID.
     // Order is guaranteed because productsInCart returns a LinkedHashMap.
@@ -532,7 +532,7 @@ class ExtraProductsNumber extends StatelessWidget {
     return overflow;
   }
 
-  Widget _buildOverflow(AppStateModel model, BuildContext context) {
+  Widget _buildOverflow(final AppStateModel model, final BuildContext context) {
     if (model.productsInCart.length <= 3) {
       return Container();
     }
@@ -547,9 +547,9 @@ class ExtraProductsNumber extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext builder, Widget? child, AppStateModel model) => _buildOverflow(model, context),
+      builder: (final BuildContext builder, final Widget? child, final AppStateModel model) => _buildOverflow(model, context),
     );
   }
 }
@@ -562,7 +562,7 @@ class ProductThumbnail extends StatelessWidget {
   final Product product;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FadeTransition(
       opacity: opacityAnimation,
       child: ScaleTransition(
@@ -592,7 +592,7 @@ class _ListModel {
   _ListModel({
     required this.listKey,
     required this.removedItemBuilder,
-    Iterable<int>? initialItems,
+    final Iterable<int>? initialItems,
   }) : _items = initialItems?.toList() ?? <int>[];
 
   final GlobalKey<AnimatedListState> listKey;
@@ -601,34 +601,34 @@ class _ListModel {
 
   AnimatedListState? get _animatedList => listKey.currentState;
 
-  void add(int product) {
+  void add(final int product) {
     _insert(_items.length, product);
   }
 
-  void _insert(int index, int item) {
+  void _insert(final int index, final int item) {
     _items.insert(index, item);
     _animatedList!.insertItem(index, duration: const Duration(milliseconds: 225));
   }
 
-  void remove(int product) {
+  void remove(final int product) {
     final int index = _items.indexOf(product);
     if (index >= 0) {
       _removeAt(index);
     }
   }
 
-  void _removeAt(int index) {
+  void _removeAt(final int index) {
     final int removedItem = _items.removeAt(index);
-    _animatedList!.removeItem(index, (BuildContext context, Animation<double> animation) {
+    _animatedList!.removeItem(index, (final BuildContext context, final Animation<double> animation) {
       return removedItemBuilder(removedItem, context, animation);
     });
   }
 
   int get length => _items.length;
 
-  int operator [](int index) => _items[index];
+  int operator [](final int index) => _items[index];
 
-  int indexOf(int item) => _items.indexOf(item);
+  int indexOf(final int item) => _items.indexOf(item);
 
   List<int> get list => _items;
 }

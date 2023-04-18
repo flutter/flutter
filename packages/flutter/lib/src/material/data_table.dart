@@ -130,7 +130,7 @@ class DataRow {
   ///
   /// The [cells] argument must not be null.
   DataRow.byIndex({
-    int? index,
+    final int? index,
     this.selected = false,
     this.onSelectChanged,
     this.onLongPress,
@@ -236,7 +236,7 @@ class DataRow {
   ///  * [MaterialStateMouseCursor], which can be used to create a [MouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
-  bool get _debugInteractive => onSelectChanged != null || cells.any((DataCell cell) => cell._debugInteractive);
+  bool get _debugInteractive => onSelectChanged != null || cells.any((final DataCell cell) => cell._debugInteractive);
 }
 
 /// The data for a cell of a [DataTable].
@@ -427,9 +427,9 @@ class DataTable extends StatelessWidget {
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.7.0-5.0.pre.',
     )
-    double? dataRowHeight,
-    double? dataRowMinHeight,
-    double? dataRowMaxHeight,
+    final double? dataRowHeight,
+    final double? dataRowMinHeight,
+    final double? dataRowMaxHeight,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -445,7 +445,7 @@ class DataTable extends StatelessWidget {
     this.clipBehavior = Clip.none,
   }) : assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
-       assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
+       assert(!rows.any((final DataRow row) => row.cells.length != columns.length)),
        assert(dividerThickness == null || dividerThickness >= 0),
        assert(dataRowMinHeight == null || dataRowMaxHeight == null || dataRowMaxHeight >= dataRowMinHeight),
        assert(dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null),
@@ -708,7 +708,7 @@ class DataTable extends StatelessWidget {
   // Set by the constructor to the index of the only Column that is
   // non-numeric, if there is exactly one, otherwise null.
   final int? _onlyTextColumn;
-  static int? _initOnlyTextColumn(List<DataColumn> columns) {
+  static int? _initOnlyTextColumn(final List<DataColumn> columns) {
     int? result;
     for (int index = 0; index < columns.length; index += 1) {
       final DataColumn column = columns[index];
@@ -723,13 +723,13 @@ class DataTable extends StatelessWidget {
   }
 
   bool get _debugInteractive {
-    return columns.any((DataColumn column) => column._debugInteractive)
-        || rows.any((DataRow row) => row._debugInteractive);
+    return columns.any((final DataColumn column) => column._debugInteractive)
+        || rows.any((final DataRow row) => row._debugInteractive);
   }
 
   static final LocalKey _headingRowKey = UniqueKey();
 
-  void _handleSelectAll(bool? checked, bool someChecked) {
+  void _handleSelectAll(final bool? checked, final bool someChecked) {
     // If some checkboxes are checked, all checkboxes are selected. Otherwise,
     // use the new checked value but default to false if it's null.
     final bool effectiveChecked = someChecked || (checked ?? false);
@@ -763,13 +763,13 @@ class DataTable extends StatelessWidget {
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
 
   Widget _buildCheckbox({
-    required BuildContext context,
-    required bool? checked,
-    required VoidCallback? onRowTap,
-    required ValueChanged<bool?>? onCheckboxChanged,
-    required MaterialStateProperty<Color?>? overlayColor,
-    required bool tristate,
-    MouseCursor? rowMouseCursor,
+    required final BuildContext context,
+    required final bool? checked,
+    required final VoidCallback? onRowTap,
+    required final ValueChanged<bool?>? onCheckboxChanged,
+    required final MaterialStateProperty<Color?>? overlayColor,
+    required final bool tristate,
+    final MouseCursor? rowMouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
     final double effectiveHorizontalMargin = horizontalMargin
@@ -812,16 +812,16 @@ class DataTable extends StatelessWidget {
   }
 
   Widget _buildHeadingCell({
-    required BuildContext context,
-    required EdgeInsetsGeometry padding,
+    required final BuildContext context,
+    required final EdgeInsetsGeometry padding,
     required Widget label,
-    required String? tooltip,
-    required bool numeric,
-    required VoidCallback? onSort,
-    required bool sorted,
-    required bool ascending,
-    required MaterialStateProperty<Color?>? overlayColor,
-    required MouseCursor? mouseCursor,
+    required final String? tooltip,
+    required final bool numeric,
+    required final VoidCallback? onSort,
+    required final bool sorted,
+    required final bool ascending,
+    required final MaterialStateProperty<Color?>? overlayColor,
+    required final MouseCursor? mouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -879,21 +879,21 @@ class DataTable extends StatelessWidget {
   }
 
   Widget _buildDataCell({
-    required BuildContext context,
-    required EdgeInsetsGeometry padding,
+    required final BuildContext context,
+    required final EdgeInsetsGeometry padding,
     required Widget label,
-    required bool numeric,
-    required bool placeholder,
-    required bool showEditIcon,
-    required GestureTapCallback? onTap,
-    required VoidCallback? onSelectChanged,
-    required GestureTapCallback? onDoubleTap,
-    required GestureLongPressCallback? onLongPress,
-    required GestureTapDownCallback? onTapDown,
-    required GestureTapCancelCallback? onTapCancel,
-    required MaterialStateProperty<Color?>? overlayColor,
-    required GestureLongPressCallback? onRowLongPress,
-    required MouseCursor? mouseCursor,
+    required final bool numeric,
+    required final bool placeholder,
+    required final bool showEditIcon,
+    required final GestureTapCallback? onTap,
+    required final VoidCallback? onSelectChanged,
+    required final GestureTapCallback? onDoubleTap,
+    required final GestureLongPressCallback? onLongPress,
+    required final GestureTapDownCallback? onTapDown,
+    required final GestureTapCancelCallback? onTapCancel,
+    required final MaterialStateProperty<Color?>? overlayColor,
+    required final GestureLongPressCallback? onRowLongPress,
+    required final MouseCursor? mouseCursor,
   }) {
     final ThemeData themeData = Theme.of(context);
     final DataTableThemeData dataTableTheme = DataTableTheme.of(context);
@@ -956,7 +956,7 @@ class DataTable extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(!_debugInteractive || debugCheckHasMaterial(context));
 
     final ThemeData theme = Theme.of(context);
@@ -968,18 +968,18 @@ class DataTable extends StatelessWidget {
       ?? dataTableTheme.dataRowColor
       ?? theme.dataTableTheme.dataRowColor;
     final MaterialStateProperty<Color?> defaultRowColor = MaterialStateProperty.resolveWith(
-      (Set<MaterialState> states) {
+      (final Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           return theme.colorScheme.primary.withOpacity(0.08);
         }
         return null;
       },
     );
-    final bool anyRowSelectable = rows.any((DataRow row) => row.onSelectChanged != null);
+    final bool anyRowSelectable = rows.any((final DataRow row) => row.onSelectChanged != null);
     final bool displayCheckboxColumn = showCheckboxColumn && anyRowSelectable;
     final Iterable<DataRow> rowsWithCheckbox = displayCheckboxColumn ?
-      rows.where((DataRow row) => row.onSelectChanged != null) : <DataRow>[];
-    final Iterable<DataRow> rowsChecked = rowsWithCheckbox.where((DataRow row) => row.selected);
+      rows.where((final DataRow row) => row.onSelectChanged != null) : <DataRow>[];
+    final Iterable<DataRow> rowsChecked = rowsWithCheckbox.where((final DataRow row) => row.selected);
     final bool allChecked = displayCheckboxColumn && rowsChecked.length == rowsWithCheckbox.length;
     final bool anyChecked = displayCheckboxColumn && rowsChecked.isNotEmpty;
     final bool someChecked = anyChecked && !allChecked;
@@ -1003,7 +1003,7 @@ class DataTable extends StatelessWidget {
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>.filled(columns.length + (displayCheckboxColumn ? 1 : 0), const _NullTableColumnWidth());
     final List<TableRow> tableRows = List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
-      (int index) {
+      (final int index) {
         final bool isSelected = index > 0 && rows[index - 1].selected;
         final bool isDisabled = index > 0 && anyRowSelectable && rows[index - 1].onSelectChanged == null;
         final Set<MaterialState> states = <MaterialState>{
@@ -1045,7 +1045,7 @@ class DataTable extends StatelessWidget {
         context: context,
         checked: someChecked ? null : allChecked,
         onRowTap: null,
-        onCheckboxChanged: (bool? checked) => _handleSelectAll(checked, someChecked),
+        onCheckboxChanged: (final bool? checked) => _handleSelectAll(checked, someChecked),
         overlayColor: null,
         tristate: true,
       );
@@ -1199,7 +1199,7 @@ class TableRowInkWell extends InkResponse {
   );
 
   @override
-  RectCallback getRectCallback(RenderBox referenceBox) {
+  RectCallback getRectCallback(final RenderBox referenceBox) {
     return () {
       RenderObject cell = referenceBox;
       AbstractNode? table = cell.parent;
@@ -1227,7 +1227,7 @@ class TableRowInkWell extends InkResponse {
   }
 
   @override
-  bool debugCheckContext(BuildContext context) {
+  bool debugCheckContext(final BuildContext context) {
     assert(debugCheckHasTable(context));
     return super.debugCheckContext(context);
   }
@@ -1294,7 +1294,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     });
   }
 
-  void _resetOrientationAnimation(AnimationStatus status) {
+  void _resetOrientationAnimation(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       assert(_orientationAnimation.value == math.pi);
       _orientationOffset += math.pi;
@@ -1303,7 +1303,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(_SortArrow oldWidget) {
+  void didUpdateWidget(final _SortArrow oldWidget) {
     super.didUpdateWidget(oldWidget);
     bool skipArrow = false;
     final bool? newUp = widget.up ?? _up;
@@ -1341,7 +1341,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   static const double _arrowIconSize = 16.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
       child: Transform(
@@ -1361,10 +1361,10 @@ class _NullTableColumnWidth extends TableColumnWidth {
   const _NullTableColumnWidth();
 
   @override
-  double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) => throw UnimplementedError();
+  double maxIntrinsicWidth(final Iterable<RenderBox> cells, final double containerWidth) => throw UnimplementedError();
 
   @override
-  double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) => throw UnimplementedError();
+  double minIntrinsicWidth(final Iterable<RenderBox> cells, final double containerWidth) => throw UnimplementedError();
 }
 
 class _NullWidget extends Widget {

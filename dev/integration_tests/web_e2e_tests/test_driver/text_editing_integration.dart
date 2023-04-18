@@ -16,7 +16,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Focused text field creates a native input element',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -40,7 +40,7 @@ void main() {
   }, semanticsEnabled: false);
 
   testWidgets('Input field with no initial value works',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -64,7 +64,7 @@ void main() {
   }, semanticsEnabled: false);
 
   testWidgets('Pressing enter on the text field triggers submit',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -96,7 +96,7 @@ void main() {
   }, semanticsEnabled: false);
 
   testWidgets('Jump between TextFormFields with tab key',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -127,7 +127,7 @@ void main() {
     expect(input2.value, 'Text2');
   }, semanticsEnabled: false);
 
-  testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (WidgetTester tester) async {
+  testWidgets('Jump between TextFormFields with tab key after CapsLock is activated', (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 
@@ -174,7 +174,7 @@ void main() {
     expect(input2.value, 'Text2');
   }, semanticsEnabled: false);
 
-  testWidgets('Read-only fields work', (WidgetTester tester) async {
+  testWidgets('Read-only fields work', (final WidgetTester tester) async {
     const String text = 'Lorem ipsum dolor sit amet';
     app.main();
     await tester.pumpAndSettle();
@@ -233,7 +233,7 @@ void main() {
 }
 
 KeyboardEvent dispatchKeyboardEvent(
-    EventTarget target, String type, Map<String, dynamic> args) {
+    final EventTarget target, final String type, final Map<String, dynamic> args) {
   final Object jsKeyboardEvent = js_util.getProperty(window, 'KeyboardEvent') as Object;
   final List<dynamic> eventArgs = <dynamic>[
     type,

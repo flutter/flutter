@@ -33,7 +33,7 @@ class SamplePageState extends State<SamplePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sample Page')),
     );
@@ -48,7 +48,7 @@ class SampleForm extends StatelessWidget {
   final WillPopCallback callback;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Sample Form')),
       body: SizedBox.expand(
@@ -77,7 +77,7 @@ class _TestPageRoute<T> extends MaterialPageRoute<T> {
 class _TestPage extends Page<dynamic> {
   _TestPage({
     required this.builder,
-    required LocalKey key,
+    required final LocalKey key,
   })  : _key = GlobalKey(),
         super(key: key);
 
@@ -85,10 +85,10 @@ class _TestPage extends Page<dynamic> {
   final GlobalKey<dynamic> _key;
 
   @override
-  Route<dynamic> createRoute(BuildContext context) {
+  Route<dynamic> createRoute(final BuildContext context) {
     return _TestPageRoute<dynamic>(
         settings: this,
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           // keep state during move to another location in tree
           return KeyedSubtree(key: _key, child: builder.call(context));
         });
@@ -96,20 +96,20 @@ class _TestPage extends Page<dynamic> {
 }
 
 void main() {
-  testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (WidgetTester tester) async {
+  testWidgets('ModalRoute scopedWillPopupCallback can inhibit back button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           appBar: AppBar(title: const Text('Home')),
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Center(
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     showDialog<void>(
                       context: context,
-                      builder: (BuildContext context) => const SamplePage(),
+                      builder: (final BuildContext context) => const SamplePage(),
                     );
                   },
                 ),
@@ -151,19 +151,19 @@ void main() {
     expect(find.text('Sample Page'), findsNothing);
   });
 
-  testWidgets('willPop will only pop if the callback returns true', (WidgetTester tester) async {
+  testWidgets('willPop will only pop if the callback returns true', (final WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(title: const Text('Home')),
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Center(
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
                         );
@@ -190,19 +190,19 @@ void main() {
     expect(find.text('Sample Form'), findsNothing);
   });
 
-  testWidgets('Form.willPop can inhibit back button', (WidgetTester tester) async {
+  testWidgets('Form.willPop can inhibit back button', (final WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         home: Scaffold(
           appBar: AppBar(title: const Text('Home')),
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Center(
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return SampleForm(
                           callback: () => Future<bool>.value(willPopValue),
                         );
@@ -244,11 +244,11 @@ void main() {
     expect(willPopCount, 1);
   });
 
-  testWidgets('Form.willPop callbacks do not accumulate', (WidgetTester tester) async {
-    Future<bool> showYesNoAlert(BuildContext context) async {
+  testWidgets('Form.willPop callbacks do not accumulate', (final WidgetTester tester) async {
+    Future<bool> showYesNoAlert(final BuildContext context) async {
       return (await showDialog<bool>(
         context: context,
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return AlertDialog(
             actions: <Widget> [
               TextButton(
@@ -270,13 +270,13 @@ void main() {
         home: Scaffold(
           appBar: AppBar(title: const Text('Home')),
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Center(
                 child: TextButton(
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return SampleForm(
                           callback: () => showYesNoAlert(context),
                         );
@@ -336,14 +336,14 @@ void main() {
     expect(find.text('Sample Form'), findsNothing);
   });
 
-  testWidgets('Route.scopedWillPop callbacks do not accumulate', (WidgetTester tester) async {
+  testWidgets('Route.scopedWillPop callbacks do not accumulate', (final WidgetTester tester) async {
     late StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
     final _TestPageRoute<void> route = _TestPageRoute<void>(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             contentsSetState = setState;
             return contentsEmpty ? Container() : SampleForm(key: UniqueKey(), callback: () async => false);
           },
@@ -356,7 +356,7 @@ void main() {
         home: Scaffold(
           appBar: AppBar(title: const Text('Home')),
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Center(
                 child: TextButton(
                   child: const Text('X'),
@@ -396,7 +396,7 @@ void main() {
     expect(route.hasCallback, isFalse);
   });
 
-  testWidgets('should handle new route if page moved from one navigator to another', (WidgetTester tester) async {
+  testWidgets('should handle new route if page moved from one navigator to another', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89133
     late StateSetter contentsSetState;
     bool moveToAnotherNavigator = false;
@@ -404,7 +404,7 @@ void main() {
     final List<Page<dynamic>> pages = <Page<dynamic>>[
       _TestPage(
         key: UniqueKey(),
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return WillPopScope(
             onWillPop: () async => true,
             child: const Text('anchor'),
@@ -413,11 +413,11 @@ void main() {
       ),
     ];
 
-    Widget buildNavigator(Key? key, List<Page<dynamic>> pages) {
+    Widget buildNavigator(final Key? key, final List<Page<dynamic>> pages) {
       return Navigator(
         key: key,
         pages: pages,
-        onPopPage: (Route<dynamic> route, dynamic result) {
+        onPopPage: (final Route<dynamic> route, final dynamic result) {
           return route.didPop(result);
         },
       );
@@ -427,7 +427,7 @@ void main() {
       return MaterialApp(
         home: Scaffold(
           body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               contentsSetState = setState;
               if (moveToAnotherNavigator) {
                 return buildNavigator(const ValueKey<int>(1), pages);

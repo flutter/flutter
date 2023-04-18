@@ -32,14 +32,14 @@ typedef PrintFn = void Function(Object);
 
 class CustomDevicesCommand extends FlutterCommand {
   factory CustomDevicesCommand({
-    required CustomDevicesConfig customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FeatureFlags featureFlags,
+    required final CustomDevicesConfig customDevicesConfig,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Terminal terminal,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final FeatureFlags featureFlags,
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
@@ -55,15 +55,15 @@ class CustomDevicesCommand extends FlutterCommand {
 
   @visibleForTesting
   factory CustomDevicesCommand.test({
-    required CustomDevicesConfig customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FeatureFlags featureFlags,
-    PrintFn usagePrintFn = print
+    required final CustomDevicesConfig customDevicesConfig,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Terminal terminal,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final FeatureFlags featureFlags,
+    final PrintFn usagePrintFn = print
   }) {
     return CustomDevicesCommand._common(
       customDevicesConfig: customDevicesConfig,
@@ -79,15 +79,15 @@ class CustomDevicesCommand extends FlutterCommand {
   }
 
   CustomDevicesCommand._common({
-    required CustomDevicesConfig customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
-    required ProcessManager processManager,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FeatureFlags featureFlags,
-    PrintFn usagePrintFn = print,
+    required final CustomDevicesConfig customDevicesConfig,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Terminal terminal,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final FeatureFlags featureFlags,
+    final PrintFn usagePrintFn = print,
   }) : _customDevicesConfig = customDevicesConfig,
        _featureFlags = featureFlags,
        _usagePrintFn = usagePrintFn
@@ -292,11 +292,11 @@ If a file already exists at the backup location, it will be overwritten.
 class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   CustomDevicesAddCommand({
     required super.customDevicesConfig,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Terminal terminal,
-    required Platform platform,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Terminal terminal,
+    required final Platform platform,
     required super.featureFlags,
-    required ProcessManager processManager,
+    required final ProcessManager processManager,
     required FileSystem super.fileSystem,
     required super.logger,
   }) : _operatingSystemUtils = operatingSystemUtils,
@@ -366,7 +366,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
   @override
   String get name => 'add';
 
-  void _printConfigCheckingError(String err) {
+  void _printConfigCheckingError(final String err) {
     logger.printError(err);
   }
 
@@ -492,17 +492,17 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     logger.printStatus('Successfully added custom device to config file at "${customDevicesConfig.configPath}".');
   }
 
-  bool _isValidHostname(String s) => _hostnameRegex.hasMatch(s);
+  bool _isValidHostname(final String s) => _hostnameRegex.hasMatch(s);
 
-  bool _isValidIpAddr(String s) => InternetAddress.tryParse(s) != null;
+  bool _isValidIpAddr(final String s) => InternetAddress.tryParse(s) != null;
 
   /// Ask the user to input a string.
   Future<String?> askForString(
-    String name, {
-    String? description,
-    String? example,
-    String? defaultsTo,
-    Future<bool> Function(String)? validator,
+    final String name, {
+    final String? description,
+    final String? example,
+    final String? defaultsTo,
+    final Future<bool> Function(String)? validator,
   }) async {
     String msg = description ?? name;
 
@@ -533,9 +533,9 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
   /// Ask the user for a y(es) / n(o) or empty input.
   Future<bool> askForBool(
-    String name, {
-    String? description,
-    bool defaultsTo = true,
+    final String name, {
+    final String? description,
+    final bool defaultsTo = true,
   }) async {
     final String defaultsToStr = defaultsTo == true ? '[Y/n]' : '[y/N]';
     logger.printStatus('$description $defaultsToStr (empty for default)');
@@ -556,7 +556,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
 
   /// Ask the user if he wants to apply the config.
   /// Shows a different prompt if errors or warnings exist in the config.
-  Future<bool> askApplyConfig({bool hasErrorsOrWarnings = false}) {
+  Future<bool> askApplyConfig({final bool hasErrorsOrWarnings = false}) {
     return askForBool(
       'apply',
       description: hasErrorsOrWarnings
@@ -583,7 +583,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
     // stream and listen to that instead.
     final StreamController<String> nonClosingKeystrokes = StreamController<String>();
     final StreamSubscription<String> keystrokesSubscription = _terminal.keystrokes.listen(
-      (String s) => nonClosingKeystrokes.add(s.trim()),
+      (final String s) => nonClosingKeystrokes.add(s.trim()),
       cancelOnError: true
     );
 
@@ -595,7 +595,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
         'Please enter the id you want to device to have. Must contain only '
         'alphanumeric or underscore characters.',
       example: 'pi',
-      validator: (String s) async => RegExp(r'^\w+$').hasMatch(s),
+      validator: (final String s) async => RegExp(r'^\w+$').hasMatch(s),
     ))!;
 
     final String label = (await askForString(
@@ -620,7 +620,7 @@ class CustomDevicesAddCommand extends CustomDevicesCommandBase {
       'target',
       description: 'Please enter the hostname or IPv4/v6 address of the device.',
       example: 'raspberrypi',
-      validator: (String s) async => _isValidHostname(s) || _isValidIpAddr(s)
+      validator: (final String s) async => _isValidHostname(s) || _isValidIpAddr(s)
     ))!;
 
     final InternetAddress? targetIp = InternetAddress.tryParse(targetStr);

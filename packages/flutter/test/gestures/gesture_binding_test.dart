@@ -38,7 +38,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   HandleEventCallback? onHandlePointerEvent;
 
   @override
-  void handlePointerEvent(PointerEvent event) {
+  void handlePointerEvent(final PointerEvent event) {
     onHandlePointerEvent?.call(event);
     super.handlePointerEvent(event);
   }
@@ -46,7 +46,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding, Schedul
   HandleEventCallback? onHandleEvent;
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     super.handleEvent(event, entry);
     onHandleEvent?.call(event);
   }
@@ -149,7 +149,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    binding.onHandleEvent = (PointerEvent event) {
+    binding.onHandleEvent = (final PointerEvent event) {
       events.add(event);
       if (event is PointerDownEvent) {
         binding.cancelPointer(event.pointer);
@@ -415,8 +415,8 @@ void main() {
     );
 
     final List<String> events = <String>[];
-    binding.onHandlePointerEvent = (PointerEvent event) { throw Exception('zipzapzooey $event'); };
-    FlutterError.onError = (FlutterErrorDetails details) { events.add(details.toString()); };
+    binding.onHandlePointerEvent = (final PointerEvent event) { throw Exception('zipzapzooey $event'); };
+    FlutterError.onError = (final FlutterErrorDetails details) { events.add(details.toString()); };
     try {
       GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
       expect(events.length, 1);

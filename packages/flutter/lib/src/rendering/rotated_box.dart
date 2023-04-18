@@ -22,8 +22,8 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   ///
   /// The [quarterTurns] argument must not be null.
   RenderRotatedBox({
-    required int quarterTurns,
-    RenderBox? child,
+    required final int quarterTurns,
+    final RenderBox? child,
   }) : _quarterTurns = quarterTurns {
     this.child = child;
   }
@@ -31,7 +31,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   /// The number of clockwise quarter turns the child should be rotated.
   int get quarterTurns => _quarterTurns;
   int _quarterTurns;
-  set quarterTurns(int value) {
+  set quarterTurns(final int value) {
     if (_quarterTurns == value) {
       return;
     }
@@ -42,7 +42,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   bool get _isVertical => quarterTurns.isOdd;
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     if (child == null) {
       return 0.0;
     }
@@ -50,7 +50,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     if (child == null) {
       return 0.0;
     }
@@ -58,7 +58,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     if (child == null) {
       return 0.0;
     }
@@ -66,7 +66,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     if (child == null) {
       return 0.0;
     }
@@ -76,7 +76,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   Matrix4? _paintTransform;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     if (child == null) {
       return constraints.smallest;
     }
@@ -100,7 +100,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null) {
       return false;
@@ -108,18 +108,18 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
     return result.addWithPaintTransform(
       transform: _paintTransform,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset position) {
+      hitTest: (final BoxHitTestResult result, final Offset position) {
         return child!.hitTest(result, position: position);
       },
     );
   }
 
-  void _paintChild(PaintingContext context, Offset offset) {
+  void _paintChild(final PaintingContext context, final Offset offset) {
     context.paintChild(child!, offset);
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (child != null) {
       _transformLayer.layer = context.pushTransform(
         needsCompositing,
@@ -142,7 +142,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  void applyPaintTransform(final RenderBox child, final Matrix4 transform) {
     if (_paintTransform != null) {
       transform.multiply(_paintTransform!);
     }

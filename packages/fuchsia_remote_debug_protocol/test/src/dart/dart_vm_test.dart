@@ -18,8 +18,8 @@ void main() {
     test('disconnect closes peer', () async {
       final FakeVmService service = FakeVmService();
       Future<vms.VmService> fakeServiceFunction(
-        Uri uri, {
-        Duration? timeout,
+        final Uri uri, {
+        final Duration? timeout,
       }) {
         return Future<vms.VmService>(() => service);
       }
@@ -77,8 +77,8 @@ void main() {
       };
 
       Future<vms.VmService> fakeVmConnectionFunction(
-        Uri uri, {
-        Duration? timeout,
+        final Uri uri, {
+        final Duration? timeout,
       }) {
         fakeService.flutterListViews =
             vms.Response.parse(flutterViewCannedResponses);
@@ -135,8 +135,8 @@ void main() {
       };
 
       Future<vms.VmService> fakeVmConnectionFunction(
-        Uri uri, {
-        Duration? timeout,
+        final Uri uri, {
+        final Duration? timeout,
       }) {
         fakeService.flutterListViews =
             vms.Response.parse(flutterViewCannedResponses);
@@ -185,8 +185,8 @@ void main() {
       };
 
       Future<vms.VmService> fakeVmConnectionFunction(
-        Uri uri, {
-        Duration? timeout,
+        final Uri uri, {
+        final Duration? timeout,
       }) {
         fakeService.flutterListViews =
             vms.Response.parse(flutterViewCannedResponseMissingId);
@@ -238,8 +238,8 @@ void main() {
       ];
 
       Future<vms.VmService> fakeVmConnectionFunction(
-        Uri uri, {
-        Duration? timeout,
+        final Uri uri, {
+        final Duration? timeout,
       }) {
         fakeService.vm = FakeVM(isolates: isolates);
         return Future<vms.VmService>(() => fakeService);
@@ -276,8 +276,8 @@ void main() {
       };
 
       Future<vms.VmService> fakeVmConnectionFunction(
-        Uri uri, {
-        Duration? timeout,
+        final Uri uri, {
+        final Duration? timeout,
       }) {
         fakeService.flutterListViews =
             vms.Response.parse(flutterViewCannedResponseMissingIsolateName);
@@ -312,8 +312,8 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Response> callMethod(String method,
-      {String? isolateId, Map<String, dynamic>? args}) async {
+  Future<vms.Response> callMethod(final String method,
+      {final String? isolateId, final Map<String, dynamic>? args}) async {
     if (method == '_flutter.listViews') {
       return flutterListViews!;
     }

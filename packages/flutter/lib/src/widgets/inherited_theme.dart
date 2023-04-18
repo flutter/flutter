@@ -48,7 +48,7 @@ abstract class InheritedTheme extends InheritedWidget {
   ///   return TooltipTheme(data: data, child: child);
   /// }
   /// ```
-  Widget wrap(BuildContext context, Widget child);
+  Widget wrap(final BuildContext context, final Widget child);
 
   /// Returns a widget that will [wrap] `child` in all of the inherited themes
   /// which are present between `context` and the specified `to`
@@ -63,7 +63,7 @@ abstract class InheritedTheme extends InheritedWidget {
   /// change in the original subtree, those changes will not be visible to
   /// the wrapped `child` - unless this method is called again to re-wrap the
   /// child.
-  static Widget captureAll(BuildContext context, Widget child, {BuildContext? to}) {
+  static Widget captureAll(final BuildContext context, final Widget child, {final BuildContext? to}) {
 
     return capture(from: context, to: to).wrap(child);
   }
@@ -85,7 +85,7 @@ abstract class InheritedTheme extends InheritedWidget {
   ///
   /// This method can be expensive if there are many widgets between `from` and
   /// `to` (it walks the element tree between those nodes).
-  static CapturedThemes capture({ required BuildContext from, required BuildContext? to }) {
+  static CapturedThemes capture({ required final BuildContext from, required final BuildContext? to }) {
 
     if (from == to) {
       // Nothing to capture.
@@ -99,7 +99,7 @@ abstract class InheritedTheme extends InheritedWidget {
       debugDidFindAncestor = to == null;
       return true;
     }());
-    from.visitAncestorElements((Element ancestor) {
+    from.visitAncestorElements((final Element ancestor) {
       if (ancestor == to) {
         assert(() {
           debugDidFindAncestor = true;
@@ -136,7 +136,7 @@ class CapturedThemes {
   final List<InheritedTheme> _themes;
 
   /// Wraps a `child` [Widget] in the [InheritedTheme]s captured in this object.
-  Widget wrap(Widget child) {
+  Widget wrap(final Widget child) {
     return _CaptureAll(themes: _themes, child: child);
   }
 }
@@ -151,7 +151,7 @@ class _CaptureAll extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget wrappedChild = child;
     for (final InheritedTheme theme in themes) {
       wrappedChild = theme.wrap(context, wrappedChild);

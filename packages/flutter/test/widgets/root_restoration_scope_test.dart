@@ -17,7 +17,7 @@ void main() {
     binding._restorationManager = MockRestorationManager();
   });
 
-  testWidgets('does not inject root bucket if inside scope', (WidgetTester tester) async {
+  testWidgets('does not inject root bucket if inside scope', (final WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
@@ -47,7 +47,7 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
   });
 
-  testWidgets('waits for root bucket', (WidgetTester tester) async {
+  testWidgets('waits for root bucket', (final WidgetTester tester) async {
     final Completer<RestorationBucket> bucketCompleter = Completer<RestorationBucket>();
     binding.restorationManager.rootBucket = bucketCompleter.future;
 
@@ -83,7 +83,7 @@ void main() {
     expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
   });
 
-  testWidgets('no delay when root is available synchronously', (WidgetTester tester) async {
+  testWidgets('no delay when root is available synchronously', (final WidgetTester tester) async {
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: rawData);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
@@ -109,7 +109,7 @@ void main() {
     expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
   });
 
-  testWidgets('does not insert root when restoration id is null', (WidgetTester tester) async {
+  testWidgets('does not insert root when restoration id is null', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -175,7 +175,7 @@ void main() {
     expect(state.bucket, isNull);
   });
 
-  testWidgets('injects root bucket when moved out of scope', (WidgetTester tester) async {
+  testWidgets('injects root bucket when moved out of scope', (final WidgetTester tester) async {
     final Key rootScopeKey = GlobalKey();
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> inScopeRawData = <String, dynamic>{};
@@ -257,7 +257,7 @@ void main() {
     expect((inScopeRawData[childrenMapKey] as Map<Object?, Object?>).containsKey('root-child'), isTrue);
   });
 
-  testWidgets('injects new root when old one is decommissioned', (WidgetTester tester) async {
+  testWidgets('injects new root when old one is decommissioned', (final WidgetTester tester) async {
     final Map<String, dynamic> firstRawData = <String, dynamic>{};
     final RestorationBucket firstRoot = RestorationBucket.root(manager: binding.restorationManager, rawData: firstRawData);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(firstRoot);
@@ -300,7 +300,7 @@ void main() {
     expect(state.bucket!.read<int>('foo'), 22);
   });
 
-  testWidgets('injects null when rootBucket is null', (WidgetTester tester) async {
+  testWidgets('injects null when rootBucket is null', (final WidgetTester tester) async {
     final Completer<RestorationBucket?> completer = Completer<RestorationBucket?>();
     binding.restorationManager.rootBucket = completer.future;
 
@@ -337,7 +337,7 @@ void main() {
     expect(state.bucket, isNotNull);
   });
 
-  testWidgets('can switch to null', (WidgetTester tester) async {
+  testWidgets('can switch to null', (final WidgetTester tester) async {
     final RestorationBucket root = RestorationBucket.root(manager: binding.restorationManager, rawData: null);
     binding.restorationManager.rootBucket = SynchronousFuture<RestorationBucket>(root);
 

@@ -101,7 +101,7 @@ class _CardDataItem extends StatelessWidget {
   final _CardData? data;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -142,12 +142,12 @@ class TabsDemo extends StatelessWidget {
   static const String routeName = '/material/tabs';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: _allPages.length,
       child: Scaffold(
         body: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -159,7 +159,7 @@ class TabsDemo extends StatelessWidget {
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
                     tabs: _allPages.keys.map<Widget>(
-                      (_Page page) => Tab(text: page.label),
+                      (final _Page page) => Tab(text: page.label),
                     ).toList(),
                   ),
                 ),
@@ -167,12 +167,12 @@ class TabsDemo extends StatelessWidget {
             ];
           },
           body: TabBarView(
-            children: _allPages.keys.map<Widget>((_Page page) {
+            children: _allPages.keys.map<Widget>((final _Page page) {
               return SafeArea(
                 top: false,
                 bottom: false,
                 child: Builder(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return CustomScrollView(
                       key: PageStorageKey<_Page>(page),
                       slivers: <Widget>[
@@ -187,7 +187,7 @@ class TabsDemo extends StatelessWidget {
                           sliver: SliverFixedExtentList(
                             itemExtent: _CardDataItem.height,
                             delegate: SliverChildBuilderDelegate(
-                              (BuildContext context, int index) {
+                              (final BuildContext context, final int index) {
                                 final _CardData data = _allPages[page]![index];
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(

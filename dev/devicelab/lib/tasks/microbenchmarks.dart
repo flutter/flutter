@@ -15,13 +15,13 @@ import '../microbenchmarks.dart';
 
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
-TaskFunction createMicrobenchmarkTask({bool enableImpeller = false}) {
+TaskFunction createMicrobenchmarkTask({final bool enableImpeller = false}) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
     await device.clearLogs();
 
-    Future<Map<String, double>> runMicrobench(String benchmarkPath) async {
+    Future<Map<String, double>> runMicrobench(final String benchmarkPath) async {
       Future<Map<String, double>> run() async {
         print('Running $benchmarkPath');
         final Directory appDir = dir(

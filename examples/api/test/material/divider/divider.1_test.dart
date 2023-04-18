@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/divider/divider.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Horizontal Divider', (WidgetTester tester) async {
+  testWidgets('Horizontal Divider', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

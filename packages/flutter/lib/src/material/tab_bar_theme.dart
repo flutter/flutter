@@ -93,18 +93,18 @@ class TabBarTheme with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   TabBarTheme copyWith({
-    Decoration? indicator,
-    Color? indicatorColor,
-    TabBarIndicatorSize? indicatorSize,
-    Color? dividerColor,
-    Color? labelColor,
-    EdgeInsetsGeometry? labelPadding,
-    TextStyle? labelStyle,
-    Color? unselectedLabelColor,
-    TextStyle? unselectedLabelStyle,
-    MaterialStateProperty<Color?>? overlayColor,
-    InteractiveInkFeatureFactory? splashFactory,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final Decoration? indicator,
+    final Color? indicatorColor,
+    final TabBarIndicatorSize? indicatorSize,
+    final Color? dividerColor,
+    final Color? labelColor,
+    final EdgeInsetsGeometry? labelPadding,
+    final TextStyle? labelStyle,
+    final Color? unselectedLabelColor,
+    final TextStyle? unselectedLabelStyle,
+    final MaterialStateProperty<Color?>? overlayColor,
+    final InteractiveInkFeatureFactory? splashFactory,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
   }) {
     return TabBarTheme(
       indicator: indicator ?? this.indicator,
@@ -123,7 +123,7 @@ class TabBarTheme with Diagnosticable {
   }
 
   /// The data from the closest [TabBarTheme] instance given the build context.
-  static TabBarTheme of(BuildContext context) {
+  static TabBarTheme of(final BuildContext context) {
     return Theme.of(context).tabBarTheme;
   }
 
@@ -132,7 +132,7 @@ class TabBarTheme with Diagnosticable {
   /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TabBarTheme lerp(TabBarTheme a, TabBarTheme b, double t) {
+  static TabBarTheme lerp(final TabBarTheme a, final TabBarTheme b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -169,7 +169,7 @@ class TabBarTheme with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

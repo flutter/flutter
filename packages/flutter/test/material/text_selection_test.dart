@@ -39,9 +39,9 @@ void main() {
 
   group('canSelectAll', () {
     Widget createEditableText({
-      required Key key,
-      String? text,
-      TextSelection? selection,
+      required final Key key,
+      final String? text,
+      final TextSelection? selection,
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
@@ -57,13 +57,13 @@ void main() {
       );
     }
 
-    testWidgets('should return false when there is no text', (WidgetTester tester) async {
+    testWidgets('should return false when there is no text', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(key: key));
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
-    testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
+    testWidgets('should return true when there is text and collapsed selection', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -72,7 +72,7 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgets('should return true when there is text and partial uncollapsed selection', (WidgetTester tester) async {
+    testWidgets('should return true when there is text and partial uncollapsed selection', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -82,7 +82,7 @@ void main() {
       expect(materialTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
+    testWidgets('should return false when there is text and full selection', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -94,7 +94,7 @@ void main() {
   });
 
   group('Text selection menu overflow (Android)', () {
-    testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
+    testWidgets('All menu items show when they fit.', (final WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -156,7 +156,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets("When menu items don't fit, an overflow menu is used.", (WidgetTester tester) async {
+    testWidgets("When menu items don't fit, an overflow menu is used.", (final WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
@@ -230,7 +230,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('A smaller menu bumps more items to the overflow menu.', (WidgetTester tester) async {
+    testWidgets('A smaller menu bumps more items to the overflow menu.', (final WidgetTester tester) async {
       // Set the screen size so narrow that only Cut and Copy can fit.
       tester.view.physicalSize = const Size(800, 800);
       addTearDown(tester.view.reset);
@@ -295,7 +295,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (WidgetTester tester) async {
+    testWidgets('When the menu renders below the text, the overflow menu back button is at the top.', (final WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
@@ -369,7 +369,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (WidgetTester tester) async {
+    testWidgets('When the menu items change, the menu is closed and _closedWidth reset.', (final WidgetTester tester) async {
       // Set the screen size to more narrow, so that Select all can't fit.
       tester.view.physicalSize = const Size(1000, 800);
       addTearDown(tester.view.reset);
@@ -477,7 +477,7 @@ void main() {
   });
 
   group('menu position', () {
-    testWidgets('When renders below a block of text, menu appears below bottom endpoint', (WidgetTester tester) async {
+    testWidgets('When renders below a block of text, menu appears below bottom endpoint', (final WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -551,7 +551,7 @@ void main() {
 
     testWidgets(
       'When selecting multiple lines over max lines',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final TextEditingController controller =
             TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         await tester.pumpWidget(MaterialApp(
@@ -627,7 +627,7 @@ void main() {
   });
 
   group('material handles', () {
-    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
+    testWidgets('draws transparent handle correctly', (final WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
         child: Theme(
           data: ThemeData(
@@ -636,7 +636,7 @@ void main() {
             ),
           ),
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Container(
                 color: Colors.white,
                 height: 800,
@@ -661,7 +661,7 @@ void main() {
       );
     });
 
-    testWidgets('works with 3 positional parameters', (WidgetTester tester) async {
+    testWidgets('works with 3 positional parameters', (final WidgetTester tester) async {
       await tester.pumpWidget(Theme(
         data: ThemeData(
           textSelectionTheme: const TextSelectionThemeData(
@@ -669,7 +669,7 @@ void main() {
           ),
         ),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Container(
               color: Colors.white,
               height: 800,
@@ -694,7 +694,7 @@ void main() {
     });
   });
 
-  testWidgets('Paste only appears when clipboard has contents', (WidgetTester tester) async {
+  testWidgets('Paste only appears when clipboard has contents', (final WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Atwater Peel Sherbrooke Bonaventure',
     );

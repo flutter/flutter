@@ -88,7 +88,7 @@ class ShapeDecoration extends Decoration {
   /// different shapes (e.g. from a [CircleBorder] to a
   /// [RoundedRectangleBorder]; the [BoxDecoration] class cannot animate the
   /// transition from a [BoxShape.circle] to [BoxShape.rectangle]).
-  factory ShapeDecoration.fromBoxDecoration(BoxDecoration source) {
+  factory ShapeDecoration.fromBoxDecoration(final BoxDecoration source) {
     final ShapeBorder shape;
     switch (source.shape) {
       case BoxShape.circle:
@@ -119,7 +119,7 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  Path getClipPath(Rect rect, TextDirection textDirection) {
+  Path getClipPath(final Rect rect, final TextDirection textDirection) {
     return shape.getOuterPath(rect, textDirection: textDirection);
   }
 
@@ -185,7 +185,7 @@ class ShapeDecoration extends Decoration {
   bool get isComplex => shadows != null;
 
   @override
-  ShapeDecoration? lerpFrom(Decoration? a, double t) {
+  ShapeDecoration? lerpFrom(final Decoration? a, final double t) {
     if (a is BoxDecoration) {
       return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
     } else if (a == null || a is ShapeDecoration) {
@@ -195,7 +195,7 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  ShapeDecoration? lerpTo(Decoration? b, double t) {
+  ShapeDecoration? lerpTo(final Decoration? b, final double t) {
     if (b is BoxDecoration) {
       return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
     } else if (b == null || b is ShapeDecoration) {
@@ -222,7 +222,7 @@ class ShapeDecoration extends Decoration {
   ///  * [lerpFrom] and [lerpTo], which are used to implement [Decoration.lerp]
   ///    and which use [ShapeDecoration.lerp] when interpolating two
   ///    [ShapeDecoration]s or a [ShapeDecoration] to or from null.
-  static ShapeDecoration? lerp(ShapeDecoration? a, ShapeDecoration? b, double t) {
+  static ShapeDecoration? lerp(final ShapeDecoration? a, final ShapeDecoration? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -244,7 +244,7 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -269,7 +269,7 @@ class ShapeDecoration extends Decoration {
   );
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
     properties.add(ColorProperty('color', color, defaultValue: null));
@@ -280,12 +280,12 @@ class ShapeDecoration extends Decoration {
   }
 
   @override
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
+  bool hitTest(final Size size, final Offset position, { final TextDirection? textDirection }) {
     return shape.getOuterPath(Offset.zero & size, textDirection: textDirection).contains(position);
   }
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([ final VoidCallback? onChanged ]) {
     assert(onChanged != null || image == null);
     return _ShapeDecorationPainter(this, onChanged!);
   }
@@ -293,7 +293,7 @@ class ShapeDecoration extends Decoration {
 
 /// An object that paints a [ShapeDecoration] into a canvas.
 class _ShapeDecorationPainter extends BoxPainter {
-  _ShapeDecorationPainter(this._decoration, VoidCallback onChanged)
+  _ShapeDecorationPainter(this._decoration, final VoidCallback onChanged)
     : super(onChanged);
 
   final ShapeDecoration _decoration;
@@ -311,7 +311,7 @@ class _ShapeDecorationPainter extends BoxPainter {
   @override
   VoidCallback get onChanged => super.onChanged!;
 
-  void _precache(Rect rect, TextDirection? textDirection) {
+  void _precache(final Rect rect, final TextDirection? textDirection) {
     if (rect == _lastRect && textDirection == _lastTextDirection) {
       return;
     }
@@ -333,18 +333,18 @@ class _ShapeDecorationPainter extends BoxPainter {
       if (_shadowCount == null) {
         _shadowCount = _decoration.shadows!.length;
         _shadowPaints = <Paint>[
-          ..._decoration.shadows!.map((BoxShadow shadow) => shadow.toPaint()),
+          ..._decoration.shadows!.map((final BoxShadow shadow) => shadow.toPaint()),
         ];
       }
       if (_decoration.shape.preferPaintInterior) {
         _shadowBounds = <Rect>[
-          ..._decoration.shadows!.map((BoxShadow shadow) {
+          ..._decoration.shadows!.map((final BoxShadow shadow) {
             return rect.shift(shadow.offset).inflate(shadow.spreadRadius);
           }),
         ];
       } else {
         _shadowPaths = <Path>[
-          ..._decoration.shadows!.map((BoxShadow shadow) {
+          ..._decoration.shadows!.map((final BoxShadow shadow) {
             return _decoration.shape.getOuterPath(rect.shift(shadow.offset).inflate(shadow.spreadRadius), textDirection: textDirection);
           }),
         ];
@@ -361,7 +361,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     _lastTextDirection = textDirection;
   }
 
-  void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
+  void _paintShadows(final Canvas canvas, final Rect rect, final TextDirection? textDirection) {
     if (_shadowCount != null) {
       if (_decoration.shape.preferPaintInterior) {
         for (int index = 0; index < _shadowCount!; index += 1) {
@@ -375,7 +375,7 @@ class _ShapeDecorationPainter extends BoxPainter {
     }
   }
 
-  void _paintInterior(Canvas canvas, Rect rect, TextDirection? textDirection) {
+  void _paintInterior(final Canvas canvas, final Rect rect, final TextDirection? textDirection) {
     if (_interiorPaint != null) {
       if (_decoration.shape.preferPaintInterior) {
         _decoration.shape.paintInterior(canvas, rect, _interiorPaint!, textDirection: textDirection);
@@ -386,7 +386,7 @@ class _ShapeDecorationPainter extends BoxPainter {
   }
 
   DecorationImagePainter? _imagePainter;
-  void _paintImage(Canvas canvas, ImageConfiguration configuration) {
+  void _paintImage(final Canvas canvas, final ImageConfiguration configuration) {
     if (_decoration.image == null) {
       return;
     }
@@ -401,7 +401,7 @@ class _ShapeDecorationPainter extends BoxPainter {
   }
 
   @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+  void paint(final Canvas canvas, final Offset offset, final ImageConfiguration configuration) {
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;

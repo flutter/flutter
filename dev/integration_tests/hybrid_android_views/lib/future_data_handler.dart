@@ -17,12 +17,12 @@ class FutureDataHandler {
   final Map<String, Completer<DriverHandler>> _handlers = <String, Completer<DriverHandler>>{};
 
   /// Registers a lazy handler that will be invoked on the next message from the driver.
-  Completer<DriverHandler> registerHandler(String key) {
+  Completer<DriverHandler> registerHandler(final String key) {
     _handlers[key] = Completer<DriverHandler>();
     return _handlers[key]!;
   }
 
-  Future<String> handleMessage(String? message) async {
+  Future<String> handleMessage(final String? message) async {
     if (_handlers[message] == null) {
       return 'Unsupported driver message: $message.\n'
              'Supported messages are: ${_handlers.keys}.';

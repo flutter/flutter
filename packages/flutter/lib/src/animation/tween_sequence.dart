@@ -50,7 +50,7 @@ class TweenSequence<T> extends Animatable<T> {
   /// There's a small cost associated with building a [TweenSequence] so it's
   /// best to reuse one, rather than rebuilding it on every frame, when that's
   /// possible.
-  TweenSequence(List<TweenSequenceItem<T>> items)
+  TweenSequence(final List<TweenSequenceItem<T>> items)
       : assert(items.isNotEmpty) {
     _items.addAll(items);
 
@@ -71,14 +71,14 @@ class TweenSequence<T> extends Animatable<T> {
   final List<TweenSequenceItem<T>> _items = <TweenSequenceItem<T>>[];
   final List<_Interval> _intervals = <_Interval>[];
 
-  T _evaluateAt(double t, int index) {
+  T _evaluateAt(final double t, final int index) {
     final TweenSequenceItem<T> element = _items[index];
     final double tInterval = _intervals[index].value(t);
     return element.tween.transform(tInterval);
   }
 
   @override
-  T transform(double t) {
+  T transform(final double t) {
     assert(t >= 0.0 && t <= 1.0);
     if (t == 1.0) {
       return _evaluateAt(t, _items.length - 1);
@@ -115,7 +115,7 @@ class FlippedTweenSequence extends TweenSequence<double> {
   FlippedTweenSequence(super.items);
 
   @override
-  double transform(double t) => 1 - super.transform(1 - t);
+  double transform(final double t) => 1 - super.transform(1 - t);
 }
 
 /// A simple holder for one element of a [TweenSequence].
@@ -158,9 +158,9 @@ class _Interval {
   final double start;
   final double end;
 
-  bool contains(double t) => t >= start && t < end;
+  bool contains(final double t) => t >= start && t < end;
 
-  double value(double t) => (t - start) / (end - start);
+  double value(final double t) => (t - start) / (end - start);
 
   @override
   String toString() => '<$start, $end>';

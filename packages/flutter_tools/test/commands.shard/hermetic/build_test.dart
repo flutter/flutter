@@ -147,9 +147,9 @@ class FakeBuildCommand extends BuildCommand {
     required super.fileSystem,
     required super.buildSystem,
     required super.osUtils,
-    required Logger logger,
+    required final Logger logger,
     required super.androidSdk,
-    bool verboseHelp = false,
+    final bool verboseHelp = false,
   }) : super(logger: logger, verboseHelp: verboseHelp,) {
     addSubcommand(FakeBuildSubcommand(logger: logger, verboseHelp: verboseHelp));
   }

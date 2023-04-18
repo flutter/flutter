@@ -12,7 +12,7 @@ class DefaultTextStyleApp extends StatelessWidget {
   const DefaultTextStyleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,
@@ -28,7 +28,7 @@ class DefaultTextStyleExample extends StatelessWidget {
   const DefaultTextStyleExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('DefaultTextStyle.merge Sample')),
       // Inherit MaterialApp text theme and override font size and font weight.

@@ -31,7 +31,7 @@ void main() {
       );
     });
 
-    FeatureFlags createFlags(String channel) {
+    FeatureFlags createFlags(final String channel) {
       return FlutterFeatureFlags(
         flutterVersion: FakeFlutterVersion(channel: channel),
         config: testConfig,

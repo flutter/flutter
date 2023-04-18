@@ -12,7 +12,7 @@ class FlowApp extends StatelessWidget {
   const FlowApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -42,7 +42,7 @@ class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin
     Icons.menu,
   ];
 
-  void _updateMenu(IconData icon) {
+  void _updateMenu(final IconData icon) {
     if (icon != Icons.menu) {
       setState(() => lastTapped = icon);
     }
@@ -57,7 +57,7 @@ class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget flowMenuItem(IconData icon) {
+  Widget flowMenuItem(final IconData icon) {
     final double buttonDiameter = MediaQuery.of(context).size.width / menuItems.length;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -80,10 +80,10 @@ class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Flow(
       delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
-      children: menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
+      children: menuItems.map<Widget>((final IconData icon) => flowMenuItem(icon)).toList(),
     );
   }
 }
@@ -94,12 +94,12 @@ class FlowMenuDelegate extends FlowDelegate {
   final Animation<double> menuAnimation;
 
   @override
-  bool shouldRepaint(FlowMenuDelegate oldDelegate) {
+  bool shouldRepaint(final FlowMenuDelegate oldDelegate) {
     return menuAnimation != oldDelegate.menuAnimation;
   }
 
   @override
-  void paintChildren(FlowPaintingContext context) {
+  void paintChildren(final FlowPaintingContext context) {
     double dx = 0.0;
     for (int i = 0; i < context.childCount; ++i) {
       dx = context.getChildSize(i)!.width * i;

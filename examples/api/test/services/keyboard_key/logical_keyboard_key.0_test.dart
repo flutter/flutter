@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/services/keyboard_key/logical_keyboard_key.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Responds to key', (WidgetTester tester) async {
+  testWidgets('Responds to key', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.KeyExampleApp(),
     );

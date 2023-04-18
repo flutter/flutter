@@ -74,14 +74,14 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// The arguments [duration], [curve], [alignment], and [vsync] must
   /// not be null.
   RenderAnimatedSize({
-    required TickerProvider vsync,
-    required Duration duration,
-    Duration? reverseDuration,
-    Curve curve = Curves.linear,
+    required final TickerProvider vsync,
+    required final Duration duration,
+    final Duration? reverseDuration,
+    final Curve curve = Curves.linear,
     super.alignment,
     super.textDirection,
     super.child,
-    Clip clipBehavior = Clip.hardEdge,
+    final Clip clipBehavior = Clip.hardEdge,
   }) : _vsync = vsync,
        _clipBehavior = clipBehavior {
     _controller = AnimationController(
@@ -114,7 +114,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   /// The duration of the animation.
   Duration get duration => _controller.duration!;
-  set duration(Duration value) {
+  set duration(final Duration value) {
     if (value == _controller.duration) {
       return;
     }
@@ -123,7 +123,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   /// The duration of the animation when running in reverse.
   Duration? get reverseDuration => _controller.reverseDuration;
-  set reverseDuration(Duration? value) {
+  set reverseDuration(final Duration? value) {
     if (value == _controller.reverseDuration) {
       return;
     }
@@ -132,7 +132,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   /// The curve of the animation.
   Curve get curve => _animation.curve;
-  set curve(Curve value) {
+  set curve(final Curve value) {
     if (value == _animation.curve) {
       return;
     }
@@ -144,7 +144,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
-  set clipBehavior(Clip value) {
+  set clipBehavior(final Clip value) {
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -161,7 +161,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// The [TickerProvider] for the [AnimationController] that runs the animation.
   TickerProvider get vsync => _vsync;
   TickerProvider _vsync;
-  set vsync(TickerProvider value) {
+  set vsync(final TickerProvider value) {
     if (value == _vsync) {
       return;
     }
@@ -170,7 +170,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
     switch (state) {
       case RenderAnimatedSizeState.start:
@@ -230,7 +230,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     if (child == null || constraints.isTight) {
       return constraints.smallest;
     }
@@ -329,7 +329,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (child != null && _hasVisualOverflow && clipBehavior != Clip.none) {
       final Rect rect = Offset.zero & size;
       _clipRectLayer.layer = context.pushClipRect(

@@ -21,10 +21,10 @@ String _dataRoot = path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', '
 String? testDataRoot;
 
 /// Converts `FOO_BAR` to `FooBar`.
-String shoutingToUpperCamel(String shouting) {
+String shoutingToUpperCamel(final String shouting) {
   final RegExp initialLetter = RegExp(r'(?:_|^)([^_])([^_]*)');
   final String snake = shouting.toLowerCase();
-  final String result = snake.replaceAllMapped(initialLetter, (Match match) {
+  final String result = snake.replaceAllMapped(initialLetter, (final Match match) {
     return match.group(1)!.toUpperCase() + match.group(2)!.toLowerCase();
   });
   return result;
@@ -34,15 +34,15 @@ String shoutingToUpperCamel(String shouting) {
 ///
 /// 'TVFoo' should be convert to 'tvFoo'.
 /// 'KeyX' should be convert to 'keyX'.
-String upperCamelToLowerCamel(String upperCamel) {
+String upperCamelToLowerCamel(final String upperCamel) {
   final RegExp initialGroup = RegExp(r'^([A-Z]([A-Z]*|[^A-Z]*))([A-Z]([^A-Z]|$)|$)');
-  return upperCamel.replaceFirstMapped(initialGroup, (Match match) {
+  return upperCamel.replaceFirstMapped(initialGroup, (final Match match) {
     return match.group(1)!.toLowerCase() + (match.group(3) ?? '');
   });
 }
 
 /// Converts 'fooBar' to 'FooBar'.
-String lowerCamelToUpperCamel(String lowerCamel) {
+String lowerCamelToUpperCamel(final String lowerCamel) {
   return lowerCamel.substring(0, 1).toUpperCase() + lowerCamel.substring(1);
 }
 
@@ -113,7 +113,7 @@ const List<String> kDartReservedWords = <String>[
 ];
 
 /// Converts an integer into a hex string with the given number of digits.
-String toHex(int? value, {int digits = 8}) {
+String toHex(final int? value, {final int digits = 8}) {
   if (value == null) {
     return 'null';
   }
@@ -121,13 +121,13 @@ String toHex(int? value, {int digits = 8}) {
 }
 
 /// Parses an integer from a hex string.
-int getHex(String input) {
+int getHex(final String input) {
   return int.parse(input, radix: 16);
 }
 
 /// Given an [input] string, wraps the text at 80 characters and prepends each
 /// line with the [prefix] string. Use for generated comments.
-String wrapString(String input, {required String prefix}) {
+String wrapString(final String input, {required final String prefix}) {
   final int wrapWidth = 80 - prefix.length;
   final StringBuffer result = StringBuffer();
   final List<String> words = input.split(RegExp(r'\s+'));
@@ -152,7 +152,7 @@ String wrapString(String input, {required String prefix}) {
 /// after printing an error.
 ///
 /// An null list is considered a list with length 0.
-void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1, T2) fn) {
+void zipStrict<T1, T2>(final Iterable<T1> list1, final Iterable<T2> list2, final void Function(T1, T2) fn) {
   assert(list1.length == list2.length);
   final Iterator<T1> it1 = list1.iterator;
   final Iterator<T2> it2 = list2.iterator;
@@ -163,33 +163,33 @@ void zipStrict<T1, T2>(Iterable<T1> list1, Iterable<T2> list2, void Function(T1,
 }
 
 /// Read a Map<String, String> out of its string representation in JSON.
-Map<String, String> parseMapOfString(String jsonString) {
+Map<String, String> parseMapOfString(final String jsonString) {
   return (json.decode(jsonString) as Map<String, dynamic>).cast<String, String>();
 }
 
 /// Read a Map<String, List<String>> out of its string representation in JSON.
-Map<String, List<String>> parseMapOfListOfString(String jsonString) {
+Map<String, List<String>> parseMapOfListOfString(final String jsonString) {
   final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
-  return dynamicMap.map<String, List<String>>((String key, List<dynamic> value) {
+  return dynamicMap.map<String, List<String>>((final String key, final List<dynamic> value) {
     return MapEntry<String, List<String>>(key, value.cast<String>());
   });
 }
 
-Map<String, List<String?>> parseMapOfListOfNullableString(String jsonString) {
+Map<String, List<String?>> parseMapOfListOfNullableString(final String jsonString) {
   final Map<String, List<dynamic>> dynamicMap = (json.decode(jsonString) as Map<String, dynamic>).cast<String, List<dynamic>>();
-  return dynamicMap.map<String, List<String?>>((String key, List<dynamic> value) {
+  return dynamicMap.map<String, List<String?>>((final String key, final List<dynamic> value) {
     return MapEntry<String, List<String?>>(key, value.cast<String?>());
   });
 }
 
-Map<String, bool> parseMapOfBool(String jsonString) {
+Map<String, bool> parseMapOfBool(final String jsonString) {
   return (json.decode(jsonString) as Map<String, dynamic>).cast<String, bool>();
 }
 
 /// Reverse the map of { fromValue -> list of toValue } to { toValue -> fromValue } and return.
-Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, void Function(String fromValue, String newToValue) onDuplicate) {
+Map<String, String> reverseMapOfListOfString(final Map<String, List<String>> inMap, final void Function(String fromValue, String newToValue) onDuplicate) {
   final Map<String, String> result = <String, String>{};
-  inMap.forEach((String fromValue, List<String> toValues) {
+  inMap.forEach((final String fromValue, final List<String> toValues) {
     for (final String toValue in toValues) {
       if (result.containsKey(toValue)) {
         onDuplicate(fromValue, toValue);
@@ -204,8 +204,8 @@ Map<String, String> reverseMapOfListOfString(Map<String, List<String>> inMap, vo
 /// Remove entries whose value `isEmpty` or is null, and return the map.
 ///
 /// Will modify the input map.
-Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
-  return map..removeWhere((String key, dynamic value) {
+Map<String, dynamic> removeEmptyValues(final Map<String, dynamic> map) {
+  return map..removeWhere((final String key, final dynamic value) {
     if (value == null) {
       return true;
     }
@@ -220,7 +220,7 @@ Map<String, dynamic> removeEmptyValues(Map<String, dynamic> map) {
   });
 }
 
-void addNameValue(List<String> names, List<int> values, String name, int value) {
+void addNameValue(final List<String> names, final List<int> values, final String name, final int value) {
   final int foundIndex = values.indexOf(value);
   if (foundIndex == -1) {
     names.add(name);
@@ -245,7 +245,7 @@ enum DeduplicateBehavior {
 
 /// The information for a line used by [OutputLines].
 class OutputLine<T extends Comparable<Object>> {
-  OutputLine(this.key, String value)
+  OutputLine(this.key, final String value)
     : values = <String>[value];
 
   final T key;
@@ -270,7 +270,7 @@ class OutputLines<T extends Comparable<Object>> {
 
   final Map<T, OutputLine<T>> lines = <T, OutputLine<T>>{};
 
-  void add(T key, String line) {
+  void add(final T key, final String line) {
     final OutputLine<T>? existing = lines[key];
     if (existing != null) {
       switch (behavior) {
@@ -288,21 +288,21 @@ class OutputLines<T extends Comparable<Object>> {
   }
 
   String join() {
-    return lines.values.map((OutputLine<T> line) => line.values.join('\n')).join('\n');
+    return lines.values.map((final OutputLine<T> line) => line.values.join('\n')).join('\n');
   }
 
   String sortedJoin() {
     return (lines.values.toList()
-      ..sort((OutputLine<T> a, OutputLine<T> b) => a.key.compareTo(b.key)))
-      .map((OutputLine<T> line) => line.values.join('\n'))
+      ..sort((final OutputLine<T> a, final OutputLine<T> b) => a.key.compareTo(b.key)))
+      .map((final OutputLine<T> line) => line.values.join('\n'))
       .join('\n');
   }
 }
 
-int toPlane(int value, int plane) {
+int toPlane(final int value, final int plane) {
   return (value & kValueMask.value) + (plane & kPlaneMask.value);
 }
 
-int getPlane(int value) {
+int getPlane(final int value) {
   return value & kPlaneMask.value;
 }

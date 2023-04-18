@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/checkbox_list_tile/custom_labeled_c
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('LinkedLabelCheckbox contains RichText and Checkbox', (WidgetTester tester) async {
+  testWidgets('LinkedLabelCheckbox contains RichText and Checkbox', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LabeledCheckboxApp(),
     );

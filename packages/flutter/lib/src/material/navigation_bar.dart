@@ -202,14 +202,14 @@ class NavigationBar extends StatelessWidget {
   /// [NavigationDestinationLabelBehavior.alwaysShow].
   final NavigationDestinationLabelBehavior? labelBehavior;
 
-  VoidCallback _handleTap(int index) {
+  VoidCallback _handleTap(final int index) {
     return onDestinationSelected != null
       ? () => onDestinationSelected!(index)
       : () {};
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final NavigationBarThemeData defaults = _defaultsFor(context);
 
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
@@ -235,7 +235,7 @@ class NavigationBar extends StatelessWidget {
                   child: _SelectableAnimatedBuilder(
                     duration: animationDuration ?? const Duration(milliseconds: 500),
                     isSelected: i == selectedIndex,
-                    builder: (BuildContext context, Animation<double> animation) {
+                    builder: (final BuildContext context, final Animation<double> animation) {
                       return _NavigationDestinationInfo(
                         index: i,
                         selectedIndex: selectedIndex,
@@ -335,7 +335,7 @@ class NavigationDestination extends StatelessWidget {
   final String? tooltip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     const Set<MaterialState> selectedState = <MaterialState>{MaterialState.selected};
     const Set<MaterialState> unselectedState = <MaterialState>{};
@@ -347,7 +347,7 @@ class NavigationDestination extends StatelessWidget {
     return _NavigationDestinationBuilder(
       label: label,
       tooltip: tooltip,
-      buildIcon: (BuildContext context) {
+      buildIcon: (final BuildContext context) {
         final Widget selectedIconWidget = IconTheme.merge(
           data: navigationBarTheme.iconTheme?.resolve(selectedState)
             ?? defaults.iconTheme!.resolve(selectedState)!,
@@ -369,7 +369,7 @@ class NavigationDestination extends StatelessWidget {
             ),
             _StatusTransitionWidgetBuilder(
               animation: animation,
-              builder: (BuildContext context, Widget? child) {
+              builder: (final BuildContext context, final Widget? child) {
                 return _isForwardOrCompleted(animation)
                   ? selectedIconWidget
                   : unselectedIconWidget;
@@ -378,7 +378,7 @@ class NavigationDestination extends StatelessWidget {
           ],
         );
       },
-      buildLabel: (BuildContext context) {
+      buildLabel: (final BuildContext context) {
         final TextStyle? effectiveSelectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(selectedState)
           ?? defaults.labelTextStyle!.resolve(selectedState);
         final TextStyle? effectiveUnselectedLabelTextStyle = navigationBarTheme.labelTextStyle?.resolve(unselectedState)
@@ -467,7 +467,7 @@ class _NavigationDestinationBuilderState extends State<_NavigationDestinationBui
   final GlobalKey iconKey = GlobalKey();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
@@ -513,7 +513,7 @@ class _IndicatorInkWell extends InkResponse {
   final NavigationDestinationLabelBehavior labelBehavior;
 
   @override
-  RectCallback? getRectCallback(RenderBox referenceBox) {
+  RectCallback? getRectCallback(final RenderBox referenceBox) {
     return () {
       final RenderBox iconBox = iconKey.currentContext!.findRenderObject()! as RenderBox;
       final Rect iconRect = iconBox.localToGlobal(Offset.zero) & iconBox.size;
@@ -617,7 +617,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   ///
   /// Used by widgets that are implementing a navigation destination info to
   /// get information like the selected animation and destination number.
-  static _NavigationDestinationInfo of(BuildContext context) {
+  static _NavigationDestinationInfo of(final BuildContext context) {
     final _NavigationDestinationInfo? result = context.dependOnInheritedWidgetOfExactType<_NavigationDestinationInfo>();
     assert(
       result != null,
@@ -628,7 +628,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(_NavigationDestinationInfo oldWidget) {
+  bool updateShouldNotify(final _NavigationDestinationInfo oldWidget) {
     return index != oldWidget.index
         || totalNumberOfDestinations != oldWidget.totalNumberOfDestinations
         || selectedAnimation != oldWidget.selectedAnimation
@@ -695,10 +695,10 @@ class NavigationIndicator extends StatelessWidget {
   final ShapeBorder? shape;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         // The scale should be 0 when the animation is unselected, as soon as
         // the animation starts, the scale jumps to 40%, and then animates to
         // 100% along a curve.
@@ -722,12 +722,12 @@ class NavigationIndicator extends StatelessWidget {
       // direction.
       child: _StatusTransitionWidgetBuilder(
         animation: animation,
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return _SelectableAnimatedBuilder(
             isSelected: _isForwardOrCompleted(animation),
             duration: const Duration(milliseconds: 100),
             alwaysDoFullAnimation: true,
-            builder: (BuildContext context, Animation<double> fadeAnimation) {
+            builder: (final BuildContext context, final Animation<double> fadeAnimation) {
               return FadeTransition(
                 opacity: fadeAnimation,
                 child: Container(
@@ -783,9 +783,9 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   static final Key _labelKey = UniqueKey();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _DestinationLayoutAnimationBuilder(
-      builder: (BuildContext context, Animation<double> animation) {
+      builder: (final BuildContext context, final Animation<double> animation) {
         return CustomMultiChildLayout(
           delegate: _NavigationDestinationLayoutDelegate(
             animation: animation,
@@ -837,7 +837,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
   final Widget Function(BuildContext, Animation<double>) builder;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     switch (info.labelBehavior) {
       case NavigationDestinationLabelBehavior.alwaysShow:
@@ -849,7 +849,7 @@ class _DestinationLayoutAnimationBuilder extends StatelessWidget {
           animation: info.selectedAnimation,
           curve: Curves.easeInOutCubicEmphasized,
           reverseCurve: Curves.easeInOutCubicEmphasized.flipped,
-          builder: (BuildContext context, Animation<double> curvedAnimation) {
+          builder: (final BuildContext context, final Animation<double> curvedAnimation) {
             return builder(context, curvedAnimation);
           },
         );
@@ -877,14 +877,14 @@ class _NavigationBarDestinationSemantics extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final _NavigationDestinationInfo destinationInfo = _NavigationDestinationInfo.of(context);
     // The AnimationStatusBuilder will make sure that the semantics update to
     // "selected" when the animation status changes.
     return _StatusTransitionWidgetBuilder(
       animation: destinationInfo.selectedAnimation,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return Semantics(
           selected: _isForwardOrCompleted(destinationInfo.selectedAnimation),
           container: true,
@@ -925,7 +925,7 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Tooltip(
       message: message,
       // TODO(johnsonmh): Make this value configurable/themable.
@@ -975,9 +975,9 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   static const int labelId = 2;
 
   @override
-  void performLayout(Size size) {
-    double halfWidth(Size size) => size.width / 2;
-    double halfHeight(Size size) => size.height / 2;
+  void performLayout(final Size size) {
+    double halfWidth(final Size size) => size.width / 2;
+    double halfHeight(final Size size) => size.height / 2;
 
     final Size iconSize = layoutChild(iconId, BoxConstraints.loose(size));
     final Size labelSize = layoutChild(labelId, BoxConstraints.loose(size));
@@ -1013,7 +1013,7 @@ class _NavigationDestinationLayoutDelegate extends MultiChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_NavigationDestinationLayoutDelegate oldDelegate) {
+  bool shouldRelayout(final _NavigationDestinationLayoutDelegate oldDelegate) {
     return oldDelegate.animation != animation;
   }
 }
@@ -1052,7 +1052,7 @@ class _ClampTextScaleFactor extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaleFactor: clampDouble(MediaQuery.textScaleFactorOf(context),
@@ -1095,7 +1095,7 @@ class _StatusTransitionWidgetBuilder extends StatusTransitionWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) => builder(context, child);
+  Widget build(final BuildContext context) => builder(context, child);
 }
 
 // Builder widget for widgets that need to be animated from 0 (unselected) to
@@ -1187,7 +1187,7 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
   }
 
   @override
-  void didUpdateWidget(_SelectableAnimatedBuilder oldWidget) {
+  void didUpdateWidget(final _SelectableAnimatedBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.duration != widget.duration) {
       _controller.duration = widget.duration;
@@ -1208,7 +1208,7 @@ class _SelectableAnimatedBuilderState extends State<_SelectableAnimatedBuilder>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.builder(
       context,
       _controller,
@@ -1268,7 +1268,7 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
   //
   // The preserved direction is reset when the animation finishes in either
   // direction.
-  void _updateStatus(AnimationStatus status) {
+  void _updateStatus(final AnimationStatus status) {
     if (_animationDirection != status) {
       setState(() {
         _animationDirection = status;
@@ -1289,7 +1289,7 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final bool shouldUseForwardCurve = (_preservedDirection ?? _animationDirection) != AnimationStatus.reverse;
 
     final Animation<double> curvedAnimation = CurveTween(
@@ -1302,18 +1302,18 @@ class _CurvedAnimationBuilderState extends State<_CurvedAnimationBuilder> {
 
 /// Returns `true` if this animation is ticking forward, or has completed,
 /// based on [status].
-bool _isForwardOrCompleted(Animation<double> animation) {
+bool _isForwardOrCompleted(final Animation<double> animation) {
   return animation.status == AnimationStatus.forward
       || animation.status == AnimationStatus.completed;
 }
 
-NavigationBarThemeData _defaultsFor(BuildContext context) {
+NavigationBarThemeData _defaultsFor(final BuildContext context) {
   return Theme.of(context).useMaterial3 ? _NavigationBarDefaultsM3(context) : _NavigationBarDefaultsM2(context);
 }
 
 // Hand coded defaults based on Material Design 2.
 class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
-  _NavigationBarDefaultsM2(BuildContext context)
+  _NavigationBarDefaultsM2(final BuildContext context)
       : _theme = Theme.of(context),
         _colors = Theme.of(context).colorScheme,
         super(
@@ -1370,7 +1370,7 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override Color? get surfaceTintColor => _colors.surfaceTint;
 
   @override MaterialStateProperty<IconThemeData?>? get iconTheme {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       return IconThemeData(
         size: 24.0,
         color: states.contains(MaterialState.selected)
@@ -1384,7 +1384,7 @@ class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   @override ShapeBorder? get indicatorShape => const StadiumBorder();
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelMedium!;
       return style.apply(color: states.contains(MaterialState.selected)
         ? _colors.onSurface

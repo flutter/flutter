@@ -86,7 +86,7 @@ abstract class PopupMenuEntry<T> extends StatefulWidget {
   /// If the [PopupMenuEntry] represents a single value, this should return true
   /// if the argument matches that value. If it represents multiple values, it
   /// should return true if the argument matches any of them.
-  bool represents(T? value);
+  bool represents(final T? value);
 }
 
 /// A horizontal divider in a Material Design popup menu.
@@ -112,7 +112,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
   final double height;
 
   @override
-  bool represents(void value) => false;
+  bool represents(final void value) => false;
 
   @override
   State<PopupMenuDivider> createState() => _PopupMenuDividerState();
@@ -120,7 +120,7 @@ class PopupMenuDivider extends PopupMenuEntry<Never> {
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
   @override
-  Widget build(BuildContext context) => Divider(height: widget.height);
+  Widget build(final BuildContext context) => Divider(height: widget.height);
 }
 
 // This widget only exists to enable _PopupMenuRoute to save the sizes of
@@ -136,23 +136,23 @@ class _MenuItem extends SingleChildRenderObjectWidget {
   final ValueChanged<Size> onLayout;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderMenuItem(onLayout);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderMenuItem renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderMenuItem renderObject) {
     renderObject.onLayout = onLayout;
   }
 }
 
 class _RenderMenuItem extends RenderShiftedBox {
-  _RenderMenuItem(this.onLayout, [RenderBox? child]) : super(child);
+  _RenderMenuItem(this.onLayout, [final RenderBox? child]) : super(child);
 
   ValueChanged<Size> onLayout;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     if (child == null) {
       return Size.zero;
     }
@@ -299,7 +299,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   final Widget? child;
 
   @override
-  bool represents(T? value) => value == this.value;
+  bool represents(final T? value) => value == this.value;
 
   @override
   PopupMenuItemState<T, PopupMenuItem<T>> createState() => PopupMenuItemState<T, PopupMenuItem<T>>();
@@ -345,7 +345,7 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final PopupMenuThemeData defaults = theme.useMaterial3 ? _PopupMenuDefaultsM3(context) : _PopupMenuDefaultsM2(context);
@@ -556,7 +556,7 @@ class _PopupMenu<T> extends StatelessWidget {
   final Clip clipBehavior;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     final List<Widget> children = <Widget>[];
     final ThemeData theme = Theme.of(context);
@@ -579,7 +579,7 @@ class _PopupMenu<T> extends StatelessWidget {
       }
       children.add(
         _MenuItem(
-          onLayout: (Size size) {
+          onLayout: (final Size size) {
             route.itemSizes[i] = size;
           },
           child: FadeTransition(
@@ -618,7 +618,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
     return AnimatedBuilder(
       animation: route.animation!,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return FadeTransition(
           opacity: opacity.animate(route.animation!),
           child: Material(
@@ -679,7 +679,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   // child's position so that it fits.
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
     return BoxConstraints.loose(constraints.biggest).deflate(
@@ -688,7 +688,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     // size: The size of the overlay.
     // childSize: The size of the menu, when fully open, as determined by
     // getConstraintsForChild.
@@ -729,7 +729,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     return _fitInsideScreen(subScreen, childSize, wantedPosition);
   }
 
-  Rect _closestScreen(Iterable<Rect> screens, Offset point) {
+  Rect _closestScreen(final Iterable<Rect> screens, final Offset point) {
     Rect closest = screens.first;
     for (final Rect screen in screens) {
       if ((screen.center - point).distance < (closest.center - point).distance) {
@@ -739,7 +739,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
     return closest;
   }
 
-  Offset _fitInsideScreen(Rect screen, Size childSize, Offset wantedPosition){
+  Offset _fitInsideScreen(final Rect screen, final Size childSize, final Offset wantedPosition){
     double x = wantedPosition.dx;
     double y = wantedPosition.dy;
     // Avoid going outside an area defined as the rectangle 8.0 pixels from the
@@ -759,7 +759,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_PopupMenuRouteLayout oldDelegate) {
+  bool shouldRelayout(final _PopupMenuRouteLayout oldDelegate) {
     // If called when the old and new itemSizes have been initialized then
     // we expect them to have the same length because there's no practical
     // way to change length of the items list once the menu has been shown.
@@ -830,7 +830,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
 
     int? selectedItemIndex;
     if (initialValue != null) {
@@ -855,7 +855,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       removeLeft: true,
       removeRight: true,
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return CustomSingleChildLayout(
             delegate: _PopupMenuRouteLayout(
               position,
@@ -872,7 +872,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     );
   }
 
-  Set<Rect> _avoidBounds(MediaQueryData mediaQuery) {
+  Set<Rect> _avoidBounds(final MediaQueryData mediaQuery) {
     return DisplayFeatureSubScreen.avoidBounds(mediaQuery).toSet();
   }
 }
@@ -936,19 +936,19 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 ///  * [SemanticsConfiguration.namesRoute], for a description of edge triggered
 ///    semantics.
 Future<T?> showMenu<T>({
-  required BuildContext context,
-  required RelativeRect position,
-  required List<PopupMenuEntry<T>> items,
-  T? initialValue,
-  double? elevation,
-  Color? shadowColor,
-  Color? surfaceTintColor,
+  required final BuildContext context,
+  required final RelativeRect position,
+  required final List<PopupMenuEntry<T>> items,
+  final T? initialValue,
+  final double? elevation,
+  final Color? shadowColor,
+  final Color? surfaceTintColor,
   String? semanticLabel,
-  ShapeBorder? shape,
-  Color? color,
-  bool useRootNavigator = false,
-  BoxConstraints? constraints,
-  Clip clipBehavior = Clip.none,
+  final ShapeBorder? shape,
+  final Color? color,
+  final bool useRootNavigator = false,
+  final BoxConstraints? constraints,
+  final Clip clipBehavior = Clip.none,
 }) {
   assert(items.isNotEmpty);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1269,7 +1269,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
         constraints: widget.constraints,
         clipBehavior: widget.clipBehavior,
       )
-      .then<void>((T? newValue) {
+      .then<void>((final T? newValue) {
         if (!mounted) {
           return null;
         }
@@ -1293,7 +1293,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     final bool enableFeedback = widget.enableFeedback
       ?? PopupMenuTheme.of(context).enableFeedback
@@ -1337,7 +1337,7 @@ class _EffectiveMouseCursor extends MaterialStateMouseCursor {
   final MaterialStateProperty<MouseCursor?>? themeCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(final Set<MaterialState> states) {
     return MaterialStateProperty.resolveAs<MouseCursor?>(widgetCursor, states)
       ?? themeCursor?.resolve(states)
       ?? MaterialStateMouseCursor.clickable.resolve(states);
@@ -1378,7 +1378,7 @@ class _PopupMenuDefaultsM3 extends PopupMenuThemeData {
   late final TextTheme _textTheme = _theme.textTheme;
 
   @override MaterialStateProperty<TextStyle?>? get labelTextStyle {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
     final TextStyle style = _textTheme.labelLarge!;
       if (states.contains(MaterialState.disabled)) {
         return style.apply(color: _colors.onSurface.withOpacity(0.38));

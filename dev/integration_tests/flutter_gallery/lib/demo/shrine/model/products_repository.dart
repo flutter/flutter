@@ -4,7 +4,7 @@
 
 import 'product.dart';
 
-List<Product> loadProducts(Category category) {
+List<Product> loadProducts(final Category category) {
   const List<Product> allProducts = <Product>[
     Product(
       category: Category.accessories,
@@ -276,6 +276,6 @@ List<Product> loadProducts(Category category) {
   if (category == Category.all) {
     return allProducts;
   } else {
-    return allProducts.where((Product p) => p.category == category).toList();
+    return allProducts.where((final Product p) => p.category == category).toList();
   }
 }

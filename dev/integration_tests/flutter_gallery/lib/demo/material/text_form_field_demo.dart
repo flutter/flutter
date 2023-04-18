@@ -52,7 +52,7 @@ class _PasswordFieldState extends State<PasswordField> {
   bool _obscureText = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextFormField(
       key: widget.fieldKey,
       obscureText: _obscureText,
@@ -87,7 +87,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   PersonData person = PersonData();
 
-  void showInSnackBar(String value) {
+  void showInSnackBar(final String value) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(value),
     ));
@@ -110,7 +110,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     }
   }
 
-  String? _validateName(String? value) {
+  String? _validateName(final String? value) {
     _formWasEdited = true;
     if (value!.isEmpty) {
       return 'Name is required.';
@@ -122,7 +122,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return null;
   }
 
-  String? _validatePhoneNumber(String? value) {
+  String? _validatePhoneNumber(final String? value) {
     _formWasEdited = true;
     final RegExp phoneExp = RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value!)) {
@@ -131,7 +131,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return null;
   }
 
-  String? _validatePassword(String? value) {
+  String? _validatePassword(final String? value) {
     _formWasEdited = true;
     final FormFieldState<String> passwordField = _passwordFieldKey.currentState!;
     if (passwordField.value == null || passwordField.value!.isEmpty) {
@@ -151,7 +151,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
     final bool? result = await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return AlertDialog(
           title: const Text('This form has errors'),
           content: const Text('Really leave this form?'),
@@ -172,7 +172,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       drawerDragStartBehavior: DragStartBehavior.down,
       appBar: AppBar(
@@ -204,7 +204,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                       hintText: 'What do people call you?',
                       labelText: 'Name *',
                     ),
-                    onSaved: (String? value) { person.name = value; },
+                    onSaved: (final String? value) { person.name = value; },
                     validator: _validateName,
                   ),
                   const SizedBox(height: 24.0),
@@ -218,7 +218,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                       prefixText: '+1',
                     ),
                     keyboardType: TextInputType.phone,
-                    onSaved: (String? value) { person.phoneNumber = value; },
+                    onSaved: (final String? value) { person.phoneNumber = value; },
                     validator: _validatePhoneNumber,
                     // TextInputFormatters are applied in sequence.
                     inputFormatters: <TextInputFormatter> [
@@ -237,7 +237,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                       labelText: 'E-mail',
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    onSaved: (String? value) { person.email = value; },
+                    onSaved: (final String? value) { person.email = value; },
                   ),
                   const SizedBox(height: 24.0),
                   TextFormField(
@@ -265,7 +265,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     fieldKey: _passwordFieldKey,
                     helperText: 'No more than 8 characters.',
                     labelText: 'Password *',
-                    onFieldSubmitted: (String value) {
+                    onFieldSubmitted: (final String value) {
                       setState(() {
                         person.password = value;
                       });
@@ -310,8 +310,8 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
+    final TextEditingValue oldValue,
+    final TextEditingValue newValue,
   ) {
     final int newTextLength = newValue.text.length;
     int selectionIndex = newValue.selection.end;

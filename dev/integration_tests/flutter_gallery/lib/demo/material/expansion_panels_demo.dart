@@ -30,7 +30,7 @@ class DualHeaderWithHint extends StatelessWidget {
   final String? hint;
   final bool? showHint;
 
-  Widget _crossFade(Widget first, Widget second, bool isExpanded) {
+  Widget _crossFade(final Widget first, final Widget second, final bool isExpanded) {
     return AnimatedCrossFade(
       firstChild: first,
       secondChild: second,
@@ -43,7 +43,7 @@ class DualHeaderWithHint extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
@@ -94,7 +94,7 @@ class CollapsibleBody extends StatelessWidget {
   final VoidCallback? onCancel;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
 
@@ -163,7 +163,7 @@ class DemoItem<T> {
   bool isExpanded = false;
 
   ExpansionPanelHeaderBuilder get headerBuilder {
-    return (BuildContext context, bool isExpanded) {
+    return (final BuildContext context, final bool isExpanded) {
       return DualHeaderWithHint(
         name: name,
         value: valueToString(value),
@@ -197,8 +197,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         name: 'Trip',
         value: 'Caribbean cruise',
         hint: 'Change trip name',
-        valueToString: (String? value) => value,
-        builder: (DemoItem<String> item) {
+        valueToString: (final String? value) => value,
+        builder: (final DemoItem<String> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -207,7 +207,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
           return Form(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return CollapsibleBody(
                   margin: const EdgeInsets.symmetric(horizontal: 16.0),
                   onSave: () { Form.of(context).save(); close(); },
@@ -220,7 +220,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                         hintText: item.hint,
                         labelText: item.name,
                       ),
-                      onSaved: (String? value) { item.value = value; },
+                      onSaved: (final String? value) { item.value = value; },
                     ),
                   ),
                 );
@@ -233,8 +233,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         name: 'Location',
         value: Location.Bahamas,
         hint: 'Select location',
-        valueToString: (Location? location) => location.toString().split('.')[1],
-        builder: (DemoItem<Location> item) {
+        valueToString: (final Location? location) => location.toString().split('.')[1],
+        builder: (final DemoItem<Location> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -242,14 +242,14 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           }
           return Form(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return CollapsibleBody(
                   onSave: () { Form.of(context).save(); close(); },
                   onCancel: () { Form.of(context).reset(); close(); },
                   child: FormField<Location>(
                     initialValue: item.value,
-                    onSaved: (Location? result) { item.value = result; },
-                    builder: (FormFieldState<Location> field) {
+                    onSaved: (final Location? result) { item.value = result; },
+                    builder: (final FormFieldState<Location> field) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -286,8 +286,8 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
         name: 'Sun',
         value: 80.0,
         hint: 'Select sun level',
-        valueToString: (double? amount) => '${amount!.round()}',
-        builder: (DemoItem<double> item) {
+        valueToString: (final double? amount) => '${amount!.round()}',
+        builder: (final DemoItem<double> item) {
           void close() {
             setState(() {
               item.isExpanded = false;
@@ -296,14 +296,14 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
 
           return Form(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return CollapsibleBody(
                   onSave: () { Form.of(context).save(); close(); },
                   onCancel: () { Form.of(context).reset(); close(); },
                   child: FormField<double>(
                     initialValue: item.value,
-                    onSaved: (double? value) { item.value = value; },
-                    builder: (FormFieldState<double> field) {
+                    onSaved: (final double? value) { item.value = value; },
+                    builder: (final FormFieldState<double> field) {
                       return Container(
                         // Allow room for the value indicator.
                         padding: const EdgeInsets.only(top: 44.0),
@@ -328,7 +328,7 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expansion panels'),
@@ -343,12 +343,12 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
           child: Container(
             margin: const EdgeInsets.all(24.0),
             child: ExpansionPanelList(
-              expansionCallback: (int index, bool isExpanded) {
+              expansionCallback: (final int index, final bool isExpanded) {
                 setState(() {
                   _demoItems[index].isExpanded = !isExpanded;
                 });
               },
-              children: _demoItems.map<ExpansionPanel>((DemoItem<dynamic> item) {
+              children: _demoItems.map<ExpansionPanel>((final DemoItem<dynamic> item) {
                 return ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,

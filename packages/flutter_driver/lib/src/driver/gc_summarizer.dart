@@ -30,7 +30,7 @@ class GCSummarizer {
   GCSummarizer._(this.totalGCTimeMillis);
 
   /// Creates a [GCSummarizer] given the timeline events.
-  static GCSummarizer fromEvents(List<TimelineEvent> gcEvents) {
+  static GCSummarizer fromEvents(final List<TimelineEvent> gcEvents) {
     double totalGCTimeMillis = 0;
     TimelineEvent? lastGCBeginEvent;
 

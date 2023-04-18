@@ -11,7 +11,7 @@ import '../../xcode_project.dart';
 // Removed in https://github.com/flutter/flutter/pull/33684.
 class XcodeBuildSystemMigration extends ProjectMigrator {
   XcodeBuildSystemMigration(
-    IosProject project,
+    final IosProject project,
     super.logger,
   ) : _xcodeWorkspaceSharedSettings = project.xcodeWorkspaceSharedSettings;
 

@@ -7,20 +7,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget boilerplateWidget(VoidCallback? onButtonPressed, {
-    DraggableScrollableController? controller,
-    int itemCount = 100,
-    double initialChildSize = .5,
-    double maxChildSize = 1.0,
-    double minChildSize = .25,
-    bool snap = false,
-    List<double>? snapSizes,
-    Duration? snapAnimationDuration,
-    double? itemExtent,
-    Key? containerKey,
-    Key? stackKey,
-    NotificationListenerCallback<ScrollNotification>? onScrollNotification,
-    bool ignoreController = false,
+  Widget boilerplateWidget(final VoidCallback? onButtonPressed, {
+    final DraggableScrollableController? controller,
+    final int itemCount = 100,
+    final double initialChildSize = .5,
+    final double maxChildSize = 1.0,
+    final double minChildSize = .25,
+    final bool snap = false,
+    final List<double>? snapSizes,
+    final Duration? snapAnimationDuration,
+    final double? itemExtent,
+    final Key? containerKey,
+    final Key? stackKey,
+    final NotificationListenerCallback<ScrollNotification>? onScrollNotification,
+    final bool ignoreController = false,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -42,7 +42,7 @@ void main() {
                 snap: snap,
                 snapSizes: snapSizes,
                 snapAnimationDuration: snapAnimationDuration,
-                builder: (BuildContext context, ScrollController scrollController) {
+                builder: (final BuildContext context, final ScrollController scrollController) {
                   return NotificationListener<ScrollNotification>(
                     onNotification: onScrollNotification,
                     child: ColoredBox(
@@ -52,7 +52,7 @@ void main() {
                         controller: ignoreController ? null : scrollController,
                         itemExtent: itemExtent,
                         itemCount: itemCount,
-                        itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                        itemBuilder: (final BuildContext context, final int index) => Text('Item $index'),
                       ),
                     ),
                   );
@@ -65,7 +65,7 @@ void main() {
     );
   }
 
-  testWidgets('Do not crash when replacing scroll position during the drag', (WidgetTester tester) async {
+  testWidgets('Do not crash when replacing scroll position during the drag', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89681
     bool showScrollbars = false;
     await tester.pumpWidget(
@@ -80,7 +80,7 @@ void main() {
               minChildSize: 0.2,
               maxChildSize: 0.9,
               expand: false,
-              builder: (BuildContext context, ScrollController scrollController) {
+              builder: (final BuildContext context, final ScrollController scrollController) {
                 showScrollbars = !showScrollbars;
                 // Change the scroll behavior will trigger scroll position replace.
                 final ScrollBehavior behavior = const ScrollBehavior().copyWith(scrollbars: showScrollbars);
@@ -89,9 +89,9 @@ void main() {
                   child: ListView.separated(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, __) => const Divider(),
+                    separatorBuilder: (final _, final __) => const Divider(),
                     itemCount: 100,
-                    itemBuilder: (_, int index) => SizedBox(
+                    itemBuilder: (final _, final int index) => SizedBox(
                       height: 100,
                       child: ColoredBox(
                         color: Colors.primaries[index % Colors.primaries.length],
@@ -113,7 +113,7 @@ void main() {
     // Go without throw.
   });
 
-  testWidgets('Scrolls correct amount when maxChildSize < 1.0', (WidgetTester tester) async {
+  testWidgets('Scrolls correct amount when maxChildSize < 1.0', (final WidgetTester tester) async {
     const Key key = ValueKey<String>('container');
     await tester.pumpWidget(boilerplateWidget(
       null,
@@ -129,7 +129,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
-  testWidgets('Scrolls correct amount when maxChildSize == 1.0', (WidgetTester tester) async {
+  testWidgets('Scrolls correct amount when maxChildSize == 1.0', (final WidgetTester tester) async {
     const Key key = ValueKey<String>('container');
     await tester.pumpWidget(boilerplateWidget(
       null,
@@ -144,7 +144,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
-  testWidgets('Invalid snap targets throw assertion errors.', (WidgetTester tester) async {
+  testWidgets('Invalid snap targets throw assertion errors.', (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplateWidget(
       null,
       maxChildSize: .8,
@@ -166,7 +166,7 @@ void main() {
   });
 
   group('Scroll Physics', () {
-    testWidgets('Can be dragged up without covering its container', (WidgetTester tester) async {
+    testWidgets('Can be dragged up without covering its container', (final WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(boilerplateWidget(() => taps++));
 
@@ -187,7 +187,7 @@ void main() {
       expect(find.text('Item 31'), findsOneWidget);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Can be dragged down when not full height', (WidgetTester tester) async {
+    testWidgets('Can be dragged down when not full height', (final WidgetTester tester) async {
       await tester.pumpWidget(boilerplateWidget(null));
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 21'), findsOneWidget);
@@ -200,7 +200,7 @@ void main() {
       expect(find.text('Item 36'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Can be dragged down when list is shorter than full height', (WidgetTester tester) async {
+    testWidgets('Can be dragged down when list is shorter than full height', (final WidgetTester tester) async {
       await tester.pumpWidget(boilerplateWidget(null, itemCount: 30, initialChildSize: .25));
 
       expect(find.text('Item 1').hitTestable(), findsOneWidget);
@@ -217,7 +217,7 @@ void main() {
       expect(find.text('Item 29').hitTestable(), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (WidgetTester tester) async {
+    testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (final WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(boilerplateWidget(() => taps++));
 
@@ -246,7 +246,7 @@ void main() {
       expect(find.text('Item 36'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Can be flung up gently', (WidgetTester tester) async {
+    testWidgets('Can be flung up gently', (final WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(boilerplateWidget(() => taps++));
 
@@ -269,7 +269,7 @@ void main() {
       expect(find.text('Item 70'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Can be flung up', (WidgetTester tester) async {
+    testWidgets('Can be flung up', (final WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(boilerplateWidget(() => taps++));
 
@@ -295,7 +295,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Can be flung down when not full height', (WidgetTester tester) async {
+    testWidgets('Can be flung down when not full height', (final WidgetTester tester) async {
       await tester.pumpWidget(boilerplateWidget(null));
       expect(find.text('Item 1'), findsOneWidget);
       expect(find.text('Item 21'), findsOneWidget);
@@ -308,7 +308,7 @@ void main() {
       expect(find.text('Item 36'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Can be flung up and then back down', (WidgetTester tester) async {
+    testWidgets('Can be flung up and then back down', (final WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(boilerplateWidget(() => taps++));
 
@@ -352,7 +352,7 @@ void main() {
       expect(find.text('Item 70'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Ballistic animation on fling can be interrupted', (WidgetTester tester) async {
+    testWidgets('Ballistic animation on fling can be interrupted', (final WidgetTester tester) async {
       int taps = 0;
       await tester.pumpWidget(boilerplateWidget(() => taps++));
 
@@ -386,7 +386,7 @@ void main() {
       expect(find.text('Item 70'), findsNothing);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('Ballistic animation on fling should not leak Ticker', (WidgetTester tester) async {
+    testWidgets('Ballistic animation on fling should not leak Ticker', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/101061
       await tester.pumpWidget(
         Directionality(
@@ -400,13 +400,13 @@ void main() {
                 minChildSize: 0.2,
                 maxChildSize: 0.9,
                 expand: false,
-                builder: (_, ScrollController scrollController) {
+                builder: (final _, final ScrollController scrollController) {
                   return ListView.separated(
                     physics: const BouncingScrollPhysics(),
                     controller: scrollController,
-                    separatorBuilder: (_, __) => const Divider(),
+                    separatorBuilder: (final _, final __) => const Divider(),
                     itemCount: 100,
-                    itemBuilder: (_, int index) => SizedBox(
+                    itemBuilder: (final _, final int index) => SizedBox(
                       height: 100,
                       child: ColoredBox(
                         color: Colors.primaries[index % Colors.primaries.length],
@@ -441,7 +441,7 @@ void main() {
     });
   });
 
-  testWidgets('Does not snap away from initial child on build', (WidgetTester tester) async {
+  testWidgets('Does not snap away from initial child on build', (final WidgetTester tester) async {
     const Key containerKey = ValueKey<String>('container');
     const Key stackKey = ValueKey<String>('stack');
     await tester.pumpWidget(boilerplateWidget(null,
@@ -461,7 +461,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   for (final bool useActuator in <bool>[false, true]) {
-    testWidgets('Does not snap away from initial child on ${useActuator ? 'actuator' : 'controller'}.reset()', (WidgetTester tester) async {
+    testWidgets('Does not snap away from initial child on ${useActuator ? 'actuator' : 'controller'}.reset()', (final WidgetTester tester) async {
       const Key containerKey = ValueKey<String>('container');
       const Key stackKey = ValueKey<String>('stack');
       final DraggableScrollableController controller = DraggableScrollableController();
@@ -501,7 +501,7 @@ void main() {
     testWidgets(
       'Zero velocity drag snaps to nearest snap target with '
       'snapAnimationDuration: $snapAnimationDuration',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       await tester.pumpWidget(boilerplateWidget(null,
@@ -557,7 +557,7 @@ void main() {
   }
 
   for (final List<double>? snapSizes in <List<double>?>[null, <double>[]]) {
-    testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (WidgetTester tester) async {
+    testWidgets('Setting snapSizes to $snapSizes resolves to min and max', (final WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       await tester.pumpWidget(boilerplateWidget(null,
@@ -585,7 +585,7 @@ void main() {
     }, variant: TargetPlatformVariant.all());
   }
 
-  testWidgets('Min and max are implicitly added to snapSizes', (WidgetTester tester) async {
+  testWidgets('Min and max are implicitly added to snapSizes', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     await tester.pumpWidget(boilerplateWidget(null,
@@ -612,7 +612,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Changes to widget parameters are propagated', (WidgetTester tester) async {
+  testWidgets('Changes to widget parameters are propagated', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     await tester.pumpWidget(boilerplateWidget(
@@ -720,7 +720,7 @@ void main() {
     );
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Fling snaps in direction of momentum', (WidgetTester tester) async {
+  testWidgets('Fling snaps in direction of momentum', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     await tester.pumpWidget(boilerplateWidget(null,
@@ -748,7 +748,7 @@ void main() {
 
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets("Changing parameters with an un-listened controller doesn't throw", (WidgetTester tester) async {
+  testWidgets("Changing parameters with an un-listened controller doesn't throw", (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplateWidget(
       null,
       snap: true,
@@ -763,17 +763,17 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Transitioning between scrollable children sharing a scroll controller will not throw', (WidgetTester tester) async {
+  testWidgets('Transitioning between scrollable children sharing a scroll controller will not throw', (final WidgetTester tester) async {
     int s = 0;
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
+        builder: (final BuildContext context, final StateSetter setState) {
           return Scaffold(
             body: DraggableScrollableSheet(
               initialChildSize: 0.25,
               snap: true,
               snapSizes: const <double>[0.25, 0.5, 1.0],
-              builder: (BuildContext context, ScrollController scrollController) {
+              builder: (final BuildContext context, final ScrollController scrollController) {
                 return PrimaryScrollController(
                   controller: scrollController,
                   child: AnimatedSwitcher(
@@ -820,11 +820,11 @@ void main() {
     // Completes without throwing
   });
 
-  testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
+  testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (final WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
     await tester.pumpWidget(boilerplateWidget(
       null,
-      onScrollNotification: (ScrollNotification notification) {
+      onScrollNotification: (final ScrollNotification notification) {
         notificationTypes.add(notification.runtimeType);
         return false;
       },
@@ -841,11 +841,11 @@ void main() {
     expect(notificationTypes, equals(types));
   });
 
-  testWidgets('ScrollNotification correctly dispatched when flung with contents scroll', (WidgetTester tester) async {
+  testWidgets('ScrollNotification correctly dispatched when flung with contents scroll', (final WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
     await tester.pumpWidget(boilerplateWidget(
       null,
-      onScrollNotification: (ScrollNotification notification) {
+      onScrollNotification: (final ScrollNotification notification) {
         notificationTypes.add(notification.runtimeType);
         return false;
       },
@@ -864,11 +864,11 @@ void main() {
     expect(notificationTypes, types);
   });
 
-  testWidgets('Do not crash when remove the tree during animation.', (WidgetTester tester) async {
+  testWidgets('Do not crash when remove the tree during animation.', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/89214
     await tester.pumpWidget(boilerplateWidget(
       null,
-      onScrollNotification: (ScrollNotification notification) {
+      onScrollNotification: (final ScrollNotification notification) {
         return false;
       },
     ));
@@ -883,7 +883,7 @@ void main() {
   });
 
   for (final bool shouldAnimate in <bool>[true, false]) {
-    testWidgets('Can ${shouldAnimate ? 'animate' : 'jump'} to arbitrary positions', (WidgetTester tester) async {
+    testWidgets('Can ${shouldAnimate ? 'animate' : 'jump'} to arbitrary positions', (final WidgetTester tester) async {
       const Key stackKey = ValueKey<String>('stack');
       const Key containerKey = ValueKey<String>('container');
       final DraggableScrollableController controller = DraggableScrollableController();
@@ -897,7 +897,7 @@ void main() {
       final double screenHeight = tester.getSize(find.byKey(stackKey)).height;
       // Use a local helper to animate so we can share code across a jumpTo test
       // and an animateTo test.
-      void goTo(double size) => shouldAnimate
+      void goTo(final double size) => shouldAnimate
           ? controller.animateTo(size, duration: const Duration(milliseconds: 200), curve: Curves.linear)
           : controller.jumpTo(size);
       // If we're animating, pump will call four times, two of which are for the
@@ -958,7 +958,7 @@ void main() {
     });
   }
 
-  testWidgets('Can animateTo with a nonlinear curve', (WidgetTester tester) async {
+  testWidgets('Can animateTo with a nonlinear curve', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1005,7 +1005,7 @@ void main() {
     );
   });
 
-  testWidgets('Can animateTo with a Curves.easeInOutBack curve begin min-size', (WidgetTester tester) async {
+  testWidgets('Can animateTo with a Curves.easeInOutBack curve begin min-size', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1028,7 +1028,7 @@ void main() {
     );
   });
 
-  testWidgets('Can reuse a controller after the old controller is disposed', (WidgetTester tester) async {
+  testWidgets('Can reuse a controller after the old controller is disposed', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1058,7 +1058,7 @@ void main() {
     );
   });
 
-  testWidgets('animateTo interrupts other animations', (WidgetTester tester) async {
+  testWidgets('animateTo interrupts other animations', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1094,7 +1094,7 @@ void main() {
     expect(find.text('Item 1'), findsOneWidget);
   });
 
-  testWidgets('Other animations interrupt animateTo', (WidgetTester tester) async {
+  testWidgets('Other animations interrupt animateTo', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1127,7 +1127,7 @@ void main() {
     );
   });
 
-  testWidgets('animateTo can be interrupted by other animateTo or jumpTo', (WidgetTester tester) async {
+  testWidgets('animateTo can be interrupted by other animateTo or jumpTo', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1169,7 +1169,7 @@ void main() {
     );
   });
 
-  testWidgets('Can get size and pixels', (WidgetTester tester) async {
+  testWidgets('Can get size and pixels', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final DraggableScrollableController controller = DraggableScrollableController();
@@ -1199,7 +1199,7 @@ void main() {
     expect(controller.pixels, closeTo(.4*screenHeight, precisionErrorTolerance));
   });
 
-  testWidgets('Cannot attach a controller to multiple sheets', (WidgetTester tester) async {
+  testWidgets('Cannot attach a controller to multiple sheets', (final WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -1219,7 +1219,7 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('Can listen for changes in sheet size', (WidgetTester tester) async {
+  testWidgets('Can listen for changes in sheet size', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final List<double> loggedSizes = <double>[];
@@ -1243,31 +1243,31 @@ void main() {
 
     await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.4].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     await tester.timedDrag(find.text('Item 1'), Offset(0, -.1 * screenHeight), const Duration(seconds: 1), frequency: 2);
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.45, .5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.45, .5].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     controller.jumpTo(.6);
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.6].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.6].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     controller.animateTo(1, duration: const Duration(milliseconds: 400), curve: Curves.linear);
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.7, .8, .9, 1].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.7, .8, .9, 1].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     DraggableScrollableActuator.reset(tester.element(find.byKey(containerKey)));
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.5].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
   });
 
-  testWidgets('Listener does not fire on parameter change and persists after change', (WidgetTester tester) async {
+  testWidgets('Listener does not fire on parameter change and persists after change', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final List<double> loggedSizes = <double>[];
@@ -1290,7 +1290,7 @@ void main() {
 
     await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.4].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     // Update a parameter without forcing a change in the current size.
@@ -1305,11 +1305,11 @@ void main() {
 
     await tester.drag(find.text('Item 1'), Offset(0, .1 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.3].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
   });
 
-  testWidgets('Listener fires if a parameter change forces a change in size', (WidgetTester tester) async {
+  testWidgets('Listener fires if a parameter change forces a change in size', (final WidgetTester tester) async {
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
     final List<double> loggedSizes = <double>[];
@@ -1339,13 +1339,13 @@ void main() {
       stackKey: stackKey,
       containerKey: containerKey,
     ));
-    expect(loggedSizes, <double>[.6].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.6].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     // Move away from initial child size.
     await tester.drag(find.text('Item 1'), Offset(0, .3 * screenHeight), touchSlopY: 0);
     await tester.pumpAndSettle();
-    expect(loggedSizes, <double>[.3].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.3].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     // Set a `minChildSize` greater than the current size.
@@ -1356,11 +1356,11 @@ void main() {
       stackKey: stackKey,
       containerKey: containerKey,
     ));
-    expect(loggedSizes, <double>[.4].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[.4].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
   });
 
-  testWidgets('Invalid controller interactions throw assertion errors', (WidgetTester tester) async {
+  testWidgets('Invalid controller interactions throw assertion errors', (final WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     // Can't use a controller before attaching it.
     expect(() => controller.jumpTo(.1), throwsAssertionError);
@@ -1392,7 +1392,7 @@ void main() {
     expect(() => controller.animateTo(.5, duration: Duration.zero, curve: Curves.linear), throwsAssertionError);
   });
 
-  testWidgets('DraggableScrollableController must be attached before using any of its parameters', (WidgetTester tester) async {
+  testWidgets('DraggableScrollableController must be attached before using any of its parameters', (final WidgetTester tester) async {
     final DraggableScrollableController controller = DraggableScrollableController();
     expect(controller.isAttached, false);
     expect(()=>controller.size, throwsAssertionError);
@@ -1406,7 +1406,7 @@ void main() {
     expect(controller.size, isNotNull);
     });
 
-    testWidgets('DraggableScrollableController.animateTo should not leak Ticker', (WidgetTester tester) async {
+    testWidgets('DraggableScrollableController.animateTo should not leak Ticker', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/102483
       final DraggableScrollableController controller = DraggableScrollableController();
       await tester.pumpWidget(boilerplateWidget(() {}, controller: controller));
@@ -1421,7 +1421,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-  testWidgets('DraggableScrollableSheet should not reset programmatic drag on rebuild', (WidgetTester tester) async {
+  testWidgets('DraggableScrollableSheet should not reset programmatic drag on rebuild', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/101114
     const Key stackKey = ValueKey<String>('stack');
     const Key containerKey = ValueKey<String>('container');
@@ -1487,16 +1487,16 @@ void main() {
     );
   });
 
-  testWidgets('DraggableScrollableSheet should respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
+  testWidgets('DraggableScrollableSheet should respect NeverScrollableScrollPhysics', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/121021
     final DraggableScrollableController controller = DraggableScrollableController();
-    Widget buildFrame(ScrollPhysics? physics) {
+    Widget buildFrame(final ScrollPhysics? physics) {
       return MaterialApp(
         home: Scaffold(
           body: DraggableScrollableSheet(
             controller: controller,
             initialChildSize: 0.25,
-            builder: (BuildContext context, ScrollController scrollController) {
+            builder: (final BuildContext context, final ScrollController scrollController) {
               return ListView(
                 physics: physics,
                 controller: scrollController,
@@ -1532,17 +1532,17 @@ void main() {
     expect(controller.pixels, initPixels + 300.0);
   });
 
-  testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (WidgetTester tester) async {
+  testWidgets('DraggableScrollableSheet should not rebuild every frame while dragging', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/67219
     int buildCount = 0;
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) => Scaffold(
+        builder: (final BuildContext context, final StateSetter setState) => Scaffold(
           body: DraggableScrollableSheet(
             initialChildSize: 0.25,
             snap: true,
             snapSizes: const <double>[0.25, 0.5, 1.0],
-            builder: (BuildContext context, ScrollController scrollController) {
+            builder: (final BuildContext context, final ScrollController scrollController) {
               buildCount++;
               return ListView(
                 controller: scrollController,
@@ -1579,7 +1579,7 @@ void main() {
     expect(buildCount, 2);
   });
 
-  testWidgets('DraggableScrollableSheet controller can be changed', (WidgetTester tester) async {
+  testWidgets('DraggableScrollableSheet controller can be changed', (final WidgetTester tester) async {
     final DraggableScrollableController controller1 = DraggableScrollableController();
     final DraggableScrollableController controller2 = DraggableScrollableController();
     final List<double> loggedSizes = <double>[];
@@ -1587,13 +1587,13 @@ void main() {
     DraggableScrollableController controller = controller1;
     await tester.pumpWidget(MaterialApp(
       home: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) => Scaffold(
+        builder: (final BuildContext context, final StateSetter setState) => Scaffold(
           body: DraggableScrollableSheet(
             initialChildSize: 0.25,
             snap: true,
             snapSizes: const <double>[0.25, 0.5, 1.0],
             controller: controller,
-            builder: (BuildContext context, ScrollController scrollController) {
+            builder: (final BuildContext context, final ScrollController scrollController) {
               return ListView(
                 controller: scrollController,
                 children: <Widget>[
@@ -1621,7 +1621,7 @@ void main() {
       loggedSizes.add(controller1.size);
     });
     controller1.jumpTo(0.5);
-    expect(loggedSizes, <double>[0.5].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[0.5].map((final double v) => closeTo(v, precisionErrorTolerance)));
     loggedSizes.clear();
 
     await tester.tap(find.text('Switch controller'));
@@ -1634,6 +1634,6 @@ void main() {
       loggedSizes.add(controller2.size);
     });
     controller2.jumpTo(1.0);
-    expect(loggedSizes, <double>[1.0].map((double v) => closeTo(v, precisionErrorTolerance)));
+    expect(loggedSizes, <double>[1.0].map((final double v) => closeTo(v, precisionErrorTolerance)));
   });
 }

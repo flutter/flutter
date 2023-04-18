@@ -8,7 +8,7 @@ import 'dart:isolate';
 
 import 'package:flutter/src/foundation/_isolates_io.dart';
 
-int getLength(String s) {
+int getLength(final String s) {
   final ReceivePort r = ReceivePort();
   try {
     throw r;

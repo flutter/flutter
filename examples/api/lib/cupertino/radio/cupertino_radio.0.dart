@@ -12,7 +12,7 @@ class CupertinoRadioApp extends StatelessWidget {
   const CupertinoRadioApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoPageScaffold(
@@ -40,7 +40,7 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
   SingingCharacter? _character = SingingCharacter.lafayette;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoListSection(
       children: <Widget>[
         CupertinoListTile(
@@ -48,7 +48,7 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
           leading: CupertinoRadio<SingingCharacter>(
             value: SingingCharacter.lafayette,
             groupValue: _character,
-            onChanged: (SingingCharacter? value) {
+            onChanged: (final SingingCharacter? value) {
               setState(() {
                 _character = value;
               });
@@ -60,7 +60,7 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
           leading: CupertinoRadio<SingingCharacter>(
             value: SingingCharacter.jefferson,
             groupValue: _character,
-            onChanged: (SingingCharacter? value) {
+            onChanged: (final SingingCharacter? value) {
               setState(() {
                 _character = value;
               });

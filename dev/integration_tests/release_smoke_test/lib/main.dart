@@ -24,6 +24,6 @@ Future<void> main() async {
   );
 }
 
-List<int> _utf8Encode(String data) {
+List<int> _utf8Encode(final String data) {
   return utf8.encode(data);
 }

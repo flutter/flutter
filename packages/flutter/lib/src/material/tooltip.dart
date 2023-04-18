@@ -254,7 +254,7 @@ class Tooltip extends StatefulWidget {
 
   // Causes any current tooltips to be concealed. Only called for mouse hover enter
   // detections. Won't conceal the supplied tooltip.
-  static void _concealOtherTooltips(TooltipState current) {
+  static void _concealOtherTooltips(final TooltipState current) {
     if (_openedTooltips.isNotEmpty) {
       // Avoid concurrent modification.
       final List<TooltipState> openedTooltips = _openedTooltips.toList();
@@ -295,7 +295,7 @@ class Tooltip extends StatefulWidget {
   State<Tooltip> createState() => TooltipState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty(
       'message',
@@ -451,7 +451,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _handleStatusChanged(AnimationStatus status) {
+  void _handleStatusChanged(final AnimationStatus status) {
     // If this tip is concealed, don't remove it, even if it is dismissed, so that we can
     // reveal it later, unless it has explicitly been hidden with _dismissTooltip.
     if (status == AnimationStatus.dismissed && (_forceRemoval || !_isConcealed)) {
@@ -459,7 +459,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _dismissTooltip({ bool immediately = false }) {
+  void _dismissTooltip({ final bool immediately = false }) {
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -477,7 +477,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _pressActivated = false;
   }
 
-  void _showTooltip({ bool immediately = false }) {
+  void _showTooltip({ final bool immediately = false }) {
     _dismissTimer?.cancel();
     _dismissTimer = null;
     if (immediately) {
@@ -562,7 +562,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _handleMouseExit({bool immediately = false}) {
+  void _handleMouseExit({final bool immediately = false}) {
     if (mounted) {
       // If the tip is currently covered, we can just remove it without waiting.
       _dismissTooltip(immediately: _isConcealed || immediately);
@@ -591,8 +591,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         height: _height,
         padding: _padding,
         margin: _margin,
-        onEnter: _mouseIsConnected ? (_) => _handleMouseEnter() : null,
-        onExit: _mouseIsConnected ? (_) => _handleMouseExit() : null,
+        onEnter: _mouseIsConnected ? (final _) => _handleMouseEnter() : null,
+        onExit: _mouseIsConnected ? (final _) => _handleMouseExit() : null,
         decoration: _decoration,
         textStyle: _textStyle,
         textAlign: _textAlign,
@@ -605,7 +605,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         preferBelow: _preferBelow,
       ),
     );
-    _entry = OverlayEntry(builder: (BuildContext context) => overlay);
+    _entry = OverlayEntry(builder: (final BuildContext context) => overlay);
     _isConcealed = false;
     overlayState.insert(_entry!);
     SemanticsService.tooltip(_tooltipMessage);
@@ -637,7 +637,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _handlePointerEvent(PointerEvent event) {
+  void _handlePointerEvent(final PointerEvent event) {
     if (_entry == null) {
       return;
     }
@@ -692,7 +692,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // If message is empty then no need to create a tooltip overlay to show
     // the empty black container so just return the wrapped child as is or
     // empty container if child is not specified.
@@ -758,8 +758,8 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       // Only check for hovering if there is a mouse connected.
       if (_mouseIsConnected) {
         result = MouseRegion(
-          onEnter: (_) => _handleMouseEnter(),
-          onExit: (_) => _handleMouseExit(),
+          onEnter: (final _) => _handleMouseEnter(),
+          onExit: (final _) => _handleMouseExit(),
           child: result,
         );
       }
@@ -796,10 +796,10 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   final bool preferBelow;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) => constraints.loosen();
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) => constraints.loosen();
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     return positionDependentBox(
       size: size,
       childSize: childSize,
@@ -810,7 +810,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_TooltipPositionDelegate oldDelegate) {
+  bool shouldRelayout(final _TooltipPositionDelegate oldDelegate) {
     return target != oldDelegate.target
         || verticalOffset != oldDelegate.verticalOffset
         || preferBelow != oldDelegate.preferBelow;
@@ -849,7 +849,7 @@ class _TooltipOverlay extends StatelessWidget {
   final PointerExitEventListener? onExit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget result = IgnorePointer(
       child: FadeTransition(
         opacity: animation,

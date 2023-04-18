@@ -9,7 +9,7 @@ import 'package:stocks/stock_data.dart' as stock_data;
 void main() {
   stock_data.StockData.actuallyFetchData = false;
 
-  testWidgets('Changing locale', (WidgetTester tester) async {
+  testWidgets('Changing locale', (final WidgetTester tester) async {
     stocks.main();
     await tester.pump();
     // The initial test app's locale is "_", so we're seeing the fallback translation here.

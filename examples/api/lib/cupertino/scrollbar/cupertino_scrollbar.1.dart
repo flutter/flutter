@@ -12,7 +12,7 @@ class ScrollbarApp extends StatelessWidget {
   const ScrollbarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: ScrollbarExample(),
@@ -31,7 +31,7 @@ class _ScrollbarExampleState extends State<ScrollbarExample> {
   final ScrollController _controllerOne = ScrollController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoScrollbar Sample'),
@@ -46,7 +46,7 @@ class _ScrollbarExampleState extends State<ScrollbarExample> {
         child: ListView.builder(
           controller: _controllerOne,
           itemCount: 120,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),

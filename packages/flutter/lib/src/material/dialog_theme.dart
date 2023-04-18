@@ -75,16 +75,16 @@ class DialogTheme with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DialogTheme copyWith({
-    Color? backgroundColor,
-    double? elevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    ShapeBorder? shape,
-    AlignmentGeometry? alignment,
-    Color? iconColor,
-    TextStyle? titleTextStyle,
-    TextStyle? contentTextStyle,
-    EdgeInsetsGeometry? actionsPadding,
+    final Color? backgroundColor,
+    final double? elevation,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final ShapeBorder? shape,
+    final AlignmentGeometry? alignment,
+    final Color? iconColor,
+    final TextStyle? titleTextStyle,
+    final TextStyle? contentTextStyle,
+    final EdgeInsetsGeometry? actionsPadding,
   }) {
     return DialogTheme(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -101,7 +101,7 @@ class DialogTheme with Diagnosticable {
   }
 
   /// The data from the closest [DialogTheme] instance given the build context.
-  static DialogTheme of(BuildContext context) {
+  static DialogTheme of(final BuildContext context) {
     return Theme.of(context).dialogTheme;
   }
 
@@ -110,7 +110,7 @@ class DialogTheme with Diagnosticable {
   /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DialogTheme lerp(DialogTheme? a, DialogTheme? b, double t) {
+  static DialogTheme lerp(final DialogTheme? a, final DialogTheme? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -132,7 +132,7 @@ class DialogTheme with Diagnosticable {
   int get hashCode => shape.hashCode;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -153,7 +153,7 @@ class DialogTheme with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DoubleProperty('elevation', elevation));

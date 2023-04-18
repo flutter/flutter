@@ -17,7 +17,7 @@ class ColorFilterAndFadePage extends StatefulWidget {
 
 class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with TickerProviderStateMixin {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget shadowWidget = _ShadowWidget(
       width: 24,
       height: 24,
@@ -79,7 +79,7 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
                 const Text('Use Color Filter:'),
                 Checkbox(
                   value: _useColorFilter,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       _useColorFilter = value ?? false;
                     });
@@ -95,7 +95,7 @@ class _ColorFilterAndFadePageState extends State<ColorFilterAndFadePage> with Ti
   void _initAnimation() {
     _controller = AnimationController(duration: const Duration(seconds: 3), vsync: this);
     _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
-    _opacityAnimation.addStatusListener((AnimationStatus status) {
+    _opacityAnimation.addStatusListener((final AnimationStatus status) {
       if (status == AnimationStatus.completed) {
         _controller.reverse();
       } else if (status == AnimationStatus.dismissed) {
@@ -136,7 +136,7 @@ class _ShadowWidget extends StatelessWidget {
   final Shadow shadow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       width: width,
       height: height,
@@ -159,7 +159,7 @@ class _ShadowPainter extends CustomPainter {
   final Shadow shadow;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Rect rect = Offset.zero & size;
 
     final Paint paint = Paint();
@@ -177,5 +177,5 @@ class _ShadowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_ShadowPainter oldDelegate) => oldDelegate.useColorFilter != useColorFilter;
+  bool shouldRepaint(final _ShadowPainter oldDelegate) => oldDelegate.useColorFilter != useColorFilter;
 }

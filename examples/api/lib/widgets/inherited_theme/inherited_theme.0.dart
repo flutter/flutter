@@ -14,7 +14,7 @@ class MyAppBody extends StatelessWidget {
   const MyAppBody({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final NavigatorState navigator = Navigator.of(context);
     // This InheritedTheme.capture() saves references to themes that are
     // found above the context provided to this widget's build method
@@ -28,7 +28,7 @@ class MyAppBody extends StatelessWidget {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (BuildContext _) {
+            builder: (final BuildContext _) {
               // Wrap the actual child of the route in the previously
               // captured themes.
               return themes.wrap(
@@ -51,7 +51,7 @@ class InheritedThemeExampleApp extends StatelessWidget {
   const InheritedThemeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(
         // Override the DefaultTextStyle defined by the Scaffold.

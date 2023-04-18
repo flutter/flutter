@@ -45,7 +45,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   Iterable<PhysicalKeyEntry> get _functionKeyData {
     final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
-    return keyData.entries.where((PhysicalKeyEntry entry) {
+    return keyData.entries.where((final PhysicalKeyEntry entry) {
       return functionKeyRe.hasMatch(entry.constantName);
     });
   }
@@ -61,7 +61,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get _keyCodeToLogicalMap {
     final OutputLines<int> lines = OutputLines<int>('iOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      zipStrict(entry.iOSKeyCodeValues, entry.iOSKeyCodeNames, (int iOSValue, String iOSName) {
+      zipStrict(entry.iOSKeyCodeValues, entry.iOSKeyCodeNames, (final int iOSValue, final String iOSName) {
         lines.add(iOSValue, '    {${toHex(iOSValue)}, ${toHex(entry.value, digits: 11)}},  // $iOSName');
       });
     }
@@ -108,7 +108,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
 
   String get _specialKeyMapping {
     final OutputLines<int> lines = OutputLines<int>('iOS special key mapping');
-    kIosSpecialKeyMapping.forEach((String key, String logicalName) {
+    kIosSpecialKeyMapping.forEach((final String key, final String logicalName) {
       final int value = logicalData.entryByName(logicalName).value;
       lines.add(value, '  @"$key" : @(${toHex(value)}),');
     });
@@ -131,7 +131,7 @@ class IOSCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'ios_key_code_map_mm.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+  String outputPath(final String platform) => path.join(PlatformCodeGenerator.engineRoot,
       'shell', 'platform', 'darwin', 'ios', 'framework', 'Source', 'KeyCodeMap.g.mm');
 
   @override

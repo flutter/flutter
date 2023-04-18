@@ -10,9 +10,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
 
   void expectBorders(
-    WidgetTester tester, {
-    required bool expectGreenHasBorder,
-    required bool expectYellowHasBorder,
+    final WidgetTester tester, {
+    required final bool expectGreenHasBorder,
+    required final bool expectYellowHasBorder,
   }) {
     final Finder containerFinder = find.byType(Container);
     final Finder greenFinder = containerFinder.first;
@@ -27,14 +27,14 @@ void main() {
     expect(yellowDecoration?.border, expectYellowHasBorder ? isNot(null) : null);
   }
 
-  void expectInnerGestureDetectorBehavior(WidgetTester tester, HitTestBehavior behavior) {
+  void expectInnerGestureDetectorBehavior(final WidgetTester tester, final HitTestBehavior behavior) {
     // There is a third GestureDetector added by Scaffold.
     final Finder innerGestureDetectorFinder = find.byType(GestureDetector).at(1);
     final GestureDetector innerGestureDetector = tester.firstWidget<GestureDetector>(innerGestureDetectorFinder);
     expect(innerGestureDetector.behavior, behavior);
   }
 
-  testWidgets('Only the green Container shows a red border when tapped', (WidgetTester tester) async {
+  testWidgets('Only the green Container shows a red border when tapped', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.NestedGestureDetectorsApp(),
     );
@@ -63,7 +63,7 @@ void main() {
     expectInnerGestureDetectorBehavior(tester, HitTestBehavior.opaque);
   });
 
-  testWidgets('Only the yellow Container shows a red border when tapped', (WidgetTester tester) async {
+  testWidgets('Only the yellow Container shows a red border when tapped', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.NestedGestureDetectorsApp(),
     );

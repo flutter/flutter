@@ -60,7 +60,7 @@ const String _kIntegrationTestDirectory = 'integration_test';
 /// - https://flutter.dev/docs/testing/integration-tests
 class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   TestCommand({
-    bool verboseHelp = false,
+    final bool verboseHelp = false,
     this.testWrapper = const TestWrapper(),
     this.testRunner = const FlutterTestRunner(),
     this.verbose = false,
@@ -260,7 +260,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   String get category => FlutterCommandCategory.project;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) {
+  Future<FlutterCommandResult> verifyThenRunCommand(final String? commandPath) {
     final List<Uri> testUris = argResults!.rest.map(_parseTestArgument).toList();
     if (testUris.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
@@ -293,7 +293,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
     // This needs to be set before [super.verifyThenRunCommand] so that the
     // correct [requiredArtifacts] can be identified before [run] takes place.
-    final List<String> testFilePaths = _testFileUris.map((Uri uri) => uri.replace(query: '').toFilePath()).toList();
+    final List<String> testFilePaths = _testFileUris.map((final Uri uri) => uri.replace(query: '').toFilePath()).toList();
     _isIntegrationTest = _shouldRunAsIntegrationTests(globals.fs.currentDirectory.absolute.path, testFilePaths);
 
     globals.printTrace(
@@ -508,7 +508,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
   /// Parses a test file/directory target passed as an argument and returns it
   /// as an absolute file:/// [URI] with optional querystring for name/line/col.
-  Uri _parseTestArgument(String arg) {
+  Uri _parseTestArgument(final String arg) {
     // We can't parse Windows paths as URIs if they have query strings, so
     // parse the file and query parts separately.
     final int queryStart = arg.indexOf('?');
@@ -538,7 +538,7 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
     }
   }
 
-  bool _needRebuild(Map<String, DevFSContent> entries) {
+  bool _needRebuild(final Map<String, DevFSContent> entries) {
     final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     if (!manifest.existsSync()) {
       return true;
@@ -562,11 +562,11 @@ class TestCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
 
 /// Searches [directory] and returns files that end with `_test.dart` as
 /// absolute paths.
-Iterable<String> _findTests(Directory directory) {
+Iterable<String> _findTests(final Directory directory) {
   return directory.listSync(recursive: true, followLinks: false)
-      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
+      .where((final FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
       globals.fs.isFileSync(entity.path))
-      .map((FileSystemEntity entity) => globals.fs.path.absolute(entity.path));
+      .map((final FileSystemEntity entity) => globals.fs.path.absolute(entity.path));
 }
 
 /// Returns true if there are files that are Integration Tests.
@@ -576,14 +576,14 @@ Iterable<String> _findTests(Directory directory) {
 ///
 /// Throws an exception if there are both Integration Tests and Widget Tests
 /// found in [testFiles].
-bool _shouldRunAsIntegrationTests(String currentDirectory, List<String> testFiles) {
+bool _shouldRunAsIntegrationTests(final String currentDirectory, final List<String> testFiles) {
   final String integrationTestDirectory = globals.fs.path.join(currentDirectory, _kIntegrationTestDirectory);
 
-  if (testFiles.every((String absolutePath) => !absolutePath.startsWith(integrationTestDirectory))) {
+  if (testFiles.every((final String absolutePath) => !absolutePath.startsWith(integrationTestDirectory))) {
     return false;
   }
 
-  if (testFiles.every((String absolutePath) => absolutePath.startsWith(integrationTestDirectory))) {
+  if (testFiles.every((final String absolutePath) => absolutePath.startsWith(integrationTestDirectory))) {
     return true;
   }
 

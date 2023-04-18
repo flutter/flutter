@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('provides a value to the layer tree', (WidgetTester tester) async {
+  testWidgets('provides a value to the layer tree', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const AnnotatedRegion<int>(
         value: 1,
@@ -18,7 +18,7 @@ void main() {
     final AnnotatedRegionLayer<int> layer = layers.whereType<AnnotatedRegionLayer<int>>().first;
     expect(layer.value, 1);
   });
-  testWidgets('provides a value to the layer tree in a particular region', (WidgetTester tester) async {
+  testWidgets('provides a value to the layer tree in a particular region', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Transform.translate(
         offset: const Offset(25.0, 25.0),

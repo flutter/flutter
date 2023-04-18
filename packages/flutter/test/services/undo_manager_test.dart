@@ -37,7 +37,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/undomanager',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'handlePlatformUndo(${UndoDirection.redo})');
@@ -61,7 +61,7 @@ class _FakeUndoManagerClient with UndoManagerClient {
   bool get canRedo => false;
 
   @override
-  void handlePlatformUndo(UndoDirection direction) {
+  void handlePlatformUndo(final UndoDirection direction) {
     latestMethodCall = 'handlePlatformUndo($direction)';
   }
 }

@@ -43,21 +43,21 @@ abstract class DirectionalTextEditingIntent extends Intent {
 /// caret ([TextSelection.isValid] is false for the current selection).
 class DeleteCharacterIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteCharacterIntent].
-  const DeleteCharacterIntent({ required bool forward }) : super(forward);
+  const DeleteCharacterIntent({ required final bool forward }) : super(forward);
 }
 
 /// Deletes from the current caret location to the previous or next word
 /// boundary, based on whether `forward` is true.
 class DeleteToNextWordBoundaryIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteToNextWordBoundaryIntent].
-  const DeleteToNextWordBoundaryIntent({ required bool forward }) : super(forward);
+  const DeleteToNextWordBoundaryIntent({ required final bool forward }) : super(forward);
 }
 
 /// Deletes from the current caret location to the previous or next soft or hard
 /// line break, based on whether `forward` is true.
 class DeleteToLineBreakIntent extends DirectionalTextEditingIntent {
   /// Creates a [DeleteToLineBreakIntent].
-  const DeleteToLineBreakIntent({ required bool forward }) : super(forward);
+  const DeleteToLineBreakIntent({ required final bool forward }) : super(forward);
 }
 
 /// A [DirectionalTextEditingIntent] that moves the caret or the selection to a
@@ -110,8 +110,8 @@ abstract class DirectionalCaretMovementIntent extends DirectionalTextEditingInte
 class ExtendSelectionByCharacterIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionByCharacterIntent].
   const ExtendSelectionByCharacterIntent({
-    required bool forward,
-    required bool collapseSelection,
+    required final bool forward,
+    required final bool collapseSelection,
   }) : super(forward, collapseSelection);
 }
 
@@ -121,8 +121,8 @@ class ExtendSelectionByCharacterIntent extends DirectionalCaretMovementIntent {
 class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextWordBoundaryIntent].
   const ExtendSelectionToNextWordBoundaryIntent({
-    required bool forward,
-    required bool collapseSelection,
+    required final bool forward,
+    required final bool collapseSelection,
   }) : super(forward, collapseSelection);
 }
 
@@ -140,7 +140,7 @@ class ExtendSelectionToNextWordBoundaryIntent extends DirectionalCaretMovementIn
 class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextWordBoundaryOrCaretLocationIntent].
   const ExtendSelectionToNextWordBoundaryOrCaretLocationIntent({
-    required bool forward,
+    required final bool forward,
   }) : super(forward, false, true);
 }
 
@@ -157,7 +157,7 @@ class ExtendSelectionToNextWordBoundaryOrCaretLocationIntent extends Directional
 class ExpandSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExpandSelectionToDocumentBoundaryIntent].
   const ExpandSelectionToDocumentBoundaryIntent({
-    required bool forward,
+    required final bool forward,
   }) : super(forward, false);
 }
 
@@ -176,7 +176,7 @@ class ExpandSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIn
 class ExpandSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExpandSelectionToLineBreakIntent].
   const ExpandSelectionToLineBreakIntent({
-    required bool forward,
+    required final bool forward,
   }) : super(forward, false);
 }
 
@@ -191,10 +191,10 @@ class ExpandSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
 class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToLineBreakIntent].
   const ExtendSelectionToLineBreakIntent({
-    required bool forward,
-    required bool collapseSelection,
-    bool collapseAtReversal = false,
-    bool continuesAtWrap = false,
+    required final bool forward,
+    required final bool collapseSelection,
+    final bool collapseAtReversal = false,
+    final bool continuesAtWrap = false,
   }) : assert(!collapseSelection || !collapseAtReversal),
        super(forward, collapseSelection, collapseAtReversal, continuesAtWrap);
 }
@@ -205,8 +205,8 @@ class ExtendSelectionToLineBreakIntent extends DirectionalCaretMovementIntent {
 class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionVerticallyToAdjacentLineIntent].
   const ExtendSelectionVerticallyToAdjacentLineIntent({
-    required bool forward,
-    required bool collapseSelection,
+    required final bool forward,
+    required final bool collapseSelection,
   }) : super(forward, collapseSelection);
 }
 
@@ -216,8 +216,8 @@ class ExtendSelectionVerticallyToAdjacentLineIntent extends DirectionalCaretMove
 class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionVerticallyToAdjacentPageIntent].
   const ExtendSelectionVerticallyToAdjacentPageIntent({
-    required bool forward,
-    required bool collapseSelection,
+    required final bool forward,
+    required final bool collapseSelection,
   }) : super(forward, collapseSelection);
 }
 
@@ -227,8 +227,8 @@ class ExtendSelectionVerticallyToAdjacentPageIntent extends DirectionalCaretMove
 class ExtendSelectionToNextParagraphBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextParagraphBoundaryIntent].
   const ExtendSelectionToNextParagraphBoundaryIntent({
-    required bool forward,
-    required bool collapseSelection,
+    required final bool forward,
+    required final bool collapseSelection,
   }) : super(forward, collapseSelection);
 }
 
@@ -245,7 +245,7 @@ class ExtendSelectionToNextParagraphBoundaryIntent extends DirectionalCaretMovem
 class ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent].
   const ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent({
-    required bool forward,
+    required final bool forward,
   }) : super(forward, false, true);
 }
 
@@ -259,8 +259,8 @@ class ExtendSelectionToNextParagraphBoundaryOrCaretLocationIntent extends Direct
 class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIntent {
   /// Creates an [ExtendSelectionToDocumentBoundaryIntent].
   const ExtendSelectionToDocumentBoundaryIntent({
-    required bool forward,
-    required bool collapseSelection,
+    required final bool forward,
+    required final bool collapseSelection,
   }) : super(forward, collapseSelection);
 }
 
@@ -269,7 +269,7 @@ class ExtendSelectionToDocumentBoundaryIntent extends DirectionalCaretMovementIn
 class ScrollToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
   /// Creates a [ScrollToDocumentBoundaryIntent].
   const ScrollToDocumentBoundaryIntent({
-    required bool forward,
+    required final bool forward,
   }) : super(forward);
 }
 
@@ -278,7 +278,7 @@ class ScrollToDocumentBoundaryIntent extends DirectionalTextEditingIntent {
 class ExtendSelectionByPageIntent extends DirectionalTextEditingIntent {
   /// Creates a [ExtendSelectionByPageIntent].
   const ExtendSelectionByPageIntent({
-    required bool forward,
+    required final bool forward,
   }) : super(forward);
 }
 
@@ -300,7 +300,7 @@ class CopySelectionTextIntent extends Intent {
 
   /// Creates an [Intent] that represents a user interaction that attempts to
   /// cut the current selection in the field.
-  const CopySelectionTextIntent.cut(SelectionChangedCause cause) : this._(cause, true);
+  const CopySelectionTextIntent.cut(final SelectionChangedCause cause) : this._(cause, true);
 
   /// An [Intent] that represents a user interaction that attempts to copy the
   /// current selection in the field.

@@ -12,7 +12,7 @@ class FrameBuilderExampleApp extends StatelessWidget {
   const FrameBuilderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FrameBuilderExample(),
     );
@@ -24,7 +24,7 @@ class FrameBuilderExample extends StatelessWidget {
 
   @override
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -33,7 +33,7 @@ class FrameBuilderExample extends StatelessWidget {
       ),
       child: Image.network(
         'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',
-        frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+        frameBuilder: (final BuildContext context, final Widget child, final int? frame, final bool wasSynchronouslyLoaded) {
           if (wasSynchronouslyLoaded) {
             return child;
           }

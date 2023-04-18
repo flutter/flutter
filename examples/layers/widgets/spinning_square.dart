@@ -27,7 +27,7 @@ class _SpinningSquareState extends State<SpinningSquare> with SingleTickerProvid
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RotationTransition(
       turns: _animation,
       child: Container(

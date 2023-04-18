@@ -17,15 +17,15 @@ import 'run_demos.dart';
 // These names are reported by the test app, see _handleMessages()
 // in transitions_perf.dart.
 List<String> _allDemos = kAllGalleryDemos.map(
-  (GalleryDemo demo) => '${demo.title}@${demo.category.name}',
+  (final GalleryDemo demo) => '${demo.title}@${demo.category.name}',
 ).toList();
 
-void main([List<String> args = const <String>[]]) {
+void main([final List<String> args = const <String>[]]) {
   final bool withSemantics = args.contains('--with_semantics');
   final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   group('flutter gallery transitions on e2e', () {
-    testWidgets('find.bySemanticsLabel', (WidgetTester tester) async {
+    testWidgets('find.bySemanticsLabel', (final WidgetTester tester) async {
       runApp(const GalleryApp(testMode: true));
       await tester.pumpAndSettle();
       final int id = tester.getSemantics(find.bySemanticsLabel('Material')).id;
@@ -34,7 +34,7 @@ void main([List<String> args = const <String>[]]) {
 
     testWidgets(
       'all demos',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         runApp(const GalleryApp(testMode: true));
         await tester.pumpAndSettle();
         // Collect timeline data for just a limited set of demos to avoid OOMs.

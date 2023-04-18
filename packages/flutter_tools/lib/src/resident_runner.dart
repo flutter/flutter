@@ -47,9 +47,9 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     required this.buildInfo,
-    TargetModel targetModel = TargetModel.flutter,
+    final TargetModel targetModel = TargetModel.flutter,
     this.targetPlatform,
-    ResidentCompiler? generator,
+    final ResidentCompiler? generator,
     this.userIdentifier,
     required this.developmentShaderCompiler,
     this.developmentSceneImporter,
@@ -76,13 +76,13 @@ class FlutterDevice {
 
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
-    Device device, {
-    required String? target,
-    required BuildInfo buildInfo,
-    required Platform platform,
+    final Device device, {
+    required final String? target,
+    required final BuildInfo buildInfo,
+    required final Platform platform,
     TargetModel targetModel = TargetModel.flutter,
-    List<String>? experimentalFlags,
-    String? userIdentifier,
+    final List<String>? experimentalFlags,
+    final String? userIdentifier,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     if (device.platformType == PlatformType.fuchsia) {
@@ -245,31 +245,31 @@ class FlutterDevice {
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
   Future<void> connect({
-    ReloadSources? reloadSources,
-    Restart? restart,
-    CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
-    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    int? hostVmServicePort,
-    int? ddsPort,
-    bool disableServiceAuthCodes = false,
-    bool cacheStartupProfile = false,
-    bool enableDds = true,
-    required bool allowExistingDdsInstance,
-    bool ipv6 = false,
+    final ReloadSources? reloadSources,
+    final Restart? restart,
+    final CompileExpression? compileExpression,
+    final GetSkSLMethod? getSkSLMethod,
+    final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    final int? hostVmServicePort,
+    final int? ddsPort,
+    final bool disableServiceAuthCodes = false,
+    final bool cacheStartupProfile = false,
+    final bool enableDds = true,
+    required final bool allowExistingDdsInstance,
+    final bool ipv6 = false,
   }) {
     final Completer<void> completer = Completer<void>();
     late StreamSubscription<void> subscription;
     bool isWaitingForVm = false;
 
-    subscription = vmServiceUris!.listen((Uri? vmServiceUri) async {
+    subscription = vmServiceUris!.listen((final Uri? vmServiceUri) async {
       // FYI, this message is used as a sentinel in tests.
       globals.printTrace('Connecting to service protocol: $vmServiceUri');
       isWaitingForVm = true;
       bool existingDds = false;
       FlutterVmService? service;
       if (enableDds) {
-        void handleError(Exception e, StackTrace st) {
+        void handleError(final Exception e, final StackTrace st) {
           globals.printTrace('Fail to connect to service protocol: $vmServiceUri: $e');
           if (!completer.isCompleted) {
             completer.completeError('failed to connect to $vmServiceUri', st);
@@ -354,7 +354,7 @@ class FlutterDevice {
       (await device!.getLogReader(app: package)).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
-    }, onError: (dynamic error) {
+    }, onError: (final dynamic error) {
       globals.printTrace('Fail to handle VM Service URI: $error');
     }, onDone: () {
       _isListeningForVmServiceUri = false;
@@ -367,7 +367,7 @@ class FlutterDevice {
   }
 
   Future<void> exitApps({
-    @visibleForTesting Duration timeoutDelay = const Duration(seconds: 10),
+    @visibleForTesting final Duration timeoutDelay = const Duration(seconds: 10),
   }) async {
     // TODO(zanderso): https://github.com/flutter/flutter/issues/83127
     // When updating `flutter attach` to support running without a device,
@@ -376,8 +376,8 @@ class FlutterDevice {
   }
 
   Future<Uri?> setupDevFS(
-    String fsName,
-    Directory rootDirectory,
+    final String fsName,
+    final Directory rootDirectory,
   ) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
@@ -396,7 +396,7 @@ class FlutterDevice {
       return;
     }
     final Stream<String> logStream = (await device!.getLogReader(app: package)).logLines;
-    _loggingSubscription = logStream.listen((String line) {
+    _loggingSubscription = logStream.listen((final String line) {
       if (!line.contains(globals.kVMServiceMessageRegExp)) {
         globals.printStatus(line, wrap: false);
       }
@@ -418,8 +418,8 @@ class FlutterDevice {
   }
 
   Future<int> runHot({
-    required HotRunner hotRunner,
-    String? route,
+    required final HotRunner hotRunner,
+    final String? route,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
@@ -485,8 +485,8 @@ class FlutterDevice {
   }
 
   Future<int> runCold({
-    required ColdRunner coldRunner,
-    String? route,
+    required final ColdRunner coldRunner,
+    final String? route,
   }) async {
     final TargetPlatform targetPlatform = await device!.targetPlatform;
     package = await ApplicationPackageFactory.instance!.getPackageForPlatform(
@@ -550,18 +550,18 @@ class FlutterDevice {
   }
 
   Future<UpdateFSReport> updateDevFS({
-    required Uri mainUri,
-    String? target,
-    AssetBundle? bundle,
-    DateTime? firstBuildTime,
-    bool bundleFirstUpload = false,
-    bool bundleDirty = false,
-    bool fullRestart = false,
-    String? projectRootPath,
-    required String pathToReload,
-    required String dillOutputPath,
-    required List<Uri> invalidatedFiles,
-    required PackageConfig packageConfig,
+    required final Uri mainUri,
+    final String? target,
+    final AssetBundle? bundle,
+    final DateTime? firstBuildTime,
+    final bool bundleFirstUpload = false,
+    final bool bundleDirty = false,
+    final bool fullRestart = false,
+    final String? projectRootPath,
+    required final String pathToReload,
+    required final String dillOutputPath,
+    required final List<Uri> invalidatedFiles,
+    required final PackageConfig packageConfig,
   }) async {
     final Status devFSStatus = globals.logger.startProgress(
       'Syncing files to device ${device!.name}...',
@@ -596,7 +596,7 @@ class FlutterDevice {
     return report;
   }
 
-  Future<void> updateReloadStatus(bool wasReloadSuccessful) async {
+  Future<void> updateReloadStatus(final bool wasReloadSuccessful) async {
     if (wasReloadSuccessful) {
       generator?.accept();
     } else {
@@ -650,14 +650,14 @@ abstract class ResidentHandlers {
   FileSystem? get fileSystem;
 
   /// Called to print help to the terminal.
-  void printHelp({ required bool details });
+  void printHelp({ required final bool details });
 
   /// Perform a hot reload or hot restart of all attached applications.
   ///
   /// If [fullRestart] is true, a hot restart is performed. Otherwise a hot reload
   /// is run instead. On web devices, this only performs a hot restart regardless of
   /// the value of [fullRestart].
-  Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String? reason }) {
+  Future<OperationResult> restart({ final bool fullRestart = false, final bool pause = false, final String? reason }) {
     final String mode = isRunningProfile ? 'profile' :isRunningRelease ? 'release' : 'this';
     throw Exception('${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode');
   }
@@ -973,7 +973,7 @@ abstract class ResidentHandlers {
   /// RPC errors are encountered, printing them to stderr. This is true even
   /// if an error occurs after the data has already been received, such as
   /// from restoring the debug banner.
-  Future<void> screenshot(FlutterDevice device) async {
+  Future<void> screenshot(final FlutterDevice device) async {
     if (!device.device!.supportsScreenshot && !supportsServiceProtocol) {
       return;
     }
@@ -1007,7 +1007,7 @@ abstract class ResidentHandlers {
     }
   }
 
-  Future<bool> _takeVmServiceScreenshot(FlutterDevice device, File outputFile) async {
+  Future<bool> _takeVmServiceScreenshot(final FlutterDevice device, final File outputFile) async {
     final bool isWebDevice = device.targetPlatform == TargetPlatform.web_javascript;
     assert(supportsServiceProtocol);
 
@@ -1023,13 +1023,13 @@ abstract class ResidentHandlers {
     });
   }
 
-  Future<bool> _toggleDebugBanner(FlutterDevice device, Future<void> Function() cb) async {
+  Future<bool> _toggleDebugBanner(final FlutterDevice device, final Future<void> Function() cb) async {
     List<FlutterView> views = <FlutterView>[];
     if (supportsServiceProtocol) {
       views = await device.vmService!.getFlutterViews();
     }
 
-    Future<bool> setDebugBanner(bool value) async {
+    Future<bool> setDebugBanner(final bool value) async {
       try {
         for (final FlutterView view in views) {
           await device.vmService!.flutterDebugAllowBanner(
@@ -1083,13 +1083,13 @@ abstract class ResidentRunner extends ResidentHandlers {
     this.flutterDevices, {
     required this.target,
     required this.debuggingOptions,
-    String? projectRootPath,
+    final String? projectRootPath,
     this.ipv6,
     this.stayResident = true,
     this.hotMode = true,
-    String? dillOutputPath,
+    final String? dillOutputPath,
     this.machine = false,
-    ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
+    final ResidentDevtoolsHandlerFactory devtoolsHandler = createDefaultHandler,
   }) : mainPath = globals.fs.file(target).absolute.path,
        packagesFilePath = debuggingOptions.buildInfo.packagesPath,
        projectRootPath = projectRootPath ?? globals.fs.currentDirectory.path,
@@ -1150,15 +1150,15 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   /// Returns true if every device is streaming vmService URIs.
   bool get isWaitingForVmService {
-    return flutterDevices.every((FlutterDevice? device) {
+    return flutterDevices.every((final FlutterDevice? device) {
       return device!.isWaitingForVmService;
     });
   }
 
   String get dillOutputPath => _dillOutputPath ?? globals.fs.path.join(artifactDirectory.path, 'app.dill');
   String getReloadPath({
-    bool fullRestart = false,
-    required bool swap,
+    final bool fullRestart = false,
+    required final bool swap,
   }) {
     if (!fullRestart) {
       return 'main.dart.incremental.dill';
@@ -1201,7 +1201,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   @override
   bool get supportsRestart {
-    return isRunningDebug && flutterDevices.every((FlutterDevice? device) {
+    return isRunningDebug && flutterDevices.every((final FlutterDevice? device) {
       return device!.device!.supportsHotRestart;
     });
   }
@@ -1214,10 +1214,10 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// Returns the exit code that we should use for the flutter tool process; 0
   /// for success, 1 for user error (e.g. bad arguments), 2 for other failures.
   Future<int?> run({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
-    String? route,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool enableDevTools = false,
+    final String? route,
   });
 
   /// Connect to a flutter application.
@@ -1225,11 +1225,11 @@ abstract class ResidentRunner extends ResidentHandlers {
   /// [needsFullRestart] defaults to `true`, and controls if the frontend server should
   /// compile a full dill. This should be set to `false` if this is called in [ResidentRunner.run], since that method already performs an initial compilation.
   Future<int?> attach({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
-    bool needsFullRestart = true,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool allowExistingDdsInstance = false,
+    final bool enableDevTools = false,
+    final bool needsFullRestart = true,
   });
 
   @override
@@ -1311,14 +1311,14 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   Future<void> stopEchoingDeviceLog() async {
     await Future.wait<void>(
-      flutterDevices.map<Future<void>>((FlutterDevice? device) => device!.stopEchoingDeviceLog())
+      flutterDevices.map<Future<void>>((final FlutterDevice? device) => device!.stopEchoingDeviceLog())
     );
   }
 
   Future<void> shutdownDartDevelopmentService() async {
     await Future.wait<void>(
       flutterDevices.map<Future<void>>(
-        (FlutterDevice? device) => device?.device?.dds.shutdown() ?? Future<void>.value()
+        (final FlutterDevice? device) => device?.device?.dds.shutdown() ?? Future<void>.value()
       )
     );
   }
@@ -1344,7 +1344,7 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
-  void printStructuredErrorLog(vm_service.Event event) {
+  void printStructuredErrorLog(final vm_service.Event event) {
     if (event.extensionKind == 'Flutter.Error' && !machine) {
       final Map<String, Object?>? json = event.extensionData?.data;
       if (json != null && json.containsKey('renderedErrorText')) {
@@ -1376,11 +1376,11 @@ abstract class ResidentRunner extends ResidentHandlers {
   // a string as the error object, which will be used by the caller (attach())
   // to display an error message.
   Future<void> connectToServiceProtocol({
-    ReloadSources? reloadSources,
-    Restart? restart,
-    CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
-    required bool allowExistingDdsInstance,
+    final ReloadSources? reloadSources,
+    final Restart? restart,
+    final CompileExpression? compileExpression,
+    final GetSkSLMethod? getSkSLMethod,
+    required final bool allowExistingDdsInstance,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw Exception('The service protocol is not enabled.');
@@ -1414,11 +1414,11 @@ abstract class ResidentRunner extends ResidentHandlers {
     }
   }
 
-  Future<void> _serviceProtocolDone(dynamic object) async {
+  Future<void> _serviceProtocolDone(final dynamic object) async {
     globals.printTrace('Service protocol connection closed.');
   }
 
-  Future<void> _serviceProtocolError(Object error, StackTrace stack) {
+  Future<void> _serviceProtocolError(final Object error, final StackTrace stack) {
     globals.printTrace('Service protocol connection closed with an error: $error\n$stack');
     return Future<void>.error(error, stack);
   }
@@ -1495,7 +1495,7 @@ abstract class ResidentRunner extends ResidentHandlers {
   bool get reportedDebuggers => _reportedDebuggers;
   bool _reportedDebuggers = false;
 
-  void printDebuggerList({ bool includeVmService = true, bool includeDevtools = true }) {
+  void printDebuggerList({ final bool includeVmService = true, bool includeDevtools = true }) {
     final DevToolsServerAddress? devToolsServerAddress = residentDevtoolsHandler!.activeDevToolsServer;
     if (!residentDevtoolsHandler!.readyToAnnounce) {
       includeDevtools = false;
@@ -1529,7 +1529,7 @@ abstract class ResidentRunner extends ResidentHandlers {
 
   void printHelpDetails() {
     commandHelp.v.print();
-    if (flutterDevices.any((FlutterDevice? d) => d!.device!.supportsScreenshot)) {
+    if (flutterDevices.any((final FlutterDevice? d) => d!.device!.supportsScreenshot)) {
       commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
@@ -1601,7 +1601,7 @@ class OperationResultExtraTiming {
   final int timeInMs;
 }
 
-Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async {
+Future<String?> getMissingPackageHintForPlatform(final TargetPlatform platform) async {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
@@ -1628,12 +1628,12 @@ Future<String?> getMissingPackageHintForPlatform(TargetPlatform platform) async 
 /// Redirects terminal commands to the correct resident runner methods.
 class TerminalHandler {
   TerminalHandler(this.residentRunner, {
-    required Logger logger,
-    required Terminal terminal,
-    required Signals signals,
-    required io.ProcessInfo processInfo,
-    required bool reportReady,
-    String? pidFile,
+    required final Logger logger,
+    required final Terminal terminal,
+    required final Signals signals,
+    required final io.ProcessInfo processInfo,
+    required final bool reportReady,
+    final String? pidFile,
   }) : _logger = logger,
        _terminal = terminal,
        _signals = signals,
@@ -1671,7 +1671,7 @@ class TerminalHandler {
 
   final Map<io.ProcessSignal, Object> _signalTokens = <io.ProcessSignal, Object>{};
 
-  void _addSignalHandler(io.ProcessSignal signal, SignalHandler handler) {
+  void _addSignalHandler(final io.ProcessSignal signal, final SignalHandler handler) {
     _signalTokens[signal] = _signals.addHandler(signal, handler);
   }
 
@@ -1709,7 +1709,7 @@ class TerminalHandler {
   }
 
   /// Returns [true] if the input has been handled by this function.
-  Future<bool> _commonTerminalInputHandler(String character) async {
+  Future<bool> _commonTerminalInputHandler(final String character) async {
     _logger.printStatus(''); // the key the user tapped might be on this line
     switch (character) {
       case 'a':
@@ -1835,7 +1835,7 @@ class TerminalHandler {
     }
   }
 
-  Future<void> _handleSignal(io.ProcessSignal signal) async {
+  Future<void> _handleSignal(final io.ProcessSignal signal) async {
     if (_processingUserRequest) {
       _logger.printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
@@ -1851,7 +1851,7 @@ class TerminalHandler {
     }
   }
 
-  Future<void> _cleanUp(io.ProcessSignal? signal) async {
+  Future<void> _cleanUp(final io.ProcessSignal? signal) async {
     _terminal.singleCharMode = false;
     await subscription?.cancel();
     await residentRunner.cleanupAfterSignal();
@@ -1870,7 +1870,7 @@ class DebugConnectionInfo {
 ///
 /// These values must match what is available in
 /// `packages/flutter/lib/src/foundation/binding.dart`.
-String nextPlatform(String currentPlatform) {
+String nextPlatform(final String currentPlatform) {
   switch (currentPlatform) {
     case 'android':
       return 'iOS';
@@ -1904,7 +1904,7 @@ abstract class DevtoolsLauncher {
   ///
   /// This method must return a future that is guaranteed not to fail, because it
   /// will be used in unawaited contexts.
-  Future<void> launch(Uri vmServiceUri, {List<String>? additionalArguments});
+  Future<void> launch(final Uri vmServiceUri, {final List<String>? additionalArguments});
 
   Future<void> close();
 
@@ -1923,7 +1923,7 @@ abstract class DevtoolsLauncher {
 
   Uri? get devToolsUrl => _devToolsUrl;
   Uri? _devToolsUrl;
-  set devToolsUrl(Uri? value) {
+  set devToolsUrl(final Uri? value) {
     assert((_devToolsUrl == null) != (value == null));
     _devToolsUrl = value;
     if (_devToolsUrl != null) {

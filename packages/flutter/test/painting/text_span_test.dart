@@ -30,8 +30,8 @@ void main() {
     expect(b1 == a2, isFalse);
     expect(c1 == b2, isFalse);
 
-    void callback1(PointerEnterEvent _) {}
-    void callback2(PointerEnterEvent _) {}
+    void callback1(final PointerEnterEvent _) {}
+    void callback2(final PointerEnterEvent _) {}
 
     final TextSpan d1 = TextSpan(text: 'a', onEnter: callback1);
     final TextSpan d2 = TextSpan(text: 'a', onEnter: callback1);
@@ -89,8 +89,8 @@ void main() {
 
     final TextSpan test2 = TextSpan(
       text: 'a',
-      onEnter: (_) {},
-      onExit: (_) {},
+      onEnter: (final _) {},
+      onExit: (final _) {},
       mouseCursor: SystemMouseCursors.forbidden,
     );
     expect(test2.toStringDeep(), equals(
@@ -282,7 +282,7 @@ void main() {
     expect(collector[0].semanticsLabel, 'bbb');
   });
 
-  testWidgets('handles mouse cursor', (WidgetTester tester) async {
+  testWidgets('handles mouse cursor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -319,7 +319,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
-  testWidgets('handles onEnter and onExit', (WidgetTester tester) async {
+  testWidgets('handles onEnter and onExit', (final WidgetTester tester) async {
     final List<PointerEvent> logEvents = <PointerEvent>[];
     await tester.pumpWidget(
       Directionality(
@@ -331,10 +331,10 @@ void main() {
               children: <InlineSpan>[
                 TextSpan(
                   text: 'yyyyy',
-                  onEnter: (PointerEnterEvent event) {
+                  onEnter: (final PointerEnterEvent event) {
                     logEvents.add(event);
                   },
-                  onExit: (PointerExitEvent event) {
+                  onExit: (final PointerExitEvent event) {
                     logEvents.add(event);
                   },
                 ),
@@ -364,7 +364,7 @@ void main() {
     expect(logEvents[1], isA<PointerExitEvent>());
   });
 
-  testWidgets('TextSpan can compute StringAttributes', (WidgetTester tester) async {
+  testWidgets('TextSpan can compute StringAttributes', (final WidgetTester tester) async {
     const TextSpan span = TextSpan(
       text: 'aaaaa',
       spellOut: true,

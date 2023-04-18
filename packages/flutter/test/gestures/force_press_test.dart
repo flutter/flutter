@@ -11,7 +11,7 @@ import 'gesture_tester.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testGesture('A force press can be recognized', (GestureTester tester) {
+  testGesture('A force press can be recognized', (final GestureTester tester) {
 
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
@@ -24,7 +24,7 @@ void main() {
 
     Offset? startGlobalPosition;
 
-    void onStart(ForcePressDetails details) {
+    void onStart(final ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;
       started += 1;
     }
@@ -32,9 +32,9 @@ void main() {
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
     force.onStart = onStart;
-    force.onPeak = (ForcePressDetails details) => peaked += 1;
-    force.onUpdate = (ForcePressDetails details) => updated += 1;
-    force.onEnd = (ForcePressDetails details) => ended += 1;
+    force.onPeak = (final ForcePressDetails details) => peaked += 1;
+    force.onUpdate = (final ForcePressDetails details) => updated += 1;
+    force.onEnd = (final ForcePressDetails details) => ended += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();
@@ -105,8 +105,8 @@ void main() {
     expect(ended, 1);
   });
 
-  testGesture('Invalid pressure ranges capabilities are not recognized', (GestureTester tester) {
-    void testGestureWithMaxPressure(double pressureMax) {
+  testGesture('Invalid pressure ranges capabilities are not recognized', (final GestureTester tester) {
+    void testGestureWithMaxPressure(final double pressureMax) {
       int started = 0;
       int peaked = 0;
       int updated = 0;
@@ -114,10 +114,10 @@ void main() {
 
       final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
-      force.onStart = (ForcePressDetails details) => started += 1;
-      force.onPeak = (ForcePressDetails details) => peaked += 1;
-      force.onUpdate = (ForcePressDetails details) => updated += 1;
-      force.onEnd = (ForcePressDetails details) => ended += 1;
+      force.onStart = (final ForcePressDetails details) => started += 1;
+      force.onPeak = (final ForcePressDetails details) => peaked += 1;
+      force.onUpdate = (final ForcePressDetails details) => updated += 1;
+      force.onEnd = (final ForcePressDetails details) => ended += 1;
 
       const int pointerValue = 1;
       final TestPointer pointer = TestPointer();
@@ -156,7 +156,7 @@ void main() {
     testGestureWithMaxPressure(0.5);
   });
 
-  testGesture('If minimum pressure is not reached, start and end callbacks are not called', (GestureTester tester) {
+  testGesture('If minimum pressure is not reached, start and end callbacks are not called', (final GestureTester tester) {
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 6.66;
@@ -168,10 +168,10 @@ void main() {
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+    force.onStart = (final _) => started += 1;
+    force.onPeak = (final _) => peaked += 1;
+    force.onUpdate = (final _) => updated += 1;
+    force.onEnd = (final _) => ended += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();
@@ -202,7 +202,7 @@ void main() {
     expect(ended, 0);
   });
 
-  testGesture('Should recognize drag and not force touch if there is a drag recognizer', (GestureTester tester) {
+  testGesture('Should recognize drag and not force touch if there is a drag recognizer', (final GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
 
     // Device specific constants that represent those from the iPhone X
@@ -216,13 +216,13 @@ void main() {
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+    force.onStart = (final _) => started += 1;
+    force.onPeak = (final _) => peaked += 1;
+    force.onUpdate = (final _) => updated += 1;
+    force.onEnd = (final _) => ended += 1;
 
     int didStartPan = 0;
-    drag.onStart = (_) => didStartPan += 1;
+    drag.onStart = (final _) => didStartPan += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();
@@ -274,7 +274,7 @@ void main() {
     expect(didStartPan, 1);
   });
 
-  testGesture('Should not call ended on pointer up if the gesture was never accepted', (GestureTester tester) {
+  testGesture('Should not call ended on pointer up if the gesture was never accepted', (final GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
 
     // Device specific constants that represent those from the iPhone X
@@ -288,13 +288,13 @@ void main() {
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+    force.onStart = (final _) => started += 1;
+    force.onPeak = (final _) => peaked += 1;
+    force.onUpdate = (final _) => updated += 1;
+    force.onEnd = (final _) => ended += 1;
 
     int didStartPan = 0;
-    drag.onStart = (_) => didStartPan += 1;
+    drag.onStart = (final _) => didStartPan += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();
@@ -319,7 +319,7 @@ void main() {
     expect(didStartPan, 0);
   });
 
-  testGesture('Should call start only once if there is a competing gesture recognizer', (GestureTester tester) {
+  testGesture('Should call start only once if there is a competing gesture recognizer', (final GestureTester tester) {
     final PanGestureRecognizer drag = PanGestureRecognizer();
 
     // Device specific constants that represent those from the iPhone X
@@ -333,13 +333,13 @@ void main() {
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+    force.onStart = (final _) => started += 1;
+    force.onPeak = (final _) => peaked += 1;
+    force.onUpdate = (final _) => updated += 1;
+    force.onEnd = (final _) => ended += 1;
 
     int didStartPan = 0;
-    drag.onStart = (_) => didStartPan += 1;
+    drag.onStart = (final _) => didStartPan += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();
@@ -374,7 +374,7 @@ void main() {
     expect(didStartPan, 0);
   });
 
-  testGesture('A force press can be recognized with a custom interpolation function', (GestureTester tester) {
+  testGesture('A force press can be recognized with a custom interpolation function', (final GestureTester tester) {
 
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
@@ -387,12 +387,12 @@ void main() {
 
     Offset? startGlobalPosition;
 
-    void onStart(ForcePressDetails details) {
+    void onStart(final ForcePressDetails details) {
       startGlobalPosition = details.globalPosition;
       started += 1;
     }
 
-    double interpolateWithEasing(double min, double max, double t) {
+    double interpolateWithEasing(final double min, final double max, final double t) {
       final double lerp = (t - min) / (max - min);
       return Curves.easeIn.transform(lerp);
     }
@@ -400,9 +400,9 @@ void main() {
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer(interpolation: interpolateWithEasing);
 
     force.onStart = onStart;
-    force.onPeak = (ForcePressDetails details) => peaked += 1;
-    force.onUpdate = (ForcePressDetails details) => updated += 1;
-    force.onEnd = (ForcePressDetails details) => ended += 1;
+    force.onPeak = (final ForcePressDetails details) => peaked += 1;
+    force.onUpdate = (final ForcePressDetails details) => updated += 1;
+    force.onEnd = (final ForcePressDetails details) => ended += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();
@@ -477,7 +477,7 @@ void main() {
     expect(ended, 1);
   });
 
-  testGesture('A pressure outside of the device reported min and max pressure will not give an error', (GestureTester tester) {
+  testGesture('A pressure outside of the device reported min and max pressure will not give an error', (final GestureTester tester) {
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 6.66;
@@ -489,10 +489,10 @@ void main() {
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+    force.onStart = (final _) => started += 1;
+    force.onPeak = (final _) => peaked += 1;
+    force.onUpdate = (final _) => updated += 1;
+    force.onEnd = (final _) => ended += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();
@@ -525,7 +525,7 @@ void main() {
     expect(ended, 1);
   });
 
-  testGesture('A pressure of NAN will not give an error', (GestureTester tester) {
+  testGesture('A pressure of NAN will not give an error', (final GestureTester tester) {
     // Device specific constants that represent those from the iPhone X
     const double pressureMin = 0;
     const double pressureMax = 6.66;
@@ -537,10 +537,10 @@ void main() {
 
     final ForcePressGestureRecognizer force = ForcePressGestureRecognizer();
 
-    force.onStart = (_) => started += 1;
-    force.onPeak = (_) => peaked += 1;
-    force.onUpdate = (_) => updated += 1;
-    force.onEnd = (_) => ended += 1;
+    force.onStart = (final _) => started += 1;
+    force.onPeak = (final _) => peaked += 1;
+    force.onUpdate = (final _) => updated += 1;
+    force.onEnd = (final _) => ended += 1;
 
     const int pointerValue = 1;
     final TestPointer pointer = TestPointer();

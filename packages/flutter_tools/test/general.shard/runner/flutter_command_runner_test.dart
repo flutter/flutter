@@ -196,7 +196,7 @@ void main() {
       testUsingContext('', () {
         final FlutterCommandRunner runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
         final List<String> packagePaths = runner.getRepoPackages()
-          .map((Directory d) => d.path).toList();
+          .map((final Directory d) => d.path).toList();
         expect(packagePaths, <String>[
           fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool')).path,
           fileSystem.directory(fileSystem.path.join(_kFlutterRoot, 'dev', 'tools')).path,

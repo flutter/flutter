@@ -17,7 +17,7 @@ class _StockSymbolView extends StatelessWidget {
   final Widget arrow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0) {
@@ -78,10 +78,10 @@ class StockSymbolPage extends StatelessWidget {
   final StockData stocks;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: stocks,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         final Stock? stock = stocks[symbol];
         return Scaffold(
           appBar: AppBar(
@@ -128,7 +128,7 @@ class StockSymbolBottomSheet extends StatelessWidget {
   final Stock stock;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10.0),
       decoration: const BoxDecoration(

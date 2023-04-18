@@ -17,13 +17,13 @@ Future<void> main() async {
   final FakeCodec fakeCodec = await FakeCodec.fromData(Uint8List.fromList(kAnimatedGif));
   final FakeImageProvider fakeImageProvider = FakeImageProvider(fakeCodec);
 
-  testWidgets('Obscured image does not animate', (WidgetTester tester) async {
+  testWidgets('Obscured image does not animate', (final WidgetTester tester) async {
     final GlobalKey imageKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
         home: Image(image: fakeImageProvider, excludeFromSemantics: true, key: imageKey),
         routes: <String, WidgetBuilder>{
-          '/page': (BuildContext context) => Container(),
+          '/page': (final BuildContext context) => Container(),
         },
       ),
     );

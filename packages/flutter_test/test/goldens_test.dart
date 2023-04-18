@@ -55,23 +55,23 @@ void main() {
     return path.replaceAll('/', fs.path.separator);
   }
 
-  void test(String description, FutureOr<void> Function() body) {
+  void test(final String description, final FutureOr<void> Function() body) {
     test_package.test(description, () async {
       await io.IOOverrides.runZoned<FutureOr<void>>(
         body,
-        createDirectory: (String path) => fs.directory(path),
-        createFile: (String path) => fs.file(path),
-        createLink: (String path) => fs.link(path),
+        createDirectory: (final String path) => fs.directory(path),
+        createFile: (final String path) => fs.file(path),
+        createLink: (final String path) => fs.link(path),
         getCurrentDirectory: () => fs.currentDirectory,
-        setCurrentDirectory: (String path) => fs.currentDirectory = path,
+        setCurrentDirectory: (final String path) => fs.currentDirectory = path,
         getSystemTempDirectory: () => fs.systemTempDirectory,
-        stat: (String path) => fs.stat(path),
-        statSync: (String path) => fs.statSync(path),
-        fseIdentical: (String p1, String p2) => fs.identical(p1, p2),
-        fseIdenticalSync: (String p1, String p2) => fs.identicalSync(p1, p2),
-        fseGetType: (String path, bool followLinks) => fs.type(path, followLinks: followLinks),
-        fseGetTypeSync: (String path, bool followLinks) => fs.typeSync(path, followLinks: followLinks),
-        fsWatch: (String a, int b, bool c) => throw UnsupportedError('unsupported'),
+        stat: (final String path) => fs.stat(path),
+        statSync: (final String path) => fs.statSync(path),
+        fseIdentical: (final String p1, final String p2) => fs.identical(p1, p2),
+        fseIdenticalSync: (final String p1, final String p2) => fs.identicalSync(p1, p2),
+        fseGetType: (final String path, final bool followLinks) => fs.type(path, followLinks: followLinks),
+        fseGetTypeSync: (final String path, final bool followLinks) => fs.typeSync(path, followLinks: followLinks),
+        fsWatch: (final String a, final int b, final bool c) => throw UnsupportedError('unsupported'),
         fsWatchIsSupported: () => fs.isWatchSupported,
       );
     });
@@ -135,7 +135,7 @@ void main() {
     });
 
     group('compare', () {
-      Future<bool> doComparison([ String golden = 'golden.png' ]) {
+      Future<bool> doComparison([ final String golden = 'golden.png' ]) {
         final Uri uri = fs.file(fix(golden)).uri;
         return comparator.compare(
           Uint8List.fromList(_kExpectedPngBytes),
@@ -189,7 +189,7 @@ void main() {
           await expectLater(
             () => doComparison(),
             throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
+              (final FlutterError error) => error.message,
               'message',
               contains('% diff detected'),
             )),
@@ -220,7 +220,7 @@ void main() {
           await expectLater(
             () => doComparison('subdir/golden.png'),
             throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
+              (final FlutterError error) => error.message,
               'message',
               contains('% diff detected'),
             )),
@@ -247,7 +247,7 @@ void main() {
           await expectLater(
             () => doComparison(),
             throwsA(isA<TestFailure>().having(
-              (TestFailure error) => error.message,
+              (final TestFailure error) => error.message,
               'message',
               contains('Could not be compared against non-existent file'),
             )),
@@ -259,7 +259,7 @@ void main() {
           await expectLater(
             () => doComparison(),
             throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
+              (final FlutterError error) => error.message,
               'message',
               contains('image sizes do not match'),
             )),
@@ -271,7 +271,7 @@ void main() {
           await expectLater(
             () => doComparison(),
             throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
+              (final FlutterError error) => error.message,
               'message',
               contains('% diff detected'),
             )),
@@ -283,7 +283,7 @@ void main() {
           await expectLater(
             () => doComparison(),
             throwsA(isFlutterError.having(
-              (FlutterError error) => error.message,
+              (final FlutterError error) => error.message,
               'message',
               contains('null image provided'),
             )),

@@ -25,7 +25,7 @@ class _SaltedKey<S, V> extends LocalKey {
   final V value;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -273,7 +273,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   @override
-  void didUpdateWidget(ExpansionPanelList oldWidget) {
+  void didUpdateWidget(final ExpansionPanelList oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget._allowOnlyOnePanelOpen) {
@@ -297,7 +297,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     return identifierMap.length == widget.children.length;
   }
 
-  bool _isChildExpanded(int index) {
+  bool _isChildExpanded(final int index) {
     if (widget._allowOnlyOnePanelOpen) {
       final ExpansionPanelRadio radioWidget = widget.children[index] as ExpansionPanelRadio;
       return _currentOpenPanel?.value == radioWidget.value;
@@ -305,7 +305,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     return widget.children[index].isExpanded;
   }
 
-  void _handlePressed(bool isExpanded, int index) {
+  void _handlePressed(final bool isExpanded, final int index) {
     widget.expansionCallback?.call(index, isExpanded);
 
     if (widget._allowOnlyOnePanelOpen) {
@@ -328,7 +328,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     }
   }
 
-  ExpansionPanelRadio? searchPanelByValue(List<ExpansionPanelRadio> panels, Object? value)  {
+  ExpansionPanelRadio? searchPanelByValue(final List<ExpansionPanelRadio> panels, final Object? value)  {
     for (final ExpansionPanelRadio panel in panels) {
       if (panel.value == value) {
         return panel;
@@ -338,7 +338,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(kElevationToShadow.containsKey(widget.elevation),
       'Invalid value for elevation. See the kElevationToShadow constant for'
       ' possible elevation values.',
@@ -364,7 +364,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           isExpanded: _isChildExpanded(index),
           padding: _kExpandIconPadding,
           onPressed: !child.canTapOnHeader
-              ? (bool isExpanded) => _handlePressed(isExpanded, index)
+              ? (final bool isExpanded) => _handlePressed(isExpanded, index)
               : null,
         ),
       );

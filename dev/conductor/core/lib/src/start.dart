@@ -263,7 +263,7 @@ class StartContext extends Context {
   ///
   /// If [atBranchPoint] is true, then this is a [ReleaseType.BETA_INITIAL].
   @visibleForTesting
-  ReleaseType computeReleaseType(Version lastVersion, bool atBranchPoint) {
+  ReleaseType computeReleaseType(final Version lastVersion, final bool atBranchPoint) {
     if (atBranchPoint) {
       return ReleaseType.BETA_INITIAL;
     }
@@ -384,7 +384,7 @@ class StartContext extends Context {
   }
 
   /// Determine this release's version number from the [lastVersion] and the [incrementLetter].
-  Version calculateNextVersion(Version lastVersion, ReleaseType releaseType) {
+  Version calculateNextVersion(final Version lastVersion, final ReleaseType releaseType) {
     late final Version nextVersion;
     switch (releaseType) {
       case ReleaseType.STABLE_INITIAL:
@@ -409,9 +409,9 @@ class StartContext extends Context {
   /// This is necessary for version reporting for users on the `master` channel
   /// to be correct.
   Future<Version> ensureBranchPointTagged({
-    required Version requestedVersion,
-    required String branchPoint,
-    required FrameworkRepository framework,
+    required final Version requestedVersion,
+    required final String branchPoint,
+    required final FrameworkRepository framework,
   }) async {
     if (await framework.isCommitTagged(branchPoint)) {
       // The branch point is tagged, no work to be done

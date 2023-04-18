@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/tabs/tab_bar.2.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Switch tabs in the TabBar', (WidgetTester tester) async {
+  testWidgets('Switch tabs in the TabBar', (final WidgetTester tester) async {
     const String primaryTabLabel1 = 'Flights';
     const String primaryTabLabel2 = 'Trips';
     const String primaryTabLabel3 = 'Explore';

@@ -17,10 +17,10 @@ import '../convert.dart';
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
   VisualStudio({
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Platform platform,
-    required Logger logger,
+    required final FileSystem fileSystem,
+    required final ProcessManager processManager,
+    required final Platform platform,
+    required final Logger logger,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
@@ -219,7 +219,7 @@ class VisualStudio {
   ///
   /// Maps from component IDs to description in the installer UI.
   /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
-  Map<String, String> _requiredComponents([int? majorVersion]) {
+  Map<String, String> _requiredComponents([final int? majorVersion]) {
     // The description of the C++ toolchain required by the template. The
     // component name is significantly different in different versions.
     // When a new major version of VS is supported, its toolchain description
@@ -269,9 +269,9 @@ class VisualStudio {
   /// If [validateRequirements] is set, the search will be limited to versions
   /// that have all of the required workloads and components.
   VswhereDetails? _visualStudioDetails({
-      bool validateRequirements = false,
-      List<String>? additionalArguments,
-      String? requiredWorkload
+      final bool validateRequirements = false,
+      final List<String>? additionalArguments,
+      final String? requiredWorkload
     }) {
     final List<String> requirementArguments = validateRequirements
         ? <String>[
@@ -407,7 +407,7 @@ class VisualStudio {
   /// Windows 10 SDK installation directory.
   ///
   /// Returns null if no Windows 10 SDKs are found.
-  String? findHighestVersionInSdkDirectory(Directory dir) {
+  String? findHighestVersionInSdkDirectory(final Directory dir) {
     // This contains subfolders that are named by the SDK version.
     final Directory includeDir = dir.childDirectory('Includes');
     if (!includeDir.existsSync()) {
@@ -447,8 +447,8 @@ class VswhereDetails {
 
   /// Create a `VswhereDetails` from the JSON output of vswhere.exe.
   factory VswhereDetails.fromJson(
-    bool meetsRequirements,
-    Map<String, dynamic> details
+    final bool meetsRequirements,
+    final Map<String, dynamic> details
   ) {
     final Map<String, dynamic>? catalog = details['catalog'] as Map<String, dynamic>?;
 
@@ -476,7 +476,7 @@ class VswhereDetails {
   /// Use this to ensure values that must be well-formed are valid. Strings that
   /// are only used for display purposes should skip this check.
   /// See: https://github.com/flutter/flutter/issues/102451
-  static String? _validateString(String? value) {
+  static String? _validateString(final String? value) {
     if (value != null && value.contains('\u{FFFD}')) {
       throwToolExit(
         'Bad UTF-8 encoding (U+FFFD; REPLACEMENT CHARACTER) found in string: $value. '

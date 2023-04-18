@@ -42,7 +42,7 @@ class MenuThemeData with Diagnosticable {
   final MenuStyle? style;
 
   /// Linearly interpolate between two menu button themes.
-  static MenuThemeData? lerp(MenuThemeData? a, MenuThemeData? b, double t) {
+  static MenuThemeData? lerp(final MenuThemeData? a, final MenuThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -53,7 +53,7 @@ class MenuThemeData with Diagnosticable {
   int get hashCode => style.hashCode;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -64,7 +64,7 @@ class MenuThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MenuStyle>('style', style, defaultValue: null));
   }
@@ -118,16 +118,16 @@ class MenuTheme extends InheritedTheme {
   ///   );
   /// }
   /// ```
-  static MenuThemeData of(BuildContext context) {
+  static MenuThemeData of(final BuildContext context) {
     final MenuTheme? menuTheme = context.dependOnInheritedWidgetOfExactType<MenuTheme>();
     return menuTheme?.data ?? Theme.of(context).menuTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return MenuTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(MenuTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final MenuTheme oldWidget) => data != oldWidget.data;
 }

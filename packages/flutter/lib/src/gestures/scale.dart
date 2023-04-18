@@ -50,7 +50,7 @@ enum _ScaleState {
 class _PointerPanZoomData {
   _PointerPanZoomData.fromStartEvent(
     this.parent,
-    PointerPanZoomStartEvent event
+    final PointerPanZoomStartEvent event
   ) : _position = event.position,
       _pan = Offset.zero,
       _scale = 1,
@@ -58,7 +58,7 @@ class _PointerPanZoomData {
 
   _PointerPanZoomData.fromUpdateEvent(
     this.parent,
-    PointerPanZoomUpdateEvent event
+    final PointerPanZoomUpdateEvent event
   ) : _position = event.position,
       _pan = event.pan,
       _scale = event.scale,
@@ -100,7 +100,7 @@ class ScaleStartDetails {
   /// The [focalPoint] argument must not be null.
   ScaleStartDetails({
     this.focalPoint = Offset.zero,
-    Offset? localFocalPoint,
+    final Offset? localFocalPoint,
     this.pointerCount = 0,
   }) : localFocalPoint = localFocalPoint ?? focalPoint;
 
@@ -144,7 +144,7 @@ class ScaleUpdateDetails {
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
-    Offset? localFocalPoint,
+    final Offset? localFocalPoint,
     this.scale = 1.0,
     this.horizontalScale = 1.0,
     this.verticalScale = 1.0,
@@ -274,7 +274,7 @@ typedef GestureScaleUpdateCallback = void Function(ScaleUpdateDetails details);
 /// Signature for when the pointers are no longer in contact with the screen.
 typedef GestureScaleEndCallback = void Function(ScaleEndDetails details);
 
-bool _isFlingGesture(Velocity velocity) {
+bool _isFlingGesture(final Velocity velocity) {
   final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
   return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
 }
@@ -473,7 +473,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addAllowedPointer(PointerDownEvent event) {
+  void addAllowedPointer(final PointerDownEvent event) {
     super.addAllowedPointer(event);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
     if (_state == _ScaleState.ready) {
@@ -488,10 +488,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) => true;
+  bool isPointerPanZoomAllowed(final PointerPanZoomStartEvent event) => true;
 
   @override
-  void addAllowedPointerPanZoom(PointerPanZoomStartEvent event) {
+  void addAllowedPointerPanZoom(final PointerPanZoomStartEvent event) {
     super.addAllowedPointerPanZoom(event);
     startTrackingPointer(event.pointer, event.transform);
     _velocityTrackers[event.pointer] = VelocityTracker.withKind(event.kind);
@@ -503,7 +503,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void handleEvent(PointerEvent event) {
+  void handleEvent(final PointerEvent event) {
     assert(_state != _ScaleState.ready);
     bool didChangeConfiguration = false;
     bool shouldStartIfAccepted = false;
@@ -639,7 +639,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
   }
 
-  bool _reconfigure(int pointer) {
+  bool _reconfigure(final int pointer) {
     _initialFocalPoint = _currentFocalPoint!;
     _initialSpan = _currentSpan;
     _initialLine = _currentLine;
@@ -650,7 +650,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialPanZoomRotationFactor = 0.0;
     } else {
       _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-      _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
+      _initialPanZoomRotationFactor = _pointerPanZooms.values.map((final _PointerPanZoomData x) => x.rotation).reduce((final double a, final double b) => a + b);
     }
     if (_state == _ScaleState.started) {
       if (onEnd != null) {
@@ -675,7 +675,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     return true;
   }
 
-  void _advanceStateMachine(bool shouldStartIfAccepted, PointerEvent event) {
+  void _advanceStateMachine(final bool shouldStartIfAccepted, final PointerEvent event) {
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
     }
@@ -728,7 +728,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(final int pointer) {
     if (_state == _ScaleState.possible) {
       _state = _ScaleState.started;
       _dispatchOnStartCallbackIfNeeded();
@@ -743,14 +743,14 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           _initialPanZoomRotationFactor = 0.0;
         } else {
           _initialPanZoomScaleFactor = _scaleFactor / _pointerScaleFactor;
-          _initialPanZoomRotationFactor = _pointerPanZooms.values.map((_PointerPanZoomData x) => x.rotation).reduce((double a, double b) => a + b);
+          _initialPanZoomRotationFactor = _pointerPanZooms.values.map((final _PointerPanZoomData x) => x.rotation).reduce((final double a, final double b) => a + b);
         }
       }
     }
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(final int pointer) {
     _pointerPanZooms.remove(pointer);
     _pointerLocations.remove(pointer);
     _pointerQueue.remove(pointer);
@@ -758,7 +758,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(final int pointer) {
     switch (_state) {
       case _ScaleState.possible:
         resolve(GestureDisposition.rejected);

@@ -22,7 +22,7 @@ class _SearchDemoState extends State<SearchDemo> {
   int? _lastIntegerSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -136,11 +136,11 @@ class _SearchDemoState extends State<SearchDemo> {
 }
 
 class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
-  final List<int> _data = List<int>.generate(100001, (int i) => i).reversed.toList();
+  final List<int> _data = List<int>.generate(100001, (final int i) => i).reversed.toList();
   final List<int> _history = <int>[42607, 85604, 66374, 44, 174];
 
   @override
-  Widget buildLeading(BuildContext context) {
+  Widget buildLeading(final BuildContext context) {
     return IconButton(
       tooltip: 'Back',
       icon: AnimatedIcon(
@@ -154,16 +154,16 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
   }
 
   @override
-  Widget buildSuggestions(BuildContext context) {
+  Widget buildSuggestions(final BuildContext context) {
 
     final Iterable<int> suggestions = query.isEmpty
         ? _history
-        : _data.where((int i) => '$i'.startsWith(query));
+        : _data.where((final int i) => '$i'.startsWith(query));
 
     return _SuggestionList(
       query: query,
-      suggestions: suggestions.map<String>((int i) => '$i').toList(),
-      onSelected: (String suggestion) {
+      suggestions: suggestions.map<String>((final int i) => '$i').toList(),
+      onSelected: (final String suggestion) {
         query = suggestion;
         showResults(context);
       },
@@ -171,7 +171,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
   }
 
   @override
-  Widget buildResults(BuildContext context) {
+  Widget buildResults(final BuildContext context) {
     final int? searched = int.tryParse(query);
     if (searched == null || !_data.contains(searched)) {
       return Center(
@@ -204,7 +204,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
   }
 
   @override
-  List<Widget> buildActions(BuildContext context) {
+  List<Widget> buildActions(final BuildContext context) {
     return <Widget>[
       if (query.isEmpty)
         IconButton(
@@ -227,7 +227,7 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int?> {
   }
 
   @override
-  PreferredSizeWidget buildBottom(BuildContext context) => const PreferredSize(
+  PreferredSizeWidget buildBottom(final BuildContext context) => const PreferredSize(
     preferredSize: Size.fromHeight(56.0),
     child: Text('Numbers'),
   );
@@ -241,7 +241,7 @@ class _ResultCard extends StatelessWidget {
   final SearchDelegate<int?>? searchDelegate;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return GestureDetector(
       onTap: () {
@@ -273,11 +273,11 @@ class _SuggestionList extends StatelessWidget {
   final ValueChanged<String>? onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return ListView.builder(
       itemCount: suggestions!.length,
-      itemBuilder: (BuildContext context, int i) {
+      itemBuilder: (final BuildContext context, final int i) {
         final String suggestion = suggestions![i];
         return ListTile(
           leading: query!.isEmpty ? const Icon(Icons.history) : const Icon(null),

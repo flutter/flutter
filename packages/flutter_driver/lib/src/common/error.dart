@@ -53,7 +53,7 @@ typedef DriverLogCallback = void Function(String source, String message);
 /// The default implementation prints `"$source: $message"` to stderr.
 DriverLogCallback driverLog = _defaultDriverLogger;
 
-void _defaultDriverLogger(String source, String message) {
+void _defaultDriverLogger(final String source, final String message) {
   try {
     stderr.writeln('$source: $message');
   } on FileSystemException {

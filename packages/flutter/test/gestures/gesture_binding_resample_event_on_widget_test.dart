@@ -29,10 +29,10 @@ class TestSamplingClock implements SamplingClock {
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestResampleEventFlutterBinding();
-  testWidgets('PointerEvent resampling on a widget', (WidgetTester tester) async {
+  testWidgets('PointerEvent resampling on a widget', (final WidgetTester tester) async {
     assert(WidgetsBinding.instance == binding);
     Duration currentTestFrameTime() => Duration(milliseconds: binding.clock.now().millisecondsSinceEpoch);
-    void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((_) {});
+    void requestFrame() => SchedulerBinding.instance.scheduleFrameCallback((final _) {});
     final Duration epoch = currentTestFrameTime();
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[
@@ -82,9 +82,9 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: Listener(
-          onPointerDown: (PointerDownEvent event) => events.add(event),
-          onPointerMove: (PointerMoveEvent event) => events.add(event),
-          onPointerUp: (PointerUpEvent event) => events.add(event),
+          onPointerDown: (final PointerDownEvent event) => events.add(event),
+          onPointerMove: (final PointerMoveEvent event) => events.add(event),
+          onPointerUp: (final PointerUpEvent event) => events.add(event),
           child: const Text('test'),
         ),
       ),
@@ -124,7 +124,7 @@ void main() {
     expect(events[3], isA<PointerUpEvent>());
   });
 
-  testWidgets('Timer should be canceled when resampling stopped', (WidgetTester tester) async {
+  testWidgets('Timer should be canceled when resampling stopped', (final WidgetTester tester) async {
     // A timer will be started when event's timeStamp is larger than sampleTime.
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
       data: <ui.PointerData>[

@@ -48,7 +48,7 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
   final List<Widget> children;
 
   // Builds a desktop toolbar in the Material style.
-  static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
+  static Widget _defaultToolbarBuilder(final BuildContext context, final Widget child) {
     return SizedBox(
       width: _kToolbarWidth,
       child: Material(
@@ -62,7 +62,7 @@ class DesktopTextSelectionToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
 
     final double paddingAbove = MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;

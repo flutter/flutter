@@ -31,7 +31,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
       24.0,
     ];
 
-    return elevations.map<Widget>((double elevation) {
+    return elevations.map<Widget>((final double elevation) {
       return Center(
         child: Card(
           margin: const EdgeInsets.all(20.0),
@@ -49,7 +49,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Elevation'),

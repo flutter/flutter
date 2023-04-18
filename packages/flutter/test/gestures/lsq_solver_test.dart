@@ -6,7 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  bool approx(double value, double expectation) {
+  bool approx(final double value, final double expectation) {
     const double eps = 1e-6;
     return (value - expectation).abs() < eps;
   }

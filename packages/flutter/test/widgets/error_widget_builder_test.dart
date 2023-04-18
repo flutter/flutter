@@ -8,15 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('ErrorWidget.builder', (WidgetTester tester) async {
+  testWidgets('ErrorWidget.builder', (final WidgetTester tester) async {
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
-    ErrorWidget.builder = (FlutterErrorDetails details) {
+    ErrorWidget.builder = (final FlutterErrorDetails details) {
       return const Text('oopsie!', textDirection: TextDirection.ltr);
     };
     await tester.pumpWidget(
       SizedBox(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             throw 'test';
           },
         ),
@@ -27,15 +27,15 @@ void main() {
     ErrorWidget.builder = oldBuilder;
   });
 
-  testWidgets('ErrorWidget.builder', (WidgetTester tester) async {
+  testWidgets('ErrorWidget.builder', (final WidgetTester tester) async {
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
-    ErrorWidget.builder = (FlutterErrorDetails details) {
+    ErrorWidget.builder = (final FlutterErrorDetails details) {
       return ErrorWidget('');
     };
     await tester.pumpWidget(
       SizedBox(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             throw 'test';
           },
         ),

@@ -11,24 +11,24 @@ import 'gesture_tester.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testGesture('toString control tests', (GestureTester tester) {
+  testGesture('toString control tests', (final GestureTester tester) {
     expect(const PointerDownEvent(), hasOneLineDescription);
     expect(const PointerDownEvent().toStringFull(), hasOneLineDescription);
   });
 
-  testGesture('nthMouseButton control tests', (GestureTester tester) {
+  testGesture('nthMouseButton control tests', (final GestureTester tester) {
     expect(nthMouseButton(2), kSecondaryMouseButton);
     expect(nthStylusButton(2), kSecondaryStylusButton);
   });
 
-  testGesture('smallestButton tests', (GestureTester tester) {
+  testGesture('smallestButton tests', (final GestureTester tester) {
     expect(smallestButton(0x0), equals(0x0));
     expect(smallestButton(0x1), equals(0x1));
     expect(smallestButton(0x200), equals(0x200));
     expect(smallestButton(0x220), equals(0x20));
   });
 
-  testGesture('isSingleButton tests', (GestureTester tester) {
+  testGesture('isSingleButton tests', (final GestureTester tester) {
     expect(isSingleButton(0x0), isFalse);
     expect(isSingleButton(0x1), isTrue);
     expect(isSingleButton(0x200), isTrue);
@@ -863,10 +863,10 @@ void main() {
 }
 
 void _expectTransformedEvent({
-  required PointerEvent original,
-  required Matrix4 transform,
-  Offset? localDelta,
-  Offset? localPosition,
+  required final PointerEvent original,
+  required final Matrix4 transform,
+  final Offset? localDelta,
+  final Offset? localPosition,
 }) {
   expect(original.position, original.localPosition);
   expect(original.delta, original.localDelta);

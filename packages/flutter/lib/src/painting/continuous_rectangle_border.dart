@@ -49,7 +49,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
 
   @override
-  ShapeBorder scale(double t) {
+  ShapeBorder scale(final double t) {
     return ContinuousRectangleBorder(
       side: side.scale(t),
       borderRadius: borderRadius * t,
@@ -57,7 +57,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (a is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -68,7 +68,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (b is ContinuousRectangleBorder) {
       return ContinuousRectangleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -78,11 +78,11 @@ class ContinuousRectangleBorder extends OutlinedBorder {
     return super.lerpTo(b, t);
   }
 
-  double _clampToShortest(RRect rrect, double value) {
+  double _clampToShortest(final RRect rrect, final double value) {
     return value > rrect.shortestSide ? rrect.shortestSide : value;
   }
 
-  Path _getPath(RRect rrect) {
+  Path _getPath(final RRect rrect) {
     final double left = rrect.left;
     final double right = rrect.right;
     final double top = rrect.top;
@@ -119,17 +119,17 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(final Rect rect, { final TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(final Rect rect, { final TextDirection? textDirection }) {
     return _getPath(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
-  ContinuousRectangleBorder copyWith({ BorderSide? side, BorderRadiusGeometry? borderRadius }) {
+  ContinuousRectangleBorder copyWith({ final BorderSide? side, final BorderRadiusGeometry? borderRadius }) {
     return ContinuousRectangleBorder(
       side: side ?? this.side,
       borderRadius: borderRadius ?? this.borderRadius,
@@ -137,7 +137,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+  void paint(final Canvas canvas, final Rect rect, { final TextDirection? textDirection }) {
     if (rect.isEmpty) {
       return;
     }
@@ -153,7 +153,7 @@ class ContinuousRectangleBorder extends OutlinedBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

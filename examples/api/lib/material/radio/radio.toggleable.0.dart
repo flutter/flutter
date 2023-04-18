@@ -12,7 +12,7 @@ class ToggleableExampleApp extends StatelessWidget {
   const ToggleableExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Radio Sample')),
@@ -40,10 +40,10 @@ class _ToggleableExampleState extends State<ToggleableExample> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -53,7 +53,7 @@ class _ToggleableExampleState extends State<ToggleableExample> {
                   // TRY THIS: Try setting the toggleable value to false and
                   // see how that changes the behavior of the widget.
                   toggleable: true,
-                  onChanged: (int? value) {
+                  onChanged: (final int? value) {
                     setState(() {
                       groupValue = value;
                     });

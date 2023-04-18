@@ -17,7 +17,7 @@ Future<void> main() async {
     home: Scaffold(
       body: GridView.count(
         crossAxisCount: 5,
-        children: List<Widget>.generate(25, (int index) {
+        children: List<Widget>.generate(25, (final int index) {
           return Center(
             child: Scaffold(
               appBar: AppBar(

@@ -12,7 +12,7 @@ class SuffixIconConstraintsExampleApp extends StatelessWidget {
   const SuffixIconConstraintsExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration Sample')),
@@ -26,7 +26,7 @@ class SuffixIconConstraintsExample extends StatelessWidget {
   const SuffixIconConstraintsExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(

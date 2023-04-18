@@ -66,7 +66,7 @@ class _WillPopScopeState extends State<WillPopScope> {
   }
 
   @override
-  void didUpdateWidget(WillPopScope oldWidget) {
+  void didUpdateWidget(final WillPopScope oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.onWillPop != oldWidget.onWillPop && _route != null) {
       if (oldWidget.onWillPop != null) {
@@ -87,5 +87,5 @@ class _WillPopScopeState extends State<WillPopScope> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(final BuildContext context) => widget.child;
 }

@@ -26,14 +26,14 @@ const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
 
 void main() {
 
-  Future<void> dragSlider(WidgetTester tester, Key sliderKey) {
+  Future<void> dragSlider(final WidgetTester tester, final Key sliderKey) {
     final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
     return tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
   }
 
-  testWidgets('Slider does not move when tapped (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider does not move when tapped (LTR)', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -42,13 +42,13 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: CupertinoSlider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() { value = newValue; });
                     },
                   ),
@@ -69,7 +69,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider does not move when tapped (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider does not move when tapped (RTL)', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -78,13 +78,13 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: CupertinoSlider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() { value = newValue; });
                     },
                   ),
@@ -105,7 +105,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider calls onChangeStart once when interaction begins', (WidgetTester tester) async {
+  testWidgets('Slider calls onChangeStart once when interaction begins', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     int numberOfTimesOnChangeStartIsCalled = 0;
@@ -115,16 +115,16 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: CupertinoSlider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() { value = newValue; });
                     },
-                    onChangeStart: (double value) {
+                    onChangeStart: (final double value) {
                       numberOfTimesOnChangeStartIsCalled++;
                     },
                   ),
@@ -146,7 +146,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider calls onChangeEnd once after interaction has ended', (WidgetTester tester) async {
+  testWidgets('Slider calls onChangeEnd once after interaction has ended', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     int numberOfTimesOnChangeEndIsCalled = 0;
@@ -156,16 +156,16 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: CupertinoSlider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() { value = newValue; });
                     },
-                    onChangeEnd: (double value) {
+                    onChangeEnd: (final double value) {
                       numberOfTimesOnChangeEndIsCalled++;
                     },
                   ),
@@ -187,7 +187,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider moves when dragged (LTR)', (WidgetTester tester) async {
+  testWidgets('Slider moves when dragged (LTR)', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     late double startValue;
@@ -198,19 +198,19 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: CupertinoSlider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() { value = newValue; });
                     },
-                    onChangeStart: (double value) {
+                    onChangeStart: (final double value) {
                       startValue = value;
                     },
-                    onChangeEnd: (double value) {
+                    onChangeEnd: (final double value) {
                       endValue = value;
                     },
                   ),
@@ -241,7 +241,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider moves when dragged (RTL)', (WidgetTester tester) async {
+  testWidgets('Slider moves when dragged (RTL)', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
     late double startValue;
@@ -252,19 +252,19 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: CupertinoSlider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() { value = newValue; });
                     },
-                    onChangeStart: (double value) {
+                    onChangeStart: (final double value) {
                       setState(() { startValue = value; });
                     },
-                    onChangeEnd: (double value) {
+                    onChangeEnd: (final double value) {
                       setState(() { endValue = value; });
                     },
                   ),
@@ -295,7 +295,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Slider Semantics', (WidgetTester tester) async {
+  testWidgets('Slider Semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -305,7 +305,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CupertinoSlider(
             value: 0.5,
-            onChanged: (double v) { },
+            onChanged: (final double v) { },
           ),
         ),
       ),
@@ -359,7 +359,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Slider Semantics can be updated', (WidgetTester tester) async {
+  testWidgets('Slider Semantics can be updated', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     double value = 0.5;
     await tester.pumpWidget(
@@ -368,7 +368,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CupertinoSlider(
             value: value,
-            onChanged: (double v) { },
+            onChanged: (final double v) { },
           ),
         ),
       ),
@@ -391,7 +391,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CupertinoSlider(
             value: value,
-            onChanged: (double v) { },
+            onChanged: (final double v) { },
           ),
         ),
       ),
@@ -410,12 +410,12 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Slider respects themes', (WidgetTester tester) async {
+  testWidgets('Slider respects themes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoSlider(
-            onChanged: (double value) { },
+            onChanged: (final double value) { },
             value: 0.5,
           ),
         ),
@@ -432,7 +432,7 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
-            onChanged: (double value) { },
+            onChanged: (final double value) { },
             value: 0.5,
           ),
         ),
@@ -445,14 +445,14 @@ void main() {
     );
   });
 
-  testWidgets('Themes can be overridden', (WidgetTester tester) async {
+  testWidgets('Themes can be overridden', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,
-            onChanged: (double value) { },
+            onChanged: (final double value) { },
             value: 0.5,
           ),
         ),
@@ -464,7 +464,7 @@ void main() {
     );
   });
 
-  testWidgets('Themes can be overridden by dynamic colors', (WidgetTester tester) async {
+  testWidgets('Themes can be overridden by dynamic colors', (final WidgetTester tester) async {
     const CupertinoDynamicColor activeColor = CupertinoDynamicColor(
       color: Color(0x00000001),
       darkColor: Color(0x00000002),
@@ -476,7 +476,7 @@ void main() {
       darkHighContrastElevatedColor: Color(0x00000008),
     );
 
-    Widget withTraits(Brightness brightness, CupertinoUserInterfaceLevelData level, bool highContrast) {
+    Widget withTraits(final Brightness brightness, final CupertinoUserInterfaceLevelData level, final bool highContrast) {
       return CupertinoTheme(
         data: CupertinoThemeData(brightness: brightness),
         child: CupertinoUserInterfaceLevel(
@@ -486,7 +486,7 @@ void main() {
             child: Center(
               child: CupertinoSlider(
                 activeColor: activeColor,
-                onChanged: (double value) { },
+                onChanged: (final double value) { },
                 value: 0.5,
               ),
             ),
@@ -520,14 +520,14 @@ void main() {
     expect(find.byType(CupertinoSlider), paints..rrect(color: activeColor.highContrastElevatedColor));
   });
 
-  testWidgets('track color is dynamic', (WidgetTester tester) async {
+  testWidgets('track color is dynamic', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         theme: const CupertinoThemeData(brightness: Brightness.light),
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,
-            onChanged: (double value) { },
+            onChanged: (final double value) { },
             value: 0,
           ),
         ),
@@ -550,7 +550,7 @@ void main() {
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,
-            onChanged: (double value) { },
+            onChanged: (final double value) { },
             value: 0,
           ),
         ),
@@ -568,13 +568,13 @@ void main() {
     );
   });
 
-  testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
+  testWidgets('Thumb color can be overridden', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoSlider(
             thumbColor: CupertinoColors.systemPurple,
-            onChanged: (double value) { },
+            onChanged: (final double value) { },
             value: 0,
           ),
         ),
@@ -597,7 +597,7 @@ void main() {
         home: Center(
           child: CupertinoSlider(
             thumbColor: CupertinoColors.activeOrange,
-            onChanged: (double value) { },
+            onChanged: (final double value) { },
             value: 0,
           ),
         ),
@@ -616,7 +616,7 @@ void main() {
     );
   });
 
-  testWidgets('Hovering over Cupertino slider thumb updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino slider thumb updates cursor to clickable on Web', (final WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
     double value = 0.0;
 
@@ -625,13 +625,13 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: CupertinoSlider(
                     key: sliderKey,
                     value: value,
-                    onChanged: (double newValue) {
+                    onChanged: (final double newValue) {
                       setState(() { value = newValue; });
                     },
                   ),

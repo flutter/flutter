@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void approxExpect(Alignment a, Alignment b) {
+void approxExpect(final Alignment a, final Alignment b) {
   expect(a.x, moreOrLessEquals(b.x));
   expect(a.y, moreOrLessEquals(b.y));
 }

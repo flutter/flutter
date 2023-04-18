@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/dialog/show_dialog.2.dart' as examp
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Show dialog', (WidgetTester tester) async {
+  testWidgets('Show dialog', (final WidgetTester tester) async {
     const String dialogTitle = 'Basic dialog title';
     await tester.pumpWidget(
       const MaterialApp(

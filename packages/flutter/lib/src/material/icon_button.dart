@@ -603,31 +603,31 @@ class IconButton extends StatelessWidget {
   /// ),
   /// ```
   static ButtonStyle styleFrom({
-    Color? foregroundColor,
-    Color? backgroundColor,
-    Color? disabledForegroundColor,
-    Color? disabledBackgroundColor,
-    Color? focusColor,
-    Color? hoverColor,
-    Color? highlightColor,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    double? elevation,
-    Size? minimumSize,
-    Size? fixedSize,
-    Size? maximumSize,
-    double? iconSize,
-    BorderSide? side,
-    OutlinedBorder? shape,
-    EdgeInsetsGeometry? padding,
-    MouseCursor? enabledMouseCursor,
-    MouseCursor? disabledMouseCursor,
-    VisualDensity? visualDensity,
-    MaterialTapTargetSize? tapTargetSize,
-    Duration? animationDuration,
-    bool? enableFeedback,
-    AlignmentGeometry? alignment,
-    InteractiveInkFeatureFactory? splashFactory,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
+    final Color? disabledForegroundColor,
+    final Color? disabledBackgroundColor,
+    final Color? focusColor,
+    final Color? hoverColor,
+    final Color? highlightColor,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final double? elevation,
+    final Size? minimumSize,
+    final Size? fixedSize,
+    final Size? maximumSize,
+    final double? iconSize,
+    final BorderSide? side,
+    final OutlinedBorder? shape,
+    final EdgeInsetsGeometry? padding,
+    final MouseCursor? enabledMouseCursor,
+    final MouseCursor? disabledMouseCursor,
+    final VisualDensity? visualDensity,
+    final MaterialTapTargetSize? tapTargetSize,
+    final Duration? animationDuration,
+    final bool? enableFeedback,
+    final AlignmentGeometry? alignment,
+    final InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? buttonBackgroundColor = (backgroundColor == null && disabledBackgroundColor == null)
         ? null
@@ -667,7 +667,7 @@ class IconButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     if (theme.useMaterial3) {
@@ -796,7 +796,7 @@ class IconButton extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
@@ -851,7 +851,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
   }
 
   @override
-  void didUpdateWidget(_SelectableIconButton oldWidget) {
+  void didUpdateWidget(final _SelectableIconButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isSelected == null) {
       if (statesController.value.contains(MaterialState.selected)) {
@@ -865,7 +865,7 @@ class _SelectableIconButtonState extends State<_SelectableIconButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final bool toggleable = widget.isSelected != null;
 
     return _IconButtonM3(
@@ -938,7 +938,7 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// * `alignment` - Alignment.center
   /// * `splashFactory` - Theme.splashFactory
   @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
+  ButtonStyle defaultStyleOf(final BuildContext context) {
     switch (variant) {
       case _IconButtonVariant.filled:
         return _FilledIconButtonDefaultsM3(context, toggleable);
@@ -956,11 +956,11 @@ class _IconButtonM3 extends ButtonStyleButton {
   /// has a null value in [IconButtonTheme]. However, if any of the properties exist
   /// in both [IconButtonTheme] and [IconTheme], [IconTheme] will be overridden.
   @override
-  ButtonStyle? themeStyleOf(BuildContext context) {
+  ButtonStyle? themeStyleOf(final BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
-    bool isIconThemeDefault(Color? color) {
+    bool isIconThemeDefault(final Color? color) {
       if (isDark) {
         return color == kDefaultIconLightColor;
       }
@@ -986,7 +986,7 @@ class _IconButtonDefaultBackground extends MaterialStateProperty<Color?> {
   final Color? disabledBackground;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledBackground;
     }
@@ -1007,7 +1007,7 @@ class _IconButtonDefaultForeground extends MaterialStateProperty<Color?> {
   final Color? disabledForegroundColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledForegroundColor;
     }
@@ -1030,7 +1030,7 @@ class _IconButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   final Color? highlightColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
       if (states.contains(MaterialState.pressed)) {
         return highlightColor ?? foregroundColor?.withOpacity(0.12);
@@ -1068,7 +1068,7 @@ class _IconButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
   final MouseCursor disabledCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
@@ -1105,7 +1105,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -1117,7 +1117,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
           return _colors.primary.withOpacity(0.08);
@@ -1180,7 +1180,7 @@ class _IconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }
@@ -1224,7 +1224,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
@@ -1239,7 +1239,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -1254,7 +1254,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
           return _colors.onPrimary.withOpacity(0.08);
@@ -1328,7 +1328,7 @@ class _FilledIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }
@@ -1372,7 +1372,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
@@ -1387,7 +1387,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -1402,7 +1402,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 
  @override
   MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
           return _colors.onSecondaryContainer.withOpacity(0.08);
@@ -1476,7 +1476,7 @@ class _FilledTonalIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }
@@ -1520,7 +1520,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return _colors.onSurface.withOpacity(0.12);
@@ -1535,7 +1535,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -1546,7 +1546,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
     });
 
  @override
-  MaterialStateProperty<Color?>? get overlayColor =>    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+  MaterialStateProperty<Color?>? get overlayColor =>    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.hovered)) {
           return _colors.onInverseSurface.withOpacity(0.08);
@@ -1602,7 +1602,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<BorderSide?>? get side =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return null;
       } else {
@@ -1619,7 +1619,7 @@ class _OutlinedIconButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }

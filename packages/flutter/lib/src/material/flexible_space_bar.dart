@@ -151,12 +151,12 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///  * [FlexibleSpaceBarSettings] which creates a settings object that can be
   ///    used to specify these settings to a [FlexibleSpaceBar].
   static Widget createSettings({
-    double? toolbarOpacity,
-    double? minExtent,
-    double? maxExtent,
-    bool? isScrolledUnder,
-    required double currentExtent,
-    required Widget child,
+    final double? toolbarOpacity,
+    final double? minExtent,
+    final double? maxExtent,
+    final bool? isScrolledUnder,
+    required final double currentExtent,
+    required final Widget child,
   }) {
     return FlexibleSpaceBarSettings(
       toolbarOpacity: toolbarOpacity ?? 1.0,
@@ -173,7 +173,7 @@ class FlexibleSpaceBar extends StatefulWidget {
 }
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
-  bool _getEffectiveCenterTitle(ThemeData theme) {
+  bool _getEffectiveCenterTitle(final ThemeData theme) {
     if (widget.centerTitle != null) {
       return widget.centerTitle!;
     }
@@ -189,7 +189,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     }
   }
 
-  Alignment _getTitleAlignment(bool effectiveCenterTitle) {
+  Alignment _getTitleAlignment(final bool effectiveCenterTitle) {
     if (effectiveCenterTitle) {
       return Alignment.bottomCenter;
     }
@@ -202,7 +202,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     }
   }
 
-  double _getCollapsePadding(double t, FlexibleSpaceBarSettings settings) {
+  double _getCollapsePadding(final double t, final FlexibleSpaceBarSettings settings) {
     switch (widget.collapseMode) {
       case CollapseMode.pin:
         return -(settings.maxExtent - settings.currentExtent);
@@ -215,9 +215,9 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
 
         final List<Widget> children = <Widget>[];
@@ -336,7 +336,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                   child: DefaultTextStyle(
                     style: titleStyle,
                     child: LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
+                      builder: (final BuildContext context, final BoxConstraints constraints) {
                         return Container(
                           width: constraints.maxWidth / scaleValue,
                           alignment: titleAlignment,
@@ -412,7 +412,7 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   final bool? isScrolledUnder;
 
   @override
-  bool updateShouldNotify(FlexibleSpaceBarSettings oldWidget) {
+  bool updateShouldNotify(final FlexibleSpaceBarSettings oldWidget) {
     return toolbarOpacity != oldWidget.toolbarOpacity
         || minExtent != oldWidget.minExtent
         || maxExtent != oldWidget.maxExtent

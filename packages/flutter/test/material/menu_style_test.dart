@@ -7,28 +7,28 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Finder findMenuPanels() {
-    return find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MenuPanel');
+    return find.byWidgetPredicate((final Widget widget) => widget.runtimeType.toString() == '_MenuPanel');
   }
 
-  Material getMenuBarMaterial(WidgetTester tester) {
+  Material getMenuBarMaterial(final WidgetTester tester) {
     return tester.widget<Material>(
       find.descendant(of: findMenuPanels(), matching: find.byType(Material)).first,
     );
   }
 
-  Padding getMenuBarPadding(WidgetTester tester) {
+  Padding getMenuBarPadding(final WidgetTester tester) {
     return tester.widget<Padding>(
       find.descendant(of: findMenuPanels(), matching: find.byType(Padding)).first,
     );
   }
 
-  Material getMenuMaterial(WidgetTester tester) {
+  Material getMenuMaterial(final WidgetTester tester) {
     return tester.widget<Material>(
       find.descendant(of: findMenuPanels().at(1), matching: find.byType(Material)).first,
     );
   }
 
-  Padding getMenuPadding(WidgetTester tester) {
+  Padding getMenuPadding(final WidgetTester tester) {
     return tester.widget<Padding>(
       find.descendant(of: findMenuPanels().at(1), matching: find.byType(Padding)).first,
     );
@@ -41,7 +41,7 @@ void main() {
       expect(identical(MenuStyle.lerp(data, data, 0.5), data), true);
     });
 
-    testWidgets('fixedSize affects geometry', (WidgetTester tester) async {
+    testWidgets('fixedSize affects geometry', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -60,7 +60,7 @@ void main() {
                       ),
                     ),
                     child: MenuBar(
-                      children: createTestMenus(onPressed: (TestMenu menu) {}),
+                      children: createTestMenus(onPressed: (final TestMenu menu) {}),
                     ),
                   ),
                 ),
@@ -84,7 +84,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
-    testWidgets('maximumSize affects geometry', (WidgetTester tester) async {
+    testWidgets('maximumSize affects geometry', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -103,7 +103,7 @@ void main() {
                       ),
                     ),
                     child: MenuBar(
-                      children: createTestMenus(onPressed: (TestMenu menu) {}),
+                      children: createTestMenus(onPressed: (final TestMenu menu) {}),
                     ),
                   ),
                 ),
@@ -127,7 +127,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(100.0, 100.0)));
     });
 
-    testWidgets('minimumSize affects geometry', (WidgetTester tester) async {
+    testWidgets('minimumSize affects geometry', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -146,7 +146,7 @@ void main() {
                       ),
                     ),
                     child: MenuBar(
-                      children: createTestMenus(onPressed: (TestMenu menu) {}),
+                      children: createTestMenus(onPressed: (final TestMenu menu) {}),
                     ),
                   ),
                 ),
@@ -170,7 +170,7 @@ void main() {
       expect(tester.getRect(findMenuPanels().at(1)).size, equals(const Size(300.0, 300.0)));
     });
 
-    testWidgets('Material parameters are honored', (WidgetTester tester) async {
+    testWidgets('Material parameters are honored', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -201,7 +201,7 @@ void main() {
                       ),
                     ),
                     child: MenuBar(
-                      children: createTestMenus(onPressed: (TestMenu menu) {}),
+                      children: createTestMenus(onPressed: (final TestMenu menu) {}),
                     ),
                   ),
                 ),
@@ -236,7 +236,7 @@ void main() {
       expect(panelPadding.padding, equals(const EdgeInsets.all(20)));
     });
 
-    testWidgets('visual density', (WidgetTester tester) async {
+    testWidgets('visual density', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -255,7 +255,7 @@ void main() {
                       ),
                     ),
                     child: MenuBar(
-                      children: createTestMenus(onPressed: (TestMenu menu) {}),
+                      children: createTestMenus(onPressed: (final TestMenu menu) {}),
                     ),
                   ),
                 ),
@@ -287,12 +287,12 @@ void main() {
 }
 
 List<Widget> createTestMenus({
-  void Function(TestMenu)? onPressed,
-  void Function(TestMenu)? onOpen,
-  void Function(TestMenu)? onClose,
-  Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
-  bool includeStandard = false,
-  bool includeExtraGroups = false,
+  final void Function(TestMenu)? onPressed,
+  final void Function(TestMenu)? onOpen,
+  final void Function(TestMenu)? onClose,
+  final Map<TestMenu, MenuSerializableShortcut> shortcuts = const <TestMenu, MenuSerializableShortcut>{},
+  final bool includeStandard = false,
+  final bool includeExtraGroups = false,
 }) {
   final List<Widget> result = <Widget>[
     SubmenuButton(

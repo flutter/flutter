@@ -59,34 +59,34 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// are now connected to a stream.
   ///
   /// The default implementation returns [current] as is.
-  S afterConnected(S current) => current;
+  S afterConnected(final S current) => current;
 
   /// Returns an updated version of the [current] summary following a data event.
   ///
   /// Sub-classes must override this method to specify how the current summary
   /// is combined with the new data item in the fold computation.
-  S afterData(S current, T data);
+  S afterData(final S current, final T data);
 
   /// Returns an updated version of the [current] summary following an error
   /// with a stack trace.
   ///
   /// The default implementation returns [current] as is.
-  S afterError(S current, Object error, StackTrace stackTrace) => current;
+  S afterError(final S current, final Object error, final StackTrace stackTrace) => current;
 
   /// Returns an updated version of the [current] summary following stream
   /// termination.
   ///
   /// The default implementation returns [current] as is.
-  S afterDone(S current) => current;
+  S afterDone(final S current) => current;
 
   /// Returns an updated version of the [current] summary reflecting that we
   /// are no longer connected to a stream.
   ///
   /// The default implementation returns [current] as is.
-  S afterDisconnected(S current) => current;
+  S afterDisconnected(final S current) => current;
 
   /// Returns a Widget based on the [currentSummary].
-  Widget build(BuildContext context, S currentSummary);
+  Widget build(final BuildContext context, final S currentSummary);
 
   @override
   State<StreamBuilderBase<T, S>> createState() => _StreamBuilderBaseState<T, S>();
@@ -105,7 +105,7 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
   }
 
   @override
-  void didUpdateWidget(StreamBuilderBase<T, S> oldWidget) {
+  void didUpdateWidget(final StreamBuilderBase<T, S> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.stream != widget.stream) {
       if (_subscription != null) {
@@ -117,7 +117,7 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.build(context, _summary);
+  Widget build(final BuildContext context) => widget.build(context, _summary);
 
   @override
   void dispose() {
@@ -127,11 +127,11 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
 
   void _subscribe() {
     if (widget.stream != null) {
-      _subscription = widget.stream!.listen((T data) {
+      _subscription = widget.stream!.listen((final T data) {
         setState(() {
           _summary = widget.afterData(_summary, data);
         });
-      }, onError: (Object error, StackTrace stackTrace) {
+      }, onError: (final Object error, final StackTrace stackTrace) {
         setState(() {
           _summary = widget.afterError(_summary, error, stackTrace);
         });
@@ -210,16 +210,16 @@ class AsyncSnapshot<T> {
   const AsyncSnapshot.waiting() : this._(ConnectionState.waiting, null, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  const AsyncSnapshot.withData(ConnectionState state, T data): this._(state, data, null, null);
+  const AsyncSnapshot.withData(final ConnectionState state, final T data): this._(state, data, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] with the specified [error]
   /// and a [stackTrace].
   ///
   /// If no [stackTrace] is explicitly specified, [StackTrace.empty] will be used instead.
   const AsyncSnapshot.withError(
-    ConnectionState state,
-    Object error, [
-    StackTrace stackTrace = StackTrace.empty,
+    final ConnectionState state,
+    final Object error, [
+    final StackTrace stackTrace = StackTrace.empty,
   ]) : this._(state, null, error, stackTrace);
 
   /// Current state of connection to the asynchronous computation.
@@ -270,7 +270,7 @@ class AsyncSnapshot<T> {
   ///
   /// The [data], [error], and [stackTrace] fields persist unmodified, even if
   /// the new state is [ConnectionState.none].
-  AsyncSnapshot<T> inState(ConnectionState state) => AsyncSnapshot<T>._(state, data, error, stackTrace);
+  AsyncSnapshot<T> inState(final ConnectionState state) => AsyncSnapshot<T>._(state, data, error, stackTrace);
 
   /// Returns whether this snapshot contains a non-null [data] value.
   ///
@@ -290,7 +290,7 @@ class AsyncSnapshot<T> {
   String toString() => '${objectRuntimeType(this, 'AsyncSnapshot')}($connectionState, $data, $error, $stackTrace)';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -417,26 +417,26 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
       : AsyncSnapshot<T>.withData(ConnectionState.none, initialData as T);
 
   @override
-  AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
+  AsyncSnapshot<T> afterConnected(final AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
 
   @override
-  AsyncSnapshot<T> afterData(AsyncSnapshot<T> current, T data) {
+  AsyncSnapshot<T> afterData(final AsyncSnapshot<T> current, final T data) {
     return AsyncSnapshot<T>.withData(ConnectionState.active, data);
   }
 
   @override
-  AsyncSnapshot<T> afterError(AsyncSnapshot<T> current, Object error, StackTrace stackTrace) {
+  AsyncSnapshot<T> afterError(final AsyncSnapshot<T> current, final Object error, final StackTrace stackTrace) {
     return AsyncSnapshot<T>.withError(ConnectionState.active, error, stackTrace);
   }
 
   @override
-  AsyncSnapshot<T> afterDone(AsyncSnapshot<T> current) => current.inState(ConnectionState.done);
+  AsyncSnapshot<T> afterDone(final AsyncSnapshot<T> current) => current.inState(ConnectionState.done);
 
   @override
-  AsyncSnapshot<T> afterDisconnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.none);
+  AsyncSnapshot<T> afterDisconnected(final AsyncSnapshot<T> current) => current.inState(ConnectionState.none);
 
   @override
-  Widget build(BuildContext context, AsyncSnapshot<T> currentSummary) => builder(context, currentSummary);
+  Widget build(final BuildContext context, final AsyncSnapshot<T> currentSummary) => builder(context, currentSummary);
 }
 
 /// A widget that builds itself based on the latest snapshot of interaction with
@@ -597,7 +597,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   @override
-  void didUpdateWidget(FutureBuilder<T> oldWidget) {
+  void didUpdateWidget(final FutureBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.future != widget.future) {
       if (_activeCallbackIdentity != null) {
@@ -609,7 +609,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.builder(context, _snapshot);
+  Widget build(final BuildContext context) => widget.builder(context, _snapshot);
 
   @override
   void dispose() {
@@ -621,13 +621,13 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
     if (widget.future != null) {
       final Object callbackIdentity = Object();
       _activeCallbackIdentity = callbackIdentity;
-      widget.future!.then<void>((T data) {
+      widget.future!.then<void>((final T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
             _snapshot = AsyncSnapshot<T>.withData(ConnectionState.done, data);
           });
         }
-      }, onError: (Object error, StackTrace stackTrace) {
+      }, onError: (final Object error, final StackTrace stackTrace) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
             _snapshot = AsyncSnapshot<T>.withError(ConnectionState.done, error, stackTrace);

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_chip/input_chip.0.dart' as ex
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('', (WidgetTester tester) async {
+  testWidgets('', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ChipApp(),
     );

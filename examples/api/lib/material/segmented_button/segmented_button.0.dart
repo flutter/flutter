@@ -14,7 +14,7 @@ class SegmentedButtonApp extends StatelessWidget {
   const SegmentedButtonApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const Scaffold(
@@ -50,7 +50,7 @@ class _SingleChoiceState extends State<SingleChoice> {
   Calendar calendarView = Calendar.day;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SegmentedButton<Calendar>(
       segments: const <ButtonSegment<Calendar>>[
         ButtonSegment<Calendar>(value: Calendar.day, label: Text('Day'), icon: Icon(Icons.calendar_view_day)),
@@ -59,7 +59,7 @@ class _SingleChoiceState extends State<SingleChoice> {
         ButtonSegment<Calendar>(value: Calendar.year, label: Text('Year'), icon: Icon(Icons.calendar_today)),
       ],
       selected: <Calendar>{calendarView},
-      onSelectionChanged: (Set<Calendar> newSelection) {
+      onSelectionChanged: (final Set<Calendar> newSelection) {
         setState(() {
           // By default there is only a single segment that can be
           // selected at one time, so its value is always the first
@@ -84,7 +84,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
   Set<Sizes> selection = <Sizes>{Sizes.large, Sizes.extraLarge};
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SegmentedButton<Sizes>(
       segments: const <ButtonSegment<Sizes>>[
         ButtonSegment<Sizes>(value: Sizes.extraSmall, label: Text('XS')),
@@ -97,7 +97,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
         ButtonSegment<Sizes>(value: Sizes.extraLarge, label: Text('XL')),
       ],
       selected: selection,
-      onSelectionChanged: (Set<Sizes> newSelection) {
+      onSelectionChanged: (final Set<Sizes> newSelection) {
         setState(() {
           selection = newSelection;
         });

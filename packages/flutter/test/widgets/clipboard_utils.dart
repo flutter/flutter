@@ -15,7 +15,7 @@ class MockClipboard {
     'text': null,
   };
 
-  Future<Object?> handleMethodCall(MethodCall methodCall) async {
+  Future<Object?> handleMethodCall(final MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.getData':
         return clipboardData;

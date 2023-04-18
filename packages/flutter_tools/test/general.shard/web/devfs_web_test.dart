@@ -621,7 +621,7 @@ void main() {
       .handleRequest(Request('GET', Uri.parse('http://foobar/assets/fooπ')));
     final String etag = response.headers[HttpHeaders.etagHeader]!;
 
-    expect(etag.runes, everyElement(predicate((int char) => char < 255)));
+    expect(etag.runes, everyElement(predicate((final int char) => char < 255)));
   }));
 
   test('serves /packages/<package>/<path> files as if they were '
@@ -872,7 +872,7 @@ void main() {
   }));
 
   test('.connect() will never call vmServiceFactory twice', () => testbed.run(() async {
-    await FakeAsync().run<Future<void>>((FakeAsync time) {
+    await FakeAsync().run<Future<void>>((final FakeAsync time) {
       final File outputFile = globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
         ..createSync(recursive: true);
       outputFile.parent.childFile('a.sources').writeAsStringSync('');
@@ -909,12 +909,12 @@ void main() {
       final FakeAppConnection firstConnection = FakeAppConnection();
       final FakeAppConnection secondConnection = FakeAppConnection();
 
-      final Future<void> done = webDevFS.create().then<void>((Uri _) {
+      final Future<void> done = webDevFS.create().then<void>((final Uri _) {
         // In non-test mode, webDevFS.create() would have initialized DWDS
         webDevFS.webAssetServer.dwds = FakeDwds(<AppConnection>[firstConnection, secondConnection]);
 
         int vmServiceFactoryInvocationCount = 0;
-        Future<vm_service.VmService> vmServiceFactory(Uri uri, {CompressionOptions? compression, required Logger logger}) {
+        Future<vm_service.VmService> vmServiceFactory(final Uri uri, {final CompressionOptions? compression, required final Logger logger}) {
           if (vmServiceFactoryInvocationCount > 0) {
             fail('Called vmServiceFactory twice!');
           }
@@ -924,7 +924,7 @@ void main() {
             () => FakeVmService(),
           );
         }
-        return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((ConnectionResult? firstConnectionResult) {
+        return webDevFS.connect(false, vmServiceFactory: vmServiceFactory).then<void>((final ConnectionResult? firstConnectionResult) {
           return webDevFS.destroy();
         });
       });
@@ -1170,7 +1170,7 @@ class FakeHttpServer extends Fake implements HttpServer {
   bool closed = false;
 
   @override
-  Future<void> close({bool force = false}) async {
+  Future<void> close({final bool force = false}) async {
     closed = true;
   }
 }
@@ -1179,17 +1179,17 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
   CompilerOutput? output;
 
   @override
-  void addFileSystemRoot(String root) { }
+  void addFileSystemRoot(final String root) { }
 
   @override
-  Future<CompilerOutput?> recompile(Uri mainUri, List<Uri>? invalidatedFiles, {
-    String? outputPath,
-    PackageConfig? packageConfig,
-    String? projectRootPath,
-    FileSystem? fs,
-    bool suppressErrors = false,
-    bool checkDartPluginRegistry = false,
-    File? dartPluginRegistrant,
+  Future<CompilerOutput?> recompile(final Uri mainUri, final List<Uri>? invalidatedFiles, {
+    final String? outputPath,
+    final PackageConfig? packageConfig,
+    final String? projectRootPath,
+    final FileSystem? fs,
+    final bool suppressErrors = false,
+    final bool checkDartPluginRegistry = false,
+    final File? dartPluginRegistrant,
   }) async {
     return output;
   }
@@ -1200,12 +1200,12 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
+    final TargetPlatform? platform, {
+    required final ImpellerStatus impellerStatus,
   }) { }
 
   @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+  Future<DevFSContent> recompileShader(final DevFSContent inputShader) {
     throw UnimplementedError();
   }
 }
@@ -1220,7 +1220,7 @@ class FakeDwds extends Fake implements Dwds {
   final Stream<AppConnection> connectedApps;
 
   @override
-  Future<DebugConnection> debugConnection(AppConnection appConnection) => Future<DebugConnection>.value(FakeDebugConnection());
+  Future<DebugConnection> debugConnection(final AppConnection appConnection) => Future<DebugConnection>.value(FakeDebugConnection());
 }
 
 class FakeAppConnection extends Fake implements AppConnection {

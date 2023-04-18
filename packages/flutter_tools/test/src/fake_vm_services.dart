@@ -15,24 +15,24 @@ export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: depr
 /// and response structure.
 class FakeVmServiceHost {
   FakeVmServiceHost({
-    required List<VmServiceExpectation> requests,
-    Uri? httpAddress,
-    Uri? wsAddress,
+    required final List<VmServiceExpectation> requests,
+    final Uri? httpAddress,
+    final Uri? wsAddress,
   }) : _requests = requests {
     _vmService = FlutterVmService(vm_service.VmService(
       _input.stream,
       _output.add,
     ), httpAddress: httpAddress, wsAddress: wsAddress);
     _applyStreamListen();
-    _output.stream.listen((String data) {
+    _output.stream.listen((final String data) {
       final Map<String, Object?> request = json.decode(data) as Map<String, Object?>;
       if (_requests.isEmpty) {
         throw Exception('Unexpected request: $request');
       }
       final FakeVmServiceRequest fakeRequest = _requests.removeAt(0) as FakeVmServiceRequest;
       expect(request, isA<Map<String, Object?>>()
-        .having((Map<String, Object?> request) => request['method'], 'method', fakeRequest.method)
-        .having((Map<String, Object?> request) => request['params'], 'args', fakeRequest.args)
+        .having((final Map<String, Object?> request) => request['method'], 'method', fakeRequest.method)
+        .having((final Map<String, Object?> request) => request['params'], 'args', fakeRequest.args)
       );
       if (fakeRequest.close) {
         unawaited(_vmService.dispose());

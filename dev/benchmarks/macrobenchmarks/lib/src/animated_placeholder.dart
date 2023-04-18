@@ -28,11 +28,11 @@ class AnimatedPlaceholderPage extends StatelessWidget {
   const AnimatedPlaceholderPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GridView.builder(
       itemCount: 100,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 10),
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return FadeInImage(
           placeholder: const DelayedBase64Image(Duration.zero, kAnimatedGif),
           image: DelayedBase64Image(Duration(milliseconds: 100 * index), kBlueSquare),
@@ -53,12 +53,12 @@ class DelayedBase64Image extends ImageProvider<int> {
   final Duration delay;
 
   @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
+  Future<int> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<int>(_key++);
   }
 
   @override
-  ImageStreamCompleter loadImage(int key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(final int key, final ImageDecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
       codec: Future<ui.Codec>.delayed(
         delay,

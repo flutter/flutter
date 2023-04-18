@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-void _validate(List<String> args) {
+void _validate(final List<String> args) {
   bool errors = false;
   if (!File('bin/internal/engine.version').existsSync()) {
     errors = true;
@@ -25,7 +25,7 @@ void _validate(List<String> args) {
 
 const String engineRepo = '../engine/src/flutter';
 
-Future<void> main(List<String> args) async {
+Future<void> main(final List<String> args) async {
   _validate(args);
   await _fetchUpstream();
   await _fetchUpstream(engineRepo);
@@ -45,7 +45,7 @@ Future<void> main(List<String> args) async {
   }
 }
 
-Future<void> _fetchUpstream([String workingDirectory = '.']) async {
+Future<void> _fetchUpstream([final String workingDirectory = '.']) async {
   print('Fetching remotes for "$workingDirectory" - you may be prompted for SSH credentials by git.');
   final ProcessResult fetchResult = await Process.run(
     'git',
@@ -60,7 +60,7 @@ Future<void> _fetchUpstream([String workingDirectory = '.']) async {
   }
 }
 
-Future<String> _tagsForRevision(String flutterRevision) async {
+Future<String> _tagsForRevision(final String flutterRevision) async {
   final ProcessResult tagResult = await Process.run(
     'git',
     <String>[
@@ -72,7 +72,7 @@ Future<String> _tagsForRevision(String flutterRevision) async {
   return tagResult.stdout as String;
 }
 
-Future<bool> containsRevision(String ancestorRevision, String revision) async {
+Future<bool> containsRevision(final String ancestorRevision, final String revision) async {
   final ProcessResult result = await Process.run(
     'git',
     <String>[

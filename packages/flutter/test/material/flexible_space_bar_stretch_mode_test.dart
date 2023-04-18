@@ -15,7 +15,7 @@ const double expandedAppbarHeight = 250.0;
 final Key finderKey = UniqueKey();
 
 void main() {
-  testWidgets('FlexibleSpaceBar stretch mode default zoomBackground', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode default zoomBackground', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -50,7 +50,7 @@ void main() {
     expect(sizeBeforeScroll.height, lessThan(sizeAfterScroll.height));
   });
 
-  testWidgets('FlexibleSpaceBar stretch mode blurBackground', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode blurBackground', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -89,7 +89,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -133,7 +133,7 @@ void main() {
     expect(opacityWidget.opacity, equals(0.0));
   });
 
-  testWidgets('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar stretch mode ignored for non-overscroll physics', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -168,7 +168,7 @@ void main() {
   });
 }
 
-Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {
+Future<void> slowDrag(final WidgetTester tester, final Key widget, final Offset offset) async {
   final Offset target = tester.getCenter(find.byKey(widget));
   final TestGesture gesture = await tester.startGesture(target);
   await gesture.moveBy(offset);

@@ -46,7 +46,7 @@ class SourceVisitor implements ResolvedFiles {
   /// This is used by the [Node] class to tell the [BuildSystem] to
   /// defer hash computation until after executing the target.
   // depfile logic adopted from https://github.com/flutter/flutter/blob/7065e4330624a5a216c8ffbace0a462617dc1bf5/dev/devicelab/lib/framework/apk_utils.dart#L390
-  void visitDepfile(String name) {
+  void visitDepfile(final String name) {
     final File depfile = environment.buildDir.childFile(name);
     if (!depfile.existsSync()) {
       _containsNewDepfile = true;
@@ -68,14 +68,14 @@ class SourceVisitor implements ResolvedFiles {
   final RegExp _separatorExpr = RegExp(r'([^\\]) ');
   final RegExp _escapeExpr = RegExp(r'\\(.)');
 
-  Iterable<File> _processList(String rawText) {
+  Iterable<File> _processList(final String rawText) {
     return rawText
     // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
+        .replaceAllMapped(_separatorExpr, (final Match match) => '${match.group(1)}\n')
         .split('\n')
     // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim())
-        .where((String path) => path.isNotEmpty)
+        .map<String>((final String path) => path.replaceAllMapped(_escapeExpr, (final Match match) => match.group(1)!).trim())
+        .where((final String path) => path.isNotEmpty)
         .toSet()
         .map(environment.fileSystem.file);
   }
@@ -85,7 +85,7 @@ class SourceVisitor implements ResolvedFiles {
   /// The URL may include constants defined in an [Environment]. If
   /// [optional] is true, the file is not required to exist. In this case, it
   /// is never resolved as an input.
-  void visitPattern(String pattern, bool optional) {
+  void visitPattern(final String pattern, final bool optional) {
     // perform substitution of the environmental values and then
     // of the local values.
     final List<String> segments = <String>[];
@@ -164,7 +164,7 @@ class SourceVisitor implements ResolvedFiles {
   /// To increase the performance of builds that use a known revision of Flutter,
   /// these are updated to point towards the engine.version file instead of
   /// the artifact itself.
-  void visitArtifact(Artifact artifact, TargetPlatform? platform, BuildMode? mode) {
+  void visitArtifact(final Artifact artifact, final TargetPlatform? platform, final BuildMode? mode) {
     // This is not a local engine.
     if (environment.engineVersion != null) {
       sources.add(environment.flutterRootDir
@@ -193,7 +193,7 @@ class SourceVisitor implements ResolvedFiles {
   /// To increase the performance of builds that use a known revision of Flutter,
   /// these are updated to point towards the engine.version file instead of
   /// the artifact itself.
-  void visitHostArtifact(HostArtifact artifact) {
+  void visitHostArtifact(final HostArtifact artifact) {
     // This is not a local engine.
     if (environment.engineVersion != null) {
       sources.add(environment.flutterRootDir
@@ -220,20 +220,20 @@ class SourceVisitor implements ResolvedFiles {
 abstract class Source {
   /// This source is a file URL which contains some references to magic
   /// environment variables.
-  const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
+  const factory Source.pattern(final String pattern, { final bool optional }) = _PatternSource;
 
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
-  const factory Source.artifact(Artifact artifact, {TargetPlatform? platform, BuildMode? mode}) = _ArtifactSource;
+  const factory Source.artifact(final Artifact artifact, {final TargetPlatform? platform, final BuildMode? mode}) = _ArtifactSource;
 
   /// The source is provided by an [HostArtifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
-  const factory Source.hostArtifact(HostArtifact artifact) = _HostArtifactSource;
+  const factory Source.hostArtifact(final HostArtifact artifact) = _HostArtifactSource;
 
   /// Visit the particular source type.
-  void accept(SourceVisitor visitor);
+  void accept(final SourceVisitor visitor);
 
   /// Whether the output source provided can be known before executing the rule.
   ///
@@ -252,7 +252,7 @@ class _PatternSource implements Source {
   final bool optional;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitPattern(value, optional);
+  void accept(final SourceVisitor visitor) => visitor.visitPattern(value, optional);
 
   @override
   bool get implicit => value.contains('*');
@@ -266,7 +266,7 @@ class _ArtifactSource implements Source {
   final BuildMode? mode;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
+  void accept(final SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
 
   @override
   bool get implicit => false;
@@ -278,7 +278,7 @@ class _HostArtifactSource implements Source {
   final HostArtifact artifact;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
+  void accept(final SourceVisitor visitor) => visitor.visitHostArtifact(artifact);
 
   @override
   bool get implicit => false;

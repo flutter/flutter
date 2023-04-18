@@ -6,11 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Use home', (WidgetTester tester) async {
+  testWidgets('Use home', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
-          builder: (BuildContext context) => const Text('home'),
+          builder: (final BuildContext context) => const Text('home'),
         ),
       ),
     );
@@ -18,12 +18,12 @@ void main() {
     expect(find.text('home'), findsOneWidget);
   });
 
-  testWidgets('Use routes', (WidgetTester tester) async {
+  testWidgets('Use routes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
           routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) => const Text('first route'),
+            '/': (final BuildContext context) => const Text('first route'),
           },
         ),
       ),
@@ -32,11 +32,11 @@ void main() {
     expect(find.text('first route'), findsOneWidget);
   });
 
-  testWidgets('Use home and named routes', (WidgetTester tester) async {
+  testWidgets('Use home and named routes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
@@ -45,7 +45,7 @@ void main() {
             );
           },
           routes: <String, WidgetBuilder>{
-            '/2': (BuildContext context) => const Text('second named route'),
+            '/2': (final BuildContext context) => const Text('second named route'),
           },
         ),
       ),
@@ -58,15 +58,15 @@ void main() {
     expect(find.text('second named route'), findsOneWidget);
   });
 
-  testWidgets('Use onGenerateRoute', (WidgetTester tester) async {
+  testWidgets('Use onGenerateRoute', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
-          onGenerateRoute: (RouteSettings settings) {
+          onGenerateRoute: (final RouteSettings settings) {
             if (settings.name == Navigator.defaultRouteName) {
               return CupertinoPageRoute<void>(
                 settings: settings,
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return const Text('generated home');
                 },
               );
@@ -80,12 +80,12 @@ void main() {
     expect(find.text('generated home'), findsOneWidget);
   });
 
-  testWidgets('Use onUnknownRoute', (WidgetTester tester) async {
+  testWidgets('Use onUnknownRoute', (final WidgetTester tester) async {
     late String unknownForRouteCalled;
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
-          onUnknownRoute: (RouteSettings settings) {
+          onUnknownRoute: (final RouteSettings settings) {
             unknownForRouteCalled = settings.name!;
             return null;
           },
@@ -101,15 +101,15 @@ void main() {
     expect(tester.takeException(), isAssertionError);
   });
 
-  testWidgets('Can use navigatorKey to navigate', (WidgetTester tester) async {
+  testWidgets('Can use navigatorKey to navigate', (final WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
           navigatorKey: key,
-          builder: (BuildContext context) => const Text('first route'),
+          builder: (final BuildContext context) => const Text('first route'),
           routes: <String, WidgetBuilder>{
-            '/2': (BuildContext context) => const Text('second route'),
+            '/2': (final BuildContext context) => const Text('second route'),
           },
         ),
       ),
@@ -122,12 +122,12 @@ void main() {
     expect(find.text('second route'), findsOneWidget);
   });
 
-  testWidgets('Changing the key resets the navigator', (WidgetTester tester) async {
+  testWidgets('Changing the key resets the navigator', (final WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
@@ -136,7 +136,7 @@ void main() {
             );
           },
           routes: <String, WidgetBuilder>{
-            '/2': (BuildContext context) => const Text('second route'),
+            '/2': (final BuildContext context) => const Text('second route'),
           },
         ),
       ),
@@ -152,7 +152,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabView(
           key: key,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return CupertinoButton(
               child: const Text('go to second page'),
               onPressed: () {
@@ -161,7 +161,7 @@ void main() {
             );
           },
           routes: <String, WidgetBuilder>{
-            '/2': (BuildContext context) => const Text('second route'),
+            '/2': (final BuildContext context) => const Text('second route'),
           },
         ),
       ),
@@ -172,13 +172,13 @@ void main() {
     expect(find.text('second route'), findsNothing);
   });
 
-  testWidgets('Throws FlutterError when onUnknownRoute is null', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError when onUnknownRoute is null', (final WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
           navigatorKey: key,
-          builder: (BuildContext context) => const Text('first route'),
+          builder: (final BuildContext context) => const Text('first route'),
         ),
       ),
     );
@@ -209,14 +209,14 @@ void main() {
     );
   });
 
-  testWidgets('Throws FlutterError when onUnknownRoute returns null', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError when onUnknownRoute returns null', (final WidgetTester tester) async {
     final GlobalKey<NavigatorState> key = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabView(
           navigatorKey: key,
-          builder: (BuildContext context) => const Text('first route'),
-          onUnknownRoute: (_) => null,
+          builder: (final BuildContext context) => const Text('first route'),
+          onUnknownRoute: (final _) => null,
         ),
       ),
     );
@@ -239,20 +239,20 @@ void main() {
     );
   });
 
-  testWidgets('Navigator of CupertinoTabView restores state', (WidgetTester tester) async {
+  testWidgets('Navigator of CupertinoTabView restores state', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',
         home: CupertinoTabView(
           restorationScopeId: 'tab',
-          builder: (BuildContext context) => CupertinoButton(
+          builder: (final BuildContext context) => CupertinoButton(
             child: const Text('home'),
             onPressed: () {
               Navigator.of(context).restorablePushNamed('/2');
             },
           ),
           routes: <String, WidgetBuilder>{
-            '/2' : (BuildContext context) => const Text('second route'),
+            '/2' : (final BuildContext context) => const Text('second route'),
           },
         ),
       ),

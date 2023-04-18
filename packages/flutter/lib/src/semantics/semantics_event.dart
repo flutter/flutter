@@ -46,7 +46,7 @@ abstract class SemanticsEvent {
   ///
   /// [nodeId] is the unique identifier of the semantics node associated with
   /// the event, or null if the event is not associated with a semantics node.
-  Map<String, dynamic> toMap({ int? nodeId }) {
+  Map<String, dynamic> toMap({ final int? nodeId }) {
     final Map<String, dynamic> event = <String, dynamic>{
       'type': type,
       'data': getDataMap(),

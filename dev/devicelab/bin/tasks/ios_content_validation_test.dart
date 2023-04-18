@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     try {
-      await runProjectTest((FlutterProject flutterProject) async {
+      await runProjectTest((final FlutterProject flutterProject) async {
         section('Archive');
 
         await inDirectory(flutterProject.rootPath, () async {
@@ -57,7 +57,7 @@ Future<void> main() async {
             '    ! Launch image is set to the default placeholder icon. Replace with unique launch image.\n',
             'To update the settings, please refer to https://docs.flutter.dev/deployment/ios\n',
           ];
-          if (expectedValidationMessages.any((String message) => !output.contains(message))) {
+          if (expectedValidationMessages.any((final String message) => !output.contains(message))) {
             throw TaskResult.failure('Must have the expected validation message');
           }
         });
@@ -84,7 +84,7 @@ Future<void> main() async {
         final Directory appBundle = applications
             .listSync()
             .whereType<Directory>()
-            .singleWhere((Directory directory) => path.extension(directory.path) == '.app');
+            .singleWhere((final Directory directory) => path.extension(directory.path) == '.app');
 
         final String flutterFramework = path.join(
           appBundle.path,

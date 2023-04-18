@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('FlexibleSpaceBar centers title on iOS', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar centers title on iOS', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -56,7 +56,7 @@ void main() {
     }
   });
 
-  testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBarSettings provides settings to a FlexibleSpaceBar', (final WidgetTester tester) async {
     const double minExtent = 100.0;
     const double initExtent = 200.0;
     const double maxExtent = 300.0;
@@ -131,7 +131,7 @@ void main() {
     expect(clipRect.size.height, minExtent);
   });
 
-  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar.background is visible when using height other than kToolbarHeight', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80451
     await tester.pumpWidget(
       MaterialApp(
@@ -163,7 +163,7 @@ void main() {
     expect(backgroundOpacity.opacity, 1.0);
   });
 
-  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (WidgetTester tester) async {
+  testWidgets('Collapsed FlexibleSpaceBar has correct semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const double expandedHeight = 200;
     await tester.pumpWidget(
@@ -430,7 +430,7 @@ void main() {
   });
 
   // This is a regression test for https://github.com/flutter/flutter/issues/14227
-  testWidgets('FlexibleSpaceBar sets width constraints for the title', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar sets width constraints for the title', (final WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     late double width;
@@ -438,7 +438,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               width = MediaQuery.sizeOf(context).width;
               return CustomScrollView(
                 slivers: <Widget>[
@@ -480,7 +480,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar sets constraints for the title - override expandedTitleScale', (final WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -552,7 +552,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar scaled title', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar scaled title', (final WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     await tester.pumpWidget(
@@ -611,7 +611,7 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar scaled title - override expandedTitleScale', (final WidgetTester tester) async {
     const double titleFontSize = 20.0;
     const double height = 300.0;
     const double expandedTitleScale = 3.0;
@@ -673,8 +673,8 @@ void main() {
     );
   });
 
-  testWidgets('FlexibleSpaceBar test titlePadding defaults', (WidgetTester tester) async {
-    Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
+  testWidgets('FlexibleSpaceBar test titlePadding defaults', (final WidgetTester tester) async {
+    Widget buildFrame(final TargetPlatform platform, final bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Scaffold(
@@ -723,8 +723,8 @@ void main() {
 
   });
 
-  testWidgets('FlexibleSpaceBar test titlePadding override', (WidgetTester tester) async {
-    Widget buildFrame(TargetPlatform platform, bool? centerTitle) {
+  testWidgets('FlexibleSpaceBar test titlePadding override', (final WidgetTester tester) async {
+    Widget buildFrame(final TargetPlatform platform, final bool? centerTitle) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: Scaffold(
@@ -807,10 +807,10 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => settings.minExtent;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     return settings;
   }
 
   @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
+  bool shouldRebuild(final TestDelegate oldDelegate) => false;
 }

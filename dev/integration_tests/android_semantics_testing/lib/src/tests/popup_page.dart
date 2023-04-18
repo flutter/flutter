@@ -25,7 +25,7 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
   String dropdownValue = popupItems.first;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
       body: SafeArea(
@@ -37,8 +37,8 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
               PopupMenuButton<String>(
                 key: const ValueKey<String>(popupButtonKeyValue),
                 icon: const Icon(Icons.arrow_drop_down),
-                itemBuilder: (BuildContext context) {
-                  return popupItems.map<PopupMenuItem<String>>((String item) {
+                itemBuilder: (final BuildContext context) {
+                  return popupItems.map<PopupMenuItem<String>>((final String item) {
                     return PopupMenuItem<String>(
                       key: ValueKey<String>('$popupKeyValue.$item'),
                       value: item,
@@ -46,21 +46,21 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
                     );
                   }).toList();
                 },
-                onSelected: (String value) {
+                onSelected: (final String value) {
                   popupValue = value;
                 },
               ),
               DropdownButton<String>(
                 key: const ValueKey<String>(dropdownButtonKeyValue),
                 value: dropdownValue,
-                items: popupItems.map<DropdownMenuItem<String>>((String item) {
+                items: popupItems.map<DropdownMenuItem<String>>((final String item) {
                   return DropdownMenuItem<String>(
                     key: ValueKey<String>('$dropdownKeyValue.$item'),
                     value: item,
                     child: Text(item),
                   );
                 }).toList(),
-                onChanged: (String? value) {
+                onChanged: (final String? value) {
                   setState(() {
                     dropdownValue = value!;
                   });
@@ -73,7 +73,7 @@ class _PopupControlsPageState extends State<PopupControlsPage> {
                   showDialog<void>(
                     context: context,
                     barrierDismissible: false, // user must tap button!
-                    builder: (BuildContext context) {
+                    builder: (final BuildContext context) {
                       return AlertDialog(
                         key: const ValueKey<String>(alertKeyValue),
                         title: const Text('Title text', key: ValueKey<String>('$alertKeyValue.Title')),

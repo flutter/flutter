@@ -10,7 +10,7 @@ import 'package:flutter_driver/driver_extension.dart';
 
 import 'windows.dart';
 
-void drawHelloWorld(ui.FlutterView view) {
+void drawHelloWorld(final ui.FlutterView view) {
   final ui.ParagraphStyle style = ui.ParagraphStyle();
   final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(style)
     ..addText('Hello world');
@@ -39,7 +39,7 @@ void main() async {
   // Create a completer to send the window visibility result back to the
   // integration test.
   final Completer<String> visibilityCompleter = Completer<String>();
-  enableFlutterDriverExtension(handler: (String? message) async {
+  enableFlutterDriverExtension(handler: (final String? message) async {
     if (message == 'verifyWindowVisibility') {
       return visibilityCompleter.future;
     } else if (message == 'verifyTheme') {
@@ -71,7 +71,7 @@ void main() async {
     }
 
     bool firstFrame = true;
-    ui.PlatformDispatcher.instance.onBeginFrame = (Duration duration) async {
+    ui.PlatformDispatcher.instance.onBeginFrame = (final Duration duration) async {
       if (await isWindowVisible()) {
         if (firstFrame) {
           throw 'Window should be hidden on first frame';

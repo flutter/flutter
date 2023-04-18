@@ -19,7 +19,7 @@ void main() {
       driver.close();
     });
 
-    Future<void> testScrollPerf(String listKey, String summaryName) async {
+    Future<void> testScrollPerf(final String listKey, final String summaryName) async {
       // The slight initial delay avoids starting the timing during a
       // period of increased load on the device. Without this delay, the
       // benchmark has greater noise.

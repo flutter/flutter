@@ -11,8 +11,8 @@ import 'keyboard_utils.dart';
 
 void main() {
   Widget buildSpyAboveEditableText({
-    required FocusNode editableFocusNode,
-    required FocusNode spyFocusNode,
+    required final FocusNode editableFocusNode,
+    required final FocusNode spyFocusNode,
   }) {
     return MaterialApp(
       home: Align(
@@ -50,7 +50,7 @@ void main() {
     final FocusNode editable = FocusNode();
     final FocusNode spy = FocusNode();
 
-    testWidgets('backspace with and without word modifier', (WidgetTester tester) async {
+    testWidgets('backspace with and without word modifier', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -74,7 +74,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: iOS);
 
-    testWidgets('delete with and without word modifier', (WidgetTester tester) async {
+    testWidgets('delete with and without word modifier', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -98,7 +98,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: iOS);
 
-    testWidgets('Exception: deleting to line boundary is handled by the framework', (WidgetTester tester) async {
+    testWidgets('Exception: deleting to line boundary is handled by the framework', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown(tester.binding.testTextInput.register);
 
@@ -128,7 +128,7 @@ void main() {
   group('macOS does not accept shortcuts if focus under EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowLeft', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -151,7 +151,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowRight', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -174,7 +174,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowLeft', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -197,7 +197,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowRight', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -220,7 +220,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('word modifier + arrow key movement', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -255,7 +255,7 @@ void main() {
       expect(state.lastIntent, isNull);
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('line modifier + arrow key movement', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -293,7 +293,7 @@ void main() {
   group('macOS does accept shortcuts if focus above EditableText', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowLeft', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -316,7 +316,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowRight', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -339,7 +339,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowLeft', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -362,7 +362,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowRight', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -385,7 +385,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToLineBreakIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('word modifier + arrow key movement', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -422,7 +422,7 @@ void main() {
       expect(state.lastIntent, isA<ExtendSelectionToNextWordBoundaryIntent>());
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('line modifier + arrow key movement', (final WidgetTester tester) async {
       tester.binding.testTextInput.unregister();
       addTearDown((){
         tester.binding.testTextInput.register();
@@ -488,12 +488,12 @@ class ActionSpyState extends State<ActionSpy> {
   };
 
   // ignore: use_setters_to_change_properties
-  void _captureIntent(Intent intent) {
+  void _captureIntent(final Intent intent) {
     lastIntent = intent;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Actions(
       actions: _actions,
       child: Focus(

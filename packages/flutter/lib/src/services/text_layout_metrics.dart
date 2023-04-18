@@ -19,7 +19,7 @@ abstract class TextLayoutMetrics {
   ///
   /// Includes newline characters from ASCII and separators from the
   /// [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
-  static bool isWhitespace(int codeUnit) {
+  static bool isWhitespace(final int codeUnit) {
     switch (codeUnit) {
       case 0x9: // horizontal tab
       case 0xA: // line feed
@@ -58,7 +58,7 @@ abstract class TextLayoutMetrics {
   ///
   /// Includes newline characters from ASCII
   /// (https://www.unicode.org/standard/reports/tr13/tr13-5.html).
-  static bool isLineTerminator(int codeUnit) {
+  static bool isLineTerminator(final int codeUnit) {
     switch (codeUnit) {
       case 0x0A: // line feed
       case 0x0B: // vertical feed
@@ -76,10 +76,10 @@ abstract class TextLayoutMetrics {
   /// {@template flutter.services.TextLayoutMetrics.getLineAtOffset}
   /// Return a [TextSelection] containing the line of the given [TextPosition].
   /// {@endtemplate}
-  TextSelection getLineAtOffset(TextPosition position);
+  TextSelection getLineAtOffset(final TextPosition position);
 
   /// {@macro flutter.painting.TextPainter.getWordBoundary}
-  TextRange getWordBoundary(TextPosition position);
+  TextRange getWordBoundary(final TextPosition position);
 
   /// {@template flutter.services.TextLayoutMetrics.getTextPositionAbove}
   /// Returns the TextPosition above the given offset into the text.
@@ -87,7 +87,7 @@ abstract class TextLayoutMetrics {
   /// If the offset is already on the first line, the given offset will be
   /// returned.
   /// {@endtemplate}
-  TextPosition getTextPositionAbove(TextPosition position);
+  TextPosition getTextPositionAbove(final TextPosition position);
 
   /// {@template flutter.services.TextLayoutMetrics.getTextPositionBelow}
   /// Returns the TextPosition below the given offset into the text.
@@ -95,5 +95,5 @@ abstract class TextLayoutMetrics {
   /// If the offset is already on the last line, the given offset will be
   /// returned.
   /// {@endtemplate}
-  TextPosition getTextPositionBelow(TextPosition position);
+  TextPosition getTextPositionBelow(final TextPosition position);
 }

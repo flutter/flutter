@@ -24,7 +24,7 @@ class FractionalOffsetTween extends Tween<FractionalOffset?> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  FractionalOffset? lerp(double t) => FractionalOffset.lerp(begin, end, t);
+  FractionalOffset? lerp(final double t) => FractionalOffset.lerp(begin, end, t);
 }
 
 /// An interpolation between two alignments.
@@ -47,7 +47,7 @@ class AlignmentTween extends Tween<Alignment> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Alignment lerp(double t) => Alignment.lerp(begin, end, t)!;
+  Alignment lerp(final double t) => Alignment.lerp(begin, end, t)!;
 }
 
 /// An interpolation between two [AlignmentGeometry].
@@ -72,5 +72,5 @@ class AlignmentGeometryTween extends Tween<AlignmentGeometry?> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  AlignmentGeometry? lerp(double t) => AlignmentGeometry.lerp(begin, end, t);
+  AlignmentGeometry? lerp(final double t) => AlignmentGeometry.lerp(begin, end, t);
 }

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
+void verifyPaintPosition(final GlobalKey key, final Offset ideal, final bool visible) {
   final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
   expect(target.parent, isA<RenderViewport>());
   final SliverPhysicalParentData parentData = target.parentData! as SliverPhysicalParentData;
@@ -18,14 +18,14 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
   expect(geometry.visible, visible);
 }
 
-void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
+void verifyActualBoxPosition(final WidgetTester tester, final Finder finder, final int index, final Rect ideal) {
   final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
   final Rect rect = Rect.fromPoints(box.localToGlobal(Offset.zero), box.localToGlobal(box.size.bottomRight(Offset.zero)));
   expect(rect, equals(ideal));
 }
 
 void main() {
-  testWidgets("Sliver appbars - floating - scroll offset doesn't change", (WidgetTester tester) async {
+  testWidgets("Sliver appbars - floating - scroll offset doesn't change", (final WidgetTester tester) async {
     const double bigHeight = 1000.0;
     await tester.pumpWidget(
       Directionality(
@@ -53,7 +53,7 @@ void main() {
     expect(position.maxScrollExtent, max);
   });
 
-  testWidgets('Sliver appbars - floating - normal behavior works', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating - normal behavior works', (final WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
@@ -125,7 +125,7 @@ void main() {
     verifyPaintPosition(key3, Offset.zero, true);
   });
 
-  testWidgets('Sliver appbars - floating - no floating behavior when animating', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating - no floating behavior when animating', (final WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
@@ -160,7 +160,7 @@ void main() {
     verifyPaintPosition(key3, Offset.zero, true);
   });
 
-  testWidgets('Sliver appbars - floating - floating behavior when dragging down', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating - floating behavior when dragging down', (final WidgetTester tester) async {
     final TestDelegate delegate = TestDelegate();
     const double bigHeight = 1000.0;
     GlobalKey key1, key2, key3;
@@ -197,7 +197,7 @@ void main() {
     verifyPaintPosition(key3, Offset.zero, true);
   });
 
-  testWidgets('Sliver appbars - floating - overscroll gap is below header', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating - overscroll gap is below header', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -230,7 +230,7 @@ void main() {
   });
 
   group('Pointer scrolled floating', () {
-    Widget buildTest(Widget sliver) {
+    Widget buildTest(final Widget sliver) {
       return MaterialApp(
         home: CustomScrollView(
           slivers: <Widget>[
@@ -238,7 +238,7 @@ void main() {
             SliverFixedExtentList(
               itemExtent: 50.0,
               delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => Text('Item $index'),
+                  (final BuildContext context, final int index) => Text('Item $index'),
                 childCount: 30,
               )
             ),
@@ -248,9 +248,9 @@ void main() {
     }
 
     void verifyGeometry({
-      required GlobalKey key,
-      required bool visible,
-      required double paintExtent
+      required final GlobalKey key,
+      required final bool visible,
+      required final double paintExtent
     }) {
       final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
       final SliverGeometry geometry = target.geometry!;
@@ -258,7 +258,7 @@ void main() {
       expect(geometry.paintExtent, paintExtent);
     }
 
-    testWidgets('SliverAppBar', (WidgetTester tester) async {
+    testWidgets('SliverAppBar', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverAppBar(
         key: appBarKey,
@@ -312,7 +312,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('SliverPersistentHeader', (WidgetTester tester) async {
+    testWidgets('SliverPersistentHeader', (final WidgetTester tester) async {
       final GlobalKey headerKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverPersistentHeader(
         key: headerKey,
@@ -354,7 +354,7 @@ void main() {
       verifyGeometry(key: headerKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('and snapping SliverAppBar', (WidgetTester tester) async {
+    testWidgets('and snapping SliverAppBar', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildTest(SliverAppBar(
         key: appBarKey,
@@ -436,7 +436,7 @@ void main() {
 
 class HeaderDelegate extends SliverPersistentHeaderDelegate {
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     return Container(
       height: 56,
       color: Colors.red,
@@ -451,7 +451,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 56;
 
   @override
-  bool shouldRebuild(SliverPersistentHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(final SliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
@@ -462,21 +462,21 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
   double get minExtent => 100.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     return Container(constraints: BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
   }
 
   @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
+  bool shouldRebuild(final TestDelegate oldDelegate) => false;
 }
 
 
 class RenderBigSliver extends RenderSliver {
-  RenderBigSliver(double height) : _height = height;
+  RenderBigSliver(final double height) : _height = height;
 
   double get height => _height;
   double _height;
-  set height(double value) {
+  set height(final double value) {
     if (value == _height) {
       return;
     }
@@ -502,12 +502,12 @@ class BigSliver extends LeafRenderObjectWidget {
   final double height;
 
   @override
-  RenderBigSliver createRenderObject(BuildContext context) {
+  RenderBigSliver createRenderObject(final BuildContext context) {
     return RenderBigSliver(height);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderBigSliver renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderBigSliver renderObject) {
     renderObject.height = height;
   }
 }

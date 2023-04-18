@@ -45,7 +45,7 @@ class Memento extends Object with Diagnosticable {
   final ValueGetter<Memento> redo;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('name', name));
   }
@@ -60,7 +60,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   ///
   /// The [maxUndoLevels] argument must not be null.
   UndoableActionDispatcher({
-    int maxUndoLevels = _defaultMaxUndoLevels,
+    final int maxUndoLevels = _defaultMaxUndoLevels,
   })  : _maxUndoLevels = maxUndoLevels;
 
   // A stack of actions that have been performed. The most recent action
@@ -79,7 +79,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   /// the last [maxUndoLevels] actions.
   int get maxUndoLevels => _maxUndoLevels;
   int _maxUndoLevels;
-  set maxUndoLevels(int value) {
+  set maxUndoLevels(final int value) {
     _maxUndoLevels = value;
     _pruneActions();
   }
@@ -87,12 +87,12 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   final Set<VoidCallback> _listeners = <VoidCallback>{};
 
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     _listeners.add(listener);
   }
 
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     _listeners.remove(listener);
   }
 
@@ -107,7 +107,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   }
 
   @override
-  Object? invokeAction(Action<Intent> action, Intent intent, [BuildContext? context]) {
+  Object? invokeAction(final Action<Intent> action, final Intent intent, [final BuildContext? context]) {
     final Object? result = super.invokeAction(action, intent, context);
     print('Invoking ${action is UndoableAction ? 'undoable ' : ''}$intent as $action: $this ');
     if (action is UndoableAction) {
@@ -174,7 +174,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('undoable items', _completedActions.length));
     properties.add(IntProperty('redoable items', _undoneActions.length));
@@ -189,7 +189,7 @@ class UndoIntent extends Intent {
 
 class UndoAction extends Action<UndoIntent> {
   @override
-  bool isEnabled(UndoIntent intent) {
+  bool isEnabled(final UndoIntent intent) {
     final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return false;
@@ -199,7 +199,7 @@ class UndoAction extends Action<UndoIntent> {
   }
 
   @override
-  void invoke(UndoIntent intent) {
+  void invoke(final UndoIntent intent) {
     final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return;
@@ -215,7 +215,7 @@ class RedoIntent extends Intent {
 
 class RedoAction extends Action<RedoIntent> {
   @override
-  bool isEnabled(RedoIntent intent) {
+  bool isEnabled(final RedoIntent intent) {
     final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return false;
@@ -225,7 +225,7 @@ class RedoAction extends Action<RedoIntent> {
   }
 
   @override
-  RedoAction invoke(RedoIntent intent) {
+  RedoAction invoke(final RedoIntent intent) {
     final BuildContext? buildContext = primaryFocus?.context ?? FocusDemo.appKey.currentContext;
     if (buildContext == null) {
       return this;
@@ -243,11 +243,11 @@ abstract class UndoableAction<T extends Intent> extends Action<T> {
   Intent? _invocationTag;
 
   @protected
-  set invocationIntent(Intent? value) => _invocationTag = value;
+  set invocationIntent(final Intent? value) => _invocationTag = value;
 
   @override
   @mustCallSuper
-  void invoke(T intent) {
+  void invoke(final T intent) {
     invocationIntent = intent;
   }
 }
@@ -255,7 +255,7 @@ abstract class UndoableAction<T extends Intent> extends Action<T> {
 class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
   @override
   @mustCallSuper
-  Memento invoke(T intent) {
+  Memento invoke(final T intent) {
     super.invoke(intent);
     final FocusNode? previousFocus = primaryFocus;
     return Memento(name: previousFocus!.debugLabel!, undo: () {
@@ -268,7 +268,7 @@ class UndoableFocusActionBase<T extends Intent> extends UndoableAction<T> {
 
 class UndoableRequestFocusAction extends UndoableFocusActionBase<RequestFocusIntent> {
   @override
-  Memento invoke(RequestFocusIntent intent) {
+  Memento invoke(final RequestFocusIntent intent) {
     final Memento memento = super.invoke(intent);
     intent.focusNode.requestFocus();
     return memento;
@@ -278,7 +278,7 @@ class UndoableRequestFocusAction extends UndoableFocusActionBase<RequestFocusInt
 /// Actions for manipulating focus.
 class UndoableNextFocusAction extends UndoableFocusActionBase<NextFocusIntent> {
   @override
-  Memento invoke(NextFocusIntent intent) {
+  Memento invoke(final NextFocusIntent intent) {
     final Memento memento = super.invoke(intent);
     primaryFocus?.nextFocus();
     return memento;
@@ -287,7 +287,7 @@ class UndoableNextFocusAction extends UndoableFocusActionBase<NextFocusIntent> {
 
 class UndoablePreviousFocusAction extends UndoableFocusActionBase<PreviousFocusIntent> {
   @override
-  Memento invoke(PreviousFocusIntent intent) {
+  Memento invoke(final PreviousFocusIntent intent) {
     final Memento memento = super.invoke(intent);
     primaryFocus?.previousFocus();
     return memento;
@@ -298,7 +298,7 @@ class UndoableDirectionalFocusAction extends UndoableFocusActionBase<Directional
   TraversalDirection? direction;
 
   @override
-  Memento invoke(DirectionalFocusIntent intent) {
+  Memento invoke(final DirectionalFocusIntent intent) {
     final Memento memento = super.invoke(intent);
     primaryFocus?.focusInDirection(intent.direction);
     return memento;
@@ -333,12 +333,12 @@ class _DemoButtonState extends State<DemoButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextButton(
       focusNode: _focusNode,
       style: ButtonStyle(
         foregroundColor: const MaterialStatePropertyAll<Color>(Colors.black),
-        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        overlayColor: MaterialStateProperty.resolveWith<Color>((final Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return Colors.red;
           }
@@ -398,7 +398,7 @@ class _FocusDemoState extends State<FocusDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Actions(
       dispatcher: dispatcher,
@@ -428,7 +428,7 @@ class _FocusDemoState extends State<FocusDemo> {
                   title: const Text('Actions Demo'),
                 ),
                 body: Center(
-                  child: Builder(builder: (BuildContext context) {
+                  child: Builder(builder: (final BuildContext context) {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[

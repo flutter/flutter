@@ -48,7 +48,7 @@ class IconButtonThemeData with Diagnosticable {
   final ButtonStyle? style;
 
   /// Linearly interpolate between two icon button themes.
-  static IconButtonThemeData? lerp(IconButtonThemeData? a, IconButtonThemeData? b, double t) {
+  static IconButtonThemeData? lerp(final IconButtonThemeData? a, final IconButtonThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -61,7 +61,7 @@ class IconButtonThemeData with Diagnosticable {
   int get hashCode => style.hashCode;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -72,7 +72,7 @@ class IconButtonThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
   }
@@ -110,16 +110,16 @@ class IconButtonTheme extends InheritedTheme {
   /// ```dart
   /// IconButtonThemeData theme = IconButtonTheme.of(context);
   /// ```
-  static IconButtonThemeData of(BuildContext context) {
+  static IconButtonThemeData of(final BuildContext context) {
     final IconButtonTheme? buttonTheme = context.dependOnInheritedWidgetOfExactType<IconButtonTheme>();
     return buttonTheme?.data ?? Theme.of(context).iconButtonTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return IconButtonTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(IconButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final IconButtonTheme oldWidget) => data != oldWidget.data;
 }

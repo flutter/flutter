@@ -12,7 +12,7 @@ class CustomListItemApp extends StatelessWidget {
   const CustomListItemApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: CustomListItemExample(),
     );
@@ -35,7 +35,7 @@ class _ArticleDescription extends StatelessWidget {
   final String readDuration;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -110,7 +110,7 @@ class CustomListItemTwo extends StatelessWidget {
   final String readDuration;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: SizedBox(
@@ -145,7 +145,7 @@ class CustomListItemExample extends StatelessWidget {
   const CustomListItemExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView(

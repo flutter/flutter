@@ -16,21 +16,21 @@ class _CustomPhysics extends ClampingScrollPhysics {
   const _CustomPhysics({ super.parent });
 
   @override
-  _CustomPhysics applyTo(ScrollPhysics? ancestor) {
+  _CustomPhysics applyTo(final ScrollPhysics? ancestor) {
     return _CustomPhysics(parent: buildParent(ancestor));
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
+  Simulation createBallisticSimulation(final ScrollMetrics position, final double dragVelocity) {
     return ScrollSpringSimulation(spring, 1000.0, 1000.0, 1000.0);
   }
 }
 
 Widget buildTest({
-  ScrollController? controller,
-  String title = 'TTTTTTTT',
-  Key? key,
-  bool expanded = true,
+  final ScrollController? controller,
+  final String title = 'TTTTTTTT',
+  final Key? key,
+  final bool expanded = true,
 }) {
   return Localizations(
     locale: const Locale('en', 'US'),
@@ -50,7 +50,7 @@ Widget buildTest({
               key: key,
               dragStartBehavior: DragStartBehavior.down,
               controller: controller,
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
                 return <Widget>[
                   SliverAppBar(
                     title: Text(title),
@@ -120,7 +120,7 @@ Widget buildTest({
 }
 
 void main() {
-  testWidgets('ScrollDirection test', (WidgetTester tester) async {
+  testWidgets('ScrollDirection test', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/107101
     final List<ScrollDirection> receivedResult = <ScrollDirection>[];
     const List<ScrollDirection> expectedReverseResult = <ScrollDirection>[ScrollDirection.reverse, ScrollDirection.idle];
@@ -129,7 +129,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: NotificationListener<UserScrollNotification>(
-          onNotification: (UserScrollNotification notification) {
+          onNotification: (final UserScrollNotification notification) {
             if (notification.depth != 1) {
               return true;
             }
@@ -137,7 +137,7 @@ void main() {
             return true;
           },
           child: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) => <Widget>[
               const SliverAppBar(
                 expandedHeight: 250.0,
                 pinned: true,
@@ -146,7 +146,7 @@ void main() {
             body: ListView.builder(
               padding: const EdgeInsets.all(8),
               itemCount: 30,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 return SizedBox(
                   height: 50,
                   child: Center(child: Text('Item $index')),
@@ -173,8 +173,8 @@ void main() {
     expect(receivedResult, expectedForwardResult);
   });
 
-  testWidgets('NestedScrollView respects clipBehavior', (WidgetTester tester) async {
-    Widget build(NestedScrollView nestedScrollView) {
+  testWidgets('NestedScrollView respects clipBehavior', (final WidgetTester tester) async {
+    Widget build(final NestedScrollView nestedScrollView) {
       return Localizations(
         locale: const Locale('en', 'US'),
         delegates: const <LocalizationsDelegate<dynamic>>[
@@ -193,7 +193,7 @@ void main() {
 
     await tester.pumpWidget(build(
       NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
+        headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
         body: Container(height: 2000.0),
       ),
     ));
@@ -210,7 +210,7 @@ void main() {
     // 3rd, pump a new widget to check that the render object can update its clip behavior.
     await tester.pumpWidget(build(
         NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) => <Widget>[const SliverAppBar()],
           body: Container(height: 2000.0),
           clipBehavior: Clip.antiAlias,
         ),
@@ -222,7 +222,7 @@ void main() {
     expect(context.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
+  testWidgets('NestedScrollView overscroll and release and hold', (final WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -245,7 +245,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
+  testWidgets('NestedScrollView overscroll and release and hold', (final WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 250));
@@ -270,7 +270,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('NestedScrollView overscroll and release', (WidgetTester tester) async {
+  testWidgets('NestedScrollView overscroll and release', (final WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 500));
@@ -286,7 +286,7 @@ void main() {
     expect(find.text('aaa2'), findsOneWidget);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('NestedScrollView', (WidgetTester tester) async {
+  testWidgets('NestedScrollView', (final WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     expect(find.text('aaa3'), findsNothing);
@@ -353,7 +353,7 @@ void main() {
     );
   });
 
-  testWidgets('NestedScrollView with a ScrollController', (WidgetTester tester) async {
+  testWidgets('NestedScrollView with a ScrollController', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController(
       initialScrollOffset: 50.0,
     );
@@ -430,7 +430,7 @@ void main() {
     expect(find.text('ddd1'), findsOneWidget);
   });
 
-  testWidgets('Three NestedScrollViews with one ScrollController', (WidgetTester tester) async {
+  testWidgets('Three NestedScrollViews with one ScrollController', (final WidgetTester tester) async {
     final TrackingScrollController controller = TrackingScrollController();
     expect(controller.mostRecentlyUpdatedPosition, isNull);
     expect(controller.initialScrollOffset, 0.0);
@@ -493,7 +493,7 @@ void main() {
     );
   });
 
-  testWidgets('NestedScrollViews with custom physics', (WidgetTester tester) async {
+  testWidgets('NestedScrollViews with custom physics', (final WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Localizations(
@@ -506,7 +506,7 @@ void main() {
           data: const MediaQueryData(),
           child: NestedScrollView(
             physics: const _CustomPhysics(),
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               return <Widget>[
                 const SliverAppBar(
                   floating: true,
@@ -531,7 +531,7 @@ void main() {
     expect(point1.dy, greaterThan(point2.dy));
   });
 
-  testWidgets('NestedScrollViews respect NeverScrollableScrollPhysics', (WidgetTester tester) async {
+  testWidgets('NestedScrollViews respect NeverScrollableScrollPhysics', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/113753
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -545,7 +545,7 @@ void main() {
           data: const MediaQueryData(),
           child: NestedScrollView(
             physics: const NeverScrollableScrollPhysics(),
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               return <Widget>[
                 const SliverAppBar(
                   floating: true,
@@ -572,7 +572,7 @@ void main() {
     expect(point1, point2);
   });
 
-  testWidgets('NestedScrollView and internal scrolling', (WidgetTester tester) async {
+  testWidgets('NestedScrollView and internal scrolling', (final WidgetTester tester) async {
     debugDisableShadows = false;
     const List<String> tabs = <String>['Hello', 'World'];
     int buildCount = 0;
@@ -584,7 +584,7 @@ void main() {
           length: tabs.length, // This is the number of tabs.
           child: NestedScrollView(
             dragStartBehavior: DragStartBehavior.down,
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               buildCount += 1; // THIS LINE IS NOT IN THE ORIGINAL -- ADDED FOR TEST
               // These are the slivers that show up in the "outer" scroll view.
               return <Widget>[
@@ -614,7 +614,7 @@ void main() {
                     bottom: TabBar(
                       // These are the widgets to put in each tab in the tab
                       // bar.
-                      tabs: tabs.map<Widget>((String name) => Tab(text: name)).toList(),
+                      tabs: tabs.map<Widget>((final String name) => Tab(text: name)).toList(),
                       dragStartBehavior: DragStartBehavior.down,
                     ),
                   ),
@@ -624,7 +624,7 @@ void main() {
             body: TabBarView(
               dragStartBehavior: DragStartBehavior.down,
               // These are the contents of the tab views, below the tabs.
-              children: tabs.map<Widget>((String name) {
+              children: tabs.map<Widget>((final String name) {
                 return SafeArea(
                   top: false,
                   bottom: false,
@@ -633,7 +633,7 @@ void main() {
                     // "inside" the NestedScrollView, so that
                     // sliverOverlapAbsorberHandleFor() can find the
                     // NestedScrollView.
-                    builder: (BuildContext context) {
+                    builder: (final BuildContext context) {
                       return CustomScrollView(
                         // The "controller" and "primary" members should be left
                         // unset, so that the NestedScrollView can control this
@@ -665,7 +665,7 @@ void main() {
                               // spec for ListTile widgets.
                               itemExtent: 48.0,
                               delegate: SliverChildBuilderDelegate(
-                                (BuildContext context, int index) {
+                                (final BuildContext context, final int index) {
                                   // This builder is called for each child.
                                   // In this example, we just number each list
                                   // item.
@@ -695,7 +695,7 @@ void main() {
       )),
     );
 
-    Object? dfsFindPhysicalLayer(RenderObject object) {
+    Object? dfsFindPhysicalLayer(final RenderObject object) {
       expect(object, isNotNull);
       if (object is RenderPhysicalModel || object is RenderPhysicalShape) {
         return object;
@@ -712,7 +712,7 @@ void main() {
     }
 
     final RenderObject nestedScrollViewLayer = find.byType(NestedScrollView).evaluate().first.renderObject!;
-    void checkPhysicalLayer({required double elevation}) {
+    void checkPhysicalLayer({required final double elevation}) {
       final dynamic physicalModel = dfsFindPhysicalLayer(nestedScrollViewLayer);
       expect(physicalModel, isNotNull);
       // ignore: avoid_dynamic_calls
@@ -854,7 +854,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('NestedScrollView and bouncing', (WidgetTester tester) async {
+  testWidgets('NestedScrollView and bouncing', (final WidgetTester tester) async {
     // This verifies that overscroll bouncing works correctly on iOS. For
     // example, this checks that if you pull to overscroll, friction is applied;
     // it also makes sure that if you scroll back the other way, the scroll
@@ -868,7 +868,7 @@ void main() {
             length: 1,
             child: NestedScrollView(
               dragStartBehavior: DragStartBehavior.down,
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
                 return <Widget>[
                   const SliverPersistentHeader(
                     delegate: TestHeader(key: key1),
@@ -953,7 +953,7 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   group('NestedScrollViewState exposes inner and outer controllers', () {
-    testWidgets('Scrolling by less than the outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgets('Scrolling by less than the outer extent does not scroll the inner body', (final WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -985,7 +985,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('Scrolling by exactly the outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgets('Scrolling by exactly the outer extent does not scroll the inner body', (final WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -1017,7 +1017,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('Scrolling by greater than the outer extent scrolls the inner body', (WidgetTester tester) async {
+    testWidgets('Scrolling by greater than the outer extent scrolls the inner body', (final WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -1053,7 +1053,7 @@ void main() {
       );
     });
 
-    testWidgets('Inertia-cancel event does not modify either position.', (WidgetTester tester) async {
+    testWidgets('Inertia-cancel event does not modify either position.', (final WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(
         key: globalKey,
@@ -1101,7 +1101,7 @@ void main() {
       );
     });
 
-    testWidgets('scrolling by less than the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgets('scrolling by less than the expanded outer extent does not scroll the inner body', (final WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(key: globalKey));
 
@@ -1130,7 +1130,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('scrolling by exactly the expanded outer extent does not scroll the inner body', (WidgetTester tester) async {
+    testWidgets('scrolling by exactly the expanded outer extent does not scroll the inner body', (final WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(key: globalKey));
 
@@ -1159,7 +1159,7 @@ void main() {
       expect(globalKey.currentState!.innerController.offset, 0.0);
     });
 
-    testWidgets('scrolling by greater than the expanded outer extent scrolls the inner body', (WidgetTester tester) async {
+    testWidgets('scrolling by greater than the expanded outer extent scrolls the inner body', (final WidgetTester tester) async {
       final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
       await tester.pumpWidget(buildTest(key: globalKey));
 
@@ -1191,7 +1191,7 @@ void main() {
 
     testWidgets(
       'NestedScrollViewState.outerController should correspond to NestedScrollView.controller',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
         final ScrollController scrollController = ScrollController();
 
@@ -1220,7 +1220,7 @@ void main() {
     );
 
     group('manipulating controllers when', () {
-      testWidgets('outer: not scrolled, inner: not scrolled', (WidgetTester tester) async {
+      testWidgets('outer: not scrolled, inner: not scrolled', (final WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1262,7 +1262,7 @@ void main() {
         expect(globalKey2.currentState!.outerController.position.pixels, 0.0);
       });
 
-      testWidgets('outer: not scrolled, inner: scrolled', (WidgetTester tester) async {
+      testWidgets('outer: not scrolled, inner: scrolled', (final WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1306,7 +1306,7 @@ void main() {
         expect(globalKey2.currentState!.outerController.position.pixels, 0.0);
       });
 
-      testWidgets('outer: scrolled, inner: not scrolled', (WidgetTester tester) async {
+      testWidgets('outer: scrolled, inner: not scrolled', (final WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1350,7 +1350,7 @@ void main() {
         expect(globalKey2.currentState!.outerController.position.pixels, 0.0);
       });
 
-      testWidgets('outer: scrolled, inner: scrolled', (WidgetTester tester) async {
+      testWidgets('outer: scrolled, inner: scrolled', (final WidgetTester tester) async {
         final GlobalKey<NestedScrollViewState> globalKey1 = GlobalKey();
         await tester.pumpWidget(buildTest(
           key: globalKey1,
@@ -1399,21 +1399,21 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/39963.
-  testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (WidgetTester tester) async {
+  testWidgets('NestedScrollView with SliverOverlapAbsorber in or out of the first screen', (final WidgetTester tester) async {
     await tester.pumpWidget(const _TestLayoutExtentIsNegative(1));
     await tester.pumpWidget(const _TestLayoutExtentIsNegative(10));
   });
 
   group('NestedScrollView can float outer sliver with inner scroll view:', () {
     Widget buildFloatTest({
-      GlobalKey? appBarKey,
-      GlobalKey? nestedKey,
-      ScrollController? controller,
-      bool floating = false,
-      bool pinned = false,
-      bool snap = false,
-      bool nestedFloat = false,
-      bool expanded = false,
+      final GlobalKey? appBarKey,
+      final GlobalKey? nestedKey,
+      final ScrollController? controller,
+      final bool floating = false,
+      final bool pinned = false,
+      final bool snap = false,
+      final bool nestedFloat = false,
+      final bool expanded = false,
     }) {
       return MaterialApp(
         home: Scaffold(
@@ -1421,7 +1421,7 @@ void main() {
             key: nestedKey,
             controller: controller,
             floatHeaderSlivers: nestedFloat,
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverOverlapAbsorber(
                   handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -1437,14 +1437,14 @@ void main() {
               ];
             },
             body: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return CustomScrollView(
                   slivers: <Widget>[
                     SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
                     SliverFixedExtentList(
                       itemExtent: 50.0,
                       delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) => ListTile(title: Text('Item $index')),
+                        (final BuildContext context, final int index) => ListTile(title: Text('Item $index')),
                         childCount: 30,
                       ),
                     ),
@@ -1458,11 +1458,11 @@ void main() {
     }
 
     double verifyGeometry({
-      required GlobalKey key,
-      required double paintExtent,
-      bool extentGreaterThan = false,
-      bool extentLessThan = false,
-      required bool visible,
+      required final GlobalKey key,
+      required final double paintExtent,
+      final bool extentGreaterThan = false,
+      final bool extentLessThan = false,
+      required final bool visible,
     }) {
       final RenderSliver target = key.currentContext!.findRenderObject()! as RenderSliver;
       final SliverGeometry geometry = target.geometry!;
@@ -1478,7 +1478,7 @@ void main() {
       return geometry.paintExtent;
     }
 
-    testWidgets('float', (WidgetTester tester) async {
+    testWidgets('float', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1530,7 +1530,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('float expanded', (WidgetTester tester) async {
+    testWidgets('float expanded', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1585,7 +1585,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
-    testWidgets('float with pointer signal', (WidgetTester tester) async {
+    testWidgets('float with pointer signal', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1642,7 +1642,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('snap with pointer signal', (WidgetTester tester) async {
+    testWidgets('snap with pointer signal', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1696,7 +1696,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 0.0, visible: false);
     });
 
-    testWidgets('float expanded with pointer signal', (WidgetTester tester) async {
+    testWidgets('float expanded with pointer signal', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
         floating: true,
@@ -1756,7 +1756,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
-    testWidgets('only snap', (WidgetTester tester) async {
+    testWidgets('only snap', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       final GlobalKey<NestedScrollViewState> nestedKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
@@ -1891,7 +1891,7 @@ void main() {
       expect(nestedKey.currentState!.outerController.offset, 56.0);
     });
 
-    testWidgets('only snap expanded', (WidgetTester tester) async {
+    testWidgets('only snap expanded', (final WidgetTester tester) async {
       final GlobalKey appBarKey = GlobalKey();
       final GlobalKey<NestedScrollViewState> nestedKey = GlobalKey();
       await tester.pumpWidget(buildFloatTest(
@@ -2027,7 +2027,7 @@ void main() {
       expect(nestedKey.currentState!.outerController.offset, 200.0);
     });
 
-    testWidgets('float pinned', (WidgetTester tester) async {
+    testWidgets('float pinned', (final WidgetTester tester) async {
       // This configuration should have the same behavior of a pinned app bar.
       // No floating should happen, and the app bar should persist.
       final GlobalKey appBarKey = GlobalKey();
@@ -2082,7 +2082,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('float pinned expanded', (WidgetTester tester) async {
+    testWidgets('float pinned expanded', (final WidgetTester tester) async {
       // Only the expanded portion (flexible space) of the app bar should float
       // in and out.
       final GlobalKey appBarKey = GlobalKey();
@@ -2141,7 +2141,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 200.0, visible: true);
     });
 
-    testWidgets('float pinned with pointer signal', (WidgetTester tester) async {
+    testWidgets('float pinned with pointer signal', (final WidgetTester tester) async {
       // This configuration should have the same behavior of a pinned app bar.
       // No floating should happen, and the app bar should persist.
       final GlobalKey appBarKey = GlobalKey();
@@ -2201,7 +2201,7 @@ void main() {
       verifyGeometry(key: appBarKey, paintExtent: 56.0, visible: true);
     });
 
-    testWidgets('float pinned expanded with pointer signal', (WidgetTester tester) async {
+    testWidgets('float pinned expanded with pointer signal', (final WidgetTester tester) async {
       // Only the expanded portion (flexible space) of the app bar should float
       // in and out.
       final GlobalKey appBarKey = GlobalKey();
@@ -2268,12 +2268,12 @@ void main() {
 
   group('Correctly handles 0 velocity inner ballistic scroll activity:', () {
     // Regression tests for https://github.com/flutter/flutter/issues/17096
-    Widget buildBallisticTest(ScrollController controller) {
+    Widget buildBallisticTest(final ScrollController controller) {
       return MaterialApp(
         home: Scaffold(
           body: NestedScrollView(
             controller: controller,
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               return <Widget>[
                 const SliverAppBar(
                   pinned: true,
@@ -2283,7 +2283,7 @@ void main() {
             },
             body: ListView.builder(
               itemCount: 50,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text('Item $index'),
@@ -2295,7 +2295,7 @@ void main() {
       );
     }
 
-    testWidgets('overscroll, hold for 0 velocity, and release', (WidgetTester tester) async {
+    testWidgets('overscroll, hold for 0 velocity, and release', (final WidgetTester tester) async {
       // Dragging into an overscroll and holding so that when released, the
       // ballistic scroll activity has a 0 velocity.
       final ScrollController controller = ScrollController();
@@ -2322,7 +2322,7 @@ void main() {
       expect(tester.getCenter(find.text('Item 49')).dy, equals(585.0));
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-    testWidgets('overscroll, release, and tap', (WidgetTester tester) async {
+    testWidgets('overscroll, release, and tap', (final WidgetTester tester) async {
       // Tapping while an inner ballistic scroll activity is in progress will
       // trigger a secondary ballistic scroll activity with a 0 velocity.
       final ScrollController controller = ScrollController();
@@ -2356,13 +2356,13 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/63978
-  testWidgets('Inner _NestedScrollPosition.applyClampedDragUpdate correctly calculates range when in overscroll', (WidgetTester tester) async {
+  testWidgets('Inner _NestedScrollPosition.applyClampedDragUpdate correctly calculates range when in overscroll', (final WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: NestedScrollView(
           key: nestedScrollView,
-          headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
+          headerSliverBuilder: (final BuildContext context, final bool boxIsScrolled) {
             return <Widget>[
               const SliverAppBar(
                 expandedHeight: 200,
@@ -2372,7 +2372,7 @@ void main() {
           },
           body: ListView.builder(
             itemExtent: 100.0,
-            itemBuilder: (BuildContext context, int index) => Container(
+            itemBuilder: (final BuildContext context, final int index) => Container(
               padding: const EdgeInsets.all(10.0),
               child: Material(
                 color: index.isEven ? Colors.cyan : Colors.deepOrange,
@@ -2410,7 +2410,7 @@ void main() {
     expect(nestedScrollView.currentState!.innerController.position.pixels, 295.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Scroll pointer signal should not cause overscroll.', (WidgetTester tester) async {
+  testWidgets('Scroll pointer signal should not cause overscroll.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(buildTest(controller: controller));
 
@@ -2432,7 +2432,7 @@ void main() {
     expect(find.text('ddd1'), findsOneWidget);
   });
 
-  testWidgets('NestedScrollView basic scroll with pointer signal', (WidgetTester tester) async{
+  testWidgets('NestedScrollView basic scroll with pointer signal', (final WidgetTester tester) async{
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
     expect(find.text('aaa3'), findsNothing);
@@ -2474,7 +2474,7 @@ void main() {
   // Related to https://github.com/flutter/flutter/issues/64266
   testWidgets(
     'Holding scroll and Scroll pointer signal will update ScrollDirection.forward / ScrollDirection.reverse',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       ScrollDirection? lastUserScrollingDirection;
 
       final ScrollController controller = ScrollController();
@@ -2509,16 +2509,16 @@ void main() {
   );
 
   // Regression test for https://github.com/flutter/flutter/issues/72257
-  testWidgets('NestedScrollView works well when rebuilding during scheduleWarmUpFrame', (WidgetTester tester) async {
+  testWidgets('NestedScrollView works well when rebuilding during scheduleWarmUpFrame', (final WidgetTester tester) async {
     bool? isScrolled;
     final Widget myApp = MaterialApp(
       home: Scaffold(
         body: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Focus(
-              onFocusChange: (_) => setState( (){} ),
+              onFocusChange: (final _) => setState( (){} ),
               child: NestedScrollView(
-                headerSliverBuilder: (BuildContext context, bool boxIsScrolled) {
+                headerSliverBuilder: (final BuildContext context, final bool boxIsScrolled) {
                   isScrolled = boxIsScrolled;
                   return <Widget>[
                     const SliverAppBar(
@@ -2531,7 +2531,7 @@ void main() {
                   slivers: <Widget>[
                     SliverList(
                       delegate: SliverChildBuilderDelegate(
-                        (BuildContext context, int index) {
+                        (final BuildContext context, final int index) {
                           return const Text('');
                         },
                         childCount: 10,
@@ -2552,11 +2552,11 @@ void main() {
   });
 
   // Regression test of https://github.com/flutter/flutter/issues/74372
-  testWidgets('ScrollPosition can be accessed during `_updatePosition()`', (WidgetTester tester) async {
+  testWidgets('ScrollPosition can be accessed during `_updatePosition()`', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     late ScrollPosition position;
 
-    Widget buildFrame({ScrollPhysics? physics}) {
+    Widget buildFrame({final ScrollPhysics? physics}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Localizations(
@@ -2570,10 +2570,10 @@ void main() {
             child: NestedScrollView(
               controller: controller,
               physics: physics,
-              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+              headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
                 return <Widget>[
                   Builder(
-                    builder: (BuildContext context) {
+                    builder: (final BuildContext context) {
                       position = controller.position;
                       return const SliverAppBar(
                         floating: true,
@@ -2598,14 +2598,14 @@ void main() {
     expect(position.pixels, 0.0);
   });
 
-  testWidgets("NestedScrollView doesn't crash due to precision error", (WidgetTester tester) async {
+  testWidgets("NestedScrollView doesn't crash due to precision error", (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/63825
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: NestedScrollView(
           floatHeaderSlivers: true,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) => <Widget>[
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) => <Widget>[
             const SliverAppBar(
               expandedHeight: 250.0,
             ),
@@ -2618,7 +2618,7 @@ void main() {
                 sliver: SliverFixedExtentList(
                   itemExtent: 48.0,
                   delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
+                    (final BuildContext context, final int index) {
                       return ListTile(
                         title: Text('Item $index'),
                       );
@@ -2645,14 +2645,14 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('NestedScrollViewCoordinator.pointerScroll dispatches correct scroll notifications', (WidgetTester tester) async {
+  testWidgets('NestedScrollViewCoordinator.pointerScroll dispatches correct scroll notifications', (final WidgetTester tester) async {
     int scrollEnded = 0;
     int scrollStarted = 0;
     bool isScrolled = false;
 
     await tester.pumpWidget(MaterialApp(
       home: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
+        onNotification: (final ScrollNotification notification) {
           if (notification is ScrollStartNotification) {
             scrollStarted += 1;
           } else if (notification is ScrollEndNotification) {
@@ -2662,7 +2662,7 @@ void main() {
         },
         child: Scaffold(
           body: NestedScrollView(
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               isScrolled = innerBoxIsScrolled;
               return <Widget>[
                 const SliverAppBar(
@@ -2678,7 +2678,7 @@ void main() {
                   sliver: SliverFixedExtentList(
                     itemExtent: 48.0,
                     delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
+                          (final BuildContext context, final int index) {
                         return ListTile(
                           title: Text('Item $index'),
                         );
@@ -2707,7 +2707,7 @@ void main() {
     expect(scrollEnded, 2);
   });
 
-  testWidgets('SliverAppBar.medium collapses in NestedScrollView', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium collapses in NestedScrollView', (final WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 112;
@@ -2716,7 +2716,7 @@ void main() {
       home: Scaffold(
         body: NestedScrollView(
           key: nestedScrollView,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -2727,14 +2727,14 @@ void main() {
             ];
           },
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return CustomScrollView(
                 slivers: <Widget>[
                   SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
                   SliverFixedExtentList(
                     itemExtent: 50.0,
                     delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) => ListTile(title: Text('Item $index')),
+                      (final BuildContext context, final int index) => ListTile(title: Text('Item $index')),
                       childCount: 30,
                     ),
                   ),
@@ -2789,7 +2789,7 @@ void main() {
     expect(tester.getSize(expandedTitleClip).height, expandedAppBarHeight - collapsedAppBarHeight);
   });
 
-  testWidgets('SliverAppBar.large collapses in NestedScrollView', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large collapses in NestedScrollView', (final WidgetTester tester) async {
     final GlobalKey<NestedScrollViewState> nestedScrollView = GlobalKey();
     const double collapsedAppBarHeight = 64;
     const double expandedAppBarHeight = 152;
@@ -2798,7 +2798,7 @@ void main() {
       home: Scaffold(
         body: NestedScrollView(
           key: nestedScrollView,
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
@@ -2810,14 +2810,14 @@ void main() {
             ];
           },
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return CustomScrollView(
                 slivers: <Widget>[
                   SliverOverlapInjector(handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context)),
                   SliverFixedExtentList(
                     itemExtent: 50.0,
                     delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) => ListTile(title: Text('Item $index')),
+                          (final BuildContext context, final int index) => ListTile(title: Text('Item $index')),
                       childCount: 30,
                     ),
                   ),
@@ -2873,7 +2873,7 @@ void main() {
   });
 }
 
-double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
+double appBarHeight(final WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
 
 class TestHeader extends SliverPersistentHeaderDelegate {
   const TestHeader({ this.key });
@@ -2883,27 +2883,27 @@ class TestHeader extends SliverPersistentHeaderDelegate {
   @override
   double get maxExtent => 100.0;
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     return Placeholder(key: key);
   }
   @override
-  bool shouldRebuild(TestHeader oldDelegate) => false;
+  bool shouldRebuild(final TestHeader oldDelegate) => false;
 }
 
 class _TestLayoutExtentIsNegative extends StatelessWidget {
   const _TestLayoutExtentIsNegative(this.widgetCountBeforeSliverOverlapAbsorber);
   final int widgetCountBeforeSliverOverlapAbsorber;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Test'),
         ),
         body: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
             return <Widget>[
-              ...List<Widget>.generate(widgetCountBeforeSliverOverlapAbsorber, (_) {
+              ...List<Widget>.generate(widgetCountBeforeSliverOverlapAbsorber, (final _) {
                 return SliverToBoxAdapter(
                   child: Container(
                     color: Colors.red,
@@ -2932,7 +2932,7 @@ class _TestLayoutExtentIsNegative extends StatelessWidget {
             height: 2000,
             margin: const EdgeInsets.only(top: 50),
             child: ListView(
-              children: List<Widget>.generate(3, (_) {
+              children: List<Widget>.generate(3, (final _) {
                 return Container(
                   color: Colors.green[200],
                   height: 200,

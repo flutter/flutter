@@ -91,7 +91,7 @@ abstract class ScrollView extends StatelessWidget {
     this.reverse = false,
     this.controller,
     this.primary,
-    ScrollPhysics? physics,
+    final ScrollPhysics? physics,
     this.scrollBehavior,
     this.shrinkWrap = false,
     this.center,
@@ -377,7 +377,7 @@ abstract class ScrollView extends StatelessWidget {
   /// [AxisDirection.left] and the reversed [AxisDirection] is
   /// [AxisDirection.right].
   @protected
-  AxisDirection getDirection(BuildContext context) {
+  AxisDirection getDirection(final BuildContext context) {
     return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
 
@@ -388,7 +388,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// To learn more about slivers, see [CustomScrollView.slivers].
   @protected
-  List<Widget> buildSlivers(BuildContext context);
+  List<Widget> buildSlivers(final BuildContext context);
 
   /// Build the viewport.
   ///
@@ -405,10 +405,10 @@ abstract class ScrollView extends StatelessWidget {
   /// The `slivers` argument is the value obtained from [buildSlivers].
   @protected
   Widget buildViewport(
-    BuildContext context,
-    ViewportOffset offset,
-    AxisDirection axisDirection,
-    List<Widget> slivers,
+    final BuildContext context,
+    final ViewportOffset offset,
+    final AxisDirection axisDirection,
+    final List<Widget> slivers,
   ) {
     assert(() {
       switch (axisDirection) {
@@ -445,7 +445,7 @@ abstract class ScrollView extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<Widget> slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
 
@@ -464,7 +464,7 @@ abstract class ScrollView extends StatelessWidget {
       scrollBehavior: scrollBehavior,
       semanticChildCount: semanticChildCount,
       restorationId: restorationId,
-      viewportBuilder: (BuildContext context, ViewportOffset offset) {
+      viewportBuilder: (final BuildContext context, final ViewportOffset offset) {
         return buildViewport(context, offset, axisDirection, slivers);
       },
       clipBehavior: clipBehavior,
@@ -478,7 +478,7 @@ abstract class ScrollView extends StatelessWidget {
     if (keyboardDismissBehavior == ScrollViewKeyboardDismissBehavior.onDrag) {
       return NotificationListener<ScrollUpdateNotification>(
         child: scrollableResult,
-        onNotification: (ScrollUpdateNotification notification) {
+        onNotification: (final ScrollUpdateNotification notification) {
           final FocusScopeNode focusScope = FocusScope.of(context);
           if (notification.dragDetails != null && focusScope.hasFocus) {
             focusScope.unfocus();
@@ -492,7 +492,7 @@ abstract class ScrollView extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('scrollDirection', scrollDirection));
     properties.add(FlagProperty('reverse', value: reverse, ifTrue: 'reversed', showName: true));
@@ -752,7 +752,7 @@ class CustomScrollView extends ScrollView {
   final List<Widget> slivers;
 
   @override
-  List<Widget> buildSlivers(BuildContext context) => slivers;
+  List<Widget> buildSlivers(final BuildContext context) => slivers;
 }
 
 /// A [ScrollView] that uses a single child layout model.
@@ -796,7 +796,7 @@ abstract class BoxScrollView extends ScrollView {
   final EdgeInsetsGeometry? padding;
 
   @override
-  List<Widget> buildSlivers(BuildContext context) {
+  List<Widget> buildSlivers(final BuildContext context) {
     Widget sliver = buildChildLayout(context);
     EdgeInsetsGeometry? effectivePadding = padding;
     if (padding == null) {
@@ -831,10 +831,10 @@ abstract class BoxScrollView extends ScrollView {
 
   /// Subclasses should override this method to build the layout model.
   @protected
-  Widget buildChildLayout(BuildContext context);
+  Widget buildChildLayout(final BuildContext context);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
   }
@@ -1213,12 +1213,12 @@ class ListView extends BoxScrollView {
     super.padding,
     this.itemExtent,
     this.prototypeItem,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
     super.cacheExtent,
-    List<Widget> children = const <Widget>[],
-    int? semanticChildCount,
+    final List<Widget> children = const <Widget>[],
+    final int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
@@ -1286,14 +1286,14 @@ class ListView extends BoxScrollView {
     super.padding,
     this.itemExtent,
     this.prototypeItem,
-    required NullableIndexedWidgetBuilder itemBuilder,
-    ChildIndexGetter? findChildIndexCallback,
-    int? itemCount,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    required final NullableIndexedWidgetBuilder itemBuilder,
+    final ChildIndexGetter? findChildIndexCallback,
+    final int? itemCount,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
     super.cacheExtent,
-    int? semanticChildCount,
+    final int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
@@ -1376,13 +1376,13 @@ class ListView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
-    required NullableIndexedWidgetBuilder itemBuilder,
-    ChildIndexGetter? findChildIndexCallback,
-    required IndexedWidgetBuilder separatorBuilder,
-    required int itemCount,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    required final NullableIndexedWidgetBuilder itemBuilder,
+    final ChildIndexGetter? findChildIndexCallback,
+    required final IndexedWidgetBuilder separatorBuilder,
+    required final int itemCount,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
     super.cacheExtent,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
@@ -1392,7 +1392,7 @@ class ListView extends BoxScrollView {
        itemExtent = null,
        prototypeItem = null,
        childrenDelegate = SliverChildBuilderDelegate(
-         (BuildContext context, int index) {
+         (final BuildContext context, final int index) {
            final int itemIndex = index ~/ 2;
            if (index.isEven) {
              return itemBuilder(context, itemIndex);
@@ -1404,7 +1404,7 @@ class ListView extends BoxScrollView {
          addAutomaticKeepAlives: addAutomaticKeepAlives,
          addRepaintBoundaries: addRepaintBoundaries,
          addSemanticIndexes: addSemanticIndexes,
-         semanticIndexCallback: (Widget widget, int index) {
+         semanticIndexCallback: (final Widget widget, final int index) {
            return index.isEven ? index ~/ 2 : null;
          },
        ),
@@ -1569,7 +1569,7 @@ class ListView extends BoxScrollView {
   final SliverChildDelegate childrenDelegate;
 
   @override
-  Widget buildChildLayout(BuildContext context) {
+  Widget buildChildLayout(final BuildContext context) {
     if (itemExtent != null) {
       return SliverFixedExtentList(
         delegate: childrenDelegate,
@@ -1585,13 +1585,13 @@ class ListView extends BoxScrollView {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('itemExtent', itemExtent, defaultValue: null));
   }
 
   // Helper method to compute the actual child count for the separated constructor.
-  static int _computeActualChildCount(int itemCount) {
+  static int _computeActualChildCount(final int itemCount) {
     return math.max(0, itemCount * 2 - 1);
   }
 }
@@ -1843,12 +1843,12 @@ class GridView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     required this.gridDelegate,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
     super.cacheExtent,
-    List<Widget> children = const <Widget>[],
-    int? semanticChildCount,
+    final List<Widget> children = const <Widget>[],
+    final int? semanticChildCount,
     super.dragStartBehavior,
     super.clipBehavior,
     super.keyboardDismissBehavior,
@@ -1897,14 +1897,14 @@ class GridView extends BoxScrollView {
     super.shrinkWrap,
     super.padding,
     required this.gridDelegate,
-    required NullableIndexedWidgetBuilder itemBuilder,
-    ChildIndexGetter? findChildIndexCallback,
-    int? itemCount,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    required final NullableIndexedWidgetBuilder itemBuilder,
+    final ChildIndexGetter? findChildIndexCallback,
+    final int? itemCount,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
     super.cacheExtent,
-    int? semanticChildCount,
+    final int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
@@ -1970,16 +1970,16 @@ class GridView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
-    required int crossAxisCount,
-    double mainAxisSpacing = 0.0,
-    double crossAxisSpacing = 0.0,
-    double childAspectRatio = 1.0,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    required final int crossAxisCount,
+    final double mainAxisSpacing = 0.0,
+    final double crossAxisSpacing = 0.0,
+    final double childAspectRatio = 1.0,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
     super.cacheExtent,
-    List<Widget> children = const <Widget>[],
-    int? semanticChildCount,
+    final List<Widget> children = const <Widget>[],
+    final int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
@@ -2023,16 +2023,16 @@ class GridView extends BoxScrollView {
     super.physics,
     super.shrinkWrap,
     super.padding,
-    required double maxCrossAxisExtent,
-    double mainAxisSpacing = 0.0,
-    double crossAxisSpacing = 0.0,
-    double childAspectRatio = 1.0,
-    bool addAutomaticKeepAlives = true,
-    bool addRepaintBoundaries = true,
-    bool addSemanticIndexes = true,
+    required final double maxCrossAxisExtent,
+    final double mainAxisSpacing = 0.0,
+    final double crossAxisSpacing = 0.0,
+    final double childAspectRatio = 1.0,
+    final bool addAutomaticKeepAlives = true,
+    final bool addRepaintBoundaries = true,
+    final bool addSemanticIndexes = true,
     super.cacheExtent,
-    List<Widget> children = const <Widget>[],
-    int? semanticChildCount,
+    final List<Widget> children = const <Widget>[],
+    final int? semanticChildCount,
     super.dragStartBehavior,
     super.keyboardDismissBehavior,
     super.restorationId,
@@ -2068,7 +2068,7 @@ class GridView extends BoxScrollView {
   final SliverChildDelegate childrenDelegate;
 
   @override
-  Widget buildChildLayout(BuildContext context) {
+  Widget buildChildLayout(final BuildContext context) {
     return SliverGrid(
       delegate: childrenDelegate,
       gridDelegate: gridDelegate,

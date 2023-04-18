@@ -22,7 +22,7 @@ void main() {
   SliverList buildAListOfStuff() {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
+        (final BuildContext context, final int index) {
           return SizedBox(
             height: 200.0,
             child: Center(child: Text(index.toString())),
@@ -34,7 +34,7 @@ void main() {
   }
 
   void uiTestGroup() {
-    testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
+    testWidgets("doesn't invoke anything without user interaction", (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -56,7 +56,7 @@ void main() {
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('calls the indicator builder when starting to overscroll', (WidgetTester tester) async {
+    testWidgets('calls the indicator builder when starting to overscroll', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -92,7 +92,7 @@ void main() {
 
     testWidgets(
       "don't call the builder if overscroll doesn't move slivers like on Android",
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
@@ -124,7 +124,7 @@ void main() {
       variant: TargetPlatformVariant.only(TargetPlatform.android),
     );
 
-    testWidgets('let the builder update as canceled drag scrolls away', (WidgetTester tester) async {
+    testWidgets('let the builder update as canceled drag scrolls away', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -186,10 +186,10 @@ void main() {
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('drag past threshold triggers refresh task', (WidgetTester tester) async {
+    testWidgets('drag past threshold triggers refresh task', (final WidgetTester tester) async {
       final List<MethodCall> platformCallLog = <MethodCall>[];
 
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
         platformCallLog.add(methodCall);
         return null;
       });
@@ -270,7 +270,7 @@ void main() {
 
     testWidgets(
       'refreshing task keeps the sliver expanded forever until done',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             home: CustomScrollView(
@@ -345,7 +345,7 @@ void main() {
 
     testWidgets(
       'refreshing task keeps the sliver expanded forever until completes with error',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final FlutterError error = FlutterError('Oops');
         double errorCount = 0;
         final TargetPlatform? platform = debugDefaultTargetPlatformOverride; // Will not be correct within the zone.
@@ -421,7 +421,7 @@ void main() {
             )));
             expect(mockHelper.invocations, hasLength(5));
           },
-          (Object e, StackTrace stack) {
+          (final Object e, final StackTrace stack) {
             expect(e, error);
             expect(errorCount, 0);
             errorCount++;
@@ -431,7 +431,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
-    testWidgets('expanded refreshing sliver scrolls normally', (WidgetTester tester) async {
+    testWidgets('expanded refreshing sliver scrolls normally', (final WidgetTester tester) async {
       mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -520,7 +520,7 @@ void main() {
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('expanded refreshing sliver goes away when done', (WidgetTester tester) async {
+    testWidgets('expanded refreshing sliver goes away when done', (final WidgetTester tester) async {
       mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -588,7 +588,7 @@ void main() {
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('builder still called when sliver snapped back more than 90%', (WidgetTester tester) async {
+    testWidgets('builder still called when sliver snapped back more than 90%', (final WidgetTester tester) async {
       mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
       await tester.pumpWidget(
@@ -688,7 +688,7 @@ void main() {
 
     testWidgets(
       'retracting sliver during done cannot be pulled to refresh again until fully retracted',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -793,7 +793,7 @@ void main() {
 
     testWidgets(
       'sliver held in overscroll when task finishes completes normally',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -845,7 +845,7 @@ void main() {
 
     testWidgets(
       'sliver scrolled away when task completes properly removes itself',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         if (testListLength < 4) {
           // This test only makes sense when the list is long enough that
           // the indicator can be scrolled away while refreshing.
@@ -931,7 +931,7 @@ void main() {
 
     testWidgets(
       "don't do anything unless it can be overscrolled at the start of the list",
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -959,7 +959,7 @@ void main() {
 
     testWidgets(
       'without an onRefresh, builder is called with arm for one frame then sliver goes away',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -1014,7 +1014,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
-    testWidgets('Should not crash when dragged', (WidgetTester tester) async {
+    testWidgets('Should not crash when dragged', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -1041,7 +1041,7 @@ void main() {
     // nav bar sliver https://github.com/flutter/flutter/issues/74516.
     testWidgets(
       'properly displays when the refresh sliver is behind the large title nav bar sliver',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             home: CustomScrollView(
@@ -1082,7 +1082,7 @@ void main() {
   }
 
   void stateMachineTestGroup() {
-    testWidgets('starts in inactive state', (WidgetTester tester) async {
+    testWidgets('starts in inactive state', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -1102,7 +1102,7 @@ void main() {
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('goes to drag and returns to inactive in a small drag', (WidgetTester tester) async {
+    testWidgets('goes to drag and returns to inactive in a small drag', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -1132,7 +1132,7 @@ void main() {
       );
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-    testWidgets('goes to armed the frame it passes the threshold', (WidgetTester tester) async {
+    testWidgets('goes to armed the frame it passes the threshold', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: CustomScrollView(
@@ -1169,7 +1169,7 @@ void main() {
 
     testWidgets(
       'goes to refresh the frame it crossed back the refresh threshold',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             home: CustomScrollView(
@@ -1218,7 +1218,7 @@ void main() {
 
     testWidgets(
       'goes to done internally as soon as the task finishes',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             home: CustomScrollView(
@@ -1266,7 +1266,7 @@ void main() {
 
     testWidgets(
       'goes back to inactive when retracting back past 10% of arming distance',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             home: CustomScrollView(
@@ -1351,7 +1351,7 @@ void main() {
 
     testWidgets(
       'goes back to inactive if already scrolled away when task completes',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             home: CustomScrollView(
@@ -1415,7 +1415,7 @@ void main() {
 
     testWidgets(
       "don't have to build any indicators or occupy space during refresh",
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         mockHelper.refreshIndicator = const Center(child: Text('-1'));
 
         await tester.pumpWidget(
@@ -1463,11 +1463,11 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
     );
 
-    testWidgets('buildRefreshIndicator progress', (WidgetTester tester) async {
+    testWidgets('buildRefreshIndicator progress', (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return CupertinoSliverRefreshControl.buildRefreshIndicator(
                 context,
                 RefreshIndicatorMode.drag,
@@ -1482,7 +1482,7 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           home: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return CupertinoSliverRefreshControl.buildRefreshIndicator(
                 context,
                 RefreshIndicatorMode.drag,
@@ -1497,7 +1497,7 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           home: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return CupertinoSliverRefreshControl.buildRefreshIndicator(
                 context,
                 RefreshIndicatorMode.drag,
@@ -1510,13 +1510,13 @@ void main() {
       expect(tester.widget<CupertinoActivityIndicator>(find.byType(CupertinoActivityIndicator)).progress, 100.0 / 100.0);
     });
 
-    testWidgets('indicator should not become larger when overscrolled', (WidgetTester tester) async {
+    testWidgets('indicator should not become larger when overscrolled', (final WidgetTester tester) async {
       // test for https://github.com/flutter/flutter/issues/79841
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return CupertinoSliverRefreshControl.buildRefreshIndicator(
                 context,
                 RefreshIndicatorMode.done,
@@ -1548,7 +1548,7 @@ void main() {
 
   testWidgets(
     'Does not crash when paintExtent > remainingPaintExtent',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/46871.
       await tester.pumpWidget(
         CupertinoApp(
@@ -1558,7 +1558,7 @@ void main() {
               const CupertinoSliverRefreshControl(),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => const SizedBox(height: 100),
+                  (final BuildContext context, final int index) => const SizedBox(height: 100),
                   childCount: 20,
                 ),
               ),
@@ -1584,11 +1584,11 @@ class FakeBuilder {
   Widget refreshIndicator = Container();
 
   Widget builder(
-    BuildContext context,
-    RefreshIndicatorMode refreshState,
-    double pulledExtent,
-    double refreshTriggerPullDistance,
-    double refreshIndicatorExtent,
+    final BuildContext context,
+    final RefreshIndicatorMode refreshState,
+    final double pulledExtent,
+    final double refreshTriggerPullDistance,
+    final double refreshIndicatorExtent,
   ) {
     if (pulledExtent < 0.0) {
       throw TestFailure('The pulledExtent should never be less than 0.0');
@@ -1642,14 +1642,14 @@ class BuilderInvocation extends MockHelperInvocation {
 }
 
 Matcher matchesBuilder({
-  required RefreshIndicatorMode refreshState,
-  required dynamic pulledExtent,
-  required dynamic refreshTriggerPullDistance,
-  required dynamic refreshIndicatorExtent,
+  required final RefreshIndicatorMode refreshState,
+  required final dynamic pulledExtent,
+  required final dynamic refreshTriggerPullDistance,
+  required final dynamic refreshIndicatorExtent,
 }) {
   return isA<BuilderInvocation>()
-    .having((BuilderInvocation invocation) => invocation.refreshState, 'refreshState', refreshState)
-    .having((BuilderInvocation invocation) => invocation.pulledExtent, 'pulledExtent', pulledExtent)
-    .having((BuilderInvocation invocation) => invocation.refreshTriggerPullDistance, 'refreshTriggerPullDistance', refreshTriggerPullDistance)
-    .having((BuilderInvocation invocation) => invocation.refreshIndicatorExtent, 'refreshIndicatorExtent', refreshIndicatorExtent);
+    .having((final BuilderInvocation invocation) => invocation.refreshState, 'refreshState', refreshState)
+    .having((final BuilderInvocation invocation) => invocation.pulledExtent, 'pulledExtent', pulledExtent)
+    .having((final BuilderInvocation invocation) => invocation.refreshTriggerPullDistance, 'refreshTriggerPullDistance', refreshTriggerPullDistance)
+    .having((final BuilderInvocation invocation) => invocation.refreshIndicatorExtent, 'refreshIndicatorExtent', refreshIndicatorExtent);
 }

@@ -12,7 +12,7 @@ class FittedBoxApp extends StatelessWidget {
   const FittedBoxApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('FittedBox Sample')),
@@ -28,7 +28,7 @@ class FittedBoxExample extends StatelessWidget {
   const FittedBoxExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       height: 400,
       width: 300,

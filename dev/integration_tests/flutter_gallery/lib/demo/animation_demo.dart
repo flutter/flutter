@@ -12,5 +12,5 @@ class AnimationDemo extends StatelessWidget {
   static const String routeName = '/animation';
 
   @override
-  Widget build(BuildContext context) => const AnimationDemoHome();
+  Widget build(final BuildContext context) => const AnimationDemoHome();
 }

@@ -55,7 +55,7 @@ class BuildIOSCommand extends _BuildIOSSubCommand {
   bool get configOnly => boolArg('config-only');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
+  Directory _outputAppDirectory(final String xcodeResultOutput) => globals.fs.directory(xcodeResultOutput).parent;
 }
 
 /// The key that uniquely identifies an image file in an image asset.
@@ -77,7 +77,7 @@ class _ImageAssetFileKey {
   int get hashCode => Object.hash(idiom, scale, size);
 
   @override
-  bool operator ==(Object other) => other is _ImageAssetFileKey
+  bool operator ==(final Object other) => other is _ImageAssetFileKey
       && other.idiom == idiom
       && other.scale == scale
       && other.size == size;
@@ -134,7 +134,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   String? get exportOptionsPlist => stringArg('export-options-plist');
 
   @override
-  Directory _outputAppDirectory(String xcodeResultOutput) => globals.fs
+  Directory _outputAppDirectory(final String xcodeResultOutput) => globals.fs
       .directory(xcodeResultOutput)
       .childDirectory('Products')
       .childDirectory('Applications');
@@ -166,8 +166,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   // with the key to be _ImageAssetFileKey, and value to be the image file name.
   // Some assets have size (e.g. app icon) and others do not (e.g. launch image).
   Map<_ImageAssetFileKey, String> _parseImageAssetContentsJson(
-    String contentsJsonDirName,
-    { required bool requiresSize })
+    final String contentsJsonDirName,
+    { required final bool requiresSize })
   {
     final Directory contentsJsonDirectory = globals.fs.directory(contentsJsonDirName);
     if (!contentsJsonDirectory.existsSync()) {
@@ -201,7 +201,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       if (size != null) {
         // for example, "64x64". Parse the width since it is a square.
         final Iterable<double> parsedSizes = size.split('x')
-          .map((String element) => double.tryParse(element))
+          .map((final String element) => double.tryParse(element))
           .whereType<double>();
         if (parsedSizes.isEmpty) {
           continue;
@@ -213,7 +213,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
       // for example, "3x".
       final Iterable<int> parsedScales = scale.split('x')
-        .map((String element) => int.tryParse(element))
+        .map((final String element) => int.tryParse(element))
         .whereType<int>();
       if (parsedScales.isEmpty) {
         continue;
@@ -226,12 +226,12 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 
   // A helper function to check if an image asset is still using template files.
   bool _isAssetStillUsingTemplateFiles({
-    required Map<_ImageAssetFileKey, String> templateImageInfoMap,
-    required Map<_ImageAssetFileKey, String> projectImageInfoMap,
-    required String templateImageDirName,
-    required String projectImageDirName,
+    required final Map<_ImageAssetFileKey, String> templateImageInfoMap,
+    required final Map<_ImageAssetFileKey, String> projectImageInfoMap,
+    required final String templateImageDirName,
+    required final String projectImageDirName,
   }) {
-    return projectImageInfoMap.entries.any((MapEntry<_ImageAssetFileKey, String> entry) {
+    return projectImageInfoMap.entries.any((final MapEntry<_ImageAssetFileKey, String> entry) {
       final String projectFileName = entry.value;
       final String? templateFileName = templateImageInfoMap[entry.key];
       if (templateFileName == null) {
@@ -252,10 +252,10 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   // A helper function to return a list of image files in an image asset with
   // wrong sizes (as specified in its Contents.json file).
   List<String> _imageFilesWithWrongSize({
-    required Map<_ImageAssetFileKey, String> imageInfoMap,
-    required String imageDirName,
+    required final Map<_ImageAssetFileKey, String> imageInfoMap,
+    required final String imageDirName,
   }) {
-    return imageInfoMap.entries.where((MapEntry<_ImageAssetFileKey, String> entry) {
+    return imageInfoMap.entries.where((final MapEntry<_ImageAssetFileKey, String> entry) {
       final String fileName = entry.value;
       final File imageFile = globals.fs.file(globals.fs.path.join(imageDirName, fileName));
       if (!imageFile.existsSync()) {
@@ -274,15 +274,15 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       final int expectedSize = entry.key.pixelSize!;
       return width != expectedSize || height != expectedSize;
     })
-    .map((MapEntry<_ImageAssetFileKey, String> entry) => entry.value)
+    .map((final MapEntry<_ImageAssetFileKey, String> entry) => entry.value)
     .toList();
   }
 
-  ValidationResult? _createValidationResult(String title, List<ValidationMessage> messages) {
+  ValidationResult? _createValidationResult(final String title, final List<ValidationMessage> messages) {
     if (messages.isEmpty) {
       return null;
     }
-    final bool anyInvalid = messages.any((ValidationMessage message) => message.type != ValidationMessageType.information);
+    final bool anyInvalid = messages.any((final ValidationMessage message) => message.type != ValidationMessageType.information);
     return ValidationResult(
       anyInvalid ? ValidationType.partial : ValidationType.success,
       messages,
@@ -291,8 +291,8 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
   }
 
   ValidationMessage _createValidationMessage({
-    required bool isValid,
-    required String message,
+    required final bool isValid,
+    required final String message,
   }) {
     // Use "information" type for valid message, and "hint" type for invalid message.
     return isValid ? ValidationMessage(message) : ValidationMessage.hint(message);
@@ -382,7 +382,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
     xcodeProjectSettingsMap['Deployment Target'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kMinimumOSVersionKey);
     xcodeProjectSettingsMap['Bundle Identifier'] = globals.plistParser.getStringValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
-    final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((MapEntry<String, String?> entry) {
+    final List<ValidationMessage> validationMessages = xcodeProjectSettingsMap.entries.map((final MapEntry<String, String?> entry) {
       final String title = entry.key;
       final String? info = entry.value;
       return _createValidationMessage(
@@ -391,7 +391,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       );
     }).toList();
 
-    final bool hasMissingSettings = xcodeProjectSettingsMap.values.any((String? element) => element == null);
+    final bool hasMissingSettings = xcodeProjectSettingsMap.values.any((final String? element) => element == null);
     if (hasMissingSettings) {
       validationMessages.add(_createValidationMessage(
         isValid: false,
@@ -498,7 +498,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
       // error: exportArchive: exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd
       // Error Domain=IDEFoundationErrorDomain Code=1 "exportOptionsPlist error for key 'method': expected one of {app-store, ad-hoc, enterprise, development, validation}, but found developmentasdasd" ...
       LineSplitter.split(result.stderr)
-          .where((String line) => line.contains('error: '))
+          .where((final String line) => line.contains('error: '))
           .forEach(errorMessage.writeln);
 
       globals.printError('Encountered error while creating the IPA:');
@@ -558,7 +558,7 @@ class BuildIOSArchiveCommand extends _BuildIOSSubCommand {
 abstract class _BuildIOSSubCommand extends BuildSubCommand {
   _BuildIOSSubCommand({
     required super.logger,
-    required bool verboseHelp
+    required final bool verboseHelp
   }) : super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     addSplitDebugInfoOption();
@@ -612,7 +612,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
     return app;
   }();
 
-  Directory _outputAppDirectory(String xcodeResultOutput);
+  Directory _outputAppDirectory(final String xcodeResultOutput);
 
   @override
   bool get supported => globals.platform.isMacOS;
@@ -689,7 +689,7 @@ abstract class _BuildIOSSubCommand extends BuildSubCommand {
       if (outputAppDirectoryCandidate.existsSync()) {
         appDirectory = outputAppDirectoryCandidate.listSync()
             .whereType<Directory>()
-            .where((Directory directory) {
+            .where((final Directory directory) {
           return globals.fs.path.extension(directory.path) == '.app';
         }).first;
       }

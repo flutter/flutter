@@ -12,7 +12,7 @@ class RestorableRouteFutureExampleApp extends StatelessWidget {
   const RestorableRouteFutureExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       restorationScopeId: 'app',
       home: Scaffold(
@@ -40,14 +40,14 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
   @override
   void initState() {
     super.initState();
-    _counterRoute = RestorableRouteFuture<int>(onPresent: (NavigatorState navigator, Object? arguments) {
+    _counterRoute = RestorableRouteFuture<int>(onPresent: (final NavigatorState navigator, final Object? arguments) {
       // Defines what route should be shown (and how it should be added
       // to the navigator) when `RestorableRouteFuture.present` is called.
       return navigator.restorablePush(
         _counterRouteBuilder,
         arguments: arguments,
       );
-    }, onComplete: (int count) {
+    }, onComplete: (final int count) {
       // Defines what should happen with the return value when the route
       // completes.
       setState(() {
@@ -57,7 +57,7 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     // Register the `RestorableRouteFuture` with the state restoration framework.
     registerForRestoration(_counterRoute, 'route');
     registerForRestoration(_lastCount, 'count');
@@ -73,16 +73,16 @@ class _MyHomeState extends State<MyHome> with RestorationMixin {
   // A static `RestorableRouteBuilder` that can re-create the route during
   // state restoration.
   @pragma('vm:entry-point')
-  static Route<int> _counterRouteBuilder(BuildContext context, Object? arguments) {
+  static Route<int> _counterRouteBuilder(final BuildContext context, final Object? arguments) {
     return MaterialPageRoute<int>(
-      builder: (BuildContext context) => MyCounter(
+      builder: (final BuildContext context) => MyCounter(
         title: arguments!.toString(),
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -118,7 +118,7 @@ class _MyCounterState extends State<MyCounter> with RestorationMixin {
   String get restorationId => 'counter';
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(_count, 'count');
   }
 
@@ -129,7 +129,7 @@ class _MyCounterState extends State<MyCounter> with RestorationMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),

@@ -29,7 +29,7 @@ void main() {
     );
   });
 
-  testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
+  testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (final WidgetTester tester) async {
     const String buttonText = 'Click me';
 
     await tester.pumpWidget(
@@ -70,7 +70,7 @@ void main() {
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
-  testWidgets('Can build children directly as well', (WidgetTester tester) async {
+  testWidgets('Can build children directly as well', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -93,7 +93,7 @@ void main() {
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
-  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgets('Can build from EditableTextState', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(CupertinoApp(
       home: Align(
@@ -108,8 +108,8 @@ void main() {
             cursorColor: const Color(0xff00ffff),
             selectionControls: cupertinoTextSelectionHandleControls,
             contextMenuBuilder: (
-              BuildContext context,
-              EditableTextState editableTextState,
+              final BuildContext context,
+              final EditableTextState editableTextState,
             ) {
               return CupertinoAdaptiveTextSelectionToolbar.editableText(
                 key: key,
@@ -152,7 +152,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('Can build for editable text from raw parameters', (WidgetTester tester) async {
+  testWidgets('Can build for editable text from raw parameters', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(CupertinoApp(
       home: Center(
@@ -191,14 +191,14 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('Builds the correct button per-platform', (WidgetTester tester) async {
+  testWidgets('Builds the correct button per-platform', (final WidgetTester tester) async {
     const String buttonText = 'Click me';
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Column(
                 children: CupertinoAdaptiveTextSelectionToolbar.getAdaptiveButtons(
                   context,

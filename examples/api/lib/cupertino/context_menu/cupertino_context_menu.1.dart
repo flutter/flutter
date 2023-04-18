@@ -26,7 +26,7 @@ class ContextMenuApp extends StatelessWidget {
   const ContextMenuApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: ContextMenuExample(),
@@ -38,7 +38,7 @@ class ContextMenuExample extends StatelessWidget {
   const ContextMenuExample({super.key});
 
   // Or just do this inline in the builder below?
-  static Animation<Decoration> _boxDecorationAnimation(Animation<double> animation) {
+  static Animation<Decoration> _boxDecorationAnimation(final Animation<double> animation) {
     return _tween.animate(
       CurvedAnimation(
         parent: animation,
@@ -51,7 +51,7 @@ class ContextMenuExample extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoContextMenu Sample'),
@@ -93,7 +93,7 @@ class ContextMenuExample extends StatelessWidget {
                 child: const Text('Delete'),
               ),
             ],
-            builder: (BuildContext context, Animation<double> animation) {
+            builder: (final BuildContext context, final Animation<double> animation) {
               final Animation<Decoration> boxDecorationAnimation = _boxDecorationAnimation(animation);
 
               return Container(

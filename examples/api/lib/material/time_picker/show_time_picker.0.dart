@@ -21,20 +21,20 @@ class _ShowTimePickerAppState extends State<ShowTimePickerApp> {
   ThemeMode themeMode = ThemeMode.dark;
   bool useMaterial3 = true;
 
-  void setThemeMode(ThemeMode mode) {
+  void setThemeMode(final ThemeMode mode) {
     setState(() {
       themeMode = mode;
     });
   }
 
-  void setUseMaterial3(bool? value) {
+  void setUseMaterial3(final bool? value) {
     setState(() {
       useMaterial3 = value!;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(useMaterial3: useMaterial3),
       darkTheme: ThemeData.dark(useMaterial3: useMaterial3),
@@ -75,7 +75,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
   MaterialTapTargetSize tapTargetSize = MaterialTapTargetSize.padded;
   bool use24HourTime = false;
 
-  void _entryModeChanged(TimePickerEntryMode? value) {
+  void _entryModeChanged(final TimePickerEntryMode? value) {
     if (value != entryMode) {
       setState(() {
         entryMode = value!;
@@ -83,7 +83,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
     }
   }
 
-  void _orientationChanged(Orientation? value) {
+  void _orientationChanged(final Orientation? value) {
     if (value != orientation) {
       setState(() {
         orientation = value;
@@ -91,7 +91,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
     }
   }
 
-  void _textDirectionChanged(TextDirection? value) {
+  void _textDirectionChanged(final TextDirection? value) {
     if (value != textDirection) {
       setState(() {
         textDirection = value!;
@@ -99,7 +99,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
     }
   }
 
-  void _tapTargetSizeChanged(MaterialTapTargetSize? value) {
+  void _tapTargetSizeChanged(final MaterialTapTargetSize? value) {
     if (value != tapTargetSize) {
       setState(() {
         tapTargetSize = value!;
@@ -107,7 +107,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
     }
   }
 
-  void _use24HourTimeChanged(bool? value) {
+  void _use24HourTimeChanged(final bool? value) {
     if (value != use24HourTime) {
       setState(() {
         use24HourTime = value!;
@@ -115,12 +115,12 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
     }
   }
 
-  void _themeModeChanged(ThemeMode? value) {
+  void _themeModeChanged(final ThemeMode? value) {
     widget.setThemeMode(value!);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Column(
         children: <Widget>[
@@ -201,7 +201,7 @@ class _TimePickerOptionsState extends State<TimePickerOptions> {
                         initialTime: selectedTime ?? TimeOfDay.now(),
                         initialEntryMode: entryMode,
                         orientation: orientation,
-                        builder: (BuildContext context, Widget? child) {
+                        builder: (final BuildContext context, final Widget? child) {
                           // We just wrap these environmental changes around the
                           // child in this builder so that we can apply the
                           // options selected above. In regular usage, this is
@@ -258,7 +258,7 @@ class ChoiceCard<T extends Object?> extends StatelessWidget {
   final ValueChanged<T?> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Card(
       // If the card gets too small, let it scroll both directions.
       child: SingleChildScrollView(
@@ -304,7 +304,7 @@ class EnumCard<T extends Enum> extends StatelessWidget {
   final ValueChanged<T?> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ChoiceCard<T>(
         value: value,
         choices: choices,
@@ -338,7 +338,7 @@ class RadioSelection<T extends Object?> extends StatefulWidget {
 
 class _RadioSelectionState<T extends Object?> extends State<RadioSelection<T>> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[

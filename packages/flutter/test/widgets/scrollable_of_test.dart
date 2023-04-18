@@ -34,7 +34,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(final BuildContext context) => widget.child;
 
   void listener() {
     widget.log('listener ${_position?.pixels.toStringAsFixed(1)}');
@@ -47,7 +47,7 @@ class TestScrollController extends ScrollController {
   final bool deferLoading;
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+  ScrollPosition createScrollPosition(final ScrollPhysics physics, final ScrollContext context, final ScrollPosition? oldPosition) {
     return TestScrollPosition(
       physics: physics,
       context: context,
@@ -68,7 +68,7 @@ class TestScrollPosition extends ScrollPositionWithSingleContext {
   final bool deferLoading;
 
   @override
-  bool recommendDeferredLoading(BuildContext context) => deferLoading;
+  bool recommendDeferredLoading(final BuildContext context) => deferLoading;
 }
 
 class TestScrollable extends StatefulWidget {
@@ -90,7 +90,7 @@ class TestScrollableState extends State<TestScrollable> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }
@@ -114,7 +114,7 @@ class TestChildState extends State<TestChild> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox.square(
       dimension: 1000,
       child: Text(scrollable.axisDirection.toString()),
@@ -123,19 +123,19 @@ class TestChildState extends State<TestChild> {
 }
 
 void main() {
-  testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (WidgetTester tester) async {
+  testWidgets('Scrollable.of() dependent rebuilds when Scrollable position changes', (final WidgetTester tester) async {
     late String logValue;
     final ScrollController controller = ScrollController();
 
     // Changing the SingleChildScrollView's physics causes the
     // ScrollController's ScrollPosition to be rebuilt.
 
-    Widget buildFrame(ScrollPhysics? physics) {
+    Widget buildFrame(final ScrollPhysics? physics) {
       return SingleChildScrollView(
         controller: controller,
         physics: physics,
         child: ScrollPositionListener(
-          log: (String s) { logValue = s; },
+          log: (final String s) { logValue = s; },
           child: const SizedBox(height: 400.0),
         ),
       );
@@ -163,11 +163,11 @@ void main() {
     expect(logValue, 'listener 400.0');
   });
 
-  testWidgets('Scrollable.of() is possible using ScrollNotification context', (WidgetTester tester) async {
+  testWidgets('Scrollable.of() is possible using ScrollNotification context', (final WidgetTester tester) async {
     late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification value) {
+      onNotification: (final ScrollNotification value) {
         notification = value;
         return false;
       },
@@ -183,7 +183,7 @@ void main() {
     expect(Scrollable.of(notification.context!), equals(scrollableElement.state));
   });
 
-  testWidgets('Static Scrollable methods can target a specific axis', (WidgetTester tester) async {
+  testWidgets('Static Scrollable methods can target a specific axis', (final WidgetTester tester) async {
     final TestScrollController horizontalController = TestScrollController(deferLoading: true);
     final TestScrollController verticalController = TestScrollController(deferLoading: false);
     late final AxisDirection foundAxisDirection;
@@ -197,7 +197,7 @@ void main() {
         child: SingleChildScrollView(
           controller: verticalController,
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               foundAxisDirection = Scrollable.of(
                 context,
                 axis: Axis.horizontal,
@@ -218,7 +218,7 @@ void main() {
     expect(foundRecommendation, isTrue);
   });
 
-  testWidgets('Axis targeting scrollables establishes the correct dependencies', (WidgetTester tester) async {
+  testWidgets('Axis targeting scrollables establishes the correct dependencies', (final WidgetTester tester) async {
     final GlobalKey<TestScrollableState> verticalKey = GlobalKey<TestScrollableState>();
     final GlobalKey<TestChildState> childKey = GlobalKey<TestChildState>();
 

@@ -18,7 +18,7 @@ class TestDataSource extends DataTableSource {
 
   int get generation => _generation;
   int _generation = 0;
-  set generation(int value) {
+  set generation(final int value) {
     if (_generation == value) {
       return;
     }
@@ -28,7 +28,7 @@ class TestDataSource extends DataTableSource {
 
   final Set<int> _selectedRows = <int>{};
 
-  void _handleSelected(int index, bool? selected) {
+  void _handleSelected(final int index, final bool? selected) {
     if (selected ?? false) {
       _selectedRows.add(index);
     } else {
@@ -38,7 +38,7 @@ class TestDataSource extends DataTableSource {
   }
 
   @override
-  DataRow getRow(int index) {
+  DataRow getRow(final int index) {
     final Dessert dessert = kDesserts[index % kDesserts.length];
     final int page = index ~/ kDesserts.length;
     return DataRow.byIndex(
@@ -49,7 +49,7 @@ class TestDataSource extends DataTableSource {
         DataCell(Text('${dessert.calories}')),
         DataCell(Text('$generation')),
       ],
-      onSelectChanged: allowSelection ? (bool? selected) => _handleSelected(index, selected) : null,
+      onSelectChanged: allowSelection ? (final bool? selected) => _handleSelected(index, selected) : null,
     );
   }
 
@@ -66,7 +66,7 @@ class TestDataSource extends DataTableSource {
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable paging', (final WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
     final List<String> log = <String>[];
@@ -80,10 +80,10 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {
+        onRowsPerPageChanged: (final int? rowsPerPage) {
           log.add('rows-per-page-changed: $rowsPerPage');
         },
-        onPageChanged: (int rowIndex) {
+        onPageChanged: (final int rowIndex) {
           log.add('page-changed: $rowIndex');
         },
         columns: const <DataColumn>[
@@ -118,7 +118,7 @@ void main() {
 
     final Finder lastPageButton = find.ancestor(
       of: find.byTooltip('Last page'),
-      matching: find.byWidgetPredicate((Widget widget) => widget is IconButton),
+      matching: find.byWidgetPredicate((final Widget widget) => widget is IconButton),
     );
 
     expect(tester.widget<IconButton>(lastPageButton).onPressed, isNotNull);
@@ -138,7 +138,7 @@ void main() {
 
     final Finder firstPageButton = find.ancestor(
       of: find.byTooltip('First page'),
-      matching: find.byWidgetPredicate((Widget widget) => widget is IconButton),
+      matching: find.byWidgetPredicate((final Widget widget) => widget is IconButton),
     );
 
     expect(tester.widget<IconButton>(firstPageButton).onPressed, isNotNull);
@@ -170,17 +170,17 @@ void main() {
     log.clear();
   });
 
-  testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable control test', (final WidgetTester tester) async {
     TestDataSource source = TestDataSource()
       ..generation = 42;
 
     final List<String> log = <String>[];
 
-    Widget buildTable(TestDataSource source) {
+    Widget buildTable(final TestDataSource source) {
       return PaginatedDataTable(
         header: const Text('Test table'),
         source: source,
-        onPageChanged: (int rowIndex) {
+        onPageChanged: (final int rowIndex) {
           log.add('page-changed: $rowIndex');
         },
         columns: <DataColumn>[
@@ -192,7 +192,7 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {
+            onSort: (final int columnIndex, final bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
             },
           ),
@@ -263,7 +263,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('PaginatedDataTable text alignment', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable text alignment', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: PaginatedDataTable(
         header: const Text('HEADER'),
@@ -272,7 +272,7 @@ void main() {
         availableRowsPerPage: const <int>[
           8, 9,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) { },
+        onRowsPerPageChanged: (final int? rowsPerPage) { },
         columns: const <DataColumn>[
           DataColumn(label: Text('COL1')),
           DataColumn(label: Text('COL2')),
@@ -285,13 +285,13 @@ void main() {
     expect(tester.getTopRight(find.text('8')).dx, tester.getTopRight(find.text('Rows per page:')).dx + 40.0); // per spec
   });
 
-  testWidgets('PaginatedDataTable with and without header and actions', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable with and without header and actions', (final WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
     const String headerText = 'HEADER';
     final List<Widget> actions = <Widget>[
       IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
     ];
-    Widget buildTable({String? header, List<Widget>? actions}) => MaterialApp(
+    Widget buildTable({final String? header, final List<Widget>? actions}) => MaterialApp(
       home: PaginatedDataTable(
         header: header != null ? Text(header) : null,
         actions: actions,
@@ -321,7 +321,7 @@ void main() {
     await binding.setSurfaceSize(null);
   });
 
-  testWidgets('PaginatedDataTable with large text', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable with large text', (final WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
@@ -333,7 +333,7 @@ void main() {
           source: source,
           rowsPerPage: 501,
           availableRowsPerPage: const <int>[ 501 ],
-          onRowsPerPageChanged: (int? rowsPerPage) { },
+          onRowsPerPageChanged: (final int? rowsPerPage) { },
           columns: const <DataColumn>[
             DataColumn(label: Text('COL1')),
             DataColumn(label: Text('COL2')),
@@ -358,7 +358,7 @@ void main() {
     expect(tester.getTopRight(find.text('501')).dx, greaterThanOrEqualTo(tester.getTopRight(find.text('Rows per page:')).dx + 40.0));
   }, skip: isBrowser);  // https://github.com/flutter/flutter/issues/43433
 
-  testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable footer scrolls', (final WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     await tester.pumpWidget(
       MaterialApp(
@@ -372,7 +372,7 @@ void main() {
               rowsPerPage: 5,
               dragStartBehavior: DragStartBehavior.down,
               availableRowsPerPage: const <int>[ 5 ],
-              onRowsPerPageChanged: (int? rowsPerPage) { },
+              onRowsPerPageChanged: (final int? rowsPerPage) { },
               columns: const <DataColumn>[
                 DataColumn(label: Text('COL1')),
                 DataColumn(label: Text('COL2')),
@@ -394,14 +394,14 @@ void main() {
     expect(tester.getTopLeft(find.text('Rows per page:')).dx, 18.0); // 14 padding in the footer row, 4 padding from the card
   });
 
-  testWidgets('PaginatedDataTable custom row height', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable custom row height', (final WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
     Widget buildCustomHeightPaginatedTable({
-      double? dataRowHeight,
-      double? dataRowMinHeight,
-      double? dataRowMaxHeight,
-      double headingRowHeight = 56.0,
+      final double? dataRowHeight,
+      final double? dataRowMinHeight,
+      final double? dataRowMaxHeight,
+      final double headingRowHeight = 56.0,
     }) {
       return PaginatedDataTable(
         header: const Text('Test table'),
@@ -410,8 +410,8 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
-        onPageChanged: (int rowIndex) {},
+        onRowsPerPageChanged: (final int? rowsPerPage) {},
+        onPageChanged: (final int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -433,8 +433,8 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
-        onPageChanged: (int rowIndex) {},
+        onRowsPerPageChanged: (final int? rowsPerPage) {},
+        onPageChanged: (final int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -486,7 +486,7 @@ void main() {
     ).size.height, 51.0);
   });
 
-  testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (final WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -514,9 +514,9 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
-        onPageChanged: (int rowIndex) {},
-        onSelectAll: (bool? value) {},
+        onRowsPerPageChanged: (final int? rowsPerPage) {},
+        onPageChanged: (final int rowIndex) {},
+        onSelectAll: (final bool? value) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -583,9 +583,9 @@ void main() {
           availableRowsPerPage: const <int>[
             2, 4,
           ],
-          onRowsPerPageChanged: (int? rowsPerPage) {},
-          onPageChanged: (int rowIndex) {},
-          onSelectAll: (bool? value) {},
+          onRowsPerPageChanged: (final int? rowsPerPage) {},
+          onPageChanged: (final int rowIndex) {},
+          onSelectAll: (final bool? value) {},
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -649,7 +649,7 @@ void main() {
     await binding.setSurfaceSize(originalSize);
   });
 
-  testWidgets('PaginatedDataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable custom horizontal padding - no checkbox', (final WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -666,8 +666,8 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
-        onPageChanged: (int rowIndex) {},
+        onRowsPerPageChanged: (final int? rowsPerPage) {},
+        onPageChanged: (final int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -722,8 +722,8 @@ void main() {
           availableRowsPerPage: const <int>[
             2, 4, 8, 16,
           ],
-          onRowsPerPageChanged: (int? rowsPerPage) {},
-          onPageChanged: (int rowIndex) {},
+          onRowsPerPageChanged: (final int? rowsPerPage) {},
+          onPageChanged: (final int rowIndex) {},
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -772,7 +772,7 @@ void main() {
     );
   });
 
-  testWidgets('PaginatedDataTable table fills Card width', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable table fills Card width', (final WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
     // 800 is wide enough to ensure that all of the columns fit in the
@@ -797,8 +797,8 @@ void main() {
         availableRowsPerPage: const <int>[
           2, 4, 8, 16,
         ],
-        onRowsPerPageChanged: (int? rowsPerPage) {},
-        onPageChanged: (int rowIndex) {},
+        onRowsPerPageChanged: (final int? rowsPerPage) {},
+        onPageChanged: (final int rowIndex) {},
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
@@ -836,11 +836,11 @@ void main() {
     await binding.setSurfaceSize(originalSize);
   });
 
-  testWidgets('PaginatedDataTable with optional column checkbox', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable with optional column checkbox', (final WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => binding.setSurfaceSize(null));
 
-    Widget buildTable(bool checkbox) => MaterialApp(
+    Widget buildTable(final bool checkbox) => MaterialApp(
       home: PaginatedDataTable(
         header: const Text('Test table'),
         source: TestDataSource(allowSelection: true),
@@ -860,7 +860,7 @@ void main() {
     expect(find.byType(Checkbox), findsNothing);
   });
 
-  testWidgets('Table should not use decoration from DataTableTheme', (WidgetTester tester) async {
+  testWidgets('Table should not use decoration from DataTableTheme', (final WidgetTester tester) async {
     final Size originalSize = binding.renderView.size;
     await binding.setSurfaceSize(const Size(800, 800));
 
@@ -891,7 +891,7 @@ void main() {
     await binding.setSurfaceSize(originalSize);
   });
 
-  testWidgets('PaginatedDataTable custom checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable custom checkboxHorizontalMargin properly applied', (final WidgetTester tester) async {
     const double customCheckboxHorizontalMargin = 15.0;
     const double customHorizontalMargin = 10.0;
 
@@ -919,9 +919,9 @@ void main() {
           availableRowsPerPage: const <int>[
             2, 4,
           ],
-          onRowsPerPageChanged: (int? rowsPerPage) {},
-          onPageChanged: (int rowIndex) {},
-          onSelectAll: (bool? value) {},
+          onRowsPerPageChanged: (final int? rowsPerPage) {},
+          onPageChanged: (final int rowIndex) {},
+          onSelectAll: (final bool? value) {},
           columns: const <DataColumn>[
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Calories'), numeric: true),
@@ -957,7 +957,7 @@ void main() {
     await binding.setSurfaceSize(originalSize);
   });
 
-  testWidgets('Items selected text uses secondary color', (WidgetTester tester) async {
+  testWidgets('Items selected text uses secondary color', (final WidgetTester tester) async {
     const Color selectedTextColor = Color(0xff00ddff);
     final ColorScheme colors = const ColorScheme.light().copyWith(secondary: selectedTextColor);
     final ThemeData theme = ThemeData.from(colorScheme: colors);
@@ -996,7 +996,7 @@ void main() {
     await binding.setSurfaceSize(null);
   });
 
-  testWidgets('PaginatedDataTable arrowHeadColor set properly', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable arrowHeadColor set properly', (final WidgetTester tester) async {
     await binding.setSurfaceSize(const Size(800, 800));
     addTearDown(() => binding.setSurfaceSize(null));
     const Color arrowHeadColor = Color(0xFFE53935);
@@ -1025,11 +1025,11 @@ void main() {
     expect(icons.elementAt(3).color, arrowHeadColor);
   });
 
-  testWidgets('OverflowBar header left alignment', (WidgetTester tester) async {
+  testWidgets('OverflowBar header left alignment', (final WidgetTester tester) async {
     // Test an old special case that tried to align the first child of a ButtonBar
     // and the left edge of a Text header widget. Still possible with OverflowBar
     // albeit without any special case in the implementation's build method.
-    Widget buildFrame(Widget header) {
+    Widget buildFrame(final Widget header) {
       return MaterialApp(
         home: PaginatedDataTable(
           header: header,
@@ -1053,11 +1053,11 @@ void main() {
     expect(headerX, tester.getTopLeft(find.byType(ElevatedButton)).dx);
   });
 
-  testWidgets('PaginatedDataTable can be scrolled using ScrollController', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable can be scrolled using ScrollController', (final WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
     final ScrollController scrollController = ScrollController();
 
-    Widget buildTable(TestDataSource source) {
+    Widget buildTable(final TestDataSource source) {
       return Align(
         alignment: Alignment.topLeft,
         child: SizedBox(
@@ -1102,7 +1102,7 @@ void main() {
     expect(scrollController.offset, 50.0);
   });
 
-  testWidgets('PaginatedDataTable uses PrimaryScrollController when primary ', (WidgetTester tester) async {
+  testWidgets('PaginatedDataTable uses PrimaryScrollController when primary ', (final WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     final TestDataSource source = TestDataSource();
 

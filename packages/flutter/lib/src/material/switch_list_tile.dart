@@ -509,7 +509,7 @@ class SwitchListTile extends StatelessWidget {
   final bool? applyCupertinoTheme;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget control;
     switch (_switchListTileType) {
       case _SwitchListTileType.adaptive:

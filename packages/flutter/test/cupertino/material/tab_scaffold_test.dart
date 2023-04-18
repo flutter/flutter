@@ -17,7 +17,7 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  testWidgets('Last tab gets focus', (WidgetTester tester) async {
+  testWidgets('Last tab gets focus', (final WidgetTester tester) async {
     // 2 nodes for 2 tabs
     final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
 
@@ -26,7 +26,7 @@ void main() {
         home: Material(
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               return TextField(
                 focusNode: focusNodes[index],
                 autofocus: true,
@@ -52,7 +52,7 @@ void main() {
     expect(focusNodes[1].hasFocus, isFalse);
   });
 
-  testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
+  testWidgets('Do not affect focus order in the route', (final WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
       FocusNode(), FocusNode(), FocusNode(), FocusNode(),
     ];
@@ -62,7 +62,7 @@ void main() {
         home: Material(
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               return Column(
                 children: <Widget>[
                   TextField(
@@ -86,14 +86,14 @@ void main() {
     );
 
     expect(
-      focusNodes.any((FocusNode node) => node.hasFocus),
+      focusNodes.any((final FocusNode node) => node.hasFocus),
       isFalse,
     );
 
     await tester.tap(find.widgetWithText(TextField, 'TextField 2'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((final FocusNode node) => node.hasFocus)),
       1,
     );
 
@@ -103,7 +103,7 @@ void main() {
     await tester.tap(find.widgetWithText(TextField, 'TextField 1'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((final FocusNode node) => node.hasFocus)),
       2,
     );
 
@@ -113,17 +113,17 @@ void main() {
     // Upon going back to tab 1, the item it tab 1 that previously had the focus
     // (TextField 2) gets it back.
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((final FocusNode node) => node.hasFocus)),
       1,
     );
   });
 
-  testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+  testWidgets('Tab bar respects themes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -149,7 +149,7 @@ void main() {
         ),
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -176,7 +176,7 @@ void main() {
     expect(tab2.text.style!.color!.value, CupertinoColors.systemRed.darkColor.value);
   });
 
-  testWidgets('dark mode background color', (WidgetTester tester) async {
+  testWidgets('dark mode background color', (final WidgetTester tester) async {
     const CupertinoDynamicColor backgroundColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF123456),
       darkColor: Color(0xFF654321),
@@ -187,7 +187,7 @@ void main() {
         home: CupertinoTabScaffold(
           backgroundColor: backgroundColor,
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -212,7 +212,7 @@ void main() {
         home: CupertinoTabScaffold(
           backgroundColor: backgroundColor,
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -229,7 +229,7 @@ void main() {
     expect(tabDecoration.color!.value, backgroundColor.darkColor.value);
   });
 
-  testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
+  testWidgets('Does not lose state when focusing on text input', (final WidgetTester tester) async {
     // Regression testing for https://github.com/flutter/flutter/issues/28457.
 
     await tester.pumpWidget(
@@ -239,7 +239,7 @@ void main() {
           home: Material(
             child: CupertinoTabScaffold(
               tabBar: _buildTabBar(),
-              tabBuilder: (BuildContext context, int index) {
+              tabBuilder: (final BuildContext context, final int index) {
                 return const TextField();
               },
             ),
@@ -261,7 +261,7 @@ void main() {
           home: Material(
             child: CupertinoTabScaffold(
               tabBar: _buildTabBar(),
-              tabBuilder: (BuildContext context, int index) {
+              tabBuilder: (final BuildContext context, final int index) {
                 return const TextField();
               },
             ),
@@ -275,20 +275,20 @@ void main() {
     expect(find.text("don't lose me"), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgets('textScaleFactor is set to 1.0', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Builder(builder: (BuildContext context) {
+        home: Builder(builder: (final BuildContext context) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
+                  (final int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
                 ),
               ),
-              tabBuilder: (BuildContext context, int index) => const Text('content'),
+              tabBuilder: (final BuildContext context, final int index) => const Text('content'),
             ),
           );
         }),
@@ -311,14 +311,14 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems.any((final RichText t) => t.textScaleFactor != 1), isFalse);
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents.any((final RichText t) => t.textScaleFactor != 99), isFalse);
   });
 }
 
-CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
+CupertinoTabBar _buildTabBar({ final int selectedTab = 0 }) {
   return CupertinoTabBar(
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
@@ -331,6 +331,6 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
       ),
     ],
     currentIndex: selectedTab,
-    onTap: (int newTab) => selectedTabs.add(newTab),
+    onTap: (final int newTab) => selectedTabs.add(newTab),
   );
 }

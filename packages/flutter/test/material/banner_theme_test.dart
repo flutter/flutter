@@ -24,19 +24,19 @@ void main() {
     expect(bannerTheme.leadingPadding, null);
   });
 
-  testWidgets('Default MaterialBannerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default MaterialBannerThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const MaterialBannerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('MaterialBannerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('MaterialBannerThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const MaterialBannerThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -50,8 +50,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[
@@ -66,14 +66,14 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no MaterialBannerThemeData returns defaults', (final WidgetTester tester) async {
     const String contentText = 'Content';
     final ThemeData theme = ThemeData(useMaterial3: true);
     late final ThemeData localizedTheme;
 
     await tester.pumpWidget(MaterialApp(
       theme: theme,
-      builder:(BuildContext context, Widget? child) {
+      builder:(final BuildContext context, final Widget? child) {
         localizedTheme = Theme.of(context);
         return child!;
       },
@@ -115,7 +115,7 @@ void main() {
     expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
-  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (final WidgetTester tester) async {
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
     final ThemeData theme = ThemeData(useMaterial3: true);
@@ -125,7 +125,7 @@ void main() {
       theme: theme,
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             localizedTheme = Theme.of(context);
             return GestureDetector(
               key: tapTarget,
@@ -178,7 +178,7 @@ void main() {
     expect(divider.color, theme.colorScheme.outlineVariant);
   });
 
-  testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (WidgetTester tester) async {
+  testWidgets('MaterialBanner uses values from MaterialBannerThemeData', (final WidgetTester tester) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
     await tester.pumpWidget(MaterialApp(
@@ -217,7 +217,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgets('MaterialBanner uses values from MaterialBannerThemeData when presented by ScaffoldMessenger', (final WidgetTester tester) async {
     final MaterialBannerThemeData bannerTheme = _bannerTheme();
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
@@ -225,7 +225,7 @@ void main() {
       theme: ThemeData(bannerTheme: bannerTheme),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -273,7 +273,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('MaterialBanner widget properties take priority over theme', (final WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color surfaceTintColor = Colors.red;
     const Color shadowColor = Colors.orange;
@@ -324,7 +324,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgets('MaterialBanner widget properties take priority over theme when presented by ScaffoldMessenger', (final WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const double elevation = 6.0;
     const TextStyle textStyle = TextStyle(color: Colors.green);
@@ -336,7 +336,7 @@ void main() {
       theme: ThemeData(bannerTheme: bannerTheme),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -387,7 +387,7 @@ void main() {
     expect(find.byType(Divider), findsNothing);
   });
 
-  testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
+  testWidgets('MaterialBanner uses color scheme when necessary', (final WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
     const String contentText = 'Content';
     await tester.pumpWidget(MaterialApp(
@@ -409,7 +409,7 @@ void main() {
     expect(material.color, colorScheme.surface);
   });
 
-  testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (WidgetTester tester) async {
+  testWidgets('MaterialBanner uses color scheme when necessary when presented by ScaffoldMessenger', (final WidgetTester tester) async {
     final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
     const String contentText = 'Content';
     const Key tapTarget = Key('tap-target');
@@ -417,7 +417,7 @@ void main() {
       theme: ThemeData(colorScheme: colorScheme),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               key: tapTarget,
               onTap: () {
@@ -452,7 +452,7 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults', (WidgetTester tester) async {
+    testWidgets('Passing no MaterialBannerThemeData returns defaults', (final WidgetTester tester) async {
       const String contentText = 'Content';
 
       await tester.pumpWidget(MaterialApp(
@@ -497,14 +497,14 @@ void main() {
       expect(divider.color, null);
     });
 
-    testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (WidgetTester tester) async {
+    testWidgets('Passing no MaterialBannerThemeData returns defaults when presented by ScaffoldMessenger', (final WidgetTester tester) async {
       const String contentText = 'Content';
       const Key tapTarget = Key('tap-target');
 
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return GestureDetector(
                 key: tapTarget,
                 onTap: () {
@@ -574,7 +574,7 @@ MaterialBannerThemeData _bannerTheme() {
   );
 }
 
-Material _getMaterialFromText(WidgetTester tester, String text) {
+Material _getMaterialFromText(final WidgetTester tester, final String text) {
   return tester.widget<Material>(find.widgetWithText(Material, text).first);
 }
 
@@ -582,10 +582,10 @@ Finder _materialFinder() {
   return find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Material)).first;
 }
 
-RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
+RenderParagraph _getTextRenderObjectFromDialog(final WidgetTester tester, final String text) {
   return tester.element<StatelessElement>(_textFinder(text)).renderObject! as RenderParagraph;
 }
 
-Finder _textFinder(String text) {
+Finder _textFinder(final String text) {
   return find.descendant(of: find.byType(MaterialBanner), matching: find.text(text));
 }

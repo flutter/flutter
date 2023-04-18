@@ -10,8 +10,8 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('MouseTrackerAnnotation has correct toString', () {
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
-      onEnter: (_) {},
-      onExit: (_) {},
+      onEnter: (final _) {},
+      onExit: (final _) {},
     );
     expect(
       annotation1.toString(),
@@ -25,7 +25,7 @@ void main() {
     );
 
     final MouseTrackerAnnotation annotation3 = MouseTrackerAnnotation(
-      onEnter: (_) {},
+      onEnter: (final _) {},
       cursor: SystemMouseCursors.grab,
     );
     expect(

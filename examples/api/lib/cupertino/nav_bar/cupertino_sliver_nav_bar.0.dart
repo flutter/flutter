@@ -12,7 +12,7 @@ class SliverNavBarApp extends StatelessWidget {
   const SliverNavBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: SliverNavBarExample(),
@@ -24,7 +24,7 @@ class SliverNavBarExample extends StatelessWidget {
   const SliverNavBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       // A ScrollView that creates custom scroll effects using slivers.
       child: CustomScrollView(
@@ -50,7 +50,7 @@ class SliverNavBarExample extends StatelessWidget {
                     Navigator.push(
                       context,
                       CupertinoPageRoute<Widget>(
-                        builder: (BuildContext context) {
+                        builder: (final BuildContext context) {
                           return const NextPage();
                         },
                       ),
@@ -71,7 +71,7 @@ class NextPage extends StatelessWidget {
   const NextPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Brightness brightness = CupertinoTheme.brightnessOf(context);
     return CupertinoPageScaffold(
       child: CustomScrollView(

@@ -14,7 +14,7 @@ class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: ExampleWidget(),
     );
@@ -31,7 +31,7 @@ class ExampleWidget extends StatelessWidget {
   const ExampleWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // The Cardo, Milonga and Raleway Dots fonts can be downloaded from Google
     // Fonts (https://www.google.com/fonts).
     return Scaffold(

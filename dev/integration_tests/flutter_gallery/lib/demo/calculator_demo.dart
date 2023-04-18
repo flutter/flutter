@@ -12,5 +12,5 @@ class CalculatorDemo extends StatelessWidget {
   static const String routeName = '/calculator';
 
   @override
-  Widget build(BuildContext context) => const Calculator();
+  Widget build(final BuildContext context) => const Calculator();
 }

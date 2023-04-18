@@ -297,8 +297,8 @@ class StrutStyle with Diagnosticable {
   /// If provided, fontSize must be positive and non-zero, leading must be
   /// zero or positive.
   const StrutStyle({
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
     this.fontSize,
     this.height,
     this.leadingDistribution,
@@ -307,7 +307,7 @@ class StrutStyle with Diagnosticable {
     this.fontStyle,
     this.forceStrutHeight,
     this.debugLabel,
-    String? package,
+    final String? package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        _fontFamilyFallback = fontFamilyFallback,
        _package = package,
@@ -335,18 +335,18 @@ class StrutStyle with Diagnosticable {
   /// an empty list instead of null. This prevents the previous package name
   /// from being prepended twice.
   StrutStyle.fromTextStyle(
-    TextStyle textStyle, {
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    double? height,
-    TextLeadingDistribution? leadingDistribution,
+    final TextStyle textStyle, {
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final double? fontSize,
+    final double? height,
+    final TextLeadingDistribution? leadingDistribution,
     this.leading, // TextStyle does not have an equivalent (yet).
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
+    final FontWeight? fontWeight,
+    final FontStyle? fontStyle,
     this.forceStrutHeight,
-    String? debugLabel,
-    String? package,
+    final String? debugLabel,
+    final String? package,
   }) : assert(fontSize == null || fontSize > 0),
        assert(leading == null || leading >= 0),
        assert(package == null || fontFamily != null || fontFamilyFallback != null),
@@ -405,7 +405,7 @@ class StrutStyle with Diagnosticable {
   /// constructor.
   List<String>? get fontFamilyFallback {
     if (_package != null && _fontFamilyFallback != null) {
-      return _fontFamilyFallback!.map((String family) => 'packages/$_package/$family').toList();
+      return _fontFamilyFallback!.map((final String family) => 'packages/$_package/$family').toList();
     }
     return _fontFamilyFallback;
   }
@@ -517,7 +517,7 @@ class StrutStyle with Diagnosticable {
   /// See also:
   ///
   ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
-  RenderComparison compareTo(StrutStyle other) {
+  RenderComparison compareTo(final StrutStyle other) {
     if (identical(this, other)) {
       return RenderComparison.identical;
     }
@@ -542,7 +542,7 @@ class StrutStyle with Diagnosticable {
   /// [StrutStyle] shares many of the same basic properties as [TextStyle].
   ///
   /// If the given text style is null, returns this strut style.
-  StrutStyle inheritFromTextStyle(TextStyle? other) {
+  StrutStyle inheritFromTextStyle(final TextStyle? other) {
     if (other == null) {
       return this;
     }
@@ -562,7 +562,7 @@ class StrutStyle with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -595,7 +595,7 @@ class StrutStyle with Diagnosticable {
 
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties, { final String prefix = '' }) {
     super.debugFillProperties(properties);
     if (debugLabel != null) {
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel!));
@@ -622,7 +622,7 @@ class StrutStyle with Diagnosticable {
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
     styles.add(FlagProperty('${prefix}forceStrutHeight', value: forceStrutHeight, ifTrue: '$prefix<strut height forced>', ifFalse: '$prefix<strut height normal>'));
 
-    final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
+    final bool styleSpecified = styles.any((final DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     styles.forEach(properties.add);
 
     if (!styleSpecified) {

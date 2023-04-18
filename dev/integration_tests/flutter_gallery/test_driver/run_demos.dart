@@ -18,7 +18,7 @@ final List<String> kSkippedDemos = <String>[
 
 /// Scrolls each demo menu item into view, launches it, then returns to the
 /// home screen twice.
-Future<void> runDemos(List<String> demos, WidgetController controller) async {
+Future<void> runDemos(final List<String> demos, final WidgetController controller) async {
   final Finder demoList = find.byType(Scrollable);
   String? currentDemoCategory;
 

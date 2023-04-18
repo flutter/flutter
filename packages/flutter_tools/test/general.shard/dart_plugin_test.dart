@@ -282,7 +282,7 @@ void main() {
         ]);
         expect(resolutions.length, equals(3));
         expect(
-          resolutions.map((PluginInterfaceResolution resolution) => resolution.toMap()),
+          resolutions.map((final PluginInterfaceResolution resolution) => resolution.toMap()),
           containsAll(<Map<String, String>>[
             <String, String>{
               'pluginName': 'url_launcher',
@@ -1068,10 +1068,10 @@ void main() {
 }
 
 void createFakeDartPlugins(
-  FakeFlutterProject flutterProject,
-  FakeFlutterManifest flutterManifest,
-  FileSystem fs,
-  Map<String, String> plugins,
+  final FakeFlutterProject flutterProject,
+  final FakeFlutterManifest flutterManifest,
+  final FileSystem fs,
+  final Map<String, String> plugins,
 ) {
   final Directory fakePubCache = fs.systemTempDirectory.childDirectory('cache');
   final File packagesFile = flutterProject.directory

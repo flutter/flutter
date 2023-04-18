@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets(
     'Items can be selected, added, and removed from SliverAnimatedList',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(const example.SliverAnimatedListSample());
 
       expect(find.text('Item 0'), findsOneWidget);

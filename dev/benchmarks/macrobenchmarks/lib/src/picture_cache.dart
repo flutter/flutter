@@ -10,7 +10,7 @@ class PictureCachePage extends StatelessWidget {
   static const List<String> kTabNames = <String>['1', '2', '3', '4', '5'];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: kTabNames.length, // This is the number of tabs.
       child: Scaffold(
@@ -20,19 +20,19 @@ class PictureCachePage extends StatelessWidget {
           // expandedHeight: 50.0,
           // forceElevated: innerBoxIsScrolled,
           bottom: TabBar(
-            tabs: kTabNames.map((String name) => Tab(text: name)).toList(),
+            tabs: kTabNames.map((final String name) => Tab(text: name)).toList(),
           ),
         ),
         body: TabBarView(
           key: const Key('tabbar_view'), // this key is used by the driver test
-          children: kTabNames.map((String name) {
+          children: kTabNames.map((final String name) {
             return SafeArea(
               top: false,
               bottom: false,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return ListView.builder(
-                    itemBuilder: (BuildContext context, int index) => ListItem(index: index),
+                    itemBuilder: (final BuildContext context, final int index) => ListItem(index: index),
                   );
                 },
               ),
@@ -54,7 +54,7 @@ class ListItem extends StatelessWidget {
   static const int kMockCount = 999;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<Widget> contents = <Widget>[
       const SizedBox(
         height: 15,
@@ -208,7 +208,7 @@ class ListItem extends StatelessWidget {
     );
   }
 
-  String _convertCountToStr(int count) {
+  String _convertCountToStr(final int count) {
     if (count < 10000) {
       return count.toString();
     } else if (count < 100000) {
@@ -254,7 +254,7 @@ class ListItem extends StatelessWidget {
     );
   }
 
-  Widget buildDivider(double height, EdgeInsets padding) {
+  Widget buildDivider(final double height, final EdgeInsets padding) {
     return Container(
       padding: padding,
       height: height,

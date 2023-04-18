@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Router state restoration without RouteInformationProvider', (WidgetTester tester) async {
+  testWidgets('Router state restoration without RouteInformationProvider', (final WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
     _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
 
@@ -41,7 +41,7 @@ void main() {
     expect(delegate().restoredRoutePaths, <String>['/foo', '/foo']);
   });
 
-  testWidgets('Router state restoration with RouteInformationProvider', (WidgetTester tester) async {
+  testWidgets('Router state restoration with RouteInformationProvider', (final WidgetTester tester) async {
     final UniqueKey router = UniqueKey();
     _TestRouterDelegate delegate() => tester.widget<Router<Object?>>(find.byKey(router)).routerDelegate as _TestRouterDelegate;
     _TestRouteInformationProvider provider() => tester.widget<Router<Object?>>(find.byKey(router)).routeInformationProvider! as _TestRouteInformationProvider;
@@ -79,12 +79,12 @@ void main() {
 
 class _TestRouteInformationParser extends RouteInformationParser<String> {
   @override
-  Future<String> parseRouteInformation(RouteInformation routeInformation) {
+  Future<String> parseRouteInformation(final RouteInformation routeInformation) {
     return SynchronousFuture<String>(routeInformation.location!);
   }
 
   @override
-  RouteInformation? restoreRouteInformation(String configuration) {
+  RouteInformation? restoreRouteInformation(final String configuration) {
     return RouteInformation(location: configuration);
   }
 }
@@ -96,7 +96,7 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
   @override
   String? get currentConfiguration => _currentConfiguration;
   String? _currentConfiguration;
-  set currentConfiguration(String? value) {
+  set currentConfiguration(final String? value) {
     if (value == _currentConfiguration) {
       return;
     }
@@ -105,21 +105,21 @@ class _TestRouterDelegate extends RouterDelegate<String> with ChangeNotifier {
   }
 
   @override
-  Future<void> setNewRoutePath(String configuration) {
+  Future<void> setNewRoutePath(final String configuration) {
     _currentConfiguration = configuration;
     newRoutePaths.add(configuration);
     return SynchronousFuture<void>(null);
   }
 
   @override
-  Future<void> setRestoredRoutePath(String configuration) {
+  Future<void> setRestoredRoutePath(final String configuration) {
     _currentConfiguration = configuration;
     restoredRoutePaths.add(configuration);
     return SynchronousFuture<void>(null);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Text('Current config: $currentConfiguration', textDirection: TextDirection.ltr);
   }
 
@@ -131,7 +131,7 @@ class _TestRouteInformationProvider extends RouteInformationProvider with Change
   @override
   RouteInformation get value => _value;
   RouteInformation _value = const RouteInformation(location: '/home');
-  set value(RouteInformation value) {
+  set value(final RouteInformation value) {
     if (value == _value) {
       return;
     }
@@ -147,7 +147,7 @@ class _TestWidget extends StatelessWidget {
   final Key? routerKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RootRestorationScope(
       restorationId: 'root',
       child: Router<String>(

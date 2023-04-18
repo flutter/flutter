@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/implicit_animations/animated_slide.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Translate FlutterLogo using AnimatedSlide', (WidgetTester tester) async {
+  testWidgets('Translate FlutterLogo using AnimatedSlide', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.AnimatedSlideApp(),
     );

@@ -33,7 +33,7 @@ String getArtifactPath() {
 }
 
 /// Return the item is in idList if find a match, otherwise return null
-String? _findMatchId(List<String> idList, String idPattern) {
+String? _findMatchId(final List<String> idList, String idPattern) {
   String? candidate;
   idPattern = idPattern.toLowerCase();
   for(final String id in idList) {
@@ -100,7 +100,7 @@ abstract class DeviceDiscovery {
   Future<void> chooseWorkingDevice();
 
   /// Selects a device to work with by device ID.
-  Future<void> chooseWorkingDeviceById(String deviceId);
+  Future<void> chooseWorkingDeviceById(final String deviceId);
 
   /// A device to work with.
   ///
@@ -154,10 +154,10 @@ abstract class Device {
   Future<void> reboot();
 
   /// Emulate a tap on the touch screen.
-  Future<void> tap(int x, int y);
+  Future<void> tap(final int x, final int y);
 
   /// Read memory statistics for a process.
-  Future<Map<String, dynamic>> getMemoryStats(String packageName);
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName);
 
   /// Stream the system log from the device.
   ///
@@ -181,7 +181,7 @@ abstract class Device {
   ///
   /// If `clear` is set to true, the log will be cleared before starting. This
   /// is not supported on all platforms.
-  Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) {
+  Future<void> startLoggingToSink(final IOSink sink, {final bool clear = true}) {
     throw UnimplementedError();
   }
 
@@ -191,7 +191,7 @@ abstract class Device {
   }
 
   /// Stop a process.
-  Future<void> stop(String packageName);
+  Future<void> stop(final String packageName);
 
   @override
   String toString() {
@@ -205,7 +205,7 @@ enum AndroidCPU {
 }
 
 class AndroidDeviceDiscovery implements DeviceDiscovery {
-  factory AndroidDeviceDiscovery({AndroidCPU? cpu}) {
+  factory AndroidDeviceDiscovery({final AndroidCPU? cpu}) {
     return _instance ??= AndroidDeviceDiscovery._(cpu);
   }
 
@@ -236,7 +236,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     return _workingDevice!;
   }
 
-  Future<bool> _matchesCPURequirement(AndroidDevice device) async {
+  Future<bool> _matchesCPURequirement(final AndroidDevice device) async {
     switch (cpu) {
       case null:
         return true;
@@ -252,7 +252,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<void> chooseWorkingDevice() async {
     final List<AndroidDevice> allDevices = (await discoverDevices())
-      .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
+      .map<AndroidDevice>((final String id) => AndroidDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty) {
@@ -280,7 +280,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<void> chooseWorkingDeviceById(String deviceId) async {
+  Future<void> chooseWorkingDeviceById(final String deviceId) async {
     final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = AndroidDevice(deviceId: matchedId);
@@ -379,7 +379,7 @@ class LinuxDeviceDiscovery implements DeviceDiscovery {
   Future<void> chooseWorkingDevice() async { }
 
   @override
-  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+  Future<void> chooseWorkingDeviceById(final String deviceId) async { }
 
   @override
   Future<List<String>> discoverDevices() async {
@@ -413,7 +413,7 @@ class MacosDeviceDiscovery implements DeviceDiscovery {
   Future<void> chooseWorkingDevice() async { }
 
   @override
-  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+  Future<void> chooseWorkingDeviceById(final String deviceId) async { }
 
   @override
   Future<List<String>> discoverDevices() async {
@@ -447,7 +447,7 @@ class WindowsDeviceDiscovery implements DeviceDiscovery {
   Future<void> chooseWorkingDevice() async { }
 
   @override
-  Future<void> chooseWorkingDeviceById(String deviceId) async { }
+  Future<void> chooseWorkingDeviceById(final String deviceId) async { }
 
   @override
   Future<List<String>> discoverDevices() async {
@@ -497,7 +497,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<void> chooseWorkingDevice() async {
     final List<FuchsiaDevice> allDevices = (await discoverDevices())
-      .map<FuchsiaDevice>((String id) => FuchsiaDevice(deviceId: id))
+      .map<FuchsiaDevice>((final String id) => FuchsiaDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty) {
@@ -508,7 +508,7 @@ class FuchsiaDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<void> chooseWorkingDeviceById(String deviceId) async {
+  Future<void> chooseWorkingDeviceById(final String deviceId) async {
     final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = FuchsiaDevice(deviceId: matchedId);
@@ -628,7 +628,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<void> tap(int x, int y) async {
+  Future<void> tap(final int x, final int y) async {
     await shellExec('input', <String>['tap', '$x', '$y']);
   }
 
@@ -680,20 +680,20 @@ class AndroidDevice extends Device {
   }
 
   /// Executes [command] on `adb shell`.
-  Future<void> shellExec(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) async {
+  Future<void> shellExec(final String command, final List<String> arguments, { final Map<String, String>? environment, final bool silent = false }) async {
     await adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
 
   /// Executes [command] on `adb shell` and returns its standard output as a [String].
-  Future<String> shellEval(String command, List<String> arguments, { Map<String, String>? environment, bool silent = false }) {
+  Future<String> shellEval(final String command, final List<String> arguments, { final Map<String, String>? environment, final bool silent = false }) {
     return adb(<String>['shell', command, ...arguments], environment: environment, silent: silent);
   }
 
   /// Runs `adb` with the given [arguments], selecting this device.
   Future<String> adb(
-      List<String> arguments, {
-      Map<String, String>? environment,
-      bool silent = false,
+      final List<String> arguments, {
+      final Map<String, String>? environment,
+      final bool silent = false,
     }) {
     return eval(
       adbPath,
@@ -705,7 +705,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName) async {
     final String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
     final Match? match = RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
     assert(match != null, 'could not parse dumpsys meminfo output');
@@ -721,7 +721,7 @@ class AndroidDevice extends Device {
   Process? _loggingProcess;
 
   @override
-  Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
+  Future<void> startLoggingToSink(final IOSink sink, {final bool clear = true}) async {
     if (clear) {
       await adb(<String>['logcat', '--clear'], silent: true);
     }
@@ -737,15 +737,15 @@ class AndroidDevice extends Device {
     );
     _loggingProcess!.stdout
       .transform<String>(const Utf8Decoder(allowMalformed: true))
-      .listen((String line) {
+      .listen((final String line) {
         sink.write(line);
       });
     _loggingProcess!.stderr
       .transform<String>(const Utf8Decoder(allowMalformed: true))
-      .listen((String line) {
+      .listen((final String line) {
         sink.write(line);
       });
-    unawaited(_loggingProcess!.exitCode.then<void>((int exitCode) {
+    unawaited(_loggingProcess!.exitCode.then<void>((final int exitCode) {
       if (!_abortedLogging) {
         sink.writeln('adb logcat failed with exit code $exitCode.\n');
       }
@@ -790,7 +790,7 @@ class AndroidDevice extends Device {
         process.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
             print('adb logcat: $line');
             if (!stream.isClosed) {
               stream.sink.add(line);
@@ -799,10 +799,10 @@ class AndroidDevice extends Device {
         process.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
             print('adb logcat stderr: $line');
           }, onDone: () { stderrDone.complete(); });
-        unawaited(process.exitCode.then<void>((int exitCode) {
+        unawaited(process.exitCode.then<void>((final int exitCode) {
           print('adb logcat process terminated with exit code $exitCode');
           if (!aborted) {
             stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.\n'));
@@ -835,7 +835,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<void> stop(String packageName) async {
+  Future<void> stop(final String packageName) async {
     return shellExec('am', <String>['force-stop', packageName]);
   }
 
@@ -880,7 +880,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<void> chooseWorkingDevice() async {
     final List<IosDevice> allDevices = (await discoverDevices())
-      .map<IosDevice>((String id) => IosDevice(deviceId: id))
+      .map<IosDevice>((final String id) => IosDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty) {
@@ -893,7 +893,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<void> chooseWorkingDeviceById(String deviceId) async {
+  Future<void> chooseWorkingDeviceById(final String deviceId) async {
     final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = IosDevice(deviceId: matchedId);
@@ -995,7 +995,7 @@ class IosDevice extends Device {
   Process? _loggingProcess;
 
   @override
-  Future<void> startLoggingToSink(IOSink sink, {bool clear = true}) async {
+  Future<void> startLoggingToSink(final IOSink sink, {final bool clear = true}) async {
     // Clear is not supported.
     _loggingProcess = await startProcess(
       idevicesyslogPath,
@@ -1006,15 +1006,15 @@ class IosDevice extends Device {
     );
     _loggingProcess!.stdout
       .transform<String>(const Utf8Decoder(allowMalformed: true))
-      .listen((String line) {
+      .listen((final String line) {
         sink.write(line);
       });
     _loggingProcess!.stderr
       .transform<String>(const Utf8Decoder(allowMalformed: true))
-      .listen((String line) {
+      .listen((final String line) {
         sink.write(line);
       });
-    unawaited(_loggingProcess!.exitCode.then<void>((int exitCode) {
+    unawaited(_loggingProcess!.exitCode.then<void>((final int exitCode) {
       if (!_abortedLogging) {
         sink.writeln('idevicesyslog failed with exit code $exitCode.\n');
       }
@@ -1057,12 +1057,12 @@ class IosDevice extends Device {
   Future<void> unlock() async {}
 
   @override
-  Future<void> tap(int x, int y) async {
+  Future<void> tap(final int x, final int y) async {
     throw UnimplementedError();
   }
 
   @override
-  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName) async {
     throw UnimplementedError();
   }
 
@@ -1075,7 +1075,7 @@ class IosDevice extends Device {
   Future<void> clearLogs() async {}
 
   @override
-  Future<void> stop(String packageName) async {}
+  Future<void> stop(final String packageName) async {}
 
   @override
   Future<void> reboot() {
@@ -1090,7 +1090,7 @@ class LinuxDevice extends Device {
   String get deviceId => 'linux';
 
   @override
-  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName) async {
     return <String, dynamic>{};
   }
 
@@ -1120,10 +1120,10 @@ class LinuxDevice extends Device {
   Future<void> sendToSleep() async { }
 
   @override
-  Future<void> stop(String packageName) async { }
+  Future<void> stop(final String packageName) async { }
 
   @override
-  Future<void> tap(int x, int y) async { }
+  Future<void> tap(final int x, final int y) async { }
 
   @override
   Future<void> togglePower() async { }
@@ -1142,7 +1142,7 @@ class MacosDevice extends Device {
   String get deviceId => 'macos';
 
   @override
-  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName) async {
     return <String, dynamic>{};
   }
 
@@ -1172,10 +1172,10 @@ class MacosDevice extends Device {
   Future<void> sendToSleep() async { }
 
   @override
-  Future<void> stop(String packageName) async { }
+  Future<void> stop(final String packageName) async { }
 
   @override
-  Future<void> tap(int x, int y) async { }
+  Future<void> tap(final int x, final int y) async { }
 
   @override
   Future<void> togglePower() async { }
@@ -1194,7 +1194,7 @@ class WindowsDevice extends Device {
   String get deviceId => 'windows';
 
   @override
-  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName) async {
     return <String, dynamic>{};
   }
 
@@ -1224,10 +1224,10 @@ class WindowsDevice extends Device {
   Future<void> sendToSleep() async { }
 
   @override
-  Future<void> stop(String packageName) async { }
+  Future<void> stop(final String packageName) async { }
 
   @override
-  Future<void> tap(int x, int y) async { }
+  Future<void> tap(final int x, final int y) async { }
 
   @override
   Future<void> togglePower() async { }
@@ -1269,13 +1269,13 @@ class FuchsiaDevice extends Device {
   Future<void> unlock() async {}
 
   @override
-  Future<void> tap(int x, int y) async {}
+  Future<void> tap(final int x, final int y) async {}
 
   @override
-  Future<void> stop(String packageName) async {}
+  Future<void> stop(final String packageName) async {}
 
   @override
-  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName) async {
     throw UnimplementedError();
   }
 
@@ -1342,12 +1342,12 @@ class FakeDevice extends Device {
   Future<void> unlock() async {}
 
   @override
-  Future<void> tap(int x, int y) async {
+  Future<void> tap(final int x, final int y) async {
     throw UnimplementedError();
   }
 
   @override
-  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+  Future<Map<String, dynamic>> getMemoryStats(final String packageName) async {
     throw UnimplementedError();
   }
 
@@ -1360,7 +1360,7 @@ class FakeDevice extends Device {
   Future<void> clearLogs() async {}
 
   @override
-  Future<void> stop(String packageName) async {}
+  Future<void> stop(final String packageName) async {}
 
   @override
   Future<void> reboot() async {
@@ -1400,7 +1400,7 @@ class FakeDeviceDiscovery implements DeviceDiscovery {
   }
 
   @override
-  Future<void> chooseWorkingDeviceById(String deviceId) async {
+  Future<void> chooseWorkingDeviceById(final String deviceId) async {
     final String? matchedId = _findMatchId(await discoverDevices(), deviceId);
     if (matchedId != null) {
       _workingDevice = FakeDevice(deviceId: matchedId);

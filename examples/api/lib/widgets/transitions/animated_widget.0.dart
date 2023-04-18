@@ -14,7 +14,7 @@ class AnimatedWidgetExampleApp extends StatelessWidget {
   const AnimatedWidgetExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: AnimatedWidgetExample(),
     );
@@ -24,13 +24,13 @@ class AnimatedWidgetExampleApp extends StatelessWidget {
 class SpinningContainer extends AnimatedWidget {
   const SpinningContainer({
     super.key,
-    required AnimationController controller,
+    required final AnimationController controller,
   }) : super(listenable: controller);
 
   Animation<double> get _progress => listenable as Animation<double>;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Transform.rotate(
       angle: _progress.value * 2.0 * math.pi,
       child: Container(width: 200.0, height: 200.0, color: Colors.green),
@@ -60,7 +60,7 @@ class _AnimatedWidgetExampleState extends State<AnimatedWidgetExample> with Tick
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SpinningContainer(controller: _controller);
   }
 }

@@ -39,7 +39,7 @@ void main() {
       // Tests might trigger exit() multiple times. In real life, exit() would
       // cause the VM to terminate immediately, so only the first one matters.
       firstExitCode = null;
-      io.setExitFunctionForTests((int exitCode) {
+      io.setExitFunctionForTests((final int exitCode) {
         firstExitCode ??= exitCode;
 
         // TODO(jamesderlin): Ideally only the first call to exit() would be
@@ -75,7 +75,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (final Object error, final StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -128,7 +128,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (final Object error, final StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -176,7 +176,7 @@ void main() {
           ));
           return null;
         },
-        onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+        onError: (final Object error, final StackTrace stack) { // ignore: deprecated_member_use
           expect(firstExitCode, isNotNull);
           expect(firstExitCode, isNot(0));
           expect(error.toString(), 'Exception: test exit');
@@ -222,7 +222,7 @@ void main() {
     group('in directory without permission', () {
       setUp(() {
         bool inTestSetup = true;
-        fileSystem = MemoryFileSystem(opHandle: (String context, FileSystemOp operation) {
+        fileSystem = MemoryFileSystem(opHandle: (final String context, final FileSystemOp operation) {
           if (inTestSetup) {
             // Allow all operations during test setup.
             return;
@@ -271,7 +271,7 @@ void main() {
             ));
             return null;
           },
-          onError: (Object error, StackTrace stack) { // ignore: deprecated_member_use
+          onError: (final Object error, final StackTrace stack) { // ignore: deprecated_member_use
             expect(firstExitCode, isNotNull);
             expect(firstExitCode, isNot(0));
             expect(error.toString(), 'Exception: test exit');
@@ -325,7 +325,7 @@ void main() {
     testUsingContext(
       'runner disable telemetry with flag',
       () async {
-        io.setExitFunctionForTests((int exitCode) {});
+        io.setExitFunctionForTests((final int exitCode) {});
 
         expect(globals.analytics.telemetryEnabled, true);
         expect(globals.analytics.shouldShowMessage, true);
@@ -351,7 +351,7 @@ void main() {
       'legacy analytics disabled will disable new analytics',
       () async {
 
-        io.setExitFunctionForTests((int exitCode) {});
+        io.setExitFunctionForTests((final int exitCode) {});
 
         await runner.run(
           <String>[],
@@ -379,8 +379,8 @@ void main() {
 
 class CrashingFlutterCommand extends FlutterCommand {
   CrashingFlutterCommand({
-    bool asyncCrash = false,
-    Completer<void>? completer,
+    final bool asyncCrash = false,
+    final Completer<void>? completer,
   }) :  _asyncCrash = asyncCrash,
         _completer = completer;
 
@@ -428,7 +428,7 @@ class CrashingUsage implements Usage {
 
   // Crash while crashing.
   @override
-  void sendException(dynamic exception) {
+  void sendException(final dynamic exception) {
     if (_firstAttempt) {
       _firstAttempt = false;
       throw Exception('CrashingUsage.sendException');
@@ -440,7 +440,7 @@ class CrashingUsage implements Usage {
   bool get suppressAnalytics => _impl.suppressAnalytics;
 
   @override
-  set suppressAnalytics(bool value) {
+  set suppressAnalytics(final bool value) {
     _impl.suppressAnalytics = value;
   }
 
@@ -448,7 +448,7 @@ class CrashingUsage implements Usage {
   bool get enabled => _impl.enabled;
 
   @override
-  set enabled(bool value) {
+  set enabled(final bool value) {
     _impl.enabled = value;
   }
 
@@ -456,16 +456,16 @@ class CrashingUsage implements Usage {
   String get clientId => _impl.clientId;
 
   @override
-  void sendCommand(String command, {CustomDimensions? parameters}) =>
+  void sendCommand(final String command, {final CustomDimensions? parameters}) =>
       _impl.sendCommand(command, parameters: parameters);
 
   @override
   void sendEvent(
-    String category,
-    String parameter, {
-    String? label,
-    int? value,
-    CustomDimensions? parameters,
+    final String category,
+    final String parameter, {
+    final String? label,
+    final int? value,
+    final CustomDimensions? parameters,
   }) => _impl.sendEvent(
     category,
     parameter,
@@ -476,10 +476,10 @@ class CrashingUsage implements Usage {
 
   @override
   void sendTiming(
-    String category,
-    String variableName,
-    Duration duration, {
-    String? label,
+    final String category,
+    final String variableName,
+    final Duration duration, {
+    final String? label,
   }) => _impl.sendTiming(category, variableName, duration, label: label);
 
   @override
@@ -502,13 +502,13 @@ class CustomBugInstructions extends UserMessages {
 /// Used to exacerbate a race between the success and failure paths of
 /// [runner.run]. See https://github.com/flutter/flutter/issues/56406.
 class WaitingCrashReporter implements CrashReporter {
-  WaitingCrashReporter(Future<void> future) : _future = future;
+  WaitingCrashReporter(final Future<void> future) : _future = future;
 
   final Future<void> _future;
   late CrashDetails _details;
 
   @override
-  Future<void> informUser(CrashDetails details, File crashFile) {
+  Future<void> informUser(final CrashDetails details, final File crashFile) {
     _details = details;
     return _future;
   }
@@ -532,7 +532,7 @@ class FakeAnalytics extends Fake implements Analytics {
   }
 
   @override
-  Future<void> setTelemetry(bool reportingBool) {
+  Future<void> setTelemetry(final bool reportingBool) {
     _fakeTelemetryStatus = reportingBool;
     return Future<void>.value();
   }

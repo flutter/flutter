@@ -43,7 +43,7 @@ class UpdaterState extends State<Updater> {
     }
   }
 
-  Widget _buildDialog(BuildContext context) {
+  Widget _buildDialog(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle =
         theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
@@ -68,5 +68,5 @@ class UpdaterState extends State<Updater> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child!;
+  Widget build(final BuildContext context) => widget.child!;
 }

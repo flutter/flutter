@@ -52,19 +52,19 @@ void main() {
     expect(themeData.mouseCursor, null);
   });
 
-  testWidgets('Default BottomNavigationBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default BottomNavigationBarThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('BottomNavigationBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBarThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const BottomNavigationBarThemeData(
       backgroundColor: Color(0xfffffff0),
@@ -82,8 +82,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description[0], 'backgroundColor: Color(0xfffffff0)');
@@ -105,7 +105,7 @@ void main() {
     expect(description[11], 'mouseCursor: MaterialStateMouseCursor(clickable)');
   });
 
-  testWidgets('BottomNavigationBar is themeable', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar is themeable', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0xFF000001);
     const Color selectedItemColor = Color(0xFF000002);
     const Color unselectedItemColor = Color(0xFF000003);
@@ -130,7 +130,7 @@ void main() {
             type: BottomNavigationBarType.fixed,
             selectedLabelStyle: selectedTextStyle,
             unselectedLabelStyle: unselectedTextStyle,
-            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((Set<MaterialState> states) {
+            mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>((final Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return SystemMouseCursors.grab;
               }
@@ -209,7 +209,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.move);
   });
 
-  testWidgets('BottomNavigationBar properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar properties are taken over the theme values', (final WidgetTester tester) async {
     const Color themeBackgroundColor = Color(0xFF000001);
     const Color themeSelectedItemColor = Color(0xFF000002);
     const Color themeUnselectedItemColor = Color(0xFF000003);
@@ -281,7 +281,7 @@ void main() {
       ),
     );
 
-    Finder findDescendantOfBottomNavigationBar(Finder finder) {
+    Finder findDescendantOfBottomNavigationBar(final Finder finder) {
       return find.descendant(
         of: find.byType(BottomNavigationBar),
         matching: finder,
@@ -336,7 +336,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgets('BottomNavigationBarTheme can be used to hide all labels', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBarTheme can be used to hide all labels', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66738.
     await tester.pumpWidget(
       MaterialApp(
@@ -374,7 +374,7 @@ void main() {
     expect(tester.widget<Visibility>(findVisibility.at(1)).visible, false);
   });
 
-  testWidgets('BottomNavigationBarTheme can be used to hide selected labels', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBarTheme can be used to hide selected labels', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/66738.
     await tester.pumpWidget(
       MaterialApp(
@@ -412,7 +412,7 @@ void main() {
     expect(tester.widget<FadeTransition>(findFadeTransition.at(1)).opacity.value, 1.0);
   });
 
-  testWidgets('BottomNavigationBarTheme can be used to hide unselected labels', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBarTheme can be used to hide unselected labels', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -450,14 +450,14 @@ void main() {
   });
 }
 
-TextStyle _iconStyle(WidgetTester tester, IconData icon) {
+TextStyle _iconStyle(final WidgetTester tester, final IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
     find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
   );
   return iconRichText.text.style!;
 }
 
-Material _material(WidgetTester tester) {
+Material _material(final WidgetTester tester) {
   return tester.firstWidget<Material>(
     find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
   );

@@ -25,7 +25,7 @@ class DeviceGestureSettings {
   });
 
   /// Create a new [DeviceGestureSettings] from the provided [view].
-  factory DeviceGestureSettings.fromView(ui.FlutterView view) {
+  factory DeviceGestureSettings.fromView(final ui.FlutterView view) {
     final double? physicalTouchSlop = view.gestureSettings.physicalTouchSlop;
     return DeviceGestureSettings(
       touchSlop: physicalTouchSlop == null ? null : physicalTouchSlop / view.devicePixelRatio
@@ -43,7 +43,7 @@ class DeviceGestureSettings {
   int get hashCode => Object.hash(touchSlop, 23);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

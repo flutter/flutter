@@ -25,7 +25,7 @@ class ImageClipExample extends StatelessWidget {
   final ImageProvider image;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(100),
       child: Material(

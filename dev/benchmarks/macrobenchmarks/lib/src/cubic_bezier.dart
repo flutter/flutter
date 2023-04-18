@@ -11,7 +11,7 @@ class CubicBezierPage extends StatelessWidget {
   const CubicBezierPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -72,7 +72,7 @@ class Bezier extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(children: <Widget>[
       CustomPaint(
         foregroundPainter:
@@ -275,7 +275,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
   }
 
   //From http://wiki.roblox.com/index.php?title=File:Beziereq4.png
-  double _getCubicPoint(double t, double p0, double p1, double p2, double p3) {
+  double _getCubicPoint(final double t, final double p0, final double p1, final double p2, final double p3) {
     return (pow(1 - t, 3) as double) * p0 +
         3 * pow(1 - t, 2) * t * p1 +
         3 * (1 - t) * pow(t, 2) * p2 +
@@ -318,7 +318,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
       ..addListener(() {
         setState(() {});
       })
-      ..addStatusListener((AnimationStatus state) {
+      ..addStatusListener((final AnimationStatus state) {
         if (state == AnimationStatus.completed) {
           reverseAnimation();
         } else if (state == AnimationStatus.dismissed) {
@@ -336,7 +336,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomPaint(
         foregroundPainter: BezierPainter(widget.color,
             curve.value * widget.blur, _getLogoPath(), isPlaying),
@@ -353,7 +353,7 @@ class BezierPainter extends CustomPainter {
   bool isPlaying;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint();
     paint.strokeWidth = 18.0;
     paint.style = PaintingStyle.stroke;
@@ -382,8 +382,8 @@ class BezierPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(BezierPainter oldDelegate) => true;
+  bool shouldRepaint(final BezierPainter oldDelegate) => true;
 
   @override
-  bool shouldRebuildSemantics(BezierPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(final BezierPainter oldDelegate) => false;
 }

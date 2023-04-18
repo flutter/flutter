@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> main() async {
   final ui.Image image = await createTestImage();
 
-  testWidgets('didHaveMemoryPressure clears imageCache', (WidgetTester tester) async {
+  testWidgets('didHaveMemoryPressure clears imageCache', (final WidgetTester tester) async {
     imageCache.putIfAbsent(1, () => OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(ImageInfo(
         image: image,
@@ -24,7 +24,7 @@ Future<void> main() async {
     await tester.idle();
     expect(imageCache.currentSize, 1);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (final _) { });
     expect(imageCache.currentSize, 0);
   });
 
@@ -48,13 +48,13 @@ class TestBindingBase implements BindingBase {
   void initInstances() {}
 
   @override
-  bool debugCheckZone(String entryPoint) { return true; }
+  bool debugCheckZone(final String entryPoint) { return true; }
 
   @override
   void initServiceExtensions() {}
 
   @override
-  Future<void> lockEvents(Future<void> Function() callback) async {}
+  Future<void> lockEvents(final Future<void> Function() callback) async {}
 
   @override
   bool get locked => throw UnimplementedError();
@@ -65,7 +65,7 @@ class TestBindingBase implements BindingBase {
   }
 
   @override
-  void postEvent(String eventKind, Map<String, dynamic> eventData) {}
+  void postEvent(final String eventKind, final Map<String, dynamic> eventData) {}
 
   @override
   Future<void> reassembleApplication() {
@@ -73,19 +73,19 @@ class TestBindingBase implements BindingBase {
   }
 
   @override
-  void registerBoolServiceExtension({required String name, required AsyncValueGetter<bool> getter, required AsyncValueSetter<bool> setter}) {}
+  void registerBoolServiceExtension({required final String name, required final AsyncValueGetter<bool> getter, required final AsyncValueSetter<bool> setter}) {}
 
   @override
-  void registerNumericServiceExtension({required String name, required AsyncValueGetter<double> getter, required AsyncValueSetter<double> setter}) {}
+  void registerNumericServiceExtension({required final String name, required final AsyncValueGetter<double> getter, required final AsyncValueSetter<double> setter}) {}
 
   @override
-  void registerServiceExtension({required String name, required ServiceExtensionCallback callback}) {}
+  void registerServiceExtension({required final String name, required final ServiceExtensionCallback callback}) {}
 
   @override
-  void registerSignalServiceExtension({required String name, required AsyncCallback callback}) {}
+  void registerSignalServiceExtension({required final String name, required final AsyncCallback callback}) {}
 
   @override
-  void registerStringServiceExtension({required String name, required AsyncValueGetter<String> getter, required AsyncValueSetter<String> setter}) {}
+  void registerStringServiceExtension({required final String name, required final AsyncValueGetter<String> getter, required final AsyncValueSetter<String> setter}) {}
 
   @override
   void unlocked() {}

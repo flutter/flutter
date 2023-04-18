@@ -53,7 +53,7 @@ void main() {
         );
       });
 
-      final Iterable<TimelineEvent>? semanticsEvents = timeline.events?.where((TimelineEvent event) => event.name == 'SEMANTICS');
+      final Iterable<TimelineEvent>? semanticsEvents = timeline.events?.where((final TimelineEvent event) => event.name == 'SEMANTICS');
       if (semanticsEvents?.length != 2) {
         fail('Expected exactly two "SEMANTICS" events, got ${semanticsEvents?.length}:\n$semanticsEvents');
       }

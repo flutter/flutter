@@ -32,7 +32,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   );
 
   @override
-  Widget build (BuildContext context) {
+  Widget build (final BuildContext context) {
     final BoardPainter painter = BoardPainter(
       board: _board,
     );
@@ -49,14 +49,14 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             onPressed: () {
               showDialog<Column>(
                 context: context,
-                builder: (BuildContext context) => instructionDialog,
+                builder: (final BuildContext context) => instructionDialog,
               );
             },
           ),
         ],
       ),
       body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (final BuildContext context, final BoxConstraints constraints) {
           // Draw the scene as big as is available, but allow the user to
           // translate beyond that to a visibleSize that's a bit bigger.
           final Size size = Size(constraints.maxWidth, constraints.maxHeight);
@@ -134,14 +134,14 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         if (_board.selected == null) {
           return;
         }
-        showModalBottomSheet<Widget>(context: context, builder: (BuildContext context) {
+        showModalBottomSheet<Widget>(context: context, builder: (final BuildContext context) {
           return Container(
             width: double.infinity,
             height: 150,
             padding: const EdgeInsets.all(12.0),
             child: EditBoardPoint(
               boardPoint: _board.selected!,
-              onColorSelection: (Color color) {
+              onColorSelection: (final Color color) {
                 setState(() {
                   _board = _board.copyWithBoardPointColor(_board.selected!, color);
                   Navigator.pop(context);
@@ -156,7 +156,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     );
   }
 
-  void _onTapUp(TapUpDetails details) {
+  void _onTapUp(final TapUpDetails details) {
     final Offset scenePoint = details.globalPosition;
     final BoardPoint? boardPoint = _board.pointToBoardPoint(scenePoint);
     setState(() {
@@ -175,8 +175,8 @@ class BoardPainter extends CustomPainter {
   final Board? board;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    void drawBoardPoint(BoardPoint? boardPoint) {
+  void paint(final Canvas canvas, final Size size) {
+    void drawBoardPoint(final BoardPoint? boardPoint) {
       final Color color = boardPoint!.color.withOpacity(
         board!.selected == boardPoint ? 0.2 : 1.0,
       );
@@ -190,7 +190,7 @@ class BoardPainter extends CustomPainter {
 
   // We should repaint whenever the board changes, such as board.selected.
   @override
-  bool shouldRepaint(BoardPainter oldDelegate) {
+  bool shouldRepaint(final BoardPainter oldDelegate) {
     return oldDelegate.board != board;
   }
 }

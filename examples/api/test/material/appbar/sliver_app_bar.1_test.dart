@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kOffset = Offset(0.0, -200.0);
 
 void main() {
-  testWidgets('SliverAppbar can be pinned', (WidgetTester tester) async {
+  testWidgets('SliverAppbar can be pinned', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.AppBarApp(),
     );

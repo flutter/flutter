@@ -11,7 +11,7 @@ const double expandedAppbarHeight = 250.0;
 final Key appbarContainerKey = UniqueKey();
 
 void main() {
-  testWidgets('FlexibleSpaceBar collapse mode none', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar collapse mode none', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
@@ -49,7 +49,7 @@ void main() {
     expect(topAfterScroll.dy, equals(0.0));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgets('FlexibleSpaceBar collapse mode pin', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar collapse mode pin', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
@@ -87,7 +87,7 @@ void main() {
     expect(topAfterScroll.dy, equals(-100.0));
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgets('FlexibleSpaceBar collapse mode parallax', (WidgetTester tester) async {
+  testWidgets('FlexibleSpaceBar collapse mode parallax', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: debugDefaultTargetPlatformOverride),
@@ -126,7 +126,7 @@ void main() {
   }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.fuchsia }));
 }
 
-Future<void> slowDrag(WidgetTester tester, Key widget, Offset offset) async {
+Future<void> slowDrag(final WidgetTester tester, final Key widget, final Offset offset) async {
   final Offset target = tester.getCenter(find.byKey(widget));
   final TestGesture gesture = await tester.startGesture(target);
   await gesture.moveBy(offset);

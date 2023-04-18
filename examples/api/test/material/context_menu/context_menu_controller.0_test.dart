@@ -10,7 +10,7 @@ import 'package:flutter_api_samples/material/context_menu/context_menu_controlle
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('showing and hiding the custom context menu in the whole app', (WidgetTester tester) async {
+  testWidgets('showing and hiding the custom context menu in the whole app', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ContextMenuControllerExampleApp(),
     );

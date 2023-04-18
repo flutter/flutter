@@ -187,7 +187,7 @@ class FakeFile extends Fake implements File {
   }
 
   @override
-  String readAsStringSync({Encoding encoding = utf8ForTesting}) {
+  String readAsStringSync({final Encoding encoding = utf8ForTesting}) {
     throw const FileSystemException('', '', OSError('', 13)); // EACCES error on linux
   }
 }

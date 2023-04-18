@@ -21,12 +21,12 @@ abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
   /// Returns null if the message is null.
-  ByteData? encodeMessage(T message);
+  ByteData? encodeMessage(final T message);
 
   /// Decodes the specified [message] from binary.
   ///
   /// Returns null if the message is null.
-  T? decodeMessage(ByteData? message);
+  T? decodeMessage(final ByteData? message);
 }
 
 /// A command object representing the invocation of a named method.
@@ -64,10 +64,10 @@ class MethodCall {
 ///    between Flutter and platform plugins.
 abstract class MethodCodec {
   /// Encodes the specified [methodCall] into binary.
-  ByteData encodeMethodCall(MethodCall methodCall);
+  ByteData encodeMethodCall(final MethodCall methodCall);
 
   /// Decodes the specified [methodCall] from binary.
-  MethodCall decodeMethodCall(ByteData? methodCall);
+  MethodCall decodeMethodCall(final ByteData? methodCall);
 
   /// Decodes the specified result [envelope] from binary.
   ///
@@ -79,16 +79,16 @@ abstract class MethodCodec {
   /// strongly recommended that the return value be immediately cast to a known
   /// type to prevent runtime errors due to typos that the type checker could
   /// otherwise catch.
-  dynamic decodeEnvelope(ByteData envelope);
+  dynamic decodeEnvelope(final ByteData envelope);
 
   /// Encodes a successful [result] into a binary envelope.
-  ByteData encodeSuccessEnvelope(Object? result);
+  ByteData encodeSuccessEnvelope(final Object? result);
 
   /// Encodes an error result into a binary envelope.
   ///
   /// The specified error [code], human-readable error [message] and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({ required String code, String? message, Object? details});
+  ByteData encodeErrorEnvelope({ required final String code, final String? message, final Object? details});
 }
 
 /// Thrown to indicate that a platform interaction failed in the platform

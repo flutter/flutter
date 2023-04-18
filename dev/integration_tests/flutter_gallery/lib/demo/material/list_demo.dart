@@ -43,7 +43,7 @@ class _ListDemoState extends State<ListDemo> {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
-  void changeItemType(_MaterialListType? type) {
+  void changeItemType(final _MaterialListType? type) {
     setState(() {
       _itemType = type;
     });
@@ -51,7 +51,7 @@ class _ListDemoState extends State<ListDemo> {
   }
 
   void _showConfigurationSheet() {
-    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((BuildContext bottomSheetContext) {
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState!.showBottomSheet<void>((final BuildContext bottomSheetContext) {
       return Container(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: Colors.black26)),
@@ -99,7 +99,7 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Show avatar'),
                 trailing: Checkbox(
                   value: _showAvatars,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       _showAvatars = value;
                     });
@@ -117,7 +117,7 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Show icon'),
                 trailing: Checkbox(
                   value: _showIcons,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       _showIcons = value;
                     });
@@ -135,7 +135,7 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Show dividers'),
                 trailing: Checkbox(
                   value: _showDividers,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       _showDividers = value;
                     });
@@ -153,7 +153,7 @@ class _ListDemoState extends State<ListDemo> {
                 title: const Text('Dense layout'),
                 trailing: Checkbox(
                   value: _dense,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       _dense = value;
                     });
@@ -183,7 +183,7 @@ class _ListDemoState extends State<ListDemo> {
     });
   }
 
-  Widget buildListTile(BuildContext context, String item) {
+  Widget buildListTile(final BuildContext context, final String item) {
     Widget? secondary;
     if (_itemType == _MaterialListType.twoLine) {
       secondary = const Text('Additional item information.');
@@ -205,7 +205,7 @@ class _ListDemoState extends State<ListDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final String layoutText = _dense != null ? ' \u2013 Dense' : '';
     String? itemTypeText;
     switch (_itemType) {
@@ -220,7 +220,7 @@ class _ListDemoState extends State<ListDemo> {
         break;
     }
 
-    Iterable<Widget> listTiles = items.map<Widget>((String item) => buildListTile(context, item));
+    Iterable<Widget> listTiles = items.map<Widget>((final String item) => buildListTile(context, item));
     if (_showDividers != null) {
       listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
     }
@@ -237,7 +237,7 @@ class _ListDemoState extends State<ListDemo> {
             onPressed: () {
               setState(() {
                 _reverseSort = !_reverseSort;
-                items.sort((String a, String b) => _reverseSort ? b.compareTo(a) : a.compareTo(b));
+                items.sort((final String a, final String b) => _reverseSort ? b.compareTo(a) : a.compareTo(b));
               });
             },
           ),

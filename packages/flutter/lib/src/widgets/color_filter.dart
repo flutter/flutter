@@ -40,15 +40,15 @@ class ColorFiltered extends SingleChildRenderObjectWidget {
   final ColorFilter colorFilter;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _ColorFilterRenderObject(colorFilter);
+  RenderObject createRenderObject(final BuildContext context) => _ColorFilterRenderObject(colorFilter);
 
   @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderObject renderObject) {
     (renderObject as _ColorFilterRenderObject).colorFilter = colorFilter;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ColorFilter>('colorFilter', colorFilter));
   }
@@ -59,7 +59,7 @@ class _ColorFilterRenderObject extends RenderProxyBox {
 
   ColorFilter get colorFilter => _colorFilter;
   ColorFilter _colorFilter;
-  set colorFilter(ColorFilter value) {
+  set colorFilter(final ColorFilter value) {
     if (value != _colorFilter) {
       _colorFilter = value;
       markNeedsPaint();
@@ -70,7 +70,7 @@ class _ColorFilterRenderObject extends RenderProxyBox {
   bool get alwaysNeedsCompositing => child != null;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     layer = context.pushColorFilter(offset, colorFilter, super.paint, oldLayer: layer as ColorFilterLayer?);
     assert(() {
       layer!.debugCreator = debugCreator;

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 
 void main() {
-  testWidgets('DisposableBuildContext asserts on disposed state', (WidgetTester tester) async {
+  testWidgets('DisposableBuildContext asserts on disposed state', (final WidgetTester tester) async {
     final GlobalKey<TestWidgetState> key = GlobalKey<TestWidgetState>();
     await tester.pumpWidget(TestWidget(key));
 
@@ -32,7 +32,7 @@ void main() {
 }
 
 class TestWidget extends StatefulWidget {
-  const TestWidget(Key? key) : super(key: key);
+  const TestWidget(final Key? key) : super(key: key);
 
   @override
   State<TestWidget> createState() => TestWidgetState();
@@ -40,5 +40,5 @@ class TestWidget extends StatefulWidget {
 
 class TestWidgetState extends State<TestWidget> {
   @override
-  Widget build(BuildContext context) => const SizedBox(height: 50);
+  Widget build(final BuildContext context) => const SizedBox(height: 50);
 }

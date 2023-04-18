@@ -72,14 +72,14 @@ class DrawerThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   DrawerThemeData copyWith({
-    Color? backgroundColor,
-    Color? scrimColor,
-    double? elevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    ShapeBorder? shape,
-    ShapeBorder? endShape,
-    double? width,
+    final Color? backgroundColor,
+    final Color? scrimColor,
+    final double? elevation,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final ShapeBorder? shape,
+    final ShapeBorder? endShape,
+    final double? width,
   }) {
     return DrawerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -98,7 +98,7 @@ class DrawerThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DrawerThemeData? lerp(DrawerThemeData? a, DrawerThemeData? b, double t) {
+  static DrawerThemeData? lerp(final DrawerThemeData? a, final DrawerThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -127,7 +127,7 @@ class DrawerThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -146,7 +146,7 @@ class DrawerThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('scrimColor', scrimColor, defaultValue: null));
@@ -189,16 +189,16 @@ class DrawerTheme extends InheritedTheme {
   /// ```dart
   /// DrawerThemeData theme = DrawerTheme.of(context);
   /// ```
-  static DrawerThemeData of(BuildContext context) {
+  static DrawerThemeData of(final BuildContext context) {
     final DrawerTheme? drawerTheme = context.dependOnInheritedWidgetOfExactType<DrawerTheme>();
     return drawerTheme?.data ?? Theme.of(context).drawerTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return DrawerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(DrawerTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final DrawerTheme oldWidget) => data != oldWidget.data;
 }

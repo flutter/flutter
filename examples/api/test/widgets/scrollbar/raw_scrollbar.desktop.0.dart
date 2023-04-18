@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/scrollbar/raw_scrollbar.desktop.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can hide default scrollbar on desktop', (WidgetTester tester) async {
+  testWidgets('Can hide default scrollbar on desktop', (final WidgetTester tester) async {
 
     await tester.pumpWidget(
       const example.ScrollbarApp(),

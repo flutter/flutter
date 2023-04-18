@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../image_data.dart';
 import '../widgets/semantics_tester.dart';
 
-Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async {
+Future<void> pumpWidgetWithBoilerplate(final WidgetTester tester, final Widget widget) async {
   await tester.pumpWidget(
     Localizations(
       locale: const Locale('en', 'US'),
@@ -29,7 +29,7 @@ Future<void> pumpWidgetWithBoilerplate(WidgetTester tester, Widget widget) async
 
 Future<void> main() async {
 
-  testWidgets('Need at least 2 tabs', (WidgetTester tester) async {
+  testWidgets('Need at least 2 tabs', (final WidgetTester tester) async {
     await expectLater(
       () => pumpWidgetWithBoilerplate(tester, CupertinoTabBar(
         items: <BottomNavigationBarItem>[
@@ -40,14 +40,14 @@ Future<void> main() async {
         ],
       )),
       throwsA(isAssertionError.having(
-        (AssertionError error) => error.toString(),
+        (final AssertionError error) => error.toString(),
         '.toString()',
         contains('items.length'),
       )),
     );
   });
 
-  testWidgets('Active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Active and inactive colors', (final WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
       child: CupertinoTabBar(
@@ -81,7 +81,7 @@ Future<void> main() async {
   });
 
 
-  testWidgets('BottomNavigationBar.label will create a text widget', (WidgetTester tester) async {
+  testWidgets('BottomNavigationBar.label will create a text widget', (final WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
       child: CupertinoTabBar(
@@ -103,7 +103,7 @@ Future<void> main() async {
     expect(find.text('Tab 2'), findsOneWidget);
   });
 
-  testWidgets('Active and inactive colors dark mode', (WidgetTester tester) async {
+  testWidgets('Active and inactive colors dark mode', (final WidgetTester tester) async {
     const CupertinoDynamicColor dynamicActiveColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF000000),
       darkColor: Color(0xFF000001),
@@ -191,7 +191,7 @@ Future<void> main() async {
     expect(decoration2.border!.top.color.value, 0x29000000);
   });
 
-  testWidgets('Tabs respects themes', (WidgetTester tester) async {
+  testWidgets('Tabs respects themes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabBar(
@@ -255,7 +255,7 @@ Future<void> main() async {
     expect(actualActive.text.style!.color, isSameColorAs(CupertinoColors.activeBlue.darkColor));
   });
 
-  testWidgets('Use active icon', (WidgetTester tester) async {
+  testWidgets('Use active icon', (final WidgetTester tester) async {
     final MemoryImage activeIcon = MemoryImage(Uint8List.fromList(kBlueSquarePng));
     final MemoryImage inactiveIcon = MemoryImage(Uint8List.fromList(kTransparentImage));
 
@@ -288,7 +288,7 @@ Future<void> main() async {
     expect(image.image, activeIcon);
   });
 
-  testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
+  testWidgets('Adjusts height to account for bottom padding', (final WidgetTester tester) async {
     final CupertinoTabBar tabBar = CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         BottomNavigationBarItem(
@@ -307,7 +307,7 @@ Future<void> main() async {
       data: const MediaQueryData(),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
+        tabBuilder: (final BuildContext context, final int index) {
           return const Placeholder();
         },
       ),
@@ -319,7 +319,7 @@ Future<void> main() async {
       data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: 40.0)),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
+        tabBuilder: (final BuildContext context, final int index) {
           return const Placeholder();
         },
       ),
@@ -327,7 +327,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
   });
 
-  testWidgets('Set custom height', (WidgetTester tester) async {
+  testWidgets('Set custom height', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/51704
     const double tabBarHeight = 56.0;
     final CupertinoTabBar tabBar = CupertinoTabBar(
@@ -349,7 +349,7 @@ Future<void> main() async {
       data: const MediaQueryData(),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
+        tabBuilder: (final BuildContext context, final int index) {
           return const Placeholder();
         },
       ),
@@ -362,7 +362,7 @@ Future<void> main() async {
       data: const MediaQueryData(viewPadding: EdgeInsets.only(bottom: bottomPadding)),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
+        tabBuilder: (final BuildContext context, final int index) {
           return const Placeholder();
         },
       ),
@@ -370,7 +370,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
   });
 
-  testWidgets('Ensure bar height will not change when toggle keyboard', (WidgetTester tester) async {
+  testWidgets('Ensure bar height will not change when toggle keyboard', (final WidgetTester tester) async {
     const double tabBarHeight = 56.0;
     final CupertinoTabBar tabBar = CupertinoTabBar(
       height: tabBarHeight,
@@ -397,7 +397,7 @@ Future<void> main() async {
       ),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
-        tabBuilder: (BuildContext context, int index) {
+        tabBuilder: (final BuildContext context, final int index) {
           return const Placeholder();
         },
       ),
@@ -413,7 +413,7 @@ Future<void> main() async {
         ),
         child:  CupertinoTabScaffold(
           tabBar: tabBar,
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -424,7 +424,7 @@ Future<void> main() async {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, tabBarHeight + bottomPadding);
   });
 
-  testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
+  testWidgets('Opaque background does not add blur effects', (final WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
       child: CupertinoTabBar(
@@ -463,7 +463,7 @@ Future<void> main() async {
     expect(find.byType(BackdropFilter), findsNothing);
   });
 
-  testWidgets('Tap callback', (WidgetTester tester) async {
+  testWidgets('Tap callback', (final WidgetTester tester) async {
     late int callbackTab;
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -480,7 +480,7 @@ Future<void> main() async {
           ),
         ],
         currentIndex: 1,
-        onTap: (int tab) { callbackTab = tab; },
+        onTap: (final int tab) { callbackTab = tab; },
       ),
     ));
 
@@ -491,7 +491,7 @@ Future<void> main() async {
     expect(callbackTab, 1);
   });
 
-  testWidgets('tabs announce semantics', (WidgetTester tester) async {
+  testWidgets('tabs announce semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
@@ -526,7 +526,7 @@ Future<void> main() async {
     semantics.dispose();
   });
 
-  testWidgets('Label of items should be nullable', (WidgetTester tester) async {
+  testWidgets('Label of items should be nullable', (final WidgetTester tester) async {
     final MemoryImage iconProvider = MemoryImage(Uint8List.fromList(kTransparentImage));
     final List<int> itemsTapped = <int>[];
 
@@ -548,7 +548,7 @@ Future<void> main() async {
               ),
             ),
           ],
-          onTap: (int index) => itemsTapped.add(index),
+          onTap: (final int index) => itemsTapped.add(index),
         ),
       ),
     );
@@ -556,14 +556,14 @@ Future<void> main() async {
     expect(find.text('Tab 1'), findsOneWidget);
 
     final Finder finder = find.byWidgetPredicate(
-      (Widget widget) => widget is Image && widget.image == iconProvider,
+      (final Widget widget) => widget is Image && widget.image == iconProvider,
     );
 
     await tester.tap(finder);
     expect(itemsTapped, <int>[1]);
   });
 
-  testWidgets('Hide border hides the top border of the tabBar', (WidgetTester tester) async {
+  testWidgets('Hide border hides the top border of the tabBar', (final WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(
@@ -623,7 +623,7 @@ Future<void> main() async {
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 
-  testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over tab bar item updates cursor to clickable on Web', (final WidgetTester tester) async {
     await pumpWidgetWithBoilerplate(
       tester,
       MediaQuery(

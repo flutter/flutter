@@ -610,10 +610,10 @@ class PathMatcher extends Matcher {
   final double margin;
 
   @override
-  Description describe(Description description) => description.add('$actual (±$margin)');
+  Description describe(final Description description) => description.add('$actual (±$margin)');
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     if (item == null) {
       return item == actual;
     }
@@ -639,7 +639,7 @@ class PathMatcher extends Matcher {
     return true;
   }
 
-  bool commandsMatch(SvgPathCommand actual, SvgPathCommand other) {
+  bool commandsMatch(final SvgPathCommand actual, final SvgPathCommand other) {
     if (other.points.length != actual.points.length) {
       return false;
     }
@@ -662,10 +662,10 @@ class PathAnimationMatcher extends Matcher {
   final PathAnimation expected;
 
   @override
-  Description describe(Description description) => description.add('$expected');
+  Description describe(final Description description) => description.add('$expected');
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     if (item == null) {
       return item == expected;
     }
@@ -692,7 +692,7 @@ class PathAnimationMatcher extends Matcher {
     return true;
   }
 
-  bool commandsMatch(PathCommandAnimation expected, PathCommandAnimation other) {
+  bool commandsMatch(final PathCommandAnimation expected, final PathCommandAnimation other) {
     if (other.points.length != expected.points.length) {
       return false;
     }
@@ -707,6 +707,6 @@ class PathAnimationMatcher extends Matcher {
   }
 }
 
-String testAsset(String name) {
+String testAsset(final String name) {
   return path.join('test_assets', name);
 }

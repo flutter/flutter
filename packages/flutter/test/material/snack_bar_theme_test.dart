@@ -46,19 +46,19 @@ void main() {
   });
 
   testWidgets('Default SnackBarThemeData debugFillProperties',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('SnackBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('SnackBarThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SnackBarThemeData(
       backgroundColor: Color(0xFFFFFFFF),
@@ -76,8 +76,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -96,12 +96,12 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no SnackBarThemeData returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no SnackBarThemeData returns defaults', (final WidgetTester tester) async {
     const String text = 'I am a snack bar.';
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -129,7 +129,7 @@ void main() {
     expect(material.shape, null);
   });
 
-  testWidgets('SnackBar uses values from SnackBarThemeData', (WidgetTester tester) async {
+  testWidgets('SnackBar uses values from SnackBarThemeData', (final WidgetTester tester) async {
     const String text = 'I am a snack bar.';
     const String action = 'ACTION';
     final SnackBarThemeData snackBarTheme = _snackBarTheme(showCloseIcon: true);
@@ -138,7 +138,7 @@ void main() {
       theme: ThemeData(snackBarTheme: snackBarTheme),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -170,7 +170,7 @@ void main() {
     expect(icon.icon, Icons.close);
   });
 
-  testWidgets('SnackBar widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('SnackBar widget properties take priority over theme', (final WidgetTester tester) async {
     const Color backgroundColor = Colors.purple;
     const Color textColor = Colors.pink;
     const double elevation = 7.0;
@@ -184,7 +184,7 @@ void main() {
       theme: ThemeData(snackBarTheme: _snackBarTheme(showCloseIcon: true)),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -230,8 +230,8 @@ void main() {
     expect(snackBarBottomRight.dx, (800 + snackBarWidth) / 2); // Device width is 800.
   });
 
-  testWidgets('SnackBarAction uses actionBackgroundColor', (WidgetTester tester) async {
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  testWidgets('SnackBarAction uses actionBackgroundColor', (final WidgetTester tester) async {
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
       }
@@ -242,7 +242,7 @@ void main() {
       theme: ThemeData(snackBarTheme: _createSnackBarTheme(actionBackgroundColor: actionBackgroundColor)),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -279,15 +279,15 @@ void main() {
     expect(materialAfterDismissed.color, Colors.blue);
   });
 
-  testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (WidgetTester tester) async {
-    final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  testWidgets('SnackBarAction backgroundColor overrides SnackBarThemeData actionBackgroundColor', (final WidgetTester tester) async {
+    final MaterialStateColor snackBarActionBackgroundColor = MaterialStateColor.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.amber;
       }
       return Colors.cyan;
     });
 
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
       }
@@ -298,7 +298,7 @@ void main() {
       theme: ThemeData(snackBarTheme: _createSnackBarTheme(actionBackgroundColor: actionBackgroundColor)),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -336,8 +336,8 @@ void main() {
     expect(materialAfterDismissed.color, Colors.amber);
   });
 
-  testWidgets('SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided', (WidgetTester tester) async {
-    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((Set<MaterialState> states) {
+  testWidgets('SnackBarThemeData asserts when actionBackgroundColor is a MaterialStateColor and disabledActionBackgroundColor is also provided', (final WidgetTester tester) async {
+    final MaterialStateColor actionBackgroundColor = MaterialStateColor.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return Colors.blue;
       }
@@ -348,7 +348,7 @@ void main() {
       theme: ThemeData(snackBarTheme: _createSnackBarTheme(actionBackgroundColor: actionBackgroundColor, disabledActionBackgroundColor: Colors.amber)),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -365,14 +365,14 @@ void main() {
         ),
       ),
     )), throwsA(isA<AssertionError>().having(
-        (AssertionError e) => e.toString(),
+        (final AssertionError e) => e.toString(),
         'description',
         contains('disabledBackgroundColor must not be provided when background color is a MaterialStateColor'))
       )
     );
   });
 
-  testWidgets('SnackBar theme behavior is correct for floating', (WidgetTester tester) async {
+  testWidgets('SnackBar theme behavior is correct for floating', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)),
@@ -382,7 +382,7 @@ void main() {
           onPressed: () {},
         ),
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -412,7 +412,7 @@ void main() {
     expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
   });
 
-  testWidgets('SnackBar theme behavior is correct for fixed', (WidgetTester tester) async {
+  testWidgets('SnackBar theme behavior is correct for fixed', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.fixed),
@@ -423,7 +423,7 @@ void main() {
           onPressed: () {},
         ),
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -456,10 +456,10 @@ void main() {
   });
 
   Widget buildApp({
-    required SnackBarBehavior themedBehavior,
-    EdgeInsetsGeometry? margin,
-    double? width,
-    double? themedActionOverflowThreshold,
+    required final SnackBarBehavior themedBehavior,
+    final EdgeInsetsGeometry? margin,
+    final double? width,
+    final double? themedActionOverflowThreshold,
   }) {
     return MaterialApp(
       theme: ThemeData(
@@ -474,7 +474,7 @@ void main() {
           onPressed: () {},
         ),
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return GestureDetector(
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -493,7 +493,7 @@ void main() {
     );
   }
 
-  testWidgets('SnackBar theme behavior will assert properly for margin use', (WidgetTester tester) async {
+  testWidgets('SnackBar theme behavior will assert properly for margin use', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/84935
     // SnackBarBehavior.floating set in theme does not assert with margin
     await tester.pumpWidget(buildApp(
@@ -532,7 +532,7 @@ void main() {
    });
   }
 
-  testWidgets('SnackBar theme behavior will assert properly for width use', (WidgetTester tester) async {
+  testWidgets('SnackBar theme behavior will assert properly for width use', (final WidgetTester tester) async {
     // SnackBarBehavior.floating set in theme does not assert with width
     await tester.pumpWidget(buildApp(
       themedBehavior: SnackBarBehavior.floating,
@@ -561,7 +561,7 @@ void main() {
   });
 }
 
-SnackBarThemeData _snackBarTheme({bool? showCloseIcon}) {
+SnackBarThemeData _snackBarTheme({final bool? showCloseIcon}) {
   return SnackBarThemeData(
     backgroundColor: Colors.orange,
     actionTextColor: Colors.green,
@@ -573,15 +573,15 @@ SnackBarThemeData _snackBarTheme({bool? showCloseIcon}) {
 }
 
 SnackBarThemeData _createSnackBarTheme({
-  Color? backgroundColor,
-  Color? actionTextColor,
-  Color? disabledActionTextColor,
-  TextStyle? contentTextStyle,
-  double? elevation,
-  ShapeBorder? shape,
-  SnackBarBehavior? behavior,
-  Color? actionBackgroundColor,
-  Color? disabledActionBackgroundColor
+  final Color? backgroundColor,
+  final Color? actionTextColor,
+  final Color? disabledActionTextColor,
+  final TextStyle? contentTextStyle,
+  final double? elevation,
+  final ShapeBorder? shape,
+  final SnackBarBehavior? behavior,
+  final Color? actionBackgroundColor,
+  final Color? disabledActionBackgroundColor
 }) {
   return SnackBarThemeData(
     backgroundColor: backgroundColor,
@@ -596,38 +596,38 @@ SnackBarThemeData _createSnackBarTheme({
   );
 }
 
-Material _getSnackBarMaterial(WidgetTester tester) {
+Material _getSnackBarMaterial(final WidgetTester tester) {
   return tester.widget<Material>(
     _getSnackBarMaterialFinder(tester).first,
   );
 }
 
-Finder _getSnackBarMaterialFinder(WidgetTester tester) {
+Finder _getSnackBarMaterialFinder(final WidgetTester tester) {
   return find.descendant(
     of: find.byType(SnackBar),
     matching: find.byType(Material),
   );
 }
 
-RenderParagraph _getSnackBarActionTextRenderObject(WidgetTester tester, String text) {
+RenderParagraph _getSnackBarActionTextRenderObject(final WidgetTester tester, final String text) {
   return tester.renderObject(find.descendant(
     of: find.byType(TextButton),
     matching: find.text(text),
   ));
 }
 
-Icon _getSnackBarIcon(WidgetTester tester) {
+Icon _getSnackBarIcon(final WidgetTester tester) {
   return tester.widget<Icon>(_getSnackBarIconFinder(tester));
 }
 
-Finder _getSnackBarIconFinder(WidgetTester tester) {
+Finder _getSnackBarIconFinder(final WidgetTester tester) {
   return find.descendant(
     of: find.byType(SnackBar),
     matching: find.byIcon(Icons.close),
   );
 }
 
-RenderParagraph _getSnackBarTextRenderObject(WidgetTester tester, String text) {
+RenderParagraph _getSnackBarTextRenderObject(final WidgetTester tester, final String text) {
   return tester.renderObject(find.descendant(
     of: find.byType(SnackBar),
     matching: find.text(text),

@@ -29,14 +29,14 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
     super.dispose();
   }
 
-  void _setMessageVisibility(bool visible) {
+  void _setMessageVisibility(final bool visible) {
     setState(() {
       _showingMessage = visible;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CallbackShortcuts(
       bindings: <ShortcutActivator, VoidCallback>{
         _showShortcut: () {
@@ -51,13 +51,13 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
             menuChildren: <Widget>[
               CheckboxMenuButton(
                 value: _showingMessage,
-                onChanged: (bool? value) {
+                onChanged: (final bool? value) {
                   _setMessageVisibility(value!);
                 },
                 child: const Text('Show Message'),
               ),
             ],
-            builder: (BuildContext context, MenuController controller, Widget? child) {
+            builder: (final BuildContext context, final MenuController controller, final Widget? child) {
               return TextButton(
                 focusNode: _buttonFocusNode,
                 onPressed: () {
@@ -100,7 +100,7 @@ class MenuApp extends StatelessWidget {
   static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: MyCheckboxMenu(message: kMessage)),
     );

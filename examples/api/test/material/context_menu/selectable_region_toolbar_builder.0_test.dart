@@ -10,7 +10,7 @@ import 'package:flutter_api_samples/material/context_menu/selectable_region_tool
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('showing and hiding the custom context menu on SelectionArea', (WidgetTester tester) async {
+  testWidgets('showing and hiding the custom context menu on SelectionArea', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SelectableRegionToolbarBuilderExampleApp(),
     );

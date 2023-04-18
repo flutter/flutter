@@ -151,7 +151,7 @@ void main() {
     late FakeTextChannel fakeTextChannel;
 
     setUp(() {
-      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      fakeTextChannel = FakeTextChannel((final MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
     });
 
@@ -212,7 +212,7 @@ void main() {
 
     test('Invalid TextRange fails loudly when being converted to JSON', () async {
       final List<FlutterErrorDetails> record = <FlutterErrorDetails>[];
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         record.add(details);
       };
 
@@ -232,7 +232,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
       expect(record.length, 1);
       // Verify the error message in parts because Web formats the message
@@ -262,7 +262,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(errors, isEmpty);
@@ -399,7 +399,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'connectionClosed');
@@ -424,7 +424,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-            (ByteData? _) {},
+            (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'commitContent');
@@ -452,7 +452,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performSelector');
@@ -478,7 +478,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
@@ -503,7 +503,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
@@ -528,7 +528,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
@@ -554,7 +554,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
@@ -580,7 +580,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
@@ -605,7 +605,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'performPrivateCommand');
@@ -629,7 +629,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'showAutocorrectionPromptRect');
@@ -652,7 +652,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(client.latestMethodCall, 'showToolbar');
@@ -681,7 +681,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(connection.scribbleInProgress, true);
@@ -695,7 +695,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       expect(connection.scribbleInProgress, false);
@@ -724,7 +724,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? _) {},
+        (final ByteData? _) {},
       );
 
       TextInput.unregisterScribbleElement(targetElement.elementIdentifier);
@@ -749,8 +749,8 @@ void main() {
         FakeScribbleElement(elementIdentifier: 'other2', bounds: const Rect.fromLTWH(100.0, 100.0, 100.0, 100.0)),
       ];
 
-      void registerElements(FakeScribbleElement element) => TextInput.registerScribbleElement(element.elementIdentifier, element);
-      void unregisterElements(FakeScribbleElement element) => TextInput.unregisterScribbleElement(element.elementIdentifier);
+      void registerElements(final FakeScribbleElement element) => TextInput.registerScribbleElement(element.elementIdentifier, element);
+      void unregisterElements(final FakeScribbleElement element) => TextInput.unregisterScribbleElement(element.elementIdentifier);
 
       <FakeScribbleElement>[...targetElements, ...otherElements].forEach(registerElements);
 
@@ -764,7 +764,7 @@ void main() {
       await binding.defaultBinaryMessenger.handlePlatformMessage(
         'flutter/textinput',
         messageBytes,
-        (ByteData? response) {
+        (final ByteData? response) {
           responseBytes = response;
         },
       );
@@ -809,7 +809,7 @@ void main() {
     late FakeTextChannel fakeTextChannel;
 
     setUp(() {
-      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      fakeTextChannel = FakeTextChannel((final MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
     });
 
@@ -1002,28 +1002,28 @@ class FakeTextInputClient with TextInputClient {
   AutofillScope? get currentAutofillScope => null;
 
   @override
-  void performAction(TextInputAction action) {
+  void performAction(final TextInputAction action) {
     latestMethodCall = 'performAction';
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic>? data) {
+  void performPrivateCommand(final String action, final Map<String, dynamic>? data) {
     latestMethodCall = 'performPrivateCommand';
     latestPrivateCommandData = data;
   }
 
   @override
-  void insertContent(KeyboardInsertedContent content) {
+  void insertContent(final KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
   }
 
   @override
-  void updateEditingValue(TextEditingValue value) {
+  void updateEditingValue(final TextEditingValue value) {
     latestMethodCall = 'updateEditingValue';
   }
 
   @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) {
+  void updateFloatingCursor(final RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }
 
@@ -1033,7 +1033,7 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void showAutocorrectionPromptRect(int start, int end) {
+  void showAutocorrectionPromptRect(final int start, final int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
@@ -1045,12 +1045,12 @@ class FakeTextInputClient with TextInputClient {
   TextInputConfiguration get configuration => const TextInputConfiguration();
 
   @override
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+  void didChangeInputControl(final TextInputControl? oldControl, final TextInputControl? newControl) {
     latestMethodCall = 'didChangeInputControl';
   }
 
   @override
-  void insertTextPlaceholder(Size size) {
+  void insertTextPlaceholder(final Size size) {
     latestMethodCall = 'insertTextPlaceholder';
   }
 
@@ -1060,7 +1060,7 @@ class FakeTextInputClient with TextInputClient {
   }
 
   @override
-  void performSelector(String selectorName) {
+  void performSelector(final String selectorName) {
     latestMethodCall = 'performSelector';
     performedSelectors.add(selectorName);
   }
@@ -1071,23 +1071,23 @@ class FakeTextInputControl with TextInputControl {
   late TextInputType inputType;
 
   @override
-  void attach(TextInputClient client, TextInputConfiguration configuration) {
+  void attach(final TextInputClient client, final TextInputConfiguration configuration) {
     methodCalls.add('attach');
     inputType = configuration.inputType;
   }
 
   @override
-  void detach(TextInputClient client) {
+  void detach(final TextInputClient client) {
     methodCalls.add('detach');
   }
 
   @override
-  void setEditingState(TextEditingValue value) {
+  void setEditingState(final TextEditingValue value) {
     methodCalls.add('setEditingState');
   }
 
   @override
-  void updateConfig(TextInputConfiguration configuration) {
+  void updateConfig(final TextInputConfiguration configuration) {
     methodCalls.add('updateConfig');
     inputType = configuration.inputType;
   }
@@ -1103,38 +1103,38 @@ class FakeTextInputControl with TextInputControl {
   }
 
   @override
-  void setComposingRect(Rect rect) {
+  void setComposingRect(final Rect rect) {
     methodCalls.add('setComposingRect');
   }
 
   @override
-  void setCaretRect(Rect rect) {
+  void setCaretRect(final Rect rect) {
     methodCalls.add('setCaretRect');
   }
 
   @override
-  void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+  void setEditableSizeAndTransform(final Size editableBoxSize, final Matrix4 transform) {
     methodCalls.add('setEditableSizeAndTransform');
   }
 
   @override
-  void setSelectionRects(List<SelectionRect> selectionRects) {
+  void setSelectionRects(final List<SelectionRect> selectionRects) {
     methodCalls.add('setSelectionRects');
   }
 
   @override
   void setStyle({
-    required String? fontFamily,
-    required double? fontSize,
-    required FontWeight? fontWeight,
-    required TextDirection textDirection,
-    required TextAlign textAlign,
+    required final String? fontFamily,
+    required final double? fontSize,
+    required final FontWeight? fontWeight,
+    required final TextDirection textDirection,
+    required final TextAlign textAlign,
   }) {
     methodCalls.add('setStyle');
   }
 
   @override
-  void finishAutofillContext({bool shouldSave = true}) {
+  void finishAutofillContext({final bool shouldSave = true}) {
     methodCalls.add('finishAutofillContext');
   }
 

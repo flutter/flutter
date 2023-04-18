@@ -24,11 +24,11 @@ const List<Widget> fooBarTexts = <Text>[
 
 void main() {
   group('expectLater', () {
-    testWidgets('completes when matcher completes', (WidgetTester tester) async {
+    testWidgets('completes when matcher completes', (final WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer));
       String? result;
-      future.then<void>((void value) {
+      future.then<void>((final void value) {
         result = '123';
       });
       test_package.expect(result, isNull);
@@ -39,11 +39,11 @@ void main() {
       test_package.expect(result, '123');
     });
 
-    testWidgets('respects the skip flag', (WidgetTester tester) async {
+    testWidgets('respects the skip flag', (final WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       final Future<void> future = expectLater(null, FakeMatcher(completer), skip: 'testing skip'); // [intended] API testing
       bool completed = false;
-      future.then<void>((_) {
+      future.then<void>((final _) {
         completed = true;
       });
       test_package.expect(completed, isFalse);
@@ -53,18 +53,18 @@ void main() {
   });
 
   group('respects the group skip flag', () {
-    testWidgets('should be skipped', (WidgetTester tester) async {
+    testWidgets('should be skipped', (final WidgetTester tester) async {
       expect(false, true);
     });
   }, skip: true); // [intended] API testing
 
   group('findsOneWidget', () {
-    testWidgets('finds exactly one widget', (WidgetTester tester) async {
+    testWidgets('finds exactly one widget', (final WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       expect(find.text('foo'), findsOneWidget);
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message', (final WidgetTester tester) async {
       late TestFailure failure;
       try {
         expect(find.text('foo', skipOffstage: false), findsOneWidget);
@@ -81,11 +81,11 @@ void main() {
   });
 
   group('findsNothing', () {
-    testWidgets('finds no widgets', (WidgetTester tester) async {
+    testWidgets('finds no widgets', (final WidgetTester tester) async {
       expect(find.text('foo'), findsNothing);
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message', (final WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       late TestFailure failure;
@@ -103,7 +103,7 @@ void main() {
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
 
-    testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message when skipping', (final WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       late TestFailure failure;
@@ -123,7 +123,7 @@ void main() {
   });
 
   group('pumping', () {
-    testWidgets('pumping', (WidgetTester tester) async {
+    testWidgets('pumping', (final WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
       int count;
 
@@ -157,7 +157,7 @@ void main() {
       expect(count, 6);
     });
 
-    testWidgets('pumpFrames', (WidgetTester tester) async {
+    testWidgets('pumpFrames', (final WidgetTester tester) async {
       final List<int> logPaints = <int>[];
       int? initial;
 
@@ -181,13 +181,13 @@ void main() {
   });
 
   group('find.byElementPredicate', () {
-    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
+    testWidgets('fails with a custom description in the message', (final WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       const String customDescription = 'custom description';
       late TestFailure failure;
       try {
-        expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
+        expect(find.byElementPredicate((final _) => false, description: customDescription), findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -198,13 +198,13 @@ void main() {
   });
 
   group('find.byWidgetPredicate', () {
-    testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
+    testWidgets('fails with a custom description in the message', (final WidgetTester tester) async {
       await tester.pumpWidget(const Text('foo', textDirection: TextDirection.ltr));
 
       const String customDescription = 'custom description';
       late TestFailure failure;
       try {
-        expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
+        expect(find.byWidgetPredicate((final _) => false, description: customDescription), findsOneWidget);
       } on TestFailure catch (e) {
         failure = e;
       }
@@ -215,7 +215,7 @@ void main() {
   });
 
   group('find.descendant', () {
-    testWidgets('finds one descendant', (WidgetTester tester) async {
+    testWidgets('finds one descendant', (final WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -229,7 +229,7 @@ void main() {
       ), findsOneWidget);
     });
 
-    testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
+    testWidgets('finds two descendants with different ancestors', (final WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -244,7 +244,7 @@ void main() {
       ), findsNWidgets(2));
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message', (final WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -274,7 +274,7 @@ void main() {
   });
 
   group('find.ancestor', () {
-    testWidgets('finds one ancestor', (WidgetTester tester) async {
+    testWidgets('finds one ancestor', (final WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -288,7 +288,7 @@ void main() {
       ), findsOneWidget);
     });
 
-    testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
+    testWidgets('finds two matching ancestors, one descendant', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -306,7 +306,7 @@ void main() {
       ), findsNWidgets(2));
     });
 
-    testWidgets('fails with a descriptive message', (WidgetTester tester) async {
+    testWidgets('fails with a descriptive message', (final WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -334,7 +334,7 @@ void main() {
       );
     });
 
-    testWidgets('Root not matched by default', (WidgetTester tester) async {
+    testWidgets('Root not matched by default', (final WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -348,7 +348,7 @@ void main() {
       ), findsNothing);
     });
 
-    testWidgets('Match the root', (WidgetTester tester) async {
+    testWidgets('Match the root', (final WidgetTester tester) async {
       await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -363,7 +363,7 @@ void main() {
       ), findsOneWidget);
     });
 
-    testWidgets('is fast in deep tree', (WidgetTester tester) async {
+    testWidgets('is fast in deep tree', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -389,7 +389,7 @@ void main() {
   });
 
   group('pageBack', () {
-    testWidgets('fails when there are no back buttons', (WidgetTester tester) async {
+    testWidgets('fails when there are no back buttons', (final WidgetTester tester) async {
       await tester.pumpWidget(Container());
 
       expect(
@@ -398,17 +398,17 @@ void main() {
       );
     });
 
-    testWidgets('successfully taps material back buttons', (WidgetTester tester) async {
+    testWidgets('successfully taps material back buttons', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return ElevatedButton(
                   child: const Text('Next'),
                   onPressed: () {
                     Navigator.push<void>(context, MaterialPageRoute<void>(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return Scaffold(
                           appBar: AppBar(
                             title: const Text('Page 2'),
@@ -436,17 +436,17 @@ void main() {
       expect(find.text('Page 2'), findsNothing);
     });
 
-    testWidgets('successfully taps cupertino back buttons', (WidgetTester tester) async {
+    testWidgets('successfully taps cupertino back buttons', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return CupertinoButton(
                   child: const Text('Next'),
                   onPressed: () {
                     Navigator.push<void>(context, CupertinoPageRoute<void>(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return CupertinoPageScaffold(
                           navigationBar: const CupertinoNavigationBar(
                             middle: Text('Page 2'),
@@ -476,7 +476,7 @@ void main() {
     });
   });
 
-  testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
+  testWidgets('hasRunningAnimations control test', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(seconds: 1),
       vsync: const TestVSync(),
@@ -492,7 +492,7 @@ void main() {
     expect(tester.hasRunningAnimations, isFalse);
   });
 
-  testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
+  testWidgets('pumpAndSettle control test', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(minutes: 525600),
       vsync: const TestVSync(),
@@ -512,16 +512,16 @@ void main() {
     expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
   });
 
-  testWidgets('Input event array', (WidgetTester tester) async {
+  testWidgets('Input event array', (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -578,7 +578,7 @@ void main() {
   });
 
   group('runAsync', () {
-    testWidgets('works with no async calls', (WidgetTester tester) async {
+    testWidgets('works with no async calls', (final WidgetTester tester) async {
       String? value;
       await tester.runAsync(() async {
         value = '123';
@@ -586,7 +586,7 @@ void main() {
       expect(value, '123');
     });
 
-    testWidgets('works with real async calls', (WidgetTester tester) async {
+    testWidgets('works with real async calls', (final WidgetTester tester) async {
       final StringBuffer buf = StringBuffer('1');
       await tester.runAsync(() async {
         buf.write('2');
@@ -598,14 +598,14 @@ void main() {
       expect(buf.toString(), '1234');
     });
 
-    testWidgets('propagates return values', (WidgetTester tester) async {
+    testWidgets('propagates return values', (final WidgetTester tester) async {
       final String? value = await tester.runAsync<String>(() async {
         return '123';
       });
       expect(value, '123');
     });
 
-    testWidgets('reports errors via framework', (WidgetTester tester) async {
+    testWidgets('reports errors via framework', (final WidgetTester tester) async {
       final String? value = await tester.runAsync<String>(() async {
         throw ArgumentError();
       });
@@ -613,14 +613,14 @@ void main() {
       expect(tester.takeException(), isArgumentError);
     });
 
-    testWidgets('disallows re-entry', (WidgetTester tester) async {
+    testWidgets('disallows re-entry', (final WidgetTester tester) async {
       final Completer<void> completer = Completer<void>();
       tester.runAsync<void>(() => completer.future);
       expect(() => tester.runAsync(() async { }), throwsA(isA<TestFailure>()));
       completer.complete();
     });
 
-    testWidgets('maintains existing zone values', (WidgetTester tester) async {
+    testWidgets('maintains existing zone values', (final WidgetTester tester) async {
       final Object key = Object();
       await runZoned<Future<void>>(() {
         expect(Zone.current[key], 'abczed');
@@ -632,18 +632,18 @@ void main() {
       });
     });
 
-    testWidgets('control test (return value)', (WidgetTester tester) async {
+    testWidgets('control test (return value)', (final WidgetTester tester) async {
       final String? result = await tester.binding.runAsync<String>(() async => 'Judy Turner');
       expect(result, 'Judy Turner');
     });
 
-    testWidgets('async throw', (WidgetTester tester) async {
+    testWidgets('async throw', (final WidgetTester tester) async {
       final String? result = await tester.binding.runAsync<Never>(() async => throw Exception('Lois Dilettente'));
       expect(result, isNull);
       expect(tester.takeException(), isNotNull);
     });
 
-    testWidgets('sync throw', (WidgetTester tester) async {
+    testWidgets('sync throw', (final WidgetTester tester) async {
       final String? result = await tester.binding.runAsync<Never>(() => throw Exception('Butch Barton'));
       expect(result, isNull);
       expect(tester.takeException(), isNotNull);
@@ -651,7 +651,7 @@ void main() {
   });
 
   group('showKeyboard', () {
-    testWidgets('can be called twice', (WidgetTester tester) async {
+    testWidgets('can be called twice', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -674,7 +674,7 @@ void main() {
 
     testWidgets(
       'can focus on offstage text input field if finder says not to skip offstage nodes',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
@@ -688,9 +688,9 @@ void main() {
       });
   });
 
-  testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
+  testWidgets('verifyTickersWereDisposed control test', (final WidgetTester tester) async {
     late FlutterError error;
-    final Ticker ticker = tester.createTicker((Duration duration) {});
+    final Ticker ticker = tester.createTicker((final Duration duration) {});
     ticker.start();
     try {
       tester.verifyTickersWereDisposed('');
@@ -725,7 +725,7 @@ void main() {
   group('testWidgets variants work', () {
     int numberOfVariationsRun = 0;
 
-    testWidgets('variant tests run all values provided', (WidgetTester tester) async {
+    testWidgets('variant tests run all values provided', (final WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
       } else {
@@ -733,7 +733,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
 
-    testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
+    testWidgets('variant tests have descriptions with details', (final WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(tester.testDescription, equals('variant tests have descriptions with details'));
       } else {
@@ -757,13 +757,13 @@ void main() {
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
 
-    testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
+    testWidgets('TargetPlatformVariant.only tests given value', (final WidgetTester tester) async {
       expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
       expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     group('all', () {
-      testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
+      testWidgets('TargetPlatformVariant.all tests run all variants', (final WidgetTester tester) async {
         if (debugDefaultTargetPlatformOverride == null) {
           expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
         } else {
@@ -772,7 +772,7 @@ void main() {
       }, variant: TargetPlatformVariant.all());
 
       const Set<TargetPlatform> excludePlatforms = <TargetPlatform>{ TargetPlatform.android, TargetPlatform.linux };
-      testWidgets('TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding', (WidgetTester tester) async {
+      testWidgets('TargetPlatformVariant.all, excluding runs an all variants except those provided in excluding', (final WidgetTester tester) async {
         if (debugDefaultTargetPlatformOverride == null) {
           expect(numberOfVariationsRun, equals(TargetPlatform.values.length - excludePlatforms.length));
           expect(
@@ -786,7 +786,7 @@ void main() {
       }, variant: TargetPlatformVariant.all(excluding: excludePlatforms));
     });
 
-    testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (WidgetTester tester) async {
+    testWidgets('TargetPlatformVariant.desktop + mobile contains all TargetPlatform values', (final WidgetTester tester) async {
       final TargetPlatformVariant all = TargetPlatformVariant.all();
       final TargetPlatformVariant desktop = TargetPlatformVariant.all();
       final TargetPlatformVariant mobile = TargetPlatformVariant.all();
@@ -806,7 +806,7 @@ void main() {
 
     test('Throws assertion message without code', () async {
       late FlutterErrorDetails flutterErrorDetails;
-      reportTestException = (FlutterErrorDetails details, String testDescription) {
+      reportTestException = (final FlutterErrorDetails details, final String testDescription) {
         flutterErrorDetails = details;
       };
 
@@ -824,7 +824,7 @@ void main() {
   });
 
   group('Accessibility announcements testing API', () {
-    testWidgets('Returns the list of announcements', (WidgetTester tester) async {
+    testWidgets('Returns the list of announcements', (final WidgetTester tester) async {
 
       // Make sure the handler is properly set
       expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -858,7 +858,7 @@ void main() {
     test('New test API is not breaking existing tests', () async {
       final List<Map<dynamic, dynamic>> log = <Map<dynamic, dynamic>>[];
 
-      Future<dynamic> handleMessage(dynamic mockMessage) async {
+      Future<dynamic> handleMessage(final dynamic mockMessage) async {
         final Map<dynamic, dynamic> message = mockMessage as Map<dynamic, dynamic>;
         log.add(message);
       }
@@ -902,14 +902,14 @@ class FakeMatcher extends AsyncMatcher {
   final Completer<void> completer;
 
   @override
-  Future<String?> matchAsync(dynamic object) {
-    return completer.future.then<String?>((void value) {
+  Future<String?> matchAsync(final dynamic object) {
+    return completer.future.then<String?>((final void value) {
       return object?.toString();
     });
   }
 
   @override
-  Description describe(Description description) => description.add('--fake--');
+  Description describe(final Description description) => description.add('--fake--');
 }
 
 class _AlwaysAnimating extends StatefulWidget {
@@ -943,10 +943,10 @@ class _AlwaysAnimatingState extends State<_AlwaysAnimating> with SingleTickerPro
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller.view,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return CustomPaint(
           painter: _AlwaysRepaint(widget.onPaint),
         );
@@ -961,16 +961,16 @@ class _AlwaysRepaint extends CustomPainter {
   final VoidCallback onPaint;
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(final CustomPainter oldDelegate) => true;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     onPaint();
   }
 }
 
 /// Wraps [child] in [depth] layers of [SizedBox]
-Widget _deepWidgetTree({required int depth, required Widget child}) {
+Widget _deepWidgetTree({required final int depth, required final Widget child}) {
   Widget tree = child;
   for (int i = 0; i < depth; i += 1) {
     tree = SizedBox(child: tree);

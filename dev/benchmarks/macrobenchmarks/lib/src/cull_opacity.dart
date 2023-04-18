@@ -37,8 +37,8 @@ class _CullOpacityPageState extends State<CullOpacityPage> with SingleTickerProv
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Stack(children: List<Widget>.generate(50, (int i) => Positioned(
+  Widget build(final BuildContext context) {
+    return Stack(children: List<Widget>.generate(50, (final int i) => Positioned(
       left: 0,
       top: (200 * i).toDouble() + _offsetY.value,
       child: Opacity(

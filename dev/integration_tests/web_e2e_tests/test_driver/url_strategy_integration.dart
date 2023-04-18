@@ -15,15 +15,15 @@ import 'package:web_e2e_tests/url_strategy_main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Can customize url strategy', (WidgetTester tester) async {
+  testWidgets('Can customize url strategy', (final WidgetTester tester) async {
     final TestUrlStrategy strategy = TestUrlStrategy.fromEntry(
       const TestHistoryEntry('initial state', null, '/'),
     );
     setUrlStrategy(strategy);
 
     app.appRoutes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => Container(),
-      '/foo': (BuildContext context) => Container(),
+      '/': (final BuildContext context) => Container(),
+      '/foo': (final BuildContext context) => Container(),
     };
     app.main();
     await tester.pumpAndSettle();
@@ -53,7 +53,7 @@ class TestUrlStrategy extends UrlStrategy {
 
   /// Creates an instance of [TestUrlStrategy] and populates it with a list
   /// that has [initialEntry] as the only item.
-  TestUrlStrategy.fromEntry(TestHistoryEntry initialEntry)
+  TestUrlStrategy.fromEntry(final TestHistoryEntry initialEntry)
       : _currentEntryIndex = 0,
         history = <TestHistoryEntry>[initialEntry];
 
@@ -73,7 +73,7 @@ class TestUrlStrategy extends UrlStrategy {
     return history[_currentEntryIndex];
   }
 
-  set currentEntry(TestHistoryEntry entry) {
+  set currentEntry(final TestHistoryEntry entry) {
     assert(withinAppHistory);
     history[_currentEntryIndex] = entry;
   }
@@ -84,7 +84,7 @@ class TestUrlStrategy extends UrlStrategy {
   bool get withinAppHistory => _currentEntryIndex >= 0;
 
   @override
-  void pushState(dynamic state, String title, String url) {
+  void pushState(final dynamic state, final String title, final String url) {
     assert(withinAppHistory);
     _currentEntryIndex++;
     // When pushing a new state, we need to remove all entries that exist after
@@ -97,7 +97,7 @@ class TestUrlStrategy extends UrlStrategy {
   }
 
   @override
-  void replaceState(dynamic state, String title, String url) {
+  void replaceState(final dynamic state, final String title, String url) {
     assert(withinAppHistory);
     if (url == '') {
       url = currentEntry.url;
@@ -107,7 +107,7 @@ class TestUrlStrategy extends UrlStrategy {
 
   /// This simulates the case where a user types in a url manually. It causes
   /// a new state to be pushed, and all event listeners will be invoked.
-  Future<void> simulateUserTypingUrl(String url) {
+  Future<void> simulateUserTypingUrl(final String url) {
     assert(withinAppHistory);
     return _nextEventLoop(() {
       pushState(null, '', url);
@@ -116,7 +116,7 @@ class TestUrlStrategy extends UrlStrategy {
   }
 
   @override
-  Future<void> go(int count) {
+  Future<void> go(final int count) {
     assert(withinAppHistory);
     // Browsers don't move in history immediately. They do it at the next
     // event loop. So let's simulate that.
@@ -131,7 +131,7 @@ class TestUrlStrategy extends UrlStrategy {
   final List<html.EventListener> listeners = <html.EventListener>[];
 
   @override
-  ui.VoidCallback addPopStateListener(html.EventListener fn) {
+  ui.VoidCallback addPopStateListener(final html.EventListener fn) {
     listeners.add(fn);
     return () {
       // Schedule a micro task here to avoid removing the listener during
@@ -142,8 +142,8 @@ class TestUrlStrategy extends UrlStrategy {
 
   /// Simulates the scheduling of a new event loop by creating a delayed future.
   /// Details explained here: https://webdev.dartlang.org/articles/performance/event-loop
-  Future<void> _nextEventLoop(ui.VoidCallback callback) {
-    return Future<void>.delayed(Duration.zero).then((_) => callback());
+  Future<void> _nextEventLoop(final ui.VoidCallback callback) {
+    return Future<void>.delayed(Duration.zero).then((final _) => callback());
   }
 
   /// Invokes all the attached event listeners in order of
@@ -161,7 +161,7 @@ class TestUrlStrategy extends UrlStrategy {
   }
 
   @override
-  String prepareExternalUrl(String internalUrl) => internalUrl;
+  String prepareExternalUrl(final String internalUrl) => internalUrl;
 
   @override
   String toString() {

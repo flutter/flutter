@@ -138,7 +138,7 @@ class BannerPainter extends CustomPainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     if (!_prepared) {
       _prepare();
     }
@@ -153,7 +153,7 @@ class BannerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(BannerPainter oldDelegate) {
+  bool shouldRepaint(final BannerPainter oldDelegate) {
     return message != oldDelegate.message
         || location != oldDelegate.location
         || color != oldDelegate.color
@@ -161,9 +161,9 @@ class BannerPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset position) => false;
+  bool hitTest(final Offset position) => false;
 
-  double _translationX(double width) {
+  double _translationX(final double width) {
     switch (layoutDirection) {
       case TextDirection.rtl:
         switch (location) {
@@ -190,7 +190,7 @@ class BannerPainter extends CustomPainter {
     }
   }
 
-  double _translationY(double height) {
+  double _translationY(final double height) {
     switch (location) {
       case BannerLocation.bottomStart:
       case BannerLocation.bottomEnd:
@@ -294,7 +294,7 @@ class Banner extends StatelessWidget {
   final TextStyle textStyle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert((textDirection != null && layoutDirection != null) || debugCheckHasDirectionality(context));
     return CustomPaint(
       foregroundPainter: BannerPainter(
@@ -310,7 +310,7 @@ class Banner extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('message', message, showName: false));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
@@ -338,7 +338,7 @@ class CheckedModeBanner extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget result = child;
     assert(() {
       result = Banner(
@@ -353,7 +353,7 @@ class CheckedModeBanner extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     String message = 'disabled';
     assert(() {

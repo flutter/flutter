@@ -83,7 +83,7 @@ void main() {
     expect(fallbackTheme.typography, Typography.material2021(colorScheme: fallbackTheme.colorScheme));
   });
 
-  testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (WidgetTester tester) async {
+  testWidgets('Defaults to MaterialTapTargetBehavior.padded on mobile platforms and MaterialTapTargetBehavior.shrinkWrap on desktop', (final WidgetTester tester) async {
     final ThemeData themeData = ThemeData(platform: defaultTargetPlatform);
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -388,7 +388,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, true);
   });
 
-  testWidgets('ThemeData.from a light color scheme sets appropriate values', (WidgetTester tester) async {
+  testWidgets('ThemeData.from a light color scheme sets appropriate values', (final WidgetTester tester) async {
     const ColorScheme lightColors = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: lightColors);
 
@@ -403,7 +403,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, isFalse);
   });
 
-  testWidgets('ThemeData.from a dark color scheme sets appropriate values', (WidgetTester tester) async {
+  testWidgets('ThemeData.from a dark color scheme sets appropriate values', (final WidgetTester tester) async {
     const ColorScheme darkColors = ColorScheme.dark();
     final ThemeData theme = ThemeData.from(colorScheme: darkColors);
 
@@ -419,7 +419,7 @@ void main() {
     expect(theme.applyElevationOverlayColor, isTrue);
   });
 
-  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (WidgetTester tester) async {
+  testWidgets('splashFactory is InkSparkle only for Android non-web when useMaterial3 is true', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
 
     // Basic check that this theme is in fact using material 3.
@@ -441,7 +441,7 @@ void main() {
      }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false', (WidgetTester tester) async {
+  testWidgets('splashFactory is InkSplash for every platform scenario, including Android non-web, when useMaterial3 is false', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: false);
 
     switch (debugDefaultTargetPlatformOverride!) {
@@ -455,7 +455,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('VisualDensity.adaptivePlatformDensity returns adaptive values', (WidgetTester tester) async {
+  testWidgets('VisualDensity.adaptivePlatformDensity returns adaptive values', (final WidgetTester tester) async {
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -468,7 +468,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('VisualDensity.getDensityForPlatform returns adaptive values', (WidgetTester tester) async {
+  testWidgets('VisualDensity.getDensityForPlatform returns adaptive values', (final WidgetTester tester) async {
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -481,7 +481,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile', (WidgetTester tester) async {
+  testWidgets('VisualDensity in ThemeData defaults to "compact" on desktop and "standard" on mobile', (final WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.android:
@@ -495,7 +495,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it', (WidgetTester tester) async {
+  testWidgets('VisualDensity in ThemeData defaults to the right thing when a platform is supplied to it', (final WidgetTester tester) async {
     final ThemeData themeData = ThemeData(platform: debugDefaultTargetPlatformOverride! == TargetPlatform.android ? TargetPlatform.linux : TargetPlatform.android);
     switch (debugDefaultTargetPlatformOverride!) {
       case TargetPlatform.iOS:
@@ -509,7 +509,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Ensure Visual Density effective constraints are clamped', (WidgetTester tester) async {
+  testWidgets('Ensure Visual Density effective constraints are clamped', (final WidgetTester tester) async {
     const BoxConstraints square = BoxConstraints.tightFor(width: 35, height: 35);
     BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
     expect(expanded.minWidth, equals(35));
@@ -537,7 +537,7 @@ void main() {
     expect(expanded.maxHeight, equals(4));
   });
 
-  testWidgets('Ensure Visual Density effective constraints expand and contract', (WidgetTester tester) async {
+  testWidgets('Ensure Visual Density effective constraints expand and contract', (final WidgetTester tester) async {
     const BoxConstraints square = BoxConstraints();
     final BoxConstraints expanded = const VisualDensity(horizontal: 4.0, vertical: 4.0).effectiveConstraints(square);
     expect(expanded.minWidth, equals(16));
@@ -555,7 +555,7 @@ void main() {
   group('Theme extensions', () {
     const Key containerKey = Key('container');
 
-    testWidgets('can be obtained', (WidgetTester tester) async {
+    testWidgets('can be obtained', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -582,7 +582,7 @@ void main() {
       expect(theme.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 50));
     });
 
-    testWidgets('can use copyWith', (WidgetTester tester) async {
+    testWidgets('can use copyWith', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(
@@ -605,7 +605,7 @@ void main() {
       expect(theme.extension<MyThemeExtensionA>()!.color2, Colors.amber);
     });
 
-    testWidgets('can lerp', (WidgetTester tester) async {
+    testWidgets('can lerp', (final WidgetTester tester) async {
       const MyThemeExtensionA extensionA1 = MyThemeExtensionA(
         color1: Colors.black,
         color2: Colors.amber,
@@ -681,7 +681,7 @@ void main() {
       expect(lerped.extension<MyThemeExtensionB>()!.textStyle, const TextStyle(fontSize: 100)); // Not lerped
     });
 
-    testWidgets('should return null on extension not found', (WidgetTester tester) async {
+    testWidgets('should return null on extension not found', (final WidgetTester tester) async {
       final ThemeData theme = ThemeData(
         extensions: const <ThemeExtension<dynamic>>{},
       );
@@ -713,7 +713,7 @@ void main() {
     expect(hoverColorBlack.hashCode != hoverColorWhite.hashCode, true);
   });
 
-  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (WidgetTester tester) async {
+  testWidgets('ThemeData.copyWith correctly creates new ThemeData with all copied arguments', (final WidgetTester tester) async {
     final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
       primaryColor: Colors.black,
       primaryColorDark: Colors.black,
@@ -1166,7 +1166,7 @@ void main() {
     expect(themeDataCopy.bottomAppBarColor, equals(otherTheme.bottomAppBarColor));
   });
 
-  testWidgets('ThemeData.toString has less than 200 characters output', (WidgetTester tester) async {
+  testWidgets('ThemeData.toString has less than 200 characters output', (final WidgetTester tester) async {
     // This test makes sure that the ThemeData debug output doesn't get too
     // verbose, which has been a problem in the past.
 
@@ -1181,12 +1181,12 @@ void main() {
     expect(lightTheme.toString().length, lessThan(200));
   });
 
-  testWidgets('ThemeData brightness parameter overrides ColorScheme brightness', (WidgetTester tester) async {
+  testWidgets('ThemeData brightness parameter overrides ColorScheme brightness', (final WidgetTester tester) async {
     const ColorScheme lightColors = ColorScheme.light();
     expect(() => ThemeData(colorScheme: lightColors, brightness: Brightness.dark), throwsAssertionError);
   });
 
-  testWidgets('ThemeData.copyWith brightness parameter overrides ColorScheme brightness', (WidgetTester tester) async {
+  testWidgets('ThemeData.copyWith brightness parameter overrides ColorScheme brightness', (final WidgetTester tester) async {
     const ColorScheme lightColors = ColorScheme.light();
     final ThemeData theme = ThemeData.from(colorScheme: lightColors).copyWith(brightness: Brightness.dark);
 
@@ -1329,7 +1329,7 @@ class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
   final Color? color2;
 
   @override
-  MyThemeExtensionA copyWith({Color? color1, Color? color2}) {
+  MyThemeExtensionA copyWith({final Color? color1, final Color? color2}) {
     return MyThemeExtensionA(
       color1: color1 ?? this.color1,
       color2: color2 ?? this.color2,
@@ -1337,7 +1337,7 @@ class MyThemeExtensionA extends ThemeExtension<MyThemeExtensionA> {
   }
 
   @override
-  MyThemeExtensionA lerp(MyThemeExtensionA? other, double t) {
+  MyThemeExtensionA lerp(final MyThemeExtensionA? other, final double t) {
     if (other is! MyThemeExtensionA) {
       return this;
     }
@@ -1357,14 +1357,14 @@ class MyThemeExtensionB extends ThemeExtension<MyThemeExtensionB> {
   final TextStyle? textStyle;
 
   @override
-  MyThemeExtensionB copyWith({Color? color, TextStyle? textStyle}) {
+  MyThemeExtensionB copyWith({final Color? color, final TextStyle? textStyle}) {
     return MyThemeExtensionB(
       textStyle: textStyle ?? this.textStyle,
     );
   }
 
   @override
-  MyThemeExtensionB lerp(MyThemeExtensionB? other, double t) {
+  MyThemeExtensionB lerp(final MyThemeExtensionB? other, final double t) {
     if (other is! MyThemeExtensionB) {
       return this;
     }

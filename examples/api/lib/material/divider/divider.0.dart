@@ -12,7 +12,7 @@ class DividerExampleApp extends StatelessWidget {
   const DividerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Divider Sample')),
@@ -26,7 +26,7 @@ class DividerExample extends StatelessWidget {
   const DividerExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Column(
         children: <Widget>[

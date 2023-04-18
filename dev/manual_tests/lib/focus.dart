@@ -36,7 +36,7 @@ class _DemoButtonState extends State<DemoButton> {
   }
 
   @override
-  void didUpdateWidget(DemoButton oldWidget) {
+  void didUpdateWidget(final DemoButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     focusNode.canRequestFocus = widget.canRequestFocus;
   }
@@ -48,12 +48,12 @@ class _DemoButtonState extends State<DemoButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextButton(
       focusNode: focusNode,
       autofocus: widget.autofocus,
       style: ButtonStyle(
-        overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+        overlayColor: MaterialStateProperty.resolveWith<Color>((final Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return Colors.red.withOpacity(0.25);
           }
@@ -91,7 +91,7 @@ class _FocusDemoState extends State<FocusDemo> {
     super.dispose();
   }
 
-  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyPress(final FocusNode node, final RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       print('Scope got key event: ${event.logicalKey}, $node');
       print('Keys down: ${RawKeyboard.instance.keysPressed}');
@@ -128,7 +128,7 @@ class _FocusDemoState extends State<FocusDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return FocusTraversalGroup(
@@ -148,7 +148,7 @@ class _FocusDemoState extends State<FocusDemo> {
               onPressed: () {},
             ),
             body: Center(
-              child: Builder(builder: (BuildContext context) {
+              child: Builder(builder: (final BuildContext context) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[

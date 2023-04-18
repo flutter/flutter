@@ -11,7 +11,7 @@ class BogusCurve extends Curve {
   const BogusCurve();
 
   @override
-  double transform(double t) => 100.0;
+  double transform(final double t) => 100.0;
 }
 
 void main() {

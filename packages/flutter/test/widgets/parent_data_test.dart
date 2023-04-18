@@ -18,9 +18,9 @@ class TestParentData {
   final double? left;
 }
 
-void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
+void checkTree(final WidgetTester tester, final List<TestParentData> expectedParentData) {
   final MultiChildRenderObjectElement element = tester.element(
-    find.byElementPredicate((Element element) => element is MultiChildRenderObjectElement),
+    find.byElementPredicate((final Element element) => element is MultiChildRenderObjectElement),
   );
   expect(element, isNotNull);
   expect(element.renderObject, isA<RenderStack>());
@@ -49,7 +49,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
 final TestParentData kNonPositioned = TestParentData();
 
 void main() {
-  testWidgets('ParentDataWidget control test', (WidgetTester tester) async {
+  testWidgets('ParentDataWidget control test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Stack(
         textDirection: TextDirection.ltr,
@@ -249,7 +249,7 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
+  testWidgets('ParentDataWidget conflicting data', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -331,7 +331,7 @@ void main() {
     checkTree(tester, <TestParentData>[]);
   });
 
-  testWidgets('ParentDataWidget interacts with global keys', (WidgetTester tester) async {
+  testWidgets('ParentDataWidget interacts with global keys', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -389,7 +389,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Parent data invalid ancestor', (WidgetTester tester) async {
+  testWidgets('Parent data invalid ancestor', (final WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Row(
@@ -424,7 +424,7 @@ void main() {
     );
   });
 
-  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (WidgetTester tester) async {
+  testWidgets('ParentDataWidget can be used with different ancestor RenderObjectWidgets', (final WidgetTester tester) async {
     await tester.pumpWidget(
       OneAncestorWidget(
         child: Container(),
@@ -467,7 +467,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   final String string;
 
   @override
-  void applyParentData(RenderObject renderObject) {
+  void applyParentData(final RenderObject renderObject) {
     assert(renderObject.parentData is DummyParentData);
     final DummyParentData parentData = renderObject.parentData! as DummyParentData;
     parentData.string = string;
@@ -488,7 +488,7 @@ class OneAncestorWidget extends SingleChildRenderObjectWidget {
   });
 
   @override
-  RenderOne createRenderObject(BuildContext context) => RenderOne();
+  RenderOne createRenderObject(final BuildContext context) => RenderOne();
 }
 
 class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
@@ -498,12 +498,12 @@ class AnotherAncestorWidget extends SingleChildRenderObjectWidget {
   });
 
   @override
-  RenderAnother createRenderObject(BuildContext context) => RenderAnother();
+  RenderAnother createRenderObject(final BuildContext context) => RenderAnother();
 }
 
 class RenderOne extends RenderProxyBox {
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! DummyParentData) {
       child.parentData = DummyParentData();
     }
@@ -512,7 +512,7 @@ class RenderOne extends RenderProxyBox {
 
 class RenderAnother extends RenderProxyBox {
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! DummyParentData) {
       child.parentData = DummyParentData();
     }
@@ -525,5 +525,5 @@ class DummyWidget extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }

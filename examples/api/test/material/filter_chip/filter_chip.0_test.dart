@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/filter_chip/filter_chip.0.dart' as 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Filter exercises using FilterChip', (WidgetTester tester) async {
+  testWidgets('Filter exercises using FilterChip', (final WidgetTester tester) async {
     const String baseText = 'Looking for: ';
 
     await tester.pumpWidget(

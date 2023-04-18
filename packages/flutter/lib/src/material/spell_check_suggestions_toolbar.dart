@@ -53,7 +53,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   static const double kToolbarContentDistanceBelow = TextSelectionToolbar.kHandleSize - 3.0;
 
   /// Builds the default Android Material spell check suggestions toolbar.
-  static Widget _spellCheckSuggestionsToolbarBuilder(BuildContext context, Widget child) {
+  static Widget _spellCheckSuggestionsToolbarBuilder(final BuildContext context, final Widget child) {
     return _SpellCheckSuggestionsToolbarContainer(
       child: child,
     );
@@ -62,8 +62,8 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-    BuildContext context,
-    EditableTextState editableTextState,
+    final BuildContext context,
+    final EditableTextState editableTextState,
   ) {
     // Determine if composing region is misspelled.
     final SuggestionSpan? spanAtCursorIndex =
@@ -114,7 +114,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     return buttonItems;
   }
 
-  static void _replaceText(EditableTextState editableTextState, String text, TextRange replacementRange) {
+  static void _replaceText(final EditableTextState editableTextState, final String text, final TextRange replacementRange) {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
 
@@ -125,7 +125,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     editableTextState.userUpdateTextEditingValue(newValue,  SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((final Duration duration) {
       if (editableTextState.mounted) {
         editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
       }
@@ -134,13 +134,13 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   }
 
   /// Determines the Offset that the toolbar will be anchored to.
-  static Offset getToolbarAnchor(TextSelectionToolbarAnchors anchors) {
+  static Offset getToolbarAnchor(final TextSelectionToolbarAnchors anchors) {
     return anchors.secondaryAnchor == null ? anchors.primaryAnchor : anchors.secondaryAnchor!;
   }
 
   /// Builds the toolbar buttons based on the [buttonItems].
-  List<Widget> _buildToolbarButtons(BuildContext context) {
-    return buttonItems.map((ContextMenuButtonItem buttonItem) {
+  List<Widget> _buildToolbarButtons(final BuildContext context) {
+    return buttonItems.map((final ContextMenuButtonItem buttonItem) {
       final TextSelectionToolbarTextButton button =
         TextSelectionToolbarTextButton(
           padding: const EdgeInsets.fromLTRB(20, 0, 0, 0),
@@ -163,7 +163,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Adjust toolbar height if needed.
     final double spellCheckSuggestionsToolbarHeight =
         _kDefaultToolbarHeight - (48.0 * (4 - buttonItems.length));
@@ -211,7 +211,7 @@ class _SpellCheckSuggestionsToolbarContainer extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       // This elevation was eyeballed on a Pixel 4 emulator running Android
       // API 31 for the SpellCheckSuggestionsToolbar.
@@ -235,7 +235,7 @@ class _SpellCheckSuggestsionsToolbarItemsLayout extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       // This width was eyeballed on a Pixel 4 emulator running Android
       // API 31 for the SpellCheckSuggestionsToolbar.

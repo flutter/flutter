@@ -15,7 +15,7 @@ class _CombiningGestureArenaEntry implements GestureArenaEntry {
   final GestureArenaMember _member;
 
   @override
-  void resolve(GestureDisposition disposition) {
+  void resolve(final GestureDisposition disposition) {
     _combiner._resolve(_member, disposition);
   }
 }
@@ -32,7 +32,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   GestureArenaEntry? _entry;
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(final int pointer) {
     assert(_pointer == pointer);
     assert(_winner != null || _members.isNotEmpty);
     _close();
@@ -46,7 +46,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(final int pointer) {
     assert(_pointer == pointer);
     _close();
     for (final GestureArenaMember member in _members) {
@@ -61,7 +61,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     assert(combiner == this);
   }
 
-  GestureArenaEntry _add(int pointer, GestureArenaMember member) {
+  GestureArenaEntry _add(final int pointer, final GestureArenaMember member) {
     assert(!_resolved);
     assert(_pointer == pointer);
     _members.add(member);
@@ -69,7 +69,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
     return _CombiningGestureArenaEntry(this, member);
   }
 
-  void _resolve(GestureArenaMember member, GestureDisposition disposition) {
+  void _resolve(final GestureArenaMember member, final GestureDisposition disposition) {
     if (_resolved) {
       return;
     }
@@ -147,7 +147,7 @@ class GestureArenaTeam {
   ///
   /// To assign a gesture recognizer to a team, see
   /// [OneSequenceGestureRecognizer.team].
-  GestureArenaEntry add(int pointer, GestureArenaMember member) {
+  GestureArenaEntry add(final int pointer, final GestureArenaMember member) {
     final _CombiningGestureArenaMember combiner = _combiners.putIfAbsent(
       pointer,
       () => _CombiningGestureArenaMember(this, pointer),

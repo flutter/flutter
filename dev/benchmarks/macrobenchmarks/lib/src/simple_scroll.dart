@@ -8,7 +8,7 @@ class SimpleScroll extends StatelessWidget {
   const SimpleScroll({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView(
       children: <Widget>[
         for (int n = 0; n < 200; n += 1)

@@ -33,7 +33,7 @@ void main() {
     expect(step.transform(1.0), 1.0);
   });
 
-  void assertMaximumSlope(Curve curve, double maximumSlope) {
+  void assertMaximumSlope(final Curve curve, final double maximumSlope) {
     const double delta = 0.005;
     for (double x = 0.0; x < 1.0 - delta; x += delta) {
       final double deltaY = curve.transform(x) - curve.transform(x + delta);
@@ -84,7 +84,7 @@ void main() {
     assertMaximumSlope(Curves.easeInOutCirc, 20.0);
   });
 
-  void expectStaysInBounds(Curve curve) {
+  void expectStaysInBounds(final Curve curve) {
     expect(curve.transform(0.0), inInclusiveRange(0.0, 1.0));
     expect(curve.transform(0.1), inInclusiveRange(0.0, 1.0));
     expect(curve.transform(0.2), inInclusiveRange(0.0, 1.0));
@@ -104,7 +104,7 @@ void main() {
     expectStaysInBounds(Curves.bounceInOut);
   });
 
-  List<double> estimateBounds(Curve curve) {
+  List<double> estimateBounds(final Curve curve) {
     final List<double> values = <double>[
       curve.transform(0.0),
       curve.transform(0.1),

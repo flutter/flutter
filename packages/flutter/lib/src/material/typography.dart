@@ -88,12 +88,12 @@ class Typography with Diagnosticable {
   ///
   /// This constructor is identical to [Typography.material2018].
   factory Typography({
-    TargetPlatform? platform,
-    TextTheme? black,
-    TextTheme? white,
-    TextTheme? englishLike,
-    TextTheme? dense,
-    TextTheme? tall,
+    final TargetPlatform? platform,
+    final TextTheme? black,
+    final TextTheme? white,
+    final TextTheme? englishLike,
+    final TextTheme? dense,
+    final TextTheme? tall,
   }) = Typography.material2018;
 
   /// Creates a typography instance using Material Design's 2014 defaults.
@@ -107,12 +107,12 @@ class Typography with Diagnosticable {
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
   factory Typography.material2014({
-    TargetPlatform? platform = TargetPlatform.android,
-    TextTheme? black,
-    TextTheme? white,
-    TextTheme? englishLike,
-    TextTheme? dense,
-    TextTheme? tall,
+    final TargetPlatform? platform = TargetPlatform.android,
+    final TextTheme? black,
+    final TextTheme? white,
+    final TextTheme? englishLike,
+    final TextTheme? dense,
+    final TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -135,12 +135,12 @@ class Typography with Diagnosticable {
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2018], [dense2018], and [tall2018].
   factory Typography.material2018({
-    TargetPlatform? platform = TargetPlatform.android,
-    TextTheme? black,
-    TextTheme? white,
-    TextTheme? englishLike,
-    TextTheme? dense,
-    TextTheme? tall,
+    final TargetPlatform? platform = TargetPlatform.android,
+    final TextTheme? black,
+    final TextTheme? white,
+    final TextTheme? englishLike,
+    final TextTheme? dense,
+    final TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
     return Typography._withPlatform(
@@ -166,13 +166,13 @@ class Typography with Diagnosticable {
   /// See also:
   ///  * <https://m3.material.io/styles/typography>
   factory Typography.material2021({
-    TargetPlatform? platform = TargetPlatform.android,
-    ColorScheme colorScheme = const ColorScheme.light(),
-    TextTheme? black,
-    TextTheme? white,
-    TextTheme? englishLike,
-    TextTheme? dense,
-    TextTheme? tall,
+    final TargetPlatform? platform = TargetPlatform.android,
+    final ColorScheme colorScheme = const ColorScheme.light(),
+    final TextTheme? black,
+    final TextTheme? white,
+    final TextTheme? englishLike,
+    final TextTheme? dense,
+    final TextTheme? tall,
   }) {
     assert(platform != null || (black != null && white != null));
     final Typography base = Typography._withPlatform(
@@ -203,12 +203,12 @@ class Typography with Diagnosticable {
   }
 
   factory Typography._withPlatform(
-    TargetPlatform? platform,
+    final TargetPlatform? platform,
     TextTheme? black,
     TextTheme? white,
-    TextTheme englishLike,
-    TextTheme dense,
-    TextTheme tall,
+    final TextTheme englishLike,
+    final TextTheme dense,
+    final TextTheme tall,
   ) {
     assert(platform != null || (black != null && white != null));
     switch (platform) {
@@ -291,7 +291,7 @@ class Typography with Diagnosticable {
   final TextTheme tall;
 
   /// Returns one of [englishLike], [dense], or [tall].
-  TextTheme geometryThemeFor(ScriptCategory category) {
+  TextTheme geometryThemeFor(final ScriptCategory category) {
     switch (category) {
       case ScriptCategory.englishLike:
         return englishLike;
@@ -305,11 +305,11 @@ class Typography with Diagnosticable {
   /// Creates a copy of this [Typography] with the given fields
   /// replaced by the non-null parameter values.
   Typography copyWith({
-    TextTheme? black,
-    TextTheme? white,
-    TextTheme? englishLike,
-    TextTheme? dense,
-    TextTheme? tall,
+    final TextTheme? black,
+    final TextTheme? white,
+    final TextTheme? englishLike,
+    final TextTheme? dense,
+    final TextTheme? tall,
   }) {
     return Typography._(
       black ?? this.black,
@@ -323,7 +323,7 @@ class Typography with Diagnosticable {
   /// Linearly interpolate between two [Typography] objects.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Typography lerp(Typography a, Typography b, double t) {
+  static Typography lerp(final Typography a, final Typography b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -337,7 +337,7 @@ class Typography with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -362,7 +362,7 @@ class Typography with Diagnosticable {
   );
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final Typography defaultTypography = Typography.material2014();
     properties.add(DiagnosticsProperty<TextTheme>('black', black, defaultValue: defaultTypography.black));

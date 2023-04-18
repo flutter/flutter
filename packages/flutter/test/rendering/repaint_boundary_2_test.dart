@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('repaint boundary with constraint changes', (WidgetTester tester) async {
+  testWidgets('repaint boundary with constraint changes', (final WidgetTester tester) async {
     // Regression test for as https://github.com/flutter/flutter/issues/39151.
     await tester.pumpWidget(const RelayoutBoundariesCrash());
     tester.state<RelayoutBoundariesCrashState>(find.byType(RelayoutBoundariesCrash))._toggleMode();
@@ -31,14 +31,14 @@ class RelayoutBoundariesCrashState extends State<RelayoutBoundariesCrash> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: SizedBox(
         // when _mode is true, constraints are tight, otherwise constraints are loose
         width: !_mode ? 100.0 : null,
         height: !_mode ? 100.0 : null,
         child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
+          builder: (final BuildContext context, final BoxConstraints constraints) {
             // Make the outer SizedBoxes relayout without making the Placeholders relayout.
             final double dimension = !_mode ? 10.0 : 20.0;
             return Column(

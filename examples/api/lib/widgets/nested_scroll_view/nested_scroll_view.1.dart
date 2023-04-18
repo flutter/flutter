@@ -12,7 +12,7 @@ class NestedScrollViewExampleApp extends StatelessWidget {
   const NestedScrollViewExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: NestedScrollViewExample(),
     );
@@ -23,13 +23,13 @@ class NestedScrollViewExample extends StatelessWidget {
   const NestedScrollViewExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
         body: NestedScrollView(
             // Setting floatHeaderSlivers to true is required in order to float
             // the outer slivers over the inner scrollable.
             floatHeaderSlivers: true,
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
               return <Widget>[
                 SliverAppBar(
                   title: const Text('Floating Nested SliverAppBar'),
@@ -42,7 +42,7 @@ class NestedScrollViewExample extends StatelessWidget {
             body: ListView.builder(
                 padding: const EdgeInsets.all(8),
                 itemCount: 30,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   return SizedBox(
                     height: 50,
                     child: Center(child: Text('Item $index')),

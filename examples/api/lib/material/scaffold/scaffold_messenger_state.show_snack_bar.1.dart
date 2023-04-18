@@ -12,7 +12,7 @@ class SnackBarApp extends StatelessWidget {
   const SnackBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: SnackBarExample(),
     );
@@ -30,7 +30,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
   bool _largeLogo = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('SnackBar Sample')),
       body: Padding(

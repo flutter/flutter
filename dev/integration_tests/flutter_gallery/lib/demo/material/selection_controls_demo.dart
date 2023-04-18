@@ -38,7 +38,7 @@ class SelectionControlsDemo extends StatefulWidget {
 
 class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
         tabName: 'CHECKBOX',
@@ -75,7 +75,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   int? radioValue = 0;
   bool switchValue = false;
 
-  void handleRadioValueChanged(int? value) {
+  void handleRadioValueChanged(final int? value) {
     setState(() {
       radioValue = value;
     });
@@ -94,7 +94,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 label: 'Checkbox A',
                 child: Checkbox(
                   value: checkboxValueA,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       checkboxValueA = value;
                     });
@@ -105,7 +105,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 label: 'Checkbox B',
                 child: Checkbox(
                   value: checkboxValueB,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       checkboxValueB = value;
                     });
@@ -117,7 +117,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
                 child: Checkbox(
                   value: checkboxValueC,
                   tristate: true,
-                  onChanged: (bool? value) {
+                  onChanged: (final bool? value) {
                     setState(() {
                       checkboxValueC = value;
                     });
@@ -200,7 +200,7 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
         children: <Widget>[
           Switch.adaptive(
             value: switchValue,
-            onChanged: (bool value) {
+            onChanged: (final bool value) {
               setState(() {
                 switchValue = value;
               });

@@ -61,12 +61,12 @@ class RenderErrorBox extends RenderBox {
   late final ui.Paragraph? _paragraph;
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     return _kMaxWidth;
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return _kMaxHeight;
   }
 
@@ -74,10 +74,10 @@ class RenderErrorBox extends RenderBox {
   bool get sizedByParent => true;
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return constraints.constrain(const Size(_kMaxWidth, _kMaxHeight));
   }
 
@@ -146,7 +146,7 @@ class RenderErrorBox extends RenderBox {
   );
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     try {
       context.canvas.drawRect(offset & size, Paint() .. color = backgroundColor);
       if (_paragraph != null) {

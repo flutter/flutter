@@ -9,7 +9,7 @@ final Matcher _matchesCommit = isMethodCall('TextInput.finishAutofillContext', a
 final Matcher _matchesCancel = isMethodCall('TextInput.finishAutofillContext', arguments: false);
 
 void main() {
-  testWidgets('AutofillGroup has the right clients', (WidgetTester tester) async {
+  testWidgets('AutofillGroup has the right clients', (final WidgetTester tester) async {
     const Key outerKey = Key('outer');
     const Key innerKey = Key('inner');
 
@@ -44,7 +44,7 @@ void main() {
     expect(innerState.autofillClients.toList(), <State<TextField>>[clientState2]);
   });
 
-  testWidgets('new clients can be added & removed to a scope', (WidgetTester tester) async {
+  testWidgets('new clients can be added & removed to a scope', (final WidgetTester tester) async {
     const Key scopeKey = Key('scope');
 
     const TextField client1 = TextField(autofillHints: <String>['1']);
@@ -58,7 +58,7 @@ void main() {
           body: AutofillGroup(
             key: scopeKey,
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
+              builder: (final BuildContext context, final StateSetter setter) {
                 setState = setter;
                 return Column(children: <Widget>[client1, client2]);
               },
@@ -92,7 +92,7 @@ void main() {
     expect(scopeState.autofillClients, <State<TextField>>[clientState1]);
   });
 
-  testWidgets('AutofillGroup has the right clients after reparenting', (WidgetTester tester) async {
+  testWidgets('AutofillGroup has the right clients after reparenting', (final WidgetTester tester) async {
     const Key outerKey = Key('outer');
     const Key innerKey = Key('inner');
     final GlobalKey keyClient3 = GlobalKey();
@@ -151,7 +151,7 @@ void main() {
     expect(innerState.autofillClients, <State<TextField>>[clientState2]);
   });
 
-  testWidgets('disposing AutofillGroups', (WidgetTester tester) async {
+  testWidgets('disposing AutofillGroups', (final WidgetTester tester) async {
     late StateSetter setState;
     const Key group1 = Key('group1');
     const Key group2 = Key('group2');
@@ -174,7 +174,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               return Column(children: children);
             },

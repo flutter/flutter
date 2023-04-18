@@ -42,7 +42,7 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -54,7 +54,7 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
               const SizedBox(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                contextMenuBuilder: (final BuildContext context, final EditableTextState editableTextState) {
                   return _MyTextSelectionToolbar(
                     anchor: editableTextState.contextMenuAnchors.primaryAnchor,
                     // getAdaptiveButtons creates the default button widgets for
@@ -109,7 +109,7 @@ class _MyTextSelectionToolbar extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       children: <Widget>[
         Positioned(

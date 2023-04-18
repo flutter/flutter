@@ -13,13 +13,13 @@ class TestValueKey<T> extends ValueKey<T> {
 class NotEquals {
   const NotEquals();
   @override
-  bool operator ==(Object other) => false;
+  bool operator ==(final Object other) => false;
   @override
   int get hashCode => 0;
 }
 
 void main() {
-  testWidgets('Keys', (WidgetTester tester) async {
+  testWidgets('Keys', (final WidgetTester tester) async {
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(3)), isTrue);
     expect(ValueKey<num>(nonconst(3)) == ValueKey<int>(nonconst(3)), isFalse);
     expect(ValueKey<int>(nonconst(3)) == ValueKey<int>(nonconst(2)), isFalse);

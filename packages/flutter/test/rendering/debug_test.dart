@@ -65,13 +65,13 @@ void main() {
   });
 
   test('debugPaintPadding', () {
-    expect((Canvas canvas) {
+    expect((final Canvas canvas) {
       debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), null);
     }, paints..rect(color: const Color(0x90909090)));
-    expect((Canvas canvas) {
+    expect((final Canvas canvas) {
       debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(11.0, 11.0, 19.0, 19.0));
     }, paints..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
-    expect((Canvas canvas) {
+    expect((final Canvas canvas) {
       debugPaintPadding(canvas, const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), const Rect.fromLTRB(15.0, 15.0, 15.0, 15.0));
     }, paints..rect(rect: const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0), color: const Color(0x90909090)));
   });

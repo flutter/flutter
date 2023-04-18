@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
-Future<void> test(WidgetTester tester, double offset) {
+Future<void> test(final WidgetTester tester, final double offset) {
   return tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
@@ -30,7 +30,7 @@ Future<void> test(WidgetTester tester, double offset) {
   );
 }
 
-Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
+Future<void> testWithConstChildDelegate(final WidgetTester tester, final double offset) {
   return tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
@@ -52,20 +52,20 @@ Future<void> testWithConstChildDelegate(WidgetTester tester, double offset) {
   );
 }
 
-void verify(WidgetTester tester, List<Offset> answerKey, String text) {
+void verify(final WidgetTester tester, final List<Offset> answerKey, final String text) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero),
+    (final RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
     tester.widgetList<Text>(find.byType(Text))
-    .map<String>((Text widget) => widget.data!)
-    .reduce((String value, String element) => value + element);
+    .map<String>((final Text widget) => widget.data!)
+    .reduce((final String value, final String element) => value + element);
   expect(foundText, equals(text));
 }
 
 void main() {
-  testWidgets('Viewport+SliverBlock basic test', (WidgetTester tester) async {
+  testWidgets('Viewport+SliverBlock basic test', (final WidgetTester tester) async {
     await test(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
@@ -98,7 +98,7 @@ void main() {
     ], 'ab');
   });
 
-  testWidgets('Viewport+SliverBlock basic test with constant SliverChildListDelegate', (WidgetTester tester) async {
+  testWidgets('Viewport+SliverBlock basic test with constant SliverChildListDelegate', (final WidgetTester tester) async {
     await testWithConstChildDelegate(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Offset>[
@@ -131,7 +131,7 @@ void main() {
     ], 'ab');
   });
 
-  testWidgets('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Viewport with GlobalKey reparenting', (final WidgetTester tester) async {
     final Key key1 = GlobalKey();
     final ViewportOffset offset = ViewportOffset.zero();
     await tester.pumpWidget(
@@ -244,7 +244,7 @@ void main() {
     ], 'acb');
   });
 
-  testWidgets('Viewport overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
+  testWidgets('Viewport overflow clipping of SliverToBoxAdapter', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -310,7 +310,7 @@ void main() {
     expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgets('Viewport overflow clipping of SliverBlock', (WidgetTester tester) async {
+  testWidgets('Viewport overflow clipping of SliverBlock', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

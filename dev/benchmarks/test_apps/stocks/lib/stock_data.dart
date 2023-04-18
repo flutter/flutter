@@ -18,7 +18,7 @@ final math.Random _rng = math.Random();
 class Stock {
   Stock(this.symbol, this.name, this.lastSale, this.marketCap, this.percentChange);
 
-  Stock.fromFields(List<String> fields) {
+  Stock.fromFields(final List<String> fields) {
     // TODO(jackson): This class should only have static data, not lastSale, etc.
     // "Symbol","Name","LastSale","MarketCap","IPOyear","Sector","industry","Summary Quote",
     lastSale = 0.0;
@@ -51,11 +51,11 @@ class StockData extends ChangeNotifier {
 
   List<String> get allSymbols => _symbols;
 
-  Stock? operator [](String symbol) => _stocks[symbol];
+  Stock? operator [](final String symbol) => _stocks[symbol];
 
   bool get loading => _httpClient != null;
 
-  void add(List<dynamic> data) {
+  void add(final List<dynamic> data) {
     for (final List<dynamic> fields in data.cast<List<dynamic>>()) {
       final Stock stock = Stock.fromFields(fields.cast<String>());
       _symbols.add(stock.symbol);
@@ -68,7 +68,7 @@ class StockData extends ChangeNotifier {
   static const int _chunkCount = 30;
   int _nextChunk = 0;
 
-  Uri _urlToFetch(int chunk) => Uri.https(
+  Uri _urlToFetch(final int chunk) => Uri.https(
       'domokit.github.io', 'examples/stocks/data/stock_data_$chunk.json');
 
   http.Client? _httpClient;
@@ -76,7 +76,7 @@ class StockData extends ChangeNotifier {
   static bool actuallyFetchData = true;
 
   void _fetchNextChunk() {
-    _httpClient!.get(_urlToFetch(_nextChunk++)).then<void>((http.Response response) {
+    _httpClient!.get(_urlToFetch(_nextChunk++)).then<void>((final http.Response response) {
       final String json = response.body;
       const JsonDecoder decoder = JsonDecoder();
       add(decoder.convert(json) as List<dynamic>);

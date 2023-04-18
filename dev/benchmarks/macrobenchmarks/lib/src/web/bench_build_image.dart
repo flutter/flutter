@@ -84,10 +84,10 @@ class _RotatingWidgetState extends State<_RotatingWidget> with SingleTickerProvi
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: controller,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return Transform(
           transform: Matrix4.identity()..rotateZ(2 * math.pi * controller.value),
           child: widget.child,

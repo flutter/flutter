@@ -36,9 +36,9 @@ const String endOfErrorOutputMarker = '═════════════�
 /// Expects the lines in [actual] to match the relevant matcher in [expected],
 /// ignoring differences in line endings and trailing whitespace.
 void expectLines(
-  String actual,
-  List<Object> expected, {
-  bool allowExtras = false,
+  final String actual,
+  final List<Object> expected, {
+  final bool allowExtras = false,
 }) {
   if (allowExtras) {
     expect(
@@ -67,19 +67,19 @@ class SimpleFlutterRunner {
   /// A broadcast stream of any non-JSON output from the process.
   Stream<String> get output => _output.stream;
 
-  void _handleExitCode(int code) {
+  void _handleExitCode(final int code) {
       if (!_vmServiceUriCompleter.isCompleted) {
         _vmServiceUriCompleter.completeError('Flutter process ended without producing a VM Service URI');
       }
     }
 
-  void _handleStderr(String err) {
+  void _handleStderr(final String err) {
     if (!_vmServiceUriCompleter.isCompleted) {
       _vmServiceUriCompleter.completeError(err);
     }
   }
 
-  void _handleStdout(String outputLine) {
+  void _handleStdout(final String outputLine) {
     try {
       final Object? json = jsonDecode(outputLine);
       // Flutter --machine output is wrapped in [brackets] so will deserialize
@@ -105,7 +105,7 @@ class SimpleFlutterRunner {
   final Completer<Uri> _vmServiceUriCompleter = Completer<Uri>();
    Future<Uri> get vmServiceUri => _vmServiceUriCompleter.future;
 
-  static Future<SimpleFlutterRunner> start(Directory projectDirectory) async {
+  static Future<SimpleFlutterRunner> start(final Directory projectDirectory) async {
     final String flutterToolPath = globals.fs.path.join(Cache.flutterRoot!, 'bin', globals.platform.isWindows ? 'flutter.bat' : 'flutter');
 
     final List<String> args = <String>[
@@ -137,7 +137,7 @@ class DapTestSession {
     await server.stop();
   }
 
-  static Future<DapTestSession> setUp({List<String>? additionalArgs}) async {
+  static Future<DapTestSession> setUp({final List<String>? additionalArgs}) async {
     final DapTestServer server = await _startServer(additionalArgs: additionalArgs);
     final DapTestClient client = await DapTestClient.connect(
       server,
@@ -149,8 +149,8 @@ class DapTestSession {
 
   /// Starts a DAP server that can be shared across tests.
   static Future<DapTestServer> _startServer({
-    Logger? logger,
-    List<String>? additionalArgs,
+    final Logger? logger,
+    final List<String>? additionalArgs,
   }) async {
     return useInProcessDap
         ? await InProcessDapTestServer.create(

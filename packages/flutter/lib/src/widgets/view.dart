@@ -35,7 +35,7 @@ class View extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _ViewScope(
       view: view,
       child: MediaQuery.fromView(
@@ -61,7 +61,7 @@ class View extends StatelessWidget {
   ///
   ///  * [View.of], which throws instead of returning null if no [FlutterView]
   ///    is found.
-  static FlutterView? maybeOf(BuildContext context) {
+  static FlutterView? maybeOf(final BuildContext context) {
     return LookupBoundary.dependOnInheritedWidgetOfExactType<_ViewScope>(context)?.view;
   }
 
@@ -81,7 +81,7 @@ class View extends StatelessWidget {
   ///
   ///  * [View.maybeOf], which throws instead of returning null if no
   ///    [FlutterView] is found.
-  static FlutterView of(BuildContext context) {
+  static FlutterView of(final BuildContext context) {
     final FlutterView? result = maybeOf(context);
     assert(() {
       if (result == null) {
@@ -114,5 +114,5 @@ class _ViewScope extends InheritedWidget {
   final FlutterView view;
 
   @override
-  bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
+  bool updateShouldNotify(final _ViewScope oldWidget) => view != oldWidget.view;
 }

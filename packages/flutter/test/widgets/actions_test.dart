@@ -11,13 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group(ActionDispatcher, () {
-    testWidgets('ActionDispatcher invokes actions when asked.', (WidgetTester tester) async {
+    testWidgets('ActionDispatcher invokes actions when asked.', (final WidgetTester tester) async {
       await tester.pumpWidget(Container());
       bool invoked = false;
       const ActionDispatcher dispatcher = ActionDispatcher();
       final Object? result = dispatcher.invokeAction(
         TestAction(
-          onInvoke: (Intent intent) {
+          onInvoke: (final Intent intent) {
             invoked = true;
             return invoked;
           },
@@ -34,7 +34,7 @@ void main() {
     Action<Intent>? invokedAction;
     ActionDispatcher? invokedDispatcher;
 
-    void collect({Action<Intent>? action, Intent? intent, ActionDispatcher? dispatcher}) {
+    void collect({final Action<Intent>? action, final Intent? intent, final ActionDispatcher? dispatcher}) {
       invokedIntent = intent;
       invokedAction = action;
       invokedDispatcher = dispatcher;
@@ -48,7 +48,7 @@ void main() {
 
     setUp(clear);
 
-    testWidgets('Actions widget can invoke actions with default dispatcher', (WidgetTester tester) async {
+    testWidgets('Actions widget can invoke actions with default dispatcher', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -56,7 +56,7 @@ void main() {
         Actions(
           actions: <Type, Action<Intent>>{
             TestIntent: TestAction(
-              onInvoke: (Intent intent) {
+              onInvoke: (final Intent intent) {
                 invoked = true;
                 return invoked;
               },
@@ -75,7 +75,7 @@ void main() {
       expect(invoked, isTrue);
     });
 
-    testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke', (WidgetTester tester) async {
+    testWidgets('Actions widget can invoke actions with default dispatcher and maybeInvoke', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -83,7 +83,7 @@ void main() {
         Actions(
           actions: <Type, Action<Intent>>{
             TestIntent: TestAction(
-              onInvoke: (Intent intent) {
+              onInvoke: (final Intent intent) {
                 invoked = true;
                 return invoked;
               },
@@ -102,7 +102,7 @@ void main() {
       expect(invoked, isTrue);
     });
 
-    testWidgets('maybeInvoke returns null when no action is found', (WidgetTester tester) async {
+    testWidgets('maybeInvoke returns null when no action is found', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -110,7 +110,7 @@ void main() {
         Actions(
           actions: <Type, Action<Intent>>{
             TestIntent: TestAction(
-              onInvoke: (Intent intent) {
+              onInvoke: (final Intent intent) {
                 invoked = true;
                 return invoked;
               },
@@ -129,7 +129,7 @@ void main() {
       expect(invoked, isFalse);
     });
 
-    testWidgets('invoke throws when no action is found', (WidgetTester tester) async {
+    testWidgets('invoke throws when no action is found', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
 
@@ -137,7 +137,7 @@ void main() {
         Actions(
           actions: <Type, Action<Intent>>{
             TestIntent: TestAction(
-              onInvoke: (Intent intent) {
+              onInvoke: (final Intent intent) {
                 invoked = true;
                 return invoked;
               },
@@ -156,12 +156,12 @@ void main() {
       expect(invoked, isFalse);
     });
 
-    testWidgets('Actions widget can invoke actions with custom dispatcher', (WidgetTester tester) async {
+    testWidgets('Actions widget can invoke actions with custom dispatcher', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
       final Action<Intent> testAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
@@ -187,12 +187,12 @@ void main() {
       expect(invokedIntent, equals(intent));
     });
 
-    testWidgets('Actions can invoke actions in ancestor dispatcher', (WidgetTester tester) async {
+    testWidgets('Actions can invoke actions in ancestor dispatcher', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
       final Action<Intent> testAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
@@ -224,12 +224,12 @@ void main() {
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
 
-    testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (WidgetTester tester) async {
+    testWidgets("Actions can invoke actions in ancestor dispatcher if a lower one isn't specified", (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
       final Action<Intent> testAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
@@ -260,7 +260,7 @@ void main() {
       expect(invokedDispatcher.runtimeType, equals(TestDispatcher1));
     });
 
-    testWidgets('Actions widget can be found with of', (WidgetTester tester) async {
+    testWidgets('Actions widget can be found with of', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
 
@@ -277,12 +277,12 @@ void main() {
       expect(dispatcher, equals(testDispatcher));
     });
 
-    testWidgets('Action can be found with find', (WidgetTester tester) async {
+    testWidgets('Action can be found with find', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final ActionDispatcher testDispatcher = TestDispatcher1(postInvoke: collect);
       bool invoked = false;
       final TestAction testAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
@@ -324,14 +324,14 @@ void main() {
       expect(Actions.maybeFind<DoNothingIntent>(containerKey.currentContext!), isNull);
     });
 
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (final WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const Intent intent = TestIntent();
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       final Action<Intent> testAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
@@ -339,7 +339,7 @@ void main() {
       bool hovering = false;
       bool focusing = false;
 
-      Future<void> buildTest(bool enabled) async {
+      Future<void> buildTest(final bool enabled) async {
         await tester.pumpWidget(
           Center(
             child: Actions(
@@ -354,8 +354,8 @@ void main() {
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
                 },
-                onShowHoverHighlight: (bool value) => hovering = value,
-                onShowFocusHighlight: (bool value) => focusing = value,
+                onShowHoverHighlight: (final bool value) => hovering = value,
+                onShowFocusHighlight: (final bool value) => focusing = value,
                 child: SizedBox(width: 100, height: 100, key: containerKey),
               ),
             ),
@@ -394,14 +394,14 @@ void main() {
       expect(focusing, isFalse);
     });
 
-    testWidgets('FocusableActionDetector changes mouse cursor when hovered', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector changes mouse cursor when hovered', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MouseRegion(
           cursor: SystemMouseCursors.forbidden,
           child: FocusableActionDetector(
             mouseCursor: SystemMouseCursors.text,
-            onShowHoverHighlight: (_) {},
-            onShowFocusHighlight: (_) {},
+            onShowHoverHighlight: (final _) {},
+            onShowFocusHighlight: (final _) {},
             child: Container(),
           ),
         ),
@@ -417,8 +417,8 @@ void main() {
         MouseRegion(
           cursor: SystemMouseCursors.forbidden,
           child: FocusableActionDetector(
-            onShowHoverHighlight: (_) {},
-            onShowFocusHighlight: (_) {},
+            onShowHoverHighlight: (final _) {},
+            onShowFocusHighlight: (final _) {},
             child: Container(),
           ),
         ),
@@ -427,13 +427,13 @@ void main() {
       expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
     });
 
-    testWidgets('Actions.invoke returns the value of Action.invoke', (WidgetTester tester) async {
+    testWidgets('Actions.invoke returns the value of Action.invoke', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final Object sentinel = Object();
       bool invoked = false;
       const TestIntent intent = TestIntent();
       final Action<Intent> testAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return sentinel;
         },
@@ -458,7 +458,7 @@ void main() {
       expect(invoked, isTrue);
     });
 
-    testWidgets('ContextAction can return null', (WidgetTester tester) async {
+    testWidgets('ContextAction can return null', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       const TestIntent intent = TestIntent();
       final TestContextAction testAction = TestContextAction();
@@ -485,19 +485,19 @@ void main() {
       expect(testAction.capturedContexts.single, containerKey.currentContext);
     });
 
-    testWidgets('Disabled actions stop propagation to an ancestor', (WidgetTester tester) async {
+    testWidgets('Disabled actions stop propagation to an ancestor', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked = false;
       const TestIntent intent = TestIntent();
       final TestAction enabledTestAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
       );
       enabledTestAction.enabled = true;
       final TestAction disabledTestAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
@@ -534,41 +534,41 @@ void main() {
   });
 
   group('Listening', () {
-    testWidgets('can listen to enabled state of Actions', (WidgetTester tester) async {
+    testWidgets('can listen to enabled state of Actions', (final WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       bool invoked1 = false;
       bool invoked2 = false;
       bool invoked3 = false;
       final TestAction action1 = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked1 = true;
           return invoked1;
         },
       );
       final TestAction action2 = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked2 = true;
           return invoked2;
         },
       );
       final TestAction action3 = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked3 = true;
           return invoked3;
         },
       );
       bool enabled1 = true;
-      action1.addActionListener((Action<Intent> action) => enabled1 = action.isEnabled(const TestIntent()));
+      action1.addActionListener((final Action<Intent> action) => enabled1 = action.isEnabled(const TestIntent()));
       action1.enabled = false;
       expect(enabled1, isFalse);
 
       bool enabled2 = true;
-      action2.addActionListener((Action<Intent> action) => enabled2 = action.isEnabled(const SecondTestIntent()));
+      action2.addActionListener((final Action<Intent> action) => enabled2 = action.isEnabled(const SecondTestIntent()));
       action2.enabled = false;
       expect(enabled2, isFalse);
 
       bool enabled3 = true;
-      action3.addActionListener((Action<Intent> action) => enabled3 = action.isEnabled(const ThirdTestIntent()));
+      action3.addActionListener((final Action<Intent> action) => enabled3 = action.isEnabled(const ThirdTestIntent()));
       action3.enabled = false;
       expect(enabled3, isFalse);
 
@@ -612,7 +612,7 @@ void main() {
             SecondTestIntent: action2,
           },
           child: ActionListener(
-            listener: (Action<Intent> action) => enabledChanged = action.isEnabled(const ThirdTestIntent()),
+            listener: (final Action<Intent> action) => enabledChanged = action.isEnabled(const ThirdTestIntent()),
             action: action2,
             child: Actions(
               actions: <Type, Action<Intent>>{
@@ -707,11 +707,11 @@ void main() {
     late Action<Intent> testAction;
 
     Future<void> pumpTest(
-        WidgetTester tester, {
-          bool enabled = true,
-          bool directional = false,
-          bool supplyCallbacks = true,
-          required Key key,
+        final WidgetTester tester, {
+          final bool enabled = true,
+          final bool directional = false,
+          final bool supplyCallbacks = true,
+          required final Key key,
         }) async {
       await tester.pumpWidget(
         MediaQuery(
@@ -731,8 +731,8 @@ void main() {
                 actions: <Type, Action<Intent>>{
                   TestIntent: testAction,
                 },
-                onShowHoverHighlight: supplyCallbacks ? (bool value) => hovering = value : null,
-                onShowFocusHighlight: supplyCallbacks ? (bool value) => focusing = value : null,
+                onShowHoverHighlight: supplyCallbacks ? (final bool value) => hovering = value : null,
+                onShowFocusHighlight: supplyCallbacks ? (final bool value) => focusing = value : null,
                 child: SizedBox(width: 100, height: 100, key: key),
               ),
             ),
@@ -749,14 +749,14 @@ void main() {
 
       focusNode = FocusNode(debugLabel: 'Test Node');
       testAction = TestAction(
-        onInvoke: (Intent intent) {
+        onInvoke: (final Intent intent) {
           invoked = true;
           return invoked;
         },
       );
     });
 
-    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector keeps track of focus and hover even when disabled.', (final WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -790,7 +790,7 @@ void main() {
       expect(focusing, isFalse);
     });
 
-    testWidgets('FocusableActionDetector shows focus highlight appropriately when focused and disabled', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector shows focus highlight appropriately when focused and disabled', (final WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -821,7 +821,7 @@ void main() {
       expect(focusing, isTrue);
     });
 
-    testWidgets('FocusableActionDetector can be used without callbacks', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector can be used without callbacks', (final WidgetTester tester) async {
       FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       final GlobalKey containerKey = GlobalKey();
 
@@ -857,7 +857,7 @@ void main() {
 
     testWidgets(
       'FocusableActionDetector can prevent its descendants from being focusable',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final FocusNode buttonNode = FocusNode(debugLabel: 'Test');
 
         await tester.pumpWidget(
@@ -901,7 +901,7 @@ void main() {
 
     testWidgets(
       'FocusableActionDetector can prevent its descendants from being traversable',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         final FocusNode buttonNode1 = FocusNode(debugLabel: 'Button Node 1');
         final FocusNode buttonNode2 = FocusNode(debugLabel: 'Button Node 2');
 
@@ -968,7 +968,7 @@ void main() {
       },
     );
 
-    testWidgets('FocusableActionDetector can exclude Focus semantics', (WidgetTester tester) async {
+    testWidgets('FocusableActionDetector can exclude Focus semantics', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: FocusableActionDetector(
@@ -1074,9 +1074,9 @@ void main() {
   });
 
   group('Action subclasses', () {
-    testWidgets('CallbackAction passes correct intent when invoked.', (WidgetTester tester) async {
+    testWidgets('CallbackAction passes correct intent when invoked.', (final WidgetTester tester) async {
       late Intent passedIntent;
-      final TestAction action = TestAction(onInvoke: (Intent intent) {
+      final TestAction action = TestAction(onInvoke: (final Intent intent) {
         passedIntent = intent;
         return true;
       });
@@ -1085,7 +1085,7 @@ void main() {
       expect(passedIntent, equals(intent));
     });
 
-    testWidgets('VoidCallbackAction', (WidgetTester tester) async {
+    testWidgets('VoidCallbackAction', (final WidgetTester tester) async {
       bool called = false;
       void testCallback() {
         called = true;
@@ -1095,7 +1095,7 @@ void main() {
       action.invoke(intent);
       expect(called, isTrue);
     });
-    testWidgets('Base Action class default toKeyEventResult delegates to consumesKey', (WidgetTester tester) async {
+    testWidgets('Base Action class default toKeyEventResult delegates to consumesKey', (final WidgetTester tester) async {
       expect(
         DefaultToKeyEventResultAction(consumesKey: false).toKeyEventResult(const DefaultToKeyEventResultIntent(), null),
         KeyEventResult.skipRemainingHandlers,
@@ -1108,23 +1108,23 @@ void main() {
   });
 
   group('Diagnostics', () {
-    testWidgets('default Intent debugFillProperties', (WidgetTester tester) async {
+    testWidgets('default Intent debugFillProperties', (final WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       // ignore: invalid_use_of_protected_member
       const TestIntent().debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
+        .where((final DiagnosticsNode node) {
           return !node.isFiltered(DiagnosticLevel.info);
         })
-        .map((DiagnosticsNode node) => node.toString())
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
       expect(description, isEmpty);
     });
 
-    testWidgets('default Actions debugFillProperties', (WidgetTester tester) async {
+    testWidgets('default Actions debugFillProperties', (final WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Actions(
@@ -1134,10 +1134,10 @@ void main() {
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) {
+        .where((final DiagnosticsNode node) {
           return !node.isFiltered(DiagnosticLevel.info);
         })
-        .map((DiagnosticsNode node) => node.toString())
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
       expect(description.length, equals(2));
@@ -1150,23 +1150,23 @@ void main() {
       );
     });
 
-    testWidgets('Actions implements debugFillProperties', (WidgetTester tester) async {
+    testWidgets('Actions implements debugFillProperties', (final WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Actions(
         key: const ValueKey<String>('foo'),
         dispatcher: const ActionDispatcher(),
         actions: <Type, Action<Intent>>{
-          TestIntent: TestAction(onInvoke: (Intent intent) => null),
+          TestIntent: TestAction(onInvoke: (final Intent intent) => null),
         },
         child: Container(key: const ValueKey<String>('baz')),
       ).debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
+          .where((final DiagnosticsNode node) {
             return !node.isFiltered(DiagnosticLevel.info);
           })
-          .map((DiagnosticsNode node) => node.toString())
+          .map((final DiagnosticsNode node) => node.toString())
           .toList();
 
       expect(description.length, equals(2));
@@ -1189,32 +1189,32 @@ void main() {
       invokingContext = null;
     });
 
-    testWidgets('Basic usage', (WidgetTester tester) async {
+    testWidgets('Basic usage', (final WidgetTester tester) async {
       late BuildContext invokingContext2;
       late BuildContext invokingContext3;
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent : Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   invokingContext2 = context2;
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent : Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         invokingContext3 = context3;
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1254,32 +1254,32 @@ void main() {
       expect(invocations, <String>['action1.invoke']);
     });
 
-    testWidgets('Does not break after use', (WidgetTester tester) async {
+    testWidgets('Does not break after use', (final WidgetTester tester) async {
       late BuildContext invokingContext2;
       late BuildContext invokingContext3;
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   invokingContext2 = context2;
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         invokingContext3 = context3;
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1321,26 +1321,26 @@ void main() {
       ]);
     });
 
-    testWidgets('Does not override if not overridable', (WidgetTester tester) async {
+    testWidgets('Does not override if not overridable', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> { LogIntent : LogInvocationAction(actionName: 'action2') },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1364,28 +1364,28 @@ void main() {
       ]);
     });
 
-    testWidgets('The final override controls isEnabled', (WidgetTester tester) async {
+    testWidgets('The final override controls isEnabled', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1413,25 +1413,25 @@ void main() {
       invocations.clear();
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1', enabled: false), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1451,28 +1451,28 @@ void main() {
       expect(invocations, <String>[]);
     });
 
-    testWidgets('The override can choose to defer isActionEnabled to the overridable', (WidgetTester tester) async {
+    testWidgets('The override can choose to defer isActionEnabled to the overridable', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1496,25 +1496,25 @@ void main() {
       invocations.clear();
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationButDeferIsEnabledAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3', enabled: false), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1541,31 +1541,31 @@ void main() {
       ]);
     });
 
-    testWidgets('Throws on infinite recursions', (WidgetTester tester) async {
+    testWidgets('Throws on infinite recursions', (final WidgetTester tester) async {
       late StateSetter setState;
       BuildContext? action2LookupContext;
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: StatefulBuilder(
-                builder: (BuildContext context2, StateSetter stateSetter) {
+                builder: (final BuildContext context2, final StateSetter stateSetter) {
                   setState = stateSetter;
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       if (action2LookupContext != null) LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: action2LookupContext!),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1600,20 +1600,20 @@ void main() {
       expect(exception?.toString(), contains('debugAssertIsEnabledMutuallyRecursive'));
     });
 
-    testWidgets('Throws on invoking invalid override', (WidgetTester tester) async {
+    testWidgets('Throws on invoking invalid override', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Actions(
               actions: <Type, Action<Intent>> { LogIntent : TestContextAction() },
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context),
                     },
                     child: Builder(
-                      builder: (BuildContext context1) {
+                      builder: (final BuildContext context1) {
                         invokingContext = context1;
                         return const SizedBox();
                       },
@@ -1638,22 +1638,22 @@ void main() {
       );
     });
 
-    testWidgets('Make an overridable action overridable', (WidgetTester tester) async {
+    testWidgets('Make an overridable action overridable', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2'), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(
@@ -1668,7 +1668,7 @@ void main() {
                             ),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1694,29 +1694,29 @@ void main() {
       ]);
     });
 
-    testWidgets('Overriding Actions can change the intent', (WidgetTester tester) async {
+    testWidgets('Overriding Actions can change the intent', (final WidgetTester tester) async {
       final List<String> newLogChannel = <String>[];
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: RedirectOutputAction(actionName: 'action2', newLog: newLogChannel), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1744,29 +1744,29 @@ void main() {
       ]);
     });
 
-    testWidgets('Override non-context overridable Actions with a ContextAction', (WidgetTester tester) async {
+    testWidgets('Override non-context overridable Actions with a ContextAction', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 // The default Action is a ContextAction subclass.
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1797,28 +1797,28 @@ void main() {
       expect(LogInvocationContextAction.invokeContext, invokingContext);
     });
 
-    testWidgets('Override a ContextAction with a regular Action', (WidgetTester tester) async {
+    testWidgets('Override a ContextAction with a regular Action', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Builder(
-          builder: (BuildContext context1) {
+          builder: (final BuildContext context1) {
             return Actions(
               actions: <Type, Action<Intent>> {
                 LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action1'), context: context1),
               },
               child: Builder(
-                builder: (BuildContext context2) {
+                builder: (final BuildContext context2) {
                   return Actions(
                     actions: <Type, Action<Intent>> {
                       LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationContextAction(actionName: 'action2', enabled: false), context: context2),
                     },
                     child: Builder(
-                      builder: (BuildContext context3) {
+                      builder: (final BuildContext context3) {
                         return Actions(
                           actions: <Type, Action<Intent>> {
                             LogIntent: Action<LogIntent>.overridable(defaultAction: LogInvocationAction(actionName: 'action3'), context: context3),
                           },
                           child: Builder(
-                            builder: (BuildContext context4) {
+                            builder: (final BuildContext context4) {
                               invokingContext = context4;
                               return const SizedBox();
                             },
@@ -1868,15 +1868,15 @@ class ThirdTestIntent extends SecondTestIntent {
 
 class TestAction extends CallbackAction<TestIntent> {
   TestAction({
-    required OnInvokeCallback onInvoke,
+    required final OnInvokeCallback onInvoke,
   })  : super(onInvoke: onInvoke);
 
   @override
-  bool isEnabled(TestIntent intent) => enabled;
+  bool isEnabled(final TestIntent intent) => enabled;
 
   bool get enabled => _enabled;
   bool _enabled = true;
-  set enabled(bool value) {
+  set enabled(final bool value) {
     if (_enabled == value) {
       return;
     }
@@ -1885,19 +1885,19 @@ class TestAction extends CallbackAction<TestIntent> {
   }
 
   @override
-  void addActionListener(ActionListenerCallback listener) {
+  void addActionListener(final ActionListenerCallback listener) {
     super.addActionListener(listener);
     listeners.add(listener);
   }
 
   @override
-  void removeActionListener(ActionListenerCallback listener) {
+  void removeActionListener(final ActionListenerCallback listener) {
     super.removeActionListener(listener);
     listeners.remove(listener);
   }
   List<ActionListenerCallback> listeners = <ActionListenerCallback>[];
 
-  void _testInvoke(TestIntent intent) => invoke(intent);
+  void _testInvoke(final TestIntent intent) => invoke(intent);
 }
 
 class TestDispatcher extends ActionDispatcher {
@@ -1906,7 +1906,7 @@ class TestDispatcher extends ActionDispatcher {
   final PostInvokeCallback? postInvoke;
 
   @override
-  Object? invokeAction(Action<Intent> action, Intent intent, [BuildContext? context]) {
+  Object? invokeAction(final Action<Intent> action, final Intent intent, [final BuildContext? context]) {
     final Object? result = super.invokeAction(action, intent, context);
     postInvoke?.call(action: action, intent: intent, dispatcher: this);
     return result;
@@ -1921,7 +1921,7 @@ class TestContextAction extends ContextAction<TestIntent> {
   List<BuildContext?> capturedContexts = <BuildContext?>[];
 
   @override
-  void invoke(covariant TestIntent intent, [BuildContext? context]) {
+  void invoke(covariant final TestIntent intent, [final BuildContext? context]) {
     capturedContexts.add(context);
   }
 }
@@ -1943,7 +1943,7 @@ class LogInvocationAction extends Action<LogIntent> {
   bool get isActionEnabled => enabled;
 
   @override
-  void invoke(LogIntent intent) {
+  void invoke(final LogIntent intent) {
     final Action<LogIntent>? callingAction = this.callingAction;
     if (callingAction == null) {
       intent.log.add('$actionName.invoke');
@@ -1955,7 +1955,7 @@ class LogInvocationAction extends Action<LogIntent> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('actionName', actionName));
   }
@@ -1974,7 +1974,7 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
   bool get isActionEnabled => enabled;
 
   @override
-  void invoke(LogIntent intent, [BuildContext? context]) {
+  void invoke(final LogIntent intent, [final BuildContext? context]) {
     invokeContext = context;
     final Action<LogIntent>? callingAction = this.callingAction;
     if (callingAction == null) {
@@ -1987,7 +1987,7 @@ class LogInvocationContextAction extends ContextAction<LogIntent> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('actionName', actionName));
   }
@@ -2011,7 +2011,7 @@ class RedirectOutputAction extends LogInvocationAction {
   final List<String> newLog;
 
   @override
-  void invoke(LogIntent intent) => super.invoke(LogIntent(log: newLog));
+  void invoke(final LogIntent intent) => super.invoke(LogIntent(log: newLog));
 }
 
 class DefaultToKeyEventResultIntent extends Intent {
@@ -2020,14 +2020,14 @@ class DefaultToKeyEventResultIntent extends Intent {
 
 class DefaultToKeyEventResultAction extends Action<DefaultToKeyEventResultIntent> {
   DefaultToKeyEventResultAction({
-    required bool consumesKey
+    required final bool consumesKey
   }) : _consumesKey = consumesKey;
 
   final bool _consumesKey;
 
   @override
-  bool consumesKey(DefaultToKeyEventResultIntent intent) => _consumesKey;
+  bool consumesKey(final DefaultToKeyEventResultIntent intent) => _consumesKey;
 
   @override
-  void invoke(DefaultToKeyEventResultIntent intent) {}
+  void invoke(final DefaultToKeyEventResultIntent intent) {}
 }

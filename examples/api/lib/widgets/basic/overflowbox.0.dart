@@ -12,7 +12,7 @@ class OverflowBoxApp extends StatelessWidget {
   const OverflowBoxApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OverflowBox Sample')),
@@ -28,7 +28,7 @@ class OverflowBoxExample extends StatelessWidget {
   const OverflowBoxExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[

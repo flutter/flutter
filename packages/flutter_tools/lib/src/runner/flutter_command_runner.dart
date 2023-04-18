@@ -21,7 +21,7 @@ import '../tester/flutter_tester.dart';
 import '../web/web_device.dart';
 
 class FlutterCommandRunner extends CommandRunner<void> {
-  FlutterCommandRunner({ bool verboseHelp = false }) : super(
+  FlutterCommandRunner({ final bool verboseHelp = false }) : super(
     'flutter',
     'Manage your Flutter app development.\n'
       '\n'
@@ -148,7 +148,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   @override
-  ArgResults parse(Iterable<String> args) {
+  ArgResults parse(final Iterable<String> args) {
     try {
       // This is where the CommandRunner would call argParser.parse(args). We
       // override this function so we can call tryArgsCompletion instead, so the
@@ -185,7 +185,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   @override
-  Future<void> runCommand(ArgResults topLevelResults) async {
+  Future<void> runCommand(final ArgResults topLevelResults) async {
     final Map<Type, Object?> contextOverrides = <Type, Object?>{};
 
     // If the disable-telemetry flag has been passed, return out
@@ -242,7 +242,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     await context.run<void>(
-      overrides: contextOverrides.map<Type, Generator>((Type type, Object? value) {
+      overrides: contextOverrides.map<Type, Generator>((final Type type, final Object? value) {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
@@ -302,7 +302,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   List<String> getRepoRoots() {
     final String root = globals.fs.path.absolute(Cache.flutterRoot!);
     // not bin, and not the root
-    return <String>['dev', 'examples', 'packages'].map<String>((String item) {
+    return <String>['dev', 'examples', 'packages'].map<String>((final String item) {
       return globals.fs.path.join(root, item);
     }).toList();
   }
@@ -310,19 +310,19 @@ class FlutterCommandRunner extends CommandRunner<void> {
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
     return getRepoRoots()
-      .expand<String>((String root) => _gatherProjectPaths(root))
-      .map<Directory>((String dir) => globals.fs.directory(dir))
+      .expand<String>((final String root) => _gatherProjectPaths(root))
+      .map<Directory>((final String dir) => globals.fs.directory(dir))
       .toList();
   }
 
-  static List<String> _gatherProjectPaths(String rootPath) {
+  static List<String> _gatherProjectPaths(final String rootPath) {
     if (globals.fs.isFileSync(globals.fs.path.join(rootPath, '.dartignore'))) {
       return <String>[];
     }
 
     final List<String> projectPaths = globals.fs.directory(rootPath)
       .listSync(followLinks: false)
-      .expand((FileSystemEntity entity) {
+      .expand((final FileSystemEntity entity) {
         if (entity is Directory && !globals.fs.path.split(entity.path).contains('.dart_tool')) {
           return _gatherProjectPaths(entity.path);
         }

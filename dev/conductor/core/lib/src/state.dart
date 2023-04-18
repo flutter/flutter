@@ -47,7 +47,7 @@ const String stablePostReleaseMsg = """
 // * `String presentState(pb.ConductorState state)` - pretty print the state file.
 // This is a little easier to read than the raw JSON.
 
-String luciConsoleLink(String channel, String groupName) {
+String luciConsoleLink(final String channel, final String groupName) {
   assert(
     globals.kReleaseChannels.contains(channel),
     'channel $channel not recognized',
@@ -64,7 +64,7 @@ String luciConsoleLink(String channel, String groupName) {
   return 'https://ci.chromium.org/p/flutter/g/$consoleName/console';
 }
 
-String defaultStateFilePath(Platform platform) {
+String defaultStateFilePath(final Platform platform) {
   final String? home = platform.environment['HOME'];
   if (home == null) {
     throw globals.ConductorException(
@@ -76,7 +76,7 @@ String defaultStateFilePath(Platform platform) {
   ].join(platform.pathSeparator);
 }
 
-String presentState(pb.ConductorState state) {
+String presentState(final pb.ConductorState state) {
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('Conductor version: ${state.conductorVersion}');
   buffer.writeln('Release channel: ${state.releaseChannel}');
@@ -137,7 +137,7 @@ String presentState(pb.ConductorState state) {
   return buffer.toString();
 }
 
-String presentPhases(ReleasePhase currentPhase) {
+String presentPhases(final ReleasePhase currentPhase) {
   final StringBuffer buffer = StringBuffer();
   bool phaseCompleted = true;
 
@@ -157,7 +157,7 @@ String presentPhases(ReleasePhase currentPhase) {
   return buffer.toString();
 }
 
-String phaseInstructions(pb.ConductorState state) {
+String phaseInstructions(final pb.ConductorState state) {
   switch (state.currentPhase) {
     case ReleasePhase.APPLY_ENGINE_CHERRYPICKS:
       if (state.engine.cherrypicks.isEmpty) {
@@ -198,7 +198,7 @@ String phaseInstructions(pb.ConductorState state) {
     case ReleasePhase.APPLY_FRAMEWORK_CHERRYPICKS:
       final List<pb.Cherrypick> outstandingCherrypicks =
           state.framework.cherrypicks.where(
-        (pb.Cherrypick cp) {
+        (final pb.Cherrypick cp) {
           return cp.state == pb.CherrypickState.PENDING ||
               cp.state == pb.CherrypickState.PENDING_WITH_CONFLICT;
         },
@@ -264,7 +264,7 @@ final RegExp githubRemotePattern = RegExp(
 /// Parses a Git remote URL and returns the account name.
 ///
 /// Uses [githubRemotePattern].
-String githubAccount(String remoteUrl) {
+String githubAccount(final String remoteUrl) {
   final String engineUrl = remoteUrl;
   final RegExpMatch? match = githubRemotePattern.firstMatch(engineUrl);
   if (match == null) {
@@ -285,7 +285,7 @@ String githubAccount(String remoteUrl) {
 ///
 /// Will throw a [ConductorException] if [ReleasePhase.RELEASE_COMPLETED] is
 /// passed as an argument, as there is no next phase.
-ReleasePhase getNextPhase(ReleasePhase currentPhase) {
+ReleasePhase getNextPhase(final ReleasePhase currentPhase) {
   final ReleasePhase? nextPhase = ReleasePhase.valueOf(currentPhase.value + 1);
   if (nextPhase == null) {
     throw globals.ConductorException('There is no next ReleasePhase!');
@@ -296,7 +296,7 @@ ReleasePhase getNextPhase(ReleasePhase currentPhase) {
 // Indent two spaces.
 const JsonEncoder _encoder = JsonEncoder.withIndent('  ');
 
-void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
+void writeStateToFile(final File file, final pb.ConductorState state, final List<String> logs) {
   state.logs.addAll(logs);
   file.writeAsStringSync(
     _encoder.convert(state.toProto3Json()),
@@ -304,7 +304,7 @@ void writeStateToFile(File file, pb.ConductorState state, List<String> logs) {
   );
 }
 
-pb.ConductorState readStateFromFile(File file) {
+pb.ConductorState readStateFromFile(final File file) {
   final pb.ConductorState state = pb.ConductorState();
   final String stateAsString = file.readAsStringSync();
   state.mergeFromProto3Json(
@@ -317,9 +317,9 @@ pb.ConductorState readStateFromFile(File file) {
 ///
 /// The logic is if there are engine cherrypicks that have not been abandoned OR
 /// there is a new Dart revision, then return true, else false.
-bool requiresEnginePR(pb.ConductorState state) {
+bool requiresEnginePR(final pb.ConductorState state) {
   final bool hasRequiredCherrypicks = state.engine.cherrypicks.any(
-    (pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED,
+    (final pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED,
   );
   if (hasRequiredCherrypicks) {
     return true;
@@ -331,12 +331,12 @@ bool requiresEnginePR(pb.ConductorState state) {
 ///
 /// The logic is if there was an Engine PR OR there are framework cherrypicks
 /// that have not been abandoned.
-bool requiresFrameworkPR(pb.ConductorState state) {
+bool requiresFrameworkPR(final pb.ConductorState state) {
   if (requiresEnginePR(state)) {
     return true;
   }
   final bool hasRequiredCherrypicks = state.framework.cherrypicks
-      .any((pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
+      .any((final pb.Cherrypick cp) => cp.state != pb.CherrypickState.ABANDONED);
   if (hasRequiredCherrypicks) {
     return true;
   }

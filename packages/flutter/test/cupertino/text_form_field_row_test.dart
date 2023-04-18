@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Passes textAlign to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlign to underlying CupertinoTextField', (final WidgetTester tester) async {
     const TextAlign alignment = TextAlign.center;
 
     await tester.pumpWidget(
@@ -29,7 +29,7 @@ void main() {
     expect(textFieldWidget.textAlign, alignment);
   });
 
-  testWidgets('Passes scrollPhysics to underlying TextField', (WidgetTester tester) async {
+  testWidgets('Passes scrollPhysics to underlying TextField', (final WidgetTester tester) async {
     const ScrollPhysics scrollPhysics = ScrollPhysics();
 
     await tester.pumpWidget(
@@ -49,7 +49,7 @@ void main() {
     expect(textFieldWidget.scrollPhysics, scrollPhysics);
   });
 
-  testWidgets('Passes textAlignVertical to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textAlignVertical to underlying CupertinoTextField', (final WidgetTester tester) async {
     const TextAlignVertical textAlignVertical = TextAlignVertical.bottom;
 
     await tester.pumpWidget(
@@ -69,7 +69,7 @@ void main() {
     expect(textFieldWidget.textAlignVertical, textAlignVertical);
   });
 
-  testWidgets('Passes textInputAction to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textInputAction to underlying CupertinoTextField', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -87,7 +87,7 @@ void main() {
     expect(textFieldWidget.textInputAction, TextInputAction.next);
   });
 
-  testWidgets('Passes onEditingComplete to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes onEditingComplete to underlying CupertinoTextField', (final WidgetTester tester) async {
     void onEditingComplete() {}
 
     await tester.pumpWidget(
@@ -107,7 +107,7 @@ void main() {
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
   });
 
-  testWidgets('Passes cursor attributes to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes cursor attributes to underlying CupertinoTextField', (final WidgetTester tester) async {
     const double cursorWidth = 3.14;
     const double cursorHeight = 6.28;
     const Radius cursorRadius = Radius.circular(2);
@@ -135,14 +135,14 @@ void main() {
     expect(textFieldWidget.cursorColor, cursorColor);
   });
 
-  testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
+  testWidgets('onFieldSubmit callbacks are called', (final WidgetTester tester) async {
     bool called = false;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoTextFormFieldRow(
-            onFieldSubmitted: (String value) {
+            onFieldSubmitted: (final String value) {
               called = true;
             },
           ),
@@ -156,14 +156,14 @@ void main() {
     expect(called, true);
   });
 
-  testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
+  testWidgets('onChanged callbacks are called', (final WidgetTester tester) async {
     late String value;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoTextFormFieldRow(
-            onChanged: (String v) {
+            onChanged: (final String v) {
               value = v;
             },
           ),
@@ -176,7 +176,7 @@ void main() {
     expect(value, 'Soup');
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (final WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -184,7 +184,7 @@ void main() {
         home: Center(
           child: CupertinoTextFormFieldRow(
             autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
+            validator: (final String? value) {
               validateCalled++;
               return null;
             },
@@ -199,7 +199,7 @@ void main() {
     expect(validateCalled, 2);
   });
 
-  testWidgets('validate is called if widget is enabled', (WidgetTester tester) async {
+  testWidgets('validate is called if widget is enabled', (final WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -208,7 +208,7 @@ void main() {
           child: CupertinoTextFormFieldRow(
             enabled: true,
             autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) {
+            validator: (final String? value) {
               validateCalled += 1;
               return null;
             },
@@ -223,7 +223,7 @@ void main() {
     expect(validateCalled, 2);
   });
 
-  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+  testWidgets('readonly text form field will hide cursor by default', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -264,7 +264,7 @@ void main() {
     expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   }, skip: isBrowser); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+  testWidgets('onTap is called upon tap', (final WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       CupertinoApp(
@@ -290,7 +290,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('reset resets the text fields value to the initialValue', (WidgetTester tester) async {
+  testWidgets('reset resets the text fields value to the initialValue', (final WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoTextFormFieldRow(
@@ -309,7 +309,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/54472.
-  testWidgets('didChange changes text fields value', (WidgetTester tester) async {
+  testWidgets('didChange changes text fields value', (final WidgetTester tester) async {
     await tester.pumpWidget(CupertinoApp(
       home: Center(
         child: CupertinoTextFormFieldRow(
@@ -328,7 +328,7 @@ void main() {
     expect(find.text('changedValue'), findsOneWidget);
   });
 
-  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (WidgetTester tester) async {
+  testWidgets('onChanged callbacks value and FormFieldState.value are sync', (final WidgetTester tester) async {
     bool called = false;
 
     late FormFieldState<String> state;
@@ -337,7 +337,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoTextFormFieldRow(
-            onChanged: (String value) {
+            onChanged: (final String value) {
               called = true;
               expect(value, state.value);
             },
@@ -354,7 +354,7 @@ void main() {
     expect(called, true);
   });
 
-  testWidgets('autofillHints is passed to super', (WidgetTester tester) async {
+  testWidgets('autofillHints is passed to super', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -370,7 +370,7 @@ void main() {
     expect(widget.autofillHints, equals(const <String>[AutofillHints.countryName]));
   });
 
-  testWidgets('autovalidateMode is passed to super', (WidgetTester tester) async {
+  testWidgets('autovalidateMode is passed to super', (final WidgetTester tester) async {
     int validateCalled = 0;
 
     await tester.pumpWidget(
@@ -378,7 +378,7 @@ void main() {
         home: CupertinoPageScaffold(
           child: CupertinoTextFormFieldRow(
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (String? value) {
+            validator: (final String? value) {
               validateCalled++;
               return null;
             },
@@ -393,14 +393,14 @@ void main() {
     expect(validateCalled, 1);
   });
 
-  testWidgets('AutovalidateMode.always mode shows error from the start', (WidgetTester tester) async {
+  testWidgets('AutovalidateMode.always mode shows error from the start', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: CupertinoTextFormFieldRow(
             initialValue: 'Value',
             autovalidateMode: AutovalidateMode.always,
-            validator: (String? value) => 'Error',
+            validator: (final String? value) => 'Error',
           ),
         ),
       ),
@@ -413,7 +413,7 @@ void main() {
     expect(errorText.data, 'Error');
   });
 
-  testWidgets('Shows error text upon invalid input', (WidgetTester tester) async {
+  testWidgets('Shows error text upon invalid input', (final WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(text: '');
 
     await tester.pumpWidget(
@@ -422,7 +422,7 @@ void main() {
           child: CupertinoTextFormFieldRow(
             controller: controller,
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            validator: (String? value) => 'Error',
+            validator: (final String? value) => 'Error',
           ),
         ),
       ),
@@ -441,7 +441,7 @@ void main() {
     expect(errorText.data, 'Error');
   });
 
-  testWidgets('Shows prefix', (WidgetTester tester) async {
+  testWidgets('Shows prefix', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -459,7 +459,7 @@ void main() {
     expect(errorText.data, 'Enter Value');
   });
 
-  testWidgets('Passes textDirection to underlying CupertinoTextField', (WidgetTester tester) async {
+  testWidgets('Passes textDirection to underlying CupertinoTextField', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(

@@ -12,7 +12,7 @@ class MaterialStatePropertyExampleApp extends StatelessWidget {
   const MaterialStatePropertyExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MaterialStateProperty Sample')),
@@ -28,8 +28,8 @@ class MaterialStatePropertyExample extends StatelessWidget {
   const MaterialStatePropertyExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    Color getColor(Set<MaterialState> states) {
+  Widget build(final BuildContext context) {
+    Color getColor(final Set<MaterialState> states) {
       const Set<MaterialState> interactiveStates = <MaterialState>{
         MaterialState.pressed,
         MaterialState.hovered,

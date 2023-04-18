@@ -167,7 +167,7 @@ bool debugEnhanceBuildTimelineArguments = false;
 /// Show banners for deprecated widgets.
 bool debugHighlightDeprecatedWidgets = false;
 
-Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
+Key? _firstNonUniqueKey(final Iterable<Widget> widgets) {
   final Set<Key> keySet = HashSet<Key>();
   for (final Widget widget in widgets) {
     if (widget.key == null) {
@@ -203,7 +203,7 @@ Key? _firstNonUniqueKey(Iterable<Widget> widgets) {
 /// [debugItemsHaveDuplicateKeys].
 ///
 /// Does nothing if asserts are disabled. Always returns false.
-bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children, { String? message }) {
+bool debugChildrenHaveDuplicateKeys(final Widget parent, final Iterable<Widget> children, { final String? message }) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(children);
     if (nonUniqueKey != null) {
@@ -230,7 +230,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children, { 
 /// checking their children lists, see [debugChildrenHaveDuplicateKeys].
 ///
 /// Does nothing if asserts are disabled. Always returns false.
-bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
+bool debugItemsHaveDuplicateKeys(final Iterable<Widget> items) {
   assert(() {
     final Key? nonUniqueKey = _firstNonUniqueKey(items);
     if (nonUniqueKey != null) {
@@ -259,7 +259,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasTable(BuildContext context) {
+bool debugCheckHasTable(final BuildContext context) {
   assert(() {
     if (context.widget is! Table && context.findAncestorWidgetOfExactType<Table>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -291,7 +291,7 @@ bool debugCheckHasTable(BuildContext context) {
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasMediaQuery(BuildContext context) {
+bool debugCheckHasMediaQuery(final BuildContext context) {
   assert(() {
     if (context.widget is! MediaQuery && context.getElementForInheritedWidgetOfExactType<MediaQuery>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -346,7 +346,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hint, String? alternative }) {
+bool debugCheckHasDirectionality(final BuildContext context, { String? why, final String? hint, final String? alternative }) {
   assert(() {
     if (context.widget is! Directionality && context.getElementForInheritedWidgetOfExactType<Directionality>() == null) {
       why = why == null ? '' : ' $why';
@@ -380,7 +380,7 @@ bool debugCheckHasDirectionality(BuildContext context, { String? why, String? hi
 /// function returned a non-null value, as typically required.
 ///
 /// Does nothing when asserts are disabled.
-void debugWidgetBuilderValue(Widget widget, Widget? built) {
+void debugWidgetBuilderValue(final Widget widget, final Widget? built) {
   assert(() {
     if (built == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -422,7 +422,7 @@ void debugWidgetBuilderValue(Widget widget, Widget? built) {
 /// hit.
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasWidgetsLocalizations(BuildContext context) {
+bool debugCheckHasWidgetsLocalizations(final BuildContext context) {
   assert(() {
     if (Localizations.of<WidgetsLocalizations>(context, WidgetsLocalizations) == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -465,7 +465,7 @@ bool debugCheckHasWidgetsLocalizations(BuildContext context) {
 /// This method can be expensive (it walks the element tree).
 ///
 /// Does nothing if asserts are disabled. Always returns true.
-bool debugCheckHasOverlay(BuildContext context) {
+bool debugCheckHasOverlay(final BuildContext context) {
   assert(() {
     if (LookupBoundary.findAncestorWidgetOfExactType<Overlay>(context) == null) {
       final bool hiddenByBoundary = LookupBoundary.debugIsHidingAncestorWidgetOfExactType<Overlay>(context);
@@ -499,7 +499,7 @@ bool debugCheckHasOverlay(BuildContext context) {
 /// haven't been inadvertently changed.
 ///
 /// See [the widgets library](widgets/widgets-library.html) for a complete list.
-bool debugAssertAllWidgetVarsUnset(String reason) {
+bool debugAssertAllWidgetVarsUnset(final String reason) {
   assert(() {
     if (debugPrintRebuildDirtyWidgets ||
         debugPrintBuildScope ||

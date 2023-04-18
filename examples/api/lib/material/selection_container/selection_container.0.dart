@@ -13,7 +13,7 @@ class SelectionContainerExampleApp extends StatelessWidget {
   const SelectionContainerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: SelectionArea(
         child: Scaffold(
@@ -55,7 +55,7 @@ class _SelectionAllOrNoneContainerState extends State<SelectionAllOrNoneContaine
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SelectionContainer(
       delegate: delegate,
       child: widget.child,
@@ -71,20 +71,20 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
   // This method is called when newly added selectable is in the current
   // selected range.
   @override
-  void ensureChildUpdated(Selectable selectable) {
+  void ensureChildUpdated(final Selectable selectable) {
     if (_isSelected) {
       dispatchSelectionEventToChild(selectable, const SelectAllSelectionEvent());
     }
   }
 
   @override
-  SelectionResult handleSelectWord(SelectWordSelectionEvent event) {
+  SelectionResult handleSelectWord(final SelectWordSelectionEvent event) {
     // Treat select word as select all.
     return handleSelectAll(const SelectAllSelectionEvent());
   }
 
   @override
-  SelectionResult handleSelectionEdgeUpdate(SelectionEdgeUpdateEvent event) {
+  SelectionResult handleSelectionEdgeUpdate(final SelectionEdgeUpdateEvent event) {
     final Rect containerRect = Rect.fromLTWH(0, 0, containerSize.width, containerSize.height);
     final Matrix4 globalToLocal = getTransformTo(null)..invert();
     final Offset localOffset = MatrixUtils.transformPoint(globalToLocal, event.globalPosition);
@@ -109,7 +109,7 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
   }
 
   @override
-  SelectionResult handleClearSelection(ClearSelectionEvent event) {
+  SelectionResult handleClearSelection(final ClearSelectionEvent event) {
     _adjustedStartEdge = null;
     _adjustedEndEdge = null;
     _isSelected = false;
@@ -117,7 +117,7 @@ class SelectAllOrNoneContainerDelegate extends MultiSelectableSelectionContainer
   }
 
   @override
-  SelectionResult handleSelectAll(SelectAllSelectionEvent event) {
+  SelectionResult handleSelectAll(final SelectAllSelectionEvent event) {
     _isSelected = true;
     return super.handleSelectAll(event);
   }

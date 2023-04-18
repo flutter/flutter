@@ -25,7 +25,7 @@ void main() {
     await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
   });
 
-  testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (WidgetTester tester) async {
+  testWidgets('Builds the right toolbar on each platform, including web, and shows buttonItems', (final WidgetTester tester) async {
     const String buttonText = 'Click me';
 
     await tester.pumpWidget(
@@ -80,7 +80,7 @@ void main() {
     skip: isBrowser, // [intended] see https://github.com/flutter/flutter/issues/108382
   );
 
-  testWidgets('Can build children directly as well', (WidgetTester tester) async {
+  testWidgets('Can build children directly as well', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -103,7 +103,7 @@ void main() {
     expect(find.byKey(key), findsOneWidget);
   });
 
-  testWidgets('Can build from EditableTextState', (WidgetTester tester) async {
+  testWidgets('Can build from EditableTextState', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -119,8 +119,8 @@ void main() {
                 cursorColor: const Color(0xff00ffff),
                 selectionControls: materialTextSelectionHandleControls,
                 contextMenuBuilder: (
-                  BuildContext context,
-                  EditableTextState editableTextState,
+                  final BuildContext context,
+                  final EditableTextState editableTextState,
                 ) {
                   return AdaptiveTextSelectionToolbar.editableText(
                     key: key,
@@ -167,7 +167,7 @@ void main() {
     variant: TargetPlatformVariant.all(),
   );
 
-  testWidgets('Can build for editable text from raw parameters', (WidgetTester tester) async {
+  testWidgets('Can build for editable text from raw parameters', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -216,7 +216,7 @@ void main() {
   );
 
   group('buttonItems', () {
-    testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (WidgetTester tester) async {
+    testWidgets('getEditableTextButtonItems builds the correct button items per-platform', (final WidgetTester tester) async {
       // Fill the clipboard so that the Paste option is available in the text
       // selection menu.
       await Clipboard.setData(const ClipboardData(text: 'Clipboard data'));
@@ -236,11 +236,11 @@ void main() {
                 cursorColor: Colors.red,
                 selectionControls: materialTextSelectionHandleControls,
                 contextMenuBuilder: (
-                  BuildContext context,
-                  EditableTextState editableTextState,
+                  final BuildContext context,
+                  final EditableTextState editableTextState,
                 ) {
                   buttonTypes = editableTextState.contextMenuButtonItems
-                    .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+                    .map((final ContextMenuButtonItem buttonItem) => buttonItem.type)
                     .toSet();
                   return const SizedBox.shrink();
                 },
@@ -311,7 +311,7 @@ void main() {
       skip: kIsWeb, // [intended]
     );
 
-    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (WidgetTester tester) async {
+    testWidgets('getAdaptiveButtons builds the correct button widgets per-platform', (final WidgetTester tester) async {
       const String buttonText = 'Click me';
 
       await tester.pumpWidget(
@@ -319,7 +319,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[
                     ContextMenuButtonItem(
                       label: buttonText,

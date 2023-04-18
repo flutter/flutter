@@ -15,7 +15,7 @@ import 'common.dart';
 /// Fails a test if the exit code of `result` is not the expected value. This
 /// is favored over `expect(result.exitCode, expectedExitCode)` because this
 /// will include the process result's stdio in the failure message.
-void expectExitCode(ProcessResult result, int expectedExitCode) {
+void expectExitCode(final ProcessResult result, final int expectedExitCode) {
   if (result.exitCode != expectedExitCode) {
     fail(
       'Process ${result.pid} exited with the wrong exit code.\n'
@@ -107,8 +107,8 @@ void main() {
     const ProcessManager processManager = LocalProcessManager();
 
     Future<ProcessResult> runScript([
-        Map<String, String>? environment,
-        List<String> otherArgs = const <String>[],
+        final Map<String, String>? environment,
+        final List<String> otherArgs = const <String>[],
     ]) async {
       final String dart = path.absolute(
         path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'),

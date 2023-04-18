@@ -13,7 +13,7 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/105833
-  testWidgets('Drag gesture uses provided gesture settings', (WidgetTester tester) async {
+  testWidgets('Drag gesture uses provided gesture settings', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.1, 0.5);
     bool dragStarted = false;
     final Key sliderKey = UniqueKey();
@@ -23,12 +23,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: GestureDetector(
                     behavior: HitTestBehavior.deferToChild,
-                    onHorizontalDragStart: (DragStartDetails details) {
+                    onHorizontalDragStart: (final DragStartDetails details) {
                       dragStarted = true;
                     },
                     child: MediaQuery(
@@ -36,7 +36,7 @@ void main() {
                       child: RangeSlider(
                         key: sliderKey,
                         values: values,
-                        onChanged: (RangeValues newValues) {
+                        onChanged: (final RangeValues newValues) {
                           setState(() {
                             values = newValues;
                           });
@@ -77,12 +77,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: GestureDetector(
                     behavior: HitTestBehavior.deferToChild,
-                    onHorizontalDragStart: (DragStartDetails details) {
+                    onHorizontalDragStart: (final DragStartDetails details) {
                       dragStarted = true;
                     },
                     child: MediaQuery(
@@ -90,12 +90,12 @@ void main() {
                       child: RangeSlider(
                         key: sliderKey,
                         values: values,
-                        onChanged: (RangeValues newValues) {
+                        onChanged: (final RangeValues newValues) {
                           setState(() {
                             values = newValues;
                           });
                         },
-                        onChangeEnd: (RangeValues newValues) {
+                        onChangeEnd: (final RangeValues newValues) {
                           sliderEnd = true;
                         },
                       ),
@@ -119,7 +119,7 @@ void main() {
     expect(dragStarted, false);
   });
 
-  testWidgets('Range Slider can move when tapped (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (continuous LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -127,12 +127,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -173,7 +173,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider can move when tapped (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (continuous RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -181,12 +181,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -227,7 +227,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.9, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider can move when tapped (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (discrete LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -235,14 +235,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -285,7 +285,7 @@ void main() {
     expect(values.end.round(), equals(90));
   });
 
-  testWidgets('Range Slider can move when tapped (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider can move when tapped (discrete RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -293,14 +293,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -343,7 +343,7 @@ void main() {
     expect(values.end.round(), equals(90));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -351,12 +351,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -387,7 +387,7 @@ void main() {
     expect(values.end, equals(1));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (continuous RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -395,12 +395,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -431,7 +431,7 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -439,14 +439,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -477,7 +477,7 @@ void main() {
     expect(values.end, equals(100));
   });
 
-  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged to the min and max (discrete RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -485,14 +485,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -523,7 +523,7 @@ void main() {
     expect(values.start, equals(0));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -531,12 +531,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -573,7 +573,7 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (continuous RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -581,12 +581,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -623,7 +623,7 @@ void main() {
     expect(values.start, moreOrLessEquals(0.2, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -631,14 +631,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -675,7 +675,7 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the start thumb can be dragged apart (discrete RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -683,14 +683,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -727,7 +727,7 @@ void main() {
     expect(values.start, moreOrLessEquals(20, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -735,12 +735,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -777,7 +777,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (continuous RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     await tester.pumpWidget(
@@ -785,12 +785,12 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -827,7 +827,7 @@ void main() {
     expect(values.end, moreOrLessEquals(0.8, epsilon: 0.05));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete LTR)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -835,14 +835,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -879,7 +879,7 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)', (WidgetTester tester) async {
+  testWidgets('Range Slider thumbs can be dragged together and the end thumb can be dragged apart (discrete RTL)', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
 
     await tester.pumpWidget(
@@ -887,14 +887,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
                     divisions: 10,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
@@ -931,7 +931,7 @@ void main() {
     expect(values.end, moreOrLessEquals(80, epsilon: 0.01));
   });
 
-  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     RangeValues? startValues;
     RangeValues? endValues;
@@ -941,21 +941,21 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
                     },
-                    onChangeStart: (RangeValues newValues) {
+                    onChangeStart: (final RangeValues newValues) {
                       startValues = newValues;
                     },
-                    onChangeEnd: (RangeValues newValues) {
+                    onChangeEnd: (final RangeValues newValues) {
                       endValues = newValues;
                     },
                   ),
@@ -985,7 +985,7 @@ void main() {
     expect(endValues!.end, moreOrLessEquals(70, epsilon: 1));
   });
 
-  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(30, 70);
     late RangeValues startValues;
     late RangeValues endValues;
@@ -995,21 +995,21 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100,
-                    onChanged: (RangeValues newValues) {
+                    onChanged: (final RangeValues newValues) {
                       setState(() {
                         values = newValues;
                       });
                     },
-                    onChangeStart: (RangeValues newValues) {
+                    onChangeStart: (final RangeValues newValues) {
                       startValues = newValues;
                     },
-                    onChangeEnd: (RangeValues newValues) {
+                    onChangeEnd: (final RangeValues newValues) {
                       endValues = newValues;
                     },
                   ),
@@ -1068,14 +1068,14 @@ void main() {
   }
 
   Widget buildThemedApp({
-    required ThemeData theme,
-    Color? activeColor,
-    Color? inactiveColor,
-    int? divisions,
-    bool enabled = true,
+    required final ThemeData theme,
+    final Color? activeColor,
+    final Color? inactiveColor,
+    final int? divisions,
+    final bool enabled = true,
   }) {
     RangeValues values = const RangeValues(0.5, 0.75);
-    final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
+    final ValueChanged<RangeValues>? onChanged = !enabled ? null : (final RangeValues newValues) {
       values = newValues;
     };
     return MaterialApp(
@@ -1100,7 +1100,7 @@ void main() {
     );
   }
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a default enabled slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a default enabled slider', (final WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1129,7 +1129,7 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the active color', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the active color', (final WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
@@ -1157,7 +1157,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when setting the inactive color', (final WidgetTester tester) async {
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
@@ -1184,7 +1184,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes with active and inactive colors', (final WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
@@ -1217,7 +1217,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider', (final WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1247,7 +1247,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.disabledInactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a discrete slider with active and inactive colors', (final WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
@@ -1288,7 +1288,7 @@ void main() {
     expect(sliderBox, isNot(paints..circle(color: sliderTheme.inactiveTickMarkColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a default disabled slider', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a default disabled slider', (final WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
@@ -1308,7 +1308,7 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes for a disabled slider with active and inactive colors', (final WidgetTester tester) async {
     const Color activeColor = Color(0xcafefeed);
     const Color inactiveColor = Color(0xdeadbeef);
     final ThemeData theme = buildTheme();
@@ -1335,18 +1335,18 @@ void main() {
     expect(sliderBox, isNot(paints..rect(color: sliderTheme.inactiveTrackColor)));
   });
 
-  testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (WidgetTester tester) async {
+  testWidgets('Range Slider uses the right theme colors for the right shapes when the value indicators are showing', (final WidgetTester tester) async {
     final ThemeData theme = buildTheme();
     final SliderThemeData sliderTheme = theme.sliderTheme;
     RangeValues values = const RangeValues(0.5, 0.75);
 
     Widget buildApp({
-      Color? activeColor,
-      Color? inactiveColor,
-      int? divisions,
-      bool enabled = true,
+      final Color? activeColor,
+      final Color? inactiveColor,
+      final int? divisions,
+      final bool enabled = true,
     }) {
-      final ValueChanged<RangeValues>? onChanged = !enabled ? null : (RangeValues newValues) {
+      final ValueChanged<RangeValues>? onChanged = !enabled ? null : (final RangeValues newValues) {
         values = newValues;
       };
       return MaterialApp(
@@ -1393,17 +1393,17 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (WidgetTester tester) async {
+  testWidgets('Range Slider removes value indicator from overlay if Slider gets disposed without value indicator animation completing.', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.5, 0.75);
     const Color fillColor = Color(0xf55f5f5f);
 
     Widget buildApp({
-      Color? activeColor,
-      Color? inactiveColor,
-      int? divisions,
-      bool enabled = true,
+      final Color? activeColor,
+      final Color? inactiveColor,
+      final int? divisions,
+      final bool enabled = true,
     }) {
-      void onChanged(RangeValues newValues) {
+      void onChanged(final RangeValues newValues) {
         values = newValues;
       }
       return MaterialApp(
@@ -1412,7 +1412,7 @@ void main() {
           // to the [Navigator]. This context is required in order for the
           // Navigator to work.
           body: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Column(
                 children: <Widget>[
                   RangeSlider(
@@ -1429,7 +1429,7 @@ void main() {
                     onPressed: () {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
+                          builder: (final BuildContext context) {
                             return ElevatedButton(
                               child: const Text('Inner page'),
                               onPressed: () { Navigator.of(context).pop(); },
@@ -1496,7 +1496,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Range Slider top thumb gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider top thumb gets stroked when overlapping', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1514,14 +1514,14 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Theme(
                     data: theme,
                     child: RangeSlider(
                       values: values,
-                      onChanged: (RangeValues newValues) {
+                      onChanged: (final RangeValues newValues) {
                         setState(() {
                           values = newValues;
                         });
@@ -1563,7 +1563,7 @@ void main() {
     );
   });
 
-  testWidgets('Range Slider top value indicator gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider top value indicator gets stroked when overlapping', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1582,7 +1582,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Theme(
@@ -1590,7 +1590,7 @@ void main() {
                     child: RangeSlider(
                       values: values,
                       labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
-                      onChanged: (RangeValues newValues) {
+                      onChanged: (final RangeValues newValues) {
                         setState(() {
                           values = newValues;
                         });
@@ -1637,7 +1637,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Range Slider top value indicator gets stroked when overlapping with large text scale', (WidgetTester tester) async {
+  testWidgets('Range Slider top value indicator gets stroked when overlapping with large text scale', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1656,7 +1656,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return MediaQuery(
                 data: const MediaQueryData(textScaleFactor: 2.0),
                 child: Material(
@@ -1666,7 +1666,7 @@ void main() {
                       child: RangeSlider(
                         values: values,
                         labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
-                        onChanged: (RangeValues newValues) {
+                        onChanged: (final RangeValues newValues) {
                           setState(() {
                             values = newValues;
                           });
@@ -1714,7 +1714,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Range Slider thumb gets stroked when overlapping', (WidgetTester tester) async {
+  testWidgets('Range Slider thumb gets stroked when overlapping', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(0.3, 0.7);
 
     final ThemeData theme = ThemeData(
@@ -1732,7 +1732,7 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Theme(
@@ -1740,7 +1740,7 @@ void main() {
                     child: RangeSlider(
                       values: values,
                       labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
-                      onChanged: (RangeValues newValues) {
+                      onChanged: (final RangeValues newValues) {
                         setState(() {
                           values = newValues;
                         });
@@ -1795,7 +1795,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/101868
-  testWidgets('RangeSlider.label info should not write to semantic node', (WidgetTester tester) async {
+  testWidgets('RangeSlider.label info should not write to semantic node', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1806,7 +1806,7 @@ void main() {
               child: RangeSlider(
                 values: const RangeValues(10.0, 12.0),
                 max: 100.0,
-                onChanged: (RangeValues v) { },
+                onChanged: (final RangeValues v) { },
                 labels: const RangeLabels('Begin', 'End'),
               ),
             ),
@@ -1853,7 +1853,7 @@ void main() {
     );
   });
 
-  testWidgets('Range Slider Semantics - ltr', (WidgetTester tester) async {
+  testWidgets('Range Slider Semantics - ltr', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1864,7 +1864,7 @@ void main() {
               child: RangeSlider(
                 values: const RangeValues(10.0, 30.0),
                 max: 100.0,
-                onChanged: (RangeValues v) { },
+                onChanged: (final RangeValues v) { },
               ),
             ),
           ),
@@ -1915,8 +1915,8 @@ void main() {
     // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
     final List<Rect> rects = <Rect>[];
-    semanticsNode.visitChildren((SemanticsNode node) {
-      node.visitChildren((SemanticsNode node) {
+    semanticsNode.visitChildren((final SemanticsNode node) {
+      node.visitChildren((final SemanticsNode node) {
        // Round rect values to avoid floating point errors.
         rects.add(
           Rect.fromLTRB(
@@ -1937,7 +1937,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Range Slider Semantics - rtl', (WidgetTester tester) async {
+  testWidgets('Range Slider Semantics - rtl', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Theme(
@@ -1948,7 +1948,7 @@ void main() {
               child: RangeSlider(
                 values: const RangeValues(10.0, 30.0),
                 max: 100.0,
-                onChanged: (RangeValues v) { },
+                onChanged: (final RangeValues v) { },
               ),
             ),
           ),
@@ -1997,8 +1997,8 @@ void main() {
     // https://github.com/flutter/flutter/issues/115079
     // Get semantics node rects.
     final List<Rect> rects = <Rect>[];
-    semanticsNode.visitChildren((SemanticsNode node) {
-      node.visitChildren((SemanticsNode node) {
+    semanticsNode.visitChildren((final SemanticsNode node) {
+      node.visitChildren((final SemanticsNode node) {
         // Round rect values to avoid floating point errors.
         rects.add(
           Rect.fromLTRB(
@@ -2019,7 +2019,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Range Slider implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Range Slider implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     RangeSlider(
@@ -2033,8 +2033,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString()).toList();
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       'valueStart: 25.0',
@@ -2050,7 +2050,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange', (WidgetTester tester) async {
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is RoundedRectRange', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -2089,7 +2089,7 @@ void main() {
     );
   });
 
-  testWidgets('Range Slider can be painted in a narrower constraint when track shape is Rectangular', (WidgetTester tester) async {
+  testWidgets('Range Slider can be painted in a narrower constraint when track shape is Rectangular', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -2134,9 +2134,9 @@ void main() {
     );
   });
 
-  testWidgets('Update the divisions and values at the same time for RangeSlider', (WidgetTester tester) async {
+  testWidgets('Update the divisions and values at the same time for RangeSlider', (final WidgetTester tester) async {
     // Regress test for https://github.com/flutter/flutter/issues/65943
-    Widget buildFrame(double maxValue) {
+    Widget buildFrame(final double maxValue) {
       return MaterialApp(
         home: Material(
           child: Center(
@@ -2144,7 +2144,7 @@ void main() {
               values: const RangeValues(5, 8),
               max: maxValue,
               divisions: maxValue.toInt(),
-              onChanged: (RangeValues newValue) {},
+              onChanged: (final RangeValues newValue) {},
             ),
           ),
         ),
@@ -2161,7 +2161,7 @@ void main() {
     await tester.pumpAndSettle(); // Finish the animation.
 
     late Rect activeTrackRect;
-    expect(renderObject, paints..something((Symbol method, List<dynamic> arguments) {
+    expect(renderObject, paints..something((final Symbol method, final List<dynamic> arguments) {
       if (method != #drawRect) {
         return false;
       }
@@ -2178,7 +2178,7 @@ void main() {
     expect(nearEqual(activeTrackRect.right, (800.0 - 24.0 - 24.0) * (8 / 15) + 24.0, 0.01), true);
   });
 
-  testWidgets('RangeSlider changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('RangeSlider changes mouse cursor when hovered', (final WidgetTester tester) async {
     const RangeValues values = RangeValues(50, 70);
 
     // Test default cursor.
@@ -2193,7 +2193,7 @@ void main() {
                 child: RangeSlider(
                   values: values,
                   max: 100.0,
-                  onChanged: (RangeValues values) {},
+                  onChanged: (final RangeValues values) {},
                 ),
               ),
             ),
@@ -2220,7 +2220,7 @@ void main() {
                   values: values,
                   max: 100.0,
                   mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(SystemMouseCursors.text),
-                  onChanged: (RangeValues values) {},
+                  onChanged: (final RangeValues values) {},
                 ),
               ),
             ),
@@ -2233,25 +2233,25 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgets('RangeSlider MaterialStateMouseCursor resolves correctly', (WidgetTester tester) async {
+  testWidgets('RangeSlider MaterialStateMouseCursor resolves correctly', (final WidgetTester tester) async {
     RangeValues values = const RangeValues(50, 70);
     const MouseCursor disabledCursor = SystemMouseCursors.basic;
     const MouseCursor hoveredCursor = SystemMouseCursors.grab;
     const MouseCursor draggedCursor = SystemMouseCursors.move;
 
-    Widget buildFrame({ required bool enabled }) {
+    Widget buildFrame({ required final bool enabled }) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: Material(
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Center(
                   child: MouseRegion(
                   cursor: SystemMouseCursors.forbidden,
                   child: RangeSlider(
                     mouseCursor: MaterialStateProperty.resolveWith<MouseCursor?>(
-                      (Set<MaterialState> states) {
+                      (final Set<MaterialState> states) {
                           if (states.contains(MaterialState.disabled)) {
                             return disabledCursor;
                           }
@@ -2268,14 +2268,14 @@ void main() {
                       values: values,
                       max: 100.0,
                       onChanged: enabled
-                        ? (RangeValues newValues) {
+                        ? (final RangeValues newValues) {
                             setState(() {
                               values = newValues;
                             });
                           }
                         : null,
-                      onChangeStart: enabled ? (RangeValues newValues) {} : null,
-                      onChangeEnd: enabled ? (RangeValues newValues) {} : null,
+                      onChangeStart: enabled ? (final RangeValues newValues) {} : null,
+                      onChangeEnd: enabled ? (final RangeValues newValues) {} : null,
                     ),
                   ),
                 );
@@ -2307,24 +2307,24 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), draggedCursor);
   });
 
-  testWidgets('RangeSlider can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('RangeSlider can be hovered and has correct hover color', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     RangeValues values = const RangeValues(50, 70);
     final ThemeData theme = ThemeData();
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
                     onChanged: enabled
-                      ? (RangeValues newValues) {
+                      ? (final RangeValues newValues) {
                           setState(() {
                             values = newValues;
                           });
@@ -2370,24 +2370,24 @@ void main() {
     );
   });
 
-  testWidgets('RangeSlider is draggable and has correct dragged color', (WidgetTester tester) async {
+  testWidgets('RangeSlider is draggable and has correct dragged color', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     RangeValues values = const RangeValues(50, 70);
     final ThemeData theme = ThemeData();
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
                     onChanged: enabled
-                      ? (RangeValues newValues) {
+                      ? (final RangeValues newValues) {
                           setState(() {
                             values = newValues;
                           });
@@ -2426,24 +2426,24 @@ void main() {
     );
   });
 
-  testWidgets('RangeSlider overlayColor supports hovered and dragged states', (WidgetTester tester) async {
+  testWidgets('RangeSlider overlayColor supports hovered and dragged states', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     RangeValues values = const RangeValues(50, 70);
     const Color hoverColor = Color(0xffff0000);
     const Color draggedColor = Color(0xff0000ff);
 
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: RangeSlider(
                     values: values,
                     max: 100.0,
-                    overlayColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                    overlayColor: MaterialStateProperty.resolveWith<Color?>((final Set<MaterialState> states) {
                       if (states.contains(MaterialState.hovered)) {
                         return hoverColor;
                       }
@@ -2454,14 +2454,14 @@ void main() {
                       return null;
                     }),
                     onChanged: enabled
-                      ? (RangeValues newValues) {
+                      ? (final RangeValues newValues) {
                           setState(() {
                             values = newValues;
                           });
                         }
                       : null,
-                    onChangeStart: enabled ? (RangeValues newValues) {} : null,
-                    onChangeEnd: enabled ? (RangeValues newValues) {} : null,
+                    onChangeStart: enabled ? (final RangeValues newValues) {} : null,
+                    onChangeEnd: enabled ? (final RangeValues newValues) {} : null,
                   ),
                 ),
               );

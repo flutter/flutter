@@ -13,10 +13,10 @@ void main() {
     'picture_cache_perf',
     kPictureCacheRouteName,
     pageDelay: const Duration(seconds: 1),
-    body: (WidgetController controller) async {
+    body: (final WidgetController controller) async {
       final Finder nestedScroll = find.byKey(const ValueKey<String>('tabbar_view'));
       expect(nestedScroll, findsOneWidget);
-      Future<void> scrollOnce(double offset) async {
+      Future<void> scrollOnce(final double offset) async {
         await controller.timedDrag(
           nestedScroll,
           Offset(offset, 0.0),

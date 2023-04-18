@@ -12,7 +12,7 @@ class PageViewExampleApp extends StatelessWidget {
   const PageViewExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('PageView Sample')),
@@ -26,7 +26,7 @@ class PageViewExample extends StatelessWidget {
   const PageViewExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final PageController controller = PageController();
     return PageView(
       /// [PageView.scrollDirection] defaults to [Axis.horizontal].

@@ -13,9 +13,9 @@ import '../../xcode_project.dart';
 // Remove the linking and embedding logic from the Xcode project to give the tool more control over these.
 class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   RemoveFrameworkLinkAndEmbeddingMigration(
-    IosProject project,
+    final IosProject project,
     super.logger,
-    Usage usage,
+    final Usage usage,
   ) : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
         _usage = usage;
 
@@ -33,7 +33,7 @@ class RemoveFrameworkLinkAndEmbeddingMigration extends ProjectMigrator {
   }
 
   @override
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     // App.framework Frameworks reference.
     // isa = PBXFrameworksBuildPhase;
     // files = (

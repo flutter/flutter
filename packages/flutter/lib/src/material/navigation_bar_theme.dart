@@ -94,16 +94,16 @@ class NavigationBarThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationBarThemeData copyWith({
-    double? height,
-    Color? backgroundColor,
-    double? elevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    Color? indicatorColor,
-    ShapeBorder? indicatorShape,
-    MaterialStateProperty<TextStyle?>? labelTextStyle,
-    MaterialStateProperty<IconThemeData?>? iconTheme,
-    NavigationDestinationLabelBehavior? labelBehavior,
+    final double? height,
+    final Color? backgroundColor,
+    final double? elevation,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final Color? indicatorColor,
+    final ShapeBorder? indicatorShape,
+    final MaterialStateProperty<TextStyle?>? labelTextStyle,
+    final MaterialStateProperty<IconThemeData?>? iconTheme,
+    final NavigationDestinationLabelBehavior? labelBehavior,
   }) {
     return NavigationBarThemeData(
       height: height ?? this.height,
@@ -124,7 +124,7 @@ class NavigationBarThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationBarThemeData? lerp(NavigationBarThemeData? a, NavigationBarThemeData? b, double t) {
+  static NavigationBarThemeData? lerp(final NavigationBarThemeData? a, final NavigationBarThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -157,7 +157,7 @@ class NavigationBarThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -178,7 +178,7 @@ class NavigationBarThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
@@ -228,16 +228,16 @@ class NavigationBarTheme extends InheritedTheme {
   /// ```dart
   /// NavigationBarThemeData theme = NavigationBarTheme.of(context);
   /// ```
-  static NavigationBarThemeData of(BuildContext context) {
+  static NavigationBarThemeData of(final BuildContext context) {
     final NavigationBarTheme? navigationBarTheme = context.dependOnInheritedWidgetOfExactType<NavigationBarTheme>();
     return navigationBarTheme?.data ?? Theme.of(context).navigationBarTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return NavigationBarTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(NavigationBarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final NavigationBarTheme oldWidget) => data != oldWidget.data;
 }

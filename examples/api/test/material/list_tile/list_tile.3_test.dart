@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/list_tile/list_tile.3.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListTile color properties respect Material state color', (WidgetTester tester) async {
+  testWidgets('ListTile color properties respect Material state color', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ListTileApp(),
     );
@@ -50,7 +50,7 @@ void main() {
   });
 }
 
-RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+RenderParagraph _getTextRenderObject(final WidgetTester tester, final String text) {
   return tester.renderObject(find.descendant(
     of: find.byType(ListTile),
     matching: find.text(text),

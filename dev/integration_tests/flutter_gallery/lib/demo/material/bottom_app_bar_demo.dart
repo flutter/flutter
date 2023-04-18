@@ -114,36 +114,36 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   _ChoiceValue<FloatingActionButtonLocation> _fabLocation = kFabEndDocked;
   Color? _babColor = kBabColors.first.color;
 
-  void _onShowNotchChanged(_ChoiceValue<bool>? value) {
+  void _onShowNotchChanged(final _ChoiceValue<bool>? value) {
     setState(() {
       _showNotch = value!;
     });
   }
 
-  void _onFabShapeChanged(_ChoiceValue<Widget>? value) {
+  void _onFabShapeChanged(final _ChoiceValue<Widget>? value) {
     setState(() {
       _fabShape = value!;
     });
   }
 
-  void _onFabLocationChanged(_ChoiceValue<FloatingActionButtonLocation>? value) {
+  void _onFabLocationChanged(final _ChoiceValue<FloatingActionButtonLocation>? value) {
     setState(() {
       _fabLocation = value!;
     });
   }
 
-  void _onBabColorChanged(Color? value) {
+  void _onBabColorChanged(final Color? value) {
     setState(() {
       _babColor = value;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ScaffoldMessenger(
       key: _scaffoldMessengerKey,
       child: Builder(
-        builder: (BuildContext context) => Scaffold(
+        builder: (final BuildContext context) => Scaffold(
           appBar: AppBar(
             title: const Text('Bottom app bar'),
             elevation: 0.0,
@@ -236,7 +236,7 @@ class _RadioItem<T> extends StatelessWidget {
   final ValueChanged<_ChoiceValue<T>?> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
       height: 56.0,
@@ -289,10 +289,10 @@ class _ColorsItem extends StatelessWidget {
   final ValueChanged<Color?> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: colors.map<Widget>((_NamedColor namedColor) {
+      children: colors.map<Widget>((final _NamedColor namedColor) {
         return RawMaterialButton(
           onPressed: () {
             onChanged(namedColor.color);
@@ -324,7 +324,7 @@ class _Heading extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Container(
       height: 48.0,
@@ -355,7 +355,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return BottomAppBar(
       color: color,
       shape: shape,
@@ -365,7 +365,7 @@ class _DemoBottomAppBar extends StatelessWidget {
           onPressed: () {
             showModalBottomSheet<void>(
               context: context,
-              builder: (BuildContext context) => const _DemoDrawer(),
+              builder: (final BuildContext context) => const _DemoDrawer(),
             );
           },
         ),
@@ -401,7 +401,7 @@ class _DemoDrawer extends StatelessWidget {
   const _DemoDrawer();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Drawer(
       child: Column(
         children: <Widget>[
@@ -430,7 +430,7 @@ class _DiamondFab extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       shape: const _DiamondBorder(),
       color: Colors.orange,
@@ -454,7 +454,7 @@ class _DiamondNotchedRectangle implements NotchedShape {
   const _DiamondNotchedRectangle();
 
   @override
-  Path getOuterPath(Rect host, Rect? guest) {
+  Path getOuterPath(final Rect host, final Rect? guest) {
     if (!host.overlaps(guest!)) {
       return Path()..addRect(host);
     }
@@ -498,12 +498,12 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(final Rect rect, { final TextDirection? textDirection }) {
     return getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(final Rect rect, { final TextDirection? textDirection }) {
     return Path()
       ..moveTo(rect.left + rect.width / 2.0, rect.top)
       ..lineTo(rect.right, rect.top + rect.height / 2.0)
@@ -513,11 +513,11 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) { }
+  void paint(final Canvas canvas, final Rect rect, { final TextDirection? textDirection }) { }
 
   // This border doesn't support scaling.
   @override
-  ShapeBorder scale(double t) {
+  ShapeBorder scale(final double t) {
     return this;
   }
 }

@@ -43,14 +43,14 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   /// visual level.
   const CupertinoUserInterfaceLevel({
     super.key,
-    required CupertinoUserInterfaceLevelData data,
+    required final CupertinoUserInterfaceLevelData data,
     required super.child,
   }) : _data = data;
 
   final CupertinoUserInterfaceLevelData _data;
 
   @override
-  bool updateShouldNotify(CupertinoUserInterfaceLevel oldWidget) => oldWidget._data != _data;
+  bool updateShouldNotify(final CupertinoUserInterfaceLevel oldWidget) => oldWidget._data != _data;
 
   /// The data from the closest instance of this class that encloses the given
   /// context.
@@ -63,7 +63,7 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///
   ///  * [maybeOf], which is similar, but will return null if no
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
-  static CupertinoUserInterfaceLevelData of(BuildContext context) {
+  static CupertinoUserInterfaceLevelData of(final BuildContext context) {
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null) {
       return query._data;
@@ -92,7 +92,7 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   ///
   ///  * [of], which is similar, but will throw an exception if no
   ///    [CupertinoUserInterfaceLevel] encloses the given context.
-  static CupertinoUserInterfaceLevelData? maybeOf(BuildContext context) {
+  static CupertinoUserInterfaceLevelData? maybeOf(final BuildContext context) {
     final CupertinoUserInterfaceLevel? query = context.dependOnInheritedWidgetOfExactType<CupertinoUserInterfaceLevel>();
     if (query != null) {
       return query._data;
@@ -101,7 +101,7 @@ class CupertinoUserInterfaceLevel extends InheritedWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<CupertinoUserInterfaceLevelData>('user interface level', _data));
   }

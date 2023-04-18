@@ -13,7 +13,7 @@ class TextFormFieldExampleApp extends StatelessWidget {
   const TextFormFieldExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: TextFormFieldExample(),
     );
@@ -29,7 +29,7 @@ class TextFormFieldExample extends StatefulWidget {
 
 class _TextFormFieldExampleState extends State<TextFormFieldExample> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Center(
         child: Shortcuts(
@@ -44,13 +44,13 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
                 Form.of(primaryFocus!.context!).save();
               },
               child: Wrap(
-                children: List<Widget>.generate(5, (int index) {
+                children: List<Widget>.generate(5, (final int index) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ConstrainedBox(
                       constraints: BoxConstraints.tight(const Size(200, 50)),
                       child: TextFormField(
-                        onSaved: (String? value) {
+                        onSaved: (final String? value) {
                           debugPrint('Value for field $index saved as "$value"');
                         },
                       ),

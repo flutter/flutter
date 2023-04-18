@@ -48,8 +48,8 @@ abstract class ChromiumValidator extends DoctorValidator {
 /// A validator that checks whether Chrome is installed and can run.
 class ChromeValidator extends ChromiumValidator {
   const ChromeValidator({
-    required Platform platform,
-    required ChromiumLauncher chromiumLauncher,
+    required final Platform platform,
+    required final ChromiumLauncher chromiumLauncher,
   }) : _platform = platform,
        _chromiumLauncher = chromiumLauncher,
        super('Chrome - develop for the web');
@@ -67,8 +67,8 @@ class ChromeValidator extends ChromiumValidator {
 /// A validator that checks whether Edge is installed and can run.
 class EdgeValidator extends ChromiumValidator {
   const EdgeValidator({
-    required Platform platform,
-    required ChromiumLauncher chromiumLauncher,
+    required final Platform platform,
+    required final ChromiumLauncher chromiumLauncher,
   }) : _platform = platform,
        _chromiumLauncher = chromiumLauncher,
        super('Edge - develop for the web');

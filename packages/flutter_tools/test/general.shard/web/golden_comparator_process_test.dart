@@ -25,7 +25,7 @@ void main() {
       goldenKey = Uri.parse('file://golden_key');
       imageFile2 = globals.fs.file('second_test_image_file');
       goldenKey2 = Uri.parse('file://second_golden_key');
-      createFakeProcess = (String stdout) => FakeProcess(
+      createFakeProcess = (final String stdout) => FakeProcess(
         exitCode: Future<int>.value(0),
         stdout: stdoutFromString(stdout),
       );
@@ -105,6 +105,6 @@ Other JSON data after the initial data
   });
 }
 
-Stream<List<int>> stdoutFromString(String string) => Stream<List<int>>.fromIterable(<List<int>>[
+Stream<List<int>> stdoutFromString(final String string) => Stream<List<int>>.fromIterable(<List<int>>[
   utf8.encode(string),
 ]);

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('positions itself at anchorAbove if it fits and shifts up when not', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits and shifts up when not', (final WidgetTester tester) async {
     late StateSetter setState;
     const double toolbarOverlap = 100;
     const double height = 500;
@@ -18,7 +18,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               return CustomSingleChildLayout(
                 delegate: SpellCheckSuggestionsToolbarLayoutDelegate(

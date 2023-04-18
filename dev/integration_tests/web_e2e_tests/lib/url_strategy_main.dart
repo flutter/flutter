@@ -8,7 +8,7 @@ final GlobalKey<NavigatorState> navKey = GlobalKey(debugLabel: 'mainNavigator');
 Map<String, WidgetBuilder>? appRoutes;
 
 final Map<String, WidgetBuilder> _defaultAppRoutes = <String, WidgetBuilder>{
-  '/': (BuildContext context) => Container(),
+  '/': (final BuildContext context) => Container(),
 };
 
 void main() {
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   final Map<String, WidgetBuilder> routes;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       key: const Key('mainapp'),
       navigatorKey: navKey,

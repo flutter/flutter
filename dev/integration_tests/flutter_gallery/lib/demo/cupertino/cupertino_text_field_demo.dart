@@ -56,7 +56,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       ),
       autofocus: true,
       suffixMode: OverlayVisibilityMode.editing,
-      onSubmitted: (String text)=> setState(()=> _chatTextController!.clear()),
+      onSubmitted: (final String text)=> setState(()=> _chatTextController!.clear()),
     );
   }
 
@@ -150,7 +150,7 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: const TextStyle(
         fontFamily: '.SF UI Text',

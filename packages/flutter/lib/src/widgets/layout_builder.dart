@@ -62,27 +62,27 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   Element? _child;
 
   @override
-  void visitChildren(ElementVisitor visitor) {
+  void visitChildren(final ElementVisitor visitor) {
     if (_child != null) {
       visitor(_child!);
     }
   }
 
   @override
-  void forgetChild(Element child) {
+  void forgetChild(final Element child) {
     assert(child == _child);
     _child = null;
     super.forgetChild(child);
   }
 
   @override
-  void mount(Element? parent, Object? newSlot) {
+  void mount(final Element? parent, final Object? newSlot) {
     super.mount(parent, newSlot); // Creates the renderObject.
     renderObject.updateCallback(_layout);
   }
 
   @override
-  void update(ConstrainedLayoutBuilder<ConstraintType> newWidget) {
+  void update(final ConstrainedLayoutBuilder<ConstraintType> newWidget) {
     assert(widget != newWidget);
     super.update(newWidget);
     assert(widget == newWidget);
@@ -111,7 +111,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
     super.unmount();
   }
 
-  void _layout(ConstraintType constraints) {
+  void _layout(final ConstraintType constraints) {
     @pragma('vm:notify-debugger-on-exception')
     void layoutCallback() {
       Widget built;
@@ -154,7 +154,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, Object? slot) {
+  void insertRenderObjectChild(final RenderObject child, final Object? slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(slot == null);
     assert(renderObject.debugValidateChild(child));
@@ -163,12 +163,12 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
+  void moveRenderObjectChild(final RenderObject child, final Object? oldSlot, final Object? newSlot) {
     assert(false);
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, Object? slot) {
+  void removeRenderObjectChild(final RenderObject child, final Object? slot) {
     final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
@@ -183,7 +183,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
   LayoutCallback<ConstraintType>? _callback;
   /// Change the layout callback.
-  void updateCallback(LayoutCallback<ConstraintType>? value) {
+  void updateCallback(final LayoutCallback<ConstraintType>? value) {
     if (value == _callback) {
       return;
     }
@@ -270,36 +270,36 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+  RenderObject createRenderObject(final BuildContext context) => _RenderLayoutBuilder();
 }
 
 class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     assert(_debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     assert(_debugThrowIfNotCheckingIntrinsics());
     return 0.0;
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     assert(debugCannotComputeDryLayout(reason:
       'Calculating the dry layout would require running the layout callback '
       'speculatively, which might mutate the live render object tree.',
@@ -320,7 +320,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(final TextBaseline baseline) {
     if (child != null) {
       return child!.getDistanceToActualBaseline(baseline);
     }
@@ -328,12 +328,12 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (child != null) {
       context.paintChild(child!, offset);
     }
@@ -356,10 +356,10 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 }
 
 FlutterErrorDetails _reportException(
-  DiagnosticsNode context,
-  Object exception,
-  StackTrace stack, {
-  InformationCollector? informationCollector,
+  final DiagnosticsNode context,
+  final Object exception,
+  final StackTrace stack, {
+  final InformationCollector? informationCollector,
 }) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,

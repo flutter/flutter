@@ -18,10 +18,10 @@ void main() {
 
   LiveTestWidgetsFlutterBinding().framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps;
 
-  testWidgets('Should show event indicator for pointer events', (WidgetTester tester) async {
+  testWidgets('Should show event indicator for pointer events', (final WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     final List<Offset> taps = <Offset>[];
-    Widget target({bool recording = true}) => Container(
+    Widget target({final bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
         MaterialApp(
@@ -36,7 +36,7 @@ void main() {
                 height: 40,
                 color: Colors.black,
                 child: GestureDetector(
-                  onTapDown: (TapDownDetails details) {
+                  onTapDown: (final TapDownDetails details) {
                     taps.add(details.globalPosition);
                   },
                 ),
@@ -76,10 +76,10 @@ void main() {
     // Currently skipped due to daily flake: https://github.com/flutter/flutter/issues/87588
   }, skip: true); // Typically skip: isBrowser https://github.com/flutter/flutter/issues/42767
 
-  testWidgets('Should show event indicator for pointer events with setSurfaceSize', (WidgetTester tester) async {
+  testWidgets('Should show event indicator for pointer events with setSurfaceSize', (final WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(200, 200), allLayers: true);
     final List<Offset> taps = <Offset>[];
-    Widget target({bool recording = true}) => Container(
+    Widget target({final bool recording = true}) => Container(
       padding: const EdgeInsets.fromLTRB(20, 10, 25, 20),
       child: animationSheet.record(
         MaterialApp(
@@ -94,7 +94,7 @@ void main() {
                 height: 40,
                 color: Colors.black,
                 child: GestureDetector(
-                  onTapDown: (TapDownDetails details) {
+                  onTapDown: (final TapDownDetails details) {
                     taps.add(details.globalPosition);
                   },
                 ),

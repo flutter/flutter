@@ -13,9 +13,9 @@ import '../convert.dart';
 
 class PlistParser {
   PlistParser({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required ProcessManager processManager,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final ProcessManager processManager,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _processUtils = ProcessUtils(logger: logger, processManager: processManager);
@@ -41,7 +41,7 @@ class PlistParser {
   /// valid property list file, this will return null.
   ///
   /// The [plistFilePath] argument must not be null.
-  String? plistXmlContent(String plistFilePath) {
+  String? plistXmlContent(final String plistFilePath) {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
@@ -65,7 +65,7 @@ class PlistParser {
   /// If the value is null, then the key will be removed.
   ///
   /// Returns true if successful.
-  bool replaceKey(String plistFilePath, {required String key, String? value }) {
+  bool replaceKey(final String plistFilePath, {required final String key, final String? value }) {
     if (!_fileSystem.isFileSync(_plutilExecutable)) {
       throw const FileNotFoundException(_plutilExecutable);
     }
@@ -98,7 +98,7 @@ class PlistParser {
   /// valid property list file, this will return an empty map.
   ///
   /// The [plistFilePath] argument must not be null.
-  Map<String, Object> parseFile(String plistFilePath) {
+  Map<String, Object> parseFile(final String plistFilePath) {
     if (!_fileSystem.isFileSync(plistFilePath)) {
       return const <String, Object>{};
     }
@@ -113,14 +113,14 @@ class PlistParser {
     return _parseXml(xmlContent);
   }
 
-  Map<String, Object> _parseXml(String xmlContent) {
+  Map<String, Object> _parseXml(final String xmlContent) {
     final XmlDocument document = XmlDocument.parse(xmlContent);
     // First element child is <plist>. The first element child of plist is <dict>.
     final XmlElement dictObject = document.firstElementChild!.firstElementChild!;
     return _parseXmlDict(dictObject);
   }
 
-  Map<String, Object> _parseXmlDict(XmlElement node) {
+  Map<String, Object> _parseXmlDict(final XmlElement node) {
     String? lastKey;
     final Map<String, Object> result = <String, Object>{};
     for (final XmlNode child in node.children) {
@@ -140,7 +140,7 @@ class PlistParser {
 
   static final RegExp _nonBase64Pattern = RegExp('[^a-zA-Z0-9+/=]+');
 
-  Object? _parseXmlNode(XmlElement node) {
+  Object? _parseXmlNode(final XmlElement node) {
     switch (node.name.local){
       case 'string':
         return node.text;
@@ -173,7 +173,7 @@ class PlistParser {
   /// If [key] is not found in the property list, this will return null.
   ///
   /// The [plistFilePath] and [key] arguments must not be null.
-  String? getStringValueFromFile(String plistFilePath, String key) {
+  String? getStringValueFromFile(final String plistFilePath, final String key) {
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
     return parsed[key] as String?;
   }

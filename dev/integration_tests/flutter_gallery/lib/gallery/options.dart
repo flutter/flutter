@@ -32,15 +32,15 @@ class GalleryOptions {
   final bool showOffscreenLayersCheckerboard;
 
   GalleryOptions copyWith({
-    ThemeMode? themeMode,
-    GalleryTextScaleValue? textScaleFactor,
-    GalleryVisualDensityValue? visualDensity,
-    TextDirection? textDirection,
-    double? timeDilation,
-    TargetPlatform? platform,
-    bool? showPerformanceOverlay,
-    bool? showRasterCacheImagesCheckerboard,
-    bool? showOffscreenLayersCheckerboard,
+    final ThemeMode? themeMode,
+    final GalleryTextScaleValue? textScaleFactor,
+    final GalleryVisualDensityValue? visualDensity,
+    final TextDirection? textDirection,
+    final double? timeDilation,
+    final TargetPlatform? platform,
+    final bool? showPerformanceOverlay,
+    final bool? showRasterCacheImagesCheckerboard,
+    final bool? showOffscreenLayersCheckerboard,
   }) {
     return GalleryOptions(
       themeMode: themeMode ?? this.themeMode,
@@ -56,7 +56,7 @@ class GalleryOptions {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -99,7 +99,7 @@ class _OptionsItem extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
 
     return MergeSemantics(
@@ -131,7 +131,7 @@ class _BooleanItem extends StatelessWidget {
   final Key? switchKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return _OptionsItem(
       child: Row(
@@ -157,7 +157,7 @@ class _ActionItem extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _OptionsItem(
       child: _TextButton(
         onPressed: onTap,
@@ -174,7 +174,7 @@ class _TextButton extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return TextButton(
       style: TextButton.styleFrom(
@@ -194,7 +194,7 @@ class _Heading extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return _OptionsItem(
       child: DefaultTextStyle(
@@ -225,7 +225,7 @@ class _ThemeModeItem extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _OptionsItem(
       child: Row(
         children: <Widget>[
@@ -245,15 +245,15 @@ class _ThemeModeItem extends StatelessWidget {
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
             initialValue: options!.themeMode,
-            itemBuilder: (BuildContext context) {
-              return ThemeMode.values.map<PopupMenuItem<ThemeMode>>((ThemeMode mode) {
+            itemBuilder: (final BuildContext context) {
+              return ThemeMode.values.map<PopupMenuItem<ThemeMode>>((final ThemeMode mode) {
                 return PopupMenuItem<ThemeMode>(
                   value: mode,
                   child: Text(modeLabels[mode]!),
                 );
               }).toList();
             },
-            onSelected: (ThemeMode mode) {
+            onSelected: (final ThemeMode mode) {
               onOptionsChanged!(
                 options!.copyWith(themeMode: mode),
               );
@@ -272,7 +272,7 @@ class _TextScaleFactorItem extends StatelessWidget {
   final ValueChanged<GalleryOptions>? onOptionsChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _OptionsItem(
       child: Row(
         children: <Widget>[
@@ -291,15 +291,15 @@ class _TextScaleFactorItem extends StatelessWidget {
           PopupMenuButton<GalleryTextScaleValue>(
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
-            itemBuilder: (BuildContext context) {
-              return kAllGalleryTextScaleValues.map<PopupMenuItem<GalleryTextScaleValue>>((GalleryTextScaleValue scaleValue) {
+            itemBuilder: (final BuildContext context) {
+              return kAllGalleryTextScaleValues.map<PopupMenuItem<GalleryTextScaleValue>>((final GalleryTextScaleValue scaleValue) {
                 return PopupMenuItem<GalleryTextScaleValue>(
                   value: scaleValue,
                   child: Text(scaleValue.label),
                 );
               }).toList();
             },
-            onSelected: (GalleryTextScaleValue scaleValue) {
+            onSelected: (final GalleryTextScaleValue scaleValue) {
               onOptionsChanged!(
                 options!.copyWith(textScaleFactor: scaleValue),
               );
@@ -318,7 +318,7 @@ class _VisualDensityItem extends StatelessWidget {
   final ValueChanged<GalleryOptions>? onOptionsChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _OptionsItem(
       child: Row(
         children: <Widget>[
@@ -337,15 +337,15 @@ class _VisualDensityItem extends StatelessWidget {
           PopupMenuButton<GalleryVisualDensityValue>(
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
-            itemBuilder: (BuildContext context) {
-              return kAllGalleryVisualDensityValues.map<PopupMenuItem<GalleryVisualDensityValue>>((GalleryVisualDensityValue densityValue) {
+            itemBuilder: (final BuildContext context) {
+              return kAllGalleryVisualDensityValues.map<PopupMenuItem<GalleryVisualDensityValue>>((final GalleryVisualDensityValue densityValue) {
                 return PopupMenuItem<GalleryVisualDensityValue>(
                   value: densityValue,
                   child: Text(densityValue.label),
                 );
               }).toList();
             },
-            onSelected: (GalleryVisualDensityValue densityValue) {
+            onSelected: (final GalleryVisualDensityValue densityValue) {
               onOptionsChanged!(
                 options!.copyWith(visualDensity: densityValue),
               );
@@ -364,11 +364,11 @@ class _TextDirectionItem extends StatelessWidget {
   final ValueChanged<GalleryOptions>? onOptionsChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _BooleanItem(
       'Force RTL',
       options!.textDirection == TextDirection.rtl,
-      (bool value) {
+      (final bool value) {
         onOptionsChanged!(
           options!.copyWith(
             textDirection: value ? TextDirection.rtl : TextDirection.ltr,
@@ -387,11 +387,11 @@ class _TimeDilationItem extends StatelessWidget {
   final ValueChanged<GalleryOptions>? onOptionsChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _BooleanItem(
       'Slow motion',
       options!.timeDilation != 1.0,
-      (bool value) {
+      (final bool value) {
         onOptionsChanged!(
           options!.copyWith(
             timeDilation: value ? 20.0 : 1.0,
@@ -409,7 +409,7 @@ class _PlatformItem extends StatelessWidget {
   final GalleryOptions? options;
   final ValueChanged<GalleryOptions>? onOptionsChanged;
 
-  String _platformLabel(TargetPlatform platform) {
+  String _platformLabel(final TargetPlatform platform) {
     switch (platform) {
       case TargetPlatform.android:
         return 'Mountain View';
@@ -427,7 +427,7 @@ class _PlatformItem extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _OptionsItem(
       child: Row(
         children: <Widget>[
@@ -446,15 +446,15 @@ class _PlatformItem extends StatelessWidget {
           PopupMenuButton<TargetPlatform>(
             padding: const EdgeInsetsDirectional.only(end: 16.0),
             icon: const Icon(Icons.arrow_drop_down),
-            itemBuilder: (BuildContext context) {
-              return TargetPlatform.values.map((TargetPlatform platform) {
+            itemBuilder: (final BuildContext context) {
+              return TargetPlatform.values.map((final TargetPlatform platform) {
                 return PopupMenuItem<TargetPlatform>(
                   value: platform,
                   child: Text(_platformLabel(platform)),
                 );
               }).toList();
             },
-            onSelected: (TargetPlatform platform) {
+            onSelected: (final TargetPlatform platform) {
               onOptionsChanged!(
                 options!.copyWith(platform: platform),
               );
@@ -491,21 +491,21 @@ class GalleryOptionsPage extends StatelessWidget {
       _BooleanItem(
         'Highlight offscreen layers',
         options!.showOffscreenLayersCheckerboard,
-        (bool value) {
+        (final bool value) {
           onOptionsChanged!(options!.copyWith(showOffscreenLayersCheckerboard: value));
         },
       ),
       _BooleanItem(
         'Highlight raster cache images',
         options!.showRasterCacheImagesCheckerboard,
-        (bool value) {
+        (final bool value) {
           onOptionsChanged!(options!.copyWith(showRasterCacheImagesCheckerboard: value));
         },
       ),
       _BooleanItem(
         'Show performance overlay',
         options!.showPerformanceOverlay,
-        (bool value) {
+        (final bool value) {
           onOptionsChanged!(options!.copyWith(showPerformanceOverlay: value));
         },
       ),
@@ -513,7 +513,7 @@ class GalleryOptionsPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(

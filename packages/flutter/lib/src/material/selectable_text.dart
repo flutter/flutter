@@ -29,14 +29,14 @@ import 'theme.dart';
 const int iOSHorizontalOffset = -2;
 
 class _TextSpanEditingController extends TextEditingController {
-  _TextSpanEditingController({required TextSpan textSpan}):
+  _TextSpanEditingController({required final TextSpan textSpan}):
     _textSpan = textSpan,
     super(text: textSpan.toPlainText(includeSemanticsLabels: false));
 
   final TextSpan _textSpan;
 
   @override
-  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
+  TextSpan buildTextSpan({required final BuildContext context, final TextStyle? style, required final bool withComposing}) {
     // This does not care about composing.
     return TextSpan(
       style: style,
@@ -45,7 +45,7 @@ class _TextSpanEditingController extends TextEditingController {
   }
 
   @override
-  set text(String? newText) {
+  set text(final String? newText) {
     // This should never be reached.
     throw UnimplementedError();
   }
@@ -53,14 +53,14 @@ class _TextSpanEditingController extends TextEditingController {
 
 class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _SelectableTextSelectionGestureDetectorBuilder({
-    required _SelectableTextState state,
+    required final _SelectableTextState state,
   }) : _state = state,
        super(delegate: state);
 
   final _SelectableTextState _state;
 
   @override
-  void onForcePressStart(ForcePressDetails details) {
+  void onForcePressStart(final ForcePressDetails details) {
     super.onForcePressStart(details);
     if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
       editableText.showToolbar();
@@ -68,12 +68,12 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onForcePressEnd(ForcePressDetails details) {
+  void onForcePressEnd(final ForcePressDetails details) {
     // Not required.
   }
 
   @override
-  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
+  void onSingleLongTapMoveUpdate(final LongPressMoveUpdateDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWordsInRange(
         from: details.globalPosition - details.offsetFromOrigin,
@@ -84,7 +84,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onSingleTapUp(TapDragUpDetails details) {
+  void onSingleTapUp(final TapDragUpDetails details) {
     editableText.hideToolbar();
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
@@ -102,7 +102,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   }
 
   @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
+  void onSingleLongTapStart(final LongPressStartDetails details) {
     if (delegate.selectionEnabled) {
       renderEditable.selectWord(cause: SelectionChangedCause.longPress);
       Feedback.forLongPress(_state.context);
@@ -423,7 +423,7 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.EditableText.contextMenuBuilder}
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+  static Widget _defaultContextMenuBuilder(final BuildContext context, final EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -444,7 +444,7 @@ class SelectableText extends StatefulWidget {
   State<SelectableText> createState() => _SelectableTextState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
     properties.add(DiagnosticsProperty<String>('semanticsLabel', semanticsLabel, defaultValue: null));
@@ -505,7 +505,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   }
 
   @override
-  void didUpdateWidget(SelectableText oldWidget) {
+  void didUpdateWidget(final SelectableText oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.data != oldWidget.data || widget.textSpan != oldWidget.textSpan) {
       _controller.removeListener(_onControllerChanged);
@@ -539,7 +539,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     });
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(final TextSelection selection, final SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -571,7 +571,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
     }
   }
 
-  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+  bool _shouldShowSelectionHandles(final SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
@@ -598,7 +598,7 @@ class _SelectableTextState extends State<SelectableText> implements TextSelectio
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // TODO(garyq): Assert to block WidgetSpans from being used here are removed,
     // but we still do not yet have nice handling of things like carets, clipboard,
     // and other features. We should add proper support. Currently, caret handling

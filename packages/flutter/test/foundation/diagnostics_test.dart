@@ -31,7 +31,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   ];
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     if (style != null) {
       properties.defaultDiagnosticsTreeStyle = style!;
@@ -48,15 +48,15 @@ enum ExampleEnum {
 
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
-Map<String, Object?> simulateJsonSerialization(DiagnosticsNode node) {
+Map<String, Object?> simulateJsonSerialization(final DiagnosticsNode node) {
   return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object?>;
 }
 
-void validateNodeJsonSerialization(DiagnosticsNode node) {
+void validateNodeJsonSerialization(final DiagnosticsNode node) {
   validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
 }
 
-void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsNode node) {
+void validateNodeJsonSerializationHelper(final Map<String, Object?> json, final DiagnosticsNode node) {
   expect(json['name'], equals(node.name));
   expect(json['showSeparator'] ?? true, equals(node.showSeparator));
   expect(json['description'], equals(node.toDescription()));
@@ -68,17 +68,17 @@ void validateNodeJsonSerializationHelper(Map<String, Object?> json, DiagnosticsN
   expect(json['hasChildren'] ?? false, equals(node.getChildren().isNotEmpty));
 }
 
-void validatePropertyJsonSerialization(DiagnosticsProperty<Object?> property) {
+void validatePropertyJsonSerialization(final DiagnosticsProperty<Object?> property) {
   validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
 }
 
-void validateStringPropertyJsonSerialization(StringProperty property) {
+void validateStringPropertyJsonSerialization(final StringProperty property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['quoted'], equals(property.quoted));
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateFlagPropertyJsonSerialization(FlagProperty property) {
+void validateFlagPropertyJsonSerialization(final FlagProperty property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   expect(json['ifTrue'], equals(property.ifTrue));
 
@@ -96,7 +96,7 @@ void validateFlagPropertyJsonSerialization(FlagProperty property) {
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateDoublePropertyJsonSerialization(DoubleProperty property) {
+void validateDoublePropertyJsonSerialization(final DoubleProperty property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.unit != null) {
     expect(json['unit'], equals(property.unit));
@@ -109,7 +109,7 @@ void validateDoublePropertyJsonSerialization(DoubleProperty property) {
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
+void validateObjectFlagPropertyJsonSerialization(final ObjectFlagProperty<Object> property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.ifPresent != null) {
     expect(json['ifPresent'], equals(property.ifPresent));
@@ -120,13 +120,13 @@ void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> prop
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> property) {
+void validateIterableFlagsPropertyJsonSerialization(final FlagsSummary<Object?> property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value.isNotEmpty) {
     expect(json['values'], equals(
       property.value.entries
-        .where((MapEntry<String, Object?> entry) => entry.value != null)
-        .map((MapEntry<String, Object?> entry) => entry.key).toList(),
+        .where((final MapEntry<String, Object?> entry) => entry.value != null)
+        .map((final MapEntry<String, Object?> entry) => entry.key).toList(),
     ));
   } else {
     expect(json.containsKey('values'), isFalse);
@@ -135,11 +135,11 @@ void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object?> proper
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
+void validateIterablePropertyJsonSerialization(final IterableProperty<Object> property) {
   final Map<String, Object?> json = simulateJsonSerialization(property);
   if (property.value != null) {
     final List<Object?> valuesJson = json['values']! as List<Object?>;
-    final List<String> expectedValues = property.value!.map<String>((Object value) => value.toString()).toList();
+    final List<String> expectedValues = property.value!.map<String>((final Object value) => value.toString()).toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
     expect(json.containsKey('values'), isFalse);
@@ -148,7 +148,7 @@ void validateIterablePropertyJsonSerialization(IterableProperty<Object> property
   validatePropertyJsonSerializationHelper(json, property);
 }
 
-void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, DiagnosticsProperty<Object?> property) {
+void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, final DiagnosticsProperty<Object?> property) {
   if (property.defaultValue != kNoDefaultValue) {
     expect(json['defaultValue'], equals(property.defaultValue.toString()));
   } else {
@@ -191,10 +191,10 @@ void validatePropertyJsonSerializationHelper(final Map<String, Object?> json, Di
 void main() {
   test('TreeDiagnosticsMixin control test', () async {
     void goldenStyleTest(
-      String description, {
-      DiagnosticsTreeStyle? style,
-      DiagnosticsTreeStyle? lastChildStyle,
-      String golden = '',
+      final String description, {
+      final DiagnosticsTreeStyle? style,
+      final DiagnosticsTreeStyle? lastChildStyle,
+      final String golden = '',
     }) {
       final TestTree tree = TestTree(children: <TestTree>[
         TestTree(name: 'node A', style: style),
@@ -364,12 +364,12 @@ void main() {
 
   test('TreeDiagnosticsMixin tree with properties test', () async {
     void goldenStyleTest(
-      String description, {
-      String? name,
-      DiagnosticsTreeStyle? style,
-      DiagnosticsTreeStyle? lastChildStyle,
-      DiagnosticsTreeStyle propertyStyle = DiagnosticsTreeStyle.singleLine,
-      required String golden,
+      final String description, {
+      final String? name,
+      final DiagnosticsTreeStyle? style,
+      final DiagnosticsTreeStyle? lastChildStyle,
+      final DiagnosticsTreeStyle propertyStyle = DiagnosticsTreeStyle.singleLine,
+      required final String golden,
     }) {
       final TestTree tree = TestTree(
         properties: <DiagnosticsNode>[
@@ -905,7 +905,7 @@ void main() {
     expect(
       () => describeEnum('Hello World'),
       throwsA(isAssertionError.having(
-        (AssertionError e) => e.message,
+        (final AssertionError e) => e.message,
         'message',
         'The provided object "Hello World" is not an enum.',
       )),
@@ -1925,8 +1925,8 @@ void main() {
   test('error message style wrap test', () {
     // This tests wrapping of properties with styles typical for error messages.
     DiagnosticsNode createTreeWithWrappingNodes({
-      DiagnosticsTreeStyle? rootStyle,
-      required DiagnosticsTreeStyle propertyStyle,
+      final DiagnosticsTreeStyle? rootStyle,
+      required final DiagnosticsTreeStyle propertyStyle,
     }) {
       return TestTree(
         name: 'Test tree',

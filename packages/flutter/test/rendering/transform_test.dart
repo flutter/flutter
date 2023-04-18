@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-Offset round(Offset value) {
+Offset round(final Offset value) {
   return Offset(value.dx.roundToDouble(), value.dy.roundToDouble());
 }
 
@@ -170,7 +170,7 @@ void main() {
   });
 }
 
-Matrix4 rotateAroundXAxis(double a) {
+Matrix4 rotateAroundXAxis(final double a) {
   // 3D rotation transform with alpha=a
   const double x = 1.0;
   const double y = 0.0;

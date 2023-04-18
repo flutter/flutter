@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/dialog/cupertino_action_sheet.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Perform an action on CupertinoActionSheet', (WidgetTester tester) async {
+  testWidgets('Perform an action on CupertinoActionSheet', (final WidgetTester tester) async {
     const String actionText = 'Destructive Action';
     await tester.pumpWidget(
       const example.ActionSheetApp(),

@@ -197,7 +197,7 @@ class CupertinoFormSection extends StatelessWidget {
   final Clip clipBehavior;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget? headerWidget = header == null
         ? null
         : DefaultTextStyle(

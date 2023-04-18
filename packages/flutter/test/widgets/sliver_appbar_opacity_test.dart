@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('!pinned && !floating && !bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && !bottom ==> fade opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -26,7 +26,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgets('!pinned && !floating && bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && bottom ==> fade opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -45,7 +45,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgets('!pinned && floating && !bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && floating && !bottom ==> fade opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -64,7 +64,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgets('!pinned && floating && bottom ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && floating && bottom ==> fade opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -83,7 +83,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgets('pinned && !floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && !floating && !bottom ==> 1.0 opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -102,7 +102,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgets('pinned && !floating && bottom ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && !floating && bottom ==> 1.0 opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
         _TestWidget(
@@ -121,7 +121,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgets('pinned && floating && !bottom ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && floating && !bottom ==> 1.0 opacity', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25000.
 
     final ScrollController controller = ScrollController();
@@ -142,7 +142,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgets('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('pinned && floating && bottom && extraToolbarHeight == 0.0 ==> fade opacity', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/25993.
 
     final ScrollController controller = ScrollController();
@@ -163,7 +163,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 0.0);
   });
 
-  testWidgets('pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity', (WidgetTester tester) async {
+  testWidgets('pinned && floating && bottom && extraToolbarHeight != 0.0 ==> 1.0 opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       _TestWidget(
@@ -183,7 +183,7 @@ void main() {
     expect(render.text.style!.color!.opacity, 1.0);
   });
 
-  testWidgets('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (WidgetTester tester) async {
+  testWidgets('!pinned && !floating && !bottom && extraToolbarHeight != 0.0 ==> fade opacity', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     const double collapsedHeight = 100.0;
     await tester.pumpWidget(
@@ -222,7 +222,7 @@ class _TestWidget extends StatelessWidget {
   final double? collapsedHeight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: CustomScrollView(
         controller: controller,
@@ -239,7 +239,7 @@ class _TestWidget extends StatelessWidget {
             ),
           ),
           SliverList(
-            delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
+            delegate: SliverChildListDelegate(List<Widget>.generate(20, (final int i) {
               return SizedBox(
                 height: 100.0,
                 child: Text('Tile $i'),

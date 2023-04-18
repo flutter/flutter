@@ -44,7 +44,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
   String get _keyCodeToLogicalMap {
     final OutputLines<int> lines = OutputLines<int>('macOS keycode map');
     for (final LogicalKeyEntry entry in logicalData.entries) {
-      zipStrict(entry.macOSKeyCodeValues, entry.macOSKeyCodeNames, (int macOSValue, String macOSName) {
+      zipStrict(entry.macOSKeyCodeValues, entry.macOSKeyCodeNames, (final int macOSValue, final String macOSName) {
         lines.add(macOSValue,
             '  @${toHex(macOSValue)} : @${toHex(entry.value, digits: 11)},  // $macOSName -> ${entry.constantName}');
       });
@@ -99,7 +99,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
   final Map<String, bool> _layoutGoals;
   String get _layoutGoalsString {
     final OutputLines<int> lines = OutputLines<int>('macOS layout goals');
-    _layoutGoals.forEach((String name, bool mandatory) {
+    _layoutGoals.forEach((final String name, final bool mandatory) {
       final PhysicalKeyEntry physicalEntry = keyData.entryByName(name);
       final LogicalKeyEntry logicalEntry = logicalData.entryByName(name);
       final String line = 'LayoutGoal{'
@@ -118,7 +118,7 @@ class MacOSCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'macos_key_code_map_cc.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+  String outputPath(final String platform) => path.join(PlatformCodeGenerator.engineRoot,
       'shell', 'platform', 'darwin', 'macos', 'framework', 'Source', 'KeyCodeMap.g.mm');
 
   @override

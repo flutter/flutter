@@ -70,12 +70,12 @@ class KeyboardListener extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Focus(
       focusNode: focusNode,
       autofocus: autofocus,
       includeSemantics: includeSemantics,
-      onKeyEvent: (FocusNode node, KeyEvent event) {
+      onKeyEvent: (final FocusNode node, final KeyEvent event) {
         onKeyEvent?.call(event);
         return KeyEventResult.ignored;
       },
@@ -84,7 +84,7 @@ class KeyboardListener extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
   }

@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ImageFiltered avoids repainting child as it animates', (WidgetTester tester) async {
+  testWidgets('ImageFiltered avoids repainting child as it animates', (final WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       ColoredBox(
@@ -41,7 +41,7 @@ class TestWidget extends SingleChildRenderObjectWidget {
   const TestWidget({super.key, super.child});
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return RenderTestObject();
   }
 }
@@ -50,7 +50,7 @@ class RenderTestObject extends RenderProxyBox {
   static int paintCount = 0;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     paintCount += 1;
     super.paint(context, offset);
   }

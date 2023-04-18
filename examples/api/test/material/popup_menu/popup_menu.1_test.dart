@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/popup_menu/popup_menu.1.dart' as ex
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can open popup menu', (WidgetTester tester) async {
+  testWidgets('Can open popup menu', (final WidgetTester tester) async {
     const String menuItem = 'Item 1';
 
     await tester.pumpWidget(

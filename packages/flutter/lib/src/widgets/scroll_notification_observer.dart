@@ -26,13 +26,13 @@ typedef ScrollNotificationCallback = void Function(ScrollNotification notificati
 class _ScrollNotificationObserverScope extends InheritedWidget {
   const _ScrollNotificationObserverScope({
     required super.child,
-    required ScrollNotificationObserverState scrollNotificationObserverState,
+    required final ScrollNotificationObserverState scrollNotificationObserverState,
   }) : _scrollNotificationObserverState = scrollNotificationObserverState;
 
   final ScrollNotificationObserverState  _scrollNotificationObserverState;
 
   @override
-  bool updateShouldNotify(_ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
+  bool updateShouldNotify(final _ScrollNotificationObserverScope old) => _scrollNotificationObserverState != old._scrollNotificationObserverState;
 }
 
 final class _ListenerEntry extends LinkedListEntry<_ListenerEntry> {
@@ -95,7 +95,7 @@ class ScrollNotificationObserver extends StatefulWidget {
   ///
   /// * [ScrollNotificationObserver.of], which is similar to this method, but
   ///   asserts if no [ScrollNotificationObserver] ancestor is found.
-  static ScrollNotificationObserverState? maybeOf(BuildContext context) {
+  static ScrollNotificationObserverState? maybeOf(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ScrollNotificationObserverScope>()?._scrollNotificationObserverState;
   }
 
@@ -111,7 +111,7 @@ class ScrollNotificationObserver extends StatefulWidget {
   ///
   /// * [ScrollNotificationObserver.maybeOf], which is similar to this method,
   ///   but returns null if no [ScrollNotificationObserver] ancestor is found.
-  static ScrollNotificationObserverState of(BuildContext context) {
+  static ScrollNotificationObserverState of(final BuildContext context) {
     final ScrollNotificationObserverState? observerState = maybeOf(context);
     assert(() {
       if (observerState == null) {
@@ -160,13 +160,13 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
 
   /// Add a [ScrollNotificationCallback] that will be called each time
   /// a descendant scrolls.
-  void addListener(ScrollNotificationCallback listener) {
+  void addListener(final ScrollNotificationCallback listener) {
     assert(_debugAssertNotDisposed());
     _listeners!.add(_ListenerEntry(listener));
   }
 
   /// Remove the specified [ScrollNotificationCallback].
-  void removeListener(ScrollNotificationCallback listener) {
+  void removeListener(final ScrollNotificationCallback listener) {
     assert(_debugAssertNotDisposed());
     for (final _ListenerEntry entry in _listeners!) {
       if (entry.listener == listener) {
@@ -176,7 +176,7 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
     }
   }
 
-  void _notifyListeners(ScrollNotification notification) {
+  void _notifyListeners(final ScrollNotification notification) {
     assert(_debugAssertNotDisposed());
     if (_listeners!.isEmpty) {
       return;
@@ -207,12 +207,12 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // A ScrollMetricsNotification allows listeners to be notified for an
     // initial state, as well as if the content dimensions change without
     // scrolling.
     return NotificationListener<ScrollMetricsNotification>(
-      onNotification: (ScrollMetricsNotification notification) {
+      onNotification: (final ScrollMetricsNotification notification) {
         _notifyListeners(_ConvertedScrollMetricsNotification(
           metrics: notification.metrics,
           context: notification.context,
@@ -221,7 +221,7 @@ class ScrollNotificationObserverState extends State<ScrollNotificationObserver> 
         return false;
       },
       child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
+        onNotification: (final ScrollNotification notification) {
           _notifyListeners(notification);
           return false;
         },

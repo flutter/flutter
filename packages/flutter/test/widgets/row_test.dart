@@ -15,20 +15,20 @@ class OrderPainter extends CustomPainter {
   static List<int> log = <int>[];
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     log.add(index);
   }
 
   @override
-  bool shouldRepaint(OrderPainter old) => false;
+  bool shouldRepaint(final OrderPainter old) => false;
 }
 
-Widget log(int index) => CustomPaint(painter: OrderPainter(index));
+Widget log(final int index) => CustomPaint(painter: OrderPainter(index));
 
 void main() {
   // NO DIRECTION
 
-  testWidgets('Row with one Flexible child - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with one Flexible child - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -37,7 +37,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -59,7 +59,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row with default main axis parameters - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with default main axis parameters - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -68,7 +68,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -90,7 +90,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row with MainAxisAlignment.center - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.center - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -98,7 +98,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -120,7 +120,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row with MainAxisAlignment.end - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.end - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -129,7 +129,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -152,7 +152,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceBetween - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceBetween - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -161,7 +161,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -184,7 +184,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceAround - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceAround - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -194,7 +194,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -218,7 +218,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceEvenly - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceEvenly - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -227,7 +227,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -250,7 +250,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row and MainAxisSize.min - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row and MainAxisSize.min - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('rowKey');
     const Key child0Key = Key('child0');
@@ -258,7 +258,7 @@ void main() {
 
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception ??= details.exception;
     };
 
@@ -280,7 +280,7 @@ void main() {
     expect(OrderPainter.log, <int>[]);
   });
 
-  testWidgets('Row MainAxisSize.min layout at zero size - no textDirection', (WidgetTester tester) async {
+  testWidgets('Row MainAxisSize.min layout at zero size - no textDirection', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 
@@ -308,7 +308,7 @@ void main() {
 
   // LTR
 
-  testWidgets('Row with one Flexible child - LTR', (WidgetTester tester) async {
+  testWidgets('Row with one Flexible child - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -358,7 +358,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with default main axis parameters - LTR', (WidgetTester tester) async {
+  testWidgets('Row with default main axis parameters - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -408,7 +408,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with MainAxisAlignment.center - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.center - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -450,7 +450,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgets('Row with MainAxisAlignment.end - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.end - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -500,7 +500,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceBetween - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceBetween - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -550,7 +550,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceAround - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceAround - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -608,7 +608,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3, 4]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceEvenly - LTR', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceEvenly - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -658,7 +658,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row and MainAxisSize.min - LTR', (WidgetTester tester) async {
+  testWidgets('Row and MainAxisSize.min - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('rowKey');
     const Key child0Key = Key('child0');
@@ -700,7 +700,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgets('Row MainAxisSize.min layout at zero size - LTR', (WidgetTester tester) async {
+  testWidgets('Row MainAxisSize.min layout at zero size - LTR', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 
@@ -729,7 +729,7 @@ void main() {
 
   // RTL
 
-  testWidgets('Row with one Flexible child - RTL', (WidgetTester tester) async {
+  testWidgets('Row with one Flexible child - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -779,7 +779,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with default main axis parameters - RTL', (WidgetTester tester) async {
+  testWidgets('Row with default main axis parameters - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -829,7 +829,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with MainAxisAlignment.center - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.center - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -871,7 +871,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgets('Row with MainAxisAlignment.end - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.end - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -921,7 +921,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceBetween - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceBetween - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -971,7 +971,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceAround - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceAround - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -1029,7 +1029,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3, 4]);
   });
 
-  testWidgets('Row with MainAxisAlignment.spaceEvenly - RTL', (WidgetTester tester) async {
+  testWidgets('Row with MainAxisAlignment.spaceEvenly - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('row');
     const Key child0Key = Key('child0');
@@ -1079,7 +1079,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2, 3]);
   });
 
-  testWidgets('Row and MainAxisSize.min - RTL', (WidgetTester tester) async {
+  testWidgets('Row and MainAxisSize.min - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key rowKey = Key('rowKey');
     const Key child0Key = Key('child0');
@@ -1121,7 +1121,7 @@ void main() {
     expect(OrderPainter.log, <int>[1, 2]);
   });
 
-  testWidgets('Row MainAxisSize.min layout at zero size - RTL', (WidgetTester tester) async {
+  testWidgets('Row MainAxisSize.min layout at zero size - RTL', (final WidgetTester tester) async {
     OrderPainter.log.clear();
     const Key childKey = Key('childKey');
 

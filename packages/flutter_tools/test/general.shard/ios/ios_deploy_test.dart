@@ -479,8 +479,8 @@ process continue
   });
 }
 
-IOSDeploy setUpIOSDeploy(ProcessManager processManager, {
-    Artifacts? artifacts,
+IOSDeploy setUpIOSDeploy(final ProcessManager processManager, {
+    final Artifacts? artifacts,
   }) {
   final FakePlatform macPlatform = FakePlatform(
     operatingSystem: 'macos',

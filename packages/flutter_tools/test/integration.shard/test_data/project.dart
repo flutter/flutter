@@ -43,7 +43,7 @@ abstract class Project {
   /// (Used by [HotReloadProject].)
   final String indexHtml;
 
-  Future<void> setUpIn(Directory dir) async {
+  Future<void> setUpIn(final Directory dir) async {
     this.dir = dir;
     writeFile(fileSystem.path.join(dir.path, 'pubspec.yaml'), pubspec);
     final String? main = this.main;
@@ -72,8 +72,8 @@ abstract class Project {
     await getPackages(dir.path);
   }
 
-  int lineContaining(String contents, String search) {
-    final int index = contents.split('\n').indexWhere((String l) => l.contains(search));
+  int lineContaining(final String contents, final String search) {
+    final int index = contents.split('\n').indexWhere((final String l) => l.contains(search));
     if (index == -1) {
       throw Exception("Did not find '$search' inside the file");
     }

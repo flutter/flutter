@@ -12,7 +12,7 @@ class CupertinoSliderApp extends StatelessWidget {
   const CupertinoSliderApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoSliderExample(),
@@ -32,7 +32,7 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
   String? _sliderStatus;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoSlider Sample'),
@@ -54,19 +54,19 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
               activeColor: CupertinoColors.systemPurple,
               thumbColor: CupertinoColors.systemPurple,
               // This is called when sliding is started.
-              onChangeStart: (double value) {
+              onChangeStart: (final double value) {
                 setState(() {
                   _sliderStatus = 'Sliding';
                 });
               },
               // This is called when sliding has ended.
-              onChangeEnd: (double value) {
+              onChangeEnd: (final double value) {
                 setState(() {
                   _sliderStatus = 'Finished sliding';
                 });
               },
               // This is called when slider value is changed.
-              onChanged: (double value) {
+              onChanged: (final double value) {
                 setState(() {
                   _currentSliderValue = value;
                 });

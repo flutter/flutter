@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/switch_list_tile/custom_labeled_swi
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('LinkedLabelSwitch contains RichText and Switch', (WidgetTester tester) async {
+  testWidgets('LinkedLabelSwitch contains RichText and Switch', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LabeledSwitchApp(),
     );

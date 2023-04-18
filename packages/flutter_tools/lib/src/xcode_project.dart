@@ -73,7 +73,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   File get generatedXcodePropertiesFile;
 
   /// The Flutter-managed Xcode config file for [mode].
-  File xcodeConfigFor(String mode);
+  File xcodeConfigFor(final String mode);
 
   /// The script that exports environment variables needed for Flutter tools.
   /// Can be run first in a Xcode Script build phase to make FLUTTER_ROOT,
@@ -144,7 +144,7 @@ class IosProject extends XcodeBasedProject {
   Directory get ephemeralDirectory => _flutterLibRoot.childDirectory('Flutter').childDirectory('ephemeral');
 
   @override
-  File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
+  File xcodeConfigFor(final String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
   @override
   File get generatedEnvironmentVariableExportScript => _flutterLibRoot.childDirectory('Flutter').childFile('flutter_export_environment.sh');
@@ -192,7 +192,7 @@ class IosProject extends XcodeBasedProject {
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
-  Future<String?> productBundleIdentifier(BuildInfo? buildInfo) async {
+  Future<String?> productBundleIdentifier(final BuildInfo? buildInfo) async {
     if (!existsSync()) {
       return null;
     }
@@ -200,7 +200,7 @@ class IosProject extends XcodeBasedProject {
   }
   String? _productBundleIdentifier;
 
-  Future<String?> _parseProductBundleIdentifier(BuildInfo? buildInfo) async {
+  Future<String?> _parseProductBundleIdentifier(final BuildInfo? buildInfo) async {
     String? fromPlist;
     final File defaultInfoPlist = defaultHostInfoPlist;
     // Users can change the location of the Info.plist.
@@ -243,7 +243,7 @@ class IosProject extends XcodeBasedProject {
   }
 
   /// The bundle name of the host app, `My App.app`.
-  Future<String?> hostAppBundleName(BuildInfo? buildInfo) async {
+  Future<String?> hostAppBundleName(final BuildInfo? buildInfo) async {
     if (!existsSync()) {
       return null;
     }
@@ -251,7 +251,7 @@ class IosProject extends XcodeBasedProject {
   }
   String? _hostAppBundleName;
 
-  Future<String> _parseHostAppBundleName(BuildInfo? buildInfo) async {
+  Future<String> _parseHostAppBundleName(final BuildInfo? buildInfo) async {
     // The product name and bundle name are derived from the display name, which the user
     // is instructed to change in Xcode as part of deploying to the App Store.
     // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
@@ -273,11 +273,11 @@ class IosProject extends XcodeBasedProject {
   ///
   /// Returns null, if iOS tooling is unavailable.
   Future<Map<String, String>?> buildSettingsForBuildInfo(
-    BuildInfo? buildInfo, {
-    EnvironmentType environmentType = EnvironmentType.physical,
-    String? deviceId,
+    final BuildInfo? buildInfo, {
+    final EnvironmentType environmentType = EnvironmentType.physical,
+    final String? deviceId,
     String? scheme,
-    bool isWatch = false,
+    final bool isWatch = false,
   }) async {
     if (!existsSync()) {
       return null;
@@ -326,7 +326,7 @@ class IosProject extends XcodeBasedProject {
   }
   XcodeProjectInfo? _projectInfo;
 
-  Future<Map<String, String>?> _xcodeProjectBuildSettings(XcodeProjectBuildContext buildContext) async {
+  Future<Map<String, String>?> _xcodeProjectBuildSettings(final XcodeProjectBuildContext buildContext) async {
     final XcodeProjectInterpreter? xcodeProjectInterpreter = globals.xcodeProjectInterpreter;
     if (xcodeProjectInterpreter == null || !xcodeProjectInterpreter.isInstalled) {
       return null;
@@ -353,9 +353,9 @@ class IosProject extends XcodeBasedProject {
 
   /// Check if one the [targets] of the project is a watchOS companion app target.
   Future<bool> containsWatchCompanion({
-    required XcodeProjectInfo projectInfo,
-    required BuildInfo buildInfo,
-    String? deviceId,
+    required final XcodeProjectInfo projectInfo,
+    required final BuildInfo buildInfo,
+    final String? deviceId,
   }) async {
     final String? bundleIdentifier = await productBundleIdentifier(buildInfo);
     // A bundle identifier is required for a companion app.
@@ -511,7 +511,7 @@ class IosProject extends XcodeBasedProject {
     return registryDirectory.childFile('GeneratedPluginRegistrant.m');
   }
 
-  Future<void> _overwriteFromTemplate(String path, Directory target) async {
+  Future<void> _overwriteFromTemplate(final String path, final Directory target) async {
     final Template template = await Template.fromName(
       path,
       fileSystem: globals.fs,
@@ -589,7 +589,7 @@ class MacOSProject extends XcodeBasedProject {
   File get pluginRegistrantImplementation => managedDirectory.childFile('GeneratedPluginRegistrant.swift');
 
   @override
-  File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
+  File xcodeConfigFor(final String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
 
   @override
   File get generatedEnvironmentVariableExportScript => ephemeralDirectory.childFile('flutter_export_environment.sh');

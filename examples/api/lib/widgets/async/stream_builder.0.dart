@@ -14,7 +14,7 @@ class StreamBuilderExampleApp extends StatelessWidget {
   const StreamBuilderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: StreamBuilderExample(),
     );
@@ -43,7 +43,7 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
   })();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.displayMedium!,
       textAlign: TextAlign.center,
@@ -52,7 +52,7 @@ class _StreamBuilderExampleState extends State<StreamBuilderExample> {
         color: Colors.white,
         child: StreamBuilder<int>(
           stream: _bids,
-          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+          builder: (final BuildContext context, final AsyncSnapshot<int> snapshot) {
             List<Widget> children;
             if (snapshot.hasError) {
               children = <Widget>[

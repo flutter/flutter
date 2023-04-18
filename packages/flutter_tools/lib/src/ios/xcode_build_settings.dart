@@ -11,8 +11,8 @@ import '../flutter_manifest.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 
-String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
-    Artifacts artifacts) {
+String flutterMacOSFrameworkDir(final BuildMode mode, final FileSystem fileSystem,
+    final Artifacts artifacts) {
   final String flutterMacOSFramework = artifacts.getArtifactPath(
     Artifact.flutterMacOSFramework,
     platform: TargetPlatform.darwin,
@@ -30,11 +30,11 @@ String flutterMacOSFrameworkDir(BuildMode mode, FileSystem fileSystem,
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
 Future<void> updateGeneratedXcodeProperties({
-  required FlutterProject project,
-  required BuildInfo buildInfo,
-  String? targetOverride,
-  bool useMacOSConfig = false,
-  String? buildDirOverride,
+  required final FlutterProject project,
+  required final BuildInfo buildInfo,
+  final String? targetOverride,
+  final bool useMacOSConfig = false,
+  final String? buildDirOverride,
 }) async {
   final List<String> xcodeBuildSettings = await _xcodeBuildSettingsLines(
     project: project,
@@ -61,9 +61,9 @@ Future<void> updateGeneratedXcodeProperties({
 /// for Xcode targets that need them.
 /// See [XcodeBasedProject.generatedXcodePropertiesFile].
 void _updateGeneratedXcodePropertiesFile({
-  required FlutterProject project,
-  required List<String> xcodeBuildSettings,
-  bool useMacOSConfig = false,
+  required final FlutterProject project,
+  required final List<String> xcodeBuildSettings,
+  final bool useMacOSConfig = false,
 }) {
   final StringBuffer localsBuffer = StringBuffer();
 
@@ -81,9 +81,9 @@ void _updateGeneratedXcodePropertiesFile({
 /// as flags for Flutter tools.
 /// See [XcodeBasedProject.generatedEnvironmentVariableExportScript].
 void _updateGeneratedEnvironmentVariablesScript({
-  required FlutterProject project,
-  required List<String> xcodeBuildSettings,
-  bool useMacOSConfig = false,
+  required final FlutterProject project,
+  required final List<String> xcodeBuildSettings,
+  final bool useMacOSConfig = false,
 }) {
   final StringBuffer localsBuffer = StringBuffer();
 
@@ -105,8 +105,8 @@ void _updateGeneratedEnvironmentVariablesScript({
 
 /// Build name parsed and validated from build info and manifest. Used for CFBundleShortVersionString.
 String? parsedBuildName({
-  required FlutterManifest manifest,
-  BuildInfo? buildInfo,
+  required final FlutterManifest manifest,
+  final BuildInfo? buildInfo,
 }) {
   final String? buildNameToParse = buildInfo?.buildName ?? manifest.buildName;
   return validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse, globals.logger);
@@ -114,8 +114,8 @@ String? parsedBuildName({
 
 /// Build number parsed and validated from build info and manifest. Used for CFBundleVersion.
 String? parsedBuildNumber({
-  required FlutterManifest manifest,
-  BuildInfo? buildInfo,
+  required final FlutterManifest manifest,
+  final BuildInfo? buildInfo,
 }) {
   String? buildNumberToParse = buildInfo?.buildNumber ?? manifest.buildNumber;
   final String? buildNumber = validatedBuildNumberForPlatform(
@@ -138,11 +138,11 @@ String? parsedBuildNumber({
 
 /// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
 Future<List<String>> _xcodeBuildSettingsLines({
-  required FlutterProject project,
-  required BuildInfo buildInfo,
-  String? targetOverride,
-  bool useMacOSConfig = false,
-  String? buildDirOverride,
+  required final FlutterProject project,
+  required final BuildInfo buildInfo,
+  final String? targetOverride,
+  final bool useMacOSConfig = false,
+  final String? buildDirOverride,
 }) async {
   final List<String> xcodeBuildSettings = <String>[];
 

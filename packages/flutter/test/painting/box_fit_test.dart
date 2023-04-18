@@ -43,7 +43,7 @@ void main() {
   });
 }
 
-void _testZeroAndNegativeSizes(BoxFit fit) {
+void _testZeroAndNegativeSizes(final BoxFit fit) {
   FittedSizes result;
 
   result = applyBoxFit(fit, const Size(-400.0, 2000.0), const Size(100.0, 1000.0));

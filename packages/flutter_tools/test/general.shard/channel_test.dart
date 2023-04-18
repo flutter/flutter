@@ -27,7 +27,7 @@ void main() {
       Cache.disableLocking();
     });
 
-    Future<void> simpleChannelTest(List<String> args) async {
+    Future<void> simpleChannelTest(final List<String> args) async {
       fakeProcessManager.addCommands(const <FakeCommand>[
         FakeCommand(command: <String>['git', 'branch', '-r'], stdout: '  branch-1\n  branch-2'),
       ]);
@@ -78,7 +78,7 @@ void main() {
       // format the status text for a simpler assertion.
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
-        .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
+        .map((final String line) => line.substring(2)); // remove '* ' or '  ' from output
       expect(rows, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
@@ -104,7 +104,7 @@ void main() {
       // format the status text for a simpler assertion.
       final Iterable<String> rows2 = testLogger.statusText
         .split('\n')
-        .map((String line) => line.substring(2)); // remove '* ' or '  ' from output
+        .map((final String line) => line.substring(2)); // remove '* ' or '  ' from output
       expect(rows2, containsAllInOrder(kOfficialChannels));
 
       // clear buffer for next process
@@ -162,8 +162,8 @@ void main() {
       // format the status text for a simpler assertion.
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
-        .map((String line) => line.trim())
-        .where((String line) => line.isNotEmpty == true)
+        .map((final String line) => line.trim())
+        .where((final String line) => line.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);
@@ -193,8 +193,8 @@ void main() {
       // format the status text for a simpler assertion.
       final Iterable<String> rows = testLogger.statusText
         .split('\n')
-        .map((String line) => line.trim())
-        .where((String line) => line.isNotEmpty == true)
+        .map((final String line) => line.trim())
+        .where((final String line) => line.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['beta', 'stable', 'Currently not on an official channel.']);

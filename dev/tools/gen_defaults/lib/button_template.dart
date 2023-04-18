@@ -52,7 +52,7 @@ class ButtonTemplate extends TokenTemplate {
     const MaterialStatePropertyAll<double>(0.0)''';
   }
 
-  String _elevationColor(String token) {
+  String _elevationColor(final String token) {
     if (tokens.containsKey(token)) {
       return 'MaterialStatePropertyAll<Color>(${color(token)})';
     } else {

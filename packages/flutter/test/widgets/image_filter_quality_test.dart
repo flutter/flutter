@@ -15,20 +15,20 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Image at default filterQuality', (WidgetTester tester) async {
+  testWidgets('Image at default filterQuality', (final WidgetTester tester) async {
     await testImageQuality(tester, null);
   });
 
-  testWidgets('Image at high filterQuality', (WidgetTester tester) async {
+  testWidgets('Image at high filterQuality', (final WidgetTester tester) async {
     await testImageQuality(tester, ui.FilterQuality.high);
   });
 
-  testWidgets('Image at none filterQuality', (WidgetTester tester) async {
+  testWidgets('Image at none filterQuality', (final WidgetTester tester) async {
     await testImageQuality(tester, ui.FilterQuality.none);
   });
 }
 
-Future<void> testImageQuality(WidgetTester tester, ui.FilterQuality? quality) async {
+Future<void> testImageQuality(final WidgetTester tester, final ui.FilterQuality? quality) async {
   await tester.binding.setSurfaceSize(const ui.Size(3, 3));
   // A 3x3 image encoded as PNG with white background and black pixels on the diagonal:
   // ┌──────┐
@@ -76,7 +76,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 
   @override
-  void addListener(ImageStreamListener listener) {
+  void addListener(final ImageStreamListener listener) {
     listeners.add(listener);
     if (_currentImage != null) {
       listener.onImage(_currentImage!.clone(), true);
@@ -84,13 +84,13 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   }
 
   @override
-  void removeListener(ImageStreamListener listener) {
+  void removeListener(final ImageStreamListener listener) {
     listeners.remove(listener);
   }
 
   void setData({
-    ImageInfo? imageInfo,
-    ImageChunkEvent? chunkEvent,
+    final ImageInfo? imageInfo,
+    final ImageChunkEvent? chunkEvent,
   }) {
     if (imageInfo != null) {
       _currentImage?.dispose();
@@ -108,8 +108,8 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
   }
 
   void setError({
-    required Object exception,
-    StackTrace? stackTrace,
+    required final Object exception,
+    final StackTrace? stackTrace,
   }) {
     final List<ImageStreamListener> localListeners = listeners.toList();
     for (final ImageStreamListener listener in localListeners) {
@@ -119,7 +119,7 @@ class _TestImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
-  _TestImageProvider({ImageStreamCompleter? streamCompleter}) {
+  _TestImageProvider({final ImageStreamCompleter? streamCompleter}) {
     _streamCompleter = streamCompleter
       ?? OneFrameImageStreamCompleter(_completer.future);
   }
@@ -132,21 +132,21 @@ class _TestImageProvider extends ImageProvider<Object> {
   int _loadCallCount = 0;
 
   @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
+  Future<Object> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<_TestImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter load(final Object key, final DecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }
 
-  void complete(ui.Image image) {
+  void complete(final ui.Image image) {
     _completer.complete(ImageInfo(image: image));
   }
 
-  void fail(Object exception, StackTrace? stackTrace) {
+  void fail(final Object exception, final StackTrace? stackTrace) {
     _completer.completeError(exception, stackTrace);
   }
 

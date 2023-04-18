@@ -9,7 +9,7 @@ import 'package:flutter_api_samples/widgets/basic/listener.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Listener detects press & release, and cursor location', (WidgetTester tester) async {
+  testWidgets('Listener detects press & release, and cursor location', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.ListenerExample()),
     );

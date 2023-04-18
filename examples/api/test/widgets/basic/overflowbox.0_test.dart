@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/basic/overflowbox.0.dart' as example
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('OverflowBox allows child widget to overflow parent container', (WidgetTester tester) async {
+  testWidgets('OverflowBox allows child widget to overflow parent container', (final WidgetTester tester) async {
     const Size containerSize =  Size(100, 100);
     const Size maxSize = Size(200, 200);
 

@@ -94,7 +94,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   }
 
   @override
-  void setupParentData(RenderObject child) {
+  void setupParentData(final RenderObject child) {
     if (child.parentData is! SliverPhysicalParentData) {
       child.parentData = SliverPhysicalParentData();
     }
@@ -208,7 +208,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   }
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+  bool hitTestChildren(final SliverHitTestResult result, { required final double mainAxisPosition, required final double crossAxisPosition }) {
     if (child != null && child!.geometry!.hitTestExtent > 0.0) {
       final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
       result.addWithAxisOffset(
@@ -224,13 +224,13 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   }
 
   @override
-  double childMainAxisPosition(RenderSliver child) {
+  double childMainAxisPosition(final RenderSliver child) {
     assert(child == this.child);
     return calculatePaintOffset(constraints, from: 0.0, to: beforePadding);
   }
 
   @override
-  double childCrossAxisPosition(RenderSliver child) {
+  double childCrossAxisPosition(final RenderSliver child) {
     assert(child == this.child);
     assert(resolvedPadding != null);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
@@ -244,20 +244,20 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   }
 
   @override
-  double? childScrollOffset(RenderObject child) {
+  double? childScrollOffset(final RenderObject child) {
     assert(child.parent == this);
     return beforePadding;
   }
 
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+  void applyPaintTransform(final RenderObject child, final Matrix4 transform) {
     assert(child == this.child);
     final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (child != null && child!.geometry!.visible) {
       final SliverPhysicalParentData childParentData = child!.parentData! as SliverPhysicalParentData;
       context.paintChild(child!, offset + childParentData.paintOffset);
@@ -265,7 +265,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
   }
 
   @override
-  void debugPaint(PaintingContext context, Offset offset) {
+  void debugPaint(final PaintingContext context, final Offset offset) {
     super.debugPaint(context, offset);
     assert(() {
       if (debugPaintSizeEnabled) {
@@ -300,9 +300,9 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   ///
   /// The [padding] argument must not be null and must have non-negative insets.
   RenderSliverPadding({
-    required EdgeInsetsGeometry padding,
-    TextDirection? textDirection,
-    RenderSliver? child,
+    required final EdgeInsetsGeometry padding,
+    final TextDirection? textDirection,
+    final RenderSliver? child,
   }) : assert(padding.isNonNegative),
        _padding = padding,
        _textDirection = textDirection {
@@ -332,7 +332,7 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   /// must not be null.
   EdgeInsetsGeometry get padding => _padding;
   EdgeInsetsGeometry _padding;
-  set padding(EdgeInsetsGeometry value) {
+  set padding(final EdgeInsetsGeometry value) {
     assert(padding.isNonNegative);
     if (_padding == value) {
       return;
@@ -347,7 +347,7 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   /// to a value that does not depend on the direction.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  set textDirection(final TextDirection? value) {
     if (_textDirection == value) {
       return;
     }
@@ -362,7 +362,7 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));

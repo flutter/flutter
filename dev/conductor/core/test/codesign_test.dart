@@ -38,8 +38,8 @@ void main() {
     ];
 
     void createRunner({
-      String operatingSystem = 'macos',
-      List<FakeCommand>? commands,
+      final String operatingSystem = 'macos',
+      final List<FakeCommand>? commands,
     }) {
       stdio = TestStdio();
       fileSystem = MemoryFileSystem.test();

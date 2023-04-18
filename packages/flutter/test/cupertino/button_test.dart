@@ -17,7 +17,7 @@ const TextStyle testStyle = TextStyle(
 );
 
 void main() {
-  testWidgets('Default layout minimum size', (WidgetTester tester) async {
+  testWidgets('Default layout minimum size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
         onPressed: null,
@@ -32,7 +32,7 @@ void main() {
     );
   });
 
-  testWidgets('Minimum size parameter', (WidgetTester tester) async {
+  testWidgets('Minimum size parameter', (final WidgetTester tester) async {
     const double minSize = 60.0;
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
@@ -49,7 +49,7 @@ void main() {
     );
   });
 
-  testWidgets('Size grows with text', (WidgetTester tester) async {
+  testWidgets('Size grows with text', (final WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(child: const CupertinoButton(
         onPressed: null,
@@ -102,7 +102,7 @@ void main() {
   });
   */
 
-  testWidgets('Button child alignment', (WidgetTester tester) async {
+  testWidgets('Button child alignment', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton(
@@ -129,7 +129,7 @@ void main() {
     expect(align.alignment, Alignment.centerLeft);
   });
 
-  testWidgets('Button with background is wider', (WidgetTester tester) async {
+  testWidgets('Button with background is wider', (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       color: Color(0xFFFFFFFF),
@@ -143,7 +143,7 @@ void main() {
     );
   });
 
-  testWidgets('Custom padding', (WidgetTester tester) async {
+  testWidgets('Custom padding', (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       padding: EdgeInsets.all(100.0),
@@ -156,11 +156,11 @@ void main() {
     );
   });
 
-  testWidgets('Button takes taps', (WidgetTester tester) async {
+  testWidgets('Button takes taps', (final WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
       StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
+        builder: (final BuildContext context, final StateSetter setState) {
           return boilerplate(
             child: CupertinoButton(
               child: const Text('Tap me'),
@@ -184,7 +184,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1));
   });
 
-  testWidgets("Disabled button doesn't animate", (WidgetTester tester) async {
+  testWidgets("Disabled button doesn't animate", (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
       onPressed: null,
       child: Text('Tap me'),
@@ -195,7 +195,7 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('Enabled button animates', (WidgetTester tester) async {
+  testWidgets('Enabled button animates', (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       child: const Text('Tap me'),
       onPressed: () { },
@@ -231,7 +231,7 @@ void main() {
     expect(transition.opacity.value, moreOrLessEquals(1.0, epsilon: 0.001));
   });
 
-  testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
+  testWidgets('pressedOpacity defaults to 0.1', (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       child: const Text('Tap me'),
       onPressed: () { },
@@ -250,7 +250,7 @@ void main() {
     expect(opacity.opacity.value, 0.4);
   });
 
-  testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
+  testWidgets('pressedOpacity parameter', (final WidgetTester tester) async {
     const double pressedOpacity = 0.5;
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       pressedOpacity: pressedOpacity,
@@ -271,7 +271,7 @@ void main() {
     expect(opacity.opacity.value, pressedOpacity);
   });
 
-  testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
+  testWidgets('Cupertino button is semantically a button', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       boilerplate(
@@ -302,7 +302,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can specify colors', (WidgetTester tester) async {
+  testWidgets('Can specify colors', (final WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: CupertinoButton(
       color: const Color(0x000000FF),
       disabledColor: const Color(0x0000FF00),
@@ -330,7 +330,7 @@ void main() {
     expect(boxDecoration.color, const Color(0x0000FF00));
   });
 
-  testWidgets('Can specify dynamic colors', (WidgetTester tester) async {
+  testWidgets('Can specify dynamic colors', (final WidgetTester tester) async {
     const Color bgColor = CupertinoDynamicColor.withBrightness(
       color: Color(0xFF123456),
       darkColor: Color(0xFF654321),
@@ -379,14 +379,14 @@ void main() {
     expect(boxDecoration.color!.value, 0xFF111111);
   });
 
-  testWidgets('Button respects themes', (WidgetTester tester) async {
+  testWidgets('Button respects themes', (final WidgetTester tester) async {
     late TextStyle textStyle;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoButton(
           onPressed: () { },
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(builder: (final BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
@@ -400,7 +400,7 @@ void main() {
       CupertinoApp(
         home: CupertinoButton.filled(
           onPressed: () { },
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(builder: (final BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
@@ -422,7 +422,7 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton(
           onPressed: () { },
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(builder: (final BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
@@ -436,7 +436,7 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: CupertinoButton.filled(
           onPressed: () { },
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(builder: (final BuildContext context) {
             textStyle = DefaultTextStyle.of(context).style;
             return const Placeholder();
           }),
@@ -453,7 +453,7 @@ void main() {
     expect(decoration.color, isSameColorAs(CupertinoColors.systemBlue.darkColor));
   });
 
-  testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino button updates cursor to clickable on Web', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -480,7 +480,7 @@ void main() {
   });
 }
 
-Widget boilerplate({ required Widget child }) {
+Widget boilerplate({ required final Widget child }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),

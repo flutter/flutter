@@ -49,7 +49,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<String> createProjectWithPlugin(String plugin, { List<String>? arguments }) async {
+    Future<String> createProjectWithPlugin(final String plugin, { final List<String>? arguments }) async {
       final String projectPath = await createProject(tempDir, arguments: arguments);
       final File pubspec = globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
@@ -65,7 +65,7 @@ void main() {
       return projectPath;
     }
 
-    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String>? args }) async {
+    Future<PackagesCommand> runCommandIn(final String projectPath, final String verb, { final List<String>? args }) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
@@ -78,7 +78,7 @@ void main() {
       return command;
     }
 
-    void expectExists(String projectPath, String relPath) {
+    void expectExists(final String projectPath, final String relPath) {
       expect(
         globals.fs.isFileSync(globals.fs.path.join(projectPath, relPath)),
         true,
@@ -86,7 +86,7 @@ void main() {
       );
     }
 
-    void expectContains(String projectPath, String relPath, String substring) {
+    void expectContains(final String projectPath, final String relPath, final String substring) {
       expectExists(projectPath, relPath);
       expect(
         globals.fs.file(globals.fs.path.join(projectPath, relPath)).readAsStringSync(),
@@ -95,7 +95,7 @@ void main() {
       );
     }
 
-    void expectNotExists(String projectPath, String relPath) {
+    void expectNotExists(final String projectPath, final String relPath) {
       expect(
         globals.fs.isFileSync(globals.fs.path.join(projectPath, relPath)),
         false,
@@ -103,7 +103,7 @@ void main() {
       );
     }
 
-    void expectNotContains(String projectPath, String relPath, String substring) {
+    void expectNotContains(final String projectPath, final String relPath, final String substring) {
       expectExists(projectPath, relPath);
       expect(
         globals.fs.file(globals.fs.path.join(projectPath, relPath)).readAsStringSync(),
@@ -149,54 +149,54 @@ void main() {
       '.ios/Config/Release.xcconfig': '#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
-    void expectDependenciesResolved(String projectPath) {
+    void expectDependenciesResolved(final String projectPath) {
       for (final String output in pubOutput) {
         expectExists(projectPath, output);
       }
     }
 
-    void expectZeroPluginsInjected(String projectPath) {
+    void expectZeroPluginsInjected(final String projectPath) {
       for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses) {
         expectNotExists(projectPath, witness);
       }
-      modulePluginContentWitnesses.forEach((String witness, String content) {
+      modulePluginContentWitnesses.forEach((final String witness, final String content) {
         expectNotContains(projectPath, witness, content);
       });
     }
 
-    void expectPluginInjected(String projectPath) {
+    void expectPluginInjected(final String projectPath) {
       for (final String registrant in pluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in pluginWitnesses) {
         expectExists(projectPath, witness);
       }
-      pluginContentWitnesses.forEach((String witness, String content) {
+      pluginContentWitnesses.forEach((final String witness, final String content) {
         expectContains(projectPath, witness, content);
       });
     }
 
-    void expectModulePluginInjected(String projectPath) {
+    void expectModulePluginInjected(final String projectPath) {
       for (final String registrant in modulePluginRegistrants) {
         expectExists(projectPath, registrant);
       }
       for (final String witness in modulePluginWitnesses) {
         expectExists(projectPath, witness);
       }
-      modulePluginContentWitnesses.forEach((String witness, String content) {
+      modulePluginContentWitnesses.forEach((final String witness, final String content) {
         expectContains(projectPath, witness, content);
       });
     }
 
-    void removeGeneratedFiles(String projectPath) {
+    void removeGeneratedFiles(final String projectPath) {
       final Iterable<String> allFiles = <List<String>>[
         pubOutput,
         modulePluginRegistrants,
         pluginWitnesses,
-      ].expand<String>((List<String> list) => list);
+      ].expand<String>((final List<String> list) => list);
       for (final String path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
         ErrorHandlingFileSystem.deleteIfExists(file);

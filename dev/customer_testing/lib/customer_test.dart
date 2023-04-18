@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CustomerTest {
-  factory CustomerTest(File testFile) {
+  factory CustomerTest(final File testFile) {
     final String errorPrefix = 'Could not parse: ${testFile.path}\n';
     final List<String> contacts = <String>[];
     final List<String> fetch = <String>[];
@@ -16,7 +16,7 @@ class CustomerTest {
     final List<String> test = <String>[];
     int? iterations;
     bool hasTests = false;
-    for (final String line in testFile.readAsLinesSync().map((String line) => line.trim())) {
+    for (final String line in testFile.readAsLinesSync().map((final String line) => line.trim())) {
       if (line.isEmpty) {
         // blank line
       } else if (line.startsWith('#')) {

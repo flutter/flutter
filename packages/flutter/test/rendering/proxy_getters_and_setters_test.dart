@@ -51,12 +51,12 @@ void main() {
   });
 
   test('RenderShaderMask getters and setters', () {
-    Shader callback1(Rect bounds) {
+    Shader callback1(final Rect bounds) {
       assert(false); // The test should not call this.
       const LinearGradient gradient = LinearGradient(colors: <Color>[Colors.red]);
       return gradient.createShader(Rect.zero);
     }
-    Shader callback2(Rect bounds) {
+    Shader callback2(final Rect bounds) {
       assert(false); // The test should not call this.
       const LinearGradient gradient = LinearGradient(colors: <Color>[Colors.blue]);
       return gradient.createShader(Rect.zero);

@@ -42,7 +42,7 @@ class MainActivity: FlutterActivity() {
 }
 ''';
 
-Future<TaskResult> _runWithTempDir(Directory tempDir) async {
+Future<TaskResult> _runWithTempDir(final Directory tempDir) async {
   const String testDirName = 'entrypoint_dart_registrant';
   final String testPath = '${tempDir.path}/$testDirName';
   await inDirectory(tempDir, () async {
@@ -71,7 +71,7 @@ Future<TaskResult> _runWithTempDir(Directory tempDir) async {
     final StreamSubscription<String> stdoutSub = process.stdout
         .transform<String>(const Utf8Decoder())
         .transform<String>(const LineSplitter())
-        .listen((String line) async {
+        .listen((final String line) async {
       print(line);
       if (line.contains(_messagePrefix)) {
         completer.complete(line);

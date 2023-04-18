@@ -29,7 +29,7 @@ abstract final class SemanticsService {
   /// The assertiveness level of the announcement is determined by [assertiveness].
   /// Currently, this is only supported by the web engine and has no effect on
   /// other platforms. The default mode is [Assertiveness.polite].
-  static Future<void> announce(String message, TextDirection textDirection, {Assertiveness assertiveness = Assertiveness.polite}) async {
+  static Future<void> announce(final String message, final TextDirection textDirection, {final Assertiveness assertiveness = Assertiveness.polite}) async {
     final AnnounceSemanticsEvent event = AnnounceSemanticsEvent(message, textDirection, assertiveness: assertiveness);
     await SystemChannels.accessibility.send(event.toMap());
   }
@@ -38,7 +38,7 @@ abstract final class SemanticsService {
   ///
   /// Currently only honored on Android. The contents of [message] will be
   /// read by TalkBack.
-  static Future<void> tooltip(String message) async {
+  static Future<void> tooltip(final String message) async {
     final TooltipSemanticsEvent event = TooltipSemanticsEvent(message);
     await SystemChannels.accessibility.send(event.toMap());
   }

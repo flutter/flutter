@@ -39,7 +39,7 @@ abstract class Animatable<T> {
   ///
   ///  * [Animation.drive], which provides an example for how this can be
   ///    used.
-  const factory Animatable.fromCallback(AnimatableCallback<T> callback) = _CallbackAnimatable<T>;
+  const factory Animatable.fromCallback(final AnimatableCallback<T> callback) = _CallbackAnimatable<T>;
 
   /// Returns the value of the object at point `t`.
   ///
@@ -51,7 +51,7 @@ abstract class Animatable<T> {
   ///  * [evaluate], which is a shorthand for applying [transform] to the value
   ///    of an [Animation].
   ///  * [Curve.transform], a similar method for easing curves.
-  T transform(double t);
+  T transform(final double t);
 
   /// The current value of this object for the given [Animation].
   ///
@@ -65,7 +65,7 @@ abstract class Animatable<T> {
   ///    an [Animation].
   ///  * [animate], which creates an [Animation] out of this object, continually
   ///    applying [evaluate].
-  T evaluate(Animation<double> animation) => transform(animation.value);
+  T evaluate(final Animation<double> animation) => transform(animation.value);
 
   /// Returns a new [Animation] that is driven by the given animation but that
   /// takes on values determined by this object.
@@ -77,7 +77,7 @@ abstract class Animatable<T> {
   ///
   ///  * [AnimationController.drive], which does the same thing from the
   ///    opposite starting point.
-  Animation<T> animate(Animation<double> parent) {
+  Animation<T> animate(final Animation<double> parent) {
     return _AnimatedEvaluation<T>(parent, this);
   }
 
@@ -85,7 +85,7 @@ abstract class Animatable<T> {
   /// the given parent and then evaluating this object.
   ///
   /// This allows [Tween]s to be chained before obtaining an [Animation].
-  Animatable<T> chain(Animatable<double> parent) {
+  Animatable<T> chain(final Animatable<double> parent) {
     return _ChainedEvaluation<T>(parent, this);
   }
 }
@@ -97,7 +97,7 @@ class _CallbackAnimatable<T> extends Animatable<T> {
   final AnimatableCallback<T> _callback;
 
   @override
-  T transform(double t) {
+  T transform(final double t) {
     return _callback(t);
   }
 }
@@ -131,7 +131,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
   final Animatable<T> _evaluatable;
 
   @override
-  T transform(double t) {
+  T transform(final double t) {
     return _evaluatable.transform(_parent.transform(t));
   }
 
@@ -280,7 +280,7 @@ class Tween<T extends Object?> extends Animatable<T> {
   /// In general, however, it is possible for this to return null, especially
   /// when `t`=0.0 and [begin] is null, or `t`=1.0 and [end] is null.
   @protected
-  T lerp(double t) {
+  T lerp(final double t) {
     assert(begin != null);
     assert(end != null);
     assert(() {
@@ -346,7 +346,7 @@ class Tween<T extends Object?> extends Animatable<T> {
   /// properties may be null when this is called. It varies from subclass to
   /// subclass.
   @override
-  T transform(double t) {
+  T transform(final double t) {
     if (t == 0.0) {
       return begin as T;
     }
@@ -374,7 +374,7 @@ class ReverseTween<T extends Object?> extends Tween<T> {
   final Tween<T> parent;
 
   @override
-  T lerp(double t) => parent.lerp(1.0 - t);
+  T lerp(final double t) => parent.lerp(1.0 - t);
 }
 
 /// An interpolation between two colors.
@@ -400,7 +400,7 @@ class ColorTween extends Tween<Color?> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Color? lerp(double t) => Color.lerp(begin, end, t);
+  Color? lerp(final double t) => Color.lerp(begin, end, t);
 }
 
 /// An interpolation between two sizes.
@@ -420,7 +420,7 @@ class SizeTween extends Tween<Size?> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Size? lerp(double t) => Size.lerp(begin, end, t);
+  Size? lerp(final double t) => Size.lerp(begin, end, t);
 }
 
 /// An interpolation between two rectangles.
@@ -441,7 +441,7 @@ class RectTween extends Tween<Rect?> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  Rect? lerp(double t) => Rect.lerp(begin, end, t);
+  Rect? lerp(final double t) => Rect.lerp(begin, end, t);
 }
 
 /// An interpolation between two integers that rounds.
@@ -469,7 +469,7 @@ class IntTween extends Tween<int> {
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
   @override
-  int lerp(double t) => (begin! + (end! - begin!) * t).round();
+  int lerp(final double t) => (begin! + (end! - begin!) * t).round();
 }
 
 /// An interpolation between two integers that floors.
@@ -497,17 +497,17 @@ class StepTween extends Tween<int> {
   // The inherited lerp() function doesn't work with ints because it multiplies
   // the begin and end types by a double, and int * double returns a double.
   @override
-  int lerp(double t) => (begin! + (end! - begin!) * t).floor();
+  int lerp(final double t) => (begin! + (end! - begin!) * t).floor();
 }
 
 /// A tween with a constant value.
 class ConstantTween<T> extends Tween<T> {
   /// Create a tween whose [begin] and [end] values equal [value].
-  ConstantTween(T value) : super(begin: value, end: value);
+  ConstantTween(final T value) : super(begin: value, end: value);
 
   /// This tween doesn't interpolate, it always returns the same value.
   @override
-  T lerp(double t) => begin as T;
+  T lerp(final double t) => begin as T;
 
   @override
   String toString() => '${objectRuntimeType(this, 'ConstantTween')}(value: $begin)';
@@ -549,7 +549,7 @@ class CurveTween extends Animatable<double> {
   Curve curve;
 
   @override
-  double transform(double t) {
+  double transform(final double t) {
     if (t == 0.0 || t == 1.0) {
       assert(curve.transform(t).round() == t);
       return t;

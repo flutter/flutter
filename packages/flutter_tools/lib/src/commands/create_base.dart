@@ -50,7 +50,7 @@ const String _kDefaultPlatformArgumentHelp =
 /// Common behavior for `flutter create` commands.
 abstract class CreateBase extends FlutterCommand {
   CreateBase({
-    required bool verboseHelp,
+    required final bool verboseHelp,
   }) {
     argParser.addFlag(
       'pub',
@@ -164,7 +164,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// The help message of the argument is replaced with `customHelp` if `customHelp` is not null.
   @protected
-  void addPlatformsOptions({String? customHelp}) {
+  void addPlatformsOptions({final String? customHelp}) {
     argParser.addMultiOption('platforms',
       help: customHelp ?? _kDefaultPlatformArgumentHelp,
       aliases: <String>[ 'platform' ],
@@ -226,7 +226,7 @@ abstract class CreateBase extends FlutterCommand {
       return projectType;
     }
 
-    bool exists(List<String> path) {
+    bool exists(final List<String> path) {
       return globals.fs
           .directory(globals.fs.path
               .joinAll(<String>[projectDir.absolute.path, ...path]))
@@ -272,7 +272,7 @@ abstract class CreateBase extends FlutterCommand {
 
   /// Throws with exit 2 if the project directory is illegal.
   @protected
-  void validateProjectDir({bool overwrite = false}) {
+  void validateProjectDir({final bool overwrite = false}) {
     if (globals.fs.path.isWithin(flutterRoot, projectDirPath)) {
       // Make exception for dev and examples to facilitate example project development.
       final String examplesDirectory = globals.fs.path.join(flutterRoot, 'examples');
@@ -338,28 +338,28 @@ abstract class CreateBase extends FlutterCommand {
   /// Creates a template to use for [renderTemplate].
   @protected
   Map<String, Object?> createTemplateContext({
-    required String organization,
-    required String projectName,
-    required String titleCaseProjectName,
-    String? projectDescription,
-    String? androidLanguage,
-    String? iosDevelopmentTeam,
-    String? iosLanguage,
-    required String flutterRoot,
-    required String dartSdkVersionBounds,
-    String? agpVersion,
-    String? kotlinVersion,
-    String? gradleVersion,
-    bool withPlatformChannelPluginHook = false,
-    bool withFfiPluginHook = false,
-    bool withEmptyMain = false,
-    bool ios = false,
-    bool android = false,
-    bool web = false,
-    bool linux = false,
-    bool macos = false,
-    bool windows = false,
-    bool implementationTests = false,
+    required final String organization,
+    required final String projectName,
+    required final String titleCaseProjectName,
+    final String? projectDescription,
+    final String? androidLanguage,
+    final String? iosDevelopmentTeam,
+    final String? iosLanguage,
+    required final String flutterRoot,
+    required final String dartSdkVersionBounds,
+    final String? agpVersion,
+    final String? kotlinVersion,
+    final String? gradleVersion,
+    final bool withPlatformChannelPluginHook = false,
+    final bool withFfiPluginHook = false,
+    final bool withEmptyMain = false,
+    final bool ios = false,
+    final bool android = false,
+    final bool web = false,
+    final bool linux = false,
+    final bool macos = false,
+    final bool windows = false,
+    final bool implementationTests = false,
   }) {
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
@@ -435,11 +435,11 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderTemplate(
-    String templateName,
-    Directory directory,
-    Map<String, Object?> context, {
-    bool overwrite = false,
-    bool printStatusWhenWriting = true,
+    final String templateName,
+    final Directory directory,
+    final Map<String, Object?> context, {
+    final bool overwrite = false,
+    final bool printStatusWhenWriting = true,
   }) async {
     final Template template = await Template.fromName(
       templateName,
@@ -463,11 +463,11 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> renderMerged(
-    List<String> names,
-    Directory directory,
-    Map<String, Object?> context, {
-    bool overwrite = false,
-    bool printStatusWhenWriting = true,
+    final List<String> names,
+    final Directory directory,
+    final Map<String, Object?> context, {
+    final bool overwrite = false,
+    final bool printStatusWhenWriting = true,
   }) async {
     final Template template = await Template.merged(
       names,
@@ -490,14 +490,14 @@ abstract class CreateBase extends FlutterCommand {
   /// If `overwrite` is true, overwrites existing files, `overwrite` defaults to `false`.
   @protected
   Future<int> generateApp(
-    List<String> templateNames,
-    Directory directory,
-    Map<String, Object?> templateContext, {
-    bool overwrite = false,
-    bool pluginExampleApp = false,
-    bool printStatusWhenWriting = true,
-    bool generateMetadata = true,
-    FlutterProjectType? projectType,
+    final List<String> templateNames,
+    final Directory directory,
+    final Map<String, Object?> templateContext, {
+    final bool overwrite = false,
+    final bool pluginExampleApp = false,
+    final bool printStatusWhenWriting = true,
+    final bool generateMetadata = true,
+    final FlutterProjectType? projectType,
   }) async {
     int generatedCount = 0;
     generatedCount += await renderMerged(
@@ -593,7 +593,7 @@ abstract class CreateBase extends FlutterCommand {
   ///
   /// Android application ID is specified in: https://developer.android.com/studio/build/application-id
   /// All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
-  static String createAndroidIdentifier(String organization, String name) {
+  static String createAndroidIdentifier(final String organization, final String name) {
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^\w\.]');
     tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
@@ -601,7 +601,7 @@ abstract class CreateBase extends FlutterCommand {
     // It must have at least two segments (one or more dots).
     final List<String> segments = tmpIdentifier
         .split('.')
-        .where((String segment) => segment.isNotEmpty)
+        .where((final String segment) => segment.isNotEmpty)
         .toList();
     while (segments.length < 2) {
       segments.add('untitled');
@@ -609,7 +609,7 @@ abstract class CreateBase extends FlutterCommand {
 
     // Each segment must start with a letter.
     final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
-    final List<String> prefixedSegments = segments.map((String segment) {
+    final List<String> prefixedSegments = segments.map((final String segment) {
       if (!segmentPatternRegex.hasMatch(segment)) {
         return 'u$segment';
       }
@@ -621,17 +621,17 @@ abstract class CreateBase extends FlutterCommand {
   /// Creates a Windows package name.
   ///
   /// Package names must be a globally unique, commonly a GUID.
-  static String createWindowsIdentifier(String organization, String name) {
+  static String createWindowsIdentifier(final String organization, final String name) {
     return const Uuid().v4().toUpperCase();
   }
 
-  String _createPluginClassName(String name) {
+  String _createPluginClassName(final String name) {
     final String camelizedName = camelCase(name);
     return camelizedName[0].toUpperCase() + camelizedName.substring(1);
   }
 
   /// Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  static String createUTIIdentifier(String organization, String name) {
+  static String createUTIIdentifier(final String organization, String name) {
     name = camelCase(name);
     String tmpIdentifier = '$organization.$name';
     final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
@@ -640,7 +640,7 @@ abstract class CreateBase extends FlutterCommand {
     // It must have at least two segments (one or more dots).
     final List<String> segments = tmpIdentifier
         .split('.')
-        .where((String segment) => segment.isNotEmpty)
+        .where((final String segment) => segment.isNotEmpty)
         .toList();
     while (segments.length < 2) {
       segments.add('untitled');
@@ -666,17 +666,17 @@ abstract class CreateBase extends FlutterCommand {
     ) as Map<String, Object?>;
     return Set<Uri>.from(
       (manifest['files']! as List<Object?>).cast<String>().map<Uri>(
-          (String path) =>
+          (final String path) =>
               Uri.file(globals.fs.path.join(flutterToolsAbsolutePath, path))),
     );
   }
 
-  int _injectGradleWrapper(FlutterProject project) {
+  int _injectGradleWrapper(final FlutterProject project) {
     int filesCreated = 0;
     copyDirectory(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
-      onFileCopied: (File sourceFile, File destinationFile) {
+      onFileCopied: (final File sourceFile, final File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
         if (modes.contains('x')) {
@@ -776,7 +776,7 @@ const Set<String> _packageDependencies = <String>{
 
 /// Whether [name] is a valid Pub package.
 @visibleForTesting
-bool isValidPackageName(String name) {
+bool isValidPackageName(final String name) {
   final Match? match = _identifierRegExp.matchAsPrefix(name);
   return match != null &&
       match.end == name.length &&
@@ -785,7 +785,7 @@ bool isValidPackageName(String name) {
 
 // Return null if the project name is legal. Return a validation message if
 // we should disallow the project name.
-String? _validateProjectName(String projectName) {
+String? _validateProjectName(final String projectName) {
   if (!isValidPackageName(projectName)) {
     return '"$projectName" is not a valid Dart package name.\n\n'
         'See https://dart.dev/tools/pub/pubspec#name for more information.';

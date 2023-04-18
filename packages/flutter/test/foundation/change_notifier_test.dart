@@ -36,7 +36,7 @@ class B extends A with ChangeNotifier {
 class Counter with ChangeNotifier {
   int get value => _value;
   int _value = 0;
-  set value(int value) {
+  set value(final int value) {
     if (_value != value) {
       _value = value;
       notifyListeners();
@@ -49,7 +49,7 @@ class Counter with ChangeNotifier {
 }
 
 void main() {
-  testWidgets('ChangeNotifier can not dispose in callback', (WidgetTester tester) async {
+  testWidgets('ChangeNotifier can not dispose in callback', (final WidgetTester tester) async {
     final TestNotifier test = TestNotifier();
     bool callbackDidFinish = false;
     void foo() {
@@ -65,7 +65,7 @@ void main() {
     expect(callbackDidFinish, isFalse);
   });
 
-  testWidgets('ChangeNotifier', (WidgetTester tester) async {
+  testWidgets('ChangeNotifier', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     void listener() {
       log.add('listener');
@@ -591,7 +591,7 @@ void main() {
       11,
     ];
     final List<String> expectedLog =
-        remainingListenerIndexes.map((int i) => 'listener$i').toList();
+        remainingListenerIndexes.map((final int i) => 'listener$i').toList();
 
     test.notify();
     expect(log, expectedLog);

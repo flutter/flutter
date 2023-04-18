@@ -11,11 +11,11 @@ import 'customer_test.dart';
 
 Future<bool> runTests({
   int repeat = 1,
-  bool skipOnFetchFailure = false,
-  bool verbose = false,
-  int numberShards = 1,
-  int shardIndex = 0,
-  required List<File> files,
+  final bool skipOnFetchFailure = false,
+  final bool verbose = false,
+  final int numberShards = 1,
+  final int shardIndex = 0,
+  required final List<File> files,
 }) async {
   if (verbose) {
     print('Starting run_tests.dart...');
@@ -64,7 +64,7 @@ Future<bool> runTests({
       }
     }
 
-    void failure(String message) {
+    void failure(final String message) {
       printHeader();
       print('ERROR: $message');
       failures += 1;
@@ -189,7 +189,7 @@ Future<bool> runTests({
 
 final RegExp _spaces = RegExp(r' +');
 
-Future<bool> shell(String command, Directory directory, { bool verbose = false, bool silentFailure = false, void Function()? failedCallback }) async {
+Future<bool> shell(final String command, final Directory directory, { final bool verbose = false, final bool silentFailure = false, final void Function()? failedCallback }) async {
   if (verbose) {
     print('>> $command');
   }
@@ -217,6 +217,6 @@ Future<bool> shell(String command, Directory directory, { bool verbose = false, 
   return success;
 }
 
-void printLog(String line) {
+void printLog(final String line) {
   print('| $line'.trimRight());
 }

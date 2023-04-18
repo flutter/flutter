@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent', (WidgetTester tester) async {
+  testWidgets('markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(

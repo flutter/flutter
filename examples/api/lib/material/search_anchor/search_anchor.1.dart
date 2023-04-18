@@ -19,7 +19,7 @@ class PinnedSearchBarApp extends StatefulWidget {
 
 class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
       home: Scaffold(
@@ -34,10 +34,10 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                 backgroundColor: Colors.transparent,
                 floating: true, // We can also uncomment this line and set `pinned` to true to see a pinned search bar.
                 title: SearchAnchor.bar(
-                  suggestionsBuilder: (BuildContext context, SearchController controller) {
+                  suggestionsBuilder: (final BuildContext context, final SearchController controller) {
                     return List<Widget>.generate(
                       5,
-                      (int index) {
+                      (final int index) {
                         return ListTile(
                           titleAlignment: ListTileTitleAlignment.center,
                           title: Text('Initial list item $index'),
@@ -57,7 +57,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: 10,
-                      itemBuilder: (BuildContext context, int index) {
+                      itemBuilder: (final BuildContext context, final int index) {
                         return SizedBox(
                           width: 100.0,
                           child: Card(

@@ -10,14 +10,14 @@ class TestTransition extends AnimatedWidget {
     super.key,
     required this.childFirstHalf,
     required this.childSecondHalf,
-    required Animation<double> animation,
+    required final Animation<double> animation,
   }) : super(listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
     if (animation.value >= 0.5) {
       return childSecondHalf;
@@ -29,7 +29,7 @@ class TestTransition extends AnimatedWidget {
 class TestRoute<T> extends PageRoute<T> {
   TestRoute({
     required this.child,
-    required RouteSettings settings,
+    required final RouteSettings settings,
     this.barrierColor,
   }) : super(settings: settings);
 
@@ -48,7 +48,7 @@ class TestRoute<T> extends PageRoute<T> {
   bool get maintainState => false;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
     return child;
   }
 }
@@ -57,11 +57,11 @@ void main() {
   const Duration kTwoTenthsOfTheTransitionDuration = Duration(milliseconds: 30);
   const Duration kFourTenthsOfTheTransitionDuration = Duration(milliseconds: 60);
 
-  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+  testWidgets('Check onstage/offstage handling around transitions', (final WidgetTester tester) async {
 
     final GlobalKey insideKey = GlobalKey();
 
-    String state({ bool skipOffstage = true }) {
+    String state({ final bool skipOffstage = true }) {
       String result = '';
       if (tester.any(find.text('A', skipOffstage: skipOffstage))) {
         result += 'A';
@@ -89,14 +89,14 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        onGenerateRoute: (RouteSettings settings) {
+        onGenerateRoute: (final RouteSettings settings) {
           switch (settings.name) {
             case '/':
               return TestRoute<void>(
                 settings: settings,
                 child: Builder(
                   key: insideKey,
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     final PageRoute<void> route = ModalRoute.of(context)! as PageRoute<void>;
                     return Column(
                       children: <Widget>[
@@ -196,10 +196,10 @@ void main() {
 
   });
 
-  testWidgets('Check onstage/offstage handling of barriers around transitions', (WidgetTester tester) async {
+  testWidgets('Check onstage/offstage handling of barriers around transitions', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        onGenerateRoute: (RouteSettings settings) {
+        onGenerateRoute: (final RouteSettings settings) {
           switch (settings.name) {
             case '/': return TestRoute<void>(settings: settings, child: const Text('A'));
             case '/1': return TestRoute<void>(settings: settings, barrierColor: const Color(0xFFFFFF00), child: const Text('B'));

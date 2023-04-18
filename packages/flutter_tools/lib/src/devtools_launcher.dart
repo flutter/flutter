@@ -20,10 +20,10 @@ import 'resident_runner.dart';
 /// start a server instance.
 class DevtoolsServerLauncher extends DevtoolsLauncher {
   DevtoolsServerLauncher({
-    required ProcessManager processManager,
-    required String dartExecutable,
-    required Logger logger,
-    required BotDetector botDetector,
+    required final ProcessManager processManager,
+    required final String dartExecutable,
+    required final Logger logger,
+    required final BotDetector botDetector,
   })  : _processManager = processManager,
         _dartExecutable = dartExecutable,
         _logger = logger,
@@ -47,7 +47,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
   Future<void> get processStart => _processStartCompleter.future;
 
   @override
-  Future<void> launch(Uri? vmServiceUri, {List<String>? additionalArguments}) async {
+  Future<void> launch(final Uri? vmServiceUri, {final List<String>? additionalArguments}) async {
     // Place this entire method in a try/catch that swallows exceptions because
     // this method is guaranteed not to return a Future that throws.
     try {
@@ -63,7 +63,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
       _devToolsProcess!.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
             final Match? match = _serveDevToolsPattern.firstMatch(line);
             if (match != null) {
               final String url = match[1]!;
@@ -77,7 +77,7 @@ class DevtoolsServerLauncher extends DevtoolsLauncher {
 
       final bool runningOnBot = await _botDetector.isRunningOnBot;
       devToolsProcessExit = _devToolsProcess!.exitCode.then(
-        (int exitCode) {
+        (final int exitCode) {
           if (!_devToolsProcessKilled && runningOnBot) {
             throwToolExit('DevTools process failed: exitCode=$exitCode');
           }

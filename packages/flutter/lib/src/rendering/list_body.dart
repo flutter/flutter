@@ -30,14 +30,14 @@ class RenderListBody extends RenderBox
   ///
   /// By default, children are arranged along the vertical axis.
   RenderListBody({
-    List<RenderBox>? children,
-    AxisDirection axisDirection = AxisDirection.down,
+    final List<RenderBox>? children,
+    final AxisDirection axisDirection = AxisDirection.down,
   }) : _axisDirection = axisDirection {
     addAll(children);
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! ListBodyParentData) {
       child.parentData = ListBodyParentData();
     }
@@ -49,7 +49,7 @@ class RenderListBody extends RenderBox
   /// will be laid out below the next, vertically.
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
-  set axisDirection(AxisDirection value) {
+  set axisDirection(final AxisDirection value) {
     if (_axisDirection == value) {
       return;
     }
@@ -62,7 +62,7 @@ class RenderListBody extends RenderBox
   Axis get mainAxis => axisDirectionToAxis(axisDirection);
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     assert(_debugCheckConstraints(constraints));
     double mainAxisExtent = 0.0;
     RenderBox? child = firstChild;
@@ -88,7 +88,7 @@ class RenderListBody extends RenderBox
     }
   }
 
-  bool _debugCheckConstraints(BoxConstraints constraints) {
+  bool _debugCheckConstraints(final BoxConstraints constraints) {
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
@@ -220,12 +220,12 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
   }
 
-  double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {
+  double _getIntrinsicCrossAxis(final _ChildSizingFunction childSize) {
     double extent = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
@@ -236,7 +236,7 @@ class RenderListBody extends RenderBox
     return extent;
   }
 
-  double _getIntrinsicMainAxis(_ChildSizingFunction childSize) {
+  double _getIntrinsicMainAxis(final _ChildSizingFunction childSize) {
     double extent = 0.0;
     RenderBox? child = firstChild;
     while (child != null) {
@@ -248,57 +248,57 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     switch (mainAxis) {
       case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
+        return _getIntrinsicMainAxis((final RenderBox child) => child.getMinIntrinsicWidth(height));
       case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicWidth(height));
+        return _getIntrinsicCrossAxis((final RenderBox child) => child.getMinIntrinsicWidth(height));
     }
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     switch (mainAxis) {
       case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
+        return _getIntrinsicMainAxis((final RenderBox child) => child.getMaxIntrinsicWidth(height));
       case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicWidth(height));
+        return _getIntrinsicCrossAxis((final RenderBox child) => child.getMaxIntrinsicWidth(height));
     }
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     switch (mainAxis) {
       case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
+        return _getIntrinsicMainAxis((final RenderBox child) => child.getMinIntrinsicHeight(width));
       case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMinIntrinsicHeight(width));
+        return _getIntrinsicCrossAxis((final RenderBox child) => child.getMinIntrinsicHeight(width));
     }
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     switch (mainAxis) {
       case Axis.horizontal:
-        return _getIntrinsicMainAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));
+        return _getIntrinsicMainAxis((final RenderBox child) => child.getMaxIntrinsicHeight(width));
       case Axis.vertical:
-        return _getIntrinsicCrossAxis((RenderBox child) => child.getMaxIntrinsicHeight(width));
+        return _getIntrinsicCrossAxis((final RenderBox child) => child.getMaxIntrinsicHeight(width));
     }
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(final TextBaseline baseline) {
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     defaultPaint(context, offset);
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 

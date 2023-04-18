@@ -8,8 +8,8 @@ import 'package:flutter_api_samples/material/menu_anchor/menu_accelerator_label.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can open menu', (WidgetTester tester) async {
-    Finder findMenu(String label) {
+  testWidgets('Can open menu', (final WidgetTester tester) async {
+    Finder findMenu(final String label) {
       return find
           .ancestor(
             of: find.text(label, findRichText: true),

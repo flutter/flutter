@@ -12,7 +12,7 @@ class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-  void noSuchMethod(Invocation invocation) {
+  void noSuchMethod(final Invocation invocation) {
     invocations.add(invocation);
   }
 }
@@ -40,7 +40,7 @@ void main() {
       alignment: Alignment.centerLeft,
     );
 
-    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation command = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #drawImageRect;
     });
 
@@ -52,11 +52,11 @@ void main() {
 
   test('debugInvertOversizedImages', () async {
     debugInvertOversizedImages = true;
-    expect(PaintingBinding.instance.platformDispatcher.views.any((ui. FlutterView view) => view.devicePixelRatio > 1.0), isTrue);
+    expect(PaintingBinding.instance.platformDispatcher.views.any((final ui. FlutterView view) => view.devicePixelRatio > 1.0), isTrue);
     final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
     final List<String> messages = <String>[];
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       messages.add(details.exceptionAsString());
     };
 
@@ -72,7 +72,7 @@ void main() {
     );
 
     final List<Invocation> commands = canvas.invocations
-      .skipWhile((Invocation invocation) => invocation.memberName != #saveLayer)
+      .skipWhile((final Invocation invocation) => invocation.memberName != #saveLayer)
       .take(4)
       .toList();
 
@@ -115,7 +115,7 @@ void main() {
     final FlutterExceptionHandler? oldFlutterError = FlutterError.onError;
 
     final List<String> messages = <String>[];
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       messages.add(details.exceptionAsString());
     };
 
@@ -150,7 +150,7 @@ void main() {
       centerSlice: const Rect.fromLTRB(50, 40, 250, 260),
     );
 
-    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation command = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #drawImageNine;
     });
 
@@ -160,10 +160,10 @@ void main() {
     expect(command.positionalArguments[2], equals(const Rect.fromLTRB(20.0, 40.0, 860.0, 840.0)));
   });
 
-  testWidgets('Reports Image painting', (WidgetTester tester) async {
+  testWidgets('Reports Image painting', (final WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
-    debugOnPaintImage = (ImageSizeInfo info) {
+    debugOnPaintImage = (final ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
@@ -199,10 +199,10 @@ void main() {
     debugOnPaintImage = null;
   });
 
-  testWidgets('Reports Image painting - change per frame', (WidgetTester tester) async {
+  testWidgets('Reports Image painting - change per frame', (final WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
-    debugOnPaintImage = (ImageSizeInfo info) {
+    debugOnPaintImage = (final ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };
@@ -242,10 +242,10 @@ void main() {
     debugOnPaintImage = null;
   });
 
-  testWidgets('Reports Image painting - no debug label', (WidgetTester tester) async {
+  testWidgets('Reports Image painting - no debug label', (final WidgetTester tester) async {
     late ImageSizeInfo imageSizeInfo;
     int count = 0;
-    debugOnPaintImage = (ImageSizeInfo info) {
+    debugOnPaintImage = (final ImageSizeInfo info) {
       count += 1;
       imageSizeInfo = info;
     };

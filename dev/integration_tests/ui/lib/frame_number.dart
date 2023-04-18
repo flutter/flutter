@@ -14,7 +14,7 @@ void main() {
   enableFlutterDriverExtension();
 
   final Completer<List<FrameTiming>> completer = Completer<List<FrameTiming>>();
-  SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+  SchedulerBinding.instance.addTimingsCallback((final List<FrameTiming> timings) {
     completer.complete(timings);
   });
 
@@ -39,7 +39,7 @@ class _FirstFrameTimingsState extends State<_FirstFrameTimings> {
   int? _minFrameNumber;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     widget.completer.future.then(_setMinFrameNumber);
     if (_minFrameNumber != null) {
       return Text(
@@ -51,9 +51,9 @@ class _FirstFrameTimingsState extends State<_FirstFrameTimings> {
     }
   }
 
-  void _setMinFrameNumber(List<FrameTiming> timings) {
+  void _setMinFrameNumber(final List<FrameTiming> timings) {
     final int minFrameNumber = timings
-      .map((FrameTiming timing) => timing.frameNumber)
+      .map((final FrameTiming timing) => timing.frameNumber)
       .reduce(min);
     setState(() {
       _minFrameNumber = minFrameNumber;

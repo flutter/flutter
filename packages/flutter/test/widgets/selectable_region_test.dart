@@ -13,13 +13,13 @@ import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 import 'semantics_tester.dart';
 
-Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
+Offset textOffsetToPosition(final RenderParagraph paragraph, final int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
   return paragraph.localToGlobal(localOffset);
 }
 
-Offset globalize(Offset point, RenderBox box) {
+Offset globalize(final Offset point, final RenderBox box) {
   return box.localToGlobal(point);
 }
 
@@ -37,7 +37,7 @@ void main() {
   });
 
   group('SelectableRegion', () {
-    testWidgets('mouse selection sends correct events', (WidgetTester tester) async {
+    testWidgets('mouse selection sends correct events', (final WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -74,7 +74,7 @@ void main() {
       await gesture.up();
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
-    testWidgets('Does not crash when using Navigator pages', (WidgetTester tester) async {
+    testWidgets('Does not crash when using Navigator pages', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/119776
       await tester.pumpWidget(
         MaterialApp(
@@ -97,7 +97,7 @@ void main() {
                 child: Scaffold(body: Text('Foreground Page')),
               ),
             ],
-            onPopPage: (_, __) => false,
+            onPopPage: (final _, final __) => false,
           ),
         ),
       );
@@ -105,7 +105,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('can draw handles when they are at rect boundaries', (WidgetTester tester) async {
+    testWidgets('can draw handles when they are at rect boundaries', (final WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -135,7 +135,7 @@ void main() {
       expect(renderSpy.endHandle, isNotNull);
     });
 
-    testWidgets('touch does not accept drag', (WidgetTester tester) async {
+    testWidgets('touch does not accept drag', (final WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -153,12 +153,12 @@ void main() {
       await gesture.moveTo(const Offset(200.0, 100.0));
       await gesture.up();
       expect(
-        renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
+        renderSelectionSpy.events.every((final SelectionEvent element) => element is ClearSelectionEvent),
         isTrue
       );
     });
 
-    testWidgets('does not merge semantics node of the children', (WidgetTester tester) async {
+    testWidgets('does not merge semantics node of the children', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(
         MaterialApp(
@@ -233,7 +233,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('mouse selection always cancels previous selection', (WidgetTester tester) async {
+    testWidgets('mouse selection always cancels previous selection', (final WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -253,7 +253,7 @@ void main() {
       expect(renderSelectionSpy.events[0], isA<ClearSelectionEvent>());
     }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/102410.
 
-    testWidgets('touch long press sends select-word event', (WidgetTester tester) async {
+    testWidgets('touch long press sends select-word event', (final WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -278,7 +278,7 @@ void main() {
       expect(selectionEvent.globalPosition, const Offset(200.0, 200.0));
     });
 
-    testWidgets('touch long press and drag sends correct events', (WidgetTester tester) async {
+    testWidgets('touch long press and drag sends correct events', (final WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -310,7 +310,7 @@ void main() {
       expect(edgeEvent.globalPosition, const Offset(200.0, 50.0));
     });
 
-    testWidgets('mouse long press does not send select-word event', (WidgetTester tester) async {
+    testWidgets('mouse long press does not send select-word event', (final WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -330,15 +330,15 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
       await gesture.up();
       expect(
-        renderSelectionSpy.events.every((SelectionEvent element) => element is ClearSelectionEvent),
+        renderSelectionSpy.events.every((final SelectionEvent element) => element is ClearSelectionEvent),
         isTrue,
       );
     });
   });
 
-  testWidgets('dragging handle or selecting word triggers haptic feedback on Android', (WidgetTester tester) async {
+  testWidgets('dragging handle or selecting word triggers haptic feedback on Android', (final WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       log.add(methodCall);
       return null;
     });
@@ -397,7 +397,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   group('SelectionArea integration', () {
-    testWidgets('mouse can select single text', (WidgetTester tester) async {
+    testWidgets('mouse can select single text', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -440,7 +440,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
+    testWidgets('mouse can select multiple widgets', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -480,7 +480,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('mouse can work with disabled container', (WidgetTester tester) async {
+    testWidgets('mouse can work with disabled container', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -521,7 +521,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('mouse can reverse selection', (WidgetTester tester) async {
+    testWidgets('mouse can reverse selection', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -560,7 +560,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can copy a selection made with the mouse', (WidgetTester tester) async {
+    testWidgets('can copy a selection made with the mouse', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -595,7 +595,7 @@ void main() {
 
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - non apple',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(text: 'I am fine, thank you.');
         final FocusNode selectableRegionFocus = FocusNode();
         final FocusNode textFieldFocus = FocusNode();
@@ -648,7 +648,7 @@ void main() {
 
     testWidgets(
       'does not override TextField keyboard shortcuts if the TextField is focused - apple',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(text: 'I am fine, thank you.');
         final FocusNode selectableRegionFocus = FocusNode();
         final FocusNode textFieldFocus = FocusNode();
@@ -699,7 +699,7 @@ void main() {
       skip: kIsWeb, // [intended] the web handles this on its own.
     );
 
-    testWidgets('select all', (WidgetTester tester) async {
+    testWidgets('select all', (final WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
@@ -731,7 +731,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
     testWidgets(
-      'mouse selection can handle widget span', (WidgetTester tester) async {
+      'mouse selection can handle widget span', (final WidgetTester tester) async {
       final UniqueKey outerText = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -771,7 +771,7 @@ void main() {
 
     testWidgets(
       'widget span is ignored if it does not contain text - non Apple',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final UniqueKey outerText = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
@@ -811,7 +811,7 @@ void main() {
 
     testWidgets(
       'widget span is ignored if it does not contain text - Apple',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         final UniqueKey outerText = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
@@ -849,7 +849,7 @@ void main() {
       skip: isBrowser, // https://github.com/flutter/flutter/issues/61020
     );
 
-    testWidgets('mouse can select across bidi text', (WidgetTester tester) async {
+    testWidgets('mouse can select across bidi text', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -890,7 +890,7 @@ void main() {
       await gesture.up();
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61020
 
-    testWidgets('long press and drag touch selection', (WidgetTester tester) async {
+    testWidgets('long press and drag touch selection', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -921,7 +921,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can drag end handle when not covering entire screen', (WidgetTester tester) async {
+    testWidgets('can drag end handle when not covering entire screen', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/104620.
       await tester.pumpWidget(
         MaterialApp(
@@ -958,7 +958,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can drag start handle when not covering entire screen', (WidgetTester tester) async {
+    testWidgets('can drag start handle when not covering entire screen', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/104620.
       await tester.pumpWidget(
         MaterialApp(
@@ -994,7 +994,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can drag start selection handle', (WidgetTester tester) async {
+    testWidgets('can drag start selection handle', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1036,7 +1036,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can drag start selection handle across end selection handle', (WidgetTester tester) async {
+    testWidgets('can drag start selection handle across end selection handle', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1073,7 +1073,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can drag end selection handle across start selection handle', (WidgetTester tester) async {
+    testWidgets('can drag end selection handle across start selection handle', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1110,7 +1110,7 @@ void main() {
       await gesture.up();
     });
 
-    testWidgets('can select all from toolbar', (WidgetTester tester) async {
+    testWidgets('can select all from toolbar', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1146,7 +1146,7 @@ void main() {
       expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
-    testWidgets('can copy from toolbar', (WidgetTester tester) async {
+    testWidgets('can copy from toolbar', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1186,7 +1186,7 @@ void main() {
       expect(clipboardData['text'], 'thank');
     }, skip: kIsWeb); // [intended] Web uses its native context menu.
 
-    testWidgets('can use keyboard to granularly extend selection - character', (WidgetTester tester) async {
+    testWidgets('can use keyboard to granularly extend selection - character', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1246,7 +1246,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('can use keyboard to granularly extend selection - word', (WidgetTester tester) async {
+    testWidgets('can use keyboard to granularly extend selection - word', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1354,7 +1354,7 @@ void main() {
       expect(paragraph2.selections.length, 0);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('can use keyboard to granularly extend selection - line', (WidgetTester tester) async {
+    testWidgets('can use keyboard to granularly extend selection - line', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1443,7 +1443,7 @@ void main() {
       expect(paragraph1.selections[0].end, 2);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('can use keyboard to granularly extend selection - document', (WidgetTester tester) async {
+    testWidgets('can use keyboard to granularly extend selection - document', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1519,7 +1519,7 @@ void main() {
       expect(paragraph3.selections.length, 0);
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('can use keyboard to directionally extend selection', (WidgetTester tester) async {
+    testWidgets('can use keyboard to directionally extend selection', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
@@ -1617,16 +1617,16 @@ void main() {
       final Widget fakeMagnifier = Container(key: UniqueKey());
 
       testWidgets('Can drag handles to show, unshow, and update magnifier',
-          (WidgetTester tester) async {
+          (final WidgetTester tester) async {
         const String text = 'Monkeys and rabbits in my soup';
 
         await tester.pumpWidget(
           MaterialApp(
             home: SelectableRegion(
               magnifierConfiguration: TextMagnifierConfiguration(
-                magnifierBuilder: (_,
-                    MagnifierController controller,
-                    ValueNotifier<MagnifierInfo>
+                magnifierBuilder: (final _,
+                    final MagnifierController controller,
+                    final ValueNotifier<MagnifierInfo>
                         localMagnifierInfo) {
                   magnifierInfo = localMagnifierInfo;
                   return fakeMagnifier;
@@ -1682,7 +1682,7 @@ void main() {
     });
   });
 
-  testWidgets('toolbar is hidden on mobile when orientation changes', (WidgetTester tester) async {
+  testWidgets('toolbar is hidden on mobile when orientation changes', (final WidgetTester tester) async {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
@@ -1724,7 +1724,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
   );
 
-  testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (WidgetTester tester) async {
+  testWidgets('the selection behavior when clicking `Copy` item in mobile platforms', (final WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -1732,8 +1732,8 @@ void main() {
           focusNode: FocusNode(),
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
-            BuildContext context,
-            SelectableRegionState selectableRegionState,
+            final BuildContext context,
+            final SelectableRegionState selectableRegionState,
           ) {
             buttonItems = selectableRegionState.contextMenuButtonItems;
             return const SizedBox.shrink();
@@ -1778,7 +1778,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (WidgetTester tester) async {
+  testWidgets('the handles do not disappear when clicking `Select all` item in mobile platforms', (final WidgetTester tester) async {
     List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
     await tester.pumpWidget(
       MaterialApp(
@@ -1786,8 +1786,8 @@ void main() {
           focusNode: FocusNode(),
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
-            BuildContext context,
-            SelectableRegionState selectableRegionState,
+            final BuildContext context,
+            final SelectableRegionState selectableRegionState,
           ) {
             buttonItems = selectableRegionState.contextMenuButtonItems;
             return const SizedBox.shrink();
@@ -1831,7 +1831,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android, TargetPlatform.fuchsia }),
   );
 
-  testWidgets('builds the correct button items', (WidgetTester tester) async {
+  testWidgets('builds the correct button items', (final WidgetTester tester) async {
     Set<ContextMenuButtonType> buttonTypes = <ContextMenuButtonType>{};
     await tester.pumpWidget(
       MaterialApp(
@@ -1839,11 +1839,11 @@ void main() {
           focusNode: FocusNode(),
           selectionControls: materialTextSelectionHandleControls,
           contextMenuBuilder: (
-            BuildContext context,
-            SelectableRegionState selectableRegionState,
+            final BuildContext context,
+            final SelectableRegionState selectableRegionState,
           ) {
             buttonTypes = selectableRegionState.contextMenuButtonItems
-              .map((ContextMenuButtonItem buttonItem) => buttonItem.type)
+              .map((final ContextMenuButtonItem buttonItem) => buttonItem.type)
               .toSet();
             return const SizedBox.shrink();
           },
@@ -1870,13 +1870,13 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+  testWidgets('onSelectionChange is called when the selection changes', (final WidgetTester tester) async {
     SelectedContent? content;
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableRegion(
-          onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+          onSelectionChanged: (final SelectedContent? selectedContent) => content = selectedContent,
           focusNode: FocusNode(),
           selectionControls: materialTextSelectionControls,
           child: const Center(
@@ -1909,7 +1909,7 @@ void main() {
 
   group('BrowserContextMenu', () {
     setUp(() async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall call) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (final MethodCall call) {
         // Just complete successfully, so that BrowserContextMenu thinks that
         // the engine successfully received its call.
         return Future<void>.value();
@@ -1922,11 +1922,11 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
     });
 
-    testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
+    testWidgets('web can show flutter context menu when the browser context menu is disabled', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: SelectableRegion(
-            onSelectionChanged: (SelectedContent? selectedContent) {},
+            onSelectionChanged: (final SelectedContent? selectedContent) {},
             focusNode: FocusNode(),
             selectionControls: materialTextSelectionControls,
             child: const Center(
@@ -1960,20 +1960,20 @@ class SelectionSpy extends LeafRenderObjectWidget {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return RenderSelectionSpy(
       SelectionContainer.maybeOf(context),
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+  void updateRenderObject(final BuildContext context, covariant final RenderObject renderObject) { }
 }
 
 class RenderSelectionSpy extends RenderProxyBox
     with Selectable, SelectionRegistrant {
   RenderSelectionSpy(
-      SelectionRegistrar? registrar,
+      final SelectionRegistrar? registrar,
       ) {
     this.registrar = registrar;
   }
@@ -1986,19 +1986,19 @@ class RenderSelectionSpy extends RenderProxyBox
   Size _size = Size.zero;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     _size = Size(constraints.maxWidth, constraints.maxHeight);
     return _size;
   }
 
   @override
-  void addListener(VoidCallback listener) => listeners.add(listener);
+  void addListener(final VoidCallback listener) => listeners.add(listener);
 
   @override
-  void removeListener(VoidCallback listener) => listeners.remove(listener);
+  void removeListener(final VoidCallback listener) => listeners.remove(listener);
 
   @override
-  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+  SelectionResult dispatchSelectionEvent(final SelectionEvent event) {
     events.add(event);
     return SelectionResult.end;
   }
@@ -2024,7 +2024,7 @@ class RenderSelectionSpy extends RenderProxyBox
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
+  set value(final SelectionGeometry other) {
     if (other == _value) {
       return;
     }
@@ -2035,7 +2035,7 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
+  void pushHandleLayers(final LayerLink? startHandle, final LayerLink? endHandle) { }
 }
 
 class SelectAllWidget extends SingleChildRenderObjectWidget {
@@ -2045,20 +2045,20 @@ class SelectAllWidget extends SingleChildRenderObjectWidget {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return RenderSelectAll(
       SelectionContainer.maybeOf(context),
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+  void updateRenderObject(final BuildContext context, covariant final RenderObject renderObject) { }
 }
 
 class RenderSelectAll extends RenderProxyBox
     with Selectable, SelectionRegistrant {
   RenderSelectAll(
-    SelectionRegistrar? registrar,
+    final SelectionRegistrar? registrar,
   ) {
     this.registrar = registrar;
   }
@@ -2068,13 +2068,13 @@ class RenderSelectAll extends RenderProxyBox
   LayerLink? endHandle;
 
   @override
-  void addListener(VoidCallback listener) => listeners.add(listener);
+  void addListener(final VoidCallback listener) => listeners.add(listener);
 
   @override
-  void removeListener(VoidCallback listener) => listeners.remove(listener);
+  void removeListener(final VoidCallback listener) => listeners.remove(listener);
 
   @override
-  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+  SelectionResult dispatchSelectionEvent(final SelectionEvent event) {
     value = SelectionGeometry(
       hasContent: true,
       status: SelectionStatus.uncollapsed,
@@ -2113,7 +2113,7 @@ class RenderSelectAll extends RenderProxyBox
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
+  set value(final SelectionGeometry other) {
     if (other == _value) {
       return;
     }
@@ -2124,7 +2124,7 @@ class RenderSelectAll extends RenderProxyBox
   }
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
+  void pushHandleLayers(final LayerLink? startHandle, final LayerLink? endHandle) {
     this.startHandle = startHandle;
     this.endHandle = endHandle;
   }

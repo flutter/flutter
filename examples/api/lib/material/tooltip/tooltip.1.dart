@@ -12,7 +12,7 @@ class TooltipExampleApp extends StatelessWidget {
   const TooltipExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Tooltip Sample')),
@@ -28,7 +28,7 @@ class TooltipSample extends StatelessWidget {
   const TooltipSample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Tooltip(
       message: 'I am a Tooltip',
       decoration: BoxDecoration(

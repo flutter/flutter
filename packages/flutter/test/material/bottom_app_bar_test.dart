@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('shadow effect is not doubled', (WidgetTester tester) async {
+  testWidgets('shadow effect is not doubled', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123064
     debugDisableShadows = false;
 
@@ -40,7 +40,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('only one layer with `color` is painted', (WidgetTester tester) async {
+  testWidgets('only one layer with `color` is painted', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/122667
     const Color bottomAppBarColor = Colors.black45;
 
@@ -61,7 +61,7 @@ void main() {
     // There should be just one color layer, and with the specified color.
     final Finder finder = find.descendant(
       of: find.byType(BottomAppBar),
-      matching: find.byWidgetPredicate((Widget widget) {
+      matching: find.byWidgetPredicate((final Widget widget) {
         // A color layer is probably a [PhysicalShape] or [PhysicalModel],
         // either used directly or backing a [Material] (one without
         // [MaterialType.transparency]).
@@ -79,7 +79,7 @@ void main() {
     }
   });
 
-  testWidgets('no overlap with floating action button', (WidgetTester tester) async {
+  testWidgets('no overlap with floating action button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -110,9 +110,9 @@ void main() {
     );
   });
 
-  testWidgets('custom shape', (WidgetTester tester) async {
+  testWidgets('custom shape', (final WidgetTester tester) async {
     final Key key = UniqueKey();
-    Future<void> pump(FloatingActionButtonLocation location) async {
+    Future<void> pump(final FloatingActionButtonLocation location) async {
       await tester.pumpWidget(
         SizedBox(
           width: 200,
@@ -153,13 +153,13 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/44572
 
-  testWidgets('Custom Padding', (WidgetTester tester) async {
+  testWidgets('Custom Padding', (final WidgetTester tester) async {
     const EdgeInsets customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light()),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return const Scaffold(
               body: Align(
                 alignment: Alignment.bottomCenter,
@@ -185,13 +185,13 @@ void main() {
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
 
-  testWidgets('Custom Padding in Material 3', (WidgetTester tester) async {
+  testWidgets('Custom Padding in Material 3', (final WidgetTester tester) async {
     const EdgeInsets customPadding = EdgeInsets.all(10);
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.light(), useMaterial3: true),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return const Scaffold(
               body: Align(
                 alignment: Alignment.bottomCenter,
@@ -217,11 +217,11 @@ void main() {
     expect(babRect, const Rect.fromLTRB(240, 520, 560, 600));
   });
 
-  testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
+  testWidgets('color defaults to Theme.bottomAppBarColor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Theme(
               data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
@@ -242,11 +242,11 @@ void main() {
     expect(physicalShape.color, const Color(0xffffff00));
   });
 
-  testWidgets('color overrides theme color', (WidgetTester tester) async {
+  testWidgets('color overrides theme color', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Theme(
               data: Theme.of(context).copyWith(bottomAppBarColor: const Color(0xffffff00)),
               child: const Scaffold(
@@ -272,13 +272,13 @@ void main() {
   });
 
 
-  testWidgets('color overrides theme color with Material 3', (WidgetTester tester) async {
+  testWidgets('color overrides theme color with Material 3', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true).copyWith(
           bottomAppBarColor: const Color(0xffffff00)),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return const Scaffold(
                 floatingActionButton: FloatingActionButton(
                   onPressed: null,
@@ -299,7 +299,7 @@ void main() {
     expect(physicalShape.color, const Color(0xff0000ff));
   });
 
-  testWidgets('Shadow color is transparent in Material 3', (WidgetTester tester) async {
+  testWidgets('Shadow color is transparent in Material 3', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(useMaterial3: true,
@@ -321,7 +321,7 @@ void main() {
     expect(physicalShape.shadowColor, Colors.transparent);
   });
 
-  testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
+  testWidgets('dark theme applies an elevation overlay color', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.from(colorScheme: const ColorScheme.dark()),
@@ -342,7 +342,7 @@ void main() {
   // This is a regression test for a bug we had where toggling the notch on/off
   // would crash, as the shouldReclip method of ShapeBorderClipper or
   // _BottomAppBarClipper would try an illegal downcast.
-  testWidgets('toggle shape to null', (WidgetTester tester) async {
+  testWidgets('toggle shape to null', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -372,7 +372,7 @@ void main() {
     );
   });
 
-  testWidgets('no notch when notch param is null', (WidgetTester tester) async {
+  testWidgets('no notch when notch param is null', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -402,7 +402,7 @@ void main() {
     );
   });
 
-  testWidgets('notch no margin', (WidgetTester tester) async {
+  testWidgets('notch no margin', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -454,7 +454,7 @@ void main() {
     );
   });
 
-  testWidgets('notch with margin', (WidgetTester tester) async {
+  testWidgets('notch with margin', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -506,7 +506,7 @@ void main() {
     );
   });
 
-  testWidgets('observes safe area', (WidgetTester tester) async {
+  testWidgets('observes safe area', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: MediaQuery(
@@ -530,7 +530,7 @@ void main() {
     );
   });
 
-  testWidgets('clipBehavior is propagated', (WidgetTester tester) async {
+  testWidgets('clipBehavior is propagated', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -564,7 +564,7 @@ void main() {
     expect(physicalShape.clipBehavior, Clip.antiAliasWithSaveLayer);
   });
 
-  testWidgets('BottomAppBar with shape when Scaffold.bottomNavigationBar == null', (WidgetTester tester) async {
+  testWidgets('BottomAppBar with shape when Scaffold.bottomNavigationBar == null', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/80878
     await tester.pumpWidget(
       MaterialApp(
@@ -598,7 +598,7 @@ void main() {
     expect(tester.getSize(find.byType(BottomAppBar)), const Size(800, 50));
   });
 
-  testWidgets('notch with margin and top padding, home safe area', (WidgetTester tester) async {
+  testWidgets('notch with margin and top padding, home safe area', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/90024
     await tester.pumpWidget(
       const MediaQuery(
@@ -659,8 +659,8 @@ void main() {
     );
   });
 
-  testWidgets('BottomAppBar does not apply custom clipper without FAB', (WidgetTester tester) async {
-    Widget buildWidget({Widget? fab}) {
+  testWidgets('BottomAppBar does not apply custom clipper without FAB', (final WidgetTester tester) async {
+    Widget buildWidget({final Widget? fab}) {
       return MaterialApp(
         home: Scaffold(
           floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -684,7 +684,7 @@ void main() {
     expect(physicalShape.clipper.toString(), 'ShapeBorderClipper');
   });
 
-  testWidgets('BottomAppBar adds bottom padding to height', (WidgetTester tester) async {
+  testWidgets('BottomAppBar adds bottom padding to height', (final WidgetTester tester) async {
     const double bottomPadding = 35.0;
 
     await tester.pumpWidget(
@@ -734,14 +734,14 @@ class ClipCachePainter extends CustomPainter {
   BuildContext context;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final RenderPhysicalShape physicalShape = findPhysicalShapeChild(context)!;
     value = physicalShape.clipper!.getClip(size);
   }
 
-  RenderPhysicalShape? findPhysicalShapeChild(BuildContext context) {
+  RenderPhysicalShape? findPhysicalShapeChild(final BuildContext context) {
     RenderPhysicalShape? result;
-    context.visitChildElements((Element e) {
+    context.visitChildElements((final Element e) {
       final RenderObject renderObject = e.findRenderObject()!;
       if (renderObject.runtimeType == RenderPhysicalShape) {
         assert(result == null);
@@ -754,7 +754,7 @@ class ClipCachePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ClipCachePainter oldDelegate) {
+  bool shouldRepaint(final ClipCachePainter oldDelegate) {
     return true;
   }
 }
@@ -771,7 +771,7 @@ class ShapeListener extends StatefulWidget {
 
 class ShapeListenerState extends State<ShapeListener> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomPaint(
       painter: cache,
       child: widget.child,
@@ -792,7 +792,7 @@ class RectangularNotch extends NotchedShape {
   const RectangularNotch();
 
   @override
-  Path getOuterPath(Rect host, Rect? guest) {
+  Path getOuterPath(final Rect host, final Rect? guest) {
     if (guest == null) {
       return Path()..addRect(host);
     }

@@ -9,12 +9,12 @@ import 'package:flutter/foundation.dart';
 
 // TODO(abarth): Consider using vector_math.
 class _Vector {
-  _Vector(int size)
+  _Vector(final int size)
     : _offset = 0,
       _length = size,
       _elements = Float64List(size);
 
-  _Vector.fromVOL(List<double> values, int offset, int length)
+  _Vector.fromVOL(final List<double> values, final int offset, final int length)
     : _offset = offset,
       _length = length,
       _elements = values;
@@ -25,12 +25,12 @@ class _Vector {
 
   final List<double> _elements;
 
-  double operator [](int i) => _elements[i + _offset];
-  void operator []=(int i, double value) {
+  double operator [](final int i) => _elements[i + _offset];
+  void operator []=(final int i, final double value) {
     _elements[i + _offset] = value;
   }
 
-  double operator *(_Vector a) {
+  double operator *(final _Vector a) {
     double result = 0.0;
     for (int i = 0; i < _length; i += 1) {
       result += this[i] * a[i];
@@ -43,19 +43,19 @@ class _Vector {
 
 // TODO(abarth): Consider using vector_math.
 class _Matrix {
-  _Matrix(int rows, int cols)
+  _Matrix(final int rows, final int cols)
     : _columns = cols,
       _elements = Float64List(rows * cols);
 
   final int _columns;
   final List<double> _elements;
 
-  double get(int row, int col) => _elements[row * _columns + col];
-  void set(int row, int col, double value) {
+  double get(final int row, final int col) => _elements[row * _columns + col];
+  void set(final int row, final int col, final double value) {
     _elements[row * _columns + col] = value;
   }
 
-  _Vector getRow(int row) => _Vector.fromVOL(
+  _Vector getRow(final int row) => _Vector.fromVOL(
     _elements,
     row * _columns,
     _columns,
@@ -67,7 +67,7 @@ class PolynomialFit {
   /// Creates a polynomial fit of the given degree.
   ///
   /// There are n + 1 coefficients in a fit of degree n.
-  PolynomialFit(int degree) : coefficients = Float64List(degree + 1);
+  PolynomialFit(final int degree) : coefficients = Float64List(degree + 1);
 
   /// The polynomial coefficients of the fit.
   ///
@@ -87,7 +87,7 @@ class PolynomialFit {
   @override
   String toString() {
     final String coefficientString =
-        coefficients.map((double c) => c.toStringAsPrecision(3)).toList().toString();
+        coefficients.map((final double c) => c.toStringAsPrecision(3)).toList().toString();
     return '${objectRuntimeType(this, 'PolynomialFit')}($coefficientString, confidence: ${confidence.toStringAsFixed(3)})';
   }
 }
@@ -113,7 +113,7 @@ class LeastSquaresSolver {
   /// Fits a polynomial of the given degree to the data points.
   ///
   /// When there is not enough data to fit a curve null is returned.
-  PolynomialFit? solve(int degree) {
+  PolynomialFit? solve(final int degree) {
     if (degree > x.length) {
       // Not enough data to fit a curve.
       return null;

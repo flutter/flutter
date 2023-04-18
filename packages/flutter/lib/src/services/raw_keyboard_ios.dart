@@ -126,7 +126,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
   /// information.
   ///
   /// Used by [RawKeyEvent] subclasses to help construct IDs.
-  static bool _isUnprintableKey(String label) {
+  static bool _isUnprintableKey(final String label) {
     if (label.length != 1) {
       return false;
     }
@@ -134,7 +134,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
     return codeUnit >= 0xF700 && codeUnit <= 0xF8FF;
   }
 
-  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+  bool _isLeftRightModifierPressed(final KeyboardSide side, final int anyMask, final int leftMask, final int rightMask) {
     if (modifiers & anyMask == 0) {
       return false;
     }
@@ -156,7 +156,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+  bool isModifierPressed(final ModifierKey key, {final KeyboardSide side = KeyboardSide.any}) {
     final int independentModifier = modifiers & deviceIndependentMask;
     bool result;
     switch (key) {
@@ -186,8 +186,8 @@ class RawKeyEventDataIos extends RawKeyEventData {
   }
 
   @override
-  KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
+  KeyboardSide? getModifierSide(final ModifierKey key) {
+    KeyboardSide? findSide(final int anyMask, final int leftMask, final int rightMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
@@ -223,7 +223,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
         properties.add(DiagnosticsProperty<String>('characters', characters));
         properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
@@ -232,7 +232,7 @@ class RawKeyEventDataIos extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

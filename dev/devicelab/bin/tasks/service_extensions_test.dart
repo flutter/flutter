@@ -32,7 +32,7 @@ void main() {
       run.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
         print('run:stdout: $line');
         if (vmServicePort == null) {
           vmServicePort = parseServicePort(line);
@@ -47,10 +47,10 @@ void main() {
       run.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
         stderr.writeln('run:stderr: $line');
       });
-      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
+      unawaited(run.exitCode.then<void>((final int exitCode) { ok = false; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok) {
         throw 'Failed to run test app.';
@@ -67,7 +67,7 @@ void main() {
       } catch (err) {
         // Do nothing on errors.
       }
-      client.onExtensionEvent.listen((Event event) {
+      client.onExtensionEvent.listen((final Event event) {
         if (event.extensionKind == 'Flutter.Frame') {
           frameEventsController.add(event);
         } else if (event.extensionKind == 'Flutter.Navigation') {
@@ -123,7 +123,7 @@ void main() {
   });
 }
 
-void expect(bool value) {
+void expect(final bool value) {
   if (!value) {
     throw 'failed assertion in service extensions test';
   }

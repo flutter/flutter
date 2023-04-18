@@ -12,7 +12,7 @@ class OnChangedExampleApp extends StatelessWidget {
   const OnChangedExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: OnChangedExample(),
     );
@@ -36,7 +36,7 @@ class _OnChangedExampleState extends State<OnChangedExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -45,13 +45,13 @@ class _OnChangedExampleState extends State<OnChangedExample> {
           const Text('1, 1, 2, 3, 5, 8...?'),
           TextField(
             controller: _controller,
-            onChanged: (String value) async {
+            onChanged: (final String value) async {
               if (value != '13') {
                 return;
               }
               await showDialog<void>(
                 context: context,
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return AlertDialog(
                     title: const Text('That is correct!'),
                     content: const Text('13 is the right answer.'),

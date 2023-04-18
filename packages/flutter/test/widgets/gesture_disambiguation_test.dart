@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('onTap detection with canceled pointer and a drag listener', (WidgetTester tester) async {
+  testWidgets('onTap detection with canceled pointer and a drag listener', (final WidgetTester tester) async {
     int detector1TapCount = 0;
     int detector2TapCount = 0;
 

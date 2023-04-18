@@ -27,16 +27,16 @@ class FakePub extends Fake implements Pub {
 
   @override
   Future<void> get({
-    PubContext? context,
-    required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.all,
+    final PubContext? context,
+    required final FlutterProject project,
+    final bool upgrade = false,
+    final bool offline = false,
+    final bool generateSyntheticPackage = false,
+    final bool generateSyntheticPackageForExample = false,
+    final String? flutterRootOverride,
+    final bool checkUpToDate = false,
+    final bool shouldSkipThirdPartyGenerator = true,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     project.directory.childFile('.packages').createSync();
     if (offline == true) {

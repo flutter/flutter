@@ -9,10 +9,10 @@ import '../rendering/mock_canvas.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
-  required Widget child,
-  TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
+  required final Widget child,
+  final TextDirection textDirection = TextDirection.ltr,
+  final double textScaleFactor = 1.0,
+  final Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     theme: ThemeData(brightness: brightness),
@@ -27,16 +27,16 @@ Widget wrapForChip({
 }
 
 Future<void> pumpCheckmarkChip(
-  WidgetTester tester, {
-  required Widget chip,
-  Color? themeColor,
-  Brightness brightness = Brightness.light,
+  final WidgetTester tester, {
+  required final Widget chip,
+  final Color? themeColor,
+  final Brightness brightness = Brightness.light,
 }) async {
   await tester.pumpWidget(
     wrapForChip(
       brightness: brightness,
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           final ChipThemeData chipTheme = ChipTheme.of(context);
           return ChipTheme(
             data: themeColor == null ? chipTheme : chipTheme.copyWith(
@@ -50,17 +50,17 @@ Future<void> pumpCheckmarkChip(
   );
 }
 
-Widget selectedFilterChip({ Color? checkmarkColor }) {
+Widget selectedFilterChip({ final Color? checkmarkColor }) {
   return FilterChip(
     label: const Text('InputChip'),
     selected: true,
     showCheckmark: true,
     checkmarkColor: checkmarkColor,
-    onSelected: (bool _) { },
+    onSelected: (final bool _) { },
   );
 }
 
-void expectCheckmarkColor(Finder finder, Color color) {
+void expectCheckmarkColor(final Finder finder, final Color color) {
   expect(
     finder,
     paints
@@ -75,7 +75,7 @@ void expectCheckmarkColor(Finder finder, Color color) {
   );
 }
 
-void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+void checkChipMaterialClipBehavior(final WidgetTester tester, final Clip clipBehavior) {
   final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
   // last Material is from the "RawChip".
@@ -85,12 +85,12 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('FilterChip can be tapped', (WidgetTester tester) async {
+  testWidgets('FilterChip can be tapped', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: FilterChip(
-            onSelected: (bool valueChanged) { },
+            onSelected: (final bool valueChanged) { },
             label: const Text('filter chip'),
           ),
         ),
@@ -101,7 +101,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Filter chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
+  testWidgets('Filter chip check mark color is determined by platform brightness when light', (final WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -113,7 +113,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color is determined by platform brightness when dark', (WidgetTester tester) async {
+  testWidgets('Filter chip check mark color is determined by platform brightness when dark', (final WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -126,7 +126,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color can be set by the chip theme', (WidgetTester tester) async {
+  testWidgets('Filter chip check mark color can be set by the chip theme', (final WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(),
@@ -139,7 +139,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color can be set by the chip constructor', (WidgetTester tester) async {
+  testWidgets('Filter chip check mark color can be set by the chip constructor', (final WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(checkmarkColor: const Color(0xff00ff00)),
@@ -151,7 +151,7 @@ void main() {
     );
   });
 
-  testWidgets('Filter chip check mark color is set by chip constructor even when a theme color is specified', (WidgetTester tester) async {
+  testWidgets('Filter chip check mark color is set by chip constructor even when a theme color is specified', (final WidgetTester tester) async {
     await pumpCheckmarkChip(
       tester,
       chip: selectedFilterChip(checkmarkColor: const Color(0xffff0000)),
@@ -164,16 +164,16 @@ void main() {
     );
   });
 
-  testWidgets('FilterChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('FilterChip clipBehavior properly passes through to the Material', (final WidgetTester tester) async {
     const Text label = Text('label');
-    await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { })));
+    await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (final bool b) { })));
     checkChipMaterialClipBehavior(tester, Clip.none);
 
-    await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (bool b) { }, clipBehavior: Clip.antiAlias)));
+    await tester.pumpWidget(wrapForChip(child: FilterChip(label: label, onSelected: (final bool b) { }, clipBehavior: Clip.antiAlias)));
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('M3 width should not change with selection', (WidgetTester tester) async {
+  testWidgets('M3 width should not change with selection', (final WidgetTester tester) async {
     // Regression tests for: https://github.com/flutter/flutter/issues/110645
 
     // For the text "FilterChip" the chip should default to 175 regardless of selection.
@@ -187,7 +187,7 @@ void main() {
           child: FilterChip(
             label: const Text('FilterChip'),
             showCheckmark: false,
-            onSelected: (bool _) {},
+            onSelected: (final bool _) {},
          )
         ),
       ),
@@ -203,7 +203,7 @@ void main() {
               label: const Text('FilterChip'),
               showCheckmark: false,
               selected: true,
-              onSelected: (bool _) {},
+              onSelected: (final bool _) {},
             )
         ),
       ),

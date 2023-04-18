@@ -22,26 +22,26 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
   bool _showNotch = true;
   FloatingActionButtonLocation _fabLocation = FloatingActionButtonLocation.endDocked;
 
-  void _onShowNotchChanged(bool value) {
+  void _onShowNotchChanged(final bool value) {
     setState(() {
       _showNotch = value;
     });
   }
 
-  void _onShowFabChanged(bool value) {
+  void _onShowFabChanged(final bool value) {
     setState(() {
       _showFab = value;
     });
   }
 
-  void _onFabLocationChanged(FloatingActionButtonLocation? value) {
+  void _onFabLocationChanged(final FloatingActionButtonLocation? value) {
     setState(() {
       _fabLocation = value ?? FloatingActionButtonLocation.endDocked;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -125,7 +125,7 @@ class _DemoBottomAppBar extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return BottomAppBar(
       shape: shape,
       color: Colors.blue,

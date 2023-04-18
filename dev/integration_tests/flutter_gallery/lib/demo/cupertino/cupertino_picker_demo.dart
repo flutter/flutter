@@ -28,7 +28,7 @@ class _BottomPicker extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       height: _kPickerSheetHeight,
       padding: const EdgeInsets.only(top: 6.0),
@@ -59,7 +59,7 @@ class _Menu extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: CupertinoTheme.of(context).scaffoldBackgroundColor,
@@ -98,7 +98,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   // Value that is shown in the date picker in dateAndTime mode.
   DateTime dateTime = DateTime.now();
 
-  Widget _buildColorPicker(BuildContext context) {
+  Widget _buildColorPicker(final BuildContext context) {
     final FixedExtentScrollController scrollController =
         FixedExtentScrollController(initialItem: _selectedColorIndex);
 
@@ -107,16 +107,16 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         await showCupertinoModalPopup<void>(
           context: context,
           semanticsDismissible: true,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return _BottomPicker(
               child: CupertinoPicker(
                 scrollController: scrollController,
                 itemExtent: _kPickerItemHeight,
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
-                onSelectedItemChanged: (int index) {
+                onSelectedItemChanged: (final int index) {
                   setState(() => _selectedColorIndex = index);
                 },
-                children: List<Widget>.generate(coolColorNames.length, (int index) {
+                children: List<Widget>.generate(coolColorNames.length, (final int index) {
                   return Center(
                     child: Text(coolColorNames[index]),
                   );
@@ -138,18 +138,18 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
-  Widget _buildCountdownTimerPicker(BuildContext context) {
+  Widget _buildCountdownTimerPicker(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
           semanticsDismissible: true,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return _BottomPicker(
               child: CupertinoTimerPicker(
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 initialTimerDuration: timer,
-                onTimerDurationChanged: (Duration newTimer) {
+                onTimerDurationChanged: (final Duration newTimer) {
                   setState(() => timer = newTimer);
                 },
               ),
@@ -171,19 +171,19 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
-  Widget _buildDatePicker(BuildContext context) {
+  Widget _buildDatePicker(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
           semanticsDismissible: true,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.date,
                 initialDateTime: date,
-                onDateTimeChanged: (DateTime newDateTime) {
+                onDateTimeChanged: (final DateTime newDateTime) {
                   setState(() => date = newDateTime);
                 },
               ),
@@ -203,19 +203,19 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
-  Widget _buildTimePicker(BuildContext context) {
+  Widget _buildTimePicker(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
           semanticsDismissible: true,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 mode: CupertinoDatePickerMode.time,
                 initialDateTime: time,
-                onDateTimeChanged: (DateTime newDateTime) {
+                onDateTimeChanged: (final DateTime newDateTime) {
                   setState(() => time = newDateTime);
                 },
               ),
@@ -235,18 +235,18 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
     );
   }
 
-  Widget _buildDateAndTimePicker(BuildContext context) {
+  Widget _buildDateAndTimePicker(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         showCupertinoModalPopup<void>(
           context: context,
           semanticsDismissible: true,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return _BottomPicker(
               child: CupertinoDatePicker(
                 backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
                 initialDateTime: dateTime,
-                onDateTimeChanged: (DateTime newDateTime) {
+                onDateTimeChanged: (final DateTime newDateTime) {
                   setState(() => dateTime = newDateTime);
                 },
               ),
@@ -267,7 +267,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Picker'),

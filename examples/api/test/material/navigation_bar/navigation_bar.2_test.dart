@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/navigation_bar/navigation_bar.2.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RootPage: only selected destination is on stage', (WidgetTester tester) async {
+  testWidgets('RootPage: only selected destination is on stage', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: example.Home()));
 
     const String tealTitle = 'Teal RootPage - /';
@@ -44,7 +44,7 @@ void main() {
     expect(find.text(blueTitle), findsOneWidget);
   });
 
-  testWidgets('RootPage', (WidgetTester tester) async {
+  testWidgets('RootPage', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: example.Home()));
 
     await tester.tap(find.widgetWithText(NavigationDestination, 'Teal'));
@@ -77,7 +77,7 @@ void main() {
   });
 
 
-  testWidgets('ListPage', (WidgetTester tester) async {
+  testWidgets('ListPage', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: example.Home()));
     expect(find.text('Teal RootPage - /'), findsOneWidget);
 

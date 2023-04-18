@@ -22,11 +22,11 @@ class ContextMenuControllerExampleApp extends StatefulWidget {
 }
 
 class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerExampleApp> {
-  void _showDialog(BuildContext context) {
+  void _showDialog(final BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
+        builder: (final BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
       ),
     );
   }
@@ -50,14 +50,14 @@ class _ContextMenuControllerExampleAppState extends State<ContextMenuControllerE
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Context menu outside of text'),
         ),
         body: _ContextMenuRegion(
-          contextMenuBuilder: (BuildContext context, Offset offset) {
+          contextMenuBuilder: (final BuildContext context, final Offset offset) {
             // The custom context menu will look like the default context menu
             // on the current platform with a single 'Print' button.
             return AdaptiveTextSelectionToolbar.buttonItems(
@@ -129,7 +129,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
     }
   }
 
-  void _onSecondaryTapUp(TapUpDetails details) {
+  void _onSecondaryTapUp(final TapUpDetails details) {
     _show(details.globalPosition);
   }
 
@@ -140,7 +140,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
     _hide();
   }
 
-  void _onLongPressStart(LongPressStartDetails details) {
+  void _onLongPressStart(final LongPressStartDetails details) {
     _longPressOffset = details.globalPosition;
   }
 
@@ -150,10 +150,10 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
     _longPressOffset = null;
   }
 
-  void _show(Offset position) {
+  void _show(final Offset position) {
     _contextMenuController.show(
       context: context,
-      contextMenuBuilder: (BuildContext context) {
+      contextMenuBuilder: (final BuildContext context) {
         return widget.contextMenuBuilder(context, position);
       },
     );
@@ -170,7 +170,7 @@ class _ContextMenuRegionState extends State<_ContextMenuRegion> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onSecondaryTapUp: _onSecondaryTapUp,

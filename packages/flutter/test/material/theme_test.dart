@@ -18,7 +18,7 @@ void main() {
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });
 
-  testWidgets('PopupMenu inherits app theme', (WidgetTester tester) async {
+  testWidgets('PopupMenu inherits app theme', (final WidgetTester tester) async {
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -28,7 +28,7 @@ void main() {
             actions: <Widget>[
               PopupMenuButton<String>(
                 key: popupMenuButtonKey,
-                itemBuilder: (BuildContext context) {
+                itemBuilder: (final BuildContext context) {
                   return <PopupMenuItem<String>>[
                     const PopupMenuItem<String>(child: Text('menuItem')),
                   ];
@@ -46,7 +46,7 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.dark));
   });
 
-  testWidgets('Theme overrides selection style', (WidgetTester tester) async {
+  testWidgets('Theme overrides selection style', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     const Color defaultSelectionColor = Color(0x11111111);
     const Color defaultCursorColor = Color(0x22222222);
@@ -77,7 +77,7 @@ void main() {
     // Finds RenderEditable.
     final RenderObject root = tester.renderObject(find.byType(EditableText));
     late RenderEditable renderEditable;
-    void recursiveFinder(RenderObject child) {
+    void recursiveFinder(final RenderObject child) {
       if (child is RenderEditable) {
         renderEditable = child;
         return;
@@ -95,11 +95,11 @@ void main() {
     expect(tester.widget<EditableText>(find.byType(EditableText)).cursorColor, themeCursorColor);
   });
 
-  testWidgets('Fallback theme', (WidgetTester tester) async {
+  testWidgets('Fallback theme', (final WidgetTester tester) async {
     late BuildContext capturedContext;
     await tester.pumpWidget(
       Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           capturedContext = context;
           return Container();
         },
@@ -109,7 +109,7 @@ void main() {
     expect(Theme.of(capturedContext), equals(ThemeData.localize(ThemeData.fallback(), defaultGeometryTheme)));
   });
 
-  testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
+  testWidgets('ThemeData.localize memoizes the result', (final WidgetTester tester) async {
     final ThemeData light = ThemeData.light();
     final ThemeData dark = ThemeData.dark();
 
@@ -132,13 +132,13 @@ void main() {
     );
   });
 
-  testWidgets('ThemeData with null typography uses proper defaults', (WidgetTester tester) async {
+  testWidgets('ThemeData with null typography uses proper defaults', (final WidgetTester tester) async {
     expect(ThemeData().typography, Typography.material2014());
     final ThemeData m3Theme = ThemeData(useMaterial3: true);
     expect(m3Theme.typography, Typography.material2021(colorScheme: m3Theme.colorScheme));
   });
 
-  testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('PopupMenu inherits shadowed app theme', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5572
     final Key popupMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
@@ -151,7 +151,7 @@ void main() {
               actions: <Widget>[
                 PopupMenuButton<String>(
                   key: popupMenuButtonKey,
-                  itemBuilder: (BuildContext context) {
+                  itemBuilder: (final BuildContext context) {
                     return <PopupMenuItem<String>>[
                       const PopupMenuItem<String>(child: Text('menuItem')),
                     ];
@@ -170,7 +170,7 @@ void main() {
     expect(Theme.of(tester.element(find.text('menuItem'))).brightness, equals(Brightness.light));
   });
 
-  testWidgets('DropdownMenu inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('DropdownMenu inherits shadowed app theme', (final WidgetTester tester) async {
     final Key dropdownMenuButtonKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -182,7 +182,7 @@ void main() {
               actions: <Widget>[
                 DropdownButton<String>(
                   key: dropdownMenuButtonKey,
-                  onChanged: (String? newValue) { },
+                  onChanged: (final String? newValue) { },
                   value: 'menuItem',
                   items: const <DropdownMenuItem<String>>[
                     DropdownMenuItem<String>(
@@ -206,7 +206,7 @@ void main() {
     }
   });
 
-  testWidgets('ModalBottomSheet inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('ModalBottomSheet inherits shadowed app theme', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(brightness: Brightness.dark),
@@ -215,12 +215,12 @@ void main() {
           child: Scaffold(
             body: Center(
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return ElevatedButton(
                     onPressed: () {
                       showModalBottomSheet<void>(
                         context: context,
-                        builder: (BuildContext context) => const Text('bottomSheet'),
+                        builder: (final BuildContext context) => const Text('bottomSheet'),
                       );
                     },
                     child: const Text('SHOW'),
@@ -239,7 +239,7 @@ void main() {
     expect(Theme.of(tester.element(find.text('bottomSheet'))).brightness, equals(Brightness.light));
   });
 
-  testWidgets('Dialog inherits shadowed app theme', (WidgetTester tester) async {
+  testWidgets('Dialog inherits shadowed app theme', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       MaterialApp(
@@ -250,12 +250,12 @@ void main() {
             key: scaffoldKey,
             body: Center(
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return ElevatedButton(
                     onPressed: () {
                       showDialog<void>(
                         context: context,
-                        builder: (BuildContext context) => const Text('dialog'),
+                        builder: (final BuildContext context) => const Text('dialog'),
                       );
                     },
                     child: const Text('SHOW'),
@@ -273,7 +273,7 @@ void main() {
     expect(Theme.of(tester.element(find.text('dialog'))).brightness, equals(Brightness.light));
   });
 
-  testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (WidgetTester tester) async {
+  testWidgets("Scaffold inherits theme's scaffoldBackgroundColor", (final WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
 
     await tester.pumpWidget(
@@ -282,12 +282,12 @@ void main() {
         home: Scaffold(
           body: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return GestureDetector(
                   onTap: () {
                     showDialog<void>(
                       context: context,
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return const Scaffold(
                           body: SizedBox(
                             width: 200.0,
@@ -315,7 +315,7 @@ void main() {
     expect(materials[1].color, green); // dialog scaffold
   });
 
-  testWidgets('IconThemes are applied', (WidgetTester tester) async {
+  testWidgets('IconThemes are applied', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(iconTheme: const IconThemeData(color: Colors.green, size: 10.0)),
@@ -350,7 +350,7 @@ void main() {
 
   testWidgets(
     'Same ThemeData reapplied does not trigger descendants rebuilds',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       testBuildCalled = 0;
       ThemeData themeData = ThemeData(primaryColor: const Color(0xFF000000));
 
@@ -383,7 +383,7 @@ void main() {
     },
   );
 
-  testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (WidgetTester tester) async {
+  testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (final WidgetTester tester) async {
     const double kMagicFontSize = 4321.0;
     final ThemeData fallback = ThemeData.fallback();
     final ThemeData customTheme = fallback.copyWith(
@@ -400,7 +400,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Theme(
         data: customTheme,
-        child: Builder(builder: (BuildContext context) {
+        child: Builder(builder: (final BuildContext context) {
           final ThemeData theme = Theme.of(context);
           actualFontSize = theme.primaryTextTheme.bodyMedium!.fontSize!;
           return Text(
@@ -414,19 +414,19 @@ void main() {
     expect(actualFontSize, kMagicFontSize);
   });
 
-  testWidgets('Default Theme provides all basic TextStyle properties', (WidgetTester tester) async {
+  testWidgets('Default Theme provides all basic TextStyle properties', (final WidgetTester tester) async {
     late ThemeData theme;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           theme = Theme.of(context);
           return const Text('A');
         },
       ),
     ));
 
-    List<TextStyle> extractStyles(TextTheme textTheme) {
+    List<TextStyle> extractStyles(final TextTheme textTheme) {
       return <TextStyle>[
         textTheme.displayLarge!,
         textTheme.displayMedium!,
@@ -445,7 +445,7 @@ void main() {
     }
 
     for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme]) {
-      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
+      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((final TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -475,7 +475,7 @@ void main() {
     BuildContext? context;
 
     final Widget singletonThemeSubtree = Builder(
-      builder: (BuildContext localContext) {
+      builder: (final BuildContext localContext) {
         buildCount++;
         actualTheme = CupertinoTheme.of(localContext);
         actualIconTheme = IconTheme.of(localContext);
@@ -484,7 +484,7 @@ void main() {
       },
     );
 
-    Future<CupertinoThemeData> testTheme(WidgetTester tester, ThemeData theme) async {
+    Future<CupertinoThemeData> testTheme(final WidgetTester tester, final ThemeData theme) async {
       await tester.pumpWidget(Theme(data: theme, child: singletonThemeSubtree));
       return actualTheme!;
     }
@@ -496,7 +496,7 @@ void main() {
       context = null;
     });
 
-    testWidgets('Default theme has defaults', (WidgetTester tester) async {
+    testWidgets('Default theme has defaults', (final WidgetTester tester) async {
       final CupertinoThemeData theme = await testTheme(tester, ThemeData.light());
 
       expect(theme.brightness, Brightness.light);
@@ -507,7 +507,7 @@ void main() {
       expect(theme.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('Dark theme has defaults', (WidgetTester tester) async {
+    testWidgets('Dark theme has defaults', (final WidgetTester tester) async {
       final CupertinoThemeData theme = await testTheme(tester, ThemeData.dark());
 
       expect(theme.brightness, Brightness.dark);
@@ -518,7 +518,7 @@ void main() {
       expect(theme.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
+    testWidgets('MaterialTheme overrides the brightness', (final WidgetTester tester) async {
       await testTheme(tester, ThemeData.dark());
       expect(CupertinoTheme.brightnessOf(context!), Brightness.dark);
 
@@ -539,7 +539,7 @@ void main() {
       expect(CupertinoTheme.brightnessOf(context!), Brightness.light);
     });
 
-    testWidgets('Can override material theme', (WidgetTester tester) async {
+    testWidgets('Can override material theme', (final WidgetTester tester) async {
       final CupertinoThemeData theme = await testTheme(tester, ThemeData(
         cupertinoOverrideTheme: const CupertinoThemeData(
           scaffoldBackgroundColor: CupertinoColors.lightBackgroundGray,
@@ -556,7 +556,7 @@ void main() {
       expect(theme.textTheme.textStyle.fontSize, 17.0);
     });
 
-    testWidgets('Can override properties that are independent of material', (WidgetTester tester) async {
+    testWidgets('Can override properties that are independent of material', (final WidgetTester tester) async {
       final CupertinoThemeData theme = await testTheme(tester, ThemeData(
         cupertinoOverrideTheme: const CupertinoThemeData(
           // The bar colors ignore all things material except brightness.
@@ -569,7 +569,7 @@ void main() {
       expect(theme.barBackgroundColor, CupertinoColors.black);
     });
 
-    testWidgets('Changing material theme triggers rebuilds', (WidgetTester tester) async {
+    testWidgets('Changing material theme triggers rebuilds', (final WidgetTester tester) async {
       CupertinoThemeData theme = await testTheme(tester, ThemeData(
         primarySwatch: Colors.red,
       ));
@@ -587,7 +587,7 @@ void main() {
 
     testWidgets(
       "CupertinoThemeData does not override material theme's icon theme",
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         const Color materialIconColor = Colors.blue;
         const Color cupertinoIconColor = Colors.black;
 
@@ -603,7 +603,7 @@ void main() {
 
     testWidgets(
       'Changing cupertino theme override triggers rebuilds',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         CupertinoThemeData theme = await testTheme(tester, ThemeData(
           primarySwatch: Colors.purple,
           cupertinoOverrideTheme: const CupertinoThemeData(
@@ -628,7 +628,7 @@ void main() {
 
     testWidgets(
       'Cupertino theme override blocks derivative changes',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         CupertinoThemeData theme = await testTheme(tester, ThemeData(
           primarySwatch: Colors.purple,
           cupertinoOverrideTheme: const CupertinoThemeData(
@@ -655,7 +655,7 @@ void main() {
 
     testWidgets(
       'Cupertino overrides do not block derivatives triggering rebuilds when derivatives are not overridden',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         CupertinoThemeData theme = await testTheme(tester, ThemeData(
           primarySwatch: Colors.purple,
           cupertinoOverrideTheme: const CupertinoThemeData(
@@ -682,7 +682,7 @@ void main() {
 
     testWidgets(
       'copyWith only copies the overrides, not the material or cupertino derivatives',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
           primarySwatch: Colors.purple,
           cupertinoOverrideTheme: const CupertinoThemeData(
@@ -707,7 +707,7 @@ void main() {
 
     testWidgets(
       "Material themes with no cupertino overrides can also be copyWith'ed",
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final CupertinoThemeData originalTheme = await testTheme(tester, ThemeData(
           primarySwatch: Colors.purple,
         ));
@@ -733,7 +733,7 @@ class Test extends StatelessWidget {
   const Test({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     testBuildCalled += 1;
     return Container(
       decoration: BoxDecoration(
@@ -805,11 +805,11 @@ class _TextStyleProxy implements TextStyle {
   TextOverflow? get overflow => _delegate.overflow;
 
   @override
-  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
+  String toString({ final DiagnosticLevel minLevel = DiagnosticLevel.info }) =>
       super.toString();
 
   @override
-  DiagnosticsNode toDiagnosticsNode({ String? name, DiagnosticsTreeStyle? style }) {
+  DiagnosticsNode toDiagnosticsNode({ final String? name, final DiagnosticsTreeStyle? style }) {
     throw UnimplementedError();
   }
 
@@ -820,105 +820,105 @@ class _TextStyleProxy implements TextStyle {
 
   @override
   TextStyle apply({
-    Color? color,
-    Color? backgroundColor,
-    TextDecoration? decoration,
-    Color? decorationColor,
-    TextDecorationStyle? decorationStyle,
-    double decorationThicknessFactor = 1.0,
-    double decorationThicknessDelta = 0.0,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double fontSizeFactor = 1.0,
-    double fontSizeDelta = 0.0,
-    int fontWeightDelta = 0,
-    FontStyle? fontStyle,
-    double letterSpacingFactor = 1.0,
-    double letterSpacingDelta = 0.0,
-    double wordSpacingFactor = 1.0,
-    double wordSpacingDelta = 0.0,
-    double heightFactor = 1.0,
-    double heightDelta = 0.0,
-    TextLeadingDistribution? leadingDistribution,
-    TextBaseline? textBaseline,
-    Locale? locale,
-    List<ui.Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-    TextOverflow? overflow,
-    String? package,
+    final Color? color,
+    final Color? backgroundColor,
+    final TextDecoration? decoration,
+    final Color? decorationColor,
+    final TextDecorationStyle? decorationStyle,
+    final double decorationThicknessFactor = 1.0,
+    final double decorationThicknessDelta = 0.0,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final double fontSizeFactor = 1.0,
+    final double fontSizeDelta = 0.0,
+    final int fontWeightDelta = 0,
+    final FontStyle? fontStyle,
+    final double letterSpacingFactor = 1.0,
+    final double letterSpacingDelta = 0.0,
+    final double wordSpacingFactor = 1.0,
+    final double wordSpacingDelta = 0.0,
+    final double heightFactor = 1.0,
+    final double heightDelta = 0.0,
+    final TextLeadingDistribution? leadingDistribution,
+    final TextBaseline? textBaseline,
+    final Locale? locale,
+    final List<ui.Shadow>? shadows,
+    final List<ui.FontFeature>? fontFeatures,
+    final List<ui.FontVariation>? fontVariations,
+    final TextOverflow? overflow,
+    final String? package,
   }) {
     throw UnimplementedError();
   }
 
   @override
-  RenderComparison compareTo(TextStyle other) {
+  RenderComparison compareTo(final TextStyle other) {
     throw UnimplementedError();
   }
 
   @override
   TextStyle copyWith({
-    bool? inherit,
-    Color? color,
-    Color? backgroundColor,
-    String? fontFamily,
-    List<String>? fontFamilyFallback,
-    double? fontSize,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
-    double? letterSpacing,
-    double? wordSpacing,
-    TextBaseline? textBaseline,
-    double? height,
-    TextLeadingDistribution? leadingDistribution,
-    Locale? locale,
-    ui.Paint? foreground,
-    ui.Paint? background,
-    List<Shadow>? shadows,
-    List<ui.FontFeature>? fontFeatures,
-    List<ui.FontVariation>? fontVariations,
-    TextDecoration? decoration,
-    Color? decorationColor,
-    TextDecorationStyle? decorationStyle,
-    double? decorationThickness,
-    String? debugLabel,
-    TextOverflow? overflow,
-    String? package,
+    final bool? inherit,
+    final Color? color,
+    final Color? backgroundColor,
+    final String? fontFamily,
+    final List<String>? fontFamilyFallback,
+    final double? fontSize,
+    final FontWeight? fontWeight,
+    final FontStyle? fontStyle,
+    final double? letterSpacing,
+    final double? wordSpacing,
+    final TextBaseline? textBaseline,
+    final double? height,
+    final TextLeadingDistribution? leadingDistribution,
+    final Locale? locale,
+    final ui.Paint? foreground,
+    final ui.Paint? background,
+    final List<Shadow>? shadows,
+    final List<ui.FontFeature>? fontFeatures,
+    final List<ui.FontVariation>? fontVariations,
+    final TextDecoration? decoration,
+    final Color? decorationColor,
+    final TextDecorationStyle? decorationStyle,
+    final double? decorationThickness,
+    final String? debugLabel,
+    final TextOverflow? overflow,
+    final String? package,
   }) {
     throw UnimplementedError();
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties, { final String prefix = '' }) {
     throw UnimplementedError();
   }
 
   @override
   ui.ParagraphStyle getParagraphStyle({
-    TextAlign? textAlign,
-    TextDirection? textDirection,
-    double textScaleFactor = 1.0,
-    String? ellipsis,
-    int? maxLines,
-    ui.TextHeightBehavior? textHeightBehavior,
-    Locale? locale,
-    String? fontFamily,
-    double? fontSize,
-    FontWeight? fontWeight,
-    FontStyle? fontStyle,
-    double? height,
-    StrutStyle? strutStyle,
+    final TextAlign? textAlign,
+    final TextDirection? textDirection,
+    final double textScaleFactor = 1.0,
+    final String? ellipsis,
+    final int? maxLines,
+    final ui.TextHeightBehavior? textHeightBehavior,
+    final Locale? locale,
+    final String? fontFamily,
+    final double? fontSize,
+    final FontWeight? fontWeight,
+    final FontStyle? fontStyle,
+    final double? height,
+    final StrutStyle? strutStyle,
   }) {
     throw UnimplementedError();
   }
 
   @override
-  ui.TextStyle getTextStyle({ double textScaleFactor = 1.0 }) {
+  ui.TextStyle getTextStyle({ final double textScaleFactor = 1.0 }) {
     throw UnimplementedError();
   }
 
   @override
-  TextStyle merge(TextStyle? other) {
+  TextStyle merge(final TextStyle? other) {
     throw UnimplementedError();
   }
 }

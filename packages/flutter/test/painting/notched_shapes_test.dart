@@ -107,7 +107,7 @@ void main() {
   });
 }
 
-bool pathDoesNotContainCircle(Path path, Rect circleBounds) {
+bool pathDoesNotContainCircle(final Path path, final Rect circleBounds) {
   assert(circleBounds.width == circleBounds.height);
   final double radius = circleBounds.width / 2.0;
 

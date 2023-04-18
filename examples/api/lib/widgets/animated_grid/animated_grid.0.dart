@@ -35,7 +35,7 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   }
 
   // Used to build list items that haven't been removed.
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(final BuildContext context, final int index, final Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: _list[index],
@@ -53,7 +53,7 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   // completed (even though it's gone as far as this ListModel is concerned).
   // The widget will be used by the [AnimatedGridState.removeItem] method's
   // [AnimatedGridRemovedItemBuilder] parameter.
-  Widget _buildRemovedItem(int item, BuildContext context, Animation<double> animation) {
+  Widget _buildRemovedItem(final int item, final BuildContext context, final Animation<double> animation) {
     return CardItem(
       animation: animation,
       item: item,
@@ -85,7 +85,7 @@ class _AnimatedGridSampleState extends State<AnimatedGridSample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -143,7 +143,7 @@ class ListModel<E> {
   ListModel({
     required this.listKey,
     required this.removedItemBuilder,
-    Iterable<E>? initialItems,
+    final Iterable<E>? initialItems,
   }) : _items = List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<AnimatedGridState> listKey;
@@ -152,7 +152,7 @@ class ListModel<E> {
 
   AnimatedGridState? get _animatedGrid => listKey.currentState;
 
-  void insert(int index, E item) {
+  void insert(final int index, final E item) {
     _items.insert(index, item);
     _animatedGrid!.insertItem(
       index,
@@ -160,12 +160,12 @@ class ListModel<E> {
     );
   }
 
-  E removeAt(int index) {
+  E removeAt(final int index) {
     final E removedItem = _items.removeAt(index);
     if (removedItem != null) {
       _animatedGrid!.removeItem(
         index,
-        (BuildContext context, Animation<double> animation) {
+        (final BuildContext context, final Animation<double> animation) {
           return removedItemBuilder(removedItem, context, animation);
         },
       );
@@ -175,9 +175,9 @@ class ListModel<E> {
 
   int get length => _items.length;
 
-  E operator [](int index) => _items[index];
+  E operator [](final int index) => _items[index];
 
-  int indexOf(E item) => _items.indexOf(item);
+  int indexOf(final E item) => _items.indexOf(item);
 }
 
 /// Displays its integer item as 'item N' on a Card whose color is based on
@@ -203,7 +203,7 @@ class CardItem extends StatelessWidget {
   final bool removing;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     TextStyle textStyle = Theme.of(context).textTheme.headlineMedium!;
     if (selected) {
       textStyle = textStyle.copyWith(color: Colors.lightGreenAccent[400]);

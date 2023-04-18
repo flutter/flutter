@@ -13,7 +13,7 @@ void main() {
   group('end-to-end test', () {
     testWidgets('Use button to resize window',
         timeout: const Timeout(Duration(seconds: 5)),
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       const app.ResizeApp resizeApp = app.ResizeApp();
 
       widgets.runApp(resizeApp);
@@ -44,7 +44,7 @@ void main() {
 
   testWidgets('resize window after calling runApp twice, the second with no content',
       timeout: const Timeout(Duration(seconds: 5)),
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     const app.ResizeApp root = app.ResizeApp();
     widgets.runApp(root);
     widgets.runApp(widgets.Container());

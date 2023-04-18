@@ -42,8 +42,8 @@ enum SupportedPlatform {
 
 class FlutterProjectFactory {
   FlutterProjectFactory({
-    required Logger logger,
-    required FileSystem fileSystem,
+    required final Logger logger,
+    required final FileSystem fileSystem,
   }) : _logger = logger,
        _fileSystem = fileSystem;
 
@@ -56,7 +56,7 @@ class FlutterProjectFactory {
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  FlutterProject fromDirectory(Directory directory) {
+  FlutterProject fromDirectory(final Directory directory) {
     return projects.putIfAbsent(directory.path, () {
       final FlutterManifest manifest = FlutterProject._readManifest(
         directory.childFile(bundle.defaultManifestPath).path,
@@ -90,7 +90,7 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromDirectory(Directory directory) => globals.projectFactory.fromDirectory(directory);
+  static FlutterProject fromDirectory(final Directory directory) => globals.projectFactory.fromDirectory(directory);
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
@@ -98,7 +98,7 @@ class FlutterProject {
 
   /// Create a [FlutterProject] and bypass the project caching.
   @visibleForTesting
-  static FlutterProject fromDirectoryTest(Directory directory, [Logger? logger]) {
+  static FlutterProject fromDirectoryTest(final Directory directory, [Logger? logger]) {
     final FileSystem fileSystem = directory.fileSystem;
     logger ??= BufferLogger.test();
     final FlutterManifest manifest = FlutterProject._readManifest(
@@ -172,7 +172,7 @@ class FlutterProject {
     return Set<String>.of(candidates.map<String?>(_organizationNameFromPackageName).whereType<String>());
   }
 
-  String? _organizationNameFromPackageName(String packageName) {
+  String? _organizationNameFromPackageName(final String packageName) {
     if (0 <= packageName.lastIndexOf('.')) {
       return packageName.substring(0, packageName.lastIndexOf('.'));
     }
@@ -258,7 +258,7 @@ class FlutterProject {
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
   /// Returns a list of platform names that are supported by the project.
-  List<SupportedPlatform> getSupportedPlatforms({bool includeRoot = false}) {
+  List<SupportedPlatform> getSupportedPlatforms({final bool includeRoot = false}) {
     final List<SupportedPlatform> platforms = includeRoot ? <SupportedPlatform>[SupportedPlatform.root] : <SupportedPlatform>[];
     if (android.existsSync()) {
       platforms.add(SupportedPlatform.android);
@@ -285,16 +285,16 @@ class FlutterProject {
   }
 
   /// The directory that will contain the example if an example exists.
-  static Directory _exampleDirectory(Directory directory) => directory.childDirectory('example');
+  static Directory _exampleDirectory(final Directory directory) => directory.childDirectory('example');
 
   /// Reads and validates the `pubspec.yaml` file at [path], asynchronously
   /// returning a [FlutterManifest] representation of the contents.
   ///
   /// Completes with an empty [FlutterManifest], if the file does not exist.
   /// Completes with a ToolExit on validation error.
-  static FlutterManifest _readManifest(String path, {
-    required Logger logger,
-    required FileSystem fileSystem,
+  static FlutterManifest _readManifest(final String path, {
+    required final Logger logger,
+    required final FileSystem fileSystem,
   }) {
     FlutterManifest? manifest;
     try {
@@ -323,7 +323,7 @@ class FlutterProject {
   /// registrants for app and module projects only.
   ///
   /// Will not create project platform directories if they do not already exist.
-  Future<void> regeneratePlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
+  Future<void> regeneratePlatformSpecificTooling({final DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     return ensureReadyForPlatformSpecificTooling(
       androidPlatform: android.existsSync(),
       iosPlatform: ios.existsSync(),
@@ -340,13 +340,13 @@ class FlutterProject {
   /// Applies template files and generates project files and plugin
   /// registrants for app and module projects only for the specified platforms.
   Future<void> ensureReadyForPlatformSpecificTooling({
-    bool androidPlatform = false,
-    bool iosPlatform = false,
-    bool linuxPlatform = false,
-    bool macOSPlatform = false,
-    bool windowsPlatform = false,
-    bool webPlatform = false,
-    DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
+    final bool androidPlatform = false,
+    final bool iosPlatform = false,
+    final bool linuxPlatform = false,
+    final bool macOSPlatform = false,
+    final bool windowsPlatform = false,
+    final bool webPlatform = false,
+    final DeprecationBehavior deprecationBehavior = DeprecationBehavior.none,
   }) async {
     if (!directory.existsSync() || isPlugin) {
       return;
@@ -380,7 +380,7 @@ class FlutterProject {
     );
   }
 
-  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+  void checkForDeprecation({final DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
     if (android.existsSync() && pubspecFile.existsSync()) {
       android.checkForDeprecation(deprecationBehavior: deprecationBehavior);
     }
@@ -628,7 +628,7 @@ $javaGradleCompatUrl
     return parent.directory.childDirectory('build');
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
+  Future<void> ensureReadyForPlatformSpecificTooling({final DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       await _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
@@ -670,7 +670,7 @@ $javaGradleCompatUrl
     globals.gradleUtils?.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
-  Future<void> _overwriteFromTemplate(String path, Directory target) async {
+  Future<void> _overwriteFromTemplate(final String path, final Directory target) async {
     final Template template = await Template.fromName(
       path,
       fileSystem: globals.fs,
@@ -699,7 +699,7 @@ $javaGradleCompatUrl
     );
   }
 
-  void checkForDeprecation({DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
+  void checkForDeprecation({final DeprecationBehavior deprecationBehavior = DeprecationBehavior.none}) {
     if (deprecationBehavior == DeprecationBehavior.none) {
       return;
     }

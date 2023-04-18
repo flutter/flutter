@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Placeholder', (WidgetTester tester) async {
+  testWidgets('Placeholder', (final WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(800.0, 600.0));
     await tester.pumpWidget(const Center(child: Placeholder()));
@@ -21,21 +21,21 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Placeholder)).size, const Size(200.0, 300.0));
   });
 
-  testWidgets('Placeholder color', (WidgetTester tester) async {
+  testWidgets('Placeholder color', (final WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(color: const Color(0xFF455A64)));
     await tester.pumpWidget(const Placeholder(color: Color(0xFF00FF00)));
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(color: const Color(0xFF00FF00)));
   });
 
-  testWidgets('Placeholder stroke width', (WidgetTester tester) async {
+  testWidgets('Placeholder stroke width', (final WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 2.0));
     await tester.pumpWidget(const Placeholder(strokeWidth: 10.0));
     expect(tester.renderObject(find.byType(Placeholder)), paints..path(strokeWidth: 10.0));
   });
 
-   testWidgets('Placeholder child widget', (WidgetTester tester) async {
+   testWidgets('Placeholder child widget', (final WidgetTester tester) async {
     await tester.pumpWidget(const Placeholder());
     expect(find.text('Label'), findsNothing);
     await tester.pumpWidget(const MaterialApp(home: Placeholder(child: Text('Label'))));

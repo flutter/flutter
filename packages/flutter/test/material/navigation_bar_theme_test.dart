@@ -24,19 +24,19 @@ void main() {
     expect(identical(NavigationBarThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Custom debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationBarThemeData(
       height: 200.0,
@@ -50,8 +50,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description[0], 'height: 200.0');
@@ -68,7 +68,7 @@ void main() {
     expect(description[7], 'labelBehavior: NavigationDestinationLabelBehavior.alwaysHide');
   });
 
-  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (WidgetTester tester) async {
+  testWidgets('NavigationBarThemeData values are used when no NavigationBar properties are specified', (final WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -94,7 +94,7 @@ void main() {
               elevation: elevation,
               indicatorColor: indicatorColor,
               indicatorShape: indicatorShape,
-              iconTheme: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              iconTheme: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return const IconThemeData(
                     size: selectedIconSize,
@@ -108,7 +108,7 @@ void main() {
                   opacity: unselectedIconOpacity,
                 );
               }),
-              labelTextStyle: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              labelTextStyle: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return const TextStyle(fontSize: selectedLabelFontSize);
                 }
@@ -140,7 +140,7 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('NavigationBar values take priority over NavigationBarThemeData values when both properties are specified', (final WidgetTester tester) async {
     const double height = 200.0;
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 42.0;
@@ -174,8 +174,8 @@ void main() {
     expect(_labelBehavior(tester), labelBehavior);
   });
 
-  testWidgets('Custom label style renders ink ripple properly', (WidgetTester tester) async {
-    Widget buildWidget({ NavigationDestinationLabelBehavior? labelBehavior }) {
+  testWidgets('Custom label style renders ink ripple properly', (final WidgetTester tester) async {
+    Widget buildWidget({ final NavigationDestinationLabelBehavior? labelBehavior }) {
       return MaterialApp(
         theme: ThemeData(
           navigationBarTheme: const NavigationBarThemeData(
@@ -199,7 +199,7 @@ void main() {
                   label: 'Alarm',
                 ),
               ],
-              onDestinationSelected: (int i) { },
+              onDestinationSelected: (final int i) { },
             ),
           ),
         ),
@@ -232,13 +232,13 @@ List<NavigationDestination> _destinations() {
   ];
 }
 
-double _barHeight(WidgetTester tester) {
+double _barHeight(final WidgetTester tester) {
   return tester.getRect(
     find.byType(NavigationBar),
   ).height;
 }
 
-Material _barMaterial(WidgetTester tester) {
+Material _barMaterial(final WidgetTester tester) {
   return tester.firstWidget<Material>(
     find.descendant(
       of: find.byType(NavigationBar),
@@ -247,7 +247,7 @@ Material _barMaterial(WidgetTester tester) {
   );
 }
 
-ShapeDecoration? _indicator(WidgetTester tester) {
+ShapeDecoration? _indicator(final WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(FadeTransition),
@@ -256,15 +256,15 @@ ShapeDecoration? _indicator(WidgetTester tester) {
   ).decoration as ShapeDecoration?;
 }
 
-IconThemeData _selectedIconTheme(WidgetTester tester) {
+IconThemeData _selectedIconTheme(final WidgetTester tester) {
   return _iconTheme(tester, Icons.favorite);
 }
 
-IconThemeData _unselectedIconTheme(WidgetTester tester) {
+IconThemeData _unselectedIconTheme(final WidgetTester tester) {
   return _iconTheme(tester, Icons.star_border);
 }
 
-IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
+IconThemeData _iconTheme(final WidgetTester tester, final IconData icon) {
   return tester.firstWidget<IconTheme>(
     find.ancestor(
       of: find.byIcon(icon),
@@ -273,7 +273,7 @@ IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
   ).data;
 }
 
-TextStyle _selectedLabelStyle(WidgetTester tester) {
+TextStyle _selectedLabelStyle(final WidgetTester tester) {
   return tester.widget<RichText>(
     find.descendant(
       of: find.text('Abc'),
@@ -282,7 +282,7 @@ TextStyle _selectedLabelStyle(WidgetTester tester) {
   ).text.style!;
 }
 
-TextStyle _unselectedLabelStyle(WidgetTester tester) {
+TextStyle _unselectedLabelStyle(final WidgetTester tester) {
   return tester.widget<RichText>(
     find.descendant(
       of: find.text('Def'),
@@ -291,7 +291,7 @@ TextStyle _unselectedLabelStyle(WidgetTester tester) {
   ).text.style!;
 }
 
-NavigationDestinationLabelBehavior _labelBehavior(WidgetTester tester) {
+NavigationDestinationLabelBehavior _labelBehavior(final WidgetTester tester) {
   if (_opacityAboveLabel('Abc').evaluate().isNotEmpty && _opacityAboveLabel('Def').evaluate().isNotEmpty) {
     return _labelOpacity(tester, 'Abc') == 1
         ? NavigationDestinationLabelBehavior.onlyShowSelected
@@ -301,7 +301,7 @@ NavigationDestinationLabelBehavior _labelBehavior(WidgetTester tester) {
   }
 }
 
-Finder _opacityAboveLabel(String text) {
+Finder _opacityAboveLabel(final String text) {
   return find.ancestor(
     of: find.text(text),
     matching: find.byType(Opacity),
@@ -309,7 +309,7 @@ Finder _opacityAboveLabel(String text) {
 }
 
 // Only valid when labelBehavior != alwaysShow.
-double _labelOpacity(WidgetTester tester, String text) {
+double _labelOpacity(final WidgetTester tester, final String text) {
   final Opacity opacityWidget = tester.widget<Opacity>(
     find.ancestor(
       of: find.text(text),

@@ -17,11 +17,11 @@ class ChangerState extends State<Changer> {
   void test2() { setState(() async { }); }
 
   @override
-  Widget build(BuildContext context) => const Text('test', textDirection: TextDirection.ltr);
+  Widget build(final BuildContext context) => const Text('test', textDirection: TextDirection.ltr);
 }
 
 void main() {
-  testWidgets('setState() catches being used with an async callback', (WidgetTester tester) async {
+  testWidgets('setState() catches being used with an async callback', (final WidgetTester tester) async {
     await tester.pumpWidget(const Changer());
     final ChangerState s = tester.state(find.byType(Changer));
     expect(s.test0, isNot(throwsFlutterError));

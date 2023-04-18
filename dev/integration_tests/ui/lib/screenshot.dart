@@ -26,7 +26,7 @@ class TogglerState extends State<Toggler> {
   bool _visible = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -57,8 +57,8 @@ class TogglerState extends State<Toggler> {
   }
 }
 
-List<Widget> _buildRows(int count) {
-  return List<Widget>.generate(count, (int i) {
+List<Widget> _buildRows(final int count) {
+  return List<Widget>.generate(count, (final int i) {
     return Row(
       children: _buildCells(i / count),
     );
@@ -67,8 +67,8 @@ List<Widget> _buildRows(int count) {
 
 /// Builds cells that are known to take time to render causing a delay on the
 /// raster thread.
-List<Widget> _buildCells(double epsilon) {
-  return List<Widget>.generate(15, (int i) {
+List<Widget> _buildCells(final double epsilon) {
+  return List<Widget>.generate(15, (final int i) {
     return Expanded(
       child: Material(
         // A magic color that the test will be looking for on the screenshot.

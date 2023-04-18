@@ -71,14 +71,14 @@ class BadgeThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BadgeThemeData copyWith({
-    Color? backgroundColor,
-    Color? textColor,
-    double? smallSize,
-    double? largeSize,
-    TextStyle? textStyle,
-    EdgeInsetsGeometry? padding,
-    AlignmentGeometry? alignment,
-    Offset? offset,
+    final Color? backgroundColor,
+    final Color? textColor,
+    final double? smallSize,
+    final double? largeSize,
+    final TextStyle? textStyle,
+    final EdgeInsetsGeometry? padding,
+    final AlignmentGeometry? alignment,
+    final Offset? offset,
   }) {
     return BadgeThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -93,7 +93,7 @@ class BadgeThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two [Badge] themes.
-  static BadgeThemeData lerp(BadgeThemeData? a, BadgeThemeData? b, double t) {
+  static BadgeThemeData lerp(final BadgeThemeData? a, final BadgeThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -122,7 +122,7 @@ class BadgeThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -141,7 +141,7 @@ class BadgeThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('textColor', textColor, defaultValue: null));
@@ -181,16 +181,16 @@ class BadgeTheme extends InheritedTheme {
   /// ```dart
   /// BadgeThemeData theme = BadgeTheme.of(context);
   /// ```
-  static BadgeThemeData of(BuildContext context) {
+  static BadgeThemeData of(final BuildContext context) {
     final BadgeTheme? badgeTheme = context.dependOnInheritedWidgetOfExactType<BadgeTheme>();
     return badgeTheme?.data ?? Theme.of(context).badgeTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return BadgeTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(BadgeTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final BadgeTheme oldWidget) => data != oldWidget.data;
 }

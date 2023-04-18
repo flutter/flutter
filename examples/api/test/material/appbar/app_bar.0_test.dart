@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/app_bar/app_bar.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Appbar updates on navigation', (WidgetTester tester) async {
+  testWidgets('Appbar updates on navigation', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.AppBarApp(),
     );

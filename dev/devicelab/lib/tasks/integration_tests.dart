@@ -44,7 +44,7 @@ TaskFunction createExternalUiIntegrationTest() {
   ).call;
 }
 
-TaskFunction createPlatformChannelSampleTest({String? deviceIdOverride}) {
+TaskFunction createPlatformChannelSampleTest({final String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/examples/platform_channel',
     'test_driver/button_tap.dart',
@@ -149,7 +149,7 @@ TaskFunction createSpellCheckIntegrationTest() {
   ).call;
 }
 
-TaskFunction createWindowsStartupDriverTest({String? deviceIdOverride}) {
+TaskFunction createWindowsStartupDriverTest({final String? deviceIdOverride}) {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/windows_startup_test',
     'lib/main.dart',

@@ -10,7 +10,7 @@ const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';
 
 void main() {
-  testWidgets('CupertinoTextField restoration', (WidgetTester tester) async {
+  testWidgets('CupertinoTextField restoration', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'app',
@@ -21,7 +21,7 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgets('CupertinoTextField restoration with external controller', (WidgetTester tester) async {
+  testWidgets('CupertinoTextField restoration with external controller', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         restorationScopeId: 'app',
@@ -35,7 +35,7 @@ void main() {
   });
 }
 
-Future<void> restoreAndVerify(WidgetTester tester) async {
+Future<void> restoreAndVerify(final WidgetTester tester) async {
   expect(find.text(text), findsNothing);
   expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
 
@@ -86,7 +86,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   String get restorationId => 'widget';
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(controller, 'controller');
   }
 
@@ -97,7 +97,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Align(
         child: SizedBox(
@@ -113,7 +113,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   }
 }
 
-Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
+Future<void> skipPastScrollingAnimation(final WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }

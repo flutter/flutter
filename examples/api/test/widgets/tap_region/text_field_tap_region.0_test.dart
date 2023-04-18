@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/tap_region/text_field_tap_region.0.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows a text field with a zero count, and the spinner buttons', (WidgetTester tester) async {
+  testWidgets('shows a text field with a zero count, and the spinner buttons', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TapRegionApp(),
     );
@@ -18,7 +18,7 @@ void main() {
     expect(find.byIcon(Icons.remove), findsOneWidget);
   });
 
-  testWidgets('tapping increment/decrement works', (WidgetTester tester) async {
+  testWidgets('tapping increment/decrement works', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TapRegionApp(),
     );
@@ -51,7 +51,7 @@ void main() {
     );
   });
 
-  testWidgets('entering text and then incrementing/decrementing works', (WidgetTester tester) async {
+  testWidgets('entering text and then incrementing/decrementing works', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TapRegionApp(),
     );
@@ -86,7 +86,7 @@ void main() {
     );
     final FocusNode textFieldFocusNode = Focus.of(
       tester.element(
-        find.byWidgetPredicate((Widget widget) {
+        find.byWidgetPredicate((final Widget widget) {
           return widget.runtimeType.toString() == '_Editable';
         }),
       ),
@@ -95,6 +95,6 @@ void main() {
   });
 }
 
-TextEditingValue getFieldValue(WidgetTester tester) {
+TextEditingValue getFieldValue(final WidgetTester tester) {
   return (tester.widget(find.byType(TextField)) as TextField).controller!.value;
 }

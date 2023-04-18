@@ -41,19 +41,19 @@ void main() {
     expect(theme.data.visualDensity, null);
   });
 
-  testWidgets('Default CheckboxThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default CheckboxThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CheckboxThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('CheckboxThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('CheckboxThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const CheckboxThemeData(
       mouseCursor: MaterialStatePropertyAll<MouseCursor?>(SystemMouseCursors.click),
@@ -66,8 +66,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(
@@ -84,7 +84,7 @@ void main() {
     );
   });
 
-  testWidgets('Checkbox is themeable', (WidgetTester tester) async {
+  testWidgets('Checkbox is themeable', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor mouseCursor = SystemMouseCursors.text;
@@ -98,24 +98,24 @@ void main() {
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity(vertical: 1.0, horizontal: 1.0);
 
-    Widget buildCheckbox({bool selected = false, bool autofocus = false}) {
+    Widget buildCheckbox({final bool selected = false, final bool autofocus = false}) {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
             mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(mouseCursor),
-            fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            fillColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return selectedFillColor;
               }
               return defaultFillColor;
             }),
-            checkColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            checkColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return focusedCheckColor;
               }
               return defaultCheckColor;
             }),
-            overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+            overlayColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
               if (states.contains(MaterialState.focused)) {
                 return focusOverlayColor;
               }
@@ -131,7 +131,7 @@ void main() {
         ),
         home: Scaffold(
           body: Checkbox(
-            onChanged: (bool? value) {},
+            onChanged: (final bool? value) {},
             value: selected,
             autofocus: autofocus,
           ),
@@ -166,7 +166,7 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor)..path(color: focusedCheckColor));
   });
 
-  testWidgets('Checkbox properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('Checkbox properties are taken over the theme values', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
     const MouseCursor themeMouseCursor = SystemMouseCursors.click;
@@ -189,19 +189,19 @@ void main() {
     const MaterialTapTargetSize materialTapTargetSize = MaterialTapTargetSize.shrinkWrap;
     const VisualDensity visualDensity = VisualDensity.standard;
 
-    Widget buildCheckbox({bool selected = false, bool autofocus = false}) {
+    Widget buildCheckbox({final bool selected = false, final bool autofocus = false}) {
         return MaterialApp(
           theme: ThemeData(
             checkboxTheme: CheckboxThemeData(
               mouseCursor: const MaterialStatePropertyAll<MouseCursor?>(themeMouseCursor),
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return themeSelectedFillColor;
                 }
                 return themeDefaultFillColor;
               }),
               checkColor: const MaterialStatePropertyAll<Color?>(themeCheckColor),
-              overlayColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              overlayColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                 if (states.contains(MaterialState.focused)) {
                   return themeFocusOverlayColor;
                 }
@@ -217,11 +217,11 @@ void main() {
           ),
           home: Scaffold(
             body: Checkbox(
-              onChanged: (bool? value) { },
+              onChanged: (final bool? value) { },
               value: selected,
               autofocus: autofocus,
               mouseCursor: mouseCursor,
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return selectedFillColor;
                 }
@@ -264,16 +264,16 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..circle(color: focusColor, radius: splashRadius));
   });
 
-  testWidgets('Checkbox activeColor property is taken over the theme', (WidgetTester tester) async {
+  testWidgets('Checkbox activeColor property is taken over the theme', (final WidgetTester tester) async {
     const Color themeSelectedFillColor = Color(0xfffffff1);
     const Color themeDefaultFillColor = Color(0xfffffff0);
     const Color selectedFillColor = Color(0xfffffff6);
 
-    Widget buildCheckbox({bool selected = false}) {
+    Widget buildCheckbox({final bool selected = false}) {
         return MaterialApp(
           theme: ThemeData(
             checkboxTheme: CheckboxThemeData(
-              fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+              fillColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return themeSelectedFillColor;
                 }
@@ -283,7 +283,7 @@ void main() {
           ),
           home: Scaffold(
             body: Checkbox(
-              onChanged: (bool? value) { },
+              onChanged: (final bool? value) { },
               value: selected,
               activeColor: selectedFillColor,
             ),
@@ -302,11 +302,11 @@ void main() {
     expect(_getCheckboxMaterial(tester), paints..path(color: selectedFillColor));
   });
 
-  testWidgets('Checkbox theme overlay color resolves in active/pressed states', (WidgetTester tester) async {
+  testWidgets('Checkbox theme overlay color resolves in active/pressed states', (final WidgetTester tester) async {
     const Color activePressedOverlayColor = Color(0xFF000001);
     const Color inactivePressedOverlayColor = Color(0xFF000002);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         if (states.contains(MaterialState.selected)) {
           return activePressedOverlayColor;
@@ -317,7 +317,7 @@ void main() {
     }
     const double splashRadius = 24.0;
 
-    Widget buildCheckbox({required bool active}) {
+    Widget buildCheckbox({required final bool active}) {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: CheckboxThemeData(
@@ -328,7 +328,7 @@ void main() {
         home: Scaffold(
           body: Checkbox(
             value: active,
-            onChanged: (_) { },
+            onChanged: (final _) { },
           ),
         ),
       );
@@ -363,13 +363,13 @@ void main() {
     );
   });
 
-  testWidgets('Local CheckboxTheme can override global CheckboxTheme', (WidgetTester tester) async {
+  testWidgets('Local CheckboxTheme can override global CheckboxTheme', (final WidgetTester tester) async {
     const Color globalThemeFillColor = Color(0xfffffff1);
     const Color globalThemeCheckColor = Color(0xff000000);
     const Color localThemeFillColor = Color(0xffff0000);
     const Color localThemeCheckColor = Color(0xffffffff);
 
-    Widget buildCheckbox({required bool active}) {
+    Widget buildCheckbox({required final bool active}) {
       return MaterialApp(
         theme: ThemeData(
           checkboxTheme: const CheckboxThemeData(
@@ -385,7 +385,7 @@ void main() {
             ),
             child: Checkbox(
               value: active,
-              onChanged: (_) { },
+              onChanged: (final _) { },
             ),
           ),
         ),
@@ -470,13 +470,13 @@ void main() {
   });
 }
 
-Future<void> _pointGestureToCheckbox(WidgetTester tester) async {
+Future<void> _pointGestureToCheckbox(final WidgetTester tester) async {
   final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
   await gesture.addPointer();
   addTearDown(gesture.removePointer);
   await gesture.moveTo(tester.getCenter(find.byType(Checkbox)));
 }
 
-MaterialInkController? _getCheckboxMaterial(WidgetTester tester) {
+MaterialInkController? _getCheckboxMaterial(final WidgetTester tester) {
   return Material.of(tester.element(find.byType(Checkbox)));
 }

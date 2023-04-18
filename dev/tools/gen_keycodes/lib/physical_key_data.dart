@@ -14,9 +14,9 @@ import 'utils.dart';
 /// [PhysicalKeyData.fromJson] constructor and [toJson] method, respectively.
 class PhysicalKeyData {
   factory PhysicalKeyData(
-    String chromiumHidCodes,
-    String androidKeyboardLayout,
-    String androidNameMap,
+    final String chromiumHidCodes,
+    final String androidKeyboardLayout,
+    final String androidNameMap,
   ) {
     final Map<String, List<int>> nameToAndroidScanCodes = _readAndroidScanCodes(androidKeyboardLayout, androidNameMap);
     final Map<String, PhysicalKeyEntry> data = _readHidEntries(
@@ -24,7 +24,7 @@ class PhysicalKeyData {
       nameToAndroidScanCodes,
     );
     final List<MapEntry<String, PhysicalKeyEntry>> sortedEntries = data.entries.toList()..sort(
-      (MapEntry<String, PhysicalKeyEntry> a, MapEntry<String, PhysicalKeyEntry> b) =>
+      (final MapEntry<String, PhysicalKeyEntry> a, final MapEntry<String, PhysicalKeyEntry> b) =>
         PhysicalKeyEntry.compareByUsbHidCode(a.value, b.value),
     );
     data
@@ -34,7 +34,7 @@ class PhysicalKeyData {
   }
 
   /// Parses the given JSON data and populates the data structure from it.
-  factory PhysicalKeyData.fromJson(Map<String, dynamic> contentMap) {
+  factory PhysicalKeyData.fromJson(final Map<String, dynamic> contentMap) {
     final Map<String, PhysicalKeyEntry> data = <String, PhysicalKeyEntry>{};
     for (final MapEntry<String, dynamic> jsonEntry in contentMap.entries) {
       final PhysicalKeyEntry entry = PhysicalKeyEntry.fromJsonMapEntry(jsonEntry.value as Map<String, dynamic>);
@@ -46,14 +46,14 @@ class PhysicalKeyData {
   PhysicalKeyData._(this._data);
 
   /// Find an entry from name, or null if not found.
-  PhysicalKeyEntry? tryEntryByName(String name) {
+  PhysicalKeyEntry? tryEntryByName(final String name) {
     return _data[name];
   }
 
   /// Find an entry from name.
   ///
   /// Asserts if the name is not found.
-  PhysicalKeyEntry entryByName(String name) {
+  PhysicalKeyEntry entryByName(final String name) {
     final PhysicalKeyEntry? entry = tryEntryByName(name);
     assert(entry != null,
         'Unable to find logical entry by name $name.');
@@ -92,7 +92,7 @@ class PhysicalKeyData {
   ///
   /// Some keys (notably `MEDIA_EJECT`) can be mapped to more than
   /// one scan code, so the mapping can't just be 1:1, it has to be 1:many.
-  static Map<String, List<int>> _readAndroidScanCodes(String keyboardLayout, String nameMap) {
+  static Map<String, List<int>> _readAndroidScanCodes(final String keyboardLayout, final String nameMap) {
     final RegExp keyEntry = RegExp(
       r'#?\s*' // Optional comment mark
       r'key\s+' // Literal "key"
@@ -118,11 +118,11 @@ class PhysicalKeyData {
     // Cast Android dom map
     final Map<String, List<String>> nameToAndroidNames = (json.decode(nameMap) as Map<String, dynamic>)
       .cast<String, List<dynamic>>()
-      .map<String, List<String>>((String key, List<dynamic> value) {
+      .map<String, List<String>>((final String key, final List<dynamic> value) {
         return MapEntry<String, List<String>>(key, value.cast<String>());
       });
 
-    final Map<String, List<int>> result = nameToAndroidNames.map((String name, List<String> androidNames) {
+    final Map<String, List<int>> result = nameToAndroidNames.map((final String name, final List<String> androidNames) {
       final Set<int> scanCodes = <int>{};
       for (final String androidName in androidNames) {
         scanCodes.addAll(androidNameToScanCodes[androidName] ?? <int>[]);
@@ -140,7 +140,7 @@ class PhysicalKeyData {
   /// DOM_CODE(0x000010, 0x0000, 0x0000, 0x0000, 0xffff, "Hyper", HYPER),
   static Map<String, PhysicalKeyEntry> _readHidEntries(
     String input,
-    Map<String, List<int>> nameToAndroidScanCodes,
+    final Map<String, List<int>> nameToAndroidScanCodes,
   ) {
     final Map<int, PhysicalKeyEntry> entries = <int, PhysicalKeyEntry>{};
     final RegExp usbMapRegExp = RegExp(
@@ -203,7 +203,7 @@ class PhysicalKeyData {
       );
       entries[newEntry.usbHidCode] = newEntry;
     }
-    return entries.map((int code, PhysicalKeyEntry entry) =>
+    return entries.map((final int code, final PhysicalKeyEntry entry) =>
         MapEntry<String, PhysicalKeyEntry>(entry.name, entry));
   }
 }
@@ -226,11 +226,11 @@ class PhysicalKeyEntry {
     required this.macOSScanCode,
     required this.iOSScanCode,
     required this.chromiumCode,
-    List<String>? otherWebCodes,
+    final List<String>? otherWebCodes,
   }) : otherWebCodes = otherWebCodes ?? <String>[];
 
   /// Populates the key from a JSON map.
-  factory PhysicalKeyEntry.fromJsonMapEntry(Map<String, dynamic> map) {
+  factory PhysicalKeyEntry.fromJsonMapEntry(final Map<String, dynamic> map) {
     final Map<String, dynamic> names = map['names'] as Map<String, dynamic>;
     final Map<String, dynamic> scanCodes = map['scanCodes'] as Map<String, dynamic>;
     return PhysicalKeyEntry(
@@ -300,13 +300,13 @@ class PhysicalKeyEntry {
     });
   }
 
-  static String getCommentName(String constantName) {
+  static String getCommentName(final String constantName) {
     String upperCamel = lowerCamelToUpperCamel(constantName);
     upperCamel = upperCamel.replaceAllMapped(
       RegExp(r'(Digit|Numpad|Lang|Button|Left|Right)([0-9]+)'),
-      (Match match) => '${match.group(1)} ${match.group(2)}',
+      (final Match match) => '${match.group(1)} ${match.group(2)}',
     );
-    return upperCamel.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match.group(1)}').trim();
+    return upperCamel.replaceAllMapped(RegExp(r'([A-Z])'), (final Match match) => ' ${match.group(1)}').trim();
   }
 
   /// Gets the name of the key suitable for placing in comments.
@@ -349,6 +349,6 @@ class PhysicalKeyEntry {
         'iOSScanCode: ${toHex(iOSScanCode)})$otherWebStr';
   }
 
-  static int compareByUsbHidCode(PhysicalKeyEntry a, PhysicalKeyEntry b) =>
+  static int compareByUsbHidCode(final PhysicalKeyEntry a, final PhysicalKeyEntry b) =>
       a.usbHidCode.compareTo(b.usbHidCode);
 }

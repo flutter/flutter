@@ -18,7 +18,7 @@ class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-  void noSuchMethod(Invocation invocation) {
+  void noSuchMethod(final Invocation invocation) {
     invocations.add(invocation);
   }
 }
@@ -29,12 +29,12 @@ class SynchronousTestImageProvider extends ImageProvider<int> {
   final ui.Image image;
 
   @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
+  Future<int> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<int>(1);
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter load(final int key, final DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(TestImageInfo(key, image: image)),
     );
@@ -47,12 +47,12 @@ class SynchronousErrorTestImageProvider extends ImageProvider<int> {
   final Object throwable;
 
   @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
+  Future<int> obtainKey(final ImageConfiguration configuration) {
     throw throwable;
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter load(final int key, final DecoderCallback decode) {
     throw throwable;
   }
 }
@@ -63,12 +63,12 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   final ui.Image image;
 
   @override
-  Future<int> obtainKey(ImageConfiguration configuration) {
+  Future<int> obtainKey(final ImageConfiguration configuration) {
     return Future<int>.value(2);
   }
 
   @override
-  ImageStreamCompleter load(int key, DecoderCallback decode) {
+  ImageStreamCompleter load(final int key, final DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       Future<ImageInfo>.value(TestImageInfo(key, image: image)),
     );
@@ -83,12 +83,12 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   final Completer<ImageInfo> _completer = Completer<ImageInfo>();
 
   @override
-  Future<DelayedImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<DelayedImageProvider> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<DelayedImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(final DelayedImageProvider key, final DecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -106,12 +106,12 @@ class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
   final MultiImageCompleter completer;
 
   @override
-  Future<MultiFrameImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<MultiFrameImageProvider> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<MultiFrameImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter load(MultiFrameImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(final MultiFrameImageProvider key, final DecoderCallback decode) {
     return completer;
   }
 
@@ -120,7 +120,7 @@ class MultiFrameImageProvider extends ImageProvider<MultiFrameImageProvider> {
 }
 
 class MultiImageCompleter extends ImageStreamCompleter {
-  void testSetImage(ImageInfo info) {
+  void testSetImage(final ImageInfo info) {
     setImage(info);
   }
 }
@@ -184,7 +184,7 @@ void main() {
 
   test('BoxDecorationImageListenerAsync', () async {
     final ui.Image image = await createTestImage(width: 10, height: 10);
-    FakeAsync().run((FakeAsync async) {
+    FakeAsync().run((final FakeAsync async) {
       final ImageProvider imageProvider = AsyncTestImageProvider(image);
       final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
 
@@ -245,8 +245,8 @@ void main() {
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () async {
     final ui.Image image = await createTestImage(width: 100, height: 100);
-    void testDecoration({ BoxShape shape = BoxShape.rectangle, BorderRadius? borderRadius, required bool expectClip }) {
-      FakeAsync().run((FakeAsync async) async {
+    void testDecoration({ final BoxShape shape = BoxShape.rectangle, final BorderRadius? borderRadius, required final bool expectClip }) {
+      FakeAsync().run((final FakeAsync async) async {
         final DelayedImageProvider imageProvider = DelayedImageProvider(image);
         final DecorationImage backgroundImage = DecorationImage(image: imageProvider);
 
@@ -277,7 +277,7 @@ void main() {
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
         // We expect a clip to precede the drawImageRect call.
-        final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
+        final List<Invocation> commands = canvas.invocations.where((final Invocation invocation) {
           return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
         }).toList();
         if (expectClip) { // We expect a clip to precede the drawImageRect call.
@@ -317,7 +317,7 @@ void main() {
     final TestCanvas canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
-    final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
+    final Invocation call = canvas.invocations.singleWhere((final Invocation call) => call.memberName == #drawImageNine);
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
     expect(call.positionalArguments[0], isA<ui.Image>());
@@ -387,7 +387,7 @@ void main() {
     late String exception;
     final DecorationImage backgroundImage = DecorationImage(
       image: const SynchronousErrorTestImageProvider('threw'),
-      onError: (dynamic error, StackTrace? stackTrace) {
+      onError: (final dynamic error, final StackTrace? stackTrace) {
         exception = error as String;
       },
     );
@@ -533,7 +533,7 @@ void main() {
 
       const Size imageSize = Size(100.0, 100.0);
 
-      final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+      final Invocation call = canvas.invocations.firstWhere((final Invocation call) => call.memberName == #drawImageRect);
 
       expect(call.isMethod, isTrue);
       expect(call.positionalArguments, hasLength(4));
@@ -575,7 +575,7 @@ void main() {
 
       const Size imageSize = Size(100.0, 100.0);
 
-      final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+      final Invocation call = canvas.invocations.firstWhere((final Invocation call) => call.memberName == #drawImageRect);
 
       expect(call.isMethod, isTrue);
       expect(call.positionalArguments, hasLength(4));
@@ -616,7 +616,7 @@ void main() {
 
     const Size imageSize = Size(100.0, 100.0);
 
-    final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+    final Invocation call = canvas.invocations.firstWhere((final Invocation call) => call.memberName == #drawImageRect);
 
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
@@ -663,7 +663,7 @@ void main() {
         fit: boxFit,
       );
 
-      final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+      final Invocation call = canvas.invocations.firstWhere((final Invocation call) => call.memberName == #drawImageRect);
 
       expect(call.isMethod, isTrue);
       expect(call.positionalArguments, hasLength(4));
@@ -693,7 +693,7 @@ void main() {
 
     const Size imageSize = Size(100.0, 100.0);
 
-    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final List<Invocation> calls = canvas.invocations.where((final Invocation call) => call.memberName == #drawImageRect).toList();
     final Set<Rect> tileRects = <Rect>{};
 
     expect(calls, hasLength(2));
@@ -733,7 +733,7 @@ void main() {
 
     const Size imageSize = Size(100.0, 100.0);
 
-    final List<Invocation> calls = canvas.invocations.where((Invocation call) => call.memberName == #drawImageRect).toList();
+    final List<Invocation> calls = canvas.invocations.where((final Invocation call) => call.memberName == #drawImageRect).toList();
     final Set<Rect> tileRects = <Rect>{};
 
     expect(calls, hasLength(2));
@@ -767,7 +767,7 @@ void main() {
     final TestCanvas canvas = TestCanvas();
     boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0)));
 
-    final Invocation call = canvas.invocations.firstWhere((Invocation call) => call.memberName == #drawImageRect);
+    final Invocation call = canvas.invocations.firstWhere((final Invocation call) => call.memberName == #drawImageRect);
     // The image should scale down to Size(25.0, 25.0) from Size(100.0, 100.0)
     // considering DecorationImage scale to be 4.0 and Image scale to be 1.0.
     // ignore: avoid_dynamic_calls
@@ -781,7 +781,7 @@ void main() {
     final ImageStream stream = provider.resolve(ImageConfiguration.empty);
 
     final Completer<ImageInfo> infoCompleter = Completer<ImageInfo>();
-    void listener(ImageInfo image, bool syncCall) {
+    void listener(final ImageInfo image, final bool syncCall) {
       assert(!infoCompleter.isCompleted);
       infoCompleter.complete(image);
     }

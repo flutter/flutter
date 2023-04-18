@@ -36,23 +36,23 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     super.dispose();
   }
 
-  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(final FocusNode node, final RawKeyEvent event) {
     setState(() {
       _event = event;
     });
     return KeyEventResult.ignored;
   }
 
-  String _asHex(int value) => '0x${value.toRadixString(16)}';
+  String _asHex(final int value) => '0x${value.toRadixString(16)}';
 
-  String _getEnumName(dynamic enumItem) {
+  String _getEnumName(final dynamic enumItem) {
     final String name = '$enumItem';
     final int index = name.indexOf('.');
     return index == -1 ? name : name.substring(index + 1);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Focus(
       focusNode: _focusNode,
@@ -60,7 +60,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
       autofocus: true,
       child: AnimatedBuilder(
         animation: _focusNode,
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           if (!_focusNode.hasFocus) {
             return GestureDetector(
               onTap: () {

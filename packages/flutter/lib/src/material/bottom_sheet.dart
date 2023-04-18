@@ -233,7 +233,7 @@ class BottomSheet extends StatefulWidget {
   /// This API available as a convenience for a Material compliant bottom sheet
   /// animation. If alternative animation durations are required, a different
   /// animation controller could be provided.
-  static AnimationController createAnimationController(TickerProvider vsync) {
+  static AnimationController createAnimationController(final TickerProvider vsync) {
     return AnimationController(
       duration: _bottomSheetEnterDuration,
       reverseDuration: _bottomSheetExitDuration,
@@ -256,14 +256,14 @@ class _BottomSheetState extends State<BottomSheet> {
 
   Set<MaterialState> dragHandleMaterialState = <MaterialState>{};
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart(final DragStartDetails details) {
     setState(() {
       dragHandleMaterialState.add(MaterialState.dragged);
     });
     widget.onDragStart?.call(details);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     assert(
       (widget.enableDrag || (widget.showDragHandle?? false)) && widget.animationController != null,
       "'BottomSheet.animationController' cannot be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
@@ -275,7 +275,7 @@ class _BottomSheetState extends State<BottomSheet> {
     widget.animationController!.value -= details.primaryDelta! / _childHeight;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     assert(
       (widget.enableDrag || (widget.showDragHandle?? false)) && widget.animationController != null,
       "'BottomSheet.animationController' cannot be null when 'BottomSheet.enableDrag' or 'BottomSheet.showDragHandle' is true. "
@@ -315,14 +315,14 @@ class _BottomSheetState extends State<BottomSheet> {
     }
   }
 
-  bool extentChanged(DraggableScrollableNotification notification) {
+  bool extentChanged(final DraggableScrollableNotification notification) {
     if (notification.extent == notification.minExtent) {
       widget.onClosing();
     }
     return false;
   }
 
-  void _handleDragHandleHover(bool hovering) {
+  void _handleDragHandleHover(final bool hovering) {
     if (hovering != dragHandleMaterialState.contains(MaterialState.hovered)) {
       setState(() {
         if(hovering){
@@ -336,7 +336,7 @@ class _BottomSheetState extends State<BottomSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final BottomSheetThemeData defaults = useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
@@ -440,14 +440,14 @@ class _DragHandle extends StatelessWidget {
   final Size? dragHandleSize;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final BottomSheetThemeData m3Defaults = _BottomSheetDefaultsM3(context);
     final Size handleSize = dragHandleSize ?? bottomSheetTheme.dragHandleSize ?? m3Defaults.dragHandleSize!;
 
     return MouseRegion(
-      onEnter: (PointerEnterEvent event) => handleHover(true),
-      onExit: (PointerExitEvent event) => handleHover(false),
+      onEnter: (final PointerEnterEvent event) => handleHover(true),
+      onExit: (final PointerExitEvent event) => handleHover(false),
       child: Semantics(
         label: MaterialLocalizations.of(context).modalBarrierDismissLabel,
         container: true,
@@ -487,7 +487,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
   final _SizeChangeCallback<Size> onChildSizeChanged;
 
   @override
-  _RenderBottomSheetLayoutWithSizeListener createRenderObject(BuildContext context) {
+  _RenderBottomSheetLayoutWithSizeListener createRenderObject(final BuildContext context) {
     return _RenderBottomSheetLayoutWithSizeListener(
       animationValue: animationValue,
       isScrollControlled: isScrollControlled,
@@ -496,7 +496,7 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderBottomSheetLayoutWithSizeListener renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderBottomSheetLayoutWithSizeListener renderObject) {
     renderObject.onChildSizeChanged = onChildSizeChanged;
     renderObject.animationValue = animationValue;
     renderObject.isScrollControlled = isScrollControlled;
@@ -505,10 +505,10 @@ class _BottomSheetLayoutWithSizeListener extends SingleChildRenderObjectWidget {
 
 class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   _RenderBottomSheetLayoutWithSizeListener({
-    RenderBox? child,
-    required _SizeChangeCallback<Size> onChildSizeChanged,
-    required double animationValue,
-    required bool isScrollControlled,
+    final RenderBox? child,
+    required final _SizeChangeCallback<Size> onChildSizeChanged,
+    required final double animationValue,
+    required final bool isScrollControlled,
   }) : _animationValue = animationValue,
        _isScrollControlled = isScrollControlled,
        _onChildSizeChanged = onChildSizeChanged,
@@ -518,7 +518,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   _SizeChangeCallback<Size> get onChildSizeChanged => _onChildSizeChanged;
   _SizeChangeCallback<Size> _onChildSizeChanged;
-    set onChildSizeChanged(_SizeChangeCallback<Size> newCallback) {
+    set onChildSizeChanged(final _SizeChangeCallback<Size> newCallback) {
     if (_onChildSizeChanged == newCallback) {
       return;
     }
@@ -529,7 +529,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   double get animationValue => _animationValue;
   double _animationValue;
-  set animationValue(double newValue) {
+  set animationValue(final double newValue) {
     if (_animationValue == newValue) {
       return;
     }
@@ -540,7 +540,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
 
   bool get isScrollControlled => _isScrollControlled;
   bool _isScrollControlled;
-  set isScrollControlled(bool newValue) {
+  set isScrollControlled(final bool newValue) {
     if (_isScrollControlled == newValue) {
       return;
     }
@@ -549,12 +549,12 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     markNeedsLayout();
   }
 
-  Size _getSize(BoxConstraints constraints) {
+  Size _getSize(final BoxConstraints constraints) {
     return constraints.constrain(constraints.biggest);
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite) {
       return width;
@@ -563,7 +563,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite) {
       return width;
@@ -572,7 +572,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite) {
       return height;
@@ -581,7 +581,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite) {
       return height;
@@ -590,11 +590,11 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _getSize(constraints);
   }
 
-    BoxConstraints _getConstraintsForChild(BoxConstraints constraints) {
+    BoxConstraints _getConstraintsForChild(final BoxConstraints constraints) {
     return BoxConstraints(
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
@@ -604,7 +604,7 @@ class _RenderBottomSheetLayoutWithSizeListener extends RenderShiftedBox {
     );
   }
 
-  Offset _getPositionForChild(Size size, Size childSize) {
+  Offset _getPositionForChild(final Size size, final Size childSize) {
     return Offset(0.0, size.height - childSize.height * animationValue);
   }
 
@@ -658,7 +658,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
 class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   ParametricCurve<double> animationCurve = _modalBottomSheetCurve;
 
-  String _getRouteLabel(MaterialLocalizations localizations) {
+  String _getRouteLabel(final MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -671,16 +671,16 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     }
   }
 
-  EdgeInsets _getNewClipDetails(Size topLayerSize) {
+  EdgeInsets _getNewClipDetails(final Size topLayerSize) {
     return EdgeInsets.fromLTRB(0, 0, 0, topLayerSize.height);
   }
 
-  void handleDragStart(DragStartDetails details) {
+  void handleDragStart(final DragStartDetails details) {
     // Allow the bottom sheet to track the user's finger accurately.
     animationCurve = Curves.linear;
   }
 
-  void handleDragEnd(DragEndDetails details, {bool? isClosing}) {
+  void handleDragEnd(final DragEndDetails details, {final bool? isClosing}) {
     // Allow the bottom sheet to animate smoothly from its current position.
     animationCurve = _BottomSheetSuspendedCurve(
       widget.route.animation!.value,
@@ -689,7 +689,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -715,7 +715,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         onDragStart: handleDragStart,
         onDragEnd: handleDragEnd,
       ),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         final double animationValue = animationCurve.transform(
             widget.route.animation!.value,
         );
@@ -726,7 +726,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           explicitChildNodes: true,
           child: ClipRect(
             child: _BottomSheetLayoutWithSizeListener(
-              onChildSizeChanged: (Size size) {
+              onChildSizeChanged: (final Size size) {
                 widget.route._didChangeBarrierSemanticsClip(
                   _getNewClipDetails(size),
                 );
@@ -977,7 +977,7 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   /// the barrier for this [ModalBottomSheetRoute] should be clipped.
   ///
   /// returns true if the clipDetails did change and false otherwise.
-  bool _didChangeBarrierSemanticsClip(EdgeInsets newClipDetails) {
+  bool _didChangeBarrierSemanticsClip(final EdgeInsets newClipDetails) {
     if (_clipDetailsNotifier.value == newClipDetails) {
       return false;
     }
@@ -1015,11 +1015,11 @@ class ModalBottomSheetRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
     final Widget content = DisplayFeatureSubScreen(
       anchorPoint: anchorPoint,
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           final BottomSheetThemeData sheetTheme = Theme.of(context).bottomSheetTheme;
           final BottomSheetThemeData defaults = Theme.of(context).useMaterial3 ? _BottomSheetDefaultsM3(context) : const BottomSheetThemeData();
           return _ModalBottomSheet<T>(
@@ -1112,7 +1112,7 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
   final Curve curve;
 
   @override
-  double transform(double t) {
+  double transform(final double t) {
     assert(t >= 0.0 && t <= 1.0);
     assert(startingPoint >= 0.0 && startingPoint <= 1.0);
 
@@ -1183,23 +1183,23 @@ class _BottomSheetSuspendedCurve extends ParametricCurve<double> {
 ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
 ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
 Future<T?> showModalBottomSheet<T>({
-  required BuildContext context,
-  required WidgetBuilder builder,
-  Color? backgroundColor,
-  double? elevation,
-  ShapeBorder? shape,
-  Clip? clipBehavior,
-  BoxConstraints? constraints,
-  Color? barrierColor,
-  bool isScrollControlled = false,
-  bool useRootNavigator = false,
-  bool isDismissible = true,
-  bool enableDrag = true,
-  bool? showDragHandle,
-  bool useSafeArea = false,
-  RouteSettings? routeSettings,
-  AnimationController? transitionAnimationController,
-  Offset? anchorPoint,
+  required final BuildContext context,
+  required final WidgetBuilder builder,
+  final Color? backgroundColor,
+  final double? elevation,
+  final ShapeBorder? shape,
+  final Clip? clipBehavior,
+  final BoxConstraints? constraints,
+  final Color? barrierColor,
+  final bool isScrollControlled = false,
+  final bool useRootNavigator = false,
+  final bool isDismissible = true,
+  final bool enableDrag = true,
+  final bool? showDragHandle,
+  final bool useSafeArea = false,
+  final RouteSettings? routeSettings,
+  final AnimationController? transitionAnimationController,
+  final Offset? anchorPoint,
 }) {
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
@@ -1274,15 +1274,15 @@ Future<T?> showModalBottomSheet<T>({
 ///  * The Material 2 spec at <https://m2.material.io/components/sheets-bottom>.
 ///  * The Material 3 spec at <https://m3.material.io/components/bottom-sheets/overview>.
 PersistentBottomSheetController<T> showBottomSheet<T>({
-  required BuildContext context,
-  required WidgetBuilder builder,
-  Color? backgroundColor,
-  double? elevation,
-  ShapeBorder? shape,
-  Clip? clipBehavior,
-  BoxConstraints? constraints,
-  bool? enableDrag,
-  AnimationController? transitionAnimationController,
+  required final BuildContext context,
+  required final WidgetBuilder builder,
+  final Color? backgroundColor,
+  final double? elevation,
+  final ShapeBorder? shape,
+  final Clip? clipBehavior,
+  final BoxConstraints? constraints,
+  final bool? enableDrag,
+  final AnimationController? transitionAnimationController,
 }) {
   assert(debugCheckHasScaffold(context));
 

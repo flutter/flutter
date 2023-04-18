@@ -38,7 +38,7 @@ class _SelectableButtonState extends State<SelectableButton> {
   }
 
   @override
-  void didUpdateWidget(SelectableButton oldWidget) {
+  void didUpdateWidget(final SelectableButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selected != oldWidget.selected) {
       statesController.update(MaterialState.selected, widget.selected);
@@ -46,7 +46,7 @@ class _SelectableButtonState extends State<SelectableButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextButton(
       statesController: statesController,
       style: widget.style,
@@ -67,14 +67,14 @@ class _HomeState extends State<Home> {
   bool selected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: SelectableButton(
           selected: selected,
           style: ButtonStyle(
             foregroundColor: MaterialStateProperty.resolveWith<Color?>(
-              (Set<MaterialState> states) {
+              (final Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return Colors.white;
                 }
@@ -82,7 +82,7 @@ class _HomeState extends State<Home> {
               },
             ),
             backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-              (Set<MaterialState> states) {
+              (final Set<MaterialState> states) {
                 if (states.contains(MaterialState.selected)) {
                   return Colors.indigo;
                 }

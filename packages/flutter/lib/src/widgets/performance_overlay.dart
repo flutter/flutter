@@ -104,7 +104,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   final bool checkerboardOffscreenLayers;
 
   @override
-  RenderPerformanceOverlay createRenderObject(BuildContext context) => RenderPerformanceOverlay(
+  RenderPerformanceOverlay createRenderObject(final BuildContext context) => RenderPerformanceOverlay(
     optionsMask: optionsMask,
     rasterizerThreshold: rasterizerThreshold,
     checkerboardRasterCacheImages: checkerboardRasterCacheImages,
@@ -112,7 +112,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   );
 
   @override
-  void updateRenderObject(BuildContext context, RenderPerformanceOverlay renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderPerformanceOverlay renderObject) {
     renderObject
       ..optionsMask = optionsMask
       ..rasterizerThreshold = rasterizerThreshold

@@ -15,8 +15,8 @@ final CommandRunner<void> runner =
       ..addCommand(TestCommand())
       ..addCommand(UploadResultsCommand());
 
-Future<void> main(List<String> rawArgs) async {
-  unawaited(runner.run(rawArgs).catchError((dynamic error) {
+Future<void> main(final List<String> rawArgs) async {
+  unawaited(runner.run(rawArgs).catchError((final dynamic error) {
     stderr.writeln('$error\n');
     stderr.writeln('Usage:\n');
     stderr.writeln(runner.usage);

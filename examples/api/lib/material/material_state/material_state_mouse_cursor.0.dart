@@ -12,7 +12,7 @@ class MaterialStateMouseCursorExampleApp extends StatelessWidget {
   const MaterialStateMouseCursorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MaterialStateMouseCursor Sample')),
@@ -28,7 +28,7 @@ class ListTileCursor extends MaterialStateMouseCursor {
   const ListTileCursor();
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return SystemMouseCursors.forbidden;
     }
@@ -43,7 +43,7 @@ class MaterialStateMouseCursorExample extends StatelessWidget {
   const MaterialStateMouseCursorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ListTile(
       title: Text('Disabled ListTile'),
       enabled: false,

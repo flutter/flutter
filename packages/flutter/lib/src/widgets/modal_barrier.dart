@@ -41,12 +41,12 @@ class _SemanticsClipper extends SingleChildRenderObjectWidget{
   final ValueNotifier<EdgeInsets> clipDetailsNotifier;
 
   @override
-  _RenderSemanticsClipper createRenderObject(BuildContext context) {
+  _RenderSemanticsClipper createRenderObject(final BuildContext context) {
     return _RenderSemanticsClipper(clipDetailsNotifier: clipDetailsNotifier,);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSemanticsClipper renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderSemanticsClipper renderObject) {
     renderObject.clipDetailsNotifier = clipDetailsNotifier;
   }
 }
@@ -56,8 +56,8 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   /// Creates a [RenderProxyBox] that Updates the [SemanticsNode.rect] of its child
   /// based on the value inside provided [ValueNotifier].
   _RenderSemanticsClipper({
-    required ValueNotifier<EdgeInsets> clipDetailsNotifier,
-    RenderBox? child,
+    required final ValueNotifier<EdgeInsets> clipDetailsNotifier,
+    final RenderBox? child,
   }) : _clipDetailsNotifier = clipDetailsNotifier,
       super(child);
 
@@ -66,7 +66,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   /// The getter and setter retrieves / updates the [ValueNotifier] associated
   /// with this clipper.
   ValueNotifier<EdgeInsets> get clipDetailsNotifier => _clipDetailsNotifier;
-  set clipDetailsNotifier (ValueNotifier<EdgeInsets> newNotifier) {
+  set clipDetailsNotifier (final ValueNotifier<EdgeInsets> newNotifier) {
     if (_clipDetailsNotifier == newNotifier) {
       return;
     }
@@ -92,7 +92,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
     clipDetailsNotifier.addListener(markNeedsSemanticsUpdate);
   }
@@ -104,7 +104,7 @@ class _RenderSemanticsClipper extends RenderProxyBox {
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = true;
   }
@@ -204,7 +204,7 @@ class ModalBarrier extends StatelessWidget {
   final String? semanticsOnTapHint;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
     final bool platformSupportsDismissingBarrier;
     switch (defaultTargetPlatform) {
@@ -294,7 +294,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   /// Creates a widget that blocks user interaction.
   const AnimatedModalBarrier({
     super.key,
-    required Animation<Color?> color,
+    required final Animation<Color?> color,
     this.dismissible = true,
     this.semanticsLabel,
     this.barrierSemanticsDismissible,
@@ -354,7 +354,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   final String? semanticsOnTapHint;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ModalBarrier(
       color: color.value,
       dismissible: dismissible,
@@ -378,7 +378,7 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
 
   @protected
   @override
-  bool isPointerAllowed(PointerDownEvent event) {
+  bool isPointerAllowed(final PointerDownEvent event) {
     if (onAnyTapUp == null) {
       return false;
     }
@@ -387,19 +387,19 @@ class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
 
   @protected
   @override
-  void handleTapDown({PointerDownEvent? down}) {
+  void handleTapDown({final PointerDownEvent? down}) {
     // Do nothing.
   }
 
   @protected
   @override
-  void handleTapUp({PointerDownEvent? down, PointerUpEvent? up}) {
+  void handleTapUp({final PointerDownEvent? down, final PointerUpEvent? up}) {
     onAnyTapUp?.call();
   }
 
   @protected
   @override
-  void handleTapCancel({PointerDownEvent? down, PointerCancelEvent? cancel, String? reason}) {
+  void handleTapCancel({final PointerDownEvent? down, final PointerCancelEvent? cancel, final String? reason}) {
     // Do nothing.
   }
 
@@ -416,7 +416,7 @@ class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGe
   _AnyTapGestureRecognizer constructor() => _AnyTapGestureRecognizer();
 
   @override
-  void initializer(_AnyTapGestureRecognizer instance) {
+  void initializer(final _AnyTapGestureRecognizer instance) {
     instance.onAnyTapUp = onAnyTapUp;
   }
 }
@@ -438,7 +438,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   final VoidCallback onDismiss;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
       _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
     };

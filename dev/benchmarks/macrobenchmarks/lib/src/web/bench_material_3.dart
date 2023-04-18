@@ -36,7 +36,7 @@ class _Material3ComponentsState extends State<Material3Components> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
@@ -72,7 +72,7 @@ class FirstComponentList extends StatelessWidget {
   final bool showSecondList;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Fully traverse this list before moving on.
     return FocusTraversalGroup(
       child: ListView(
@@ -108,7 +108,7 @@ class SecondComponentList extends StatelessWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Fully traverse this list before moving on.
     return FocusTraversalGroup(
       child: ListView(
@@ -129,7 +129,7 @@ class Actions extends StatelessWidget {
   const Actions({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentGroupDecoration(label: 'Actions', children: <Widget>[
       Buttons(),
       FloatingActionButtons(),
@@ -143,7 +143,7 @@ class Communication extends StatelessWidget {
   const Communication({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentGroupDecoration(label: 'Communication', children: <Widget>[
       NavigationBars(
         selectedIndex: 1,
@@ -160,7 +160,7 @@ class Containment extends StatelessWidget {
   const Containment({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentGroupDecoration(label: 'Containment', children: <Widget>[
       BottomSheetSection(),
       Cards(),
@@ -176,7 +176,7 @@ class Navigation extends StatelessWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentGroupDecoration(label: 'Navigation', children: <Widget>[
       const BottomAppBars(),
       const NavigationBars(
@@ -195,7 +195,7 @@ class Selection extends StatelessWidget {
   const Selection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentGroupDecoration(label: 'Selection', children: <Widget>[
       Checkboxes(),
       Chips(),
@@ -211,7 +211,7 @@ class TextInputs extends StatelessWidget {
   const TextInputs({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentGroupDecoration(
       label: 'Text inputs',
       children: <Widget>[TextFields()],
@@ -228,7 +228,7 @@ class Buttons extends StatefulWidget {
 
 class _ButtonsState extends State<Buttons> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentDecoration(
       label: 'Common buttons',
       tooltipMessage:
@@ -254,7 +254,7 @@ class ButtonsWithoutIcon extends StatelessWidget {
   final bool isDisabled;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
       child: IntrinsicWidth(
@@ -296,7 +296,7 @@ class ButtonsWithIcon extends StatelessWidget {
   const ButtonsWithIcon({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: IntrinsicWidth(
@@ -343,7 +343,7 @@ class FloatingActionButtons extends StatelessWidget {
   const FloatingActionButtons({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Floating action buttons',
       tooltipMessage:
@@ -384,7 +384,7 @@ class Cards extends StatelessWidget {
   const Cards({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Cards',
       tooltipMessage: 'Use Card',
@@ -484,7 +484,7 @@ class _ClearButton extends StatelessWidget {
   final TextEditingController controller;
 
   @override
-  Widget build(BuildContext context) => IconButton(
+  Widget build(final BuildContext context) => IconButton(
         icon: const Icon(Icons.clear),
         onPressed: () => controller.clear(),
       );
@@ -502,7 +502,7 @@ class _TextFieldsState extends State<TextFields> {
   final TextEditingController _controllerOutlined = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Text fields',
       tooltipMessage: 'Use TextField with different InputDecoration',
@@ -640,10 +640,10 @@ class Dialogs extends StatefulWidget {
 }
 
 class _DialogsState extends State<Dialogs> {
-  void openDialog(BuildContext context) {
+  void openDialog(final BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
+      builder: (final BuildContext context) => AlertDialog(
         title: const Text('What is a dialog?'),
         content: const Text(
             'A dialog is a type of modal window that appears in front of app content to provide critical information, or prompt for a decision to be made.'),
@@ -661,10 +661,10 @@ class _DialogsState extends State<Dialogs> {
     );
   }
 
-  void openFullscreenDialog(BuildContext context) {
+  void openFullscreenDialog(final BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) => Dialog.fullscreen(
+      builder: (final BuildContext context) => Dialog.fullscreen(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Scaffold(
@@ -689,7 +689,7 @@ class _DialogsState extends State<Dialogs> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Dialog',
       tooltipMessage:
@@ -721,7 +721,7 @@ class Dividers extends StatelessWidget {
   const Dividers({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentDecoration(
       label: 'Dividers',
       tooltipMessage: 'Use Divider or VerticalDivider',
@@ -738,7 +738,7 @@ class Switches extends StatelessWidget {
   const Switches({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentDecoration(
       label: 'Switches',
       tooltipMessage: 'Use SwitchListTile or Switch',
@@ -766,7 +766,7 @@ class _SwitchRowState extends State<SwitchRow> {
   bool value1 = true;
 
   final MaterialStateProperty<Icon?> thumbIcon =
-      MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+      MaterialStateProperty.resolveWith<Icon?>((final Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
       return const Icon(Icons.check);
     }
@@ -774,14 +774,14 @@ class _SwitchRowState extends State<SwitchRow> {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         Switch(
           value: value0,
           onChanged: widget.isEnabled
-              ? (bool value) {
+              ? (final bool value) {
                   setState(() {
                     value0 = value;
                   });
@@ -792,7 +792,7 @@ class _SwitchRowState extends State<SwitchRow> {
           thumbIcon: thumbIcon,
           value: value1,
           onChanged: widget.isEnabled
-              ? (bool value) {
+              ? (final bool value) {
                   setState(() {
                     value1 = value;
                   });
@@ -817,7 +817,7 @@ class _CheckboxesState extends State<Checkboxes> {
   bool? isChecked2 = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Checkboxes',
       tooltipMessage: 'Use CheckboxListTile or Checkbox',
@@ -827,7 +827,7 @@ class _CheckboxesState extends State<Checkboxes> {
             tristate: true,
             value: isChecked0,
             title: const Text('Option 1'),
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 isChecked0 = value;
               });
@@ -837,7 +837,7 @@ class _CheckboxesState extends State<Checkboxes> {
             tristate: true,
             value: isChecked1,
             title: const Text('Option 2'),
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 isChecked1 = value;
               });
@@ -847,7 +847,7 @@ class _CheckboxesState extends State<Checkboxes> {
             tristate: true,
             value: isChecked2,
             title: const Text('Option 3'),
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 isChecked2 = value;
               });
@@ -880,7 +880,7 @@ class _RadiosState extends State<Radios> {
   Options? _selectedOption = Options.option1;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Radio buttons',
       tooltipMessage: 'Use RadioListTile<T> or Radio<T>',
@@ -890,7 +890,7 @@ class _RadiosState extends State<Radios> {
             title: const Text('Option 1'),
             value: Options.option1,
             groupValue: _selectedOption,
-            onChanged: (Options? value) {
+            onChanged: (final Options? value) {
               setState(() {
                 _selectedOption = value;
               });
@@ -900,7 +900,7 @@ class _RadiosState extends State<Radios> {
             title: const Text('Option 2'),
             value: Options.option2,
             groupValue: _selectedOption,
-            onChanged: (Options? value) {
+            onChanged: (final Options? value) {
               setState(() {
                 _selectedOption = value;
               });
@@ -929,7 +929,7 @@ class _ProgressIndicatorsState extends State<ProgressIndicators> {
   bool playProgressIndicator = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final double? progressValue = playProgressIndicator ? null : 0.7;
 
     return ComponentDecoration(
@@ -1078,7 +1078,7 @@ class _NavigationBarsState extends State<NavigationBars> {
   }
 
   @override
-  void didUpdateWidget(covariant NavigationBars oldWidget) {
+  void didUpdateWidget(covariant final NavigationBars oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedIndex != oldWidget.selectedIndex) {
       selectedIndex = widget.selectedIndex;
@@ -1086,13 +1086,13 @@ class _NavigationBarsState extends State<NavigationBars> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // App NavigationBar should get first focus.
     Widget navigationBar = Focus(
       autofocus: !(widget.isExampleBar || widget.isBadgeExample),
       child: NavigationBar(
         selectedIndex: selectedIndex,
-        onDestinationSelected: (int index) {
+        onDestinationSelected: (final int index) {
           setState(() {
             selectedIndex = index;
           });
@@ -1133,7 +1133,7 @@ class IconToggleButtons extends StatefulWidget {
 
 class _IconToggleButtonsState extends State<IconToggleButtons> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentDecoration(
       label: 'Icon buttons',
       tooltipMessage: 'Use IconButton',
@@ -1228,7 +1228,7 @@ class _IconToggleButtonState extends State<IconToggleButton> {
   bool selected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
     final VoidCallback? onPressed = widget.isEnabled
         ? () {
@@ -1251,7 +1251,7 @@ class _IconToggleButtonState extends State<IconToggleButton> {
   }
 }
 
-ButtonStyle enabledFilledButtonStyle(bool selected, ColorScheme colors) {
+ButtonStyle enabledFilledButtonStyle(final bool selected, final ColorScheme colors) {
   return IconButton.styleFrom(
     foregroundColor: selected ? colors.onPrimary : colors.primary,
     backgroundColor: selected ? colors.primary : colors.surfaceVariant,
@@ -1269,14 +1269,14 @@ ButtonStyle enabledFilledButtonStyle(bool selected, ColorScheme colors) {
   );
 }
 
-ButtonStyle disabledFilledButtonStyle(bool selected, ColorScheme colors) {
+ButtonStyle disabledFilledButtonStyle(final bool selected, final ColorScheme colors) {
   return IconButton.styleFrom(
     disabledForegroundColor: colors.onSurface.withOpacity(0.38),
     disabledBackgroundColor: colors.onSurface.withOpacity(0.12),
   );
 }
 
-ButtonStyle enabledFilledTonalButtonStyle(bool selected, ColorScheme colors) {
+ButtonStyle enabledFilledTonalButtonStyle(final bool selected, final ColorScheme colors) {
   return IconButton.styleFrom(
     foregroundColor:
         selected ? colors.onSecondaryContainer : colors.onSurfaceVariant,
@@ -1294,14 +1294,14 @@ ButtonStyle enabledFilledTonalButtonStyle(bool selected, ColorScheme colors) {
   );
 }
 
-ButtonStyle disabledFilledTonalButtonStyle(bool selected, ColorScheme colors) {
+ButtonStyle disabledFilledTonalButtonStyle(final bool selected, final ColorScheme colors) {
   return IconButton.styleFrom(
     disabledForegroundColor: colors.onSurface.withOpacity(0.38),
     disabledBackgroundColor: colors.onSurface.withOpacity(0.12),
   );
 }
 
-ButtonStyle enabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
+ButtonStyle enabledOutlinedButtonStyle(final bool selected, final ColorScheme colors) {
   return IconButton.styleFrom(
     backgroundColor: selected ? colors.inverseSurface : null,
     hoverColor: selected
@@ -1315,7 +1315,7 @@ ButtonStyle enabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
         : colors.onSurface.withOpacity(0.12),
     side: BorderSide(color: colors.outline),
   ).copyWith(
-    foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    foregroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         return colors.onInverseSurface;
       }
@@ -1327,7 +1327,7 @@ ButtonStyle enabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
   );
 }
 
-ButtonStyle disabledOutlinedButtonStyle(bool selected, ColorScheme colors) {
+ButtonStyle disabledOutlinedButtonStyle(final bool selected, final ColorScheme colors) {
   return IconButton.styleFrom(
     disabledForegroundColor: colors.onSurface.withOpacity(0.38),
     disabledBackgroundColor:
@@ -1347,7 +1347,7 @@ class _ChipsState extends State<Chips> {
   bool isFiltered = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Chips',
       tooltipMessage:
@@ -1366,7 +1366,7 @@ class _ChipsState extends State<Chips> {
               FilterChip(
                 label: const Text('Filter'),
                 selected: isFiltered,
-                onSelected: (bool selected) {
+                onSelected: (final bool selected) {
                   setState(() => isFiltered = selected);
                 },
               ),
@@ -1415,7 +1415,7 @@ class SegmentedButtons extends StatelessWidget {
   const SegmentedButtons({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentDecoration(
       label: 'Segmented buttons',
       tooltipMessage: 'Use SegmentedButton<T>',
@@ -1443,7 +1443,7 @@ class _SingleChoiceState extends State<SingleChoice> {
   Calendar calendarView = Calendar.day;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SegmentedButton<Calendar>(
       segments: const <ButtonSegment<Calendar>>[
         ButtonSegment<Calendar>(
@@ -1464,7 +1464,7 @@ class _SingleChoiceState extends State<SingleChoice> {
             icon: Icon(Icons.calendar_today)),
       ],
       selected: <Calendar>{calendarView},
-      onSelectionChanged: (Set<Calendar> newSelection) {
+      onSelectionChanged: (final Set<Calendar> newSelection) {
         setState(() {
           // By default there is only a single segment that can be
           // selected at one time, so its value is always the first
@@ -1489,7 +1489,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
   Set<Sizes> selection = <Sizes>{Sizes.large, Sizes.extraLarge};
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SegmentedButton<Sizes>(
       segments: const <ButtonSegment<Sizes>>[
         ButtonSegment<Sizes>(value: Sizes.extraSmall, label: Text('XS')),
@@ -1502,7 +1502,7 @@ class _MultipleChoiceState extends State<MultipleChoice> {
         ButtonSegment<Sizes>(value: Sizes.extraLarge, label: Text('XL')),
       ],
       selected: selection,
-      onSelectionChanged: (Set<Sizes> newSelection) {
+      onSelectionChanged: (final Set<Sizes> newSelection) {
         setState(() {
           selection = newSelection;
         });
@@ -1516,7 +1516,7 @@ class SnackBarSection extends StatelessWidget {
   const SnackBarSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Snackbar',
       tooltipMessage:
@@ -1557,7 +1557,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
   PersistentBottomSheetController<void>? _nonModalBottomSheetController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     List<Widget> buttonList = <Widget>[
       IconButton(onPressed: () {}, icon: const Icon(Icons.share_outlined)),
       IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
@@ -1577,7 +1577,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
 
     buttonList = List<Widget>.generate(
         buttonList.length,
-        (int index) => Padding(
+        (final int index) => Padding(
               padding: const EdgeInsets.fromLTRB(20.0, 30.0, 20.0, 20.0),
               child: Column(
                 children: <Widget>[
@@ -1602,7 +1602,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
               showModalBottomSheet<void>(
                 context: context,
                 constraints: const BoxConstraints(maxWidth: 640),
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return SizedBox(
                     height: 150,
                     child: Padding(
@@ -1642,7 +1642,7 @@ class _BottomSheetSectionState extends State<BottomSheetSection> {
                 elevation: 8.0,
                 context: context,
                 constraints: const BoxConstraints(maxWidth: 640),
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return SizedBox(
                     height: 150,
                     child: Padding(
@@ -1668,7 +1668,7 @@ class BottomAppBars extends StatelessWidget {
   const BottomAppBars({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Bottom app bar',
       tooltipMessage: 'Use BottomAppBar',
@@ -1713,9 +1713,9 @@ class IconButtonAnchorExample extends StatelessWidget {
   const IconButtonAnchorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MenuAnchor(
-      builder: (BuildContext context, MenuController controller, Widget? child) {
+      builder: (final BuildContext context, final MenuController controller, final Widget? child) {
         return IconButton(
           onPressed: () {
             if (controller.isOpen) {
@@ -1762,9 +1762,9 @@ class ButtonAnchorExample extends StatelessWidget {
   const ButtonAnchorExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MenuAnchor(
-      builder: (BuildContext context, MenuController controller, Widget? child) {
+      builder: (final BuildContext context, final MenuController controller, final Widget? child) {
         return FilledButton.tonal(
           onPressed: () {
             if (controller.isOpen) {
@@ -1802,7 +1802,7 @@ class NavigationDrawers extends StatelessWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Navigation drawer',
       tooltipMessage:
@@ -1837,9 +1837,9 @@ class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
   int navDrawerIndex = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return NavigationDrawer(
-      onDestinationSelected: (int selectedIndex) {
+      onDestinationSelected: (final int selectedIndex) {
         setState(() {
           navDrawerIndex = selectedIndex;
         });
@@ -1853,7 +1853,7 @@ class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
-        ...destinations.map((ExampleDestination destination) {
+        ...destinations.map((final ExampleDestination destination) {
           return NavigationDrawerDestination(
             label: Text(destination.label),
             icon: destination.icon,
@@ -1868,7 +1868,7 @@ class _NavigationDrawerSectionState extends State<NavigationDrawerSection> {
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
-        ...labelDestinations.map((ExampleDestination destination) {
+        ...labelDestinations.map((final ExampleDestination destination) {
           return NavigationDrawerDestination(
             label: Text(destination.label),
             icon: destination.icon,
@@ -1908,7 +1908,7 @@ class NavigationRails extends StatelessWidget {
   const NavigationRails({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const ComponentDecoration(
       label: 'Navigation rail',
       tooltipMessage: 'Use NavigationRail',
@@ -1929,9 +1929,9 @@ class _NavigationRailSectionState extends State<NavigationRailSection> {
   int navRailIndex = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return NavigationRail(
-      onDestinationSelected: (int selectedIndex) {
+      onDestinationSelected: (final int selectedIndex) {
         setState(() {
           navRailIndex = selectedIndex;
         });
@@ -1943,7 +1943,7 @@ class _NavigationRailSectionState extends State<NavigationRailSection> {
       selectedIndex: navRailIndex,
       labelType: NavigationRailLabelType.selected,
       destinations: <NavigationRailDestination>[
-        ...destinations.map((ExampleDestination destination) {
+        ...destinations.map((final ExampleDestination destination) {
           return NavigationRailDestination(
             label: Text(destination.label),
             icon: destination.icon,
@@ -1972,7 +1972,7 @@ class _TabsState extends State<Tabs> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Tabs',
       tooltipMessage: 'Use TabBar',
@@ -2017,7 +2017,7 @@ class TopAppBars extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
       label: 'Top app bars',
       tooltipMessage:
@@ -2091,7 +2091,7 @@ class _MenusState extends State<Menus> {
   ColorLabel? selectedColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<DropdownMenuEntry<ColorLabel>> colorEntries =
         <DropdownMenuEntry<ColorLabel>>[];
     for (final ColorLabel color in ColorLabel.values) {
@@ -2133,7 +2133,7 @@ class _MenusState extends State<Menus> {
                 enableFilter: true,
                 dropdownMenuEntries: colorEntries,
                 inputDecorationTheme: const InputDecorationTheme(filled: true),
-                onSelected: (ColorLabel? color) {
+                onSelected: (final ColorLabel? color) {
                   setState(() {
                     selectedColor = color;
                   });
@@ -2145,7 +2145,7 @@ class _MenusState extends State<Menus> {
                 leadingIcon: const Icon(Icons.search),
                 label: const Text('Icon'),
                 dropdownMenuEntries: iconEntries,
-                onSelected: (IconLabel? icon) {
+                onSelected: (final IconLabel? icon) {
                   setState(() {
                     selectedIcon = icon;
                   });
@@ -2201,7 +2201,7 @@ class _SlidersState extends State<Sliders> {
   double sliderValue1 = 20.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ComponentDecoration(
         label: 'Sliders',
         tooltipMessage: 'Use Slider or RangeSlider',
@@ -2210,7 +2210,7 @@ class _SlidersState extends State<Sliders> {
             Slider(
               max: 100,
               value: sliderValue0,
-              onChanged: (double value) {
+              onChanged: (final double value) {
                 setState(() {
                   sliderValue0 = value;
                 });
@@ -2222,7 +2222,7 @@ class _SlidersState extends State<Sliders> {
               divisions: 5,
               value: sliderValue1,
               label: sliderValue1.round().toString(),
-              onChanged: (double value) {
+              onChanged: (final double value) {
                 setState(() {
                   sliderValue1 = value;
                 });
@@ -2253,7 +2253,7 @@ class _ComponentDecorationState extends State<ComponentDecoration> {
   final FocusNode focusNode = FocusNode();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RepaintBoundary(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: smallSpacing),
@@ -2281,7 +2281,7 @@ class _ComponentDecorationState extends State<ComponentDecoration> {
                 focusNode: focusNode,
                 canRequestFocus: true,
                 child: GestureDetector(
-                  onTapDown: (_) {
+                  onTapDown: (final _) {
                     focusNode.requestFocus();
                   },
                   behavior: HitTestBehavior.opaque,
@@ -2319,7 +2319,7 @@ class ComponentGroupDecoration extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Fully traverse this component group before moving on
     return FocusTraversalGroup(
       child: Card(

@@ -28,14 +28,14 @@ class _AccountPictures extends StatelessWidget {
   final Size? otherAccountsPicturesSize;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       children: <Widget>[
         PositionedDirectional(
           top: 0.0,
           end: 0.0,
           child: Row(
-            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((Widget picture) {
+            children: (otherAccountsPictures ?? <Widget>[]).take(3).map<Widget>((final Widget picture) {
               return Padding(
                 padding: const EdgeInsetsDirectional.only(start: 8.0),
                 child: Semantics(
@@ -114,7 +114,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   }
 
   @override
-  void didUpdateWidget (_AccountDetails oldWidget) {
+  void didUpdateWidget (final _AccountDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the state of the arrow did not change, there is no need to trigger the animation
     if (oldWidget.isOpen == widget.isOpen) {
@@ -129,7 +129,7 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasMaterialLocalizations(context));
@@ -222,7 +222,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   final TextDirection textDirection;
 
   @override
-  void performLayout(Size size) {
+  void performLayout(final Size size) {
     Size? iconSize;
     if (hasChild(dropdownIcon)) {
       // place the dropdown icon in bottom right (LTR) or bottom left (RTL)
@@ -250,9 +250,9 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+  bool shouldRelayout(final MultiChildLayoutDelegate oldDelegate) => true;
 
-  Offset _offsetForIcon(Size size, Size iconSize) {
+  Offset _offsetForIcon(final Size size, final Size iconSize) {
     switch (textDirection) {
       case TextDirection.ltr:
         return Offset(size.width - iconSize.width, size.height - iconSize.height);
@@ -261,7 +261,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
     }
   }
 
-  Offset _offsetForBottomLine(Size size, Size iconSize, Size bottomLineSize) {
+  Offset _offsetForBottomLine(final Size size, final Size iconSize, final Size bottomLineSize) {
     final double y = size.height - 0.5 * iconSize.height - 0.5 * bottomLineSize.height;
     switch (textDirection) {
       case TextDirection.ltr:
@@ -271,7 +271,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
     }
   }
 
-  Offset _offsetForName(Size size, Size nameSize, Offset bottomLineOffset) {
+  Offset _offsetForName(final Size size, final Size nameSize, final Offset bottomLineOffset) {
     final double y = bottomLineOffset.dy - nameSize.height;
     switch (textDirection) {
       case TextDirection.ltr:
@@ -360,7 +360,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     return Semantics(

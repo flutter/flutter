@@ -15,7 +15,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('Semantics shutdown and restart', (WidgetTester tester) async {
+  testWidgets('Semantics shutdown and restart', (final WidgetTester tester) async {
     SemanticsTester? semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -59,7 +59,7 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
-  testWidgets('Semantics tag only applies to immediate child', (WidgetTester tester) async {
+  testWidgets('Semantics tag only applies to immediate child', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -95,7 +95,7 @@ void main() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
-  testWidgets('Semantics tooltip', (WidgetTester tester) async {
+  testWidgets('Semantics tooltip', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -123,7 +123,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Detach and reattach assert', (WidgetTester tester) async {
+  testWidgets('Detach and reattach assert', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey key = GlobalKey();
 
@@ -201,7 +201,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - RTL', (WidgetTester tester) async {
+  testWidgets('Semantics and Directionality - RTL', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -218,7 +218,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - LTR', (WidgetTester tester) async {
+  testWidgets('Semantics and Directionality - LTR', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -235,7 +235,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - cannot override RTL with LTR', (WidgetTester tester) async {
+  testWidgets('Semantics and Directionality - cannot override RTL with LTR', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -262,7 +262,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics and Directionality - cannot override LTR with RTL', (WidgetTester tester) async {
+  testWidgets('Semantics and Directionality - cannot override LTR with RTL', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -289,7 +289,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics label and hint', (WidgetTester tester) async {
+  testWidgets('Semantics label and hint', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -319,7 +319,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics hints can merge', (WidgetTester tester) async {
+  testWidgets('Semantics hints can merge', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -355,7 +355,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics values do not merge', (WidgetTester tester) async {
+  testWidgets('Semantics values do not merge', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -406,7 +406,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics value and hint can merge', (WidgetTester tester) async {
+  testWidgets('Semantics value and hint can merge', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -442,7 +442,7 @@ void main() {
     semantics.dispose();
   });
 
-    testWidgets('Semantics tagForChildren works', (WidgetTester tester) async {
+    testWidgets('Semantics tagForChildren works', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -490,7 +490,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widget supports all actions', (WidgetTester tester) async {
+  testWidgets('Semantics widget supports all actions', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     final List<SemanticsAction> performedActions = <SemanticsAction>[];
@@ -510,10 +510,10 @@ void main() {
         onCopy: () => performedActions.add(SemanticsAction.copy),
         onCut: () => performedActions.add(SemanticsAction.cut),
         onPaste: () => performedActions.add(SemanticsAction.paste),
-        onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-        onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
-        onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
-        onSetText: (String _) => performedActions.add(SemanticsAction.setText),
+        onMoveCursorForwardByCharacter: (final bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+        onMoveCursorBackwardByCharacter: (final bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+        onSetSelection: (final TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+        onSetText: (final String _) => performedActions.add(SemanticsAction.setText),
         onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
         onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
       ),
@@ -531,7 +531,7 @@ void main() {
         TestSemantics.rootChild(
           id: expectedId,
           rect: TestSemantics.fullScreen,
-          actions: allActions.fold<int>(0, (int previous, SemanticsAction action) => previous | action.index),
+          actions: allActions.fold<int>(0, (final int previous, final SemanticsAction action) => previous | action.index),
         ),
       ],
     );
@@ -580,7 +580,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widget supports all flags', (WidgetTester tester) async {
+  testWidgets('Semantics widget supports all flags', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // Checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(
@@ -708,7 +708,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
   });
 
-  testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
+  testWidgets('Actions can be replaced without triggering semantics update', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -805,7 +805,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('onTapHint and onLongPressHint create custom actions', (WidgetTester tester) async {
+  testWidgets('onTapHint and onLongPressHint create custom actions', (final WidgetTester tester) async {
     final SemanticsHandle semantics = tester.ensureSemantics();
     await tester.pumpWidget(Semantics(
       container: true,
@@ -831,7 +831,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('CustomSemanticsActions can be added to a Semantics widget', (WidgetTester tester) async {
+  testWidgets('CustomSemanticsActions can be added to a Semantics widget', (final WidgetTester tester) async {
     final SemanticsHandle semantics = tester.ensureSemantics();
     await tester.pumpWidget(Semantics(
       container: true,
@@ -850,7 +850,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
+  testWidgets('Increased/decreased values are annotated', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -882,7 +882,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets built in a widget tree are sorted properly', (WidgetTester tester) async {
+  testWidgets('Semantics widgets built in a widget tree are sorted properly', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -965,7 +965,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (WidgetTester tester) async {
+  testWidgets('Semantics widgets built with explicit sort orders are sorted properly', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -1023,7 +1023,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets without sort orders are sorted properly', (WidgetTester tester) async {
+  testWidgets('Semantics widgets without sort orders are sorted properly', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -1084,7 +1084,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets that are transformed are sorted properly', (WidgetTester tester) async {
+  testWidgets('Semantics widgets that are transformed are sorted properly', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(
@@ -1148,7 +1148,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics widgets without sort orders are sorted properly when no Directionality is present', (WidgetTester tester) async {
+  testWidgets('Semantics widgets without sort orders are sorted properly when no Directionality is present', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     int semanticsUpdateCount = 0;
     final SemanticsHandle handle = tester.binding.pipelineOwner.ensureSemantics(listener: () {
@@ -1249,7 +1249,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Semantics excludeSemantics ignores children', (WidgetTester tester) async {
+  testWidgets('Semantics excludeSemantics ignores children', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Semantics(
       label: 'label',
@@ -1277,7 +1277,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can change handlers', (WidgetTester tester) async {
+  testWidgets('Can change handlers', (final WidgetTester tester) async {
     await tester.pumpWidget(Semantics(
       container: true,
       label: 'foo',
@@ -1593,7 +1593,7 @@ void main() {
       container: true,
       label: 'foo',
       textDirection: TextDirection.ltr,
-      onSetSelection: (TextSelection _) {},
+      onSetSelection: (final TextSelection _) {},
     ));
 
     expect(tester.getSemantics(find.bySemanticsLabel('foo')), matchesSemantics(
@@ -1664,7 +1664,7 @@ void main() {
     ));
   });
 
-  testWidgets('Semantics with zero transform gets dropped', (WidgetTester tester) async {
+  testWidgets('Semantics with zero transform gets dropped', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/110671.
     // Construct a widget tree that will end up with a fitted box that applies
     // a zero transform because it does not actually draw its children.
@@ -1691,7 +1691,7 @@ void main() {
     expect(node.childrenCount, 0);
   });
 
-  testWidgets('blocking user interaction works on explicit child node.', (WidgetTester tester) async {
+  testWidgets('blocking user interaction works on explicit child node.', (final WidgetTester tester) async {
     final UniqueKey key1 = UniqueKey();
     final UniqueKey key2 = UniqueKey();
     await tester.pumpWidget(
@@ -1734,7 +1734,7 @@ void main() {
     );
   });
 
-  testWidgets('blocking user interaction on a merged child', (WidgetTester tester) async {
+  testWidgets('blocking user interaction on a merged child', (final WidgetTester tester) async {
     final UniqueKey key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -1769,7 +1769,7 @@ void main() {
     );
   });
 
-  testWidgets('does not merge conflicting actions even if one of them is blocked', (WidgetTester tester) async {
+  testWidgets('does not merge conflicting actions even if one of them is blocked', (final WidgetTester tester) async {
     final UniqueKey key = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(

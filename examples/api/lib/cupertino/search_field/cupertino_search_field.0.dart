@@ -12,7 +12,7 @@ class SearchTextFieldApp extends StatelessWidget {
   const SearchTextFieldApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: SearchTextFieldExample(),
@@ -43,7 +43,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoSearchTextField Sample'),

@@ -20,7 +20,7 @@ class TestIconState extends State<TestIcon> {
   late IconThemeData iconTheme;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     iconTheme = IconTheme.of(context);
     return const Icon(Icons.add);
   }
@@ -39,7 +39,7 @@ class TestTextState extends State<TestText> {
   late TextStyle textStyle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     textStyle = DefaultTextStyle.of(context).style;
     return Text(widget.text);
   }
@@ -80,19 +80,19 @@ void main() {
     expect(themeData.titleAlignment, null);
   });
 
-  testWidgets('Default ListTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ListTileThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('ListTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ListTileThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ListTileThemeData(
       dense: true,
@@ -117,8 +117,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(
@@ -147,7 +147,7 @@ void main() {
     );
   });
 
-  testWidgets('ListTileTheme backwards compatibility constructor', (WidgetTester tester) async {
+  testWidgets('ListTileTheme backwards compatibility constructor', (final WidgetTester tester) async {
     late ListTileThemeData theme;
 
     await tester.pumpWidget(
@@ -170,7 +170,7 @@ void main() {
             mouseCursor: MaterialStateMouseCursor.clickable,
             child: Center(
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   theme = ListTileTheme.of(context);
                   return const Placeholder();
                 },
@@ -197,7 +197,7 @@ void main() {
     expect(theme.mouseCursor, MaterialStateMouseCursor.clickable);
   });
 
-  testWidgets('ListTileTheme', (WidgetTester tester) async {
+  testWidgets('ListTileTheme', (final WidgetTester tester) async {
     final Key listTileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key subtitleKey = UniqueKey();
@@ -206,13 +206,13 @@ void main() {
     late ThemeData theme;
 
     Widget buildFrame({
-      bool enabled = true,
-      bool dense = false,
-      bool selected = false,
-      ShapeBorder? shape,
-      Color? selectedColor,
-      Color? iconColor,
-      Color? textColor,
+      final bool enabled = true,
+      final bool dense = false,
+      final bool selected = false,
+      final ShapeBorder? shape,
+      final Color? selectedColor,
+      final Color? iconColor,
+      final Color? textColor,
     }) {
       return MaterialApp(
         home: Material(
@@ -225,7 +225,7 @@ void main() {
                 iconColor: iconColor,
                 textColor: textColor,
                 minVerticalPadding: 25.0,
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                mouseCursor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
@@ -236,7 +236,7 @@ void main() {
                 titleAlignment: ListTileTitleAlignment.bottom,
               ),
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   theme = Theme.of(context);
                   return ListTile(
                     key: listTileKey,
@@ -261,8 +261,8 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(4.0)),
     );
 
-    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
-    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+    Color iconColor(final Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+    Color textColor(final Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
     ShapeBorder inkWellBorder() => tester.widget<InkWell>(find.descendant(of: find.byType(ListTile), matching: find.byType(InkWell))).customBorder!;
 
     // A selected ListTile's leading, trailing, and text get the primary color by default
@@ -332,7 +332,7 @@ void main() {
     expect(trailingOffset.dy - titleOffset.dy, 6);
   });
 
-  testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (WidgetTester tester) async {
+  testWidgets('ListTileTheme colors are applied to leading and trailing text widgets', (final WidgetTester tester) async {
     final Key leadingKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
@@ -341,8 +341,8 @@ void main() {
 
     late ThemeData theme;
     Widget buildFrame({
-      bool enabled = true,
-      bool selected = false,
+      final bool enabled = true,
+      final bool selected = false,
     }) {
       return MaterialApp(
         home: Material(
@@ -353,7 +353,7 @@ void main() {
                 textColor: defaultColor,
               ),
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   theme = Theme.of(context);
                   return ListTile(
                     enabled: enabled,
@@ -370,7 +370,7 @@ void main() {
       );
     }
 
-    Color textColor(Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
+    Color textColor(final Key key) => tester.state<TestTextState>(find.byKey(key)).textStyle.color!;
 
     await tester.pumpWidget(buildFrame());
     // Enabled color should use ListTileTheme.textColor.
@@ -394,7 +394,7 @@ void main() {
 
   testWidgets(
     "ListTile respects ListTileTheme's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle",
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(
         useMaterial3: true,
         listTileTheme: const ListTileThemeData(
@@ -410,7 +410,7 @@ void main() {
         home: Material(
           child: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return const ListTile(
                   leading: TestText('leading'),
                   title: TestText('title'),
@@ -437,7 +437,7 @@ void main() {
 
   testWidgets(
     "ListTile's titleTextStyle, subtitleTextStyle & leadingAndTrailingTextStyle are overridden by ListTile properties",
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       useMaterial3: true,
       listTileTheme: const ListTileThemeData(
@@ -457,7 +457,7 @@ void main() {
         home: Material(
           child: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return const ListTile(
                   titleTextStyle: titleTextStyle,
                   subtitleTextStyle: subtitleTextStyle,
@@ -485,7 +485,7 @@ void main() {
     expect(trailing.text.style!.fontSize, 18.0);
   });
 
-  testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (WidgetTester tester) async {
+  testWidgets("ListTile respects ListTileTheme's tileColor & selectedTileColor", (final WidgetTester tester) async {
     late ListTileThemeData theme;
     bool isSelected = false;
 
@@ -499,7 +499,7 @@ void main() {
             ),
             child: Center(
               child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
+                builder: (final BuildContext context, final StateSetter setState) {
                   theme = ListTileTheme.of(context);
                   return ListTile(
                     selected: isSelected,
@@ -525,7 +525,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: theme.selectedTileColor));
   });
 
-  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (WidgetTester tester) async {
+  testWidgets("ListTileTheme's tileColor & selectedTileColor are overridden by ListTile properties", (final WidgetTester tester) async {
     bool isSelected = false;
     final Color tileColor = Colors.green.shade500;
     final Color selectedTileColor = Colors.red.shade500;
@@ -540,7 +540,7 @@ void main() {
             ),
             child: Center(
               child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
+                builder: (final BuildContext context, final StateSetter setState) {
                   return ListTile(
                     tileColor: tileColor,
                     selectedTileColor: selectedTileColor,
@@ -567,7 +567,7 @@ void main() {
     expect(find.byType(Material), paints..rect(color: selectedTileColor));
   });
 
-  testWidgets('ListTile uses ListTileTheme shape in a drawer', (WidgetTester tester) async {
+  testWidgets('ListTile uses ListTileTheme shape in a drawer', (final WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/106303
 
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -600,7 +600,7 @@ void main() {
     expect(inkWellBorder, shapeBorder);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (WidgetTester tester) async {
+  testWidgets('ListTile respects MaterialStateColor LisTileTheme.textColor', (final WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -609,7 +609,7 @@ void main() {
 
     final ThemeData theme = ThemeData(
       listTileTheme: ListTileThemeData(
-        textColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        textColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return disabledColor;
           }
@@ -626,7 +626,7 @@ void main() {
         home: Material(
           child: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
@@ -660,7 +660,7 @@ void main() {
     expect(title.text.style!.color, selectedColor);
   });
 
-  testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (WidgetTester tester) async {
+  testWidgets('ListTile respects MaterialStateColor LisTileTheme.iconColor', (final WidgetTester tester) async {
     bool enabled = false;
     bool selected = false;
     const Color defaultColor = Colors.blue;
@@ -670,7 +670,7 @@ void main() {
 
     final ThemeData theme = ThemeData(
       listTileTheme: ListTileThemeData(
-        iconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        iconColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return disabledColor;
           }
@@ -687,7 +687,7 @@ void main() {
         home: Material(
           child: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return ListTile(
                   enabled: enabled,
                   selected: selected,
@@ -700,7 +700,7 @@ void main() {
       );
     }
 
-    Color iconColor(Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
+    Color iconColor(final Key key) => tester.state<TestIconState>(find.byKey(key)).iconTheme.color!;
 
     // Test disabled state.
     await tester.pumpWidget(buildFrame());
@@ -719,7 +719,7 @@ void main() {
     expect(iconColor(leadingKey), selectedColor);
   });
 
-  testWidgets('ListTileThemeData copyWith overrides all properties', (WidgetTester tester) async {
+  testWidgets('ListTileThemeData copyWith overrides all properties', (final WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/119734
 
     const ListTileThemeData original = ListTileThemeData(
@@ -781,13 +781,13 @@ void main() {
     expect(copy.titleAlignment, ListTileTitleAlignment.top);
   });
 
-  testWidgets('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (WidgetTester tester) async {
+  testWidgets('ListTileTheme.titleAlignment is overridden by ListTile.titleAlignment', (final WidgetTester tester) async {
     final Key leadingKey = GlobalKey();
     final Key trailingKey = GlobalKey();
     const String titleText = '\nHeadline Text\n';
     const String subtitleText = '\nSupporting Text\n';
 
-    Widget buildFrame({ ListTileTitleAlignment? alignment }) {
+    Widget buildFrame({ final ListTileTitleAlignment? alignment }) {
       return MaterialApp(
         theme: ThemeData(
           useMaterial3: true,
@@ -817,7 +817,7 @@ void main() {
     expect(trailingOffset.dy - tileOffset.dy, 8.0);
   });
 
-  testWidgets('ListTileTheme.merge supports all properties', (WidgetTester tester) async {
+  testWidgets('ListTileTheme.merge supports all properties', (final WidgetTester tester) async {
     Widget buildFrame() {
       return MaterialApp(
         theme: ThemeData(
@@ -846,7 +846,7 @@ void main() {
         home: Material(
           child: Center(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return ListTileTheme.merge(
                   dense: false,
                   shape: const RoundedRectangleBorder(),
@@ -900,7 +900,7 @@ void main() {
   });
 }
 
-RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+RenderParagraph _getTextRenderObject(final WidgetTester tester, final String text) {
   return tester.renderObject(find.descendant(
     of: find.byType(ListTile),
     matching: find.text(text),

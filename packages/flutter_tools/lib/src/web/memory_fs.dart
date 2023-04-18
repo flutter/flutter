@@ -25,10 +25,10 @@ class WebMemoryFS {
   ///
   /// Returns the list of updated files.
   List<String> write(
-    File codeFile,
-    File manifestFile,
-    File sourcemapFile,
-    File metadataFile,
+    final File codeFile,
+    final File manifestFile,
+    final File sourcemapFile,
+    final File metadataFile,
   ) {
     final List<String> modules = <String>[];
     final Uint8List codeBytes = codeFile.readAsBytesSync();
@@ -95,7 +95,7 @@ class WebMemoryFS {
     }
 
     _mergedMetadata = metadataFiles.values
-      .map((Uint8List encoded) => utf8.decode(encoded))
+      .map((final Uint8List encoded) => utf8.decode(encoded))
       .join('\n');
 
     return modules;

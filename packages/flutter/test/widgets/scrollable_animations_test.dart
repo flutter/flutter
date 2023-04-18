@@ -7,14 +7,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Does not animate if already at target position', (WidgetTester tester) async {
+  testWidgets('Does not animate if already at target position', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
+          children: List<Widget>.generate(80, (final int i) => Text('$i', textDirection: TextDirection.ltr)),
         ),
       ),
     );
@@ -27,14 +27,14 @@ void main() {
     expect(controller.position.pixels, currentPosition);
   });
 
-  testWidgets('Does not animate if already at target position within tolerance', (WidgetTester tester) async {
+  testWidgets('Does not animate if already at target position within tolerance', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
+          children: List<Widget>.generate(80, (final int i) => Text('$i', textDirection: TextDirection.ltr)),
         ),
       ),
     );
@@ -50,14 +50,14 @@ void main() {
     expect(controller.position.pixels, targetPosition);
   });
 
-  testWidgets('Animates if going to a position outside of tolerance', (WidgetTester tester) async {
+  testWidgets('Animates if going to a position outside of tolerance', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           controller: controller,
-          children: List<Widget>.generate(80, (int i) => Text('$i', textDirection: TextDirection.ltr)),
+          children: List<Widget>.generate(80, (final int i) => Text('$i', textDirection: TextDirection.ltr)),
         ),
       ),
     );

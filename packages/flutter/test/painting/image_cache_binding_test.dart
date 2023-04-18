@@ -22,7 +22,7 @@ void main() {
 
     ui.channelBuffers.push(SystemChannels.system.name, SystemChannels.system.codec.encodeMessage(<String, dynamic>{
       'type': 'memoryPressure',
-    }), (ByteData? responseData) {
+    }), (final ByteData? responseData) {
       // The result is: SystemChannels.system.codec.decodeMessage(responseData)
       // ...but we ignore it for the purposes of this test.
     });

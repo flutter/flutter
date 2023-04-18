@@ -7,7 +7,7 @@ import 'package:flutter_gallery/demo/material/buttons_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Button locations are OK', (WidgetTester tester) async {
+  testWidgets('Button locations are OK', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/85351
     {
       await tester.pumpWidget(const MaterialApp(home: ButtonsDemo()));

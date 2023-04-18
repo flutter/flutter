@@ -104,10 +104,10 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     'This feature was deprecated after v2.13.0-1.0.pre.',
   )
   Future<ui.Codec> instantiateImageCodec(
-    Uint8List bytes, {
-    int? cacheWidth,
-    int? cacheHeight,
-    bool allowUpscaling = false,
+    final Uint8List bytes, {
+    final int? cacheWidth,
+    final int? cacheHeight,
+    final bool allowUpscaling = false,
   }) {
     assert(cacheWidth == null || cacheWidth > 0);
     assert(cacheHeight == null || cacheHeight > 0);
@@ -145,10 +145,10 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
     'This feature was deprecated after v3.7.0-1.4.pre.',
   )
   Future<ui.Codec> instantiateImageCodecFromBuffer(
-    ui.ImmutableBuffer buffer, {
-    int? cacheWidth,
-    int? cacheHeight,
-    bool allowUpscaling = false,
+    final ui.ImmutableBuffer buffer, {
+    final int? cacheWidth,
+    final int? cacheHeight,
+    final bool allowUpscaling = false,
   }) {
     assert(cacheWidth == null || cacheWidth > 0);
     assert(cacheHeight == null || cacheHeight > 0);
@@ -176,14 +176,14 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   /// the image will be decoded at its native resolution (as will be the case if
   /// the [getTargetSize] parameter is omitted).
   Future<ui.Codec> instantiateImageCodecWithSize(
-    ui.ImmutableBuffer buffer, {
-    ui.TargetImageSizeCallback? getTargetSize,
+    final ui.ImmutableBuffer buffer, {
+    final ui.TargetImageSizeCallback? getTargetSize,
   }) {
     return ui.instantiateImageCodecWithSize(buffer, getTargetSize: getTargetSize);
   }
 
   @override
-  void evict(String asset) {
+  void evict(final String asset) {
     super.evict(asset);
     imageCache.clear();
     imageCache.clearLiveImages();
@@ -208,7 +208,7 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
   final _SystemFontsNotifier _systemFonts = _SystemFontsNotifier();
 
   @override
-  Future<void> handleSystemMessage(Object systemMessage) async {
+  Future<void> handleSystemMessage(final Object systemMessage) async {
     await super.handleSystemMessage(systemMessage);
     final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
     final String type = message['type'] as String;
@@ -230,11 +230,11 @@ class _SystemFontsNotifier extends Listenable {
   }
 
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     _systemFontsCallbacks.add(listener);
   }
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     _systemFontsCallbacks.remove(listener);
   }
 }

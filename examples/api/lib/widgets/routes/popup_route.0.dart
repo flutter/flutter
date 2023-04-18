@@ -12,7 +12,7 @@ class PopupRouteApp extends StatelessWidget {
   const PopupRouteApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: PopupRouteExample(),
     );
@@ -23,7 +23,7 @@ class PopupRouteExample extends StatelessWidget {
   const PopupRouteExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: OutlinedButton(
@@ -54,7 +54,7 @@ class DismissibleDialog<T> extends PopupRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 300);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
     return Center(
       // Provide DefaultTextStyle to ensure that the dialog's text style
       // matches the rest of the text in the app.

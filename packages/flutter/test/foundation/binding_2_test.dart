@@ -38,7 +38,7 @@ void main() {
     Zone.current.fork().run(() {
       bool sawError = false;
       final FlutterExceptionHandler? lastHandler = FlutterError.onError;
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         final Object error = details.exception;
         expect(error, isA<FlutterError>());
         expect(error.toString(),

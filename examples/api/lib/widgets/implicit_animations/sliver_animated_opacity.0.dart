@@ -12,7 +12,7 @@ class SliverAnimatedOpacityExampleApp extends StatelessWidget {
   const SliverAnimatedOpacityExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverAnimatedOpacity Sample')),
@@ -36,7 +36,7 @@ class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExam
   bool _visible = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomScrollView(slivers: <Widget>[
       SliverAnimatedOpacity(
         opacity: _visible ? 1.0 : 0.0,
@@ -44,7 +44,7 @@ class _SliverAnimatedOpacityExampleState extends State<SliverAnimatedOpacityExam
         sliver: SliverFixedExtentList(
           itemExtent: 100.0,
           delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) {
+            (final BuildContext context, final int index) {
               return Container(
                 color: index.isEven ? Colors.indigo[200] : Colors.orange[200],
               );

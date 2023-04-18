@@ -26,7 +26,7 @@ class PointerRouter {
   ///
   /// Routes added reentrantly within [PointerRouter.route] will take effect when
   /// routing the next event.
-  void addRoute(int pointer, PointerRoute route, [Matrix4? transform]) {
+  void addRoute(final int pointer, final PointerRoute route, [final Matrix4? transform]) {
     final Map<PointerRoute, Matrix4?> routes = _routeMap.putIfAbsent(
       pointer,
       () => <PointerRoute, Matrix4?>{},
@@ -42,7 +42,7 @@ class PointerRouter {
   ///
   /// Routes removed reentrantly within [PointerRouter.route] will take effect
   /// immediately.
-  void removeRoute(int pointer, PointerRoute route) {
+  void removeRoute(final int pointer, final PointerRoute route) {
     assert(_routeMap.containsKey(pointer));
     final Map<PointerRoute, Matrix4?> routes = _routeMap[pointer]!;
     assert(routes.containsKey(route));
@@ -58,7 +58,7 @@ class PointerRouter {
   ///
   /// Routes added reentrantly within [PointerRouter.route] will take effect when
   /// routing the next event.
-  void addGlobalRoute(PointerRoute route, [Matrix4? transform]) {
+  void addGlobalRoute(final PointerRoute route, [final Matrix4? transform]) {
     assert(!_globalRoutes.containsKey(route));
     _globalRoutes[route] = transform;
   }
@@ -70,7 +70,7 @@ class PointerRouter {
   ///
   /// Routes removed reentrantly within [PointerRouter.route] will take effect
   /// immediately.
-  void removeGlobalRoute(PointerRoute route) {
+  void removeGlobalRoute(final PointerRoute route) {
     assert(_globalRoutes.containsKey(route));
     _globalRoutes.remove(route);
   }
@@ -92,7 +92,7 @@ class PointerRouter {
   }
 
   @pragma('vm:notify-debugger-on-exception')
-  void _dispatch(PointerEvent event, PointerRoute route, Matrix4? transform) {
+  void _dispatch(PointerEvent event, final PointerRoute route, final Matrix4? transform) {
     try {
       event = event.transformed(transform);
       route(event);
@@ -120,7 +120,7 @@ class PointerRouter {
   ///
   /// Routes are called in the order in which they were added to the
   /// PointerRouter object.
-  void route(PointerEvent event) {
+  void route(final PointerEvent event) {
     final Map<PointerRoute, Matrix4?>? routes = _routeMap[event.pointer];
     final Map<PointerRoute, Matrix4?> copiedGlobalRoutes = Map<PointerRoute, Matrix4?>.of(_globalRoutes);
     if (routes != null) {
@@ -134,11 +134,11 @@ class PointerRouter {
   }
 
   void _dispatchEventToRoutes(
-    PointerEvent event,
-    Map<PointerRoute, Matrix4?> referenceRoutes,
-    Map<PointerRoute, Matrix4?> copiedRoutes,
+    final PointerEvent event,
+    final Map<PointerRoute, Matrix4?> referenceRoutes,
+    final Map<PointerRoute, Matrix4?> copiedRoutes,
   ) {
-    copiedRoutes.forEach((PointerRoute route, Matrix4? transform) {
+    copiedRoutes.forEach((final PointerRoute route, final Matrix4? transform) {
       if (referenceRoutes.containsKey(route)) {
         _dispatch(event, route, transform);
       }

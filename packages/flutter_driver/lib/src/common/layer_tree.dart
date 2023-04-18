@@ -26,7 +26,7 @@ class LayerTree extends Result {
   final String? tree;
 
   /// Deserializes the result from JSON.
-  static LayerTree fromJson(Map<String, dynamic> json) {
+  static LayerTree fromJson(final Map<String, dynamic> json) {
     return LayerTree(json['tree'] as String);
   }
 

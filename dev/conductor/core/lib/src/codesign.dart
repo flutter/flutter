@@ -34,7 +34,7 @@ class CodesignCommand extends Command<void> {
   CodesignCommand({
     required this.checkouts,
     required this.flutterRoot,
-    FrameworkRepository? framework,
+    final FrameworkRepository? framework,
   })  : fileSystem = checkouts.fileSystem,
         platform = checkouts.platform,
         stdio = checkouts.stdio,
@@ -172,7 +172,7 @@ class CodesignCommand extends Command<void> {
       'dart-sdk/bin/utils/gen_snapshot',
       'dart-sdk/bin/utils/wasm-opt',
     ]
-        .map((String relativePath) =>
+        .map((final String relativePath) =>
             fileSystem.path.join(frameworkCacheDirectory, relativePath))
         .toList();
   }
@@ -199,7 +199,7 @@ class CodesignCommand extends Command<void> {
       'artifacts/engine/ios/Flutter.xcframework/ios-arm64_x86_64-simulator/Flutter.framework/Flutter',
       'artifacts/ios-deploy/ios-deploy',
     ]
-        .map((String relativePath) =>
+        .map((final String relativePath) =>
             fileSystem.path.join(frameworkCacheDirectory, relativePath))
         .toList();
   }
@@ -231,7 +231,7 @@ class CodesignCommand extends Command<void> {
     if (foundFiles.length < allExpectedFiles.length) {
       final List<String> unfoundFiles = allExpectedFiles
           .where(
-            (String file) => !foundFiles.contains(file),
+            (final String file) => !foundFiles.contains(file),
           )
           .toList();
       stdio.printError(
@@ -339,7 +339,7 @@ class CodesignCommand extends Command<void> {
   List<String>? _allBinaryPaths;
 
   /// Find every binary file in the given [rootDirectory].
-  Future<List<String>> findBinaryPaths(String rootDirectory) async {
+  Future<List<String>> findBinaryPaths(final String rootDirectory) async {
     if (_allBinaryPaths != null) {
       return _allBinaryPaths!;
     }
@@ -354,10 +354,10 @@ class CodesignCommand extends Command<void> {
     );
     final List<String> allFiles = (result.stdout as String)
         .split('\n')
-        .where((String s) => s.isNotEmpty)
+        .where((final String s) => s.isNotEmpty)
         .toList();
 
-    await Future.forEach(allFiles, (String filePath) async {
+    await Future.forEach(allFiles, (final String filePath) async {
       if (await isBinary(filePath)) {
         allBinaryPaths.add(filePath);
       }
@@ -367,7 +367,7 @@ class CodesignCommand extends Command<void> {
   }
 
   /// Check mime-type of file at [filePath] to determine if it is binary.
-  Future<bool> isBinary(String filePath) async {
+  Future<bool> isBinary(final String filePath) async {
     final io.ProcessResult result = await processManager.run(
       <String>[
         'file',
@@ -380,7 +380,7 @@ class CodesignCommand extends Command<void> {
   }
 
   /// Check if the binary has the expected entitlements.
-  Future<bool> hasExpectedEntitlements(String binaryPath) async {
+  Future<bool> hasExpectedEntitlements(final String binaryPath) async {
     final io.ProcessResult entitlementResult = await processManager.run(
       <String>[
         'codesign',

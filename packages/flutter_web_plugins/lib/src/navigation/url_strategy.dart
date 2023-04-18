@@ -31,7 +31,7 @@ UrlStrategy? get urlStrategy => _urlStrategy;
 /// Change the strategy to use for handling browser URL.
 ///
 /// Setting this to null disables all integration with the browser history.
-void setUrlStrategy(UrlStrategy? strategy) {
+void setUrlStrategy(final UrlStrategy? strategy) {
   _urlStrategy = strategy;
 
   JsUrlStrategy? jsUrlStrategy;
@@ -71,7 +71,7 @@ class HashUrlStrategy extends UrlStrategy {
   final PlatformLocation _platformLocation;
 
   @override
-  ui.VoidCallback addPopStateListener(EventListener fn) {
+  ui.VoidCallback addPopStateListener(final EventListener fn) {
     _platformLocation.addPopStateListener(fn);
     return () => _platformLocation.removePopStateListener(fn);
   }
@@ -95,7 +95,7 @@ class HashUrlStrategy extends UrlStrategy {
   Object? getState() => _platformLocation.state;
 
   @override
-  String prepareExternalUrl(String internalUrl) {
+  String prepareExternalUrl(final String internalUrl) {
     // It's convention that if the hash path is empty, we omit the `#`; however,
     // if the empty URL is pushed it won't replace any existing fragment. So
     // when the hash path is empty, we instead return the location's path and
@@ -106,17 +106,17 @@ class HashUrlStrategy extends UrlStrategy {
   }
 
   @override
-  void pushState(Object? state, String title, String url) {
+  void pushState(final Object? state, final String title, final String url) {
     _platformLocation.pushState(state, title, prepareExternalUrl(url));
   }
 
   @override
-  void replaceState(Object? state, String title, String url) {
+  void replaceState(final Object? state, final String title, final String url) {
     _platformLocation.replaceState(state, title, prepareExternalUrl(url));
   }
 
   @override
-  Future<void> go(int count) {
+  Future<void> go(final int count) {
     _platformLocation.go(count);
     return _waitForPopState();
   }
@@ -128,7 +128,7 @@ class HashUrlStrategy extends UrlStrategy {
   Future<void> _waitForPopState() {
     final Completer<void> completer = Completer<void>();
     late ui.VoidCallback unsubscribe;
-    unsubscribe = addPopStateListener((_) {
+    unsubscribe = addPopStateListener((final _) {
       unsubscribe();
       completer.complete();
     });
@@ -195,12 +195,12 @@ class BrowserPlatformLocation extends PlatformLocation {
   html.History get _history => html.window.history;
 
   @override
-  void addPopStateListener(html.EventListener fn) {
+  void addPopStateListener(final html.EventListener fn) {
     html.window.addEventListener('popstate', fn);
   }
 
   @override
-  void removePopStateListener(html.EventListener fn) {
+  void removePopStateListener(final html.EventListener fn) {
     html.window.removeEventListener('popstate', fn);
   }
 
@@ -217,17 +217,17 @@ class BrowserPlatformLocation extends PlatformLocation {
   Object? get state => _history.state;
 
   @override
-  void pushState(Object? state, String title, String url) {
+  void pushState(final Object? state, final String title, final String url) {
     _history.pushState(state, title, url);
   }
 
   @override
-  void replaceState(Object? state, String title, String url) {
+  void replaceState(final Object? state, final String title, final String url) {
     _history.replaceState(state, title, url);
   }
 
   @override
-  void go(int count) {
+  void go(final int count) {
     _history.go(count);
   }
 

@@ -43,9 +43,9 @@ class TextMagnifier extends StatefulWidget {
   static TextMagnifierConfiguration adaptiveMagnifierConfiguration = TextMagnifierConfiguration(
     shouldDisplayHandlesInMagnifier: defaultTargetPlatform == TargetPlatform.iOS,
     magnifierBuilder: (
-      BuildContext context,
-      MagnifierController controller,
-      ValueNotifier<MagnifierInfo> magnifierInfo,
+      final BuildContext context,
+      final MagnifierController controller,
+      final ValueNotifier<MagnifierInfo> magnifierInfo,
     ) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
@@ -122,7 +122,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   }
 
   @override
-  void didUpdateWidget(TextMagnifier oldWidget) {
+  void didUpdateWidget(final TextMagnifier oldWidget) {
     if (oldWidget.magnifierInfo != widget.magnifierInfo) {
       oldWidget.magnifierInfo.removeListener(_determineMagnifierPositionAndFocalPoint);
       widget.magnifierInfo.addListener(_determineMagnifierPositionAndFocalPoint);
@@ -231,7 +231,7 @@ class _TextMagnifierState extends State<TextMagnifier> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(_magnifierPosition != null,
         'Magnifier position should only be null before the first build.');
 
@@ -319,7 +319,7 @@ class Magnifier extends StatelessWidget {
   final Size size;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RawMagnifier(
       decoration: MagnifierDecoration(
         shape: RoundedRectangleBorder(borderRadius: borderRadius),

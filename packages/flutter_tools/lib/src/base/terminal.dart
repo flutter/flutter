@@ -21,17 +21,17 @@ enum TerminalColor {
 /// console.
 class OutputPreferences {
   OutputPreferences({
-    bool? wrapText,
-    int? wrapColumn,
-    bool? showColor,
-    io.Stdio? stdio,
+    final bool? wrapText,
+    final int? wrapColumn,
+    final bool? showColor,
+    final io.Stdio? stdio,
   }) : _stdio = stdio,
        wrapText = wrapText ?? stdio?.hasTerminal ?? false,
        _overrideWrapColumn = wrapColumn,
        showColor = showColor ?? false;
 
   /// A version of this class for use in tests.
-  OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
+  OutputPreferences.test({this.wrapText = false, final int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
     : _overrideWrapColumn = wrapColumn, _stdio = null;
 
   final io.Stdio? _stdio;
@@ -73,7 +73,7 @@ abstract class Terminal {
   /// Create a new test [Terminal].
   ///
   /// If not specified, [supportsColor] defaults to `false`.
-  factory Terminal.test({bool supportsColor, bool supportsEmoji}) = _TestTerminal;
+  factory Terminal.test({final bool supportsColor, final bool supportsEmoji}) = _TestTerminal;
 
   /// Whether the current terminal supports color escape codes.
   bool get supportsColor;
@@ -89,7 +89,7 @@ abstract class Terminal {
   ///
   /// If not set, defaults to false.
   bool get usesTerminalUi;
-  set usesTerminalUi(bool value);
+  set usesTerminalUi(final bool value);
 
   /// Whether there is a terminal attached to stdin.
   ///
@@ -105,14 +105,14 @@ abstract class Terminal {
   /// Success mark to use in stdout.
   String get successMark;
 
-  String bolden(String message);
+  String bolden(final String message);
 
-  String color(String message, TerminalColor color);
+  String color(final String message, final TerminalColor color);
 
   String clearScreen();
 
   bool get singleCharMode;
-  set singleCharMode(bool value);
+  set singleCharMode(final bool value);
 
   /// Return keystrokes from the console.
   ///
@@ -139,19 +139,19 @@ abstract class Terminal {
   ///
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
+    final List<String> acceptedCharacters, {
+    required final Logger logger,
+    final String? prompt,
+    final int? defaultChoiceIndex,
+    final bool displayAcceptedCharacters = true,
   });
 }
 
 class AnsiTerminal implements Terminal {
   AnsiTerminal({
-    required io.Stdio stdio,
-    required Platform platform,
-    DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
+    required final io.Stdio stdio,
+    required final Platform platform,
+    final DateTime? now, // Time used to determine preferredStyle. Defaults to 0001-01-01 00:00.
   })
     : _stdio = stdio,
       _platform = platform,
@@ -194,7 +194,7 @@ class AnsiTerminal implements Terminal {
     TerminalColor.grey: grey,
   };
 
-  static String colorCode(TerminalColor color) => _colorMap[color]!;
+  static String colorCode(final TerminalColor color) => _colorMap[color]!;
 
   @override
   bool get supportsColor => _platform.stdoutSupportsAnsi;
@@ -234,7 +234,7 @@ class AnsiTerminal implements Terminal {
   }
 
   @override
-  String bolden(String message) {
+  String bolden(final String message) {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
@@ -254,7 +254,7 @@ class AnsiTerminal implements Terminal {
   }
 
   @override
-  String color(String message, TerminalColor color) {
+  String color(final String message, final TerminalColor color) {
     if (!supportsColor || message.isEmpty) {
       return message;
     }
@@ -281,7 +281,7 @@ class AnsiTerminal implements Terminal {
   /// the cursor is on.
   ///
   /// If the terminal does not support ANSI codes, returns an empty string.
-  String clearLines(int numberOfLines) {
+  String clearLines(final int numberOfLines) {
     if (!supportsColor) {
       return '';
     }
@@ -299,7 +299,7 @@ class AnsiTerminal implements Terminal {
     return stdin.lineMode && stdin.echoMode;
   }
   @override
-  set singleCharMode(bool value) {
+  set singleCharMode(final bool value) {
     if (!_stdio.stdinHasTerminal) {
       return;
     }
@@ -326,11 +326,11 @@ class AnsiTerminal implements Terminal {
 
   @override
   Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
+    final List<String> acceptedCharacters, {
+    required final Logger logger,
+    final String? prompt,
+    final int? defaultChoiceIndex,
+    final bool displayAcceptedCharacters = true,
   }) async {
     assert(acceptedCharacters.isNotEmpty);
     assert(prompt == null || prompt.isNotEmpty);
@@ -373,23 +373,23 @@ class _TestTerminal implements Terminal {
   bool usesTerminalUi = false;
 
   @override
-  String bolden(String message) => message;
+  String bolden(final String message) => message;
 
   @override
   String clearScreen() => '\n\n';
 
   @override
-  String color(String message, TerminalColor color) => message;
+  String color(final String message, final TerminalColor color) => message;
 
   @override
   Stream<String> get keystrokes => const Stream<String>.empty();
 
   @override
-  Future<String> promptForCharInput(List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
+  Future<String> promptForCharInput(final List<String> acceptedCharacters, {
+    required final Logger logger,
+    final String? prompt,
+    final int? defaultChoiceIndex,
+    final bool displayAcceptedCharacters = true,
   }) {
     throw UnsupportedError('promptForCharInput not supported in the test terminal.');
   }
@@ -397,7 +397,7 @@ class _TestTerminal implements Terminal {
   @override
   bool get singleCharMode => false;
   @override
-  set singleCharMode(bool value) { }
+  set singleCharMode(final bool value) { }
 
   @override
   final bool supportsColor;

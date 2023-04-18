@@ -23,7 +23,7 @@ class FakePlatformViewController extends PlatformViewController {
   final int viewId;
 
   @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
+  Future<void> dispatchPointerEvent(final PointerEvent event) async {
     dispatchedPointerEvents.add(event);
   }
 
@@ -74,7 +74,7 @@ class FakeAndroidViewController implements AndroidViewController {
   late PointTransformer pointTransformer;
 
   @override
-  Future<void> dispatchPointerEvent(PointerEvent event) async {
+  Future<void> dispatchPointerEvent(final PointerEvent event) async {
     dispatchedPointerEvents.add(event);
   }
 
@@ -95,12 +95,12 @@ class FakeAndroidViewController implements AndroidViewController {
   }
 
   @override
-  Future<Size> setSize(Size size) {
+  Future<Size> setSize(final Size size) {
     return Future<Size>.value(size);
   }
 
   @override
-  Future<void> setOffset(Offset off) async {}
+  Future<void> setOffset(final Offset off) async {}
 
   @override
   int get textureId => 0;
@@ -112,28 +112,28 @@ class FakeAndroidViewController implements AndroidViewController {
   bool get isCreated => created;
 
   @override
-  void addOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+  void addOnPlatformViewCreatedListener(final PlatformViewCreatedCallback listener) {
     created = true;
     createdCallbacks.add(listener);
   }
 
   @override
-  void removeOnPlatformViewCreatedListener(PlatformViewCreatedCallback listener) {
+  void removeOnPlatformViewCreatedListener(final PlatformViewCreatedCallback listener) {
     createdCallbacks.remove(listener);
   }
 
   @override
-  Future<void> sendMotionEvent(AndroidMotionEvent event) {
+  Future<void> sendMotionEvent(final AndroidMotionEvent event) {
     throw UnimplementedError();
   }
 
   @override
-  Future<void> setLayoutDirection(TextDirection layoutDirection) {
+  Future<void> setLayoutDirection(final TextDirection layoutDirection) {
     throw UnimplementedError();
   }
 
   @override
-  Future<void> create({Size? size, Offset? position}) async {
+  Future<void> create({final Size? size, final Offset? position}) async {
     assert(!_createCalledSuccessfully);
     if (requiresSize && size != null) {
       assert(!size.isEmpty);
@@ -176,18 +176,18 @@ class FakeAndroidPlatformViewsController {
   /// When false, `create` will simulate the engine's fallback mode.
   bool allowTextureLayerMode = true;
 
-  void registerViewType(String viewType) {
+  void registerViewType(final String viewType) {
     _registeredViewTypes.add(viewType);
   }
 
-  void invokeViewFocused(int viewId) {
+  void invokeViewFocused(final int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
+        .handlePlatformMessage(SystemChannels.platform_views.name, data, (final ByteData? data) {});
   }
 
-  Future<dynamic> _onMethodCall(MethodCall call) {
+  Future<dynamic> _onMethodCall(final MethodCall call) {
     switch(call.method) {
       case 'create':
         return _create(call);
@@ -207,7 +207,7 @@ class FakeAndroidPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _create(MethodCall call) async {
+  Future<dynamic> _create(final MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
@@ -259,7 +259,7 @@ class FakeAndroidPlatformViewsController {
     return Future<int>.value(textureId);
   }
 
-  Future<dynamic> _dispose(MethodCall call) {
+  Future<dynamic> _dispose(final MethodCall call) {
     assert(call.arguments is Map);
     final Map<Object?, Object?> arguments = call.arguments as Map<Object?, Object?>;
 
@@ -283,7 +283,7 @@ class FakeAndroidPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _resize(MethodCall call) async {
+  Future<dynamic> _resize(final MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final double width = args['width'] as double;
@@ -304,7 +304,7 @@ class FakeAndroidPlatformViewsController {
     return Future<Map<dynamic, dynamic>>.sync(() => <dynamic, dynamic>{'width': width, 'height': height});
   }
 
-  Future<dynamic> _offset(MethodCall call) async {
+  Future<dynamic> _offset(final MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final double top = args['top'] as double;
@@ -313,7 +313,7 @@ class FakeAndroidPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _touch(MethodCall call) {
+  Future<dynamic> _touch(final MethodCall call) {
     final List<dynamic> args = call.arguments as List<dynamic>;
     final int id = args[0] as int;
     final int action = args[3] as int;
@@ -336,7 +336,7 @@ class FakeAndroidPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _setDirection(MethodCall call) async {
+  Future<dynamic> _setDirection(final MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final int layoutDirection = args['direction'] as int;
@@ -353,7 +353,7 @@ class FakeAndroidPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _clearFocus(MethodCall call) {
+  Future<dynamic> _clearFocus(final MethodCall call) {
     final int id = call.arguments as int;
 
     if (!_views.containsKey(id)) {
@@ -388,18 +388,18 @@ class FakeIosPlatformViewsController {
   // Maps a view id to the number of gestures it rejected so far.
   final Map<int, int> gesturesRejected = <int, int>{};
 
-  void registerViewType(String viewType) {
+  void registerViewType(final String viewType) {
     _registeredViewTypes.add(viewType);
   }
 
-  void invokeViewFocused(int viewId) {
+  void invokeViewFocused(final int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData? data) {});
+        .handlePlatformMessage(SystemChannels.platform_views.name, data, (final ByteData? data) {});
   }
 
-  Future<dynamic> _onMethodCall(MethodCall call) {
+  Future<dynamic> _onMethodCall(final MethodCall call) {
     switch(call.method) {
       case 'create':
         return _create(call);
@@ -413,7 +413,7 @@ class FakeIosPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _create(MethodCall call) async {
+  Future<dynamic> _create(final MethodCall call) async {
     if (creationDelay != null) {
       await creationDelay!.future;
     }
@@ -442,21 +442,21 @@ class FakeIosPlatformViewsController {
     return Future<int?>.sync(() => null);
   }
 
-  Future<dynamic> _acceptGesture(MethodCall call) async {
+  Future<dynamic> _acceptGesture(final MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     gesturesAccepted[id] = gesturesAccepted[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
-  Future<dynamic> _rejectGesture(MethodCall call) async {
+  Future<dynamic> _rejectGesture(final MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     gesturesRejected[id] = gesturesRejected[id]! + 1;
     return Future<int?>.sync(() => null);
   }
 
-  Future<dynamic> _dispose(MethodCall call) {
+  Future<dynamic> _dispose(final MethodCall call) {
     final int id = call.arguments as int;
 
     if (!_views.containsKey(id)) {
@@ -485,11 +485,11 @@ class FakeHtmlPlatformViewsController {
 
   Completer<void>? createCompleter;
 
-  void registerViewType(String viewType) {
+  void registerViewType(final String viewType) {
     _registeredViewTypes.add(viewType);
   }
 
-  Future<dynamic> _onMethodCall(MethodCall call) {
+  Future<dynamic> _onMethodCall(final MethodCall call) {
     switch(call.method) {
       case 'create':
         return _create(call);
@@ -499,7 +499,7 @@ class FakeHtmlPlatformViewsController {
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _create(MethodCall call) async {
+  Future<dynamic> _create(final MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
     final int id = args['id'] as int;
     final String viewType = args['viewType'] as String;
@@ -526,7 +526,7 @@ class FakeHtmlPlatformViewsController {
     return Future<int?>.sync(() => null);
   }
 
-  Future<dynamic> _dispose(MethodCall call) {
+  Future<dynamic> _dispose(final MethodCall call) {
     final int id = call.arguments as int;
 
     if (!_views.containsKey(id)) {
@@ -555,7 +555,7 @@ class FakeAndroidPlatformView {
   final bool? hybridFallback;
   final Offset? position;
 
-  FakeAndroidPlatformView copyWith({Size? size, int? layoutDirection}) => FakeAndroidPlatformView(
+  FakeAndroidPlatformView copyWith({final Size? size, final int? layoutDirection}) => FakeAndroidPlatformView(
     id,
     type,
     size ?? this.size,
@@ -567,7 +567,7 @@ class FakeAndroidPlatformView {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -612,7 +612,7 @@ class FakeAndroidMotionEvent {
 
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is FakeAndroidMotionEvent
         && listEquals<int>(other.pointerIds, pointerIds)
         && other.action == action
@@ -637,7 +637,7 @@ class FakeUiKitView {
   final Uint8List? creationParams;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -664,7 +664,7 @@ class FakeHtmlPlatformView {
   final String type;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

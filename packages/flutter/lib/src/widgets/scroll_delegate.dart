@@ -34,7 +34,7 @@ export 'package:flutter/rendering.dart' show
 ///    generate indexes.
 typedef SemanticIndexCallback = int? Function(Widget widget, int localIndex);
 
-int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
+int _kDefaultSemanticIndexCallback(final Widget _, final int localIndex) => localIndex;
 
 /// A delegate that supplies children for slivers.
 ///
@@ -141,7 +141,7 @@ abstract class SliverChildDelegate {
   /// The values returned by this method are cached. To indicate that the
   /// widgets have changed, a new delegate must be provided, and the new
   /// delegate's [shouldRebuild] method must return true.
-  Widget? build(BuildContext context, int index);
+  Widget? build(final BuildContext context, final int index);
 
   /// Returns an estimate of the number of children this delegate will build.
   ///
@@ -163,10 +163,10 @@ abstract class SliverChildDelegate {
   /// The default implementation returns null, which causes the caller to
   /// extrapolate the max scroll offset from the given parameters.
   double? estimateMaxScrollOffset(
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
+    final int firstIndex,
+    final int lastIndex,
+    final double leadingScrollOffset,
+    final double trailingScrollOffset,
   ) => null;
 
   /// Called at the end of layout to indicate that layout is now complete.
@@ -177,7 +177,7 @@ abstract class SliverChildDelegate {
   ///
   /// Useful for subclasses that which to track which children are included in
   /// the underlying render tree.
-  void didFinishLayout(int firstIndex, int lastIndex) { }
+  void didFinishLayout(final int firstIndex, final int lastIndex) { }
 
   /// Called whenever a new instance of the child delegate class is
   /// provided to the sliver.
@@ -188,7 +188,7 @@ abstract class SliverChildDelegate {
   ///
   /// If the method returns false, then the [build] call might be optimized
   /// away.
-  bool shouldRebuild(covariant SliverChildDelegate oldDelegate);
+  bool shouldRebuild(covariant final SliverChildDelegate oldDelegate);
 
   /// Find index of child element with associated key.
   ///
@@ -199,7 +199,7 @@ abstract class SliverChildDelegate {
   /// If not provided, a child widget may not map to its existing [RenderObject]
   /// when the order of children returned from the children builder changes.
   /// This may result in state-loss.
-  int? findIndexByKey(Key key) => null;
+  int? findIndexByKey(final Key key) => null;
 
   @override
   String toString() {
@@ -211,7 +211,7 @@ abstract class SliverChildDelegate {
   /// Add additional information to the given description for use by [toString].
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     try {
       final int? children = estimatedChildCount;
       if (children != null) {
@@ -464,7 +464,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   final ChildIndexGetter? findChildIndexCallback;
 
   @override
-  int? findIndexByKey(Key key) {
+  int? findIndexByKey(final Key key) {
     if (findChildIndexCallback == null) {
       return null;
     }
@@ -480,7 +480,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 
   @override
   @pragma('vm:notify-debugger-on-exception')
-  Widget? build(BuildContext context, int index) {
+  Widget? build(final BuildContext context, final int index) {
     if (index < 0 || (childCount != null && index >= childCount!)) {
       return null;
     }
@@ -513,7 +513,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   int? get estimatedChildCount => childCount;
 
   @override
-  bool shouldRebuild(covariant SliverChildBuilderDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant final SliverChildBuilderDelegate oldDelegate) => true;
 }
 
 /// A delegate that supplies children for slivers using an explicit list.
@@ -663,7 +663,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
 
   bool get _isConstantInstance => _keyToIndex == null;
 
-  int? _findChildIndex(Key key) {
+  int? _findChildIndex(final Key key) {
     if (_isConstantInstance) {
       return null;
     }
@@ -690,7 +690,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
-  int? findIndexByKey(Key key) {
+  int? findIndexByKey(final Key key) {
     final Key childKey;
     if (key is _SaltedValueKey) {
       final _SaltedValueKey saltedValueKey = key;
@@ -702,7 +702,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 
   @override
-  Widget? build(BuildContext context, int index) {
+  Widget? build(final BuildContext context, final int index) {
     if (index < 0 || index >= children.length) {
       return null;
     }
@@ -728,7 +728,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   int? get estimatedChildCount => children.length;
 
   @override
-  bool shouldRebuild(covariant SliverChildListDelegate oldDelegate) {
+  bool shouldRebuild(covariant final SliverChildListDelegate oldDelegate) {
     return children != oldDelegate.children;
   }
 }
@@ -757,14 +757,14 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
   @override
   bool get wantKeepAlive => _wantKeepAlive;
   bool _wantKeepAlive = false;
-  set wantKeepAlive(bool value) {
+  set wantKeepAlive(final bool value) {
     if (_wantKeepAlive != value) {
       _wantKeepAlive = value;
       updateKeepAlive();
     }
   }
 
-  VoidCallback listensTo(Selectable selectable) {
+  VoidCallback listensTo(final Selectable selectable) {
     return () {
       if (selectable.value.hasSelection) {
         _updateSelectablesWithSelections(selectable, add: true);
@@ -774,7 +774,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
     };
   }
 
-  void _updateSelectablesWithSelections(Selectable selectable, {required bool add}) {
+  void _updateSelectablesWithSelections(final Selectable selectable, {required final bool add}) {
     if (add) {
       assert(selectable.value.hasSelection);
       _selectablesWithSelections ??= <Selectable>{};
@@ -801,7 +801,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
   }
 
   @override
-  void add(Selectable selectable) {
+  void add(final Selectable selectable) {
     final VoidCallback attachment = listensTo(selectable);
     selectable.addListener(attachment);
     _selectableAttachments ??= <Selectable, VoidCallback>{};
@@ -813,7 +813,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
   }
 
   @override
-  void remove(Selectable selectable) {
+  void remove(final Selectable selectable) {
     if (_selectableAttachments == null) {
       return;
     }
@@ -838,7 +838,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     if (_registrar == null) {
       return widget.child;
@@ -851,7 +851,7 @@ class _SelectionKeepAliveState extends State<_SelectionKeepAlive> with Automatic
 }
 
 // Return a Widget for the given Exception
-Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
+Widget _createErrorWidget(final Object exception, final StackTrace stackTrace) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,

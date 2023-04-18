@@ -110,7 +110,7 @@ void main() {
     expect(border.getInnerPath(rect,textDirection: TextDirection.rtl), looksLikeRectRtl);
   });
 
-  testWidgets('Golden test even radii', (WidgetTester tester) async {
+  testWidgets('Golden test even radii', (final WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.blueAccent[400],
@@ -128,7 +128,7 @@ void main() {
     );
   });
 
-  testWidgets('Golden test varying radii', (WidgetTester tester) async {
+  testWidgets('Golden test varying radii', (final WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.green[100],
@@ -151,7 +151,7 @@ void main() {
     );
   });
 
-  testWidgets('Golden test topLeft radii', (WidgetTester tester) async {
+  testWidgets('Golden test topLeft radii', (final WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.green[200],
@@ -171,7 +171,7 @@ void main() {
     );
   });
 
-  testWidgets('Golden test topRight radii', (WidgetTester tester) async {
+  testWidgets('Golden test topRight radii', (final WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.green[300],
@@ -191,7 +191,7 @@ void main() {
     );
   });
 
-  testWidgets('Golden test bottomLeft radii', (WidgetTester tester) async {
+  testWidgets('Golden test bottomLeft radii', (final WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.green[400],
@@ -211,7 +211,7 @@ void main() {
     );
   });
 
-  testWidgets('Golden test bottomRight radii', (WidgetTester tester) async {
+  testWidgets('Golden test bottomRight radii', (final WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.green[500],
@@ -231,7 +231,7 @@ void main() {
     );
   });
 
-  testWidgets('Golden test large radii', (WidgetTester tester) async {
+  testWidgets('Golden test large radii', (final WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
       child: Material(
         color: Colors.redAccent[400],

@@ -33,9 +33,9 @@ void main() {
 
     hovered = false;
     hoverTarget = MouseRegion(
-      onHover: (_) { hovered = true; },
-      onEnter: (_) { hovered = true; },
-      onExit: (_) { hovered = true; },
+      onHover: (final _) { hovered = true; },
+      onEnter: (final _) { hovered = true; },
+      onExit: (final _) { hovered = true; },
       child: const SizedBox(
         width: 10.0,
         height: 10.0,
@@ -45,7 +45,7 @@ void main() {
   });
 
   group('ModalBarrier', () {
-    testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgets('prevents interactions with widgets behind it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -60,7 +60,7 @@ void main() {
       expect(tapped, isFalse, reason: 'because the tap is not prevented by ModalBarrier');
     });
 
-    testWidgets('prevents hover interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgets('prevents hover interactions with widgets behind it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -87,7 +87,7 @@ void main() {
       expect(hovered, isFalse, reason: 'because the hover is not prevented by ModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgets('does not prevent interactions with widgets in front of it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -102,7 +102,7 @@ void main() {
       expect(tapped, isTrue, reason: 'because the tap is prevented by ModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
+    testWidgets('does not prevent interactions with translucent widgets in front of it', (final WidgetTester tester) async {
       bool dragged = false;
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
@@ -110,7 +110,7 @@ void main() {
           const ModalBarrier(dismissible: false),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onHorizontalDragStart: (_) {
+            onHorizontalDragStart: (final _) {
               dragged = true;
             },
             child: const Center(
@@ -129,7 +129,7 @@ void main() {
       expect(dragged, isTrue, reason: 'because the drag is prevented by ModalBarrier');
     });
 
-    testWidgets('does not prevent hover interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgets('does not prevent hover interactions with widgets in front of it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -157,11 +157,11 @@ void main() {
       hovered = false;
     });
 
-    testWidgets('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
+    testWidgets('plays system alert sound when user tries to dismiss it', (final WidgetTester tester) async {
       final List<String> playedSystemSounds = <String>[];
       try {
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-            SystemChannels.platform, (MethodCall methodCall) async {
+            SystemChannels.platform, (final MethodCall methodCall) async {
           if (methodCall.method == 'SystemSound.play') {
             playedSystemSounds.add(methodCall.arguments as String);
           }
@@ -186,10 +186,10 @@ void main() {
       expect(playedSystemSounds[0], SystemSoundType.alert.toString());
     });
 
-    testWidgets('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
+    testWidgets('pops the Navigator when dismissed by primary tap', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => const SecondWidget(),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => const SecondWidget(),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -219,10 +219,10 @@ void main() {
       );
     });
 
-    testWidgets('pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
+    testWidgets('pops the Navigator when dismissed by non-primary tap', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => const SecondWidget(),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => const SecondWidget(),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -253,10 +253,10 @@ void main() {
       );
     });
 
-    testWidgets('may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
+    testWidgets('may pop the Navigator when competing with other gestures', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => const SecondWidgetWithCompetence(),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => const SecondWidgetWithCompetence(),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -281,11 +281,11 @@ void main() {
       );
     });
 
-    testWidgets('does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
+    testWidgets('does not pop the Navigator with a WillPopScope that returns false', (final WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) =>
             Stack(
               children: <Widget>[
                 const SecondWidget(),
@@ -326,11 +326,11 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
+    testWidgets('pops the Navigator with a WillPopScope that returns true', (final WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) =>
             Stack(
               children: <Widget>[
                 const SecondWidget(),
@@ -371,11 +371,11 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('will call onDismiss callback', (WidgetTester tester) async {
+    testWidgets('will call onDismiss callback', (final WidgetTester tester) async {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) =>
             SecondWidget(onDismiss: () {
               dismissCallbackCalled = true;
             }),
@@ -399,10 +399,10 @@ void main() {
       expect(dismissCallbackCalled, true);
     });
 
-    testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
+    testWidgets('will not pop when given an onDismiss callback', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => SecondWidget(onDismiss: () {}),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => SecondWidget(onDismiss: () {}),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -426,7 +426,7 @@ void main() {
       );
     });
 
-    testWidgets('Undismissible ModalBarrier hidden in semantic tree', (WidgetTester tester) async {
+    testWidgets('Undismissible ModalBarrier hidden in semantic tree', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(const ModalBarrier(dismissible: false));
 
@@ -436,7 +436,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
+    testWidgets('Dismissible ModalBarrier includes button in semantic tree on iOS, macOS and android', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(const Directionality(
         textDirection: TextDirection.ltr,
@@ -462,7 +462,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
   });
   group('AnimatedModalBarrier', () {
-    testWidgets('prevents interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgets('prevents interactions with widgets behind it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -477,7 +477,7 @@ void main() {
       expect(tapped, isFalse, reason: 'because the tap is not prevented by ModalBarrier');
     });
 
-    testWidgets('prevents hover interactions with widgets behind it', (WidgetTester tester) async {
+    testWidgets('prevents hover interactions with widgets behind it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -504,7 +504,7 @@ void main() {
       expect(hovered, isFalse, reason: 'because the hover is not prevented by AnimatedModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgets('does not prevent interactions with widgets in front of it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -519,7 +519,7 @@ void main() {
       expect(tapped, isTrue, reason: 'because the tap is prevented by AnimatedModalBarrier');
     });
 
-    testWidgets('does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
+    testWidgets('does not prevent interactions with translucent widgets in front of it', (final WidgetTester tester) async {
       bool dragged = false;
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
@@ -527,7 +527,7 @@ void main() {
           AnimatedModalBarrier(dismissible: false, color: colorAnimation),
           GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onHorizontalDragStart: (_) {
+            onHorizontalDragStart: (final _) {
               dragged = true;
             },
             child: const Center(
@@ -546,7 +546,7 @@ void main() {
       expect(dragged, isTrue, reason: 'because the drag is prevented by AnimatedModalBarrier');
     });
 
-    testWidgets('does not prevent hover interactions with widgets in front of it', (WidgetTester tester) async {
+    testWidgets('does not prevent hover interactions with widgets in front of it', (final WidgetTester tester) async {
       final Widget subject = Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
@@ -574,11 +574,11 @@ void main() {
       hovered = false;
     });
 
-    testWidgets('plays system alert sound when user tries to dismiss it', (WidgetTester tester) async {
+    testWidgets('plays system alert sound when user tries to dismiss it', (final WidgetTester tester) async {
       final List<String> playedSystemSounds = <String>[];
       try {
         tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-            SystemChannels.platform, (MethodCall methodCall) async {
+            SystemChannels.platform, (final MethodCall methodCall) async {
           if (methodCall.method == 'SystemSound.play') {
             playedSystemSounds.add(methodCall.arguments as String);
           }
@@ -603,10 +603,10 @@ void main() {
       expect(playedSystemSounds[0], SystemSoundType.alert.toString());
     });
 
-    testWidgets('pops the Navigator when dismissed by primary tap', (WidgetTester tester) async {
+    testWidgets('pops the Navigator when dismissed by primary tap', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => const AnimatedSecondWidget(),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => const AnimatedSecondWidget(),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -636,10 +636,10 @@ void main() {
       );
     });
 
-    testWidgets('pops the Navigator when dismissed by non-primary tap', (WidgetTester tester) async {
+    testWidgets('pops the Navigator when dismissed by non-primary tap', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => const AnimatedSecondWidget(),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => const AnimatedSecondWidget(),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -670,10 +670,10 @@ void main() {
       );
     });
 
-    testWidgets('may pop the Navigator when competing with other gestures', (WidgetTester tester) async {
+    testWidgets('may pop the Navigator when competing with other gestures', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => const AnimatedSecondWidgetWithCompetence(),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => const AnimatedSecondWidgetWithCompetence(),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -698,11 +698,11 @@ void main() {
       );
     });
 
-    testWidgets('does not pop the Navigator with a WillPopScope that returns false', (WidgetTester tester) async {
+    testWidgets('does not pop the Navigator with a WillPopScope that returns false', (final WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) =>
             Stack(
               children: <Widget>[
                 const AnimatedSecondWidget(),
@@ -743,11 +743,11 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('pops the Navigator with a WillPopScope that returns true', (WidgetTester tester) async {
+    testWidgets('pops the Navigator with a WillPopScope that returns true', (final WidgetTester tester) async {
       bool willPopCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) =>
             Stack(
               children: <Widget>[
                 const AnimatedSecondWidget(),
@@ -788,11 +788,11 @@ void main() {
       expect(willPopCalled, isTrue);
     });
 
-    testWidgets('will call onDismiss callback', (WidgetTester tester) async {
+    testWidgets('will call onDismiss callback', (final WidgetTester tester) async {
       bool dismissCallbackCalled = false;
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) =>
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) =>
             AnimatedSecondWidget(onDismiss: () {
               dismissCallbackCalled = true;
             }),
@@ -816,10 +816,10 @@ void main() {
       expect(dismissCallbackCalled, true);
     });
 
-    testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
+    testWidgets('will not pop when given an onDismiss callback', (final WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (BuildContext context) => const FirstWidget(),
-        '/modal': (BuildContext context) => AnimatedSecondWidget(onDismiss: () {}),
+        '/': (final BuildContext context) => const FirstWidget(),
+        '/modal': (final BuildContext context) => AnimatedSecondWidget(onDismiss: () {}),
       };
 
       await tester.pumpWidget(MaterialApp(routes: routes));
@@ -843,7 +843,7 @@ void main() {
       );
     });
 
-    testWidgets('Undismissible AnimatedModalBarrier hidden in semantic tree', (WidgetTester tester) async {
+    testWidgets('Undismissible AnimatedModalBarrier hidden in semantic tree', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(AnimatedModalBarrier(dismissible: false, color: colorAnimation));
 
@@ -853,7 +853,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS, macOS and android', (WidgetTester tester) async {
+    testWidgets('Dismissible AnimatedModalBarrier includes button in semantic tree on iOS, macOS and android', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
@@ -880,7 +880,7 @@ void main() {
   });
 
   group('SemanticsClipper', () {
-    testWidgets('SemanticsClipper correctly clips Semantics.rect in four directions', (WidgetTester tester) async {
+    testWidgets('SemanticsClipper correctly clips Semantics.rect in four directions', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final ValueNotifier<EdgeInsets> notifier = ValueNotifier<EdgeInsets>(const EdgeInsets.fromLTRB(10, 20, 30, 40));
       const Rect fullScreen = TestSemantics.fullScreen;
@@ -909,7 +909,7 @@ void main() {
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS, TargetPlatform.android}));
   });
 
-  testWidgets('uses default mouse cursor', (WidgetTester tester) async {
+  testWidgets('uses default mouse cursor', (final WidgetTester tester) async {
     await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -930,7 +930,7 @@ void main() {
 class FirstWidget extends StatelessWidget {
   const FirstWidget({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/modal');
@@ -946,7 +946,7 @@ class SecondWidget extends StatelessWidget {
   final VoidCallback? onDismiss;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ModalBarrier(
       key: const ValueKey<String>('barrier'),
       onDismiss: onDismiss,
@@ -960,7 +960,7 @@ class AnimatedSecondWidget extends StatelessWidget {
   final VoidCallback? onDismiss;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedModalBarrier(
       key: const ValueKey<String>('barrier'),
       color: const AlwaysStoppedAnimation<Color?>(Colors.red),
@@ -972,14 +972,14 @@ class AnimatedSecondWidget extends StatelessWidget {
 class SecondWidgetWithCompetence extends StatelessWidget {
   const SecondWidgetWithCompetence({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       children: <Widget>[
         const ModalBarrier(
           key: ValueKey<String>('barrier'),
         ),
         GestureDetector(
-          onVerticalDragStart: (_) {},
+          onVerticalDragStart: (final _) {},
           behavior: HitTestBehavior.translucent,
           child: Container(),
         ),
@@ -990,7 +990,7 @@ class SecondWidgetWithCompetence extends StatelessWidget {
 class AnimatedSecondWidgetWithCompetence extends StatelessWidget {
   const AnimatedSecondWidgetWithCompetence({super.key});
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       children: <Widget>[
         const AnimatedModalBarrier(
@@ -998,7 +998,7 @@ class AnimatedSecondWidgetWithCompetence extends StatelessWidget {
           color: AlwaysStoppedAnimation<Color?>(Colors.red),
         ),
         GestureDetector(
-          onVerticalDragStart: (_) {},
+          onVerticalDragStart: (final _) {},
           behavior: HitTestBehavior.translucent,
           child: Container(),
         ),

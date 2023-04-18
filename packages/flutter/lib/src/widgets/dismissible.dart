@@ -97,7 +97,7 @@ class Dismissible extends StatefulWidget {
   /// state of the dismissed item. Using keys causes the widgets to sync
   /// according to their keys and avoids this pitfall.
   const Dismissible({
-    required Key key,
+    required final Key key,
     required this.child,
     this.background,
     this.secondaryBackground,
@@ -267,7 +267,7 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   final Animation<Offset> moveAnimation;
 
   @override
-  Rect getClip(Size size) {
+  Rect getClip(final Size size) {
     switch (axis) {
       case Axis.horizontal:
         final double offset = moveAnimation.value.dx * size.width;
@@ -285,10 +285,10 @@ class _DismissibleClipper extends CustomClipper<Rect> {
   }
 
   @override
-  Rect getApproximateClipRect(Size size) => getClip(size);
+  Rect getApproximateClipRect(final Size size) => getClip(size);
 
   @override
-  bool shouldReclip(_DismissibleClipper oldClipper) {
+  bool shouldReclip(final _DismissibleClipper oldClipper) {
     return oldClipper.axis != axis
         || oldClipper.moveAnimation.value != moveAnimation.value;
   }
@@ -336,7 +336,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         || widget.direction == DismissDirection.startToEnd;
   }
 
-  DismissDirection _extentToDirection(double extent) {
+  DismissDirection _extentToDirection(final double extent) {
     if (extent == 0.0) {
       return DismissDirection.none;
     }
@@ -362,7 +362,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     return _directionIsXAxis ? size.width : size.height;
   }
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart(final DragStartDetails details) {
     if (_confirming) {
       return;
     }
@@ -379,7 +379,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     });
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     if (!_isActive || _moveController!.isAnimating) {
       return;
     }
@@ -464,7 +464,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     );
   }
 
-  _FlingGestureKind _describeFlingGesture(Velocity velocity) {
+  _FlingGestureKind _describeFlingGesture(final Velocity velocity) {
     if (_dragExtent == 0.0) {
       // If it was a fling, then it was a fling that was let loose at the exact
       // middle of the range (i.e. when there's no displacement). In that case,
@@ -496,7 +496,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     return _FlingGestureKind.reverse;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     if (!_isActive || _moveController!.isAnimating) {
       return;
     }
@@ -532,7 +532,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     }
   }
 
-  Future<void> _handleDismissStatusChanged(AnimationStatus status) async {
+  Future<void> _handleDismissStatusChanged(final AnimationStatus status) async {
     if (status == AnimationStatus.completed && !_dragUnderway) {
       await _handleMoveCompleted();
     }
@@ -581,7 +581,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     } else {
       _resizeController = AnimationController(duration: widget.resizeDuration, vsync: this)
         ..addListener(_handleResizeProgressChanged)
-        ..addStatusListener((AnimationStatus status) => updateKeepAlive());
+        ..addStatusListener((final AnimationStatus status) => updateKeepAlive());
       _resizeController!.forward();
       setState(() {
         _sizePriorToCollapse = context.size;
@@ -608,7 +608,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     assert(!_directionIsXAxis || debugCheckHasDirectionality(context));

@@ -56,9 +56,9 @@ class CrashDetails {
 /// Reports information about the crash to the user.
 class CrashReporter {
   CrashReporter({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required FlutterProjectFactory flutterProjectFactory,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final FlutterProjectFactory flutterProjectFactory,
   }) : _fileSystem = fileSystem,
        _logger = logger,
        _flutterProjectFactory = flutterProjectFactory;
@@ -68,7 +68,7 @@ class CrashReporter {
   final FlutterProjectFactory _flutterProjectFactory;
 
   /// Prints instructions for filing a bug about the crash.
-  Future<void> informUser(CrashDetails details, File crashFile) async {
+  Future<void> informUser(final CrashDetails details, final File crashFile) async {
     _logger.printError('A crash report has been written to ${crashFile.path}.');
     _logger.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
@@ -104,11 +104,11 @@ class CrashReporter {
 /// wish to use your own server for collecting crash reports from Flutter Tools.
 class CrashReportSender {
   CrashReportSender({
-    http.Client? client,
-    required Usage usage,
-    required Platform platform,
-    required Logger logger,
-    required OperatingSystemUtils operatingSystemUtils,
+    final http.Client? client,
+    required final Usage usage,
+    required final Platform platform,
+    required final Logger logger,
+    required final OperatingSystemUtils operatingSystemUtils,
   }) : _client = client ?? http.Client(),
       _usage = usage,
       _platform = platform,
@@ -141,10 +141,10 @@ class CrashReportSender {
   ///
   /// The report is populated from data in [error] and [stackTrace].
   Future<void> sendReport({
-    required Object error,
-    required StackTrace stackTrace,
-    required String Function() getFlutterVersion,
-    required String command,
+    required final Object error,
+    required final StackTrace stackTrace,
+    required final String Function() getFlutterVersion,
+    required final String command,
   }) async {
     // Only send one crash report per run.
     if (_crashReportSent) {

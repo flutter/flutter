@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/painting/gradient/linear_gradient.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('finds a gradient', (WidgetTester tester) async {
+  testWidgets('finds a gradient', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: example.MoodyGradient(),
@@ -18,7 +18,7 @@ void main() {
     expect(find.byType(example.MoodyGradient), findsOneWidget);
   });
 
-  testWidgets('gradient matches golden', (WidgetTester tester) async {
+  testWidgets('gradient matches golden', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: SizedBox(

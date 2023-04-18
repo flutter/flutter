@@ -8,11 +8,11 @@ import '../../gallery/demo.dart';
 
 class NavigationIconView {
   NavigationIconView({
-    required Widget icon,
-    Widget? activeIcon,
-    String? title,
-    Color? color,
-    required TickerProvider vsync,
+    required final Widget icon,
+    final Widget? activeIcon,
+    final String? title,
+    final Color? color,
+    required final TickerProvider vsync,
   }) : _icon = icon,
        _color = color,
        _title = title,
@@ -38,7 +38,7 @@ class NavigationIconView {
   final AnimationController controller;
   late Animation<double> _animation;
 
-  FadeTransition transition(BottomNavigationBarType type, BuildContext context) {
+  FadeTransition transition(final BottomNavigationBarType type, final BuildContext context) {
     Color? iconColor;
     if (type == BottomNavigationBarType.shifting) {
       iconColor = _color;
@@ -78,7 +78,7 @@ class CustomIcon extends StatelessWidget {
   const CustomIcon({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
       margin: const EdgeInsets.all(4.0),
@@ -93,7 +93,7 @@ class CustomInactiveIcon extends StatelessWidget {
   const CustomInactiveIcon({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     return Container(
       margin: const EdgeInsets.all(4.0),
@@ -177,7 +177,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     ];
 
     // We want to have the newly animating (fading in) views on top.
-    transitions.sort((FadeTransition a, FadeTransition b) {
+    transitions.sort((final FadeTransition a, final FadeTransition b) {
       final Animation<double> aAnimation = a.opacity;
       final Animation<double> bAnimation = b.opacity;
       final double aValue = aAnimation.value;
@@ -189,14 +189,14 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final BottomNavigationBar botNavBar = BottomNavigationBar(
       items: _navigationViews
-          .map<BottomNavigationBarItem>((NavigationIconView navigationView) => navigationView.item)
+          .map<BottomNavigationBarItem>((final NavigationIconView navigationView) => navigationView.item)
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
-      onTap: (int index) {
+      onTap: (final int index) {
         setState(() {
           _navigationViews[_currentIndex].controller.reverse();
           _currentIndex = index;
@@ -211,12 +211,12 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
         actions: <Widget>[
           MaterialDemoDocumentationButton(BottomNavigationDemo.routeName),
           PopupMenuButton<BottomNavigationBarType>(
-            onSelected: (BottomNavigationBarType value) {
+            onSelected: (final BottomNavigationBarType value) {
               setState(() {
                 _type = value;
               });
             },
-            itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
+            itemBuilder: (final BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
               const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
                 child: Text('Fixed'),

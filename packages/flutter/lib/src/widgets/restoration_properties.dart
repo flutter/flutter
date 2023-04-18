@@ -81,7 +81,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
     return _value as T;
   }
   T? _value;
-  set value(T newValue) {
+  set value(final T newValue) {
     assert(isRegistered);
     if (newValue != _value) {
       final T? oldValue = _value;
@@ -92,7 +92,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
 
   @mustCallSuper
   @override
-  void initWithValue(T value) {
+  void initWithValue(final T value) {
     _value = value;
   }
 
@@ -104,7 +104,7 @@ abstract class RestorableValue<T> extends RestorableProperty<T> {
   /// Subclasses should call [notifyListeners] from this method, if the new
   /// value changes what [toPrimitives] returns.
   @protected
-  void didUpdateValue(T? oldValue);
+  void didUpdateValue(final T? oldValue);
 }
 
 // _RestorablePrimitiveValueN and its subclasses allows for null values.
@@ -120,13 +120,13 @@ class _RestorablePrimitiveValueN<T extends Object?> extends RestorableValue<T> {
   T createDefaultValue() => _defaultValue;
 
   @override
-  void didUpdateValue(T? oldValue) {
+  void didUpdateValue(final T? oldValue) {
     assert(debugIsSerializableForRestoration(value));
     notifyListeners();
   }
 
   @override
-  T fromPrimitives(Object? serialized) => serialized as T;
+  T fromPrimitives(final Object? serialized) => serialized as T;
 
   @override
   Object? toPrimitives() => value;
@@ -139,12 +139,12 @@ class _RestorablePrimitiveValue<T extends Object> extends _RestorablePrimitiveVa
     : assert(debugIsSerializableForRestoration(defaultValue));
 
   @override
-  set value(T value) {
+  set value(final T value) {
     super.value = value;
   }
 
   @override
-  T fromPrimitives(Object? serialized) {
+  T fromPrimitives(final Object? serialized) {
     assert(serialized != null);
     return super.fromPrimitives(serialized);
   }
@@ -325,7 +325,7 @@ class RestorableDateTime extends RestorableValue<DateTime> {
   /// Creates a [RestorableDateTime].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableDateTime(DateTime defaultValue) : _defaultValue = defaultValue;
+  RestorableDateTime(final DateTime defaultValue) : _defaultValue = defaultValue;
 
   final DateTime _defaultValue;
 
@@ -333,13 +333,13 @@ class RestorableDateTime extends RestorableValue<DateTime> {
   DateTime createDefaultValue() => _defaultValue;
 
   @override
-  void didUpdateValue(DateTime? oldValue) {
+  void didUpdateValue(final DateTime? oldValue) {
     assert(debugIsSerializableForRestoration(value.millisecondsSinceEpoch));
     notifyListeners();
   }
 
   @override
-  DateTime fromPrimitives(Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
+  DateTime fromPrimitives(final Object? data) => DateTime.fromMillisecondsSinceEpoch(data! as int);
 
   @override
   Object? toPrimitives() => value.millisecondsSinceEpoch;
@@ -353,7 +353,7 @@ class RestorableDateTimeN extends RestorableValue<DateTime?> {
   /// Creates a [RestorableDateTime].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableDateTimeN(DateTime? defaultValue) : _defaultValue = defaultValue;
+  RestorableDateTimeN(final DateTime? defaultValue) : _defaultValue = defaultValue;
 
   final DateTime? _defaultValue;
 
@@ -361,13 +361,13 @@ class RestorableDateTimeN extends RestorableValue<DateTime?> {
   DateTime? createDefaultValue() => _defaultValue;
 
   @override
-  void didUpdateValue(DateTime? oldValue) {
+  void didUpdateValue(final DateTime? oldValue) {
     assert(debugIsSerializableForRestoration(value?.millisecondsSinceEpoch));
     notifyListeners();
   }
 
   @override
-  DateTime? fromPrimitives(Object? data) => data != null ? DateTime.fromMillisecondsSinceEpoch(data as int) : null;
+  DateTime? fromPrimitives(final Object? data) => data != null ? DateTime.fromMillisecondsSinceEpoch(data as int) : null;
 
   @override
   Object? toPrimitives() => value?.millisecondsSinceEpoch;
@@ -402,7 +402,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
   T? _value;
 
   @override
-  void initWithValue(T value) {
+  void initWithValue(final T value) {
     _value?.removeListener(notifyListeners);
     _value = value;
     _value!.addListener(notifyListeners);
@@ -432,7 +432,7 @@ abstract class RestorableListenable<T extends Listenable> extends RestorableProp
 /// [ChangeNotifier] instance.
 abstract class RestorableChangeNotifier<T extends ChangeNotifier> extends RestorableListenable<T> {
   @override
-  void initWithValue(T value) {
+  void initWithValue(final T value) {
     _disposeOldValue();
     super.initWithValue(value);
   }
@@ -464,7 +464,7 @@ class RestorableTextEditingController extends RestorableChangeNotifier<TextEditi
   ///
   /// This constructor treats a null `text` argument as if it were the empty
   /// string.
-  factory RestorableTextEditingController({String? text}) => RestorableTextEditingController.fromValue(
+  factory RestorableTextEditingController({final String? text}) => RestorableTextEditingController.fromValue(
     text == null ? TextEditingValue.empty : TextEditingValue(text: text),
   );
 
@@ -473,7 +473,7 @@ class RestorableTextEditingController extends RestorableChangeNotifier<TextEditi
   ///
   /// This constructor treats a null `value` argument as if it were
   /// [TextEditingValue.empty].
-  RestorableTextEditingController.fromValue(TextEditingValue value) : _initialValue = value;
+  RestorableTextEditingController.fromValue(final TextEditingValue value) : _initialValue = value;
 
   final TextEditingValue _initialValue;
 
@@ -483,7 +483,7 @@ class RestorableTextEditingController extends RestorableChangeNotifier<TextEditi
   }
 
   @override
-  TextEditingController fromPrimitives(Object? data) {
+  TextEditingController fromPrimitives(final Object? data) {
     return TextEditingController(text: data! as String);
   }
 
@@ -513,7 +513,7 @@ class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
   /// Creates a [RestorableEnumN].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableEnumN(T? defaultValue, { required Iterable<T> values })
+  RestorableEnumN(final T? defaultValue, { required final Iterable<T> values })
     : assert(defaultValue == null || values.contains(defaultValue),
         'Default value $defaultValue not found in $T values: $values'),
       _defaultValue = defaultValue,
@@ -524,11 +524,11 @@ class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
   final T? _defaultValue;
 
   @override
-  set value(T? newValue) {
+  set value(final T? newValue) {
     assert(newValue == null || values.contains(newValue),
       'Attempted to set an unknown enum value "$newValue" that is not null, or '
       'in the valid set of enum values for the $T type: '
-      '${values.map<String>((T value) => value.name).toSet()}');
+      '${values.map<String>((final T value) => value.name).toSet()}');
     super.value = newValue;
   }
 
@@ -556,12 +556,12 @@ class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
   Set<T> values;
 
   @override
-  void didUpdateValue(T? oldValue) {
+  void didUpdateValue(final T? oldValue) {
     notifyListeners();
   }
 
   @override
-  T? fromPrimitives(Object? data) {
+  T? fromPrimitives(final Object? data) {
     if (data == null) {
       return null;
     }
@@ -574,7 +574,7 @@ class RestorableEnumN<T extends Enum> extends RestorableValue<T?> {
       assert(false,
         'Attempted to set an unknown enum value "$data" that is not null, or '
         'in the valid set of enum values for the $T type: '
-        '${values.map<String>((T value) => value.name).toSet()}');
+        '${values.map<String>((final T value) => value.name).toSet()}');
     }
     return _defaultValue;
   }
@@ -602,7 +602,7 @@ class RestorableEnum<T extends Enum> extends RestorableValue<T> {
   /// Creates a [RestorableEnum].
   ///
   /// {@macro flutter.widgets.RestorableNum.constructor}
-  RestorableEnum(T defaultValue, { required Iterable<T> values })
+  RestorableEnum(final T defaultValue, { required final Iterable<T> values })
     : assert(values.contains(defaultValue),
         'Default value $defaultValue not found in $T values: $values'),
       _defaultValue = defaultValue,
@@ -613,11 +613,11 @@ class RestorableEnum<T extends Enum> extends RestorableValue<T> {
   final T _defaultValue;
 
   @override
-  set value(T newValue) {
+  set value(final T newValue) {
     assert(values.contains(newValue),
       'Attempted to set an unknown enum value "$newValue" that is not in the '
       'valid set of enum values for the $T type: '
-      '${values.map<String>((T value) => value.name).toSet()}');
+      '${values.map<String>((final T value) => value.name).toSet()}');
 
     super.value = newValue;
   }
@@ -643,12 +643,12 @@ class RestorableEnum<T extends Enum> extends RestorableValue<T> {
   Set<T> values;
 
   @override
-  void didUpdateValue(T? oldValue) {
+  void didUpdateValue(final T? oldValue) {
     notifyListeners();
   }
 
   @override
-  T fromPrimitives(Object? data) {
+  T fromPrimitives(final Object? data) {
     if (data != null && data is String) {
       for (final T allowed in values) {
         if (allowed.name == data) {
@@ -658,7 +658,7 @@ class RestorableEnum<T extends Enum> extends RestorableValue<T> {
       assert(false,
         'Attempted to restore an unknown enum value "$data" that is not in the '
         'valid set of enum values for the $T type: '
-        '${values.map<String>((T value) => value.name).toSet()}');
+        '${values.map<String>((final T value) => value.name).toSet()}');
     }
     return _defaultValue;
   }

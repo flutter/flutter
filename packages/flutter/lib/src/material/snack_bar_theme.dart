@@ -158,20 +158,20 @@ class SnackBarThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SnackBarThemeData copyWith({
-    Color? backgroundColor,
-    Color? actionTextColor,
-    Color? disabledActionTextColor,
-    TextStyle? contentTextStyle,
-    double? elevation,
-    ShapeBorder? shape,
-    SnackBarBehavior? behavior,
-    double? width,
-    EdgeInsets? insetPadding,
-    bool? showCloseIcon,
-    Color? closeIconColor,
-    double? actionOverflowThreshold,
-    Color? actionBackgroundColor,
-    Color? disabledActionBackgroundColor,
+    final Color? backgroundColor,
+    final Color? actionTextColor,
+    final Color? disabledActionTextColor,
+    final TextStyle? contentTextStyle,
+    final double? elevation,
+    final ShapeBorder? shape,
+    final SnackBarBehavior? behavior,
+    final double? width,
+    final EdgeInsets? insetPadding,
+    final bool? showCloseIcon,
+    final Color? closeIconColor,
+    final double? actionOverflowThreshold,
+    final Color? actionBackgroundColor,
+    final Color? disabledActionBackgroundColor,
   }) {
     return SnackBarThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -196,7 +196,7 @@ class SnackBarThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static SnackBarThemeData lerp(SnackBarThemeData? a, SnackBarThemeData? b, double t) {
+  static SnackBarThemeData lerp(final SnackBarThemeData? a, final SnackBarThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -236,7 +236,7 @@ class SnackBarThemeData with Diagnosticable {
       );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -261,7 +261,7 @@ class SnackBarThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('actionTextColor', actionTextColor, defaultValue: null));

@@ -17,7 +17,7 @@ void main() {
     controller.addListener(() {
       listener++;
     });
-    controller.addStatusListener((AnimationStatus _) {
+    controller.addStatusListener((final AnimationStatus _) {
       statusListener++;
     });
     expect(statusListener, 0);
@@ -46,7 +46,7 @@ class _TestAnimationController extends AnimationController {
     super.notifyListeners();
   }
 
-  void publicNotifyStatusListeners(AnimationStatus status) {
+  void publicNotifyStatusListeners(final AnimationStatus status) {
     super.notifyStatusListeners(status);
   }
 }

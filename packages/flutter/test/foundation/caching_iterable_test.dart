@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 int yieldCount = 0;
 
-Iterable<int> range(int start, int end) sync* {
+Iterable<int> range(final int start, final int end) sync* {
   assert(yieldCount == 0);
   for (int index = start; index <= end; index += 1) {
     yieldCount += 1;
@@ -43,7 +43,7 @@ void main() {
     expect(i.first, equals(1));
     expect(yieldCount, equals(1));
 
-    expect(i.firstWhere((int i) => i == 3), equals(3));
+    expect(i.firstWhere((final int i) => i == 3), equals(3));
     expect(yieldCount, equals(3));
 
     expect(i.last, equals(5));
@@ -54,7 +54,7 @@ void main() {
     final Iterable<int> integers = CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
 
-    final Iterable<int> evens = integers.where((int i) => i.isEven);
+    final Iterable<int> evens = integers.where((final int i) => i.isEven);
     expect(yieldCount, equals(0));
 
     expect(evens.first, equals(2));
@@ -63,7 +63,7 @@ void main() {
     expect(integers.first, equals(1));
     expect(yieldCount, equals(2));
 
-    expect(evens.map<int>((int i) => i + 1), equals(<int>[3, 5]));
+    expect(evens.map<int>((final int i) => i + 1), equals(<int>[3, 5]));
     expect(yieldCount, equals(5));
 
     expect(evens, equals(<int>[2, 4]));
@@ -83,7 +83,7 @@ void main() {
     expect(secondTwo, equals(<int>[2, 3]));
     expect(yieldCount, equals(3));
 
-    final Iterable<int> result = integers.takeWhile((int i) => i < 4).skipWhile((int i) => i < 3);
+    final Iterable<int> result = integers.takeWhile((final int i) => i < 4).skipWhile((final int i) => i < 3);
 
     expect(result, equals(<int>[3]));
     expect(yieldCount, equals(4));
@@ -95,13 +95,13 @@ void main() {
     final Iterable<int> integers = CachingIterable<int>(range(1, 5).iterator);
     expect(yieldCount, equals(0));
 
-    final Iterable<int> expanded1 = integers.expand<int>((int i) => <int>[i, i]);
+    final Iterable<int> expanded1 = integers.expand<int>((final int i) => <int>[i, i]);
 
     expect(yieldCount, equals(0));
     expect(expanded1, equals(<int>[1, 1, 2, 2, 3, 3, 4, 4, 5, 5]));
     expect(yieldCount, equals(5));
 
-    final Iterable<int> expanded2 = integers.expand<int>((int i) => <int>[i, i]);
+    final Iterable<int> expanded2 = integers.expand<int>((final int i) => <int>[i, i]);
 
     expect(yieldCount, equals(5));
     expect(expanded2, equals(<int>[1, 1, 2, 2, 3, 3, 4, 4, 5, 5]));

@@ -13,7 +13,7 @@ abstract final class MatrixUtils {
   /// nothing but a 2D translation.
   ///
   /// Otherwise, returns null.
-  static Offset? getAsTranslation(Matrix4 transform) {
+  static Offset? getAsTranslation(final Matrix4 transform) {
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[0] == 1.0 && // col 1
@@ -39,7 +39,7 @@ abstract final class MatrixUtils {
   /// scale, if the matrix is nothing but a symmetric 2D scale transform.
   ///
   /// Otherwise, returns null.
-  static double? getAsScale(Matrix4 transform) {
+  static double? getAsScale(final Matrix4 transform) {
     final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[1] == 0.0 && // col 1 (value 0 is the scale)
@@ -64,7 +64,7 @@ abstract final class MatrixUtils {
 
   /// Returns true if the given matrices are exactly equal, and false
   /// otherwise. Null values are assumed to be the identity matrix.
-  static bool matrixEquals(Matrix4? a, Matrix4? b) {
+  static bool matrixEquals(final Matrix4? a, final Matrix4? b) {
     if (identical(a, b)) {
       return true;
     }
@@ -94,7 +94,7 @@ abstract final class MatrixUtils {
   }
 
   /// Whether the given matrix is the identity matrix.
-  static bool isIdentity(Matrix4 a) {
+  static bool isIdentity(final Matrix4 a) {
     return a.storage[0] == 1.0 // col 1
         && a.storage[1] == 0.0
         && a.storage[2] == 0.0
@@ -124,7 +124,7 @@ abstract final class MatrixUtils {
   /// the zero matrix to indicate its content is currently not visible. Trying
   /// to convert an `Offset` to its coordinate space always results in
   /// (NaN, NaN).
-  static Offset transformPoint(Matrix4 transform, Offset point) {
+  static Offset transformPoint(final Matrix4 transform, final Offset point) {
     final Float64List storage = transform.storage;
     final double x = point.dx;
     final double y = point.dy;
@@ -149,7 +149,7 @@ abstract final class MatrixUtils {
   /// This version of the operation is slower than the regular transformRect
   /// method, but it avoids creating infinite values from large finite values
   /// if it can.
-  static Rect _safeTransformRect(Matrix4 transform, Rect rect) {
+  static Rect _safeTransformRect(final Matrix4 transform, final Rect rect) {
     final Float64List storage = transform.storage;
     final bool isAffine = storage[3] == 0.0 &&
         storage[7] == 0.0 &&
@@ -164,7 +164,7 @@ abstract final class MatrixUtils {
   }
 
   static final Float64List _minMax = Float64List(4);
-  static void _accumulate(Float64List m, double x, double y, bool first, bool isAffine) {
+  static void _accumulate(final Float64List m, final double x, final double y, final bool first, final bool isAffine) {
     final double w = isAffine ? 1.0 : 1.0 / (m[3] * x + m[7] * y + m[15]);
     final double tx = (m[0] * x + m[4] * y + m[12]) * w;
     final double ty = (m[1] * x + m[5] * y + m[13]) * w;
@@ -193,7 +193,7 @@ abstract final class MatrixUtils {
   /// This function assumes the given rect is in the plane with z equals 0.0.
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
-  static Rect transformRect(Matrix4 transform, Rect rect) {
+  static Rect transformRect(final Matrix4 transform, final Rect rect) {
     final Float64List storage = transform.storage;
     final double x = rect.left;
     final double y = rect.top;
@@ -411,12 +411,12 @@ abstract final class MatrixUtils {
     }
   }
 
-  static double _min4(double a, double b, double c, double d) {
+  static double _min4(final double a, final double b, final double c, final double d) {
     final double e = (a < b) ? a : b;
     final double f = (c < d) ? c : d;
     return (e < f) ? e : f;
   }
-  static double _max4(double a, double b, double c, double d) {
+  static double _max4(final double a, final double b, final double c, final double d) {
     final double e = (a > b) ? a : b;
     final double f = (c > d) ? c : d;
     return (e > f) ? e : f;
@@ -428,7 +428,7 @@ abstract final class MatrixUtils {
   /// This function assumes the given rect is in the plane with z equals 0.0.
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
-  static Rect inverseTransformRect(Matrix4 transform, Rect rect) {
+  static Rect inverseTransformRect(Matrix4 transform, final Rect rect) {
     // As exposed by `unrelated_type_equality_checks`, this assert was a no-op.
     // Fixing it introduces a bunch of runtime failures; for more context see:
     // https://github.com/flutter/flutter/pull/31568
@@ -473,10 +473,10 @@ abstract final class MatrixUtils {
   /// almost always possible to end up seeing the inner side of the cylinder
   /// or the back side of the transformed plane before π / 2 when perspective > 0.
   static Matrix4 createCylindricalProjectionTransform({
-    required double radius,
-    required double angle,
-    double perspective = 0.001,
-    Axis orientation = Axis.vertical,
+    required final double radius,
+    required final double angle,
+    final double perspective = 0.001,
+    final Axis orientation = Axis.vertical,
   }) {
     assert(perspective >= 0 && perspective <= 1.0);
 
@@ -515,7 +515,7 @@ abstract final class MatrixUtils {
   }
 
   /// Returns a matrix that transforms every point to [offset].
-  static Matrix4 forceToPoint(Offset offset) {
+  static Matrix4 forceToPoint(final Offset offset) {
     return Matrix4.identity()
       ..setRow(0, Vector4(0, 0, 0, offset.dx))
       ..setRow(1, Vector4(0, 0, 0, offset.dy));
@@ -526,7 +526,7 @@ abstract final class MatrixUtils {
 /// useful for [TransformProperty].
 ///
 /// If the argument is null, returns a list with the single string "null".
-List<String> debugDescribeTransform(Matrix4? transform) {
+List<String> debugDescribeTransform(final Matrix4? transform) {
   if (transform == null) {
     return const <String>['null'];
   }
@@ -552,7 +552,7 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   });
 
   @override
-  String valueToString({ TextTreeConfiguration? parentConfiguration }) {
+  String valueToString({ final TextTreeConfiguration? parentConfiguration }) {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.

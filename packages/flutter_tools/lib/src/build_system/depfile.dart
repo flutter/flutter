@@ -9,8 +9,8 @@ import '../base/logger.dart';
 /// A service for creating and parsing [Depfile]s.
 class DepfileService {
   DepfileService({
-    required Logger logger,
-    required FileSystem fileSystem,
+    required final Logger logger,
+    required final FileSystem fileSystem,
   }) : _logger = logger,
        _fileSystem = fileSystem;
 
@@ -25,7 +25,7 @@ class DepfileService {
   /// exist. This can be overridden with the [writeEmpty] parameter when
   /// both static and runtime dependencies exist and it is not desired
   /// to force a rerun due to no depfile.
-  void writeToFile(Depfile depfile, File output, {bool writeEmpty = false}) {
+  void writeToFile(final Depfile depfile, final File output, {final bool writeEmpty = false}) {
     if (depfile.inputs.isEmpty && depfile.outputs.isEmpty && !writeEmpty) {
       ErrorHandlingFileSystem.deleteIfExists(output);
       return;
@@ -40,7 +40,7 @@ class DepfileService {
   /// Parse the depfile contents from [file].
   ///
   /// If the syntax is invalid, returns an empty [Depfile].
-  Depfile parse(File file) {
+  Depfile parse(final File file) {
     final String contents = file.readAsStringSync();
     final List<String> colonSeparated = contents.split(': ');
     if (colonSeparated.length != 2) {
@@ -57,7 +57,7 @@ class DepfileService {
   ///
   /// The [file] contains a list of newline separated file URIs. The output
   /// file must be manually specified.
-  Depfile parseDart2js(File file, File output) {
+  Depfile parseDart2js(final File file, final File output) {
     final List<File> inputs = <File>[];
     for (final String rawUri in file.readAsLinesSync()) {
       if (rawUri.trim().isEmpty) {
@@ -75,7 +75,7 @@ class DepfileService {
     return Depfile(inputs, <File>[output]);
   }
 
-  void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
+  void _writeFilesToBuffer(final List<File> files, final StringBuffer buffer) {
     for (final File outputFile in files) {
       if (_fileSystem.path.style.separator == r'\') {
         // backslashes and spaces in a depfile have to be escaped if the
@@ -92,14 +92,14 @@ class DepfileService {
     }
   }
 
-  List<File> _processList(String rawText) {
+  List<File> _processList(final String rawText) {
     return rawText
     // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
+        .replaceAllMapped(_separatorExpr, (final Match match) => '${match.group(1)}\n')
         .split('\n')
     // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)!).trim())
-        .where((String path) => path.isNotEmpty)
+        .map<String>((final String path) => path.replaceAllMapped(_escapeExpr, (final Match match) => match.group(1)!).trim())
+        .where((final String path) => path.isNotEmpty)
     // The tool doesn't write duplicates to these lists. This call is an attempt to
     // be resilient to the outputs of other tools which write or user edits to depfiles.
         .toSet()

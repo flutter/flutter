@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/animated_grid/sliver_animated_grid.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SliverAnimatedGrid example', (WidgetTester tester) async {
+  testWidgets('SliverAnimatedGrid example', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SliverAnimatedGridSample(),
     );

@@ -14,7 +14,7 @@ class ExtendedAnimationExampleApp extends StatelessWidget {
   const ExtendedAnimationExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(
         body: MyNavigationRail(),
@@ -35,7 +35,7 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
   bool _extended = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       children: <Widget>[
         NavigationRail(
@@ -46,7 +46,7 @@ class _MyNavigationRailState extends State<MyNavigationRail> {
               _extended = !_extended;
             });
           }),
-          onDestinationSelected: (int index) {
+          onDestinationSelected: (final int index) {
             setState(() {
               _selectedIndex = index;
             });
@@ -95,11 +95,11 @@ class MyNavigationRailFab extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Animation<double> animation = NavigationRail.extendedAnimation(context);
     return AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         // The extended fab has a shorter height than the regular fab.
         return Container(
           height: 56,

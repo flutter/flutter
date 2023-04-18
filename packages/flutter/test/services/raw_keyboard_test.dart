@@ -17,10 +17,10 @@ class _ModifierCheck {
 
 void main() {
   group('RawKeyboard', () {
-    testWidgets('The correct character is produced', (WidgetTester tester) async {
+    testWidgets('The correct character is produced', (final WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows']) {
         String character = '';
-        void handleKey(RawKeyEvent event) {
+        void handleKey(final RawKeyEvent event) {
           expect(event.character, equals(character), reason: 'on $platform');
         }
         RawKeyboard.instance.addListener(handleKey);
@@ -32,9 +32,9 @@ void main() {
       }
     });
 
-    testWidgets('No character is produced for non-printables', (WidgetTester tester) async {
+    testWidgets('No character is produced for non-printables', (final WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'web']) {
-        void handleKey(RawKeyEvent event) {
+        void handleKey(final RawKeyEvent event) {
           expect(event.character, isNull, reason: 'on $platform');
         }
         RawKeyboard.instance.addListener(handleKey);
@@ -43,7 +43,7 @@ void main() {
       }
     });
 
-    testWidgets('keysPressed is maintained', (WidgetTester tester) async {
+    testWidgets('keysPressed is maintained', (final WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         RawKeyboard.instance.clearKeysPressed();
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
@@ -149,7 +149,7 @@ void main() {
       }
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/61021
 
-    testWidgets('keysPressed is correct when modifier is released before key', (WidgetTester tester) async {
+    testWidgets('keysPressed is correct when modifier is released before key', (final WidgetTester tester) async {
       for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia', 'windows', 'ios']) {
         RawKeyboard.instance.clearKeysPressed();
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
@@ -200,7 +200,7 @@ void main() {
       }
     }, skip: isBrowser); // https://github.com/flutter/flutter/issues/76741
 
-    testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on macOS', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -214,7 +214,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -224,7 +224,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a macOS-specific test.
 
-    testWidgets('keysPressed modifiers are synchronized with key events on iOS', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on iOS', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -238,7 +238,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -248,7 +248,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an iOS-specific test.
 
-    testWidgets('keysPressed modifiers are synchronized with key events on Windows', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on Windows', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -262,7 +262,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -272,7 +272,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a Windows-specific test.
 
-    testWidgets('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on android', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -286,7 +286,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -296,7 +296,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an Android-specific test.
 
-    testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -310,7 +310,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -320,7 +320,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a Fuchsia-specific test.
 
-    testWidgets('keysPressed modifiers are synchronized with key events on Linux GLFW', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on Linux GLFW', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -334,7 +334,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -350,7 +350,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a GLFW-specific test.
 
-    Future<void> simulateGTKKeyEvent(bool keyDown, int scancode, int keycode, int modifiers) async {
+    Future<void> simulateGTKKeyEvent(final bool keyDown, final int scancode, final int keycode, final int modifiers) async {
       final Map<String, dynamic> data = <String, dynamic>{
           'type': keyDown ? 'keydown' : 'keyup',
           'keymap': 'linux',
@@ -374,7 +374,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
     }
 
@@ -382,7 +382,7 @@ void main() {
     //
     // GTK has some weird behavior where the tested key event sequence will
     // result in a AltRight down event without Alt bitmask.
-    testWidgets('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on Linux GTK (down events)', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
 
       await simulateGTKKeyEvent(true,  0x6c/*AltRight*/,  0xffea/*AltRight*/,  0x2000000);
@@ -402,7 +402,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
     //
     // On Linux, CapsLock can be remapped to a non-modifier key.
-    testWidgets('CapsLock should not be release when remapped on Linux', (WidgetTester tester) async {
+    testWidgets('CapsLock should not be release when remapped on Linux', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
 
       await simulateGTKKeyEvent(true,  0x42/*CapsLock*/,  0xff08/*Backspace*/,  0x2000000);
@@ -419,7 +419,7 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/114591 .
     //
     // On Web, CapsLock can be remapped to a non-modifier key.
-    testWidgets('CapsLock should not be release when remapped on Web', (WidgetTester _) async {
+    testWidgets('CapsLock should not be release when remapped on Web', (final WidgetTester _) async {
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
       addTearDown(() {
@@ -436,7 +436,7 @@ void main() {
           'metaState': 0,
           'keyCode': 8,
         }),
-        (ByteData? data) { },
+        (final ByteData? data) { },
       );
 
       expect(
@@ -449,7 +449,7 @@ void main() {
       );
     }, skip: !isBrowser); // [intended] This is a Browser-specific test.
 
-    testWidgets('keysPressed modifiers are synchronized with key events on web', (WidgetTester tester) async {
+    testWidgets('keysPressed modifiers are synchronized with key events on web', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event. Change the modifiers so
       // that they show the shift key as already down when this event is
@@ -463,7 +463,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -487,7 +487,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data2),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -506,7 +506,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data3),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -527,7 +527,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data4),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -537,7 +537,7 @@ void main() {
       );
     });
 
-    testWidgets('sided modifiers without a side set return all sides on Android', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on Android', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -554,7 +554,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -574,7 +574,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an Android-specific test.
 
-    testWidgets('sided modifiers without a side set return all sides on macOS', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on macOS', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -591,7 +591,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -611,7 +611,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a macOS-specific test.
 
-    testWidgets('sided modifiers without a side set return all sides on iOS', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on iOS', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -628,7 +628,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -648,10 +648,10 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is an iOS-specific test.
 
-    testWidgets('repeat events', (WidgetTester tester) async {
+    testWidgets('repeat events', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       late RawKeyEvent receivedEvent;
-      RawKeyboard.instance.keyEventHandler = (RawKeyEvent event) {
+      RawKeyboard.instance.keyEventHandler = (final RawKeyEvent event) {
         receivedEvent = event;
         return true;
       };
@@ -664,7 +664,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(receivedEvent.repeat, false);
 
@@ -672,7 +672,7 @@ void main() {
       await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(downData),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(receivedEvent.repeat, true);
 
@@ -684,14 +684,14 @@ void main() {
           isDown: false,
           platform: 'windows',
         )),
-        (ByteData? data) {},
+        (final ByteData? data) {},
       );
       expect(receivedEvent.repeat, false);
 
       RawKeyboard.instance.keyEventHandler = null;
     }, skip: isBrowser); // [intended] This is a Windows-specific test.
 
-    testWidgets('sided modifiers without a side set return all sides on Windows', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on Windows', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -708,7 +708,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -726,7 +726,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a Windows-specific test.
 
-    testWidgets('sided modifiers without a side set return all sides on Linux GLFW', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return all sides on Linux GLFW', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -744,7 +744,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -764,7 +764,7 @@ void main() {
       );
     }, skip: isBrowser); // [intended] This is a GLFW-specific test.
 
-    testWidgets('sided modifiers without a side set return left sides on web', (WidgetTester tester) async {
+    testWidgets('sided modifiers without a side set return left sides on web', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -781,7 +781,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-            (ByteData? data) {},
+            (final ByteData? data) {},
       );
       expect(
         RawKeyboard.instance.keysPressed,
@@ -797,7 +797,7 @@ void main() {
       );
     });
 
-    testWidgets('RawKeyboard asserts if no keys are in keysPressed after receiving a key down event', (WidgetTester tester) async {
+    testWidgets('RawKeyboard asserts if no keys are in keysPressed after receiving a key down event', (final WidgetTester tester) async {
       final Map<String, dynamic> keyEventMessage;
       if (kIsWeb) {
         keyEventMessage = const <String, dynamic>{
@@ -822,18 +822,18 @@ void main() {
           await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
             SystemChannels.keyEvent.name,
             SystemChannels.keyEvent.codec.encodeMessage(keyEventMessage),
-            (ByteData? data) { },
+            (final ByteData? data) { },
           );
         },
         throwsA(isA<AssertionError>().having(
-          (AssertionError error) => error.toString(),
+          (final AssertionError error) => error.toString(),
           '.toString()',
           contains('Attempted to send a key down event when no keys are in keysPressed'),
         )),
       );
     });
 
-    testWidgets('Allows inconsistent modifier for iOS', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for iOS', (final WidgetTester _) async {
       // Use `testWidgets` for clean-ups.
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -850,7 +850,7 @@ void main() {
           'charactersIgnoringModifiers': '',
           'modifiers': 0,
         }),
-        (ByteData? data) { },
+        (final ByteData? data) { },
       );
 
       expect(events, hasLength(1));
@@ -861,7 +861,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
     }, skip: isBrowser); // [intended] This is an iOS-specific group.
 
-    testWidgets('Allows inconsistent modifier for Android', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for Android', (final WidgetTester _) async {
       // Use `testWidgets` for clean-ups.
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -881,7 +881,7 @@ void main() {
           'source': 0x101,
           'deviceId': 1,
         }),
-        (ByteData? data) { },
+        (final ByteData? data) { },
       );
 
       expect(events, hasLength(1));
@@ -892,7 +892,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.capsLock));
     }, skip: isBrowser); // [intended] This is an Android-specific group.
 
-    testWidgets('Allows inconsistent modifier for Web - Alt graph', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for Web - Alt graph', (final WidgetTester _) async {
       // Regression test for https://github.com/flutter/flutter/issues/113836
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -910,7 +910,7 @@ void main() {
           'metaState': 0,
           'keyCode': 225,
         }),
-        (ByteData? data) { },
+        (final ByteData? data) { },
       );
 
       expect(events, hasLength(1));
@@ -921,7 +921,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altGraph));
     }, skip: !isBrowser); // [intended] This is a Browser-specific test.
 
-    testWidgets('Allows inconsistent modifier for Web - Alt right', (WidgetTester _) async {
+    testWidgets('Allows inconsistent modifier for Web - Alt right', (final WidgetTester _) async {
       // Regression test for https://github.com/flutter/flutter/issues/113836
       final List<RawKeyEvent> events = <RawKeyEvent>[];
       RawKeyboard.instance.addListener(events.add);
@@ -939,7 +939,7 @@ void main() {
           'metaState': 0,
           'keyCode': 225,
         }),
-        (ByteData? data) { },
+        (final ByteData? data) { },
       );
 
       expect(events, hasLength(1));
@@ -950,7 +950,7 @@ void main() {
       expect(RawKeyboard.instance.keysPressed, contains(LogicalKeyboardKey.altRight));
     }, skip: !isBrowser); // [intended] This is a Browser-specific test.
 
-    testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
+    testWidgets('Dispatch events to all handlers', (final WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       final List<int> logs = <int>[];
 
@@ -959,7 +959,7 @@ void main() {
           autofocus: true,
           focusNode: focusNode,
           child: Container(),
-          onKey: (RawKeyEvent event) {
+          onKey: (final RawKeyEvent event) {
             logs.add(1);
           },
         ),
@@ -974,7 +974,7 @@ void main() {
 
       // Add a handler.
 
-      void handler2(RawKeyEvent event) {
+      void handler2(final RawKeyEvent event) {
         logs.add(2);
       }
       RawKeyboard.instance.addListener(handler2);
@@ -986,7 +986,7 @@ void main() {
 
       // Add another handler.
 
-      void handler3(RawKeyEvent event) {
+      void handler3(final RawKeyEvent event) {
         logs.add(3);
       }
       RawKeyboard.instance.addListener(handler3);
@@ -1014,8 +1014,8 @@ void main() {
       logs.clear();
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Exceptions from RawKeyboard listeners are caught and reported', (WidgetTester tester) async {
-      void throwingListener(RawKeyEvent event) {
+    testWidgets('Exceptions from RawKeyboard listeners are caught and reported', (final WidgetTester tester) async {
+      void throwingListener(final RawKeyEvent event) {
         throw 1;
       }
 
@@ -1026,7 +1026,7 @@ void main() {
       FlutterErrorDetails? record;
       await _runWhileOverridingOnError(
         () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-        onError: (FlutterErrorDetails details) {
+        onError: (final FlutterErrorDetails details) {
           record = details;
         }
       );
@@ -1045,7 +1045,7 @@ void main() {
       // Simulate a key up event.
       await _runWhileOverridingOnError(
         () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-        onError: (FlutterErrorDetails details) {
+        onError: (final FlutterErrorDetails details) {
           record = details;
         }
       );
@@ -1288,7 +1288,7 @@ void main() {
       expect(data.repeatCount, equals(42));
     });
 
-    testWidgets('Key events are responded to correctly.', (WidgetTester tester) async {
+    testWidgets('Key events are responded to correctly.', (final WidgetTester tester) async {
       expect(RawKeyboard.instance.keysPressed, isEmpty);
       // Generate the data for a regular key down event.
       final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
@@ -1299,7 +1299,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {
+        (final ByteData? data) {
           message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, Object?>?;
         },
       );
@@ -1311,7 +1311,7 @@ void main() {
       await tester.pumpWidget(
         Focus(
           focusNode: focusNode,
-          onKey: (FocusNode node, RawKeyEvent event) {
+          onKey: (final FocusNode node, final RawKeyEvent event) {
             return KeyEventResult.handled; // handle all events.
           },
           child: const SizedBox(),
@@ -1323,7 +1323,7 @@ void main() {
       await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.keyEvent.name,
         SystemChannels.keyEvent.codec.encodeMessage(data),
-        (ByteData? data) {
+        (final ByteData? data) {
           message = SystemChannels.keyEvent.codec.decodeMessage(data) as Map<String, Object?>?;
         },
       );
@@ -2098,7 +2098,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
     });
 
-    testWidgets('Win32 VK_PROCESSKEY events are skipped', (WidgetTester tester) async {
+    testWidgets('Win32 VK_PROCESSKEY events are skipped', (final WidgetTester tester) async {
       const  String platform = 'windows';
       bool lastHandled = true;
       final List<RawKeyEvent> events = <RawKeyEvent>[];
@@ -2106,7 +2106,7 @@ void main() {
       // Test both code paths: addListener, and FocusNode.onKey.
       RawKeyboard.instance.addListener(events.add);
       final FocusNode node = FocusNode(
-        onKey: (_, RawKeyEvent event) {
+        onKey: (final _, final RawKeyEvent event) {
           events.add(event);
           return KeyEventResult.ignored;
         },
@@ -2125,7 +2125,7 @@ void main() {
       events.clear();
 
       // Simulate raw events because VK_PROCESSKEY does not exist in the key mapping.
-      Future<void> simulateKeyEventMessage(String type, int keyCode, int scanCode) {
+      Future<void> simulateKeyEventMessage(final String type, final int keyCode, final int scanCode) {
         return tester.binding.defaultBinaryMessenger.handlePlatformMessage(
           SystemChannels.keyEvent.name,
           SystemChannels.keyEvent.codec.encodeMessage(<String, Object?>{
@@ -2135,7 +2135,7 @@ void main() {
             'scanCode': scanCode,
             'modifiers': 0,
           }),
-          (ByteData? data) {
+          (final ByteData? data) {
             final Map<String, Object?> decoded = SystemChannels.keyEvent.codec.decodeMessage(data)! as Map<String, Object?>;
             lastHandled = decoded['handled']! as bool;
           },
@@ -2201,7 +2201,7 @@ void main() {
     };
 
     // How modifiers are interpreted depends upon the keyCode for GLFW.
-    int keyCodeForModifier(int modifier, {required bool isLeft}) {
+    int keyCodeForModifier(final int modifier, {required final bool isLeft}) {
       switch (modifier) {
         case GLFWKeyHelper.modifierAlt:
           return isLeft ? 342 : 346;
@@ -2433,7 +2433,7 @@ void main() {
     };
 
     // How modifiers are interpreted depends upon the keyCode for GTK.
-    int keyCodeForModifier(int modifier, {required bool isLeft}) {
+    int keyCodeForModifier(final int modifier, {required final bool isLeft}) {
       switch (modifier) {
         case GtkKeyHelper.modifierMod1:
           return 65513;
@@ -2954,7 +2954,7 @@ void main() {
   });
 }
 
-Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
+Future<void> _runWhileOverridingOnError(final AsyncCallback body, {required final FlutterExceptionHandler onError}) async {
   final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;
   FlutterError.onError = onError;
 
@@ -2965,9 +2965,9 @@ Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExc
   }
 }
 
-Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> infos) {
+Map<String, DiagnosticsNode> _groupDiagnosticsByName(final Iterable<DiagnosticsNode> infos) {
   return Map<String, DiagnosticsNode>.fromIterable(
     infos,
-    key: (Object? node) => (node! as DiagnosticsNode).name ?? '',
+    key: (final Object? node) => (node! as DiagnosticsNode).name ?? '',
   );
 }

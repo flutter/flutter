@@ -51,8 +51,8 @@ class SegmentedButtonThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   SegmentedButtonThemeData copyWith({
-    ButtonStyle? style,
-    Widget? selectedIcon,
+    final ButtonStyle? style,
+    final Widget? selectedIcon,
   }) {
     return SegmentedButtonThemeData(
       style: style ?? this.style,
@@ -61,7 +61,7 @@ class SegmentedButtonThemeData with Diagnosticable {
   }
 
   /// Linearly interpolates between two segmented button themes.
-  static SegmentedButtonThemeData lerp(SegmentedButtonThemeData? a, SegmentedButtonThemeData? b, double t) {
+  static SegmentedButtonThemeData lerp(final SegmentedButtonThemeData? a, final SegmentedButtonThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -78,7 +78,7 @@ class SegmentedButtonThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -91,7 +91,7 @@ class SegmentedButtonThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ButtonStyle>('style', style, defaultValue: null));
     properties.add(DiagnosticsProperty<Widget>('selectedIcon', selectedIcon, defaultValue: null));
@@ -132,7 +132,7 @@ class SegmentedButtonTheme extends InheritedTheme {
   ///
   ///  * [maybeOf], which returns null if it doesn't find a
   ///    [SegmentedButtonTheme] ancestor.
-  static SegmentedButtonThemeData of(BuildContext context) {
+  static SegmentedButtonThemeData of(final BuildContext context) {
     return maybeOf(context) ?? Theme.of(context).segmentedButtonTheme;
   }
 
@@ -160,15 +160,15 @@ class SegmentedButtonTheme extends InheritedTheme {
   ///
   ///  * [of], which will return [ThemeData.segmentedButtonTheme] if it doesn't
   ///    find a [SegmentedButtonTheme] ancestor, instead of returning null.
-  static SegmentedButtonThemeData? maybeOf(BuildContext context) {
+  static SegmentedButtonThemeData? maybeOf(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SegmentedButtonTheme>()?.data;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return SegmentedButtonTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(SegmentedButtonTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final SegmentedButtonTheme oldWidget) => data != oldWidget.data;
 }

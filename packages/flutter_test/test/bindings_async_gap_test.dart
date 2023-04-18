@@ -17,7 +17,7 @@ Future<void> main() async {
 
     final Completer<FlutterErrorDetails> errorCompleter = Completer<FlutterErrorDetails>();
     final TestExceptionReporter oldReporter = reportTestException;
-    reportTestException = (FlutterErrorDetails details, String testDescription) {
+    reportTestException = (final FlutterErrorDetails details, final String testDescription) {
       errorCompleter.complete(details);
       reportTestException = oldReporter;
     };
@@ -27,8 +27,8 @@ Future<void> main() async {
       final Completer<String> completer = Completer<String>();
 
       completer.future.then(
-        (String value) {},
-        onError: (Object error, StackTrace stack) {
+        (final String value) {},
+        onError: (final Object error, final StackTrace stack) {
           assert(stack is stack_trace.Chain);
           FlutterError.reportError(FlutterErrorDetails(
             exception: error,

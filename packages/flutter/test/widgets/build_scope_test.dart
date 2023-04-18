@@ -23,13 +23,13 @@ class ProbeWidgetState extends State<ProbeWidget> {
   }
 
   @override
-  void didUpdateWidget(ProbeWidget oldWidget) {
+  void didUpdateWidget(final ProbeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     setState(() { });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     setState(() { });
     buildCount++;
     return Container();
@@ -42,7 +42,7 @@ class BadWidget extends StatelessWidget {
   final BadWidgetParentState parentState;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     parentState._markNeedsBuild();
     return Container();
   }
@@ -63,7 +63,7 @@ class BadWidgetParentState extends State<BadWidgetParent> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return BadWidget(this);
   }
 }
@@ -76,7 +76,7 @@ class BadDisposeWidget extends StatefulWidget {
 
 class BadDisposeWidgetState extends State<BadDisposeWidget> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 
@@ -111,7 +111,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
   static int buildId = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     buildId += 1;
     built = buildId;
     return widget.child;
@@ -127,13 +127,13 @@ class Wrapper extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return child;
   }
 }
 
 void main() {
-  testWidgets('Legal times for setState', (WidgetTester tester) async {
+  testWidgets('Legal times for setState', (final WidgetTester tester) async {
     final GlobalKey flipKey = GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
     await tester.pumpWidget(const ProbeWidget(key: Key('a')));
@@ -158,27 +158,27 @@ void main() {
     expect(ProbeWidgetState.buildCount, equals(3));
   });
 
-  testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) async {
+  testWidgets('Setting parent state during build is forbidden', (final WidgetTester tester) async {
     await tester.pumpWidget(const BadWidgetParent());
     expect(tester.takeException(), isFlutterError);
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
+  testWidgets('Setting state during dispose is forbidden', (final WidgetTester tester) async {
     await tester.pumpWidget(const BadDisposeWidget());
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(Container());
     expect(tester.takeException(), isNotNull);
   });
 
-  testWidgets('Dirty element list sort order', (WidgetTester tester) async {
+  testWidgets('Dirty element list sort order', (final WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey(debugLabel: 'key1');
     final GlobalKey key2 = GlobalKey(debugLabel: 'key2');
 
     bool didMiddle = false;
     late Widget middle;
     final List<StateSetter> setStates = <StateSetter>[];
-    Widget builder(BuildContext context, StateSetter setState) {
+    Widget builder(final BuildContext context, final StateSetter setState) {
       setStates.add(setState);
       final bool returnMiddle = !didMiddle;
       didMiddle = true;

@@ -54,30 +54,30 @@ void main() {
     expect(theme.data.dataRowCursor, null);
   });
 
-  testWidgets('Default DataTableThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default DataTableThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const DataTableThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('DataTableThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('DataTableThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     DataTableThemeData(
       decoration: const BoxDecoration(color: Color(0xfffffff0)),
       dataRowColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) => const Color(0xfffffff1),
+        (final Set<MaterialState> states) => const Color(0xfffffff1),
       ),
       dataRowMinHeight: 41.0,
       dataRowMaxHeight: 42.0,
       dataTextStyle: const TextStyle(fontSize: 12.0),
       headingRowColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) => const Color(0xfffffff2),
+        (final Set<MaterialState> states) => const Color(0xfffffff2),
       ),
       headingRowHeight: 52.0,
       headingTextStyle:  const TextStyle(fontSize: 14.0),
@@ -90,8 +90,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description[0], 'decoration: BoxDecoration(color: Color(0xfffffff0))');
@@ -110,7 +110,7 @@ void main() {
     expect(description[13], 'dataRowCursor: MaterialStatePropertyAll(SystemMouseCursor(forbidden))');
   });
 
-  testWidgets('DataTable is themeable', (WidgetTester tester) async {
+  testWidgets('DataTable is themeable', (final WidgetTester tester) async {
     const BoxDecoration decoration = BoxDecoration(color: Color(0xfffffff0));
     const MaterialStateProperty<Color> dataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff1));
     const double minMaxDataRowHeight = 41.0;
@@ -150,7 +150,7 @@ void main() {
             columns: <DataColumn>[
               DataColumn(
                 label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
+                onSort: (final int columnIndex, final bool ascending) {},
               ),
               const DataColumn(label: Text('B')),
             ],
@@ -160,7 +160,7 @@ void main() {
                   DataCell(Text('Data')),
                   DataCell(Text('Data 2')),
                 ],
-                onSelectChanged: (bool? value) { },
+                onSelectChanged: (final bool? value) { },
               ),
             ],
           ),
@@ -197,7 +197,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
-  testWidgets('DataTable is themeable - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('DataTable is themeable - separate test for deprecated dataRowHeight', (final WidgetTester tester) async {
     const double dataRowHeight = 51.0;
 
     await tester.pumpWidget(
@@ -213,7 +213,7 @@ void main() {
             columns: <DataColumn>[
               DataColumn(
                 label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
+                onSort: (final int columnIndex, final bool ascending) {},
               ),
               const DataColumn(label: Text('B')),
             ],
@@ -231,7 +231,7 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
   });
 
-  testWidgets('DataTable properties are taken over the theme values', (WidgetTester tester) async {
+  testWidgets('DataTable properties are taken over the theme values', (final WidgetTester tester) async {
     const BoxDecoration themeDecoration = BoxDecoration(color: Color(0xfffffff1));
     const MaterialStateProperty<Color> themeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
     const double minMaxThemeDataRowHeight = 50.0;
@@ -296,14 +296,14 @@ void main() {
               DataColumn(
                 label: const Text('A'),
                 mouseCursor: headingCellCursor,
-                onSort: (int columnIndex, bool ascending) {},
+                onSort: (final int columnIndex, final bool ascending) {},
               ),
               const DataColumn(label: Text('B')),
             ],
             rows: <DataRow>[
               DataRow(
                 mouseCursor: dataRowCursor,
-                onSelectChanged: (bool? selected) {},
+                onSelectChanged: (final bool? selected) {},
                 cells: const <DataCell>[
                   DataCell(Text('Data')),
                   DataCell(Text('Data 2')),
@@ -344,7 +344,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), dataRowCursor.resolve(<MaterialState>{}));
   });
 
-  testWidgets('DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('DataTable properties are taken over the theme values - separate test for deprecated dataRowHeight', (final WidgetTester tester) async {
     const double themeDataRowHeight = 50.0;
     const double dataRowHeight = 51.0;
 
@@ -362,7 +362,7 @@ void main() {
             columns: <DataColumn>[
               DataColumn(
                 label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
+                onSort: (final int columnIndex, final bool ascending) {},
               ),
               const DataColumn(label: Text('B')),
             ],
@@ -380,7 +380,7 @@ void main() {
     expect(tester.getSize(_findFirstContainerFor('Data')).height, dataRowHeight);
   });
 
-  testWidgets('Local DataTableTheme can override global DataTableTheme', (WidgetTester tester) async {
+  testWidgets('Local DataTableTheme can override global DataTableTheme', (final WidgetTester tester) async {
     const BoxDecoration globalThemeDecoration = BoxDecoration(color: Color(0xfffffff1));
     const MaterialStateProperty<Color> globalThemeDataRowColor = MaterialStatePropertyAll<Color>(Color(0xfffffff0));
     const double minMaxGlobalThemeDataRowHeight = 50.0;
@@ -449,13 +449,13 @@ void main() {
               columns: <DataColumn>[
                 DataColumn(
                   label: const Text('A'),
-                  onSort: (int columnIndex, bool ascending) {},
+                  onSort: (final int columnIndex, final bool ascending) {},
                 ),
                 const DataColumn(label: Text('B')),
               ],
               rows: <DataRow>[
                 DataRow(
-                  onSelectChanged: (bool? selected) {},
+                  onSelectChanged: (final bool? selected) {},
                   cells: const <DataCell>[
                     DataCell(Text('Data')),
                     DataCell(Text('Data 2')),
@@ -497,7 +497,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), localDataRowCursor.resolve(<MaterialState>{}));
   });
 
-  testWidgets('Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('Local DataTableTheme can override global DataTableTheme - separate test for deprecated dataRowHeight', (final WidgetTester tester) async {
     const double globalThemeDataRowHeight = 50.0;
     const double localThemeDataRowHeight = 51.0;
 
@@ -518,7 +518,7 @@ void main() {
               columns: <DataColumn>[
                 DataColumn(
                   label: const Text('A'),
-                  onSort: (int columnIndex, bool ascending) {},
+                  onSort: (final int columnIndex, final bool ascending) {},
                 ),
                 const DataColumn(label: Text('B')),
               ],
@@ -538,7 +538,7 @@ void main() {
   });
 }
 
-BoxDecoration _tableRowBoxDecoration({required WidgetTester tester, required int index}) {
+BoxDecoration _tableRowBoxDecoration({required final WidgetTester tester, required final int index}) {
   final Table table = tester.widget(find.byType(Table));
   final TableRow tableRow = table.children[index];
   return tableRow.decoration! as BoxDecoration;
@@ -547,4 +547,4 @@ BoxDecoration _tableRowBoxDecoration({required WidgetTester tester, required int
 // The finder matches with the Container of the cell content, as well as the
 // Container wrapping the whole table. The first one is used to test row
 // heights.
-Finder _findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+Finder _findFirstContainerFor(final String text) => find.widgetWithText(Container, text).first;

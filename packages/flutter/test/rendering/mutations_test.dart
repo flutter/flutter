@@ -16,7 +16,7 @@ class RenderLayoutTestBox extends RenderProxyBox {
   final VoidCallback? onPerformLayout;
 
   @override
-  void layout(Constraints constraints, { bool parentUsesSize = false }) {
+  void layout(final Constraints constraints, { final bool parentUsesSize = false }) {
     // Doing this in tests is ok, but if you're writing your own
     // render object, you want to override performLayout(), not
     // layout(). Overriding layout() would remove many critical
@@ -80,7 +80,7 @@ void main() {
   });
 
   group('Throws when illegal mutations are attempted: ', () {
-    FlutterError catchLayoutError(RenderBox box) {
+    FlutterError catchLayoutError(final RenderBox box) {
       Object? error;
       layout(box, onErrors: () {
         error = TestRenderingFlutterBinding.instance.takeFlutterErrorDetails()!.exception;

@@ -19,7 +19,7 @@ class ProductCard extends StatelessWidget {
   static const double kTextBoxHeight = 65.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final NumberFormat formatter = NumberFormat.simpleCurrency(
       decimalDigits: 0,
       locale: Localizations.localeOf(context).toString(),
@@ -34,7 +34,7 @@ class ProductCard extends StatelessWidget {
     );
 
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget? child, AppStateModel model) {
+      builder: (final BuildContext context, final Widget? child, final AppStateModel model) {
         return GestureDetector(
           onTap: () {
             model.addProductToCart(product!.id);

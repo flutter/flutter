@@ -15,9 +15,9 @@ class FooState extends State<Foo> {
   ScrollController scrollController = ScrollController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         return ScrollConfiguration(
           behavior: const FooScrollBehavior(),
           child: ListView(
@@ -77,11 +77,11 @@ class FooScrollBehavior extends ScrollBehavior {
   const FooScrollBehavior();
 
   @override
-  bool shouldNotify(FooScrollBehavior old) => true;
+  bool shouldNotify(final FooScrollBehavior old) => true;
 }
 
 void main() {
-  testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
+  testWidgets('Can animate scroll after setState', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

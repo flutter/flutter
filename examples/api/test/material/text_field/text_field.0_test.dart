@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/text_field/text_field.0.dart' as ex
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TextField is obscured and has "Password" as labelText', (WidgetTester tester) async {
+  testWidgets('TextField is obscured and has "Password" as labelText', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.TextFieldExampleApp());
 
     expect(find.byType(TextField), findsOneWidget);

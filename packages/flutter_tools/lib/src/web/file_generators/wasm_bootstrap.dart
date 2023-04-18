@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-String generateWasmBootstrapFile(bool isSkwasm) {
+String generateWasmBootstrapFile(final bool isSkwasm) {
   return '''
 // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -31,7 +31,7 @@ String generateWasmBootstrapFile(bool isSkwasm) {
 ''';
 }
 
-String generateImports(bool isSkwasm) {
+String generateImports(final bool isSkwasm) {
   if (isSkwasm) {
     return r'''
     const imports = new Promise((resolve, reject) => {

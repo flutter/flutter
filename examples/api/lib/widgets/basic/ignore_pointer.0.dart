@@ -12,7 +12,7 @@ class IgnorePointerApp extends StatelessWidget {
   const IgnorePointerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -34,14 +34,14 @@ class IgnorePointerExample extends StatefulWidget {
 
 class _IgnorePointerExampleState extends State<IgnorePointerExample> {
   bool ignoring = false;
-  void setIgnoring(bool newValue) {
+  void setIgnoring(final bool newValue) {
     setState(() {
       ignoring = newValue;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[

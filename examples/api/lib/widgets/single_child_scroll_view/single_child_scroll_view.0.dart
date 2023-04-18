@@ -12,7 +12,7 @@ class SingleChildScrollViewExampleApp extends StatelessWidget {
   const SingleChildScrollViewExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: SingleChildScrollViewExample(),
     );
@@ -23,11 +23,11 @@ class SingleChildScrollViewExample extends StatelessWidget {
   const SingleChildScrollViewExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.bodyMedium!,
       child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        builder: (final BuildContext context, final BoxConstraints viewportConstraints) {
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(

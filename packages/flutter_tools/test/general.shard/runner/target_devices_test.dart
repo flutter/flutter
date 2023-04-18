@@ -2450,8 +2450,8 @@ class TestDeviceManager extends DeviceManager {
   }
 
   void setDeviceToWaitFor(
-    IOSDevice device,
-    DeviceConnectionInterface connectionInterface,
+    final IOSDevice device,
+    final DeviceConnectionInterface connectionInterface,
   ) {
     final XCDeviceEventInterface eventInterface =
         connectionInterface == DeviceConnectionInterface.wireless
@@ -2481,21 +2481,21 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
   List<String> get wellKnownIds => const <String>[];
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({final Duration? timeout}) async {
     numberOfTimesPolled++;
     return deviceList;
   }
 
   @override
-  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async {
+  Future<List<Device>> devices({final DeviceDiscoveryFilter? filter}) async {
     devicesCalled += 1;
     return super.devices(filter: filter);
   }
 
   @override
   Future<List<Device>> discoverDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) {
     discoverDevicesCalled++;
     if (refreshDeviceList.isNotEmpty) {
@@ -2511,7 +2511,7 @@ class TestPollingDeviceDiscovery extends PollingDeviceDiscovery {
 class TestIOSDeviceDiscovery extends IOSDevices {
   TestIOSDeviceDiscovery({
     required super.platform,
-    required FakeXcdevice xcdevice,
+    required final FakeXcdevice xcdevice,
     required super.iosWorkflow,
     required super.logger,
   })  : _platform = platform,
@@ -2531,7 +2531,7 @@ class TestIOSDeviceDiscovery extends IOSDevices {
   FakeXcdevice get xcdevice => _xcdevice;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({final Duration? timeout}) async {
     numberOfTimesPolled++;
     if (!_platform.isMacOS) {
       throw UnsupportedError(
@@ -2542,15 +2542,15 @@ class TestIOSDeviceDiscovery extends IOSDevices {
   }
 
   @override
-  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async {
+  Future<List<Device>> devices({final DeviceDiscoveryFilter? filter}) async {
     devicesCalled += 1;
     return super.devices(filter: filter);
   }
 
   @override
   Future<List<Device>> discoverDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) {
     discoverDevicesCalled++;
     if (refreshDeviceList.isNotEmpty) {
@@ -2569,7 +2569,7 @@ class FakeXcdevice extends Fake implements XCDevice {
   bool waitedForDeviceToConnect = false;
 
   @override
-  Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
+  Future<XCDeviceEventNotification?> waitForDeviceToConnect(final String deviceId) async {
     final XCDeviceEventNotification? waitEvent = waitForDeviceEvent;
     if (waitEvent != null) {
       waitedForDeviceToConnect = true;
@@ -2590,15 +2590,15 @@ class FakeIOSWorkflow extends Fake implements IOSWorkflow {}
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
-    String? deviceId,
-    String? deviceName,
-    bool deviceSupported = true,
-    bool deviceSupportForProject = true,
+    final String? deviceId,
+    final String? deviceName,
+    final bool deviceSupported = true,
+    final bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.platformType = PlatformType.android,
-    TargetPlatform deviceTargetPlatform = TargetPlatform.android,
+    final TargetPlatform deviceTargetPlatform = TargetPlatform.android,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
         _isSupported = deviceSupported,
@@ -2606,15 +2606,15 @@ class FakeDevice extends Fake implements Device {
         _targetPlatform = deviceTargetPlatform;
 
   FakeDevice.wireless({
-    String? deviceId,
-    String? deviceName,
-    bool deviceSupported = true,
-    bool deviceSupportForProject = true,
+    final String? deviceId,
+    final String? deviceName,
+    final bool deviceSupported = true,
+    final bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.wireless,
     this.platformType = PlatformType.android,
-    TargetPlatform deviceTargetPlatform = TargetPlatform.android,
+    final TargetPlatform deviceTargetPlatform = TargetPlatform.android,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
         _isSupported = deviceSupported,
@@ -2622,15 +2622,15 @@ class FakeDevice extends Fake implements Device {
         _targetPlatform = deviceTargetPlatform;
 
   FakeDevice.fuchsia({
-    String? deviceId,
-    String? deviceName,
-    bool deviceSupported = true,
-    bool deviceSupportForProject = true,
+    final String? deviceId,
+    final String? deviceName,
+    final bool deviceSupported = true,
+    final bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.platformType = PlatformType.fuchsia,
-    TargetPlatform deviceTargetPlatform = TargetPlatform.fuchsia_arm64,
+    final TargetPlatform deviceTargetPlatform = TargetPlatform.fuchsia_arm64,
   })  : id = deviceId ?? 'xxx',
         name = deviceName ?? 'test',
         _isSupported = deviceSupported,
@@ -2656,7 +2656,7 @@ class FakeDevice extends Fake implements Device {
   bool isSupported() => _isSupported;
 
   @override
-  bool isSupportedForProject(FlutterProject project) => _isSupportedForProject;
+  bool isSupportedForProject(final FlutterProject project) => _isSupportedForProject;
 
   @override
   DeviceConnectionInterface connectionInterface;
@@ -2689,10 +2689,10 @@ class FakeDevice extends Fake implements Device {
 // ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
-    String? deviceId,
-    String? deviceName,
-    bool deviceSupported = true,
-    bool deviceSupportForProject = true,
+    final String? deviceId,
+    final String? deviceName,
+    final bool deviceSupported = true,
+    final bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
     this.platformType = PlatformType.ios,
@@ -2703,10 +2703,10 @@ class FakeIOSDevice extends Fake implements IOSDevice {
         _isSupportedForProject = deviceSupportForProject;
 
   FakeIOSDevice.notConnectedWireless({
-    String? deviceId,
-    String? deviceName,
-    bool deviceSupported = true,
-    bool deviceSupportForProject = true,
+    final String? deviceId,
+    final String? deviceName,
+    final bool deviceSupported = true,
+    final bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = false,
     this.platformType = PlatformType.ios,
@@ -2717,10 +2717,10 @@ class FakeIOSDevice extends Fake implements IOSDevice {
         _isSupportedForProject = deviceSupportForProject;
 
   FakeIOSDevice.connectedWireless({
-    String? deviceId,
-    String? deviceName,
-    bool deviceSupported = true,
-    bool deviceSupportForProject = true,
+    final String? deviceId,
+    final String? deviceName,
+    final bool deviceSupported = true,
+    final bool deviceSupportForProject = true,
     this.ephemeral = true,
     this.isConnected = true,
     this.platformType = PlatformType.ios,
@@ -2746,7 +2746,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   bool isSupported() => _isSupported;
 
   @override
-  bool isSupportedForProject(FlutterProject project) => _isSupportedForProject;
+  bool isSupportedForProject(final FlutterProject project) => _isSupportedForProject;
 
   @override
   DeviceConnectionInterface connectionInterface;
@@ -2791,7 +2791,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   @override
   bool singleCharMode = false;
 
-  void setPrompt(List<String> characters, String result) {
+  void setPrompt(final List<String> characters, final String result) {
     _nextPrompt = characters;
     _nextResult = result;
   }
@@ -2801,18 +2801,18 @@ class FakeTerminal extends Fake implements AnsiTerminal {
 
   @override
   Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    Logger? logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true,
+    final List<String> acceptedCharacters, {
+    final Logger? logger,
+    final String? prompt,
+    final int? defaultChoiceIndex,
+    final bool displayAcceptedCharacters = true,
   }) async {
     expect(acceptedCharacters, _nextPrompt);
     return _nextResult;
   }
 
   @override
-  String clearLines(int numberOfLines) {
+  String clearLines(final int numberOfLines) {
     return 'CLEAR_LINES_$numberOfLines';
   }
 }
@@ -2828,13 +2828,13 @@ class TestBufferLogger extends BufferLogger {
 
   @override
   void printStatus(
-    String message, {
-    bool? emphasis,
-    TerminalColor? color,
-    bool? newline,
-    int? indent,
-    int? hangingIndent,
-    bool? wrap,
+    final String message, {
+    final bool? emphasis,
+    final TerminalColor? color,
+    final bool? newline,
+    final int? indent,
+    final int? hangingIndent,
+    final bool? wrap,
   }) {
     if (message.startsWith('CLEAR_LINES_')) {
       expect(statusText, equals(originalStatusText));

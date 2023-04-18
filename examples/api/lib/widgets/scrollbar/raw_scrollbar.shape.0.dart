@@ -12,7 +12,7 @@ class ShapeExampleApp extends StatelessWidget {
   const ShapeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: ShapeExample(),
     );
@@ -23,7 +23,7 @@ class ShapeExample extends StatelessWidget {
   const ShapeExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: RawScrollbar(
         shape: const StadiumBorder(side: BorderSide(color: Colors.brown, width: 3.0)),
@@ -37,7 +37,7 @@ class ShapeExample extends StatelessWidget {
           // PrimaryScrollController requires ScrollView.primary be set.
           primary: true,
           physics: const BouncingScrollPhysics(),
-          children: List<Text>.generate(100, (int index) => Text((index * index).toString())),
+          children: List<Text>.generate(100, (final int index) => Text((index * index).toString())),
         ),
       ),
     );

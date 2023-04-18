@@ -26,7 +26,7 @@ import 'package:path/path.dart' as path;
 import '../localizations_utils.dart';
 import '../localizations_validator.dart';
 
-Future<void> main(List<String> rawArgs) async {
+Future<void> main(final List<String> rawArgs) async {
   bool removeUndefined = false;
   if (rawArgs.contains('--remove-undefined')) {
     removeUndefined = true;
@@ -38,14 +38,14 @@ Future<void> main(List<String> rawArgs) async {
   updateMissingResources(localizationPath, 'cupertino', removeUndefined: removeUndefined);
 }
 
-Map<String, dynamic> loadBundle(File file) {
+Map<String, dynamic> loadBundle(final File file) {
   if (!FileSystemEntity.isFileSync(file.path)) {
     exitWithError('Unable to find input file: ${file.path}');
   }
   return json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
-void writeBundle(File file, Map<String, dynamic> bundle) {
+void writeBundle(final File file, final Map<String, dynamic> bundle) {
   final StringBuffer contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {
@@ -55,14 +55,14 @@ void writeBundle(File file, Map<String, dynamic> bundle) {
   file.writeAsStringSync(contents.toString());
 }
 
-Set<String> resourceKeys(Map<String, dynamic> bundle) {
+Set<String> resourceKeys(final Map<String, dynamic> bundle) {
   return Set<String>.from(
     // Skip any attribute keys
-    bundle.keys.where((String key) => !key.startsWith('@'))
+    bundle.keys.where((final String key) => !key.startsWith('@'))
   );
 }
 
-bool intentionallyOmitted(String key, Map<String, dynamic> bundle) {
+bool intentionallyOmitted(final String key, final Map<String, dynamic> bundle) {
   final String attributeKey = '@$key';
   final dynamic attribute = bundle[attributeKey];
   return attribute is Map && attribute.containsKey('notUsed');
@@ -70,7 +70,7 @@ bool intentionallyOmitted(String key, Map<String, dynamic> bundle) {
 
 /// Whether `key` corresponds to one of the plural variations of a key with
 /// the same prefix and suffix "Other".
-bool isPluralVariation(String key, Map<String, dynamic> bundle) {
+bool isPluralVariation(final String key, final Map<String, dynamic> bundle) {
   final Match? pluralMatch = kPluralRegexp.firstMatch(key);
   if (pluralMatch == null) {
     return false;
@@ -79,7 +79,7 @@ bool isPluralVariation(String key, Map<String, dynamic> bundle) {
   return bundle.containsKey('${prefix}Other');
 }
 
-void updateMissingResources(String localizationPath, String groupPrefix, {bool removeUndefined = false}) {
+void updateMissingResources(final String localizationPath, final String groupPrefix, {final bool removeUndefined = false}) {
   final Directory localizationDir = Directory(localizationPath);
   final RegExp filenamePattern = RegExp('${groupPrefix}_(\\w+)\\.arb');
 
@@ -104,7 +104,7 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
         // locale. This allows unused localizations to be removed if
         // --remove-undefined is passed.
         if (removeUndefined) {
-          bool isIncluded(String key) {
+          bool isIncluded(final String key) {
             return !isPluralVariation(key, localeBundle)
                 && !intentionallyOmitted(key, localeBundle);
           }
@@ -118,7 +118,7 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
               .toSet();
 
           // Remove them.
-          localeBundle.removeWhere((String key, dynamic value) {
+          localeBundle.removeWhere((final String key, final dynamic value) {
             final bool found = extraResources.contains(key);
             if (found) {
               shouldWrite = true;
@@ -133,10 +133,10 @@ void updateMissingResources(String localizationPath, String groupPrefix, {bool r
         // Add in any resources that are in the canonical locale and not present
         // in this locale.
         final Set<String> missingResources = requiredKeys.difference(localeResources).where(
-          (String key) => !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle)
+          (final String key) => !isPluralVariation(key, localeBundle) && !intentionallyOmitted(key, localeBundle)
         ).toSet();
         if (missingResources.isNotEmpty) {
-          localeBundle.addEntries(missingResources.map((String k) =>
+          localeBundle.addEntries(missingResources.map((final String k) =>
             MapEntry<String, String>(k, englishBundle[k].toString())));
           shouldWrite = true;
           print('Updating $entityPath with missing entries for $missingResources');

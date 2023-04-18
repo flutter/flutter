@@ -63,10 +63,10 @@ class _MyScrollContainerState extends State<_MyScrollContainer> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return PageView.builder(
         controller: pageController,
-        itemBuilder: (BuildContext context, int position) {
+        itemBuilder: (final BuildContext context, final int position) {
           return CustomPaint(
             painter: _painter,
             size: const Size(300, 500),
@@ -84,7 +84,7 @@ class _CustomPainter extends CustomPainter {
   static const double lineWidth = 0.5;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     canvas.clipRect(Rect.fromLTWH(0, 0, size.width, size.height));
     double xPosition, yPosition;
     final double width = size.width / 7;
@@ -136,8 +136,8 @@ class _CustomPainter extends CustomPainter {
         canvas, size, yPosition, xPosition, height, width);
   }
 
-  void _drawVerticalAndHorizontalLines(Canvas canvas, Size size,
-      double yPosition, double xPosition, double height, double width) {
+  void _drawVerticalAndHorizontalLines(final Canvas canvas, final Size size,
+      double yPosition, double xPosition, final double height, final double width) {
     yPosition = height;
     _linePainter.strokeWidth = lineWidth;
     _linePainter.color = Colors.grey;
@@ -162,7 +162,7 @@ class _CustomPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
+  bool shouldRepaint(final CustomPainter oldDelegate) {
     return true;
   }
 }

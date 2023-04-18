@@ -12,7 +12,7 @@ import 'doctor_validator.dart';
 /// validated along with `NO_PROXY`.
 class ProxyValidator extends DoctorValidator {
   ProxyValidator({
-    required Platform platform,
+    required final Platform platform,
   })  : shouldShow = _getEnv('HTTP_PROXY', platform).isNotEmpty,
         _httpProxy = _getEnv('HTTP_PROXY', platform),
         _noProxy = _getEnv('NO_PROXY', platform),
@@ -25,7 +25,7 @@ class ProxyValidator extends DoctorValidator {
   /// Gets a trimmed, non-null environment variable. If the variable is not set
   /// an empty string will be returned. Checks for the lowercase version of the
   /// environment variable first, then uppercase to match Dart's HTTP implementation.
-  static String _getEnv(String key, Platform platform) =>
+  static String _getEnv(final String key, final Platform platform) =>
     platform.environment[key.toLowerCase()]?.trim() ??
     platform.environment[key.toUpperCase()]?.trim() ??
     '';
@@ -53,7 +53,7 @@ class ProxyValidator extends DoctorValidator {
     ];
 
     final bool hasIssues = messages.any(
-      (ValidationMessage msg) => msg.isHint || msg.isError);
+      (final ValidationMessage msg) => msg.isHint || msg.isError);
 
     return ValidationResult(
       hasIssues ? ValidationType.partial : ValidationType.success,

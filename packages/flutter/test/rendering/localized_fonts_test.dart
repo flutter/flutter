@@ -16,7 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets(
     'RichText TextSpan styles with different locales',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
 
       await tester.pumpWidget(
         MaterialApp(
@@ -26,7 +26,7 @@ void main() {
             Locale('zh'),
           ],
           home: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               const String character = '骨';
               final TextStyle style = Theme.of(context).textTheme.displayMedium!;
               return Scaffold(
@@ -61,7 +61,7 @@ void main() {
 
   testWidgets(
     'Text with locale-specific glyphs, ambient locale',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           supportedLocales: const <Locale>[
@@ -70,7 +70,7 @@ void main() {
             Locale('zh'),
           ],
           home: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               const String character = '骨';
               final TextStyle style = Theme.of(context).textTheme.displayMedium!;
               return Scaffold(
@@ -112,7 +112,7 @@ void main() {
 
   testWidgets(
     'Text with locale-specific glyphs, explicit locale',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           supportedLocales: const <Locale>[
@@ -121,7 +121,7 @@ void main() {
             Locale('zh'),
           ],
           home: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               const String character = '骨';
               final TextStyle style = Theme.of(context).textTheme.displayMedium!;
               return Scaffold(

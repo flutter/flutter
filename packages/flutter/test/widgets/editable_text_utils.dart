@@ -12,12 +12,12 @@ import 'package:flutter_test/flutter_test.dart';
 const bool isContextMenuProvidedByPlatform = isBrowser;
 
 // Returns the RenderEditable at the given index, or the first if not given.
-RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
+RenderEditable findRenderEditable(final WidgetTester tester, {final int index = 0}) {
   final RenderObject root = tester.renderObject(find.byType(EditableText).at(index));
   expect(root, isNotNull);
 
   late RenderEditable renderEditable;
-  void recursiveFinder(RenderObject child) {
+  void recursiveFinder(final RenderObject child) {
     if (child is RenderEditable) {
       renderEditable = child;
       return;
@@ -29,8 +29,8 @@ RenderEditable findRenderEditable(WidgetTester tester, {int index = 0}) {
   return renderEditable;
 }
 
-List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-  return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+List<TextSelectionPoint> globalize(final Iterable<TextSelectionPoint> points, final RenderBox box) {
+  return points.map<TextSelectionPoint>((final TextSelectionPoint point) {
     return TextSelectionPoint(
       box.localToGlobal(point.point),
       point.direction,
@@ -38,7 +38,7 @@ List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBo
   }).toList();
 }
 
-Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
+Offset textOffsetToPosition(final WidgetTester tester, final int offset, {final int index = 0}) {
   final RenderEditable renderEditable = findRenderEditable(tester, index: index);
   final List<TextSelectionPoint> endpoints = globalize(
     renderEditable.getEndpointsForSelection(
@@ -52,13 +52,13 @@ Offset textOffsetToPosition(WidgetTester tester, int offset, {int index = 0}) {
 
 /// Mimic key press events by sending key down and key up events via the [tester].
 Future<void> sendKeys(
-    WidgetTester tester,
-    List<LogicalKeyboardKey> keys, {
-      bool shift = false,
-      bool wordModifier = false,
-      bool lineModifier = false,
-      bool shortcutModifier = false,
-      required TargetPlatform targetPlatform,
+    final WidgetTester tester,
+    final List<LogicalKeyboardKey> keys, {
+      final bool shift = false,
+      final bool wordModifier = false,
+      final bool lineModifier = false,
+      final bool shortcutModifier = false,
+      required final TargetPlatform targetPlatform,
     }) async {
   final String targetPlatformString = targetPlatform.toString();
   final String platform = targetPlatformString.substring(targetPlatformString.indexOf('.') + 1).toLowerCase();
@@ -117,9 +117,9 @@ Future<void> sendKeys(
 class OverflowWidgetTextEditingController extends TextEditingController {
   @override
   TextSpan buildTextSpan({
-    required BuildContext context,
-    TextStyle? style,
-    required bool withComposing,
+    required final BuildContext context,
+    final TextStyle? style,
+    required final bool withComposing,
   }) {
     return TextSpan(
       style: style,

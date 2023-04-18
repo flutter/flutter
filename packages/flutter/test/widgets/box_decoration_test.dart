@@ -21,14 +21,14 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   static late ui.Image image;
 
   @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<TestImageProvider> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(final TestImageProvider key, final DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
-      future.then<ImageInfo>((void value) => ImageInfo(image: image)),
+      future.then<ImageInfo>((final void value) => ImageInfo(image: image)),
     );
   }
 }
@@ -37,7 +37,7 @@ Future<void> main() async {
   AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
-  testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
+  testWidgets('DecoratedBox handles loading images', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     final Completer<void> completer = Completer<void>();
     await tester.pumpWidget(
@@ -60,7 +60,7 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Moving a DecoratedBox', (WidgetTester tester) async {
+  testWidgets('Moving a DecoratedBox', (final WidgetTester tester) async {
     final Completer<void> completer = Completer<void>();
     final Widget subtree = KeyedSubtree(
       key: GlobalKey(),
@@ -89,7 +89,7 @@ Future<void> main() async {
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 
-  testWidgets('Circles can have uniform borders', (WidgetTester tester) async {
+  testWidgets('Circles can have uniform borders', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Container(
         padding: const EdgeInsets.all(50.0),
@@ -102,7 +102,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
+  testWidgets('Bordered Container insets its child', (final WidgetTester tester) async {
     const Key key = Key('outerContainer');
     await tester.pumpWidget(
       Center(
@@ -119,11 +119,11 @@ Future<void> main() async {
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
   });
 
-  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgets('BoxDecoration paints its border correctly', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
     const Key key = Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
+    Widget buildFrame(final Border border) {
       return Center(
         child: Container(
           key: key,
@@ -170,7 +170,7 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+  testWidgets('BoxDecoration paints its border correctly', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12165
     await tester.pumpWidget(
       Column(
@@ -255,12 +255,12 @@ Future<void> main() async {
     );
   });
 
-  testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
+  testWidgets('Can hit test on BoxDecoration', (final WidgetTester tester) async {
 
     late List<int> itemsTapped;
 
     const Key key = Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
+    Widget buildFrame(final Border border) {
       itemsTapped = <int>[];
       return Center(
         child: GestureDetector(
@@ -292,12 +292,12 @@ Future<void> main() async {
 
   });
 
-  testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
+  testWidgets('Can hit test on BoxDecoration circle', (final WidgetTester tester) async {
 
     late List<int> itemsTapped;
 
     const Key key = Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
+    Widget buildFrame(final Border border) {
       itemsTapped = <int>[];
       return Center(
         child: GestureDetector(
@@ -332,10 +332,10 @@ Future<void> main() async {
 
   });
 
-  testWidgets('Can hit test on BoxDecoration border', (WidgetTester tester) async {
+  testWidgets('Can hit test on BoxDecoration border', (final WidgetTester tester) async {
     late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
+    Widget buildFrame(final Border border) {
       itemsTapped = <int>[];
       return Center(
         child: GestureDetector(
@@ -370,14 +370,14 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1]);
   });
 
-  testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (final WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
 
     late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
+    Widget buildFrame(final Border border) {
       itemsTapped = <int>[];
       return Align(
         alignment: Alignment.topLeft,
@@ -430,14 +430,14 @@ Future<void> main() async {
 
   });
 
-  testWidgets('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration tap inside rounded angles - Top Left', (final WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
 
     late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
+    Widget buildFrame(final Border border) {
       itemsTapped = <int>[];
       return Align(
         alignment: Alignment.topLeft,
@@ -478,14 +478,14 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1,1,1]);
   });
 
-  testWidgets('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
+  testWidgets('BoxDecoration rounded angles other corner works', (final WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 20;
 
     late List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
+    Widget buildFrame(final Border border) {
       itemsTapped = <int>[];
       return Align(
         alignment: Alignment.topLeft,
@@ -546,7 +546,7 @@ Future<void> main() async {
     expect(itemsTapped, <int>[1,1,1,1,1], reason: 'top left tapped');
   });
 
-  testWidgets("BoxDecoration doesn't crash with BorderRadiusDirectional", (WidgetTester tester) async {
+  testWidgets("BoxDecoration doesn't crash with BorderRadiusDirectional", (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/88039
 
     await tester.pumpWidget(

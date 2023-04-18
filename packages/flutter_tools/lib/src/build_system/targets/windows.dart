@@ -51,7 +51,7 @@ class UnpackWindows extends Target {
   List<Target> get dependencies => const <Target>[];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -122,7 +122,7 @@ abstract class BundleWindowsAssets extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'bundle_windows_assets');
@@ -184,7 +184,7 @@ class WindowsAotBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final File outputFile = environment.buildDir.childFile('app.so');
     final Directory outputDirectory = environment.outputDir.childDirectory('windows');
     if (!outputDirectory.existsSync()) {

@@ -35,20 +35,20 @@ class MenuDemoState extends State<MenuDemo> {
     _checkedValues = <String>[_checkedValue3];
   }
 
-  void showInSnackBar(String value) {
+  void showInSnackBar(final String value) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
      content: Text(value),
     ));
   }
 
-  void showMenuSelection(String value) {
+  void showMenuSelection(final String value) {
     if (<String>[_simpleValue1, _simpleValue2, _simpleValue3].contains(value)) {
       setState(() => _simpleValue = value);
     }
     showInSnackBar('You selected: $value');
   }
 
-  void showCheckedMenuSelections(String value) {
+  void showCheckedMenuSelections(final String value) {
     if (_checkedValues.contains(value)) {
       _checkedValues.remove(value);
     } else {
@@ -58,10 +58,10 @@ class MenuDemoState extends State<MenuDemo> {
     showInSnackBar('Checked $_checkedValues');
   }
 
-  bool isChecked(String value) => _checkedValues.contains(value);
+  bool isChecked(final String value) => _checkedValues.contains(value);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Menus'),
@@ -69,7 +69,7 @@ class MenuDemoState extends State<MenuDemo> {
           MaterialDemoDocumentationButton(MenuDemo.routeName),
           PopupMenuButton<String>(
             onSelected: showMenuSelection,
-            itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+            itemBuilder: (final BuildContext context) => <PopupMenuItem<String>>[
               const PopupMenuItem<String>(
                 value: 'Toolbar menu',
                 child: Text('Toolbar menu'),
@@ -101,7 +101,7 @@ class MenuDemoState extends State<MenuDemo> {
               trailing: PopupMenuButton<String>(
                 padding: EdgeInsets.zero,
                 onSelected: showMenuSelection,
-                itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                itemBuilder: (final BuildContext context) => <PopupMenuItem<String>>[
                   PopupMenuItem<String>(
                     value: _simpleValue1,
                     child: const Text('Context menu item one'),
@@ -125,7 +125,7 @@ class MenuDemoState extends State<MenuDemo> {
               trailing: PopupMenuButton<String>(
                 padding: EdgeInsets.zero,
                 onSelected: showMenuSelection,
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                itemBuilder: (final BuildContext context) => <PopupMenuEntry<String>>[
                   const PopupMenuItem<String>(
                     value: 'Preview',
                     child: ListTile(
@@ -169,7 +169,7 @@ class MenuDemoState extends State<MenuDemo> {
                 title: const Text('An item with a simple menu'),
                 subtitle: Text(_simpleValue!),
               ),
-              itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+              itemBuilder: (final BuildContext context) => <PopupMenuItem<String>>[
                 PopupMenuItem<String>(
                   value: _simpleValue1,
                   child: Text(_simpleValue1),
@@ -191,7 +191,7 @@ class MenuDemoState extends State<MenuDemo> {
               trailing: PopupMenuButton<String>(
                 padding: EdgeInsets.zero,
                 onSelected: showCheckedMenuSelections,
-                itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+                itemBuilder: (final BuildContext context) => <PopupMenuItem<String>>[
                   CheckedPopupMenuItem<String>(
                     value: _checkedValue1,
                     checked: isChecked(_checkedValue1),

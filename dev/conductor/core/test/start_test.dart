@@ -44,7 +44,7 @@ void main() {
     CommandRunner<void> createRunner({
       Map<String, String>? environment,
       String? operatingSystem,
-      List<FakeCommand>? commands,
+      final List<FakeCommand>? commands,
     }) {
       operatingSystem ??= const LocalPlatform().operatingSystem;
       final String pathSeparator = operatingSystem == 'windows' ? r'\' : '/';
@@ -1173,7 +1173,7 @@ void main() {
   });
 }
 
-String generateMockDeps(String dartRevision) {
+String generateMockDeps(final String dartRevision) {
   return '''
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',

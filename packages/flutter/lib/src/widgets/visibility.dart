@@ -226,14 +226,14 @@ class Visibility extends StatelessWidget {
   /// This will register a dependency from the specified context on any
   /// [Visibility] elements in the ancestor tree, such that if any of their
   /// visibilities changes, the specified context will be rebuilt.
-  static bool of(BuildContext context) {
+  static bool of(final BuildContext context) {
     bool isVisible = true;
     BuildContext ancestorContext = context;
     InheritedElement? ancestor = ancestorContext.getElementForInheritedWidgetOfExactType<_VisibilityScope>();
     while (isVisible && ancestor != null) {
       final _VisibilityScope scope = context.dependOnInheritedElement(ancestor) as _VisibilityScope;
       isVisible = scope.isVisible;
-      ancestor.visitAncestorElements((Element parent) {
+      ancestor.visitAncestorElements((final Element parent) {
         ancestorContext = parent;
         return false;
       });
@@ -243,7 +243,7 @@ class Visibility extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget result = child;
     if (maintainSize) {
       result = _Visibility(
@@ -276,7 +276,7 @@ class Visibility extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
     properties.add(FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
@@ -294,7 +294,7 @@ class _VisibilityScope extends InheritedWidget {
   final bool isVisible;
 
   @override
-  bool updateShouldNotify(_VisibilityScope old) {
+  bool updateShouldNotify(final _VisibilityScope old) {
     return isVisible != old.isVisible;
   }
 }
@@ -498,7 +498,7 @@ class SliverVisibility extends StatelessWidget {
   final bool maintainInteractivity;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (maintainSize) {
       Widget result = sliver;
       result = SliverIgnorePointer(
@@ -530,7 +530,7 @@ class SliverVisibility extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('visible', value: visible, ifFalse: 'hidden', ifTrue: 'visible'));
     properties.add(FlagProperty('maintainState', value: maintainState, ifFalse: 'maintainState'));
@@ -554,12 +554,12 @@ class _Visibility extends SingleChildRenderObjectWidget {
   final bool maintainSemantics;
 
   @override
-  _RenderVisibility createRenderObject(BuildContext context) {
+  _RenderVisibility createRenderObject(final BuildContext context) {
     return _RenderVisibility(visible, maintainSemantics);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderVisibility renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderVisibility renderObject) {
     renderObject
       ..visible = visible
       ..maintainSemantics = maintainSemantics;
@@ -571,7 +571,7 @@ class _RenderVisibility extends RenderProxyBox {
 
   bool get visible => _visible;
   bool _visible;
-  set visible(bool value) {
+  set visible(final bool value) {
     if (value == visible) {
       return;
     }
@@ -581,7 +581,7 @@ class _RenderVisibility extends RenderProxyBox {
 
   bool get maintainSemantics => _maintainSemantics;
   bool _maintainSemantics;
-  set maintainSemantics(bool value) {
+  set maintainSemantics(final bool value) {
     if (value == maintainSemantics) {
       return;
     }
@@ -590,14 +590,14 @@ class _RenderVisibility extends RenderProxyBox {
   }
 
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+  void visitChildrenForSemantics(final RenderObjectVisitor visitor) {
     if (maintainSemantics || visible) {
       super.visitChildrenForSemantics(visitor);
     }
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (!visible) {
       return;
     }
@@ -612,19 +612,19 @@ class _RenderVisibility extends RenderProxyBox {
 // different layers. This can be significantly more expensive, so the issue is avoided by a
 // specialized render object that does not ever force compositing.
 class _SliverVisibility extends SingleChildRenderObjectWidget {
-  const _SliverVisibility({ required this.visible, required this.maintainSemantics, Widget? sliver })
+  const _SliverVisibility({ required this.visible, required this.maintainSemantics, final Widget? sliver })
     : super(child: sliver);
 
   final bool visible;
   final bool maintainSemantics;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderSliverVisibility(visible, maintainSemantics);
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSliverVisibility renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderSliverVisibility renderObject) {
     renderObject
       ..visible = visible
       ..maintainSemantics = maintainSemantics;
@@ -636,7 +636,7 @@ class _RenderSliverVisibility extends RenderProxySliver {
 
   bool get visible => _visible;
   bool _visible;
-  set visible(bool value) {
+  set visible(final bool value) {
     if (value == visible) {
       return;
     }
@@ -646,7 +646,7 @@ class _RenderSliverVisibility extends RenderProxySliver {
 
   bool get maintainSemantics => _maintainSemantics;
   bool _maintainSemantics;
-  set maintainSemantics(bool value) {
+  set maintainSemantics(final bool value) {
     if (value == maintainSemantics) {
       return;
     }
@@ -655,14 +655,14 @@ class _RenderSliverVisibility extends RenderProxySliver {
   }
 
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+  void visitChildrenForSemantics(final RenderObjectVisitor visitor) {
     if (maintainSemantics || visible) {
       super.visitChildrenForSemantics(visitor);
     }
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (!visible) {
       return;
     }

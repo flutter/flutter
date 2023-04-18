@@ -11,7 +11,7 @@ import 'package:meta/dart2js.dart';
 /// Expected sequence of method calls.
 const List<String> callChain = <String>['baz', 'bar', 'foo'];
 
-final List<StackFrame> expectedProfileStackFrames = callChain.map<StackFrame>((String method) {
+final List<StackFrame> expectedProfileStackFrames = callChain.map<StackFrame>((final String method) {
   return StackFrame(
     number: -1,
     packageScheme: '<unknown>',
@@ -119,10 +119,10 @@ void baz() {
   throw Exception('Test error message');
 }
 
-void _checkStackFrameContents(List<StackFrame> parsedFrames, List<StackFrame> expectedFrames, dynamic stackTrace) {
+void _checkStackFrameContents(final List<StackFrame> parsedFrames, final List<StackFrame> expectedFrames, final dynamic stackTrace) {
   // Filter out stack frames outside this library so this test is less brittle.
   final List<StackFrame> actual = parsedFrames
-    .where((StackFrame frame) => callChain.contains(frame.method))
+    .where((final StackFrame frame) => callChain.contains(frame.method))
     .toList();
   final bool stackFramesAsExpected = ListEquality<StackFrame>(StackFrameEquality()).equals(actual, expectedFrames);
   if (!stackFramesAsExpected) {
@@ -139,7 +139,7 @@ void _checkStackFrameContents(List<StackFrame> parsedFrames, List<StackFrame> ex
 /// for the purposes of this test.
 class StackFrameEquality implements Equality<StackFrame> {
   @override
-  bool equals(StackFrame e1, StackFrame e2) {
+  bool equals(final StackFrame e1, final StackFrame e2) {
     return e1.number == e2.number &&
            e1.packageScheme == e2.packageScheme &&
            e1.package == e2.package &&
@@ -151,10 +151,10 @@ class StackFrameEquality implements Equality<StackFrame> {
   }
 
   @override
-  int hash(StackFrame e) {
+  int hash(final StackFrame e) {
     return Object.hash(e.number, e.packageScheme, e.package, e.packagePath, e.line, e.column, e.className, e.method);
   }
 
   @override
-  bool isValidKey(Object? o) => o is StackFrame;
+  bool isValidKey(final Object? o) => o is StackFrame;
 }

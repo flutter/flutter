@@ -165,7 +165,7 @@ class ButtonBar extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ButtonThemeData parentButtonTheme = ButtonTheme.of(context);
     final ButtonBarThemeData barTheme = ButtonBarTheme.of(context);
 
@@ -187,7 +187,7 @@ class ButtonBar extends StatelessWidget {
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
         overflowDirection: overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         overflowButtonSpacing: overflowButtonSpacing,
-        children: children.map<Widget>((Widget child) {
+        children: children.map<Widget>((final Widget child) {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: paddingUnit),
             child: child,
@@ -236,7 +236,7 @@ class _ButtonBarRow extends Flex {
     required super.children,
     super.mainAxisSize,
     super.mainAxisAlignment,
-    VerticalDirection overflowDirection = VerticalDirection.down,
+    final VerticalDirection overflowDirection = VerticalDirection.down,
     this.overflowButtonSpacing,
   }) : super(
     direction: Axis.horizontal,
@@ -246,7 +246,7 @@ class _ButtonBarRow extends Flex {
   final double? overflowButtonSpacing;
 
   @override
-  _RenderButtonBarRow createRenderObject(BuildContext context) {
+  _RenderButtonBarRow createRenderObject(final BuildContext context) {
     return _RenderButtonBarRow(
       direction: direction,
       mainAxisAlignment: mainAxisAlignment,
@@ -260,7 +260,7 @@ class _ButtonBarRow extends Flex {
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderButtonBarRow renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderButtonBarRow renderObject) {
     renderObject
       ..direction = direction
       ..mainAxisAlignment = mainAxisAlignment
@@ -313,7 +313,7 @@ class _RenderButtonBarRow extends RenderFlex {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     final Size size = super.computeDryLayout(constraints.copyWith(maxWidth: double.infinity));
     if (size.width <= constraints.maxWidth) {
       return super.computeDryLayout(constraints);

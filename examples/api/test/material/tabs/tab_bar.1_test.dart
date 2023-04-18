@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/tabs/tab_bar.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Switch tabs in the TabBar', (WidgetTester tester) async {
+  testWidgets('Switch tabs in the TabBar', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TabBarApp(),
     );

@@ -81,7 +81,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
@@ -168,7 +168,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: _drawerContents.map<Widget>((String id) {
+                            children: _drawerContents.map<Widget>((final String id) {
                               return ListTile(
                                 leading: CircleAvatar(child: Text(id)),
                                 title: Text('Drawer item $id'),
@@ -248,10 +248,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
     );
   }
 
-  void _onOtherAccountsTap(BuildContext context) {
+  void _onOtherAccountsTap(final BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return AlertDialog(
           title: const Text('Account switching not implemented.'),
           actions: <Widget>[

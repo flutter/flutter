@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('precedingScrollExtent is reported as infinity for Sliver of unknown size', (WidgetTester tester) async {
+  testWidgets('precedingScrollExtent is reported as infinity for Sliver of unknown size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
@@ -15,7 +15,7 @@ void main() {
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
             const SliverToBoxAdapter(child: SizedBox(width: double.infinity, height: 150.0)),
             SliverList(
-              delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+              delegate: SliverChildBuilderDelegate((final BuildContext context, final int index) {
                 if (index < 100) {
                   return const SizedBox(width: double.infinity, height: 150.0);
                 } else {

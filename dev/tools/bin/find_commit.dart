@@ -12,7 +12,7 @@ import 'dart:io';
 
 const bool debugLogging = false;
 
-void log(String message) {
+void log(final String message) {
   if (debugLogging) {
     print(message);
   }
@@ -26,22 +26,22 @@ class Commit {
 
   static String formatArgument = '--format=%H %cI';
 
-  static Commit parse(String line) {
+  static Commit parse(final String line) {
     final int space = line.indexOf(' ');
     return Commit(line.substring(0, space), DateTime.parse(line.substring(space+1, line.length).trimRight()));
   }
 
-  static List<Commit> parseList(String lines) {
-    return lines.split('\n').where((String line) => line.isNotEmpty).map(parse).toList().reversed.toList();
+  static List<Commit> parseList(final String lines) {
+    return lines.split('\n').where((final String line) => line.isNotEmpty).map(parse).toList().reversed.toList();
   }
 }
 
 String findCommit({
-  required String primaryRepoDirectory,
-  required String primaryBranch,
-  required String primaryTrunk,
-  required String secondaryRepoDirectory,
-  required String secondaryBranch,
+  required final String primaryRepoDirectory,
+  required final String primaryBranch,
+  required final String primaryTrunk,
+  required final String secondaryRepoDirectory,
+  required final String secondaryBranch,
 }) {
   final Commit anchor;
   if (primaryBranch == primaryTrunk) {
@@ -75,7 +75,7 @@ String findCommit({
   ]);
 }
 
-String git(String workingDirectory, List<String> arguments) {
+String git(final String workingDirectory, final List<String> arguments) {
   final ProcessResult result = Process.runSync('git', arguments, workingDirectory: workingDirectory);
   if (result.exitCode != 0 || '${result.stderr}'.isNotEmpty) {
     throw ProcessException('git', arguments, '${result.stdout}${result.stderr}', result.exitCode);
@@ -83,7 +83,7 @@ String git(String workingDirectory, List<String> arguments) {
   return '${result.stdout}';
 }
 
-void main(List<String> arguments) {
+void main(final List<String> arguments) {
   if (arguments.isEmpty || arguments.length > 2 || arguments.contains('--help') || arguments.contains('-h')) {
     print(
       'Usage: dart find_commit.dart [<path-to-primary-repo>] <path-to-secondary-repo>\n'

@@ -103,12 +103,12 @@ class FakeCommand {
   final bool outputFollowsExit;
 
   void _matches(
-    List<String> command,
-    String? workingDirectory,
-    Map<String, String>? environment,
-    Encoding? encoding,
+    final List<String> command,
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final Encoding? encoding,
   ) {
-    final List<dynamic> matchers = this.command.map((Pattern x) => x is String ? x : matches(x)).toList();
+    final List<dynamic> matchers = this.command.map((final Pattern x) => x is String ? x : matches(x)).toList();
     expect(command, matchers);
     if (this.workingDirectory != null) {
       expect(this.workingDirectory, workingDirectory);
@@ -132,18 +132,18 @@ class FakeCommand {
 @visibleForTesting
 class FakeProcess implements io.Process {
   FakeProcess({
-    int exitCode = 0,
-    Duration duration = Duration.zero,
+    final int exitCode = 0,
+    final Duration duration = Duration.zero,
     this.pid = 1234,
-    List<int> stderr = const <int>[],
-    IOSink? stdin,
-    List<int> stdout = const <int>[],
-    Completer<void>? completer,
-    bool outputFollowsExit = false,
+    final List<int> stderr = const <int>[],
+    final IOSink? stdin,
+    final List<int> stdout = const <int>[],
+    final Completer<void>? completer,
+    final bool outputFollowsExit = false,
   }) : _exitCode = exitCode,
-       exitCode = Future<void>.delayed(duration).then((void value) {
+       exitCode = Future<void>.delayed(duration).then((final void value) {
          if (completer != null) {
-           return completer.future.then((void _) => exitCode);
+           return completer.future.then((final void _) => exitCode);
          }
          return exitCode;
        }),
@@ -156,7 +156,7 @@ class FakeProcess implements io.Process {
       this.stderr = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
       // Wait for the process to exit before emitting stderr.
-      this.stderr = Stream<List<int>>.fromFuture(this.exitCode.then((_) {
+      this.stderr = Stream<List<int>>.fromFuture(this.exitCode.then((final _) {
         // Return a Future so stderr isn't immediately available to those who
         // await exitCode, but is available asynchronously later.
         return Future<List<int>>(() => _stderr);
@@ -169,7 +169,7 @@ class FakeProcess implements io.Process {
       this.stdout = const Stream<List<int>>.empty();
     } else if (outputFollowsExit) {
       // Wait for the process to exit before emitting stdout.
-      this.stdout = Stream<List<int>>.fromFuture(this.exitCode.then((_) {
+      this.stdout = Stream<List<int>>.fromFuture(this.exitCode.then((final _) {
         // Return a Future so stdout isn't immediately available to those who
         // await exitCode, but is available asynchronously later.
         return Future<List<int>>(() => _stdout);
@@ -207,7 +207,7 @@ class FakeProcess implements io.Process {
   final List<int> _stdout;
 
   @override
-  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool kill([final io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     // Killing a fake process has no effect.
     return false;
   }
@@ -233,7 +233,7 @@ abstract class FakeProcessManager implements ProcessManager {
   /// [FakeCommand.onRun] to set a flag, or specify a sentinel command as your
   /// last command and verify its execution is successful, to ensure that all
   /// the specified commands are actually called.
-  factory FakeProcessManager.list(List<FakeCommand> commands) = _SequenceProcessManager;
+  factory FakeProcessManager.list(final List<FakeCommand> commands) = _SequenceProcessManager;
   factory FakeProcessManager.empty() => _SequenceProcessManager(<FakeCommand>[]);
 
   FakeProcessManager._();
@@ -244,10 +244,10 @@ abstract class FakeProcessManager implements ProcessManager {
   /// provided to another interface.
   ///
   /// This is a no-op on [FakeProcessManager.any].
-  void addCommand(FakeCommand command);
+  void addCommand(final FakeCommand command);
 
   /// Add multiple [FakeCommand] to the current process manager.
-  void addCommands(Iterable<FakeCommand> commands) {
+  void addCommands(final Iterable<FakeCommand> commands) {
     commands.forEach(addCommand);
   }
 
@@ -263,19 +263,19 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @protected
   FakeCommand findCommand(
-    List<String> command,
-    String? workingDirectory,
-    Map<String, String>? environment,
-    Encoding? encoding,
+    final List<String> command,
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final Encoding? encoding,
   );
 
   int _pid = 9999;
 
   FakeProcess _runCommand(
-    List<String> command,
-    String? workingDirectory,
-    Map<String, String>? environment,
-    Encoding? encoding,
+    final List<String> command,
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final Encoding? encoding,
   ) {
     _pid += 1;
     final FakeCommand fakeCommand = findCommand(command, workingDirectory, environment, encoding);
@@ -300,12 +300,12 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   Future<io.Process> start(
-    List<dynamic> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true, // ignored
-    bool runInShell = false, // ignored
-    io.ProcessStartMode mode = io.ProcessStartMode.normal, // ignored
+    final List<dynamic> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true, // ignored
+    final bool runInShell = false, // ignored
+    final io.ProcessStartMode mode = io.ProcessStartMode.normal, // ignored
   }) {
     final FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, io.systemEncoding);
     if (process._completer != null) {
@@ -319,13 +319,13 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   Future<io.ProcessResult> run(
-    List<dynamic> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true, // ignored
-    bool runInShell = false, // ignored
-    Encoding? stdoutEncoding = io.systemEncoding,
-    Encoding? stderrEncoding = io.systemEncoding,
+    final List<dynamic> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true, // ignored
+    final bool runInShell = false, // ignored
+    final Encoding? stdoutEncoding = io.systemEncoding,
+    final Encoding? stderrEncoding = io.systemEncoding,
   }) async {
     final FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     await process.exitCode;
@@ -339,13 +339,13 @@ abstract class FakeProcessManager implements ProcessManager {
 
   @override
   io.ProcessResult runSync(
-    List<dynamic> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true, // ignored
-    bool runInShell = false, // ignored
-    Encoding? stdoutEncoding = io.systemEncoding,
-    Encoding? stderrEncoding = io.systemEncoding,
+    final List<dynamic> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true, // ignored
+    final bool runInShell = false, // ignored
+    final Encoding? stdoutEncoding = io.systemEncoding,
+    final Encoding? stderrEncoding = io.systemEncoding,
   }) {
     final FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment, stdoutEncoding);
     return io.ProcessResult(
@@ -358,12 +358,12 @@ abstract class FakeProcessManager implements ProcessManager {
 
   /// Returns false if executable in [excludedExecutables].
   @override
-  bool canRun(dynamic executable, {String? workingDirectory}) => !excludedExecutables.contains(executable);
+  bool canRun(final dynamic executable, {final String? workingDirectory}) => !excludedExecutables.contains(executable);
 
   Set<String> excludedExecutables = <String>{};
 
   @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool killPid(final int pid, [final io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     // Killing a fake process has no effect unless it has an attached completer.
     final FakeProcess? fakeProcess = _fakeRunningProcesses[pid];
     if (fakeProcess == null) {
@@ -381,10 +381,10 @@ class _FakeAnyProcessManager extends FakeProcessManager {
 
   @override
   FakeCommand findCommand(
-    List<String> command,
-    String? workingDirectory,
-    Map<String, String>? environment,
-    Encoding? encoding,
+    final List<String> command,
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final Encoding? encoding,
   ) {
     return FakeCommand(
       command: command,
@@ -395,7 +395,7 @@ class _FakeAnyProcessManager extends FakeProcessManager {
   }
 
   @override
-  void addCommand(FakeCommand command) { }
+  void addCommand(final FakeCommand command) { }
 
   @override
   bool get hasRemainingExpectations => true;
@@ -411,10 +411,10 @@ class _SequenceProcessManager extends FakeProcessManager {
 
   @override
   FakeCommand findCommand(
-    List<String> command,
-    String? workingDirectory,
-    Map<String, String>? environment,
-    Encoding? encoding,
+    final List<String> command,
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final Encoding? encoding,
   ) {
     expect(_commands, isNotEmpty,
       reason: 'ProcessManager was told to execute $command (in $workingDirectory) '
@@ -425,7 +425,7 @@ class _SequenceProcessManager extends FakeProcessManager {
   }
 
   @override
-  void addCommand(FakeCommand command) {
+  void addCommand(final FakeCommand command) {
     _commands.add(command);
   }
 
@@ -444,22 +444,22 @@ class _HasNoRemainingExpectations extends Matcher {
   const _HasNoRemainingExpectations();
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) =>
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) =>
       item is FakeProcessManager && !item.hasRemainingExpectations;
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
       description.add('a fake process manager with no remaining expectations');
 
   @override
   Description describeMismatch(
-      dynamic item,
-      Description description,
-      Map<dynamic, dynamic> matchState,
-      bool verbose,
+      final dynamic item,
+      final Description description,
+      final Map<dynamic, dynamic> matchState,
+      final bool verbose,
       ) {
     final FakeProcessManager fakeProcessManager = item as FakeProcessManager;
     return description.add(
-        'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((FakeCommand command) => command.command).join('\n')}');
+        'has remaining expectations:\n${fakeProcessManager._remainingExpectations.map((final FakeCommand command) => command.command).join('\n')}');
   }
 }

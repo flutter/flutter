@@ -70,7 +70,7 @@ class RawMaterialButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.focusNode,
     this.autofocus = false,
-    MaterialTapTargetSize? materialTapTargetSize,
+    final MaterialTapTargetSize? materialTapTargetSize,
     this.child,
     this.enableFeedback = true,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
@@ -314,7 +314,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
   }
 
   @override
-  void didUpdateWidget(RawMaterialButton oldWidget) {
+  void didUpdateWidget(final RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     setMaterialState(MaterialState.disabled, !widget.enabled);
     // If the button is disabled while a press gesture is currently ongoing,
@@ -345,7 +345,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> with MaterialStat
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color? effectiveTextColor = MaterialStateProperty.resolveAs<Color?>(widget.textStyle?.color, materialStates);
     final ShapeBorder? effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder?>(widget.shape, materialStates);
     final Offset densityAdjustment = widget.visualDensity.baseSizeAdjustment;
@@ -445,22 +445,22 @@ class _InputPadding extends SingleChildRenderObjectWidget {
   final Size minSize;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderInputPadding(minSize);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderInputPadding renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderInputPadding renderObject) {
     renderObject.minSize = minSize;
   }
 }
 
 class _RenderInputPadding extends RenderShiftedBox {
-  _RenderInputPadding(this._minSize, [RenderBox? child]) : super(child);
+  _RenderInputPadding(this._minSize, [final RenderBox? child]) : super(child);
 
   Size get minSize => _minSize;
   Size _minSize;
-  set minSize(Size value) {
+  set minSize(final Size value) {
     if (_minSize == value) {
       return;
     }
@@ -469,7 +469,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     if (child != null) {
       return math.max(child!.getMinIntrinsicWidth(height), minSize.width);
     }
@@ -477,7 +477,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     if (child != null) {
       return math.max(child!.getMinIntrinsicHeight(width), minSize.height);
     }
@@ -485,7 +485,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     if (child != null) {
       return math.max(child!.getMaxIntrinsicWidth(height), minSize.width);
     }
@@ -493,14 +493,14 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     if (child != null) {
       return math.max(child!.getMaxIntrinsicHeight(width), minSize.height);
     }
     return 0.0;
   }
 
-  Size _computeSize({required BoxConstraints constraints, required ChildLayouter layoutChild}) {
+  Size _computeSize({required final BoxConstraints constraints, required final ChildLayouter layoutChild}) {
     if (child != null) {
       final Size childSize = layoutChild(child!, constraints);
       final double height = math.max(childSize.width, minSize.width);
@@ -511,7 +511,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _computeSize(
       constraints: constraints,
       layoutChild: ChildLayoutHelper.dryLayoutChild,
@@ -531,7 +531,7 @@ class _RenderInputPadding extends RenderShiftedBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, { required Offset position }) {
+  bool hitTest(final BoxHitTestResult result, { required final Offset position }) {
     if (super.hitTest(result, position: position)) {
       return true;
     }
@@ -539,7 +539,7 @@ class _RenderInputPadding extends RenderShiftedBox {
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,
-      hitTest: (BoxHitTestResult result, Offset position) {
+      hitTest: (final BoxHitTestResult result, final Offset position) {
         assert(position == center);
         return child!.hitTest(result, position: center);
       },

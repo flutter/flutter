@@ -13,7 +13,7 @@ import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class DevicesCommand extends FlutterCommand {
-  DevicesCommand({ bool verboseHelp = false }) {
+  DevicesCommand({ final bool verboseHelp = false }) {
     argParser.addFlag('machine',
       negatable: false,
       help: 'Output device information in machine readable structured JSON format.',
@@ -84,11 +84,11 @@ class DevicesCommand extends FlutterCommand {
 
 class DevicesCommandOutput {
   factory DevicesCommandOutput({
-    required Platform platform,
-    required Logger logger,
-    DeviceManager? deviceManager,
-    Duration? deviceDiscoveryTimeout,
-    DeviceConnectionInterface? deviceConnectionInterface,
+    required final Platform platform,
+    required final Logger logger,
+    final DeviceManager? deviceManager,
+    final Duration? deviceDiscoveryTimeout,
+    final DeviceConnectionInterface? deviceConnectionInterface,
   }) {
     if (platform.isMacOS) {
       return DevicesCommandOutputWithExtendedWirelessDeviceDiscovery(
@@ -107,8 +107,8 @@ class DevicesCommandOutput {
   }
 
   DevicesCommandOutput._private({
-    required Logger logger,
-    required DeviceManager? deviceManager,
+    required final Logger logger,
+    required final DeviceManager? deviceManager,
     required this.deviceDiscoveryTimeout,
     required this.deviceConnectionInterface,
   })  : _deviceManager = deviceManager,
@@ -127,7 +127,7 @@ class DevicesCommandOutput {
       deviceConnectionInterface == null ||
       deviceConnectionInterface == DeviceConnectionInterface.wireless;
 
-  Future<List<Device>> _getAttachedDevices(DeviceManager deviceManager) async {
+  Future<List<Device>> _getAttachedDevices(final DeviceManager deviceManager) async {
     if (!_includeAttachedDevices) {
       return <Device>[];
     }
@@ -138,7 +138,7 @@ class DevicesCommandOutput {
     );
   }
 
-  Future<List<Device>> _getWirelessDevices(DeviceManager deviceManager) async {
+  Future<List<Device>> _getWirelessDevices(final DeviceManager deviceManager) async {
     if (!_includeWirelessDevices) {
       return <Device>[];
     }
@@ -149,7 +149,7 @@ class DevicesCommandOutput {
     );
   }
 
-  Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
+  Future<void> findAndOutputAllTargetDevices({required final bool machine}) async {
     List<Device> attachedDevices = <Device>[];
     List<Device> wirelessDevices = <Device>[];
     final DeviceManager? deviceManager = _deviceManager;
@@ -210,10 +210,10 @@ class DevicesCommandOutput {
     }
   }
 
-  Future<void> printDevicesAsJson(List<Device> devices) async {
+  Future<void> printDevicesAsJson(final List<Device> devices) async {
     _logger.printStatus(
       const JsonEncoder.withIndent('  ').convert(
-        await Future.wait(devices.map((Device d) => d.toJson()))
+        await Future.wait(devices.map((final Device d) => d.toJson()))
       )
     );
   }
@@ -232,7 +232,7 @@ class DevicesCommandOutputWithExtendedWirelessDeviceDiscovery extends DevicesCom
   }) : super._private();
 
   @override
-  Future<void> findAndOutputAllTargetDevices({required bool machine}) async {
+  Future<void> findAndOutputAllTargetDevices({required final bool machine}) async {
     // When a user defines the timeout or filters to only attached devices,
     // use the super function that does not do longer wireless device discovery.
     if (deviceDiscoveryTimeout != null || deviceConnectionInterface == DeviceConnectionInterface.attached) {

@@ -12,11 +12,11 @@ import 'common.dart';
 
 typedef AsyncVoidCallback = Future<void> Function();
 
-Future<String> capture(AsyncVoidCallback callback, { bool shouldHaveErrors = false }) async {
+Future<String> capture(final AsyncVoidCallback callback, { final bool shouldHaveErrors = false }) async {
   final StringBuffer buffer = StringBuffer();
   final PrintCallback oldPrint = print;
   try {
-    print = (Object? line) {
+    print = (final Object? line) {
       buffer.writeln(line);
     };
     await callback();
@@ -58,7 +58,7 @@ void main() {
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:76: Deprecation notice does not accurately indicate a beta branch version number; please see RELEASES_URL to find the latest beta build version number.',
         '║ test/analyze-test-input/root/packages/foo/deprecation.dart:99: Deprecation notice does not match required pattern. You might have used double quotes (") for the string instead of single quotes (\').',
       ]
-      .map((String line) {
+      .map((final String line) {
         return line
           .replaceAll('/', Platform.isWindows ? r'\' : '/')
           .replaceAll('STYLE_GUIDE_URL', 'https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo')
@@ -82,7 +82,7 @@ void main() {
         '║ test/analyze-test-input/root/packages/foo/golden_missing_tag.dart: $missingTag',
         '║ test/analyze-test-input/root/packages/foo/golden_no_tag.dart: $noTag',
       ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .map((final String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .toList();
     expect(result.length, 4 + lines.length, reason: 'output had unexpected number of lines:\n${result.join('\n')}');
     expect(result[0], '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════');
@@ -115,7 +115,7 @@ void main() {
         '║ test/analyze-test-input/root/packages/foo/spaces.txt:5: trailing U+0020 space character',
         '║ test/analyze-test-input/root/packages/foo/spaces.txt:9: trailing blank line',
       ]
-      .map((String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
+      .map((final String line) => line.replaceAll('/', Platform.isWindows ? r'\' : '/'))
       .join('\n');
     expect(result,
       '╔═╡ERROR╞═══════════════════════════════════════════════════════════════════════\n'

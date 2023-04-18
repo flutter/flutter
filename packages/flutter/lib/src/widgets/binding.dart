@@ -72,7 +72,7 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
-  Future<bool> didPushRoute(String route) => Future<bool>.value(false);
+  Future<bool> didPushRoute(final String route) => Future<bool>.value(false);
 
   /// Called when the host tells the application to push a new
   /// [RouteInformation] and a restoration state onto the router.
@@ -86,7 +86,7 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// The default implementation is to call the [didPushRoute] directly with the
   /// [RouteInformation.location].
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) {
+  Future<bool> didPushRouteInformation(final RouteInformation routeInformation) {
     return didPushRoute(routeInformation.location!);
   }
 
@@ -216,7 +216,7 @@ abstract mixin class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from
   /// [dart:ui.PlatformDispatcher.onLocaleChanged].
-  void didChangeLocales(List<Locale>? locales) { }
+  void didChangeLocales(final List<Locale>? locales) { }
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
@@ -225,7 +225,7 @@ abstract mixin class WidgetsBindingObserver {
   /// documentation for the [WidgetsBindingObserver] class.
   ///
   /// This method exposes notifications from [SystemChannels.lifecycle].
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
+  void didChangeAppLifecycleState(final AppLifecycleState state) { }
 
   /// Called when a request is received from the system to exit the application.
   ///
@@ -378,7 +378,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     if (!kReleaseMode) {
       registerServiceExtension(
         name: WidgetsServiceExtensions.debugDumpApp.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           final String data = _debugDumpAppString();
           return <String, Object>{
             'data': data,
@@ -388,7 +388,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       registerServiceExtension(
         name: WidgetsServiceExtensions.debugDumpFocusTree.name,
-        callback: (Map<String, String> parameters) async {
+        callback: (final Map<String, String> parameters) async {
           final String data = focusManager.toStringDeep();
           return <String, Object>{
             'data': data,
@@ -401,7 +401,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
           name: WidgetsServiceExtensions.showPerformanceOverlay.name,
           getter: () =>
           Future<bool>.value(WidgetsApp.showPerformanceOverlayOverride),
-          setter: (bool value) {
+          setter: (final bool value) {
             if (WidgetsApp.showPerformanceOverlayOverride == value) {
               return Future<void>.value();
             }
@@ -413,7 +413,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       registerServiceExtension(
         name: WidgetsServiceExtensions.didSendFirstFrameEvent.name,
-        callback: (_) async {
+        callback: (final _) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
             // Devtools, the Intellij plugin, and the flutter tool all depend
@@ -425,7 +425,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       registerServiceExtension(
         name: WidgetsServiceExtensions.didSendFirstFrameRasterizedEvent.name,
-        callback: (_) async {
+        callback: (final _) async {
           return <String, dynamic>{
             // This is defined to return a STRING, not a boolean.
             // Devtools, the Intellij plugin, and the flutter tool all depend
@@ -437,7 +437,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 
       registerServiceExtension(
         name: WidgetsServiceExtensions.fastReassemble.name,
-        callback: (Map<String, Object> params) async {
+        callback: (final Map<String, Object> params) async {
           // This mirrors the implementation of the 'reassemble' callback registration
           // in lib/src/foundation/binding.dart, but with the extra binding config used
           // to skip some reassemble work.
@@ -456,14 +456,14 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileWidgetBuilds.name,
         getter: () async => debugProfileBuildsEnabled,
-        setter: (bool value) async {
+        setter: (final bool value) async {
           debugProfileBuildsEnabled = value;
         }
       );
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.profileUserWidgetBuilds.name,
         getter: () async => debugProfileBuildsEnabledUserWidgets,
-        setter: (bool value) async {
+        setter: (final bool value) async {
           debugProfileBuildsEnabledUserWidgets = value;
         }
       );
@@ -473,7 +473,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       registerBoolServiceExtension(
         name: WidgetsServiceExtensions.debugAllowBanner.name,
         getter: () => Future<bool>.value(WidgetsApp.debugAllowBannerOverride),
-        setter: (bool value) {
+        setter: (final bool value) {
           if (WidgetsApp.debugAllowBannerOverride == value) {
             return Future<void>.value();
           }
@@ -538,7 +538,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [removeObserver], to release the resources reserved by this method.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
-  void addObserver(WidgetsBindingObserver observer) => _observers.add(observer);
+  void addObserver(final WidgetsBindingObserver observer) => _observers.add(observer);
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
@@ -548,7 +548,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [addObserver], for the method that adds observers in the first place.
   ///  * [WidgetsBindingObserver], which has an example of using this method.
-  bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
+  bool removeObserver(final WidgetsBindingObserver observer) => _observers.remove(observer);
 
   @override
   Future<AppExitResponse> handleRequestAppExit() async {
@@ -615,7 +615,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [PlatformDispatcher.onLocaleChanged] notification is received.
   @protected
   @mustCallSuper
-  void dispatchLocalesChanged(List<Locale>? locales) {
+  void dispatchLocalesChanged(final List<Locale>? locales) {
     for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeLocales(locales);
     }
@@ -671,7 +671,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   @mustCallSuper
-  Future<void> handlePushRoute(String route) async {
+  Future<void> handlePushRoute(final String route) async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (await observer.didPushRoute(route)) {
         return;
@@ -679,7 +679,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
-  Future<void> _handlePushRouteInformation(Map<dynamic, dynamic> routeArguments) async {
+  Future<void> _handlePushRouteInformation(final Map<dynamic, dynamic> routeArguments) async {
     for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.of(_observers)) {
       if (
         await observer.didPushRouteInformation(
@@ -694,7 +694,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     }
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
+  Future<dynamic> _handleNavigationInvocation(final MethodCall methodCall) {
     switch (methodCall.method) {
       case 'popRoute':
         return handlePopRoute();
@@ -707,7 +707,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   }
 
   @override
-  void handleAppLifecycleStateChanged(AppLifecycleState state) {
+  void handleAppLifecycleStateChanged(final AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
     for (final WidgetsBindingObserver observer in _observers) {
       observer.didChangeAppLifecycleState(state);
@@ -877,7 +877,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     if (_needToReportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
 
-      firstFrameCallback = (List<FrameTiming> timings) {
+      firstFrameCallback = (final List<FrameTiming> timings) {
         assert(sendFramesToEngine);
         if (!kReleaseMode) {
           // Change the current user tag back to the default tag. At this point,
@@ -951,7 +951,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// The `rootWidget` widget provided to this method must not already be
   /// wrapped in a [View].
-  Widget wrapWithDefaultView(Widget rootWidget) {
+  Widget wrapWithDefaultView(final Widget rootWidget) {
     return View(
       view: platformDispatcher.implicitView!,
       child: rootWidget,
@@ -963,7 +963,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// This is called by [runApp] to configure the widget tree. Consider using
   /// [attachRootWidget] if you want to build the widget tree synchronously.
   @protected
-  void scheduleAttachRootWidget(Widget rootWidget) {
+  void scheduleAttachRootWidget(final Widget rootWidget) {
     Timer.run(() {
       attachRootWidget(rootWidget);
     });
@@ -978,7 +978,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
   ///    widget and attaches it to the render tree.
-  void attachRootWidget(Widget rootWidget) {
+  void attachRootWidget(final Widget rootWidget) {
     final bool isBootstrapFrame = rootElement == null;
     _readyToProduceFrames = true;
     _rootElement = RenderObjectToWidgetAdapter<RenderBox>(
@@ -1047,7 +1047,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// Second-best (and n-best) matching locales should be obtained by calling this
   /// method again with the matched locale of the first call omitted from
   /// `supportedLocales`.
-  Locale? computePlatformResolvedLocale(List<Locale> supportedLocales) {
+  Locale? computePlatformResolvedLocale(final List<Locale> supportedLocales) {
     return platformDispatcher.computePlatformResolvedLocale(supportedLocales);
   }
 }
@@ -1075,7 +1075,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
 ///    element for the element hierarchy.
 ///  * [WidgetsBinding.handleBeginFrame], which pumps the widget pipeline to
 ///    ensure the widget, element, and render trees are all built.
-void runApp(Widget app) {
+void runApp(final Widget app) {
   final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
   assert(binding.debugCheckZone('runApp'));
   binding
@@ -1133,10 +1133,10 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   RenderObjectToWidgetElement<T> createElement() => RenderObjectToWidgetElement<T>(this);
 
   @override
-  RenderObjectWithChildMixin<T> createRenderObject(BuildContext context) => container;
+  RenderObjectWithChildMixin<T> createRenderObject(final BuildContext context) => container;
 
   @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) { }
+  void updateRenderObject(final BuildContext context, final RenderObject renderObject) { }
 
   /// Inflate this widget and actually set the resulting [RenderObject] as the
   /// child of [container].
@@ -1145,7 +1145,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// the given element will have an update scheduled to switch to this widget.
   ///
   /// Used by [runApp] to bootstrap applications.
-  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T>? element ]) {
+  RenderObjectToWidgetElement<T> attachToRenderTree(final BuildOwner owner, [ RenderObjectToWidgetElement<T>? element ]) {
     if (element == null) {
       owner.lockState(() {
         element = createElement();
@@ -1189,21 +1189,21 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
   static const Object _rootChildSlot = Object();
 
   @override
-  void visitChildren(ElementVisitor visitor) {
+  void visitChildren(final ElementVisitor visitor) {
     if (_child != null) {
       visitor(_child!);
     }
   }
 
   @override
-  void forgetChild(Element child) {
+  void forgetChild(final Element child) {
     assert(child == _child);
     _child = null;
     super.forgetChild(child);
   }
 
   @override
-  void mount(Element? parent, Object? newSlot) {
+  void mount(final Element? parent, final Object? newSlot) {
     assert(parent == null);
     super.mount(parent, newSlot);
     _rebuild();
@@ -1211,7 +1211,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
   }
 
   @override
-  void update(RenderObjectToWidgetAdapter<T> newWidget) {
+  void update(final RenderObjectToWidgetAdapter<T> newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     _rebuild();
@@ -1255,19 +1255,19 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectEl
   RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
 
   @override
-  void insertRenderObjectChild(RenderObject child, Object? slot) {
+  void insertRenderObjectChild(final RenderObject child, final Object? slot) {
     assert(slot == _rootChildSlot);
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child as T;
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, Object? oldSlot, Object? newSlot) {
+  void moveRenderObjectChild(final RenderObject child, final Object? oldSlot, final Object? newSlot) {
     assert(false);
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, Object? slot) {
+  void removeRenderObjectChild(final RenderObject child, final Object? slot) {
     assert(renderObject.child == child);
     renderObject.child = null;
   }

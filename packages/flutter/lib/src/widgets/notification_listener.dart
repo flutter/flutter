@@ -56,7 +56,7 @@ abstract class Notification {
   /// with the appropriate type parameters that are ancestors of the given
   /// [BuildContext]. If the [BuildContext] is null, the notification is not
   /// dispatched.
-  void dispatch(BuildContext? target) {
+  void dispatch(final BuildContext? target) {
     target?.dispatchNotification(this);
   }
 
@@ -78,7 +78,7 @@ abstract class Notification {
   /// method, as in `super.debugFillDescription(description)`.
   @protected
   @mustCallSuper
-  void debugFillDescription(List<String> description) { }
+  void debugFillDescription(final List<String> description) { }
 }
 
 /// A widget that listens for [Notification]s bubbling up the tree.
@@ -124,7 +124,7 @@ class _NotificationElement<T extends Notification> extends ProxyElement with Not
   _NotificationElement(NotificationListener<T> super.widget);
 
   @override
-  bool onNotification(Notification notification) {
+  bool onNotification(final Notification notification) {
     final NotificationListener<T> listener = widget as NotificationListener<T>;
     if (listener.onNotification != null && notification is T) {
       return listener.onNotification!(notification);
@@ -133,7 +133,7 @@ class _NotificationElement<T extends Notification> extends ProxyElement with Not
   }
 
   @override
-  void notifyClients(covariant ProxyWidget oldWidget) {
+  void notifyClients(covariant final ProxyWidget oldWidget) {
     // Notification tree does not need to notify clients.
   }
 }

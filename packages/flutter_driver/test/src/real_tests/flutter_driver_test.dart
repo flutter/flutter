@@ -27,7 +27,7 @@ const String _kWebScriptSuffix = "')";
 void main() {
   final List<String> log = <String>[];
 
-  driverLog = (String source, String message) {
+  driverLog = (final String source, final String message) {
     log.add('$source: $message');
   };
 
@@ -125,7 +125,7 @@ void main() {
     late FakeVM fakeVM;
     late vms.Isolate fakeIsolate;
 
-    void expectLogContains(String message) {
+    void expectLogContains(final String message) {
       expect(log, anyElement(contains(message)));
     }
 
@@ -134,7 +134,7 @@ void main() {
       fakeIsolate = createFakeIsolate();
       fakeVM = FakeVM(fakeIsolate);
       fakeClient = FakeVmService(fakeVM);
-      vmServiceConnectFunction = (String url, Map<String, dynamic>? headers) async {
+      vmServiceConnectFunction = (final String url, final Map<String, dynamic>? headers) async {
         return fakeClient;
       };
       fakeClient.responses['get_health'] = makeFakeResponse(<String, dynamic>{'status': 'ok'});
@@ -160,7 +160,7 @@ void main() {
 
     test('throws after retries if no isolate', () async {
       fakeVM.numberOfTriesBeforeResolvingIsolate = 10000;
-      FakeAsync().run((FakeAsync time) {
+      FakeAsync().run((final FakeAsync time) {
         FlutterDriver.connect(dartVmServiceUrl: '');
         time.elapse(kUnusuallyLongTimeout);
       });
@@ -607,7 +607,7 @@ void main() {
           'getVMTimeline 1 999999',
           'getVMTimeline 1000001 999999',
         ]);
-        expect(timeline.events!.map((TimelineEvent event) => event.name), <String>[
+        expect(timeline.events!.map((final TimelineEvent event) => event.name), <String>[
           'test event',
           'test event 2',
         ]);
@@ -644,7 +644,7 @@ void main() {
       test('local default timeout', () async {
         log.clear();
         fakeClient.artificialExtensionDelay = Completer<void>().future;
-        FakeAsync().run((FakeAsync time) {
+        FakeAsync().run((final FakeAsync time) {
           driver.waitFor(find.byTooltip('foo'));
           expect(log, <String>[]);
           time.elapse(kUnusuallyLongTimeout);
@@ -655,7 +655,7 @@ void main() {
       test('local custom timeout', () async {
         log.clear();
         fakeClient.artificialExtensionDelay = Completer<void>().future;
-        FakeAsync().run((FakeAsync time) {
+        FakeAsync().run((final FakeAsync time) {
           final Duration customTimeout = kUnusuallyLongTimeout - const Duration(seconds: 1);
           driver.waitFor(find.byTooltip('foo'), timeout: customTimeout);
           expect(log, <String>[]);
@@ -671,7 +671,7 @@ void main() {
         await expectLater(
           () => driver.waitFor(find.byTooltip('foo')),
           throwsA(isA<DriverError>().having(
-            (DriverError error) => error.message,
+            (final DriverError error) => error.message,
             'message',
             'Error in Flutter application: {message: This is a failure}',
           )),
@@ -1071,7 +1071,7 @@ void main() {
 // This function will verify the format of the script and return the actual
 // script. The script will be in the following format:
 //   window.flutterDriver('[actual script]')
-String _checkAndEncode(dynamic script) {
+String _checkAndEncode(final dynamic script) {
   expect(script, isA<String>());
   final String scriptString = script as String;
   expect(scriptString.startsWith(_kWebScriptPrefix), isTrue);
@@ -1081,8 +1081,8 @@ String _checkAndEncode(dynamic script) {
 }
 
 vms.Response? makeFakeResponse(
-  Map<String, dynamic> response, {
-  bool isError = false,
+  final Map<String, dynamic> response, {
+  final bool isError = false,
 }) {
   return vms.Response.parse(<String, dynamic>{
     'isError': isError,
@@ -1090,8 +1090,8 @@ vms.Response? makeFakeResponse(
   });
 }
 
-void Function(vms.Isolate) changeIsolateEventAfter(int gets, vms.Event nextEvent) {
-  return (vms.Isolate i) {
+void Function(vms.Isolate) changeIsolateEventAfter(int gets, final vms.Event nextEvent) {
+  return (final vms.Isolate i) {
     gets -= 1;
     if (gets == 0) {
       i.pauseEvent = nextEvent;
@@ -1106,7 +1106,7 @@ class FakeFlutterWebConnection extends Fake implements FlutterWebConnection {
   Map<String, dynamic> responses = <String, dynamic>{};
   List<String> commandLog = <String>[];
   @override
-  Future<dynamic> sendCommand(String script, Duration? duration) async {
+  Future<dynamic> sendCommand(final String script, final Duration? duration) async {
     commandLog.add('$script $duration');
     final Map<String, dynamic> decoded = jsonDecode(_checkAndEncode(script)) as Map<String, dynamic>;
     final dynamic response = responses[decoded['command']];
@@ -1134,7 +1134,7 @@ class FakeVmService extends Fake implements vms.VmService {
   Future<vms.VM> getVM() async => vm!;
 
   @override
-  Future<vms.Isolate> getIsolate(String isolateId) async {
+  Future<vms.Isolate> getIsolate(final String isolateId) async {
     connectionLog.add('getIsolate');
     if (isolateId == vm!.isolate!.id) {
       onGetIsolate?.call(vm!.isolate!);
@@ -1144,7 +1144,7 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Success> resume(String isolateId, {String? step, int? frameIndex}) async {
+  Future<vms.Success> resume(final String isolateId, {final String? step, final int? frameIndex}) async {
     assert(isolateId == vm!.isolate!.id);
     connectionLog.add('resume');
     if (failOnResumeWith101) {
@@ -1154,19 +1154,19 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Success> streamListen(String streamId) async {
+  Future<vms.Success> streamListen(final String streamId) async {
     connectionLog.add('streamListen $streamId');
     return vms.Success();
   }
 
   @override
-  Future<vms.Success> streamCancel(String streamId) async {
+  Future<vms.Success> streamCancel(final String streamId) async {
     connectionLog.add('streamCancel $streamId');
     return vms.Success();
   }
 
   @override
-  Future<vms.Response> setFlag(String name, String value) async {
+  Future<vms.Response> setFlag(final String name, final String value) async {
     connectionLog.add('setFlag $name $value');
     if (failOnSetFlag) {
       throw Exception('setFlag failed');
@@ -1189,7 +1189,7 @@ class FakeVmService extends Fake implements vms.VmService {
   Future<void>? artificialExtensionDelay;
 
   @override
-  Future<vms.Response> callServiceExtension(String method, {Map<dynamic, dynamic>? args, String? isolateId}) async {
+  Future<vms.Response> callServiceExtension(final String method, {final Map<dynamic, dynamic>? args, final String? isolateId}) async {
     commandLog.add('$method $args');
     await artificialExtensionDelay;
 
@@ -1223,7 +1223,7 @@ class FakeVmService extends Fake implements vms.VmService {
   }
 
   @override
-  Future<vms.Success> setVMTimelineFlags(List<String> recordedStreams) async {
+  Future<vms.Success> setVMTimelineFlags(final List<String> recordedStreams) async {
     connectionLog.add('setVMTimelineFlags $recordedStreams');
     return vms.Success();
   }
@@ -1241,7 +1241,7 @@ class FakeVmService extends Fake implements vms.VmService {
   };
 
   @override
-  Future<vms.Timeline> getVMTimeline({int? timeOriginMicros, int? timeExtentMicros}) async {
+  Future<vms.Timeline> getVMTimeline({final int? timeOriginMicros, final int? timeExtentMicros}) async {
     connectionLog.add('getVMTimeline $timeOriginMicros $timeExtentMicros');
     final vms.Timeline? timeline = timelineResponses[timeOriginMicros ?? 1];
     assert(timeline != null, 'Missing entry in timelineResponses[$timeOriginMicros]');

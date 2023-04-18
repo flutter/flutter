@@ -12,7 +12,7 @@ class GeneralDialogApp extends StatelessWidget {
   const GeneralDialogApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       restorationScopeId: 'app',
       home: GeneralDialogExample(),
@@ -24,7 +24,7 @@ class GeneralDialogExample extends StatelessWidget {
   const GeneralDialogExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: OutlinedButton(
@@ -39,12 +39,12 @@ class GeneralDialogExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(final BuildContext context, final Object? arguments) {
     return RawDialogRoute<void>(
       pageBuilder: (
-        BuildContext context,
-        Animation<double> animation,
-        Animation<double> secondaryAnimation,
+        final BuildContext context,
+        final Animation<double> animation,
+        final Animation<double> secondaryAnimation,
       ) {
         return const AlertDialog(title: Text('Alert!'));
       },

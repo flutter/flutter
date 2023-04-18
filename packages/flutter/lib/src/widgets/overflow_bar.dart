@@ -203,7 +203,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderOverflowBar(
       spacing: spacing,
       alignment: alignment,
@@ -216,7 +216,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderObject renderObject) {
     (renderObject as _RenderOverflowBar)
       ..spacing = spacing
       ..alignment = alignment
@@ -228,7 +228,7 @@ class OverflowBar extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0));
     properties.add(EnumProperty<MainAxisAlignment>('alignment', alignment, defaultValue: null));
@@ -245,14 +245,14 @@ class _RenderOverflowBar extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, _OverflowBarParentData>,
          RenderBoxContainerDefaultsMixin<RenderBox, _OverflowBarParentData> {
   _RenderOverflowBar({
-    List<RenderBox>? children,
-    double spacing = 0.0,
-    MainAxisAlignment? alignment,
-    double overflowSpacing = 0.0,
-    OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
-    VerticalDirection overflowDirection = VerticalDirection.down,
-    required TextDirection textDirection,
-    Clip clipBehavior = Clip.none,
+    final List<RenderBox>? children,
+    final double spacing = 0.0,
+    final MainAxisAlignment? alignment,
+    final double overflowSpacing = 0.0,
+    final OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
+    final VerticalDirection overflowDirection = VerticalDirection.down,
+    required final TextDirection textDirection,
+    final Clip clipBehavior = Clip.none,
   }) : _spacing = spacing,
        _alignment = alignment,
        _overflowSpacing = overflowSpacing,
@@ -265,7 +265,7 @@ class _RenderOverflowBar extends RenderBox
 
   double get spacing => _spacing;
   double _spacing;
-  set spacing (double value) {
+  set spacing (final double value) {
     if (_spacing == value) {
       return;
     }
@@ -275,7 +275,7 @@ class _RenderOverflowBar extends RenderBox
 
   MainAxisAlignment? get alignment => _alignment;
   MainAxisAlignment? _alignment;
-  set alignment (MainAxisAlignment? value) {
+  set alignment (final MainAxisAlignment? value) {
     if (_alignment == value) {
       return;
     }
@@ -285,7 +285,7 @@ class _RenderOverflowBar extends RenderBox
 
   double get overflowSpacing => _overflowSpacing;
   double _overflowSpacing;
-  set overflowSpacing (double value) {
+  set overflowSpacing (final double value) {
     if (_overflowSpacing == value) {
       return;
     }
@@ -295,7 +295,7 @@ class _RenderOverflowBar extends RenderBox
 
   OverflowBarAlignment get overflowAlignment => _overflowAlignment;
   OverflowBarAlignment _overflowAlignment;
-  set overflowAlignment (OverflowBarAlignment value) {
+  set overflowAlignment (final OverflowBarAlignment value) {
     if (_overflowAlignment == value) {
       return;
     }
@@ -305,7 +305,7 @@ class _RenderOverflowBar extends RenderBox
 
   VerticalDirection get overflowDirection => _overflowDirection;
   VerticalDirection _overflowDirection;
-  set overflowDirection (VerticalDirection value) {
+  set overflowDirection (final VerticalDirection value) {
     if (_overflowDirection == value) {
       return;
     }
@@ -315,7 +315,7 @@ class _RenderOverflowBar extends RenderBox
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (_textDirection == value) {
       return;
     }
@@ -325,7 +325,7 @@ class _RenderOverflowBar extends RenderBox
 
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
+  set clipBehavior(final Clip value) {
     if (value == _clipBehavior) {
       return;
     }
@@ -335,14 +335,14 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! _OverflowBarParentData) {
       child.parentData = _OverflowBarParentData();
     }
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     RenderBox? child = firstChild;
     if (child == null) {
       return 0;
@@ -373,7 +373,7 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     RenderBox? child = firstChild;
     if (child == null) {
       return 0;
@@ -404,7 +404,7 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     RenderBox? child = firstChild;
     if (child == null) {
       return 0;
@@ -418,7 +418,7 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     RenderBox? child = firstChild;
     if (child == null) {
       return 0;
@@ -432,12 +432,12 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(final TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     RenderBox? child = firstChild;
     if (child == null) {
       return constraints.smallest;
@@ -556,17 +556,17 @@ class _RenderOverflowBar extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     defaultPaint(context, offset);
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('spacing', spacing, defaultValue: 0));
     properties.add(DoubleProperty('overflowSpacing', overflowSpacing, defaultValue: 0));

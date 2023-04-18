@@ -42,7 +42,7 @@ class MenuBarThemeData extends MenuThemeData {
   const MenuBarThemeData({super.style});
 
   /// Linearly interpolate between two [MenuBar] themes.
-  static MenuBarThemeData? lerp(MenuBarThemeData? a, MenuBarThemeData? b, double t) {
+  static MenuBarThemeData? lerp(final MenuBarThemeData? a, final MenuBarThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -100,16 +100,16 @@ class MenuBarTheme extends InheritedTheme {
   ///   );
   /// }
   /// ```
-  static MenuBarThemeData of(BuildContext context) {
+  static MenuBarThemeData of(final BuildContext context) {
     final MenuBarTheme? menuBarTheme = context.dependOnInheritedWidgetOfExactType<MenuBarTheme>();
     return menuBarTheme?.data ?? Theme.of(context).menuBarTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return MenuBarTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(MenuBarTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final MenuBarTheme oldWidget) => data != oldWidget.data;
 }

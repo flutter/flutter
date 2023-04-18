@@ -23,11 +23,11 @@ void main() {
 
 const MethodChannel kSemanticsChannel = MethodChannel('semantics');
 
-Future<String> dataHandler(String? message) async {
+Future<String> dataHandler(final String? message) async {
   if (message != null && message.contains('getSemanticsNode')) {
     final Completer<String> completer = Completer<String>();
     final int id = int.tryParse(message.split('#')[1]) ?? 0;
-    Future<void> completeSemantics([Object? _]) async {
+    Future<void> completeSemantics([final Object? _]) async {
       final dynamic result = await kSemanticsChannel.invokeMethod<dynamic>('getSemanticsNode', <String, dynamic>{
         'id': id,
       });
@@ -43,7 +43,7 @@ Future<String> dataHandler(String? message) async {
   if (message != null && message.contains('setClipboard')) {
     final Completer<String> completer = Completer<String>();
     final String str = message.split('#')[1];
-    Future<void> completeSetClipboard([Object? _]) async {
+    Future<void> completeSetClipboard([final Object? _]) async {
       await kSemanticsChannel.invokeMethod<dynamic>('setClipboard', <String, dynamic>{
         'message': str,
       });
@@ -60,24 +60,24 @@ Future<String> dataHandler(String? message) async {
 }
 
 Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  selectionControlsRoute : (BuildContext context) => const SelectionControlsPage(),
-  popupControlsRoute : (BuildContext context) => const PopupControlsPage(),
-  textFieldRoute : (BuildContext context) => const TextFieldPage(),
-  headingsRoute: (BuildContext context) => const HeadingsPage(),
+  selectionControlsRoute : (final BuildContext context) => const SelectionControlsPage(),
+  popupControlsRoute : (final BuildContext context) => const PopupControlsPage(),
+  textFieldRoute : (final BuildContext context) => const TextFieldPage(),
+  headingsRoute: (final BuildContext context) => const HeadingsPage(),
 };
 
 class TestApp extends StatelessWidget {
   const TestApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       routes: routes,
       home: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return Scaffold(
             body: ListView(
-              children: routes.keys.map<Widget>((String value) {
+              children: routes.keys.map<Widget>((final String value) {
                 return MaterialButton(
                   child: Text(value),
                   onPressed: () {

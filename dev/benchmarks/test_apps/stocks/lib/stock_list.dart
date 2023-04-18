@@ -22,12 +22,12 @@ class StockList extends StatelessWidget {
   final StockRowActionCallback onAction;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
       key: const ValueKey<String>('stock-list'),
       itemExtent: StockRow.kHeight,
       itemCount: stocks.length,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return StockRow(
           stock: stocks[index],
           onPressed: onOpen,

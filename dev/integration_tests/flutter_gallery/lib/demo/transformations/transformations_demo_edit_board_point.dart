@@ -19,7 +19,7 @@ class EditBoardPoint extends StatelessWidget {
   final ValueChanged<Color>? onColorSelection;
 
   @override
-  Widget build (BuildContext context) {
+  Widget build (final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[

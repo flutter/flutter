@@ -14,10 +14,10 @@ class TestWidget extends LeafRenderObjectWidget {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) => RenderTest();
+  RenderObject createRenderObject(final BuildContext context) => RenderTest();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     // This string is searched for verbatim by dev/bots/test.dart:
     properties.add(MessageProperty('test', 'TestWidget.debugFillProperties called'));
@@ -35,7 +35,7 @@ class RenderTest extends RenderBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     // This string is searched for verbatim by dev/bots/test.dart:
     properties.add(MessageProperty('test', 'RenderTest.debugFillProperties called'));

@@ -11,7 +11,7 @@ void main() {
 
   final List<MethodCall> log = <MethodCall>[];
 
-  Future<void> verify(AsyncCallback test, List<Object> expectations) async {
+  Future<void> verify(final AsyncCallback test, final List<Object> expectations) async {
     log.clear();
     await test();
     expect(log, expectations);
@@ -41,7 +41,7 @@ void main() {
     group('disableContextMenu', () {
       // Make sure the context menu is enabled (default) after the test.
       tearDown(() async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (final MethodCall methodCall) {
           return null;
         });
         await BrowserContextMenu.enableContextMenu();
@@ -49,7 +49,7 @@ void main() {
       });
 
       test('disableContextMenu calls its platform channel method', () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (final MethodCall methodCall) async {
           log.add(methodCall);
           return null;
         });
@@ -64,7 +64,7 @@ void main() {
 
     group('enableContextMenu', () {
       test('enableContextMenu calls its platform channel method', () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall methodCall) async {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (final MethodCall methodCall) async {
           log.add(methodCall);
           return null;
         });

@@ -12,7 +12,7 @@ class RestorablePushExampleApp extends StatelessWidget {
   const RestorablePushExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: RestorablePushExample(),
     );
@@ -28,14 +28,14 @@ class RestorablePushExample extends StatefulWidget {
 
 class _RestorablePushExampleState extends State<RestorablePushExample> {
   @pragma('vm:entry-point')
-  static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  static Route<void> _myRouteBuilder(final BuildContext context, final Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const RestorablePushExample(),
+      builder: (final BuildContext context) => const RestorablePushExample(),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sample Code'),

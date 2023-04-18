@@ -414,7 +414,7 @@ Future<void> main() async {
   });
 }
 
-void _validateIosPodfile(String appPath) {
+void _validateIosPodfile(final String appPath) {
   section('Validate iOS Podfile');
 
   final File podfileLockFile = File(path.join(appPath, 'ios', 'Podfile.lock'));
@@ -480,7 +480,7 @@ void _validateIosPodfile(String appPath) {
   ));
 }
 
-void _validateMacOSPodfile(String appPath) {
+void _validateMacOSPodfile(final String appPath) {
   section('Validate macOS Podfile');
 
   final File podfileLockFile = File(path.join(appPath, 'macos', 'Podfile.lock'));

@@ -24,10 +24,10 @@ abstract class DesktopDevice extends Device {
   DesktopDevice(super.identifier, {
       required PlatformType super.platformType,
       required super.ephemeral,
-      required Logger logger,
-      required ProcessManager processManager,
-      required FileSystem fileSystem,
-      required OperatingSystemUtils operatingSystemUtils,
+      required final Logger logger,
+      required final ProcessManager processManager,
+      required final FileSystem fileSystem,
+      required final OperatingSystemUtils operatingSystemUtils,
     }) : _logger = logger,
          _processManager = processManager,
          _fileSystem = fileSystem,
@@ -44,7 +44,7 @@ abstract class DesktopDevice extends Device {
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   @override
-  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(final ApplicationPackage? app, final String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 
@@ -52,29 +52,29 @@ abstract class DesktopDevice extends Device {
   // to install the application.
   @override
   Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
+  Future<bool> isLatestBuildInstalled(final ApplicationPackage app) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
   @override
   Future<bool> installApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => true;
 
   // Since the host and target devices are the same, no work needs to be done
   // to uninstall the application.
   @override
   Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => true;
 
   @override
@@ -90,12 +90,12 @@ abstract class DesktopDevice extends Device {
   Future<String> get sdkNameAndVersion async => _operatingSystemUtils.name;
 
   @override
-  bool supportsRuntimeMode(BuildMode buildMode) => buildMode != BuildMode.jitRelease;
+  bool supportsRuntimeMode(final BuildMode buildMode) => buildMode != BuildMode.jitRelease;
 
   @override
   DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
+    final ApplicationPackage? app,
+    final bool includePastLogs = false,
   }) {
     assert(!includePastLogs, 'Past log reading not supported on desktop.');
     return _deviceLogReader;
@@ -106,14 +106,14 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs = const <String, dynamic>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final ApplicationPackage package, {
+    final String? mainPath,
+    final String? route,
+    required final DebuggingOptions debuggingOptions,
+    final Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     if (!prebuiltApplication) {
       await buildForDevice(
@@ -146,7 +146,7 @@ abstract class DesktopDevice extends Device {
       rethrow;
     }
     _runningProcesses.add(process);
-    unawaited(process.exitCode.then((_) => _runningProcesses.remove(process)));
+    unawaited(process.exitCode.then((final _) => _runningProcesses.remove(process)));
 
     _deviceLogReader.initializeProcess(process);
     if (debuggingOptions.buildInfo.isRelease == true) {
@@ -178,8 +178,8 @@ abstract class DesktopDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
+    final ApplicationPackage? app, {
+    final String? userIdentifier,
   }) async {
     bool succeeded = true;
     // Walk a copy of _runningProcesses, since the exit handler removes from the
@@ -197,17 +197,17 @@ abstract class DesktopDevice extends Device {
 
   /// Builds the current project for this device, with the given options.
   Future<void> buildForDevice({
-    required BuildInfo buildInfo,
-    String? mainPath,
+    required final BuildInfo buildInfo,
+    final String? mainPath,
   });
 
   /// Returns the path to the executable to run for [package] on this device for
   /// the given [buildMode].
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo);
+  String? executablePathForDevice(final ApplicationPackage package, final BuildInfo buildInfo);
 
   /// Called after a process is attached, allowing any device-specific extra
   /// steps to be run.
-  void onAttached(ApplicationPackage package, BuildInfo buildInfo, Process process) {}
+  void onAttached(final ApplicationPackage package, final BuildInfo buildInfo, final Process process) {}
 
   /// Computes a set of environment variables used to pass debugging information
   /// to the engine without interfering with application level command line
@@ -216,11 +216,11 @@ abstract class DesktopDevice extends Device {
   /// The format of the environment variables is:
   ///   * FLUTTER_ENGINE_SWITCHES to the number of switches.
   ///   * FLUTTER_ENGINE_SWITCH_<N> (indexing from 1) to the individual switches.
-  Map<String, String> _computeEnvironment(DebuggingOptions debuggingOptions, bool traceStartup, String? route) {
+  Map<String, String> _computeEnvironment(final DebuggingOptions debuggingOptions, final bool traceStartup, final String? route) {
     int flags = 0;
     final Map<String, String> environment = <String, String>{};
 
-    void addFlag(String value) {
+    void addFlag(final String value) {
       flags += 1;
       environment['FLUTTER_ENGINE_SWITCH_$flags'] = value;
     }
@@ -304,7 +304,7 @@ class DesktopLogReader extends DeviceLogReader {
   final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 
   /// Begin listening to the stdout and stderr streams of the provided [process].
-  void initializeProcess(Process process) {
+  void initializeProcess(final Process process) {
     final StreamSubscription<List<int>> stdoutSub = process.stdout.listen(
       _inputController.add,
     );

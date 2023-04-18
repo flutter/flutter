@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Keyboard & TextField',
       theme: ThemeData(primarySwatch: Colors.blue),
@@ -54,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final bool isSoftKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 100;
     return Scaffold(
       body: Column(

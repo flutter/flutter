@@ -8,7 +8,7 @@ import 'package:flutter_gallery/demo/cupertino/cupertino_navigation_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Navigation demo golden', (WidgetTester tester) async {
+  testWidgets('Navigation demo golden', (final WidgetTester tester) async {
     // The point is to mainly test the cupertino icons that we don't have a
     // dependency against in the flutter/cupertino package directly.
 

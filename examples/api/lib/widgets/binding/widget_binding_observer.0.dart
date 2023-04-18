@@ -12,7 +12,7 @@ class WidgetBindingObserverExampleApp extends StatelessWidget {
   const WidgetBindingObserverExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('WidgetBindingsObserver Sample')),
@@ -42,7 +42,7 @@ class _WidgetBindingsObserverSampleState extends State<WidgetBindingsObserverSam
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(final AppLifecycleState state) {
     setState(() {
       _stateHistoryList.add(state);
     });
@@ -55,12 +55,12 @@ class _WidgetBindingsObserverSampleState extends State<WidgetBindingsObserverSam
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (_stateHistoryList.isNotEmpty) {
       return ListView.builder(
         key: const ValueKey<String>('stateHistoryList'),
         itemCount: _stateHistoryList.length,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Text('state is: ${_stateHistoryList[index]}');
         },
       );

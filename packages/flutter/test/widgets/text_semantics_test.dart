@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('SemanticsNode ids are stable', (WidgetTester tester) async {
+  testWidgets('SemanticsNode ids are stable', (final WidgetTester tester) async {
     // Regression test for b/151732341.
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(Directionality(
@@ -35,7 +35,7 @@ void main() {
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode node = tester.getSemantics(find.text('Hallo Welt !!!'));
     final Map<String, int> labelToNodeId = <String, int>{};
-    node.visitChildren((SemanticsNode node) {
+    node.visitChildren((final SemanticsNode node) {
       labelToNodeId[node.label] = node.id;
        return true;
     });
@@ -51,7 +51,7 @@ void main() {
 
     final SemanticsNode nodeAfterRebuild = tester.getSemantics(find.text('Hallo Welt !!!'));
     final Map<String, int> labelToNodeIdAfterRebuild = <String, int>{};
-    nodeAfterRebuild.visitChildren((SemanticsNode node) {
+    nodeAfterRebuild.visitChildren((final SemanticsNode node) {
       labelToNodeIdAfterRebuild[node.label] = node.id;
       return true;
     });
@@ -82,7 +82,7 @@ void main() {
 
     final SemanticsNode nodeAfterRemoval = tester.getSemantics(find.text('Hallo Welt '));
     final Map<String, int> labelToNodeIdAfterRemoval = <String, int>{};
-    nodeAfterRemoval.visitChildren((SemanticsNode node) {
+    nodeAfterRemoval.visitChildren((final SemanticsNode node) {
       labelToNodeIdAfterRemoval[node.label] = node.id;
       return true;
     });
@@ -115,7 +115,7 @@ void main() {
     expect(find.text('Hallo Welt !!!'), findsOneWidget);
     final SemanticsNode nodeAfterAddition = tester.getSemantics(find.text('Hallo Welt !!!'));
     final Map<String, int> labelToNodeIdAfterAddition = <String, int>{};
-    nodeAfterAddition.visitChildren((SemanticsNode node) {
+    nodeAfterAddition.visitChildren((final SemanticsNode node) {
       labelToNodeIdAfterAddition[node.label] = node.id;
       return true;
     });

@@ -6,15 +6,15 @@ import 'dart:convert' show json;
 import 'dart:math' as math;
 
 double _doNormal(
-    {required double mean, required double stddev, required double x}) {
+    {required final double mean, required final double stddev, required final double x}) {
   return (1.0 / (stddev * math.sqrt(2.0 * math.pi))) *
       math.pow(math.e, -0.5 * math.pow((x - mean) / stddev, 2.0));
 }
 
-double _doMean(List<double> values) =>
-    values.reduce((double x, double y) => x + y) / values.length;
+double _doMean(final List<double> values) =>
+    values.reduce((final double x, final double y) => x + y) / values.length;
 
-double _doStddev(List<double> values, double mean) {
+double _doStddev(final List<double> values, final double mean) {
   double stddev = 0.0;
   for (final double value in values) {
     stddev += (value - mean) * (value - mean);
@@ -23,10 +23,10 @@ double _doStddev(List<double> values, double mean) {
 }
 
 double _doIntegral({
-  required double Function(double) func,
+  required final double Function(double) func,
   required double start,
-  required double stop,
-  required double resolution,
+  required final double stop,
+  required final double resolution,
 }) {
   double result = 0.0;
   while (start < stop) {
@@ -39,9 +39,9 @@ double _doIntegral({
 
 /// Probability is defined as the probability that the mean is within the
 /// [margin] of the true value.
-double _doProbability({required double mean, required double stddev, required double margin}) {
+double _doProbability({required final double mean, required final double stddev, required final double margin}) {
   return _doIntegral(
-    func: (double x) => _doNormal(mean: mean, stddev: stddev, x: x),
+    func: (final double x) => _doNormal(mean: mean, stddev: stddev, x: x),
     start: (1.0 - margin) * mean,
     stop: (1.0 + margin) * mean,
     resolution: 0.001,
@@ -73,7 +73,7 @@ class BenchmarkResultPrinter {
   /// result value. [unit] is the unit of measurement, such as "ms", "km", "h".
   /// [name] is a computer-readable name of the result used as a key in the JSON
   /// serialization of the results.
-  void addResult({ required String description, required double value, required String unit, required String name }) {
+  void addResult({ required final String description, required final double value, required final String unit, required final String name }) {
     _results.add(_BenchmarkResult(description, value, unit, name));
   }
 
@@ -85,10 +85,10 @@ class BenchmarkResultPrinter {
   ///
   /// See also [addResult].
   void addResultStatistics({
-    required String description,
-    required List<double> values,
-    required String unit,
-    required String name,
+    required final String description,
+    required final List<double> values,
+    required final String unit,
+    required final String name,
   }) {
     final double mean = _doMean(values);
     final double stddev = _doStddev(values, mean);

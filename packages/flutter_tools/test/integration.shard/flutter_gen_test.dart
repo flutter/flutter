@@ -34,7 +34,7 @@ void main() {
         .childFile('package_config.json')
         .readAsStringSync());
     final Map<String, dynamic> collection = ((jsonContent as Map<String, dynamic>)['packages'] as Iterable<dynamic>)
-        .firstWhere((dynamic entry) => (entry as Map<String, dynamic>)['name'] == 'collection') as Map<String, dynamic>;
+        .firstWhere((final dynamic entry) => (entry as Map<String, dynamic>)['name'] == 'collection') as Map<String, dynamic>;
     expect(
       Uri.parse(collection['rootUri'] as String).isAbsolute,
       isTrue,

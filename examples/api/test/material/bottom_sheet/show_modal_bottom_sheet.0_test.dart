@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/bottom_sheet/show_modal_bottom_shee
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('BottomSheet can be opened and closed', (WidgetTester tester) async {
+  testWidgets('BottomSheet can be opened and closed', (final WidgetTester tester) async {
     const String titleText = 'Modal BottomSheet';
     const String closeText = 'Close BottomSheet';
 

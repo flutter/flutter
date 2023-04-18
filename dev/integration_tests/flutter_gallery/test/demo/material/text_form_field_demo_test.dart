@@ -7,7 +7,7 @@ import 'package:flutter_gallery/demo/material/text_form_field_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('validates name field correctly', (WidgetTester tester) async {
+  testWidgets('validates name field correctly', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
 
     final Finder submitButton = find.widgetWithText(ElevatedButton, 'SUBMIT');

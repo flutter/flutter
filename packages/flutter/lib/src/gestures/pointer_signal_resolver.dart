@@ -12,7 +12,7 @@ export 'events.dart' show PointerSignalEvent;
 /// interest in a pointer signal event.
 typedef PointerSignalResolvedCallback = void Function(PointerSignalEvent event);
 
-bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
+bool _isSameEvent(final PointerSignalEvent event1, final PointerSignalEvent event2) {
   return (event1.original ?? event1) == (event2.original ?? event2);
 }
 
@@ -63,7 +63,7 @@ class PointerSignalResolver {
   ///
   /// See the documentation for the [PointerSignalResolver] class on when and
   /// how this method should be used.
-  void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
+  void register(final PointerSignalEvent event, final PointerSignalResolvedCallback callback) {
     assert(_currentEvent == null || _isSameEvent(_currentEvent!, event));
     if (_firstRegisteredCallback != null) {
       return;
@@ -78,7 +78,7 @@ class PointerSignalResolver {
   /// This is called by the [GestureBinding] after the framework has finished
   /// dispatching the pointer signal event.
   @pragma('vm:notify-debugger-on-exception')
-  void resolve(PointerSignalEvent event) {
+  void resolve(final PointerSignalEvent event) {
     if (_firstRegisteredCallback == null) {
       assert(_currentEvent == null);
       return;

@@ -85,9 +85,9 @@ void main() {
       ),
     );
     final BoxPainter painter = decoration.createBoxPainter(() { log.add(0); });
-    expect((Canvas canvas) => painter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0))), paintsAssertion);
+    expect((final Canvas canvas) => painter.paint(canvas, Offset.zero, const ImageConfiguration(size: Size(100.0, 100.0))), paintsAssertion);
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         return painter.paint(
           canvas,
           const Offset(20.0, -40.0),
@@ -101,7 +101,7 @@ void main() {
         ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: const Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0)),
     );
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         return painter.paint(
           canvas,
           Offset.zero,
@@ -144,12 +144,12 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   final ui.Image image;
 
   @override
-  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<TestImageProvider> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(final TestImageProvider key, final DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(ImageInfo(image: image)),
     );

@@ -22,11 +22,11 @@ class SelectableRegionToolbarBuilderExampleApp extends StatefulWidget {
 }
 
 class _SelectableRegionToolbarBuilderExampleAppState extends State<SelectableRegionToolbarBuilderExampleApp> {
-  void _showDialog(BuildContext context) {
+  void _showDialog(final BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
+        builder: (final BuildContext context) => const AlertDialog(title: Text('You clicked print!')),
       ),
     );
   }
@@ -50,7 +50,7 @@ class _SelectableRegionToolbarBuilderExampleAppState extends State<SelectableReg
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -61,8 +61,8 @@ class _SelectableRegionToolbarBuilderExampleAppState extends State<SelectableReg
             width: 200.0,
             child: SelectionArea(
               contextMenuBuilder: (
-                BuildContext context,
-                SelectableRegionState selectableRegionState,
+                final BuildContext context,
+                final SelectableRegionState selectableRegionState,
               ) {
                 return AdaptiveTextSelectionToolbar.buttonItems(
                   anchors: selectableRegionState.contextMenuAnchors,

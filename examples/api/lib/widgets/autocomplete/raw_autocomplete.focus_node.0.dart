@@ -12,7 +12,7 @@ class AutocompleteExampleApp extends StatelessWidget {
   const AutocompleteExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: RawAutocompleteSplit(),
     );
@@ -38,7 +38,7 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
   final GlobalKey _autocompleteKey = GlobalKey();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         // This is where the real field is being built.
@@ -48,7 +48,7 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
           decoration: const InputDecoration(
             hintText: 'Split RawAutocomplete App',
           ),
-          onFieldSubmitted: (String value) {
+          onFieldSubmitted: (final String value) {
             RawAutocomplete.onFieldSubmitted<String>(_autocompleteKey);
           },
         ),
@@ -59,21 +59,21 @@ class RawAutocompleteSplitState extends State<RawAutocompleteSplit> {
           key: _autocompleteKey,
           focusNode: _focusNode,
           textEditingController: _textEditingController,
-          optionsBuilder: (TextEditingValue textEditingValue) {
-            return _options.where((String option) {
+          optionsBuilder: (final TextEditingValue textEditingValue) {
+            return _options.where((final String option) {
               return option.contains(textEditingValue.text.toLowerCase());
             }).toList();
           },
           optionsViewBuilder: (
-            BuildContext context,
-            AutocompleteOnSelected<String> onSelected,
-            Iterable<String> options,
+            final BuildContext context,
+            final AutocompleteOnSelected<String> onSelected,
+            final Iterable<String> options,
           ) {
             return Material(
               elevation: 4.0,
               child: ListView(
                 children: options
-                    .map((String option) => GestureDetector(
+                    .map((final String option) => GestureDetector(
                           onTap: () {
                             onSelected(option);
                           },

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PageStorage read and write', (WidgetTester tester) async {
+  testWidgets('PageStorage read and write', (final WidgetTester tester) async {
     const Key builderKey = PageStorageKey<String>('builderKey');
     late StateSetter setState;
     int storedValue = 0;
@@ -15,7 +15,7 @@ void main() {
       MaterialApp(
         home: StatefulBuilder(
           key: builderKey,
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (final BuildContext context, final StateSetter setter) {
             PageStorage.of(context).writeState(context, storedValue);
             setState = setter;
             return Center(
@@ -37,15 +37,15 @@ void main() {
     expect(PageStorage.of(builderElement).readState(builderElement), equals(storedValue));
   });
 
-  testWidgets('PageStorage read and write by identifier', (WidgetTester tester) async {
+  testWidgets('PageStorage read and write by identifier', (final WidgetTester tester) async {
     late StateSetter setState;
     int storedValue = 0;
 
-    Widget buildWidthKey(Key key) {
+    Widget buildWidthKey(final Key key) {
       return MaterialApp(
         home: StatefulBuilder(
           key: key,
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (final BuildContext context, final StateSetter setter) {
             PageStorage.of(context).writeState(context, storedValue, identifier: 123);
             setState = setter;
             return Center(

@@ -12,7 +12,7 @@ class SizeTransitionExampleApp extends StatelessWidget {
   const SizeTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: SizeTransitionExample(),
     );
@@ -45,7 +45,7 @@ class _SizeTransitionExampleState extends State<SizeTransitionExample> with Tick
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: SizeTransition(
         sizeFactor: _animation,

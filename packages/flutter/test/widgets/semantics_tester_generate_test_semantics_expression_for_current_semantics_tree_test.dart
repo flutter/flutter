@@ -24,7 +24,7 @@ void _tests() {
     debugResetSemanticsIdCounter();
   });
 
-  Future<void> pumpTestWidget(WidgetTester tester) async {
+  Future<void> pumpTestWidget(final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: ListView(
         children: <Widget>[
@@ -52,17 +52,17 @@ void _tests() {
   // also update this code to reflect the new output.
   //
   // This test is flexible w.r.t. leading and trailing whitespace.
-  testWidgets('generates code', (WidgetTester tester) async {
+  testWidgets('generates code', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     final String code = semantics
       .generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest)
       .split('\n')
-      .map<String>((String line) => line.trim())
+      .map<String>((final String line) => line.trim())
       .join('\n')
       .trim();
 
-    File? findThisTestFile(Directory directory) {
+    File? findThisTestFile(final Directory directory) {
       for (final FileSystemEntity entity in directory.listSync()) {
         if (entity is Directory) {
           final File? childSearch = findThisTestFile(entity);
@@ -84,14 +84,14 @@ void _tests() {
       expectedCode.indexOf('^' * 12) - 3,
     )
       .split('\n')
-      .map<String>((String line) => line.trim())
+      .map<String>((final String line) => line.trim())
       .join('\n')
       .trim();
     semantics.dispose();
     expect('$code,', expectedCode);
   });
 
-  testWidgets('generated code is correct', (WidgetTester tester) async {
+  testWidgets('generated code is correct', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
     expect(

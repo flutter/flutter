@@ -12,22 +12,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'gesture_utils.dart';
 
 void main() {
-  testWidgets('Events bubble up the tree', (WidgetTester tester) async {
+  testWidgets('Events bubble up the tree', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
       Listener(
-        onPointerDown: (_) {
+        onPointerDown: (final _) {
           log.add('top');
         },
         child: Listener(
-          onPointerDown: (_) {
+          onPointerDown: (final _) {
             log.add('middle');
           },
           child: DecoratedBox(
             decoration: const BoxDecoration(),
             child: Listener(
-              onPointerDown: (_) {
+              onPointerDown: (final _) {
                 log.add('bottom');
               },
               child: const Text('X', textDirection: TextDirection.ltr),
@@ -46,7 +46,7 @@ void main() {
     ]));
   });
 
-  testWidgets('Detects hover events from touch devices', (WidgetTester tester) async {
+  testWidgets('Detects hover events from touch devices', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -55,7 +55,7 @@ void main() {
           width: 300,
           height: 300,
           child: Listener(
-            onPointerHover: (_) {
+            onPointerHover: (final _) {
               log.add('bottom');
             },
             child: const Text('X', textDirection: TextDirection.ltr),
@@ -74,23 +74,23 @@ void main() {
   });
 
   group('transformed events', () {
-    testWidgets('simple offset for touch/signal', (WidgetTester tester) async {
+    testWidgets('simple offset for touch/signal', (final WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
       await tester.pumpWidget(
         Center(
           child: Listener(
-            onPointerDown: (PointerDownEvent event) {
+            onPointerDown: (final PointerDownEvent event) {
               events.add(event);
             },
-            onPointerUp: (PointerUpEvent event) {
+            onPointerUp: (final PointerUpEvent event) {
               events.add(event);
             },
-            onPointerMove: (PointerMoveEvent event) {
+            onPointerMove: (final PointerMoveEvent event) {
               events.add(event);
             },
-            onPointerSignal: (PointerSignalEvent event) {
+            onPointerSignal: (final PointerSignalEvent event) {
               events.add(event);
             },
             child: Container(
@@ -145,7 +145,7 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('scaled for touch/signal', (WidgetTester tester) async {
+    testWidgets('scaled for touch/signal', (final WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -157,16 +157,16 @@ void main() {
           child: Transform(
             transform: Matrix4.identity()..scale(scaleFactor),
             child: Listener(
-              onPointerDown: (PointerDownEvent event) {
+              onPointerDown: (final PointerDownEvent event) {
                 events.add(event);
               },
-              onPointerUp: (PointerUpEvent event) {
+              onPointerUp: (final PointerUpEvent event) {
                 events.add(event);
               },
-              onPointerMove: (PointerMoveEvent event) {
+              onPointerMove: (final PointerMoveEvent event) {
                 events.add(event);
               },
-              onPointerSignal: (PointerSignalEvent event) {
+              onPointerSignal: (final PointerSignalEvent event) {
                 events.add(event);
               },
               child: Container(
@@ -222,7 +222,7 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
+    testWidgets('scaled and offset for touch/signal', (final WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -233,16 +233,16 @@ void main() {
           child: Transform(
             transform: Matrix4.identity()..scale(scaleFactor),
             child: Listener(
-              onPointerDown: (PointerDownEvent event) {
+              onPointerDown: (final PointerDownEvent event) {
                 events.add(event);
               },
-              onPointerUp: (PointerUpEvent event) {
+              onPointerUp: (final PointerUpEvent event) {
                 events.add(event);
               },
-              onPointerMove: (PointerMoveEvent event) {
+              onPointerMove: (final PointerMoveEvent event) {
                 events.add(event);
               },
-              onPointerSignal: (PointerSignalEvent event) {
+              onPointerSignal: (final PointerSignalEvent event) {
                 events.add(event);
               },
               child: Container(
@@ -300,7 +300,7 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('rotated for touch/signal', (WidgetTester tester) async {
+    testWidgets('rotated for touch/signal', (final WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -310,16 +310,16 @@ void main() {
             transform: Matrix4.identity()
               ..rotateZ(math.pi / 2), // 90 degrees clockwise around Container origin
             child: Listener(
-              onPointerDown: (PointerDownEvent event) {
+              onPointerDown: (final PointerDownEvent event) {
                 events.add(event);
               },
-              onPointerUp: (PointerUpEvent event) {
+              onPointerUp: (final PointerUpEvent event) {
                 events.add(event);
               },
-              onPointerMove: (PointerMoveEvent event) {
+              onPointerMove: (final PointerMoveEvent event) {
                 events.add(event);
               },
-              onPointerSignal: (PointerSignalEvent event) {
+              onPointerSignal: (final PointerSignalEvent event) {
                 events.add(event);
               },
               child: Container(
@@ -378,13 +378,13 @@ void main() {
     });
   });
 
-  testWidgets("RenderPointerListener's debugFillProperties when default", (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when default", (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderPointerListener().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[
@@ -396,22 +396,22 @@ void main() {
     ]);
   });
 
-  testWidgets("RenderPointerListener's debugFillProperties when full", (WidgetTester tester) async {
+  testWidgets("RenderPointerListener's debugFillProperties when full", (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderPointerListener(
-      onPointerDown: (PointerDownEvent event) {},
-      onPointerUp: (PointerUpEvent event) {},
-      onPointerMove: (PointerMoveEvent event) {},
-      onPointerHover: (PointerHoverEvent event) {},
-      onPointerCancel: (PointerCancelEvent event) {},
-      onPointerSignal: (PointerSignalEvent event) {},
+      onPointerDown: (final PointerDownEvent event) {},
+      onPointerUp: (final PointerUpEvent event) {},
+      onPointerMove: (final PointerMoveEvent event) {},
+      onPointerHover: (final PointerHoverEvent event) {},
+      onPointerCancel: (final PointerCancelEvent event) {},
+      onPointerSignal: (final PointerSignalEvent event) {},
       behavior: HitTestBehavior.opaque,
       child: RenderErrorBox(),
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[

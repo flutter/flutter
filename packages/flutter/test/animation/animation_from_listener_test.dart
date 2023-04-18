@@ -37,7 +37,7 @@ void main() {
 
   test('Animation created from ValueListenable can transform value', () {
     final ValueNotifier<double> listenable = ValueNotifier<double>(0.0);
-    final Animation<double> animation = Animation<double>.fromValueListenable(listenable, transformer: (double input) {
+    final Animation<double> animation = Animation<double>.fromValueListenable(listenable, transformer: (final double input) {
       return input / 10;
     });
 
@@ -52,7 +52,7 @@ void main() {
   test('Animation created from ValueListenable can be transformed via drive', () {
     final ValueNotifier<double> listenable = ValueNotifier<double>(0.0);
     final Animation<double> animation = Animation<double>.fromValueListenable(listenable);
-    final Animation<Offset> offset = animation.drive(Animatable<Offset>.fromCallback((double value) {
+    final Animation<Offset> offset = animation.drive(Animatable<Offset>.fromCallback((final double value) {
       return Offset(0.0, value);
     }));
 

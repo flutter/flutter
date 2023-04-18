@@ -28,7 +28,7 @@ abstract class NotchedShape {
   ///
   /// The `guest` is the bounding rectangle of the shape for which a notch will
   /// be made. It is null when there is no guest.
-  Path getOuterPath(Rect host, Rect? guest);
+  Path getOuterPath(final Rect host, final Rect? guest);
 }
 
 /// A rectangle with a smooth circular notch.
@@ -55,7 +55,7 @@ class CircularNotchedRectangle extends NotchedShape {
   /// the guest circle.
   // TODO(amirh): add an example diagram here.
   @override
-  Path getOuterPath(Rect host, Rect? guest) {
+  Path getOuterPath(final Rect host, final Rect? guest) {
     if (guest == null || !host.overlaps(guest)) {
       return Path()..addRect(host);
     }
@@ -152,7 +152,7 @@ class AutomaticNotchedShape extends NotchedShape {
   final ShapeBorder? guest;
 
   @override
-  Path getOuterPath(Rect hostRect, Rect? guestRect) { // ignore: avoid_renaming_method_parameters
+  Path getOuterPath(final Rect hostRect, final Rect? guestRect) { // ignore: avoid_renaming_method_parameters
     // The parameters of this method are renamed over the baseclass because they
     // would clash with properties of this object, and the use of all four of
     // them in the code below is really confusing if they have the same names.

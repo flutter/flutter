@@ -12,7 +12,7 @@ class ImagesDemo extends StatelessWidget {
   static const String routeName = '/images';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TabbedComponentDemoScaffold(
       title: 'Animated images',
       demos: <ComponentDemoTabData>[

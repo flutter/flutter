@@ -9,7 +9,7 @@ import '../../../widgets/spinning_mixed.dart' as demo;
 
 void main() {
   test('layers smoketest for widgets/spinning_mixed.dart', () {
-    FlutterError.onError = (FlutterErrorDetails details) { throw details.exception; };
+    FlutterError.onError = (final FlutterErrorDetails details) { throw details.exception; };
     demo.main();
   });
 }

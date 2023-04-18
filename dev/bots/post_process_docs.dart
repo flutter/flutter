@@ -70,9 +70,9 @@ Future<void> postProcess() async {
 /// Gets the git revision of the current checkout. [fullLength] if true will return
 /// the full commit hash, if false it will return the first 10 characters only.
 Future<String> gitRevision({
-  bool fullLength = false,
-  @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
-  @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+  final bool fullLength = false,
+  @visibleForTesting final platform.Platform platform = const platform.LocalPlatform(),
+  @visibleForTesting final ProcessManager processManager = const LocalProcessManager(),
 }) async {
   const int kGitRevisionLength = 10;
 
@@ -91,10 +91,10 @@ Future<String> gitRevision({
 /// [executable] is a string with the script/binary to execute, [args] is the list of flags/arguments
 /// and [workingDirectory] is as string to the working directory where the subprocess will be run.
 Future<void> runProcessWithValidations(
-  List<String> command,
-  String workingDirectory, {
-  @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
-  bool verbose = true,
+  final List<String> command,
+  final String workingDirectory, {
+  @visibleForTesting final ProcessManager processManager = const LocalProcessManager(),
+  final bool verbose = true,
 }) async {
   final ProcessResult result =
       processManager.runSync(command, stdoutEncoding: utf8, workingDirectory: workingDirectory);
@@ -115,8 +115,8 @@ Future<void> runProcessWithValidations(
 /// On LUCI builds, the git HEAD is detached, so first check for the env
 /// variable "LUCI_BRANCH"; if it is not set, fall back to calling git.
 Future<String> getBranchName({
-  @visibleForTesting platform.Platform platform = const platform.LocalPlatform(),
-  @visibleForTesting ProcessManager processManager = const LocalProcessManager(),
+  @visibleForTesting final platform.Platform platform = const platform.LocalPlatform(),
+  @visibleForTesting final ProcessManager processManager = const LocalProcessManager(),
 }) async {
   final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
   final String? luciBranch = platform.environment['LUCI_BRANCH'];
@@ -134,10 +134,10 @@ Future<String> getBranchName({
 /// Updates the footer of the api documentation with the correct branch and versions.
 /// [footerPath] is the path to the location of the footer js file and [version] is a
 /// string with the version calculated by the flutter tool.
-Future<void> createFooter(File footerFile, String version,
-    {@visibleForTesting String? timestampParam,
-    @visibleForTesting String? branchParam,
-    @visibleForTesting String? revisionParam}) async {
+Future<void> createFooter(final File footerFile, final String version,
+    {@visibleForTesting final String? timestampParam,
+    @visibleForTesting final String? branchParam,
+    @visibleForTesting final String? revisionParam}) async {
   final String timestamp = timestampParam ?? DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = branchParam ?? await getBranchName();
   final String revision = revisionParam ?? await gitRevision();

@@ -113,21 +113,21 @@ class ToggleButtonsThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ToggleButtonsThemeData copyWith({
-    TextStyle? textStyle,
-    BoxConstraints? constraints,
-    Color? color,
-    Color? selectedColor,
-    Color? disabledColor,
-    Color? fillColor,
-    Color? focusColor,
-    Color? highlightColor,
-    Color? hoverColor,
-    Color? splashColor,
-    Color? borderColor,
-    Color? selectedBorderColor,
-    Color? disabledBorderColor,
-    BorderRadius? borderRadius,
-    double? borderWidth,
+    final TextStyle? textStyle,
+    final BoxConstraints? constraints,
+    final Color? color,
+    final Color? selectedColor,
+    final Color? disabledColor,
+    final Color? fillColor,
+    final Color? focusColor,
+    final Color? highlightColor,
+    final Color? hoverColor,
+    final Color? splashColor,
+    final Color? borderColor,
+    final Color? selectedBorderColor,
+    final Color? disabledBorderColor,
+    final BorderRadius? borderRadius,
+    final double? borderWidth,
   }) {
     return ToggleButtonsThemeData(
       textStyle: textStyle ?? this.textStyle,
@@ -149,7 +149,7 @@ class ToggleButtonsThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two toggle buttons themes.
-  static ToggleButtonsThemeData? lerp(ToggleButtonsThemeData? a, ToggleButtonsThemeData? b, double t) {
+  static ToggleButtonsThemeData? lerp(final ToggleButtonsThemeData? a, final ToggleButtonsThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -192,7 +192,7 @@ class ToggleButtonsThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -218,7 +218,7 @@ class ToggleButtonsThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
@@ -267,16 +267,16 @@ class ToggleButtonsTheme extends InheritedTheme {
   /// ```dart
   /// ToggleButtonsThemeData theme = ToggleButtonsTheme.of(context);
   /// ```
-  static ToggleButtonsThemeData of(BuildContext context) {
+  static ToggleButtonsThemeData of(final BuildContext context) {
     final ToggleButtonsTheme? toggleButtonsTheme = context.dependOnInheritedWidgetOfExactType<ToggleButtonsTheme>();
     return toggleButtonsTheme?.data ?? Theme.of(context).toggleButtonsTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return ToggleButtonsTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ToggleButtonsTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ToggleButtonsTheme oldWidget) => data != oldWidget.data;
 }

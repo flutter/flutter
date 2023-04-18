@@ -20,7 +20,7 @@ class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: PlatformMenuBarExample()),
     );
@@ -38,7 +38,7 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
   String _message = 'Hello';
   bool _showMessage = false;
 
-  void _handleMenuSelection(MenuSelection value) {
+  void _handleMenuSelection(final MenuSelection value) {
     switch (value) {
       case MenuSelection.about:
         showAboutDialog(
@@ -54,7 +54,7 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     ////////////////////////////////////
     // THIS SAMPLE ONLY WORKS ON MACOS.
     ////////////////////////////////////

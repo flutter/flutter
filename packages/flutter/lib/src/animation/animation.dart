@@ -108,8 +108,8 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// }
   /// ```
   /// {@end-tool}
-  factory Animation.fromValueListenable(ValueListenable<T> listenable, {
-    ValueListenableTransformer<T>? transformer,
+  factory Animation.fromValueListenable(final ValueListenable<T> listenable, {
+    final ValueListenableTransformer<T>? transformer,
   }) = _ValueListenableDelegateAnimation<T>;
 
   // keep these next five dartdocs in sync with the dartdocs in AnimationWithParentMixin<T>
@@ -118,7 +118,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   /// Listeners can be removed with [removeListener].
   @override
-  void addListener(VoidCallback listener);
+  void addListener(final VoidCallback listener);
 
   /// Stop calling the listener every time the value of the animation changes.
   ///
@@ -127,12 +127,12 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///
   /// Listeners can be added with [addListener].
   @override
-  void removeListener(VoidCallback listener);
+  void removeListener(final VoidCallback listener);
 
   /// Calls listener every time the status of the animation changes.
   ///
   /// Listeners can be removed with [removeStatusListener].
-  void addStatusListener(AnimationStatusListener listener);
+  void addStatusListener(final AnimationStatusListener listener);
 
   /// Stops calling the listener every time the status of the animation changes.
   ///
@@ -140,7 +140,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   /// method does nothing.
   ///
   /// Listeners can be added with [addStatusListener].
-  void removeStatusListener(AnimationStatusListener listener);
+  void removeStatusListener(final AnimationStatusListener listener);
 
   /// The current status of this animation.
   AnimationStatus get status;
@@ -244,7 +244,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   ///  * [Animatable.fromCallback], which allows creating an [Animatable] from an
   ///    arbitrary transformation.
   @optionalTypeArgs
-  Animation<U> drive<U>(Animatable<U> child) {
+  Animation<U> drive<U>(final Animatable<U> child) {
     assert(this is Animation<double>);
     return child.animate(this as Animation<double>);
   }
@@ -285,29 +285,29 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 // An implementation of an animation that delegates to a value listenable with a fixed direction.
 class _ValueListenableDelegateAnimation<T> extends Animation<T> {
   _ValueListenableDelegateAnimation(this._listenable, {
-    ValueListenableTransformer<T>? transformer,
+    final ValueListenableTransformer<T>? transformer,
   }) : _transformer = transformer;
 
   final ValueListenable<T> _listenable;
   final ValueListenableTransformer<T>? _transformer;
 
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     _listenable.addListener(listener);
   }
 
   @override
-  void addStatusListener(AnimationStatusListener listener) {
+  void addStatusListener(final AnimationStatusListener listener) {
     // status will never change.
   }
 
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     _listenable.removeListener(listener);
   }
 
   @override
-  void removeStatusListener(AnimationStatusListener listener) {
+  void removeStatusListener(final AnimationStatusListener listener) {
     // status will never change.
   }
 

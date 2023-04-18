@@ -16,7 +16,7 @@ import '../services/fake_platform_views.dart';
 
 void main() {
   group('HtmlElementView', () {
-    testWidgets('Create HTML view', (WidgetTester tester) async {
+    testWidgets('Create HTML view', (final WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -39,13 +39,13 @@ void main() {
       );
     });
 
-    testWidgets('Create HTML view with PlatformViewCreatedCallback', (WidgetTester tester) async {
+    testWidgets('Create HTML view with PlatformViewCreatedCallback', (final WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
 
       bool hasPlatformViewCreated = false;
-      void onPlatformViewCreatedCallBack(int id) {
+      void onPlatformViewCreatedCallBack(final int id) {
         hasPlatformViewCreated = true;
       }
 
@@ -73,7 +73,7 @@ void main() {
       );
     });
 
-    testWidgets('Resize HTML view', (WidgetTester tester) async {
+    testWidgets('Resize HTML view', (final WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -110,7 +110,7 @@ void main() {
       );
     });
 
-    testWidgets('Change HTML view type', (WidgetTester tester) async {
+    testWidgets('Change HTML view type', (final WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -143,7 +143,7 @@ void main() {
       );
     });
 
-    testWidgets('Dispose HTML view', (WidgetTester tester) async {
+    testWidgets('Dispose HTML view', (final WidgetTester tester) async {
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
@@ -171,7 +171,7 @@ void main() {
       );
     });
 
-    testWidgets('HTML view survives widget tree change', (WidgetTester tester) async {
+    testWidgets('HTML view survives widget tree change', (final WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeHtmlPlatformViewsController viewsController = FakeHtmlPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -204,7 +204,7 @@ void main() {
       );
     });
 
-    testWidgets('HtmlElementView has correct semantics', (WidgetTester tester) async {
+    testWidgets('HtmlElementView has correct semantics', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       expect(currentViewId, greaterThanOrEqualTo(0));

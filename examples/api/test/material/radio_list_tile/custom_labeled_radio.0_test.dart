@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/radio_list_tile/custom_labeled_radi
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('LinkedLabelRadio contains RichText and Radio', (WidgetTester tester) async {
+  testWidgets('LinkedLabelRadio contains RichText and Radio', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.LabeledRadioApp(),
     );

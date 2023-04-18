@@ -26,15 +26,15 @@ class OvalBorder extends CircleBorder {
   const OvalBorder({ super.side, super.eccentricity = 1.0 });
 
   @override
-  ShapeBorder scale(double t) => OvalBorder(side: side.scale(t), eccentricity: eccentricity);
+  ShapeBorder scale(final double t) => OvalBorder(side: side.scale(t), eccentricity: eccentricity);
 
   @override
-  OvalBorder copyWith({ BorderSide? side, double? eccentricity }) {
+  OvalBorder copyWith({ final BorderSide? side, final double? eccentricity }) {
     return OvalBorder(side: side ?? this.side, eccentricity: eccentricity ?? this.eccentricity);
   }
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (a is OvalBorder) {
       return OvalBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -45,7 +45,7 @@ class OvalBorder extends CircleBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (b is OvalBorder) {
       return OvalBorder(
         side: BorderSide.lerp(side, b.side, t),

@@ -17,9 +17,9 @@ FuchsiaWorkflow? get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaWorkflow implements Workflow {
   FuchsiaWorkflow({
-    required Platform platform,
-    required FeatureFlags featureFlags,
-    required FuchsiaArtifacts fuchsiaArtifacts,
+    required final Platform platform,
+    required final FeatureFlags featureFlags,
+    required final FuchsiaArtifacts fuchsiaArtifacts,
   }) : _platform = platform,
        _featureFlags = featureFlags,
        _fuchsiaArtifacts = fuchsiaArtifacts;

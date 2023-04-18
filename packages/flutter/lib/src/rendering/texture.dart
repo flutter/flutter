@@ -37,9 +37,9 @@ class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId], and use
   /// [filterQuality] to set texture's [FilterQuality].
   TextureBox({
-    required int textureId,
-    bool freeze = false,
-    FilterQuality filterQuality = FilterQuality.low,
+    required final int textureId,
+    final bool freeze = false,
+    final FilterQuality filterQuality = FilterQuality.low,
   }) : _textureId = textureId,
       _freeze = freeze,
       _filterQuality = filterQuality;
@@ -47,7 +47,7 @@ class TextureBox extends RenderBox {
   /// The identity of the backend texture.
   int get textureId => _textureId;
   int _textureId;
-  set textureId(int value) {
+  set textureId(final int value) {
     if (value != _textureId) {
       _textureId = value;
       markNeedsPaint();
@@ -57,7 +57,7 @@ class TextureBox extends RenderBox {
   /// When true the texture will not be updated with new frames.
   bool get freeze => _freeze;
   bool _freeze;
-  set freeze(bool value) {
+  set freeze(final bool value) {
     if (value != _freeze) {
       _freeze = value;
       markNeedsPaint();
@@ -67,7 +67,7 @@ class TextureBox extends RenderBox {
   /// {@macro flutter.widgets.Texture.filterQuality}
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
-  set filterQuality(FilterQuality value) {
+  set filterQuality(final FilterQuality value) {
     if (value != _filterQuality) {
       _filterQuality = value;
       markNeedsPaint();
@@ -84,15 +84,15 @@ class TextureBox extends RenderBox {
   bool get isRepaintBoundary => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return constraints.biggest;
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     context.addLayer(TextureLayer(
       rect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
       textureId: _textureId,

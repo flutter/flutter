@@ -64,7 +64,7 @@ void main() {
 
       expect(
           listeningChannel.receiveBroadcastStream(),
-          emitsError(predicate<dynamic>((dynamic e) =>
+          emitsError(predicate<dynamic>((final dynamic e) =>
               e is PlatformException && e.message == 'Test error')));
 
       controller.addError('Test error');
@@ -81,7 +81,7 @@ void main() {
 
       expect(
           listeningChannel.receiveBroadcastStream(),
-          emitsError(predicate<dynamic>((dynamic e) =>
+          emitsError(predicate<dynamic>((final dynamic e) =>
               e is PlatformException && e.message == 'Test error')));
 
       controller.addError('Test error');
@@ -133,7 +133,7 @@ void main() {
           listeningChannel.receiveBroadcastStream();
       late StreamSubscription<dynamic> subscription;
       subscription =
-          eventStream.listen(expectAsync1<void, dynamic>((dynamic x) {
+          eventStream.listen(expectAsync1<void, dynamic>((final dynamic x) {
         expect(x, equals('hello'));
         subscription.cancel();
       }));
@@ -154,7 +154,7 @@ void main() {
           listeningChannel.receiveBroadcastStream();
       late StreamSubscription<dynamic> subscription;
       subscription =
-          eventStream.listen(expectAsync1<void, dynamic>((dynamic x) {
+          eventStream.listen(expectAsync1<void, dynamic>((final dynamic x) {
         expect(x, equals('hello'));
         subscription.cancel();
       }));

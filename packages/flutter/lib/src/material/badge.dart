@@ -57,7 +57,7 @@ class Badge extends StatelessWidget {
     this.padding,
     this.alignment,
     this.offset,
-    required int count,
+    required final int count,
     this.isLabelVisible = true,
     this.child,
   }) : label = Text(count > 999 ? '999+' : '$count');
@@ -154,7 +154,7 @@ class Badge extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (!isLabelVisible) {
       return child ?? const SizedBox();
     }
@@ -223,7 +223,7 @@ class _Badge extends SingleChildRenderObjectWidget {
   final TextDirection textDirection;
 
   @override
-  _RenderBadge createRenderObject(BuildContext context) {
+  _RenderBadge createRenderObject(final BuildContext context) {
     return _RenderBadge(
       alignment: alignment,
       offset: offset,
@@ -232,7 +232,7 @@ class _Badge extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderBadge renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderBadge renderObject) {
     renderObject
       ..alignment = alignment
       ..offset = offset
@@ -240,7 +240,7 @@ class _Badge extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(DiagnosticsProperty<Offset>('offset', offset));
@@ -251,12 +251,12 @@ class _RenderBadge extends RenderAligningShiftedBox {
   _RenderBadge({
     super.textDirection,
     super.alignment,
-    required Offset offset,
+    required final Offset offset,
   }) : _offset = offset;
 
   Offset get offset => _offset;
   Offset _offset;
-  set offset(Offset value) {
+  set offset(final Offset value) {
     if (_offset == value) {
       return;
     }

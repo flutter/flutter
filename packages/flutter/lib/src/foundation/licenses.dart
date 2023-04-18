@@ -292,7 +292,7 @@ abstract final class LicenseRegistry {
   /// [LicenseEntry] objects. The closure is only called if [licenses] is itself
   /// called; in normal operation, if the user does not request to see the
   /// licenses, the closure will not be called.
-  static void addLicense(LicenseEntryCollector collector) {
+  static void addLicense(final LicenseEntryCollector collector) {
     _collectors ??= <LicenseEntryCollector>[];
     _collectors!.add(collector);
   }

@@ -11,13 +11,13 @@ import 'package:manual_tests/card_collection.dart' as card_collection;
 import 'mock_image_http.dart';
 
 void main() {
-  testWidgets('Card Collection smoke test', (WidgetTester tester) async {
+  testWidgets('Card Collection smoke test', (final WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
       card_collection.main(); // builds the app and schedules a frame but doesn't trigger one
       await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
       await tester.pump(); // triggers a frame
 
-      final Finder navigationMenu = find.byWidgetPredicate((Widget widget) {
+      final Finder navigationMenu = find.byWidgetPredicate((final Widget widget) {
         if (widget is Tooltip) {
           return widget.message == 'Open navigation menu';
         }

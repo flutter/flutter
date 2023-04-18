@@ -119,17 +119,17 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+  bool isModifierPressed(final ModifierKey key, {final KeyboardSide side = KeyboardSide.any}) {
     return keyHelper.isModifierPressed(key, modifiers, side: side, keyCode: keyCode, isDown: isDown);
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
+  KeyboardSide getModifierSide(final ModifierKey key) {
     return keyHelper.getModifierSide(key);
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('toolkit', keyHelper.debugToolkit));
     properties.add(DiagnosticsProperty<int>('unicodeScalarValues', unicodeScalarValues));
@@ -141,7 +141,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -175,7 +175,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 /// different toolkits.
 abstract class KeyHelper {
   /// Create a KeyHelper implementation depending on the given toolkit.
-  factory KeyHelper(String toolkit) {
+  factory KeyHelper(final String toolkit) {
     if (toolkit == 'glfw') {
       return GLFWKeyHelper();
     } else if (toolkit == 'gtk') {
@@ -192,17 +192,17 @@ abstract class KeyHelper {
 
   /// Returns a [KeyboardSide] enum value that describes which side or sides of
   /// the given keyboard modifier key were pressed at the time of this event.
-  KeyboardSide getModifierSide(ModifierKey key);
+  KeyboardSide getModifierSide(final ModifierKey key);
 
   /// Returns true if the given [ModifierKey] was pressed at the time of this
   /// event.
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown});
+  bool isModifierPressed(final ModifierKey key, final int modifiers, {final KeyboardSide side = KeyboardSide.any, required final int keyCode, required final bool isDown});
 
   /// The numpad key from the specific key code mapping.
-  LogicalKeyboardKey? numpadKey(int keyCode);
+  LogicalKeyboardKey? numpadKey(final int keyCode);
 
   /// The logical key from the specific key code mapping.
-  LogicalKeyboardKey? logicalKey(int keyCode);
+  LogicalKeyboardKey? logicalKey(final int keyCode);
 
   /// The platform plane mask value of this platform.
   int get platformPlane;
@@ -256,7 +256,7 @@ class GLFWKeyHelper implements KeyHelper {
   @override
   String get debugToolkit => 'GLFW';
 
-  int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
+  int _mergeModifiers({required final int modifiers, required final int keyCode, required final bool isDown}) {
     // GLFW Key codes for modifier keys.
     const int shiftLeftKeyCode = 340;
     const int shiftRightKeyCode = 344;
@@ -300,7 +300,7 @@ class GLFWKeyHelper implements KeyHelper {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown}) {
+  bool isModifierPressed(final ModifierKey key, int modifiers, {final KeyboardSide side = KeyboardSide.any, required final int keyCode, required final bool isDown}) {
     modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
     switch (key) {
       case ModifierKey.controlModifier:
@@ -324,7 +324,7 @@ class GLFWKeyHelper implements KeyHelper {
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
+  KeyboardSide getModifierSide(final ModifierKey key) {
     // Neither GLFW nor X11 provide a distinction between left and right
     // modifiers, so defaults to KeyboardSide.all.
     // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
@@ -332,12 +332,12 @@ class GLFWKeyHelper implements KeyHelper {
   }
 
   @override
-  LogicalKeyboardKey? numpadKey(int keyCode) {
+  LogicalKeyboardKey? numpadKey(final int keyCode) {
     return kGlfwNumpadMap[keyCode];
   }
 
   @override
-  LogicalKeyboardKey? logicalKey(int keyCode) {
+  LogicalKeyboardKey? logicalKey(final int keyCode) {
     return kGlfwToLogicalKey[keyCode];
   }
 
@@ -392,7 +392,7 @@ class GtkKeyHelper implements KeyHelper {
   @override
   String get debugToolkit => 'GTK';
 
-  int _mergeModifiers({required int modifiers, required int keyCode, required bool isDown}) {
+  int _mergeModifiers({required final int modifiers, required final int keyCode, required final bool isDown}) {
     // GTK Key codes for modifier keys.
     const int shiftLeftKeyCode = 0xffe1;
     const int shiftRightKeyCode = 0xffe2;
@@ -438,7 +438,7 @@ class GtkKeyHelper implements KeyHelper {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, int modifiers, {KeyboardSide side = KeyboardSide.any, required int keyCode, required bool isDown}) {
+  bool isModifierPressed(final ModifierKey key, int modifiers, {final KeyboardSide side = KeyboardSide.any, required final int keyCode, required final bool isDown}) {
     modifiers = _mergeModifiers(modifiers: modifiers, keyCode: keyCode, isDown: isDown);
     switch (key) {
       case ModifierKey.controlModifier:
@@ -462,7 +462,7 @@ class GtkKeyHelper implements KeyHelper {
   }
 
   @override
-  KeyboardSide getModifierSide(ModifierKey key) {
+  KeyboardSide getModifierSide(final ModifierKey key) {
     // Neither GTK nor X11 provide a distinction between left and right
     // modifiers, so defaults to KeyboardSide.all.
     // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
@@ -470,12 +470,12 @@ class GtkKeyHelper implements KeyHelper {
   }
 
   @override
-  LogicalKeyboardKey? numpadKey(int keyCode) {
+  LogicalKeyboardKey? numpadKey(final int keyCode) {
     return kGtkNumpadMap[keyCode];
   }
 
   @override
-  LogicalKeyboardKey? logicalKey(int keyCode) {
+  LogicalKeyboardKey? logicalKey(final int keyCode) {
     return kGtkToLogicalKey[keyCode];
   }
 

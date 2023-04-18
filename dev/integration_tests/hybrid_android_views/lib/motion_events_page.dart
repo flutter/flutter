@@ -17,11 +17,11 @@ import 'page.dart';
 const String kEventsFileName = 'touchEvents';
 
 class MotionEventsPage extends PageWidget {
-  const MotionEventsPage({Key? key})
+  const MotionEventsPage({final Key? key})
       : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'), key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MotionEventsBody();
   }
 }
@@ -45,7 +45,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   List<Map<String, dynamic>> embeddedViewEvents = <Map<String, dynamic>>[];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         SizedBox(
@@ -118,7 +118,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data) as List<dynamic>;
       final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
           .cast<Map<dynamic, dynamic>>()
-          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
+          .map<Map<String, dynamic>>((final Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
           .toList();
       await viewChannel!.invokeMethod<void>('pipeTouchEvents');
       print('replaying ${recordedEvents.length} motion events');
@@ -155,7 +155,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     channel.setMethodCallHandler(onMethodChannelCall);
   }
 
-  Future<void> saveRecordedEvents(ByteData data, BuildContext context) async {
+  Future<void> saveRecordedEvents(final ByteData data, final BuildContext context) async {
     if (await channel.invokeMethod<bool>('getStoragePermission') != true) {
       if (mounted) {
         showMessage(context, 'External storage permissions are required to save events');
@@ -179,14 +179,14 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     }
   }
 
-  void showMessage(BuildContext context, String message) {
+  void showMessage(final BuildContext context, final String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(message),
       duration: const Duration(seconds: 3),
     ));
   }
 
-  void onPlatformViewCreated(int id) {
+  void onPlatformViewCreated(final int id) {
     viewChannel = MethodChannel('simple_view/$id')
         ..setMethodCallHandler(onViewMethodChannelCall);
     driverDataHandler.registerHandler('run test').complete(playEventsFile);
@@ -199,7 +199,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     });
   }
 
-  Future<dynamic> onMethodChannelCall(MethodCall call) {
+  Future<dynamic> onMethodChannelCall(final MethodCall call) {
     switch (call.method) {
       case 'onTouch':
         final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
@@ -212,7 +212,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     return Future<dynamic>.value();
   }
 
-  Future<dynamic> onViewMethodChannelCall(MethodCall call) {
+  Future<dynamic> onViewMethodChannelCall(final MethodCall call) {
     switch (call.method) {
       case 'onTouch':
         final Map<dynamic, dynamic> map = call.arguments as Map<dynamic, dynamic>;
@@ -225,7 +225,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     return Future<dynamic>.value();
   }
 
-  Widget buildEventTile(BuildContext context, int index) {
+  Widget buildEventTile(final BuildContext context, final int index) {
     if (embeddedViewEvents.length > index) {
       return TouchEventDiff(
           flutterViewEvents[index], embeddedViewEvents[index]);
@@ -242,7 +242,7 @@ class TouchEventDiff extends StatelessWidget {
   final Map<String, dynamic> synthesizedEvent;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
 
     Color color;
     final String diff = diffMotionEvents(originalEvent, synthesizedEvent);
@@ -271,7 +271,7 @@ class TouchEventDiff extends StatelessWidget {
     );
   }
 
-  void prettyPrintEvent(Map<String, dynamic> event) {
+  void prettyPrintEvent(final Map<String, dynamic> event) {
     final StringBuffer buffer = StringBuffer();
     final int action = event['action'] as int;
     final int maskedAction = getActionMasked(action);

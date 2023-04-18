@@ -90,7 +90,7 @@ abstract final class Feedback {
   ///
   ///  * [wrapForTap] to trigger platform-specific feedback before executing a
   ///    [GestureTapCallback].
-  static Future<void> forTap(BuildContext context) async {
+  static Future<void> forTap(final BuildContext context) async {
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
@@ -114,7 +114,7 @@ abstract final class Feedback {
   ///
   ///  * [forTap] to just trigger the platform-specific feedback without wrapping
   ///    a [GestureTapCallback].
-  static GestureTapCallback? wrapForTap(GestureTapCallback? callback, BuildContext context) {
+  static GestureTapCallback? wrapForTap(final GestureTapCallback? callback, final BuildContext context) {
     if (callback == null) {
       return null;
     }
@@ -133,7 +133,7 @@ abstract final class Feedback {
   ///
   ///  * [wrapForLongPress] to trigger platform-specific feedback before
   ///    executing a [GestureLongPressCallback].
-  static Future<void> forLongPress(BuildContext context) {
+  static Future<void> forLongPress(final BuildContext context) {
     context.findRenderObject()!.sendSemanticsEvent(const LongPressSemanticsEvent());
     switch (_platform(context)) {
       case TargetPlatform.android:
@@ -158,7 +158,7 @@ abstract final class Feedback {
   ///
   ///  * [forLongPress] to just trigger the platform-specific feedback without
   ///    wrapping a [GestureLongPressCallback].
-  static GestureLongPressCallback? wrapForLongPress(GestureLongPressCallback? callback, BuildContext context) {
+  static GestureLongPressCallback? wrapForLongPress(final GestureLongPressCallback? callback, final BuildContext context) {
     if (callback == null) {
       return null;
     }
@@ -168,5 +168,5 @@ abstract final class Feedback {
     };
   }
 
-  static TargetPlatform _platform(BuildContext context) => Theme.of(context).platform;
+  static TargetPlatform _platform(final BuildContext context) => Theme.of(context).platform;
 }

@@ -12,7 +12,7 @@ Widget buildFrame() {
     textDirection: TextDirection.ltr,
     child: ListView(
       itemExtent: 290.0,
-      children: items.map<Widget>((int item) {
+      children: items.map<Widget>((final int item) {
         return Text('$item');
       }).toList(),
     ),
@@ -20,7 +20,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgets('Drag vertically', (WidgetTester tester) async {
+  testWidgets('Drag vertically', (final WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
 
     await tester.pump();
@@ -63,14 +63,14 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgets('Drag vertically', (WidgetTester tester) async {
+  testWidgets('Drag vertically', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           itemExtent: 290.0,
           padding: const EdgeInsets.only(top: 250.0),
-          children: items.map<Widget>((int item) {
+          children: items.map<Widget>((final int item) {
             return Text('$item');
           }).toList(),
         ),

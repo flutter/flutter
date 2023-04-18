@@ -12,11 +12,11 @@ import 'utils.dart';
 
 typedef SimulatorFunction = Future<void> Function(String deviceId);
 
-Future<String> fileType(String pathToBinary) {
+Future<String> fileType(final String pathToBinary) {
   return eval('file', <String>[pathToBinary]);
 }
 
-Future<String?> minPhoneOSVersion(String pathToBinary) async {
+Future<String?> minPhoneOSVersion(final String pathToBinary) async {
   final String loadCommands = await eval('otool', <String>[
     '-l',
     '-arch',
@@ -35,7 +35,7 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
   // sdk 15.2
   //  ...
   final List<String> lines = LineSplitter.split(loadCommands).toList();
-  lines.asMap().forEach((int index, String line) {
+  lines.asMap().forEach((final int index, final String line) {
     if (line.contains('LC_VERSION_MIN_IPHONEOS') && lines.length - index - 1 > 3) {
       final String versionLine = lines
           .skip(index - 1)
@@ -52,9 +52,9 @@ Future<String?> minPhoneOSVersion(String pathToBinary) async {
 ///
 /// Remember to call removeIOSimulator in the test teardown.
 Future<void> testWithNewIOSSimulator(
-  String deviceName,
-  SimulatorFunction testFunction, {
-  String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
+  final String deviceName,
+  final SimulatorFunction testFunction, {
+  final String deviceTypeId = 'com.apple.CoreSimulator.SimDeviceType.iPhone-11',
 }) async {
   // Xcode 11.4 simctl create makes the runtime argument optional, and defaults to latest.
   // TODO(jmagman): Remove runtime parsing when devicelab upgrades to Xcode 11.4 https://github.com/flutter/flutter/issues/54889
@@ -110,7 +110,7 @@ Future<void> testWithNewIOSSimulator(
 }
 
 /// Shuts down and deletes simulator with deviceId.
-Future<void> removeIOSimulator(String? deviceId) async {
+Future<void> removeIOSimulator(final String? deviceId) async {
   if (deviceId != null && deviceId != '') {
     await eval(
       'xcrun',
@@ -136,11 +136,11 @@ Future<void> removeIOSimulator(String? deviceId) async {
 }
 
 Future<bool> runXcodeTests({
-  required String platformDirectory,
-  required String destination,
-  required String testName,
-  String configuration = 'Release',
-  bool skipCodesign = false,
+  required final String platformDirectory,
+  required final String destination,
+  required final String testName,
+  final String configuration = 'Release',
+  final bool skipCodesign = false,
 }) async {
   final Map<String, String> environment = Platform.environment;
   String? developmentTeam;

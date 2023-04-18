@@ -17,13 +17,13 @@ import 'package:flutter_tools/src/base/file_system.dart';
 /// The only safe delegate types are those that do not call out to `dart:io`,
 /// like the [MemoryFileSystem].
 class FlutterIOOverrides extends io.IOOverrides {
-  FlutterIOOverrides({ FileSystem? fileSystem })
+  FlutterIOOverrides({ final FileSystem? fileSystem })
     : _fileSystemDelegate = fileSystem;
 
   final FileSystem? _fileSystemDelegate;
 
   @override
-  io.Directory createDirectory(String path) {
+  io.Directory createDirectory(final String path) {
     if (_fileSystemDelegate == null) {
       return super.createDirectory(path);
     }
@@ -31,7 +31,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  io.File createFile(String path) {
+  io.File createFile(final String path) {
     if (_fileSystemDelegate == null) {
       return super.createFile(path);
     }
@@ -39,7 +39,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  io.Link createLink(String path) {
+  io.Link createLink(final String path) {
     if (_fileSystemDelegate == null) {
       return super.createLink(path);
     }
@@ -47,7 +47,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  Stream<FileSystemEvent> fsWatch(String path, int events, bool recursive) {
+  Stream<FileSystemEvent> fsWatch(final String path, final int events, final bool recursive) {
     if (_fileSystemDelegate == null) {
       return super.fsWatch(path, events, recursive);
     }
@@ -63,7 +63,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  Future<FileSystemEntityType> fseGetType(String path, bool followLinks) {
+  Future<FileSystemEntityType> fseGetType(final String path, final bool followLinks) {
     if (_fileSystemDelegate == null) {
       return super.fseGetType(path, followLinks);
     }
@@ -71,7 +71,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  FileSystemEntityType fseGetTypeSync(String path, bool followLinks) {
+  FileSystemEntityType fseGetTypeSync(final String path, final bool followLinks) {
     if (_fileSystemDelegate == null) {
       return super.fseGetTypeSync(path, followLinks);
     }
@@ -79,7 +79,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  Future<bool> fseIdentical(String path1, String path2) {
+  Future<bool> fseIdentical(final String path1, final String path2) {
     if (_fileSystemDelegate == null) {
       return super.fseIdentical(path1, path2);
     }
@@ -87,7 +87,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  bool fseIdenticalSync(String path1, String path2) {
+  bool fseIdenticalSync(final String path1, final String path2) {
     if (_fileSystemDelegate == null) {
       return super.fseIdenticalSync(path1, path2);
     }
@@ -111,7 +111,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  void setCurrentDirectory(String path) {
+  void setCurrentDirectory(final String path) {
     if (_fileSystemDelegate == null) {
       return super.setCurrentDirectory(path);
     }
@@ -119,7 +119,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  Future<FileStat> stat(String path) {
+  Future<FileStat> stat(final String path) {
     if (_fileSystemDelegate == null) {
       return super.stat(path);
     }
@@ -127,7 +127,7 @@ class FlutterIOOverrides extends io.IOOverrides {
   }
 
   @override
-  FileStat statSync(String path) {
+  FileStat statSync(final String path) {
     if (_fileSystemDelegate == null) {
       return super.statSync(path);
     }

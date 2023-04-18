@@ -12,7 +12,7 @@ class LinearGradientExampleApp extends StatelessWidget {
   const LinearGradientExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(home: MoodyGradient());
   }
 }
@@ -21,7 +21,7 @@ class MoodyGradient extends StatelessWidget {
   const MoodyGradient({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Container(
         decoration: const BoxDecoration(

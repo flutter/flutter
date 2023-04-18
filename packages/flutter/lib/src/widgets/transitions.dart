@@ -90,14 +90,14 @@ abstract class AnimatedWidget extends StatefulWidget {
   /// Override this method to build widgets that depend on the state of the
   /// listenable (e.g., the current value of the animation).
   @protected
-  Widget build(BuildContext context);
+  Widget build(final BuildContext context);
 
   /// Subclasses typically do not override this method.
   @override
   State<AnimatedWidget> createState() => _AnimatedState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Listenable>('listenable', listenable));
   }
@@ -111,7 +111,7 @@ class _AnimatedState extends State<AnimatedWidget> {
   }
 
   @override
-  void didUpdateWidget(AnimatedWidget oldWidget) {
+  void didUpdateWidget(final AnimatedWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.listenable != oldWidget.listenable) {
       oldWidget.listenable.removeListener(_handleChange);
@@ -132,7 +132,7 @@ class _AnimatedState extends State<AnimatedWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.build(context);
+  Widget build(final BuildContext context) => widget.build(context);
 }
 
 /// Animates the position of a widget relative to its normal position.
@@ -172,7 +172,7 @@ class SlideTransition extends AnimatedWidget {
   /// The [position] argument must not be null.
   const SlideTransition({
     super.key,
-    required Animation<Offset> position,
+    required final Animation<Offset> position,
     this.transformHitTests = true,
     this.textDirection,
     this.child,
@@ -212,7 +212,7 @@ class SlideTransition extends AnimatedWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Offset offset = position.value;
     if (textDirection == TextDirection.rtl) {
       offset = Offset(-offset.dx, offset.dy);
@@ -253,7 +253,7 @@ class ScaleTransition extends AnimatedWidget {
   /// to [Alignment.center].
   const ScaleTransition({
     super.key,
-    required Animation<double> scale,
+    required final Animation<double> scale,
     this.alignment = Alignment.center,
     this.filterQuality,
     this.child,
@@ -286,7 +286,7 @@ class ScaleTransition extends AnimatedWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // The ImageFilter layer created by setting filterQuality will introduce
     // a saveLayer call. This is usually worthwhile when animating the layer,
     // but leaving it in the layer tree before the animation has started or after
@@ -334,7 +334,7 @@ class RotationTransition extends AnimatedWidget {
   /// The [turns] argument must not be null.
   const RotationTransition({
     super.key,
-    required Animation<double> turns,
+    required final Animation<double> turns,
     this.alignment = Alignment.center,
     this.filterQuality,
     this.child,
@@ -367,7 +367,7 @@ class RotationTransition extends AnimatedWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // The ImageFilter layer created by setting filterQuality will introduce
     // a saveLayer call. This is usually worthwhile when animating the layer,
     // but leaving it in the layer tree before the animation has started or after
@@ -434,7 +434,7 @@ class SizeTransition extends AnimatedWidget {
   const SizeTransition({
     super.key,
     this.axis = Axis.vertical,
-    required Animation<double> sizeFactor,
+    required final Animation<double> sizeFactor,
     this.axisAlignment = 0.0,
     this.child,
   }) : super(listenable: sizeFactor);
@@ -472,7 +472,7 @@ class SizeTransition extends AnimatedWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final AlignmentDirectional alignment;
     if (axis == Axis.vertical) {
       alignment = AlignmentDirectional(-1.0, axisAlignment);
@@ -543,7 +543,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  RenderAnimatedOpacity createRenderObject(BuildContext context) {
+  RenderAnimatedOpacity createRenderObject(final BuildContext context) {
     return RenderAnimatedOpacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
@@ -551,14 +551,14 @@ class FadeTransition extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
     properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
@@ -592,7 +592,7 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
     super.key,
     required this.opacity,
     this.alwaysIncludeSemantics = false,
-    Widget? sliver,
+    final Widget? sliver,
   }) : super(child: sliver);
 
   /// The animation that controls the opacity of the sliver child.
@@ -614,7 +614,7 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   final bool alwaysIncludeSemantics;
 
   @override
-  RenderSliverAnimatedOpacity createRenderObject(BuildContext context) {
+  RenderSliverAnimatedOpacity createRenderObject(final BuildContext context) {
     return RenderSliverAnimatedOpacity(
       opacity: opacity,
       alwaysIncludeSemantics: alwaysIncludeSemantics,
@@ -622,14 +622,14 @@ class SliverFadeTransition extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverAnimatedOpacity renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderSliverAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
     properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
@@ -651,7 +651,7 @@ class RelativeRectTween extends Tween<RelativeRect> {
 
   /// Returns the value this variable has at the given animation clock value.
   @override
-  RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t)!;
+  RelativeRect lerp(final double t) => RelativeRect.lerp(begin, end, t)!;
 }
 
 /// Animated version of [Positioned] which takes a specific
@@ -691,7 +691,7 @@ class PositionedTransition extends AnimatedWidget {
   /// The [rect] argument must not be null.
   const PositionedTransition({
     super.key,
-    required Animation<RelativeRect> rect,
+    required final Animation<RelativeRect> rect,
     required this.child,
   }) : super(listenable: rect);
 
@@ -704,7 +704,7 @@ class PositionedTransition extends AnimatedWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Positioned.fromRelativeRect(
       rect: rect.value,
       child: child,
@@ -749,7 +749,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// [size]. Both [rect] and [size] must not be null.
   const RelativePositionedTransition({
     super.key,
-    required Animation<Rect?> rect,
+    required final Animation<Rect?> rect,
     required this.size,
     required this.child,
   }) : super(listenable: rect);
@@ -774,7 +774,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final RelativeRect offsets = RelativeRect.fromSize(rect.value ?? Rect.zero, size);
     return Positioned(
       top: offsets.top,
@@ -836,7 +836,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DecoratedBox(
       decoration: decoration.value,
       position: position,
@@ -881,7 +881,7 @@ class AlignTransition extends AnimatedWidget {
   ///  * [Align.new].
   const AlignTransition({
     super.key,
-    required Animation<AlignmentGeometry> alignment,
+    required final Animation<AlignmentGeometry> alignment,
     required this.child,
     this.widthFactor,
     this.heightFactor,
@@ -902,7 +902,7 @@ class AlignTransition extends AnimatedWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Align(
       alignment: alignment.value,
       widthFactor: widthFactor,
@@ -933,7 +933,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   /// the widget.
   const DefaultTextStyleTransition({
     super.key,
-    required Animation<TextStyle> style,
+    required final Animation<TextStyle> style,
     required this.child,
     this.textAlign,
     this.softWrap = true,
@@ -967,7 +967,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: style.value,
       textAlign: textAlign,
@@ -1084,7 +1084,7 @@ class ListenableBuilder extends AnimatedWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) => builder(context, child);
+  Widget build(final BuildContext context) => builder(context, child);
 }
 
 /// A general-purpose widget for building animations.
@@ -1140,7 +1140,7 @@ class AnimatedBuilder extends ListenableBuilder {
   /// The [animation] and [builder] arguments are required.
   const AnimatedBuilder({
     super.key,
-    required Listenable animation,
+    required final Listenable animation,
     required super.builder,
     super.child,
   }) : super(listenable: animation);

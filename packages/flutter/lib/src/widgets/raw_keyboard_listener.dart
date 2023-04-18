@@ -70,7 +70,7 @@ class RawKeyboardListener extends StatefulWidget {
   State<RawKeyboardListener> createState() => _RawKeyboardListenerState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
   }
@@ -84,7 +84,7 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   }
 
   @override
-  void didUpdateWidget(RawKeyboardListener oldWidget) {
+  void didUpdateWidget(final RawKeyboardListener oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
@@ -125,12 +125,12 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
     _listening = false;
   }
 
-  void _handleRawKeyEvent(RawKeyEvent event) {
+  void _handleRawKeyEvent(final RawKeyEvent event) {
     widget.onKey?.call(event);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Focus(
       focusNode: widget.focusNode,
       autofocus: widget.autofocus,

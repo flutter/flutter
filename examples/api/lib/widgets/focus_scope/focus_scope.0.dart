@@ -12,7 +12,7 @@ class FocusScopeExampleApp extends StatelessWidget {
   const FocusScopeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FocusScopeExample(),
     );
@@ -39,7 +39,7 @@ class Pane extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       color: backgroundColor,
       child: Stack(
@@ -82,7 +82,7 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
     super.dispose();
   }
 
-  Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+  Widget _buildStack(final BuildContext context, final BoxConstraints constraints) {
     final Size stackSize = constraints.biggest;
     return Stack(
       fit: StackFit.expand,
@@ -154,7 +154,7 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Use a LayoutBuilder so that we can base the size of the stack on the size
     // of its parent.
     return LayoutBuilder(builder: _buildStack);

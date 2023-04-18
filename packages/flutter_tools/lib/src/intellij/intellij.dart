@@ -38,7 +38,7 @@ import '../doctor_validator.dart';
 ///     plugin versions.
 class IntelliJPlugins {
   IntelliJPlugins(this.pluginsPath, {
-    required FileSystem fileSystem
+    required final FileSystem fileSystem
   }) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
@@ -49,11 +49,11 @@ class IntelliJPlugins {
   static const String kIntellijFlutterPluginUrl = 'https://plugins.jetbrains.com/plugin/9212-flutter';
 
   void validatePackage(
-    List<ValidationMessage> messages,
-    List<String> packageNames,
-    String title,
-    String url, {
-    Version? minVersion,
+    final List<ValidationMessage> messages,
+    final List<String> packageNames,
+    final String title,
+    final String url, {
+    final Version? minVersion,
   }) {
     for (final String packageName in packageNames) {
       if (!_hasPackage(packageName)) {
@@ -79,7 +79,7 @@ class IntelliJPlugins {
     ));
   }
 
-  bool _hasPackage(String packageName) {
+  bool _hasPackage(final String packageName) {
     final String packagePath = _fileSystem.path.join(pluginsPath, packageName);
     if (packageName.endsWith('.jar')) {
       return _fileSystem.isFileSync(packagePath);
@@ -87,7 +87,7 @@ class IntelliJPlugins {
     return _fileSystem.isDirectorySync(packagePath);
   }
 
-  ArchiveFile? _findPluginXml(String packageName) {
+  ArchiveFile? _findPluginXml(final String packageName) {
     final List<File> mainJarFileList = <File>[];
     if (packageName.endsWith('.jar')) {
       // package exists (checked in _hasPackage)
@@ -103,7 +103,7 @@ class IntelliJPlugins {
           .directory(_fileSystem.path.join(pluginsPath, packageName, 'lib'))
           .listSync()
           .whereType<File>()
-          .where((File file) {
+          .where((final File file) {
             final String fileExt= _fileSystem.path.extension(file.path);
             return fileExt == '.jar' || fileExt == '.zip';
           })
@@ -113,7 +113,7 @@ class IntelliJPlugins {
         return null;
       }
       // Prefer file with the same suffix as the package name
-      pluginJarFiles.sort((File a, File b) {
+      pluginJarFiles.sort((final File a, final File b) {
         final bool aStartWithPackageName =
             a.basename.toLowerCase().startsWith(packageName.toLowerCase());
         final bool bStartWithPackageName =
@@ -136,7 +136,7 @@ class IntelliJPlugins {
     return null;
   }
 
-  String? _readPackageVersion(String packageName) {
+  String? _readPackageVersion(final String packageName) {
     try {
       final ArchiveFile? archiveFile = _findPluginXml(packageName);
       if (archiveFile == null) {

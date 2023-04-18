@@ -14,7 +14,7 @@ class _MockKey {
   final String payload;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is _MockKey && other.payload == payload;
   }
 }

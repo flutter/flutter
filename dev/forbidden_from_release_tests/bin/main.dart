@@ -15,7 +15,7 @@ import 'package:vm_snapshot_analysis/v8_profile.dart';
 
 const FileSystem fs = LocalFileSystem();
 
-Future<void> main(List<String> args) async {
+Future<void> main(final List<String> args) async {
   final Options options = Options.fromArgs(args);
   final String json = options.snapshot.readAsStringSync();
   final Snapshot snapshot = Snapshot.fromJson(jsonDecode(json) as Map<String, dynamic>);
@@ -59,7 +59,7 @@ Future<void> main(List<String> args) async {
   print('No forbidden types found.');
 }
 
-Future<bool> validateType(String forbiddenType, File packageConfigFile) async {
+Future<bool> validateType(final String forbiddenType, final File packageConfigFile) async {
   if (!forbiddenType.startsWith('package:')) {
     print('Warning: Unable to validate $forbiddenType. Continuing.');
     return true;
@@ -104,7 +104,7 @@ class Options {
     required this.forbiddenTypes,
   });
 
-  factory Options.fromArgs(List<String> args) {
+  factory Options.fromArgs(final List<String> args) {
     final ArgParser argParser = ArgParser();
     argParser.addOption(
       'snapshot',
@@ -142,7 +142,7 @@ class Options {
   final File packageConfig;
   final Set<String> forbiddenTypes;
 
-  static File _getFileArg(ArgResults argResults, String argName) {
+  static File _getFileArg(final ArgResults argResults, final String argName) {
     final File result = fs.file(argResults[argName] as String);
     if (!result.existsSync()) {
       print('The $argName file at $result could not be found.');

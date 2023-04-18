@@ -43,7 +43,7 @@ class BadBaselineRenderBox extends RenderBox {
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(final TextBaseline baseline) {
     throw Exception();
   }
 }
@@ -87,7 +87,7 @@ void main() {
       ),
     );
     expect(
-      result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+      result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
       'RenderBox subclasses need to either override performLayout() to set a '
       'size and lay out any children, or, set sizedByParent to true so that '
       'performResize() sizes the render object.',
@@ -142,7 +142,7 @@ void main() {
     );
 
     expect(
-      result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+      result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
       'The default applyPaintTransform implementation provided by RenderBox '
       'assumes that the children all use BoxParentData objects for their '
       'parentData field. Since RenderPadding does not in fact use that '
@@ -182,7 +182,7 @@ void main() {
           '   set its size in performLayout().\n',
         ),
       );
-      expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint), isEmpty);
+      expect(result.diagnostics.where((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint), isEmpty);
     }
     {
       late FlutterError result;
@@ -223,7 +223,7 @@ void main() {
           '   approach should be used.\n',
         ),
       );
-      expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).length, 2);
+      expect(result.diagnostics.where((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).length, 2);
     }
   });
 
@@ -415,7 +415,7 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform: (BoxConstraints constraints) => const BoxConstraints(maxHeight: -1, minHeight: 200),
+        constraintsTransform: (final BoxConstraints constraints) => const BoxConstraints(maxHeight: -1, minHeight: 200),
         child: child,
       );
 
@@ -442,7 +442,7 @@ void main() {
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
               textDirection: TextDirection.ltr,
-              constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              constraintsTransform: (final BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
               clipBehavior: clip!,
               child: RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(
@@ -455,7 +455,7 @@ void main() {
             box = RenderConstraintsTransformBox(
               alignment: Alignment.center,
               textDirection: TextDirection.ltr,
-              constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+              constraintsTransform: (final BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
               child: RenderConstrainedBox(
                 additionalConstraints: const BoxConstraints.tightFor(
                   width: double.maxFinite,
@@ -489,7 +489,7 @@ void main() {
       final RenderConstraintsTransformBox box = RenderConstraintsTransformBox(
         alignment: Alignment.center,
         textDirection: TextDirection.ltr,
-        constraintsTransform: (BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
+        constraintsTransform: (final BoxConstraints constraints) => constraints.copyWith(maxWidth: double.infinity),
         child: child,
       );
 
@@ -538,7 +538,7 @@ void main() {
         ),
       );
       expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another height before passing it to '
         'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
@@ -566,7 +566,7 @@ void main() {
         ),
       );
       expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another width before passing it to '
         'getMinIntrinsicHeight, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
@@ -594,7 +594,7 @@ void main() {
         ),
       );
       expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another height before passing it to '
         'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
@@ -622,7 +622,7 @@ void main() {
         ),
       );
       expect(
-        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
         'If you perform computations on another width before passing it to '
         'getMaxIntrinsicHeight, consider using math.max() or double.clamp() '
         'to force the value into the valid range.',
@@ -783,7 +783,7 @@ void main() {
       bool isHit = result.addWithPaintTransform(
         transform: null,
         position: Offset.zero,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -796,7 +796,7 @@ void main() {
       isHit = result.addWithPaintTransform(
         transform: Matrix4.translationValues(20, 30, 0),
         position: Offset.zero,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -810,7 +810,7 @@ void main() {
       isHit = result.addWithPaintTransform(
         transform: null,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return false;
@@ -823,7 +823,7 @@ void main() {
       isHit = result.addWithPaintTransform(
         transform: Matrix4.identity(),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -836,7 +836,7 @@ void main() {
       isHit = result.addWithPaintTransform(
         transform: Matrix4.translationValues(20, 30, 0),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -849,7 +849,7 @@ void main() {
       isHit = result.addWithPaintTransform(
         transform: MatrixUtils.forceToPoint(position), // cannot be inverted
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -867,7 +867,7 @@ void main() {
       bool isHit = result.addWithPaintOffset(
         offset: null,
         position: Offset.zero,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -880,7 +880,7 @@ void main() {
       isHit = result.addWithPaintOffset(
         offset: const Offset(55, 32),
         position: Offset.zero,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -894,7 +894,7 @@ void main() {
       isHit = result.addWithPaintOffset(
         offset: null,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return false;
@@ -907,7 +907,7 @@ void main() {
       isHit = result.addWithPaintOffset(
         offset: Offset.zero,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -920,7 +920,7 @@ void main() {
       isHit = result.addWithPaintOffset(
         offset: const Offset(20, 30),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -938,7 +938,7 @@ void main() {
       bool isHit = result.addWithRawTransform(
         transform: null,
         position: Offset.zero,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -951,7 +951,7 @@ void main() {
       isHit = result.addWithRawTransform(
         transform: Matrix4.translationValues(20, 30, 0),
         position: Offset.zero,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -965,7 +965,7 @@ void main() {
       isHit = result.addWithRawTransform(
         transform: null,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return false;
@@ -978,7 +978,7 @@ void main() {
       isHit = result.addWithRawTransform(
         transform: Matrix4.identity(),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -991,7 +991,7 @@ void main() {
       isHit = result.addWithRawTransform(
         transform: Matrix4.translationValues(20, 30, 0),
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           expect(result, isNotNull);
           positions.add(position);
           return true;
@@ -1008,7 +1008,7 @@ void main() {
 
       bool isHit = result.addWithOutOfBandPosition(
         paintOffset: const Offset(20, 30),
-        hitTest: (BoxHitTestResult result) {
+        hitTest: (final BoxHitTestResult result) {
           expect(result, isNotNull);
           ran = true;
           return true;
@@ -1020,7 +1020,7 @@ void main() {
 
       isHit = result.addWithOutOfBandPosition(
         paintTransform: Matrix4.translationValues(20, 30, 0),
-        hitTest: (BoxHitTestResult result) {
+        hitTest: (final BoxHitTestResult result) {
           expect(result, isNotNull);
           ran = true;
           return true;
@@ -1032,7 +1032,7 @@ void main() {
 
       isHit = result.addWithOutOfBandPosition(
         rawTransform: Matrix4.translationValues(20, 30, 0),
-        hitTest: (BoxHitTestResult result) {
+        hitTest: (final BoxHitTestResult result) {
           expect(result, isNotNull);
           ran = true;
           return true;
@@ -1044,7 +1044,7 @@ void main() {
 
       isHit = result.addWithOutOfBandPosition(
         rawTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
-        hitTest: (BoxHitTestResult result) {
+        hitTest: (final BoxHitTestResult result) {
           expect(result, isNotNull);
           ran = true;
           return true;
@@ -1059,13 +1059,13 @@ void main() {
         () {
           isHit = result.addWithOutOfBandPosition(
             paintTransform: MatrixUtils.forceToPoint(Offset.zero), // cannot be inverted
-            hitTest: (BoxHitTestResult result) {
+            hitTest: (final BoxHitTestResult result) {
               fail('non-invertible transform should be caught');
             },
           );
         },
         throwsA(isAssertionError.having(
-          (AssertionError error) => error.message,
+          (final AssertionError error) => error.message,
           'message',
           'paintTransform must be invertible.',
         )),
@@ -1075,13 +1075,13 @@ void main() {
       expect(
         () {
           isHit = result.addWithOutOfBandPosition(
-            hitTest: (BoxHitTestResult result) {
+            hitTest: (final BoxHitTestResult result) {
               fail('addWithOutOfBandPosition should need some transformation of some sort');
             },
           );
         },
         throwsA(isAssertionError.having(
-          (AssertionError error) => error.message,
+          (final AssertionError error) => error.message,
           'message',
           'Exactly one transform or offset argument must be provided.',
         )),
@@ -1122,7 +1122,7 @@ void main() {
           ),
         );
         expect(
-          result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'If you are trying to perform a hit test during the layout phase '
           'itself, make sure you only hit test nodes that have completed '
           "layout (e.g. the node's children, after their layout() method has "
@@ -1159,7 +1159,7 @@ void main() {
           ),
         );
         expect(
-          result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          result.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
           'A RenderBox object must have an explicit size before it can be '
           'hit-tested. Make sure that the RenderBox in question sets its '
           'size during layout.',
@@ -1182,7 +1182,7 @@ void main() {
   test('Error message when size has not been set in RenderBox performLayout should be well versed', () {
     late FlutterErrorDetails errorDetails;
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       errorDetails = details;
     };
     try {
@@ -1231,11 +1231,11 @@ void main() {
 
 class _DummyHitTestTarget implements HitTestTarget {
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     // Nothing to do.
   }
 }
 
 class MyHitTestResult extends HitTestResult {
-  void publicPushTransform(Matrix4 transform) => pushTransform(transform);
+  void publicPushTransform(final Matrix4 transform) => pushTransform(transform);
 }

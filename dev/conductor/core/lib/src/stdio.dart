@@ -23,7 +23,7 @@ abstract class Stdio {
   /// fails in some way. Errors are typically followed shortly by exiting the
   /// app with a non-zero exit status.
   @mustCallSuper
-  void printError(String message) {
+  void printError(final String message) {
     logs.add('[error] $message');
   }
 
@@ -32,7 +32,7 @@ abstract class Stdio {
   /// Display a warning `message` to the user on stderr. Print warnings if there
   /// is important information to convey to the user that is not fatal.
   @mustCallSuper
-  void printWarning(String message) {
+  void printWarning(final String message) {
     logs.add('[warning] $message');
   }
 
@@ -41,7 +41,7 @@ abstract class Stdio {
   /// Displays normal output on stdout. This should be used for things like
   /// progress messages, success messages, or just normal command output.
   @mustCallSuper
-  void printStatus(String message) {
+  void printStatus(final String message) {
     logs.add('[status] $message');
   }
 
@@ -50,13 +50,13 @@ abstract class Stdio {
   /// Use this for verbose tracing output. Users can turn this output on in order
   /// to help diagnose issues.
   @mustCallSuper
-  void printTrace(String message) {
+  void printTrace(final String message) {
     logs.add('[trace] $message');
   }
 
   /// Write the `message` string to STDOUT without a trailing newline.
   @mustCallSuper
-  void write(String message) {
+  void write(final String message) {
     logs.add('[write] $message');
   }
 
@@ -83,25 +83,25 @@ class VerboseStdio extends Stdio {
   final io.Stdin stdin;
 
   @override
-  void printError(String message) {
+  void printError(final String message) {
     super.printError(message);
     stderr.writeln(message);
   }
 
   @override
-  void printStatus(String message) {
+  void printStatus(final String message) {
     super.printStatus(message);
     stdout.writeln(message);
   }
 
   @override
-  void printTrace(String message) {
+  void printTrace(final String message) {
     super.printTrace(message);
     stdout.writeln(message);
   }
 
   @override
-  void write(String message) {
+  void write(final String message) {
     super.write(message);
     stdout.write(message);
   }

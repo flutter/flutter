@@ -32,7 +32,7 @@ class ObserverList<T> extends Iterable<T> {
   /// Adds an item to the end of this list.
   ///
   /// This operation has constant time complexity.
-  void add(T item) {
+  void add(final T item) {
     _isDirty = true;
     _list.add(item);
   }
@@ -42,7 +42,7 @@ class ObserverList<T> extends Iterable<T> {
   /// This is O(N) in the number of items in the list.
   ///
   /// Returns whether the item was present in the list.
-  bool remove(T item) {
+  bool remove(final T item) {
     _isDirty = true;
     _set.clear(); // Clear the set so that we don't leak items.
     return _list.remove(item);
@@ -56,7 +56,7 @@ class ObserverList<T> extends Iterable<T> {
   }
 
   @override
-  bool contains(Object? element) {
+  bool contains(final Object? element) {
     if (_list.length < 3) {
       return _list.contains(element);
     }
@@ -79,7 +79,7 @@ class ObserverList<T> extends Iterable<T> {
   bool get isNotEmpty => _list.isNotEmpty;
 
   @override
-  List<T> toList({bool growable = true}) {
+  List<T> toList({final bool growable = true}) {
     return _list.toList(growable: growable);
   }
 }
@@ -104,7 +104,7 @@ class HashedObserverList<T> extends Iterable<T> {
   /// Adds an item to the end of this list.
   ///
   /// This has constant time complexity.
-  void add(T item) {
+  void add(final T item) {
     _map[item] = (_map[item] ?? 0) + 1;
   }
 
@@ -113,7 +113,7 @@ class HashedObserverList<T> extends Iterable<T> {
   /// This operation has constant time complexity.
   ///
   /// Returns whether the item was present in the list.
-  bool remove(T item) {
+  bool remove(final T item) {
     final int? value = _map[item];
     if (value == null) {
       return false;
@@ -127,7 +127,7 @@ class HashedObserverList<T> extends Iterable<T> {
   }
 
   @override
-  bool contains(Object? element) => _map.containsKey(element);
+  bool contains(final Object? element) => _map.containsKey(element);
 
   @override
   Iterator<T> get iterator => _map.keys.iterator;

@@ -55,7 +55,7 @@ class NavigationToolbar extends StatelessWidget {
   final double middleSpacing;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
     return CustomMultiChildLayout(
@@ -98,7 +98,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   final TextDirection textDirection;
 
   @override
-  void performLayout(Size size) {
+  void performLayout(final Size size) {
     double leadingWidth = 0.0;
     double trailingWidth = 0.0;
 
@@ -166,7 +166,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_ToolbarLayout oldDelegate) {
+  bool shouldRelayout(final _ToolbarLayout oldDelegate) {
     return oldDelegate.centerMiddle != centerMiddle
         || oldDelegate.middleSpacing != middleSpacing
         || oldDelegate.textDirection != textDirection;

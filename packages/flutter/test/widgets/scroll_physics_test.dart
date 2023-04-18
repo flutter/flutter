@@ -14,7 +14,7 @@ class TestScrollPhysics extends ScrollPhysics {
   final String name;
 
   @override
-  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  TestScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return TestScrollPhysics(
       name: name,
       parent: parent?.applyTo(ancestor) ?? ancestor!,
@@ -67,7 +67,7 @@ void main() {
     const ScrollPhysics page = PageScrollPhysics();
     const ScrollPhysics bounceDesktop = BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast);
 
-    String types(ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
+    String types(final ScrollPhysics? value) => value!.parent == null ? '${value.runtimeType}' : '${value.runtimeType} ${types(value.parent)}';
 
     expect(
       types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
@@ -96,7 +96,7 @@ void main() {
 
     expect(
       bounceDesktop.applyTo(always),
-      (BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast
+      (final BouncingScrollPhysics x) => x.decelerationRate == ScrollDecelerationRate.fast
     );
   });
 
@@ -339,20 +339,20 @@ FlutterError
     }
   });
 
-  testWidgets('PageScrollPhysics work with NestedScrollView', (WidgetTester tester) async {
+  testWidgets('PageScrollPhysics work with NestedScrollView', (final WidgetTester tester) async {
     // Regression test for: https://github.com/flutter/flutter/issues/47850
     await tester.pumpWidget(Material(
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: NestedScrollView(
           physics: const PageScrollPhysics(),
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
             return <Widget>[
               SliverToBoxAdapter(child: Container(height: 300, color: Colors.blue)),
             ];
           },
           body: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return Text('Index $index');
             },
             itemCount: 100,

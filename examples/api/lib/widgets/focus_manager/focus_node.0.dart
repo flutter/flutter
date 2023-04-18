@@ -13,7 +13,7 @@ class FocusNodeExampleApp extends StatelessWidget {
   const FocusNodeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('FocusNode Sample')),
@@ -52,7 +52,7 @@ class _ColorfulButtonState extends State<ColorfulButton> {
     }
   }
 
-  KeyEventResult _handleKeyPress(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyPress(final FocusNode node, final RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       debugPrint('Focus node ${node.debugLabel} got key event: ${event.logicalKey}');
       if (event.logicalKey == LogicalKeyboardKey.keyR) {
@@ -87,7 +87,7 @@ class _ColorfulButtonState extends State<ColorfulButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     _nodeAttachment.reparent();
     return GestureDetector(
       onTap: () {
@@ -114,7 +114,7 @@ class FocusNodeExample extends StatelessWidget {
   const FocusNodeExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return DefaultTextStyle(
       style: textTheme.headlineMedium!,

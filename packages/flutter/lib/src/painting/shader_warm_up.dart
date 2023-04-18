@@ -75,7 +75,7 @@ abstract class ShaderWarmUp {
   /// Flutter DevTools timeline to see which Skia draw operations are commonly used,
   /// and which shader compilations are causing jank.
   @protected
-  Future<void> warmUpOnCanvas(ui.Canvas canvas);
+  Future<void> warmUpOnCanvas(final ui.Canvas canvas);
 
   /// Construct an offscreen image of [size], and execute [warmUpOnCanvas] on a
   /// canvas associated with that image.

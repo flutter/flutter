@@ -12,7 +12,7 @@ class SliderApp extends StatelessWidget {
   const SliderApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: SliderExample(),
     );
@@ -31,7 +31,7 @@ class _SliderExampleState extends State<SliderExample> {
   double _currentSliderSecondaryValue = 0.5;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Slider')),
       body: Column(
@@ -41,7 +41,7 @@ class _SliderExampleState extends State<SliderExample> {
             value: _currentSliderPrimaryValue,
             secondaryTrackValue: _currentSliderSecondaryValue,
             label: _currentSliderPrimaryValue.round().toString(),
-            onChanged: (double value) {
+            onChanged: (final double value) {
               setState(() {
                 _currentSliderPrimaryValue = value;
               });
@@ -50,7 +50,7 @@ class _SliderExampleState extends State<SliderExample> {
           Slider(
             value: _currentSliderSecondaryValue,
             label: _currentSliderSecondaryValue.round().toString(),
-            onChanged: (double value) {
+            onChanged: (final double value) {
               setState(() {
                 _currentSliderSecondaryValue = value;
               });

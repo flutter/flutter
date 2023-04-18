@@ -12,7 +12,7 @@ class ShowSnackBarExampleApp extends StatelessWidget {
   const ShowSnackBarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldMessengerState Sample')),
@@ -28,7 +28,7 @@ class ShowSnackBarExample extends StatelessWidget {
   const ShowSnackBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return OutlinedButton(
       onPressed: () {
         ScaffoldMessenger.of(context).showSnackBar(

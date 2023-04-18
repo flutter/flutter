@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/radio_list_tile/radio_list_tile.1.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Radio aligns appropriately', (WidgetTester tester) async {
+  testWidgets('Radio aligns appropriately', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RadioListTileApp(),
     );
@@ -33,7 +33,7 @@ void main() {
     expect(radioTopLeft - tileTopLeft, const Offset(16.0, 8.0));
   });
 
-  testWidgets('Radios can be checked', (WidgetTester tester) async {
+  testWidgets('Radios can be checked', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RadioListTileApp(),
     );

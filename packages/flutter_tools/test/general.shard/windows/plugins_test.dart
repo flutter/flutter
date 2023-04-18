@@ -51,6 +51,6 @@ void main() {
   });
 }
 
-void setUpProject(FileSystem fileSystem) {
+void setUpProject(final FileSystem fileSystem) {
   fileSystem.file('pubspec.yaml').createSync();
 }

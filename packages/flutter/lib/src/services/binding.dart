@@ -40,7 +40,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     _restorationManager = createRestorationManager();
     _initKeyboard();
     initLicenses();
-    SystemChannels.system.setMessageHandler((dynamic message) => handleSystemMessage(message as Object));
+    SystemChannels.system.setMessageHandler((final dynamic message) => handleSystemMessage(message as Object));
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.platform.setMethodCallHandler(_handlePlatformMessage);
     TextInput.ensureInitialized();
@@ -143,7 +143,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// Other bindings may override this to respond to incoming system messages.
   @protected
   @mustCallSuper
-  Future<void> handleSystemMessage(Object systemMessage) async {
+  Future<void> handleSystemMessage(final Object systemMessage) async {
     final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
     final String type = message['type'] as String;
     switch (type) {
@@ -189,7 +189,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   }
 
   // This is run in another isolate created by _addLicenses above.
-  static List<LicenseEntry> _parseLicenses(String rawLicenses) {
+  static List<LicenseEntry> _parseLicenses(final String rawLicenses) {
     final String licenseSeparator = '\n${'-' * 80}\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
     final List<String> licenses = rawLicenses.split(licenseSeparator);
@@ -215,7 +215,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       registerStringServiceExtension(
         name: ServicesServiceExtensions.evict.name,
         getter: () async => '',
-        setter: (String value) async {
+        setter: (final String value) async {
           evict(value);
         },
       );
@@ -229,7 +229,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// that have changed on disk get cleared from caches.
   @protected
   @mustCallSuper
-  void evict(String asset) {
+  void evict(final String asset) {
     rootBundle.evict(asset);
   }
 
@@ -257,12 +257,12 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }
   }
 
-  Future<String?> _handleLifecycleMessage(String? message) async {
+  Future<String?> _handleLifecycleMessage(final String? message) async {
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message!)!);
     return null;
   }
 
-  Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
+  Future<dynamic> _handlePlatformMessage(final MethodCall methodCall) async {
     final String method = methodCall.method;
     assert(method == 'SystemChrome.systemUIChange' || method == 'System.requestAppExit');
     switch (method) {
@@ -276,7 +276,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     }
   }
 
-  static AppLifecycleState? _parseAppLifecycleMessage(String message) {
+  static AppLifecycleState? _parseAppLifecycleMessage(final String message) {
     switch (message) {
       case 'AppLifecycleState.resumed':
         return AppLifecycleState.resumed;
@@ -355,7 +355,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   /// * [WidgetsBindingObserver.didRequestAppExit] for a handler you can
   ///   override on a [WidgetsBindingObserver] to receive exit requests.
   @mustCallSuper
-  Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
+  Future<ui.AppExitResponse> exitApplication(final ui.AppExitType exitType, [final int exitCode = 0]) async {
     final Map<String, Object?>? result = await SystemChannels.platform.invokeMethod<Map<String, Object?>>(
       'System.exitApplication',
       <String, Object?>{'type': exitType.name, 'exitCode': exitCode},
@@ -410,7 +410,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   ///   * [SystemChrome.setEnabledSystemUIMode], which specifies the
   ///     [SystemUiMode] to have visible when the application is running.
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
-  void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
+  void setSystemUiChangeCallback(final SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
 }
@@ -430,11 +430,11 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   Future<void> handlePlatformMessage(
-    String channel,
-    ByteData? message,
-    ui.PlatformMessageResponseCallback? callback,
+    final String channel,
+    final ByteData? message,
+    final ui.PlatformMessageResponseCallback? callback,
   ) async {
-    ui.channelBuffers.push(channel, message, (ByteData? data) {
+    ui.channelBuffers.push(channel, message, (final ByteData? data) {
       if (callback != null) {
         callback(data);
       }
@@ -442,7 +442,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  Future<ByteData?> send(String channel, ByteData? message) {
+  Future<ByteData?> send(final String channel, final ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
     // ui.PlatformDispatcher.instance is accessed directly instead of using
     // ServicesBinding.instance.platformDispatcher because this method might be
@@ -453,7 +453,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     // access at this location seems to be the least bad option.
     // TODO(ianh): Use ServicesBinding.instance once we have better diagnostics
     // on that getter.
-    ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (ByteData? reply) {
+    ui.PlatformDispatcher.instance.sendPlatformMessage(channel, message, (final ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -469,11 +469,11 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  void setMessageHandler(String channel, MessageHandler? handler) {
+  void setMessageHandler(final String channel, final MessageHandler? handler) {
     if (handler == null) {
       ui.channelBuffers.clearListener(channel);
     } else {
-      ui.channelBuffers.setListener(channel, (ByteData? data, ui.PlatformMessageResponseCallback callback) async {
+      ui.channelBuffers.setListener(channel, (final ByteData? data, final ui.PlatformMessageResponseCallback callback) async {
         ByteData? response;
         try {
           response = await handler(data);

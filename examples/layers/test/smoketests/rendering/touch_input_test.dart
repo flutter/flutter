@@ -11,7 +11,7 @@ import '../../../rendering/touch_input.dart' as demo;
 
 void main() {
   test('layers smoketest for rendering/touch_input.dart', () {
-    FlutterError.onError = (FlutterErrorDetails details) { throw details.exception; };
+    FlutterError.onError = (final FlutterErrorDetails details) { throw details.exception; };
     demo.main();
     expect(SchedulerBinding.instance.hasScheduledFrame, true);
   });

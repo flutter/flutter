@@ -25,7 +25,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// Errors caught between frames will cause the test to fail unless
   /// [FlutterError.onError] has been overridden.
   TestRenderingFlutterBinding({ this.onErrors }) {
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       FlutterError.dumpErrorToConsole(details);
       Zone.current.parent!.handleUncaughtError(details.exception, details.stack!);
     };
@@ -48,7 +48,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   /// Creates and initializes the binding. This function is
   /// idempotent; calling it a second time will just return the
   /// previously-created instance.
-  static TestRenderingFlutterBinding ensureInitialized({ VoidCallback? onErrors }) {
+  static TestRenderingFlutterBinding ensureInitialized({ final VoidCallback? onErrors }) {
     if (_instance != null) {
       return _instance!;
     }
@@ -194,10 +194,10 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
 void layout(
   RenderBox box, { // If you want to just repump the last box, call pumpFrame().
-  BoxConstraints? constraints,
-  Alignment alignment = Alignment.center,
-  EnginePhase phase = EnginePhase.layout,
-  VoidCallback? onErrors,
+  final BoxConstraints? constraints,
+  final Alignment alignment = Alignment.center,
+  final EnginePhase phase = EnginePhase.layout,
+  final VoidCallback? onErrors,
 }) {
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
 
@@ -219,7 +219,7 @@ void layout(
 /// Pumps a single frame.
 ///
 /// If `onErrors` is not null, it is set as [TestRenderingFlutterBinding.onError].
-void pumpFrame({ EnginePhase phase = EnginePhase.layout, VoidCallback? onErrors }) {
+void pumpFrame({ final EnginePhase phase = EnginePhase.layout, final VoidCallback? onErrors }) {
   assert(TestRenderingFlutterBinding.instance.renderView.child != null); // call layout() first!
 
   if (onErrors != null) {
@@ -236,12 +236,12 @@ class TestCallbackPainter extends CustomPainter {
   final VoidCallback onPaint;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     onPaint();
   }
 
   @override
-  bool shouldRepaint(TestCallbackPainter oldPainter) => true;
+  bool shouldRepaint(final TestCallbackPainter oldPainter) => true;
 }
 
 class RenderSizedBox extends RenderBox {
@@ -250,22 +250,22 @@ class RenderSizedBox extends RenderBox {
   final Size _size;
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     return _size.width;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     return _size.width;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return _size.height;
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return _size.height;
   }
 
@@ -281,12 +281,12 @@ class RenderSizedBox extends RenderBox {
   void performLayout() { }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 }
 
 class FakeTickerProvider implements TickerProvider {
   @override
-  Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
+  Ticker createTicker(final TickerCallback onTick, [ final bool disableAnimations = false ]) {
     return FakeTicker();
   }
 }
@@ -296,7 +296,7 @@ class FakeTicker implements Ticker {
   bool muted = false;
 
   @override
-  void absorbTicker(Ticker originalTicker) { }
+  void absorbTicker(final Ticker originalTicker) { }
 
   @override
   String? get debugLabel => null;
@@ -317,7 +317,7 @@ class FakeTicker implements Ticker {
   void dispose() { }
 
   @override
-  void scheduleTick({ bool rescheduling = false }) { }
+  void scheduleTick({ final bool rescheduling = false }) { }
 
   @override
   TickerFuture start() {
@@ -325,16 +325,16 @@ class FakeTicker implements Ticker {
   }
 
   @override
-  void stop({ bool canceled = false }) { }
+  void stop({ final bool canceled = false }) { }
 
   @override
   void unscheduleTick() { }
 
   @override
-  String toString({ bool debugIncludeStack = false }) => super.toString();
+  String toString({ final bool debugIncludeStack = false }) => super.toString();
 
   @override
-  DiagnosticsNode describeForError(String name) {
+  DiagnosticsNode describeForError(final String name) {
     return DiagnosticsProperty<Ticker>(name, this, style: DiagnosticsTreeStyle.errorProperty);
   }
 }
@@ -344,12 +344,12 @@ class TestClipPaintingContext extends PaintingContext {
 
   @override
   ClipRectLayer? pushClipRect(
-    bool needsCompositing,
-    Offset offset,
-    Rect clipRect,
-    PaintingContextCallback painter, {
-    Clip clipBehavior = Clip.hardEdge,
-    ClipRectLayer? oldLayer,
+    final bool needsCompositing,
+    final Offset offset,
+    final Rect clipRect,
+    final PaintingContextCallback painter, {
+    final Clip clipBehavior = Clip.hardEdge,
+    final ClipRectLayer? oldLayer,
   }) {
     this.clipBehavior = clipBehavior;
     return null;
@@ -365,10 +365,10 @@ class TestPushLayerPaintingContext extends PaintingContext {
 
   @override
   void pushLayer(
-    ContainerLayer childLayer,
-    PaintingContextCallback painter,
-    Offset offset, {
-    Rect? childPaintBounds
+    final ContainerLayer childLayer,
+    final PaintingContextCallback painter,
+    final Offset offset, {
+    final Rect? childPaintBounds
   }) {
     pushedLayers.add(childLayer);
     super.pushLayer(childLayer, painter, offset, childPaintBounds: childPaintBounds);
@@ -378,7 +378,7 @@ class TestPushLayerPaintingContext extends PaintingContext {
 // Absorbs errors that don't have "overflowed" in their error details.
 void absorbOverflowedErrors() {
   final Iterable<FlutterErrorDetails> errorDetails = TestRenderingFlutterBinding.instance.takeAllFlutterErrorDetails();
-  final Iterable<FlutterErrorDetails> filtered = errorDetails.where((FlutterErrorDetails details) {
+  final Iterable<FlutterErrorDetails> filtered = errorDetails.where((final FlutterErrorDetails details) {
     return !details.toString().contains('overflowed');
   });
   if (filtered.isNotEmpty) {

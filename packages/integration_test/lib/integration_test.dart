@@ -55,7 +55,7 @@ class IntegrationTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding
         await integrationTestChannel.invokeMethod<void>(
           'allTestsFinished',
           <String, dynamic>{
-            'results': results.map<String, dynamic>((String name, Object result) {
+            'results': results.map<String, dynamic>((final String name, final Object result) {
               if (result is Failure) {
                 return MapEntry<String, dynamic>(name, result.details);
               }
@@ -82,7 +82,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
     final TestExceptionReporter oldTestExceptionReporter = reportTestException;
     reportTestException =
-        (FlutterErrorDetails details, String testDescription) {
+        (final FlutterErrorDetails details, final String testDescription) {
       results[testDescription] = Failure(testDescription, details.toString());
       oldTestExceptionReporter(details, testDescription);
     };
@@ -105,7 +105,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// Set to null to use the default surface size.
   @override
-  Future<void> setSurfaceSize(Size? size) {
+  Future<void> setSurfaceSize(final Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
       if (_surfaceSize == size) {
@@ -185,7 +185,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   ///
   /// On Android, you need to call `convertFlutterSurfaceToImage()`, and
   /// pump a frame before taking a screenshot.
-  Future<List<int>> takeScreenshot(String screenshotName, [Map<String, Object?>? args]) async {
+  Future<List<int>> takeScreenshot(final String screenshotName, [final Map<String, Object?>? args]) async {
     reportData ??= <String, dynamic>{};
     reportData!['screenshots'] ??= <dynamic>[];
     final Map<String, dynamic> data = await callbackManager.takeScreenshot(screenshotName, args);
@@ -208,7 +208,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   /// The callback function to response the driver side input.
   @visibleForTesting
-  Future<Map<String, dynamic>> callback(Map<String, String> params) async {
+  Future<Map<String, dynamic>> callback(final Map<String, String> params) async {
     return callbackManager.callback(
         params, this /* as IntegrationTestResults */);
   }
@@ -227,14 +227,14 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
 
   @override
   Future<void> runTest(
-    Future<void> Function() testBody,
-    VoidCallback invariantTester, {
-    String description = '',
+    final Future<void> Function() testBody,
+    final VoidCallback invariantTester, {
+    final String description = '',
     @Deprecated(
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
-    Duration? timeout,
+    final Duration? timeout,
   }) async {
     await super.runTest(
       testBody,
@@ -249,9 +249,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// Initialize the [vm.VmService] settings for the timeline.
   @visibleForTesting
   Future<void> enableTimeline({
-    List<String> streams = const <String>['all'],
-    @visibleForTesting vm.VmService? vmService,
-    @visibleForTesting HttpClient? httpClient,
+    final List<String> streams = const <String>['all'],
+    @visibleForTesting final vm.VmService? vmService,
+    @visibleForTesting final HttpClient? httpClient,
   }) async {
     assert(streams.isNotEmpty);
     if (vmService != null) {
@@ -290,9 +290,9 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
   /// default, prior events are cleared.
   Future<vm.Timeline> traceTimeline(
-    Future<dynamic> Function() action, {
-    List<String> streams = const <String>['all'],
-    bool retainPriorEvents = false,
+    final Future<dynamic> Function() action, {
+    final List<String> streams = const <String>['all'],
+    final bool retainPriorEvents = false,
   }) async {
     await enableTimeline(streams: streams);
     if (retainPriorEvents) {
@@ -349,10 +349,10 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// The `streams` and `retainPriorEvents` parameters are passed as-is to
   /// [traceTimeline].
   Future<void> traceAction(
-    Future<dynamic> Function() action, {
-    List<String> streams = const <String>['all'],
-    bool retainPriorEvents = false,
-    String reportKey = 'timeline',
+    final Future<dynamic> Function() action, {
+    final List<String> streams = const <String>['all'],
+    final bool retainPriorEvents = false,
+    final String reportKey = 'timeline',
   }) async {
     final vm.Timeline timeline = await traceTimeline(
       action,
@@ -363,7 +363,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
     reportData![reportKey] = timeline.toJson();
   }
 
-  Future<_GarbageCollectionInfo> _runAndGetGCInfo(Future<void> Function() action) async {
+  Future<_GarbageCollectionInfo> _runAndGetGCInfo(final Future<void> Function() action) async {
     if (kIsWeb) {
       await action();
       return const _GarbageCollectionInfo();
@@ -374,10 +374,10 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
       streams: <String>['GC'],
     );
 
-    final int oldGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+    final int oldGenGCCount = timeline.traceEvents!.where((final vm.TimelineEvent event) {
       return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectOldGeneration';
     }).length;
-    final int newGenGCCount = timeline.traceEvents!.where((vm.TimelineEvent event) {
+    final int newGenGCCount = timeline.traceEvents!.where((final vm.TimelineEvent event) {
       return event.json!['cat'] == 'GC' && event.json!['name'] == 'CollectNewGeneration';
     }).length;
     return _GarbageCollectionInfo(
@@ -392,8 +392,8 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   /// This can be used to implement performance tests previously using
   /// [traceAction] and [TimelineSummary] from [flutter_driver]
   Future<void> watchPerformance(
-    Future<void> Function() action, {
-    String reportKey = 'performance',
+    final Future<void> Function() action, {
+    final String reportKey = 'performance',
   }) async {
     assert(() {
       if (_firstRun) {
@@ -442,7 +442,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   Timeout defaultTestTimeout = Timeout.none;
 
   @override
-  void attachRootWidget(Widget rootWidget) {
+  void attachRootWidget(final Widget rootWidget) {
     // This is a workaround where screenshots of root widgets have incorrect
     // bounds.
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
@@ -450,7 +450,7 @@ https://flutter.dev/docs/testing/integration-tests#testing-on-firebase-test-lab
   }
 
   @override
-  void reportExceptionNoticed(FlutterErrorDetails exception) {
+  void reportExceptionNoticed(final FlutterErrorDetails exception) {
     // This method is called to log errors as they happen, and they will also
     // be eventually logged again at the end of the tests. The superclass
     // behavior is specific to the "live" execution semantics of
@@ -479,21 +479,21 @@ class _GarbageCollectionInfo {
 // testing. Currently, the WebSocket API reuses an HttpClient that
 // is created before the test can change the HttpOverrides.
 Future<vm.VmService> _vmServiceConnectUri(
-  String wsUri, {
-  HttpClient? httpClient,
+  final String wsUri, {
+  final HttpClient? httpClient,
 }) async {
   final WebSocket socket = await WebSocket.connect(wsUri, customClient: httpClient);
   final StreamController<dynamic> controller = StreamController<dynamic>();
   final Completer<void> streamClosedCompleter = Completer<void>();
 
   socket.listen(
-    (dynamic data) => controller.add(data),
+    (final dynamic data) => controller.add(data),
     onDone: () => streamClosedCompleter.complete(),
   );
 
   return vm.VmService(
     controller.stream,
-    (String message) => socket.add(message),
+    (final String message) => socket.add(message),
     disposeHandler: () => socket.close(),
     streamClosed: streamClosedCompleter.future,
   );

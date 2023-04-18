@@ -43,7 +43,7 @@ class CoverageCollector extends TestWatcher {
   /// Whether to collect branch coverage information.
   bool branchCoverage;
 
-  static Future<coverage.Resolver> getResolver(String? packagesPath) async {
+  static Future<coverage.Resolver> getResolver(final String? packagesPath) async {
     try {
       return await coverage.Resolver.create(packagesPath: packagesPath);
     } on FileSystemException {
@@ -54,12 +54,12 @@ class CoverageCollector extends TestWatcher {
   }
 
   @override
-  Future<void> handleFinishedTest(TestDevice testDevice) async {
+  Future<void> handleFinishedTest(final TestDevice testDevice) async {
     _logMessage('Starting coverage collection');
     await collectCoverage(testDevice);
   }
 
-  void _logMessage(String line, { bool error = false }) {
+  void _logMessage(final String line, { final bool error = false }) {
     if (!verbose) {
       return;
     }
@@ -70,7 +70,7 @@ class CoverageCollector extends TestWatcher {
     }
   }
 
-  void _addHitmap(Map<String, coverage.HitMap> hitmap) {
+  void _addHitmap(final Map<String, coverage.HitMap> hitmap) {
     final Stopwatch? stopwatch = testTimeRecorder?.start(TestTimePhases.CoverageAddHitmap);
     if (_globalHitmap == null) {
       _globalHitmap = hitmap;
@@ -100,7 +100,7 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverageIsolate(Uri vmServiceUri) async {
+  Future<void> collectCoverageIsolate(final Uri vmServiceUri) async {
     _logMessage('collecting coverage data from $vmServiceUri...');
     final Map<String, dynamic> data = await collect(
         vmServiceUri, libraryNames, branchCoverage: branchCoverage);
@@ -120,8 +120,8 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverage(TestDevice testDevice, {
-    @visibleForTesting FlutterVmService? serviceOverride,
+  Future<void> collectCoverage(final TestDevice testDevice, {
+    @visibleForTesting final FlutterVmService? serviceOverride,
   }) async {
     final Stopwatch? totalTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageTotal);
 
@@ -130,8 +130,8 @@ class CoverageCollector extends TestWatcher {
     final Stopwatch? collectTestTimeRecorderStopwatch = testTimeRecorder?.start(TestTimePhases.CoverageCollect);
 
     final Future<void> processComplete = testDevice.finished.then(
-      (Object? obj) => obj,
-      onError: (Object error, StackTrace stackTrace) {
+      (final Object? obj) => obj,
+      onError: (final Object error, final StackTrace stackTrace) {
         if (error is TestDeviceException) {
           throw Exception(
             'Failed to collect coverage, test device terminated prematurely with '
@@ -142,12 +142,12 @@ class CoverageCollector extends TestWatcher {
     );
 
     final Future<void> collectionComplete = testDevice.vmServiceUri
-      .then((Uri? vmServiceUri) {
+      .then((final Uri? vmServiceUri) {
         _logMessage('collecting coverage data from $testDevice at $vmServiceUri...');
         return collect(
             vmServiceUri!, libraryNames, serviceOverride: serviceOverride,
             branchCoverage: branchCoverage)
-          .then<void>((Map<String, dynamic> result) {
+          .then<void>((final Map<String, dynamic> result) {
             _logMessage('Collected coverage data.');
             data = result;
           });
@@ -178,8 +178,8 @@ class CoverageCollector extends TestWatcher {
   /// call [collectCoverage] for each process first.
   Future<String?> finalizeCoverage({
     String Function(Map<String, coverage.HitMap> hitmap)? formatter,
-    coverage.Resolver? resolver,
-    Directory? coverageDirectory,
+    final coverage.Resolver? resolver,
+    final Directory? coverageDirectory,
   }) async {
     if (_globalHitmap == null) {
       return null;
@@ -190,7 +190,7 @@ class CoverageCollector extends TestWatcher {
       final List<String> reportOn = coverageDirectory == null
           ? <String>[globals.fs.path.join(packagePath, 'lib')]
           : <String>[coverageDirectory.path];
-      formatter = (Map<String, coverage.HitMap> hitmap) => hitmap
+      formatter = (final Map<String, coverage.HitMap> hitmap) => hitmap
           .formatLcov(usedResolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = formatter(_globalHitmap!);
@@ -198,7 +198,7 @@ class CoverageCollector extends TestWatcher {
     return result;
   }
 
-  Future<bool> collectCoverageData(String? coveragePath, { bool mergeCoverageData = false, Directory? coverageDirectory }) async {
+  Future<bool> collectCoverageData(final String? coveragePath, { final bool mergeCoverageData = false, final Directory? coverageDirectory }) async {
     final String? coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
@@ -250,18 +250,18 @@ class CoverageCollector extends TestWatcher {
   }
 
   @override
-  Future<void> handleTestCrashed(TestDevice testDevice) async { }
+  Future<void> handleTestCrashed(final TestDevice testDevice) async { }
 
   @override
-  Future<void> handleTestTimedOut(TestDevice testDevice) async { }
+  Future<void> handleTestTimedOut(final TestDevice testDevice) async { }
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, Set<String>? libraryNames, {
-  bool waitPaused = false,
-  String? debugName,
-  @visibleForTesting bool forceSequential = false,
-  @visibleForTesting FlutterVmService? serviceOverride,
-  bool branchCoverage = false,
+Future<Map<String, dynamic>> collect(final Uri serviceUri, final Set<String>? libraryNames, {
+  final bool waitPaused = false,
+  final String? debugName,
+  @visibleForTesting final bool forceSequential = false,
+  @visibleForTesting final FlutterVmService? serviceOverride,
+  final bool branchCoverage = false,
 }) {
   return coverage.collect(
       serviceUri, false, false, false, libraryNames,

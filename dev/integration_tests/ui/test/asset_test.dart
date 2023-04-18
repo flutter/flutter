@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 // Regression test for https://github.com/flutter/flutter/issues/111285
 void main() {
-  testWidgets('Can load asset from same package without error', (WidgetTester tester) async {
+  testWidgets('Can load asset from same package without error', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(body: Image.asset('assets/foo.png', package: 'integration_ui'))));
     await tester.pumpAndSettle();
 

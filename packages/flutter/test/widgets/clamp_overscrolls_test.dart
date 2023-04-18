@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 // The top of the bottom widget is at 550 (the top of the top widget
 // is at 0). The top of the bottom widget is 500 when it has been
 // scrolled completely into view.
-Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController }) {
+Widget buildFrame(final ScrollPhysics physics, { final ScrollController? scrollController }) {
   return SingleChildScrollView(
     key: UniqueKey(),
     physics: physics,
@@ -32,11 +32,11 @@ Widget buildFrame(ScrollPhysics physics, { ScrollController? scrollController })
 }
 
 void main() {
-  testWidgets('ClampingScrollPhysics', (WidgetTester tester) async {
+  testWidgets('ClampingScrollPhysics', (final WidgetTester tester) async {
 
     // Scroll the target text widget by offset and then return its origin
     // in global coordinates.
-    Future<Offset> locationAfterScroll(String target, Offset offset) async {
+    Future<Offset> locationAfterScroll(final String target, final Offset offset) async {
       await tester.dragFrom(tester.getTopLeft(find.text(target)), offset);
       await tester.pump();
       final RenderBox textBox = tester.renderObject(find.text(target));
@@ -59,7 +59,7 @@ void main() {
     expect(origin.dy, equals(500.0));
   });
 
-  testWidgets('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {
+  testWidgets('ClampingScrollPhysics affects ScrollPosition', (final WidgetTester tester) async {
 
     // BouncingScrollPhysics
 
@@ -91,8 +91,8 @@ void main() {
     expect(scrollable.position.pixels, equals(50.0));
   });
 
-  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition', (WidgetTester tester) async {
-    Future<void> testOutOfBounds(ScrollPhysics physics, double initialOffset, double expectedOffset) async {
+  testWidgets('ClampingScrollPhysics handles out of bounds ScrollPosition', (final WidgetTester tester) async {
+    Future<void> testOutOfBounds(final ScrollPhysics physics, final double initialOffset, final double expectedOffset) async {
       final ScrollController scrollController = ScrollController(initialScrollOffset: initialOffset);
       await tester.pumpWidget(buildFrame(physics, scrollController: scrollController));
       final ScrollableState scrollable = tester.state(find.byType(Scrollable));

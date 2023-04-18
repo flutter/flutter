@@ -123,7 +123,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   @override
-  void didUpdateWidget(ExpandIcon oldWidget) {
+  void didUpdateWidget(final ExpandIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.isExpanded != oldWidget.isExpanded) {
       if (widget.isExpanded) {
@@ -161,7 +161,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);

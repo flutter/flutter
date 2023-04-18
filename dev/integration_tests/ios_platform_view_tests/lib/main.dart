@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -45,7 +45,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title ?? ''),
@@ -58,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute<MergeThreadTestPage>(
-                  builder: (BuildContext context) => const MergeThreadTestPage()),
+                  builder: (final BuildContext context) => const MergeThreadTestPage()),
             );
           },
         ),
@@ -75,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute<FocusTestPage>(
-                  builder: (BuildContext context) => const FocusTestPage()),
+                  builder: (final BuildContext context) => const FocusTestPage()),
             );
           },
         ),
@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Navigator.push(
               context,
               MaterialPageRoute<ZOrderTestPage>(
-                  builder: (BuildContext context) => const ZOrderTestPage()),
+                  builder: (final BuildContext context) => const ZOrderTestPage()),
             );
           },
         ),
@@ -102,7 +102,7 @@ class MergeThreadTestPage extends StatelessWidget {
   static Key button = const ValueKey<String>('plus_button');
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Platform View Thread Merge Tests'),
@@ -146,7 +146,7 @@ class _FocusTestPageState extends State<FocusTestPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Platform View Focus Tests'),
@@ -180,7 +180,7 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
   bool _showBackground = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Platform view z order test'),
@@ -203,7 +203,7 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
                 onPressed: () {
                   showDialog(
                       context: context,
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return const SizedBox(
                           width: 250,
                           height: 250,
@@ -218,7 +218,7 @@ class _ZOrderTestPageState extends State<ZOrderTestPage> {
                   // Since it is covered by the dialog prompt, which removes
                   // semantic nodes underneath.
                   // As a workaround, we show the background with a delay.
-                  Future<void>.delayed(const Duration(seconds: 1)).then((void value) {
+                  Future<void>.delayed(const Duration(seconds: 1)).then((final void value) {
                     setState(() {
                       _showBackground = true;
                     });

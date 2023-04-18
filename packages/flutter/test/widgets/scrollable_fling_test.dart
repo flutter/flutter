@@ -10,7 +10,7 @@ const TextStyle testFont = TextStyle(
   color: Color(0xFF00FF00),
 );
 
-Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
+Future<void> pumpTest(final WidgetTester tester, final TargetPlatform platform) async {
   await tester.pumpWidget(Container());
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
@@ -20,7 +20,7 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
       color: const Color(0xFF111111),
       child: ListView.builder(
         dragStartBehavior: DragStartBehavior.down,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Text('$index', style: testFont);
         },
       ),
@@ -31,7 +31,7 @@ Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
 const double dragOffset = 213.82;
 
 void main() {
-  testWidgets('Flings on different platforms', (WidgetTester tester) async {
+  testWidgets('Flings on different platforms', (final WidgetTester tester) async {
     double getCurrentOffset() {
       return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
     }
@@ -96,14 +96,14 @@ void main() {
     expect(linuxResult, equals(androidResult));
   });
 
-  testWidgets('fling and tap to stop', (WidgetTester tester) async {
+  testWidgets('fling and tap to stop', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children: List<Widget>.generate(250, (int i) => GestureDetector(
+          children: List<Widget>.generate(250, (final int i) => GestureDetector(
             onTap: () { log.add('tap $i'); },
             child: Text('$i', style: testFont),
           )),
@@ -126,14 +126,14 @@ void main() {
     expect(log, equals(<String>['tap 21', 'tap 35']));
   });
 
-  testWidgets('fling and wait and tap', (WidgetTester tester) async {
+  testWidgets('fling and wait and tap', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: ListView(
           dragStartBehavior: DragStartBehavior.down,
-          children: List<Widget>.generate(250, (int i) => GestureDetector(
+          children: List<Widget>.generate(250, (final int i) => GestureDetector(
             onTap: () { log.add('tap $i'); },
             child: Text('$i', style: testFont),
           )),

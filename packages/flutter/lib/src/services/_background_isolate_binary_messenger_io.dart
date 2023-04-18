@@ -40,13 +40,13 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   /// on the root isolate.
   ///
   /// This function is idempotent (calling it multiple times is harmless but has no effect).
-  static void ensureInitialized(ui.RootIsolateToken token) {
+  static void ensureInitialized(final ui.RootIsolateToken token) {
     if (_instance == null) {
       ui.PlatformDispatcher.instance.registerBackgroundIsolate(token);
       final BackgroundIsolateBinaryMessenger portBinaryMessenger =
           BackgroundIsolateBinaryMessenger._();
       _instance = portBinaryMessenger;
-      portBinaryMessenger._receivePort.listen((dynamic message) {
+      portBinaryMessenger._receivePort.listen((final dynamic message) {
         try {
           final List<dynamic> args = message as List<dynamic>;
           final int identifier = args[0] as int;
@@ -69,13 +69,13 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  Future<void> handlePlatformMessage(String channel, ByteData? data,
-      ui.PlatformMessageResponseCallback? callback) {
+  Future<void> handlePlatformMessage(final String channel, final ByteData? data,
+      final ui.PlatformMessageResponseCallback? callback) {
     throw UnimplementedError('handlePlatformMessage is deprecated.');
   }
 
   @override
-  Future<ByteData?>? send(String channel, ByteData? message) {
+  Future<ByteData?>? send(final String channel, final ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
     _messageCount += 1;
     final int messageIdentifier = _messageCount;
@@ -90,7 +90,7 @@ class BackgroundIsolateBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  void setMessageHandler(String channel, MessageHandler? handler) {
+  void setMessageHandler(final String channel, final MessageHandler? handler) {
     throw UnsupportedError(
         'Background isolates do not support setMessageHandler(). Messages from the host platform always go to the root isolate.');
   }

@@ -151,9 +151,9 @@ void main() {
 class ThrowingDwarfSymbolizationService extends Fake implements DwarfSymbolizationService {
   @override
   Future<void> decode({
-    required Stream<List<int>> input,
-    required IOSink output,
-    required Uint8List symbols,
+    required final Stream<List<int>> input,
+    required final IOSink output,
+    required final Uint8List symbols,
   }) async {
     throwToolExit('test');
   }

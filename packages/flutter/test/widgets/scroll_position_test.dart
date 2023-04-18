@@ -16,19 +16,19 @@ class ThePositiveNumbers extends StatelessWidget {
   });
   final int from;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
       key: const PageStorageKey<String>('ThePositiveNumbers'),
       itemExtent: 100.0,
       controller: _controller,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return Text('${index + from}', key: ValueKey<int>(index));
       },
     );
   }
 }
 
-Future<void> performTest(WidgetTester tester, bool maintainState) async {
+Future<void> performTest(final WidgetTester tester, final bool maintainState) async {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   await tester.pumpWidget(
     Directionality(
@@ -37,17 +37,17 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
         data: MediaQueryData.fromView(tester.view),
         child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (RouteSettings settings) {
+          onGenerateRoute: (final RouteSettings settings) {
             if (settings.name == '/') {
               return MaterialPageRoute<void>(
                 settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 0),
+                builder: (final _) => const ThePositiveNumbers(from: 0),
                 maintainState: maintainState,
               );
             } else if (settings.name == '/second') {
               return MaterialPageRoute<void>(
                 settings: settings,
-                builder: (_) => const ThePositiveNumbers(from: 10000),
+                builder: (final _) => const ThePositiveNumbers(from: 10000),
                 maintainState: maintainState,
               );
             }
@@ -140,11 +140,11 @@ Future<void> performTest(WidgetTester tester, bool maintainState) async {
 }
 
 void main() {
-  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (WidgetTester tester) async {
+  testWidgets("ScrollPosition jumpTo() doesn't call notifyListeners twice", (final WidgetTester tester) async {
     int count = 0;
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Text('$index', textDirection: TextDirection.ltr);
         },
       ),
@@ -159,20 +159,20 @@ void main() {
     expect(count, 1);
   });
 
-  testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
+  testWidgets('whether we remember our scroll position', (final WidgetTester tester) async {
     await performTest(tester, true);
     await performTest(tester, false);
   });
 
-  testWidgets('scroll alignment is honored by ensureVisible', (WidgetTester tester) async {
-    final List<int> items = List<int>.generate(11, (int index) => index).toList();
-    final List<FocusNode> nodes = List<FocusNode>.generate(11, (int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
+  testWidgets('scroll alignment is honored by ensureVisible', (final WidgetTester tester) async {
+    final List<int> items = List<int>.generate(11, (final int index) => index).toList();
+    final List<FocusNode> nodes = List<FocusNode>.generate(11, (final int index) => FocusNode(debugLabel: 'Item ${index + 1}')).toList();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
         home: ListView(
           controller: controller,
-          children: items.map<Widget>((int item) {
+          children: items.map<Widget>((final int item) {
             return Focus(
               key: ValueKey<int>(item),
               focusNode: nodes[item],
@@ -226,13 +226,13 @@ void main() {
     expect(controller.position.pixels, equals(0.0));
   });
 
-  testWidgets('jumpTo recommends deferred loading', (WidgetTester tester) async {
+  testWidgets('jumpTo recommends deferred loading', (final WidgetTester tester) async {
     int loadedWithDeferral = 0;
     int buildCount = 0;
     const double height = 500;
     await tester.pumpWidget(MaterialApp(
       home: ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           buildCount += 1;
           if (Scrollable.recommendDeferredLoadingForContext(context)) {
             loadedWithDeferral += 1;

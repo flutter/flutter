@@ -21,7 +21,7 @@ void main() {
       tempDir = createResolvedTempDirectorySync('run_expression_eval_test.');
       await project.setUpIn(tempDir);
       flutter = FlutterRunTestDriver(tempDir);
-      flutter.stdout.listen((String line) {
+      flutter.stdout.listen((final String line) {
         expect(line, isNot(contains('Unresolved uri:')));
         expect(line, isNot(contains('No module for')));
       });
@@ -32,7 +32,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<void> start({required bool expressionEvaluation}) async {
+    Future<void> start({required final bool expressionEvaluation}) async {
       // The non-test project has a loop around its breakpoints.
       // No need to start paused as all breakpoint would be eventually reached.
       await flutter.run(
@@ -41,14 +41,14 @@ void main() {
         additionalCommandArgs: <String>['--verbose', '--web-renderer=html']);
     }
 
-    Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
+    Future<void> breakInBuildMethod(final FlutterTestDriver flutter) async {
       await flutter.breakAt(
         project.buildMethodBreakpointUri,
         project.buildMethodBreakpointLine,
       );
     }
 
-    Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
+    Future<void> breakInTopLevelFunction(final FlutterTestDriver flutter) async {
       await flutter.breakAt(
         project.topLevelFunctionBreakpointUri,
         project.topLevelFunctionBreakpointLine,
@@ -129,7 +129,7 @@ void main() {
       tryToDelete(tempDir);
     });
 
-    Future<Isolate?> breakInMethod(FlutterTestDriver flutter) async {
+    Future<Isolate?> breakInMethod(final FlutterTestDriver flutter) async {
       await flutter.addBreakpoint(
         project.breakpointAppUri,
         project.breakpointLine,
@@ -137,7 +137,7 @@ void main() {
       return flutter.resume(waitForNextPause: true);
     }
 
-    Future<void> startPaused({required bool expressionEvaluation}) {
+    Future<void> startPaused({required final bool expressionEvaluation}) {
       // The test project does not have a loop around its breakpoints.
       // Start paused so we can set a breakpoint before passing it
       // in the execution.
@@ -182,28 +182,28 @@ void main() {
   });
 }
 
-Future<void> failToEvaluateExpression(FlutterTestDriver flutter) async {
+Future<void> failToEvaluateExpression(final FlutterTestDriver flutter) async {
   await expectLater(
     flutter.evaluateInFrame('"test"'),
     throwsA(isA<RPCError>().having(
-      (RPCError error) => error.message,
+      (final RPCError error) => error.message,
       'message',
       contains('Expression evaluation is not supported for this configuration'),
     )),
   );
 }
 
-Future<void> checkStaticScope(FlutterTestDriver flutter) async {
+Future<void> checkStaticScope(final FlutterTestDriver flutter) async {
   final Frame res = await flutter.getTopStackFrame();
   expect(res.vars, equals(<BoundVariable>[]));
 }
 
-Future<void> evaluateErrorExpressions(FlutterTestDriver flutter) async {
+Future<void> evaluateErrorExpressions(final FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('typo');
   expectError(res, 'CompilationError:');
 }
 
-Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
+Future<void> evaluateTrivialExpressions(final FlutterTestDriver flutter) async {
   ObjRef res;
 
   res = await flutter.evaluateInFrame('"test"');
@@ -216,48 +216,48 @@ Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
   expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
-Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
+Future<void> evaluateComplexExpressions(final FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('new DateTime.now().year');
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
-Future<void> evaluateTrivialExpressionsInLibrary(FlutterTestDriver flutter) async {
+Future<void> evaluateTrivialExpressionsInLibrary(final FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
   final ObjRef res = await flutter.evaluate(library.id!, '"test"');
   expectInstance(res, InstanceKind.kString, 'test');
 }
 
-Future<void> evaluateComplexExpressionsInLibrary(FlutterTestDriver flutter) async {
+Future<void> evaluateComplexExpressionsInLibrary(final FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
   final ObjRef res = await flutter.evaluate(library.id!, 'new DateTime.now().year');
   expectInstance(res, InstanceKind.kDouble, DateTime.now().year.toString());
 }
 
-Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(FlutterTestDriver flutter) async {
+Future<void> evaluateWebLibraryBooleanFromEnvironmentInLibrary(final FlutterTestDriver flutter) async {
   final LibraryRef library = await getRootLibrary(flutter);
   final ObjRef res = await flutter.evaluate(library.id!, 'const bool.fromEnvironment("dart.library.html")');
   expectInstance(res, InstanceKind.kBool, true.toString());
 }
 
-Future<LibraryRef> getRootLibrary(FlutterTestDriver flutter) async {
+Future<LibraryRef> getRootLibrary(final FlutterTestDriver flutter) async {
   // `isolate.rootLib` returns incorrect library, so find the
   // entrypoint manually here instead.
   //
   // Issue: https://github.com/dart-lang/sdk/issues/44760
   final Isolate isolate = await flutter.getFlutterIsolate();
   return isolate.libraries!
-    .firstWhere((LibraryRef l) => l.uri!.contains('org-dartlang-app'));
+    .firstWhere((final LibraryRef l) => l.uri!.contains('org-dartlang-app'));
 }
 
-void expectInstance(ObjRef result, String kind, String message) {
+void expectInstance(final ObjRef result, final String kind, final String message) {
   expect(result,
     const TypeMatcher<InstanceRef>()
-      .having((InstanceRef instance) => instance.kind, 'kind', kind)
-      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
+      .having((final InstanceRef instance) => instance.kind, 'kind', kind)
+      .having((final InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
 }
 
-void expectError(ObjRef result, String message) {
+void expectError(final ObjRef result, final String message) {
   expect(result,
     const TypeMatcher<ErrorRef>()
-      .having((ErrorRef instance) => instance.message, 'message', contains(message)));
+      .having((final ErrorRef instance) => instance.message, 'message', contains(message)));
 }

@@ -35,13 +35,13 @@ class GenerateLocalizationsTarget extends Target {
   List<String> get depfiles => <String>['gen_localizations.d'];
 
   @override
-  bool canSkip(Environment environment) {
+  bool canSkip(final Environment environment) {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
     return !configFile.existsSync();
   }
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
     assert(configFile.existsSync());
 

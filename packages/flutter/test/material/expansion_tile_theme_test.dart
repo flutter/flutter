@@ -17,7 +17,7 @@ class TestIconState extends State<TestIcon> {
   late IconThemeData iconTheme;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     iconTheme = IconTheme.of(context);
     return const Icon(Icons.expand_more);
   }
@@ -35,7 +35,7 @@ class TestTextState extends State<TestText> {
   late TextStyle textStyle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     textStyle = DefaultTextStyle.of(context).style;
     return Text(widget.text);
   }
@@ -69,19 +69,19 @@ void main() {
     expect(theme.clipBehavior, null);
   });
 
-  testWidgets('Default ExpansionTileThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ExpansionTileThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('ExpansionTileThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ExpansionTileThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ExpansionTileThemeData(
       backgroundColor: Color(0xff000000),
@@ -99,8 +99,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -119,7 +119,7 @@ void main() {
     ]);
   });
 
-  testWidgets('ExpansionTileTheme - collapsed', (WidgetTester tester) async {
+  testWidgets('ExpansionTileTheme - collapsed', (final WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();
@@ -211,7 +211,7 @@ void main() {
     expect(shapeDecoration.shape, collapsedShape);
   });
 
-  testWidgets('ExpansionTileTheme - expanded', (WidgetTester tester) async {
+  testWidgets('ExpansionTileTheme - expanded', (final WidgetTester tester) async {
     final Key tileKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key iconKey = UniqueKey();

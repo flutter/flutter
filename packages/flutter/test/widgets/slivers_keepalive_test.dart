@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Sliver with keep alive without key - should dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive without key - should dispose after reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0', keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
@@ -29,7 +29,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver without keep alive without key - should dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver without keep alive without key - should dispose after reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0'),
       const WidgetTest1(text: 'child 1'),
@@ -52,7 +52,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver without keep alive with key - should dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver without keep alive with key - should dispose after reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey()),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
@@ -75,7 +75,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver with keep alive with key - should not dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with key - should not dispose after reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
@@ -97,7 +97,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver with keep alive with Unique key - should not dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with Unique key - should not dispose after reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey(), keepAlive: true),
@@ -119,7 +119,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver with keep alive with Value key - should not dispose after reordering', (WidgetTester tester) async {
+  testWidgets('Sliver with keep alive with Value key - should not dispose after reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       const WidgetTest0(text: 'child 0', key: ValueKey<int>(0), keepAlive: true),
       const WidgetTest1(text: 'child 1', key: ValueKey<int>(1), keepAlive: true),
@@ -141,7 +141,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('Sliver complex case 1', (WidgetTester tester) async {
+  testWidgets('Sliver complex case 1', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
@@ -185,7 +185,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgets('Sliver complex case 2', (WidgetTester tester) async {
+  testWidgets('Sliver complex case 2', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
@@ -228,7 +228,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgets('Sliver with SliverChildBuilderDelegate', (WidgetTester tester) async {
+  testWidgets('Sliver with SliverChildBuilderDelegate', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
@@ -271,7 +271,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgets('SliverFillViewport should not dispose widget with key during in screen reordering', (WidgetTester tester) async {
+  testWidgets('SliverFillViewport should not dispose widget with key during in screen reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
@@ -312,7 +312,7 @@ void main() {
     expect(state2.hasBeenDisposed, true);
   });
 
-  testWidgets('SliverList should not dispose widget with key during in screen reordering', (WidgetTester tester) async {
+  testWidgets('SliverList should not dispose widget with key during in screen reordering', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
@@ -362,7 +362,7 @@ void main() {
     expect(state2.hasBeenDisposed, false);
   });
 
-  testWidgets('SliverList remove child from child list', (WidgetTester tester) async {
+  testWidgets('SliverList remove child from child list', (final WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       const WidgetTest1(text: 'child 1', keepAlive: true),
@@ -392,7 +392,7 @@ void main() {
   });
 }
 
-List<Widget> createSwitchedChildList(List<Widget> childList, int i, int j) {
+List<Widget> createSwitchedChildList(final List<Widget> childList, final int i, final int j) {
   final Widget w = childList[i];
   childList[i] = childList[j];
   childList[j] = w;
@@ -429,7 +429,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
   }
 
   @override
-  void didUpdateWidget(SwitchingChildBuilderTest oldWidget) {
+  void didUpdateWidget(final SwitchingChildBuilderTest oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.children != widget.children) {
       children = widget.children;
@@ -444,7 +444,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -455,11 +455,11 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
             slivers: <Widget>[
               SliverFillViewport(
                 delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                  (final BuildContext context, final int index) {
                     return children[index];
                   },
                   childCount: children.length,
-                  findChildIndexCallback: (Key key) => _mapKeyToIndex[key] ?? -1,
+                  findChildIndexCallback: (final Key key) => _mapKeyToIndex[key] ?? -1,
                 ),
               ),
             ],
@@ -481,7 +481,7 @@ class SwitchingChildListTest extends StatelessWidget {
   final double viewportFraction;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -513,7 +513,7 @@ class SwitchingSliverListTest extends StatelessWidget {
   final double viewportFraction;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Center(
@@ -551,7 +551,7 @@ class _WidgetTest0State extends State<WidgetTest0> with AutomaticKeepAliveClient
   bool hasBeenDisposed = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     return Text(widget.text);
   }
@@ -584,7 +584,7 @@ class _WidgetTest1State extends State<WidgetTest1> with AutomaticKeepAliveClient
   bool hasBeenDisposed = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     return Text(widget.text);
   }
@@ -617,7 +617,7 @@ class _WidgetTest2State extends State<WidgetTest2> with AutomaticKeepAliveClient
   bool hasBeenDisposed = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context);
     return Text(widget.text);
   }

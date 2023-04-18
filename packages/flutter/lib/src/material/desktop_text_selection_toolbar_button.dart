@@ -37,9 +37,9 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
   /// a [Text] widget in the style of the Material text selection toolbar.
   DesktopTextSelectionToolbarButton.text({
     super.key,
-    required BuildContext context,
+    required final BuildContext context,
     required this.onPressed,
-    required String text,
+    required final String text,
   }) : child = Text(
          text,
          overflow: TextOverflow.ellipsis,
@@ -57,7 +57,7 @@ class DesktopTextSelectionToolbarButton extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;

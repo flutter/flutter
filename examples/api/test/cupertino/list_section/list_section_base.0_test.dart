@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/list_section/list_section_base.0.d
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Has exactly 1 CupertinoListSection base widget', (WidgetTester tester) async {
+  testWidgets('Has exactly 1 CupertinoListSection base widget', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoListSectionBaseApp(),
     );
@@ -19,7 +19,7 @@ void main() {
     expect(listSectionWidget.type, equals(CupertinoListSectionType.base));
   });
 
-  testWidgets('CupertinoListSection has 3 CupertinoListTile children', (WidgetTester tester) async {
+  testWidgets('CupertinoListSection has 3 CupertinoListTile children', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoListSectionBaseApp(),
     );

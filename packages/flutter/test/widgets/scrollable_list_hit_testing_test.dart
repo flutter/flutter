@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
 void main() {
-  testWidgets('Tap item after scroll - horizontal', (WidgetTester tester) async {
+  testWidgets('Tap item after scroll - horizontal', (final WidgetTester tester) async {
     final List<int> tapped = <int>[];
     await tester.pumpWidget(
       Directionality(
@@ -21,7 +21,7 @@ void main() {
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
               scrollDirection: Axis.horizontal,
-              children: items.map<Widget>((int item) {
+              children: items.map<Widget>((final int item) {
                 return GestureDetector(
                   onTap: () { tapped.add(item); },
                   dragStartBehavior: DragStartBehavior.down,
@@ -51,7 +51,7 @@ void main() {
     expect(tapped, equals(<int>[2]));
   });
 
-  testWidgets('Tap item after scroll - vertical', (WidgetTester tester) async {
+  testWidgets('Tap item after scroll - vertical', (final WidgetTester tester) async {
     final List<int> tapped = <int>[];
     await tester.pumpWidget(
       Directionality(
@@ -62,7 +62,7 @@ void main() {
             child: ListView(
               dragStartBehavior: DragStartBehavior.down,
               itemExtent: 290.0,
-              children: items.map<Widget>((int item) {
+              children: items.map<Widget>((final int item) {
                 return GestureDetector(
                   onTap: () { tapped.add(item); },
                   dragStartBehavior: DragStartBehavior.down,
@@ -94,7 +94,7 @@ void main() {
     expect(tapped, equals(<int>[1])); // the center of the third item is off-screen so it shouldn't get hit
   });
 
-  testWidgets('Padding scroll anchor start', (WidgetTester tester) async {
+  testWidgets('Padding scroll anchor start', (final WidgetTester tester) async {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
@@ -103,7 +103,7 @@ void main() {
         child: ListView(
           itemExtent: 290.0,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children: items.map<Widget>((int item) {
+          children: items.map<Widget>((final int item) {
             return GestureDetector(
               onTap: () { tapped.add(item); },
               child: Text('$item'),
@@ -126,7 +126,7 @@ void main() {
     expect(tapped, equals(<int>[0, 1, 1]));
   });
 
-  testWidgets('Padding scroll anchor end', (WidgetTester tester) async {
+  testWidgets('Padding scroll anchor end', (final WidgetTester tester) async {
     final List<int> tapped = <int>[];
 
     await tester.pumpWidget(
@@ -136,7 +136,7 @@ void main() {
           itemExtent: 290.0,
           reverse: true,
           padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
-          children: items.map<Widget>((int item) {
+          children: items.map<Widget>((final int item) {
             return GestureDetector(
               onTap: () { tapped.add(item); },
               child: Text('$item'),
@@ -159,7 +159,7 @@ void main() {
     expect(tapped, equals(<int>[0, 1, 1]));
   });
 
-  testWidgets('Tap immediately following clamped overscroll', (WidgetTester tester) async {
+  testWidgets('Tap immediately following clamped overscroll', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/5709
     final List<int> tapped = <int>[];
 
@@ -168,7 +168,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           itemExtent: 200.0,
-          children: items.map<Widget>((int item) {
+          children: items.map<Widget>((final int item) {
             return GestureDetector(
               onTap: () { tapped.add(item); },
               child: Text('$item'),

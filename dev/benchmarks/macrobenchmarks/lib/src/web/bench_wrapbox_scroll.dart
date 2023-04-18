@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView(
         controller: scrollController,
         children: <Widget>[
@@ -87,7 +87,7 @@ class ProductPreview extends StatelessWidget {
   final int previewIndex;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => print('tap'),
@@ -148,7 +148,7 @@ class ProductOption extends StatelessWidget {
   final String optionText;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       constraints: const BoxConstraints(minWidth: 56),
       margin: const EdgeInsets.all(2),

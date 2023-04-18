@@ -24,7 +24,7 @@ class PlatformViewApp extends StatefulWidget {
 
 class PlatformViewAppState extends State<PlatformViewApp> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(),
       title: 'Advanced Layout',
@@ -43,13 +43,13 @@ class PlatformViewLayout extends StatelessWidget {
   const PlatformViewLayout({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Platform View Scrolling Layout')),
       body: ListView.builder(
         key: const Key('platform-views-scroll'), // This key is used by the driver test.
         itemCount: 200,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Padding(
             padding: const EdgeInsets.all(5.0),
             child: Material(
@@ -70,7 +70,7 @@ class DummyPlatformView extends StatelessWidget {
   const DummyPlatformView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const String viewType = 'benchmarks/platform_views_layout/DummyPlatformView';
     late Widget nativeView;
     if (Platform.isIOS) {
@@ -94,7 +94,7 @@ class DummyPlatformView extends StatelessWidget {
 
 class ExpensivePainter extends CustomPainter {
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final double boxWidth = size.width / 50;
     final double boxHeight = size.height / 50;
     for (int i = 0; i < 50; i++) {
@@ -109,7 +109,7 @@ class ExpensivePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
     return false;
   }
 }

@@ -14,7 +14,7 @@ void main() {
     expect(SchedulerBinding.instance.hasScheduledFrame, isFalse);
     // Sends a message to notify that the engine is ready to accept frames.
     final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.resumed')!;
-    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    await binding.defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (final _) { });
 
     // Enables the semantics should not schedule any frames if the root widget
     // has not been attached.

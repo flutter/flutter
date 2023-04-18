@@ -12,7 +12,7 @@ class AutocompleteExampleApp extends StatelessWidget {
   const AutocompleteExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -36,17 +36,17 @@ class AutocompleteBasicExample extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Autocomplete<String>(
-      optionsBuilder: (TextEditingValue textEditingValue) {
+      optionsBuilder: (final TextEditingValue textEditingValue) {
         if (textEditingValue.text == '') {
           return const Iterable<String>.empty();
         }
-        return _kOptions.where((String option) {
+        return _kOptions.where((final String option) {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },
-      onSelected: (String selection) {
+      onSelected: (final String selection) {
         debugPrint('You just selected $selection');
       },
     );

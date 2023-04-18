@@ -28,7 +28,7 @@ void main() {
     ),
   );
 
-  ScrollController primaryScrollController(WidgetTester tester) {
+  ScrollController primaryScrollController(final WidgetTester tester) {
     return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
   }
 
@@ -42,7 +42,7 @@ void main() {
     expect(identical(AppBarTheme.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Passing no AppBarTheme returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no AppBarTheme returns defaults', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       MaterialApp(
@@ -92,7 +92,7 @@ void main() {
     }
   });
 
-  testWidgets('AppBar uses values from AppBarTheme', (WidgetTester tester) async {
+  testWidgets('AppBar uses values from AppBarTheme', (final WidgetTester tester) async {
     final AppBarTheme appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(
@@ -129,7 +129,7 @@ void main() {
     expect(tester.getSize(find.byType(AppBar)).width, 800);
   });
 
-  testWidgets('AppBar widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('AppBar widget properties take priority over theme', (final WidgetTester tester) async {
     const Brightness brightness = Brightness.dark;
     const SystemUiOverlayStyle systemOverlayStyle = SystemUiOverlayStyle.light;
     const Color color = Colors.orange;
@@ -185,7 +185,7 @@ void main() {
     expect(text.style, toolbarTextStyle);
   });
 
-  testWidgets('AppBar icon color takes priority over everything', (WidgetTester tester) async {
+  testWidgets('AppBar icon color takes priority over everything', (final WidgetTester tester) async {
     const Color color = Colors.lime;
     const IconThemeData iconThemeData = IconThemeData(color: Colors.green);
     const IconThemeData actionsIconThemeData = IconThemeData(color: Colors.lightBlue);
@@ -205,7 +205,7 @@ void main() {
     expect(actionIconText.text.style!.color, color);
   });
 
-  testWidgets('AppBarTheme properties take priority over ThemeData properties', (WidgetTester tester) async {
+  testWidgets('AppBarTheme properties take priority over ThemeData properties', (final WidgetTester tester) async {
     final AppBarTheme appBarTheme = _appBarTheme();
 
     await tester.pumpWidget(
@@ -239,14 +239,14 @@ void main() {
     expect(text.style, appBarTheme.toolbarTextStyle);
   });
 
-  testWidgets('ThemeData colorScheme is used when no AppBarTheme is set', (WidgetTester tester) async {
+  testWidgets('ThemeData colorScheme is used when no AppBarTheme is set', (final WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData.from(colorScheme: const ColorScheme.light());
     final ThemeData darkTheme = ThemeData.from(colorScheme: const ColorScheme.dark());
-    Widget buildFrame(ThemeData appTheme) {
+    Widget buildFrame(final ThemeData appTheme) {
       return MaterialApp(
         theme: appTheme,
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Scaffold(
               appBar: AppBar(
                 actions: <Widget>[
@@ -376,16 +376,16 @@ void main() {
     }
   });
 
-  testWidgets('AppBar iconTheme with color=null defers to outer IconTheme', (WidgetTester tester) async {
+  testWidgets('AppBar iconTheme with color=null defers to outer IconTheme', (final WidgetTester tester) async {
     // Verify claim made in https://github.com/flutter/flutter/pull/71184#issuecomment-737419215
 
-    Widget buildFrame({ Color? appIconColor, Color? appBarIconColor }) {
+    Widget buildFrame({ final Color? appIconColor, final Color? appBarIconColor }) {
       return MaterialApp(
         theme: ThemeData.from(useMaterial3: false, colorScheme: const ColorScheme.light()),
         home: IconTheme(
           data: IconThemeData(color: appIconColor),
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Scaffold(
                 appBar: AppBar(
                   iconTheme: IconThemeData(color: appBarIconColor),
@@ -416,7 +416,7 @@ void main() {
     expect(getIconText().text.style!.color, Colors.purple);
   });
 
-  testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (WidgetTester tester) async {
+  testWidgets('AppBar uses AppBarTheme.centerTitle when centerTitle is null', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(appBar: AppBar(
@@ -428,7 +428,7 @@ void main() {
     expect(navToolBar.centerMiddle, true);
   });
 
-  testWidgets('AppBar.centerTitle takes priority over AppBarTheme.centerTitle', (WidgetTester tester) async {
+  testWidgets('AppBar.centerTitle takes priority over AppBarTheme.centerTitle', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(centerTitle: true)),
       home: Scaffold(
@@ -444,7 +444,7 @@ void main() {
     expect(navToolBar.centerMiddle, false);
   });
 
-  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (WidgetTester tester) async{
+  testWidgets('AppBar.centerTitle adapts to TargetPlatform when AppBarTheme.centerTitle is null', (final WidgetTester tester) async{
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(appBar: AppBar(
@@ -458,7 +458,7 @@ void main() {
     expect(navToolBar.centerMiddle, true);
   });
 
-  testWidgets('AppBar.shadowColor takes priority over AppBarTheme.shadowColor', (WidgetTester tester) async {
+  testWidgets('AppBar.shadowColor takes priority over AppBarTheme.shadowColor', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(shadowColor: Colors.red)),
       home: Scaffold(
@@ -474,7 +474,7 @@ void main() {
     expect(appBar.shadowColor, Colors.yellow);
   });
 
-  testWidgets('AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor', (WidgetTester tester) async {
+  testWidgets('AppBar.surfaceTintColor takes priority over AppBarTheme.surfaceTintColor', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(surfaceTintColor: Colors.red)),
       home: Scaffold(
@@ -490,7 +490,7 @@ void main() {
     expect(appBar.surfaceTintColor, Colors.yellow);
   });
 
-  testWidgets('AppBarTheme.iconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+  testWidgets('AppBarTheme.iconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (final WidgetTester tester) async {
     const IconThemeData overallIconTheme = IconThemeData(color: Colors.yellow);
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -516,7 +516,7 @@ void main() {
     expect(actionIconButtonColor, overallIconTheme.color);
   });
 
-  testWidgets('AppBarTheme.iconTheme.size takes priority over IconButtonTheme.iconSize - M3', (WidgetTester tester) async {
+  testWidgets('AppBarTheme.iconTheme.size takes priority over IconButtonTheme.iconSize - M3', (final WidgetTester tester) async {
     const IconThemeData overallIconTheme = IconThemeData(size: 30.0);
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
@@ -543,7 +543,7 @@ void main() {
   });
 
 
-  testWidgets('AppBarTheme.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+  testWidgets('AppBarTheme.actionsIconTheme.color takes priority over IconButtonTheme.foregroundColor - M3', (final WidgetTester tester) async {
     const IconThemeData actionsIconTheme = IconThemeData(color: Colors.yellow);
     final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
       style: IconButton.styleFrom(foregroundColor: Colors.red),
@@ -571,7 +571,7 @@ void main() {
     expect(actionIconButtonColor, actionsIconTheme.color);
   });
 
-  testWidgets('AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize - M3', (WidgetTester tester) async {
+  testWidgets('AppBarTheme.actionsIconTheme.size takes priority over IconButtonTheme.iconSize - M3', (final WidgetTester tester) async {
     const IconThemeData actionsIconTheme = IconThemeData(size: 30.0);
     final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
       style: IconButton.styleFrom(iconSize: 32.0),
@@ -598,7 +598,7 @@ void main() {
     expect(actionIconButtonSize, actionsIconTheme.size);
   });
 
-  testWidgets('AppBarTheme.foregroundColor takes priority over IconButtonTheme.foregroundColor - M3', (WidgetTester tester) async {
+  testWidgets('AppBarTheme.foregroundColor takes priority over IconButtonTheme.foregroundColor - M3', (final WidgetTester tester) async {
     final IconButtonThemeData iconButtonTheme = IconButtonThemeData(
       style: IconButton.styleFrom(foregroundColor: Colors.red),
     );
@@ -633,7 +633,7 @@ void main() {
     expect(actionIconButtonColor, appBarTheme.foregroundColor);
   });
 
-  testWidgets('AppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+  testWidgets('AppBar uses AppBarTheme.titleSpacing', (final WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
@@ -648,7 +648,7 @@ void main() {
     expect(navToolBar.middleSpacing, kTitleSpacing);
   });
 
-  testWidgets('AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing', (WidgetTester tester) async {
+  testWidgets('AppBar.titleSpacing takes priority over AppBarTheme.titleSpacing', (final WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
@@ -664,7 +664,7 @@ void main() {
     expect(navToolBar.middleSpacing, 40);
   });
 
-  testWidgets('SliverAppBar uses AppBarTheme.titleSpacing', (WidgetTester tester) async {
+  testWidgets('SliverAppBar uses AppBarTheme.titleSpacing', (final WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
@@ -681,7 +681,7 @@ void main() {
     expect(navToolBar.middleSpacing, kTitleSpacing);
   });
 
-  testWidgets('SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.titleSpacing takes priority over AppBarTheme.titleSpacing ', (final WidgetTester tester) async {
     const double kTitleSpacing = 10;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(appBarTheme: const AppBarTheme(titleSpacing: kTitleSpacing)),
@@ -699,7 +699,7 @@ void main() {
     expect(navToolbar.middleSpacing, 40);
   });
 
-  testWidgets('SliverAppBar.medium uses AppBarTheme properties', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium uses AppBarTheme properties', (final WidgetTester tester) async {
     const String title = 'Medium App Bar';
 
     await tester.pumpWidget(MaterialApp(
@@ -755,7 +755,7 @@ void main() {
     expect(titleOffset.dx, iconOffset.dx + appBarTheme.titleSpacing!);
   });
 
-  testWidgets('SliverAppBar.medium properties take priority over AppBarTheme properties', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.medium properties take priority over AppBarTheme properties', (final WidgetTester tester) async {
     const String title = 'Medium App Bar';
     const Color backgroundColor = Color(0xff000099);
     const Color foregroundColor = Color(0xff00ff98);
@@ -832,7 +832,7 @@ void main() {
     expect(titleOffset.dx, iconOffset.dx + titleSpacing);
   });
 
-  testWidgets('SliverAppBar.large uses AppBarTheme properties', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large uses AppBarTheme properties', (final WidgetTester tester) async {
     const String title = 'Large App Bar';
 
     await tester.pumpWidget(MaterialApp(
@@ -888,7 +888,7 @@ void main() {
     expect(titleOffset.dx, iconOffset.dx + appBarTheme.titleSpacing!);
   });
 
-  testWidgets('SliverAppBar.large properties take priority over AppBarTheme properties', (WidgetTester tester) async {
+  testWidgets('SliverAppBar.large properties take priority over AppBarTheme properties', (final WidgetTester tester) async {
     const String title = 'Large App Bar';
     const Color backgroundColor = Color(0xff000099);
     const Color foregroundColor = Color(0xff00ff98);
@@ -966,12 +966,12 @@ void main() {
   });
 
   testWidgets(
-    'SliverAppBar medium & large supports foregroundColor', (WidgetTester tester) async {
+    'SliverAppBar medium & large supports foregroundColor', (final WidgetTester tester) async {
     const String title = 'AppBar title';
     const AppBarTheme appBarTheme = AppBarTheme(foregroundColor: Color(0xff00ff20));
     const Color foregroundColor = Color(0xff001298);
 
-    Widget buildWidget({ Color? color, AppBarTheme? appBarTheme }) {
+    Widget buildWidget({ final Color? color, final AppBarTheme? appBarTheme }) {
       return MaterialApp(
         theme: ThemeData(appBarTheme: appBarTheme),
         home: CustomScrollView(
@@ -1009,19 +1009,19 @@ void main() {
     expect(largeTitle.text.style!.color, foregroundColor);
   });
 
-  testWidgets('Default AppBarTheme debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default AppBarTheme debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('AppBarTheme implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AppBarTheme implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const AppBarTheme(
       backgroundColor: Color(0xff000001),
@@ -1033,8 +1033,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[
@@ -1077,7 +1077,7 @@ AppBarTheme _appBarTheme() {
   );
 }
 
-Material _getAppBarMaterial(WidgetTester tester) {
+Material _getAppBarMaterial(final WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(
       of: find.byType(AppBar),
@@ -1086,7 +1086,7 @@ Material _getAppBarMaterial(WidgetTester tester) {
   );
 }
 
-IconTheme _getAppBarIconTheme(WidgetTester tester) {
+IconTheme _getAppBarIconTheme(final WidgetTester tester) {
   return tester.widget<IconTheme>(
     find.descendant(
       of: find.byType(AppBar),
@@ -1095,7 +1095,7 @@ IconTheme _getAppBarIconTheme(WidgetTester tester) {
   );
 }
 
-IconTheme _getAppBarActionsIconTheme(WidgetTester tester) {
+IconTheme _getAppBarActionsIconTheme(final WidgetTester tester) {
   return tester.widget<IconTheme>(
     find.descendant(
       of: find.byType(NavigationToolbar),
@@ -1104,7 +1104,7 @@ IconTheme _getAppBarActionsIconTheme(WidgetTester tester) {
   );
 }
 
-RichText _getAppBarIconRichText(WidgetTester tester) {
+RichText _getAppBarIconRichText(final WidgetTester tester) {
   return tester.widget<RichText>(
     find.descendant(
       of: find.byType(Icon),
@@ -1113,7 +1113,7 @@ RichText _getAppBarIconRichText(WidgetTester tester) {
   );
 }
 
-DefaultTextStyle _getAppBarText(WidgetTester tester) {
+DefaultTextStyle _getAppBarText(final WidgetTester tester) {
   return tester.widget<DefaultTextStyle>(
     find.descendant(
       of: find.byType(CustomSingleChildLayout),
@@ -1122,7 +1122,7 @@ DefaultTextStyle _getAppBarText(WidgetTester tester) {
   );
 }
 
-TextStyle? _iconStyle(WidgetTester tester, IconData icon) {
+TextStyle? _iconStyle(final WidgetTester tester, final IconData icon) {
   final RichText iconRichText = tester.widget<RichText>(
     find.descendant(of: find.byIcon(icon).first, matching: find.byType(RichText)),
   );

@@ -12,7 +12,7 @@ class AlertDialogApp extends StatelessWidget {
   const AlertDialogApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: AlertDialogExample(),
@@ -24,10 +24,10 @@ class AlertDialogExample extends StatelessWidget {
   const AlertDialogExample({super.key});
 
   // This shows a CupertinoModalPopup which hosts a CupertinoAlertDialog.
-  void _showAlertDialog(BuildContext context) {
+  void _showAlertDialog(final BuildContext context) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoAlertDialog(
+      builder: (final BuildContext context) => CupertinoAlertDialog(
         title: const Text('Alert'),
         content: const Text('Proceed with destructive action?'),
         actions: <CupertinoDialogAction>[
@@ -56,7 +56,7 @@ class AlertDialogExample extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoAlertDialog Sample'),

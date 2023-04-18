@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets(
     'default search field has a border radius',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -35,7 +35,7 @@ void main() {
 
   testWidgets(
     'decoration overrides default background color',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -64,7 +64,7 @@ void main() {
 
   testWidgets(
     'decoration overrides default border radius',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -93,7 +93,7 @@ void main() {
 
   testWidgets(
     'text entries are padded by default',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -112,7 +112,7 @@ void main() {
     },
   );
 
-  testWidgets('can change keyboard type', (WidgetTester tester) async {
+  testWidgets('can change keyboard type', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -130,7 +130,7 @@ void main() {
 
   testWidgets(
     'can control text content via controller',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
 
       await tester.pumpWidget(
@@ -155,7 +155,7 @@ void main() {
     },
   );
 
-  testWidgets('placeholder color', (WidgetTester tester) async {
+  testWidgets('placeholder color', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         theme: CupertinoThemeData(brightness: Brightness.dark),
@@ -185,7 +185,7 @@ void main() {
 
   testWidgets(
     "placeholderStyle modifies placeholder's style and doesn't affect text's style",
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -219,7 +219,7 @@ void main() {
 
   testWidgets(
     'prefix widget is in front of the text',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -246,7 +246,7 @@ void main() {
 
   testWidgets(
     'suffix widget is after the text',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -273,7 +273,7 @@ void main() {
     },
   );
 
-  testWidgets('prefix widget visibility', (WidgetTester tester) async {
+  testWidgets('prefix widget visibility', (final WidgetTester tester) async {
       const Key prefixIcon = Key('prefix');
 
       await tester.pumpWidget(
@@ -304,7 +304,7 @@ void main() {
 
   testWidgets(
     'suffix widget respects visibility mode',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -327,7 +327,7 @@ void main() {
 
   testWidgets(
     'clear button shows with right visibility mode',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         CupertinoApp(
@@ -372,7 +372,7 @@ void main() {
 
   testWidgets(
     'clear button removes text',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
         CupertinoApp(
@@ -399,7 +399,7 @@ void main() {
 
   testWidgets(
     'tapping clear button also calls onChanged when text not empty',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       String value = 'text entry';
       final TextEditingController controller = TextEditingController();
       await tester.pumpWidget(
@@ -408,7 +408,7 @@ void main() {
             child: CupertinoSearchTextField(
               controller: controller,
               placeholder: 'placeholder',
-              onChanged: (String newValue) => value = newValue,
+              onChanged: (final String newValue) => value = newValue,
             ),
           ),
         ),
@@ -428,7 +428,7 @@ void main() {
 
   testWidgets(
     'RTL puts attachments to the right places',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Directionality(
@@ -456,7 +456,7 @@ void main() {
 
   testWidgets(
     'Can modify prefix and suffix insets',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
           home: Center(
@@ -483,7 +483,7 @@ void main() {
 
   testWidgets(
     'custom suffix onTap overrides default clearing behavior',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'Text');
       await tester.pumpWidget(
         CupertinoApp(
@@ -506,7 +506,7 @@ void main() {
     },
   );
 
-  testWidgets('onTap is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('onTap is properly forwarded to the inner text field', (final WidgetTester tester) async {
     int onTapCallCount = 0;
 
     // onTap can be null.
@@ -536,7 +536,7 @@ void main() {
     expect(onTapCallCount, 1);
   });
 
-  testWidgets('autocorrect is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('autocorrect is properly forwarded to the inner text field', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -551,7 +551,7 @@ void main() {
     expect(textField.autocorrect, false);
   });
 
-  testWidgets('enabled is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('enabled is properly forwarded to the inner text field', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -566,7 +566,7 @@ void main() {
     expect(textField.enabled, false);
   });
 
-  testWidgets('textInputAction is set to TextInputAction.search by default', (WidgetTester tester) async {
+  testWidgets('textInputAction is set to TextInputAction.search by default', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -579,7 +579,7 @@ void main() {
     expect(textField.textInputAction, TextInputAction.search);
   });
 
-  testWidgets('autofocus:true gives focus to the widget', (WidgetTester tester) async {
+  testWidgets('autofocus:true gives focus to the widget', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       CupertinoApp(
@@ -595,7 +595,7 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
-  testWidgets('smartQuotesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('smartQuotesType is properly forwarded to the inner text field', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -610,7 +610,7 @@ void main() {
     expect(textField.smartQuotesType, SmartQuotesType.disabled);
   });
 
-  testWidgets('smartDashesType is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('smartDashesType is properly forwarded to the inner text field', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -625,7 +625,7 @@ void main() {
     expect(textField.smartDashesType, SmartDashesType.disabled);
   });
 
-  testWidgets('enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
+  testWidgets('enableIMEPersonalizedLearning is properly forwarded to the inner text field', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

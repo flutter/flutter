@@ -86,7 +86,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(anchorPoint != null || debugCheckHasDirectionality(
         context,
         why: 'to determine which sub-screen DisplayFeatureSubScreen uses',
@@ -113,7 +113,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     );
   }
 
-  static Offset _fallbackAnchorPoint(BuildContext context) {
+  static Offset _fallbackAnchorPoint(final BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     switch (textDirection) {
       case TextDirection.rtl:
@@ -127,15 +127,15 @@ class DisplayFeatureSubScreen extends StatelessWidget {
   ///
   /// A [DisplayFeature] obstructs the screen when the area it occupies is
   /// not 0 or the `state` is [DisplayFeatureState.postureHalfOpened].
-  static Iterable<Rect> avoidBounds(MediaQueryData mediaQuery) {
+  static Iterable<Rect> avoidBounds(final MediaQueryData mediaQuery) {
     return mediaQuery.displayFeatures
-        .where((DisplayFeature d) => d.bounds.shortestSide > 0 ||
+        .where((final DisplayFeature d) => d.bounds.shortestSide > 0 ||
             d.state == DisplayFeatureState.postureHalfOpened)
-        .map((DisplayFeature d) => d.bounds);
+        .map((final DisplayFeature d) => d.bounds);
   }
 
   /// Returns the closest sub-screen to the [anchorPoint].
-  static Rect _closestToAnchorPoint(Iterable<Rect> subScreens, Offset anchorPoint) {
+  static Rect _closestToAnchorPoint(final Iterable<Rect> subScreens, final Offset anchorPoint) {
     Rect closestScreen = subScreens.first;
     double closestDistance = _distanceFromPointToRect(anchorPoint, closestScreen);
     for (final Rect screen in subScreens) {
@@ -148,7 +148,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     return closestScreen;
   }
 
-  static double _distanceFromPointToRect(Offset point, Rect rect) {
+  static double _distanceFromPointToRect(final Offset point, final Rect rect) {
     // Cases for point position relative to rect:
     // 1  2  3
     // 4 [R] 5
@@ -191,7 +191,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
 
   /// Returns sub-screens resulted by dividing [wantedBounds] along items of
   /// [avoidBounds] that are at least as tall or as wide.
-  static Iterable<Rect> subScreensInBounds(Rect wantedBounds, Iterable<Rect> avoidBounds) {
+  static Iterable<Rect> subScreensInBounds(final Rect wantedBounds, final Iterable<Rect> avoidBounds) {
     Iterable<Rect> subScreens = <Rect>[wantedBounds];
     for (final Rect bounds in avoidBounds) {
       final List<Rect> newSubScreens = <Rect>[];
@@ -245,7 +245,7 @@ class DisplayFeatureSubScreen extends StatelessWidget {
     return subScreens;
   }
 
-  static Offset _capOffset(Offset offset, Size maximum) {
+  static Offset _capOffset(final Offset offset, final Size maximum) {
     if (offset.dx >= 0 && offset.dx <= maximum.width
         && offset.dy >=0 && offset.dy <= maximum.height) {
       return offset;

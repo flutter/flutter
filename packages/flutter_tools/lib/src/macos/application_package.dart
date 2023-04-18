@@ -12,14 +12,14 @@ import '../ios/plist_parser.dart';
 import '../xcode_project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory.
-bool _isBundleDirectory(FileSystemEntity entity) =>
+bool _isBundleDirectory(final FileSystemEntity entity) =>
     entity is Directory && entity.path.endsWith('.app');
 
 abstract class MacOSApp extends ApplicationPackage {
-  MacOSApp({required String projectBundleId}) : super(id: projectBundleId);
+  MacOSApp({required final String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [MacOSApp] from a macOS project directory.
-  factory MacOSApp.fromMacOSProject(MacOSProject project) {
+  factory MacOSApp.fromMacOSProject(final MacOSProject project) {
     // projectBundleId is unused for macOS apps. Use a placeholder bundle ID.
     return BuildableMacOSApp(project, 'com.example.placeholder');
   }
@@ -31,7 +31,7 @@ abstract class MacOSApp extends ApplicationPackage {
   /// "~/Library/Developer/Xcode/DerivedData/" and contains an executable
   /// which is expected to start the application and send the vmService
   /// port over stdout.
-  static MacOSApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
+  static MacOSApp? fromPrebuiltApp(final FileSystemEntity applicationBinary) {
     final _BundleInfo? bundleInfo = _executableFromBundle(applicationBinary);
     if (bundleInfo == null) {
       return null;
@@ -47,7 +47,7 @@ abstract class MacOSApp extends ApplicationPackage {
   }
 
   /// Look up the executable name for a macOS application bundle.
-  static _BundleInfo? _executableFromBundle(FileSystemEntity applicationBundle) {
+  static _BundleInfo? _executableFromBundle(final FileSystemEntity applicationBundle) {
     final FileSystemEntityType entityType = globals.fs.typeSync(applicationBundle.path);
     if (entityType == FileSystemEntityType.notFound) {
       globals.printError('File "${applicationBundle.path}" does not exist.');
@@ -106,9 +106,9 @@ abstract class MacOSApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String? applicationBundle(BuildInfo buildInfo);
+  String? applicationBundle(final BuildInfo buildInfo);
 
-  String? executable(BuildInfo buildInfo);
+  String? executable(final BuildInfo buildInfo);
 }
 
 class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
@@ -116,7 +116,7 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
     required this.uncompressedBundle,
     required this.bundleName,
     required this.projectBundleId,
-    required String executable,
+    required final String executable,
     required this.applicationPackage,
   }) : _executable = executable,
        super(projectBundleId: projectBundleId);
@@ -135,10 +135,10 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
   String get name => bundleName;
 
   @override
-  String? applicationBundle(BuildInfo buildInfo) => uncompressedBundle.path;
+  String? applicationBundle(final BuildInfo buildInfo) => uncompressedBundle.path;
 
   @override
-  String? executable(BuildInfo buildInfo) => _executable;
+  String? executable(final BuildInfo buildInfo) => _executable;
 
   /// A [File] or [Directory] pointing to the application bundle.
   ///
@@ -148,7 +148,7 @@ class PrebuiltMacOSApp extends MacOSApp implements PrebuiltApplicationPackage {
 }
 
 class BuildableMacOSApp extends MacOSApp {
-  BuildableMacOSApp(this.project, String projectBundleId): super(projectBundleId: projectBundleId);
+  BuildableMacOSApp(this.project, final String projectBundleId): super(projectBundleId: projectBundleId);
 
   final MacOSProject project;
 
@@ -156,7 +156,7 @@ class BuildableMacOSApp extends MacOSApp {
   String get name => 'macOS';
 
   @override
-  String? applicationBundle(BuildInfo buildInfo) {
+  String? applicationBundle(final BuildInfo buildInfo) {
     final File appBundleNameFile = project.nameFile;
     if (!appBundleNameFile.existsSync()) {
       globals.printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
@@ -171,14 +171,14 @@ class BuildableMacOSApp extends MacOSApp {
         appBundleNameFile.readAsStringSync().trim());
   }
 
-  String bundleDirectory(BuildInfo buildInfo) {
+  String bundleDirectory(final BuildInfo buildInfo) {
     return sentenceCase(buildInfo.mode.cliName) + (buildInfo.flavor != null
       ? ' ${sentenceCase(buildInfo.flavor!)}'
       : '');
   }
 
   @override
-  String? executable(BuildInfo buildInfo) {
+  String? executable(final BuildInfo buildInfo) {
     final String? directory = applicationBundle(buildInfo);
     if (directory == null) {
       return null;

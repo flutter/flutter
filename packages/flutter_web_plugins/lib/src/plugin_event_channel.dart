@@ -70,7 +70,7 @@ class PluginEventChannel<T> {
     'Replace calls to the "controller" setter with calls to the "setController" method. '
     'This feature was deprecated after v1.23.0-7.0.pre.'
   )
-  set controller(StreamController<T> controller) { // ignore: avoid_setters_without_getters
+  set controller(final StreamController<T> controller) { // ignore: avoid_setters_without_getters
     setController(controller);
   }
 
@@ -78,7 +78,7 @@ class PluginEventChannel<T> {
   ///
   /// Setting the controller to null disconnects from the channel (setting
   /// the message handler on the [binaryMessenger] to null).
-  void setController(StreamController<T>? controller) {
+  void setController(final StreamController<T>? controller) {
     final BinaryMessenger messenger = binaryMessenger ?? pluginBinaryMessenger;
     if (controller == null) {
       messenger.setMessageHandler(name, null);
@@ -116,7 +116,7 @@ class _EventChannelHandler<T> {
 
   StreamSubscription<T>? subscription;
 
-  Future<ByteData>? handle(ByteData? message) {
+  Future<ByteData>? handle(final ByteData? message) {
     final MethodCall call = codec.decodeMethodCall(message);
     switch (call.method) {
       case 'listen':
@@ -132,9 +132,9 @@ class _EventChannelHandler<T> {
   Future<ByteData> _listen() async {
     // Cancel any existing subscription.
     await subscription?.cancel();
-    subscription = controller.stream.listen((dynamic event) {
+    subscription = controller.stream.listen((final dynamic event) {
       messenger.send(name, codec.encodeSuccessEnvelope(event));
-    }, onError: (dynamic error) {
+    }, onError: (final dynamic error) {
       messenger.send(name, codec.encodeErrorEnvelope(code: 'error', message: '$error'));
     });
     return codec.encodeSuccessEnvelope(null);

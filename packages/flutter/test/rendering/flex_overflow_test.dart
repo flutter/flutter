@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'mock_canvas.dart';
 
 void main() {
-  testWidgets('Flex overflow indicator', (WidgetTester tester) async {
+  testWidgets('Flex overflow indicator', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Column(

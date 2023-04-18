@@ -30,10 +30,10 @@ class TableBorder {
   ///
   /// The sides default to black solid borders, one logical pixel wide.
   factory TableBorder.all({
-    Color color = const Color(0xFF000000),
-    double width = 1.0,
-    BorderStyle style = BorderStyle.solid,
-    BorderRadius borderRadius = BorderRadius.zero,
+    final Color color = const Color(0xFF000000),
+    final double width = 1.0,
+    final BorderStyle style = BorderStyle.solid,
+    final BorderRadius borderRadius = BorderRadius.zero,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
     return TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side, borderRadius: borderRadius);
@@ -42,8 +42,8 @@ class TableBorder {
   /// Creates a border for a table where all the interior sides use the same
   /// styling and all the exterior sides use the same styling.
   factory TableBorder.symmetric({
-    BorderSide inside = BorderSide.none,
-    BorderSide outside = BorderSide.none,
+    final BorderSide inside = BorderSide.none,
+    final BorderSide outside = BorderSide.none,
   }) {
     return TableBorder(
       top: outside,
@@ -135,7 +135,7 @@ class TableBorder {
   /// See also:
   ///
   ///  * [BorderSide.scale], which is used to implement this method.
-  TableBorder scale(double t) {
+  TableBorder scale(final double t) {
     return TableBorder(
       top: top.scale(t),
       right: right.scale(t),
@@ -152,7 +152,7 @@ class TableBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TableBorder? lerp(TableBorder? a, TableBorder? b, double t) {
+  static TableBorder? lerp(final TableBorder? a, final TableBorder? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -199,10 +199,10 @@ class TableBorder {
   /// The paint order is particularly notable in the case of
   /// partially-transparent borders.
   void paint(
-    Canvas canvas,
-    Rect rect, {
-    required Iterable<double> rows,
-    required Iterable<double> columns,
+    final Canvas canvas,
+    final Rect rect, {
+    required final Iterable<double> rows,
+    required final Iterable<double> columns,
   }) {
     // properties can't be null
 
@@ -261,7 +261,7 @@ class TableBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

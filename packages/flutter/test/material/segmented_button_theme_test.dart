@@ -29,19 +29,19 @@ void main() {
     expect(identical(SegmentedButtonThemeData.lerp(theme, theme, 0.5), theme), true);
   });
 
-  testWidgets('Default SegmentedButtonThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SegmentedButtonThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SegmentedButtonThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('With no other configuration, defaults are used', (WidgetTester tester) async {
+  testWidgets('With no other configuration, defaults are used', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -55,7 +55,7 @@ void main() {
                 ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
               ],
               selected: const <int>{2},
-              onSelectionChanged: (Set<int> selected) { },
+              onSelectionChanged: (final Set<int> selected) { },
             ),
           ),
         ),
@@ -108,12 +108,12 @@ void main() {
     }
   });
 
-  testWidgets('ThemeData.segmentedButtonTheme overrides defaults', (WidgetTester tester) async {
+  testWidgets('ThemeData.segmentedButtonTheme overrides defaults', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       useMaterial3: true,
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: ButtonStyle(
-          backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          backgroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
             if (states.contains(MaterialState.disabled)) {
               return Colors.blue;
             }
@@ -122,7 +122,7 @@ void main() {
             }
             return null;
           }),
-          foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+          foregroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
             if (states.contains(MaterialState.disabled)) {
               return Colors.yellow;
             }
@@ -148,7 +148,7 @@ void main() {
                 ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
               ],
               selected: const <int>{2},
-              onSelectionChanged: (Set<int> selected) { },
+              onSelectionChanged: (final Set<int> selected) { },
             ),
           ),
         ),
@@ -201,10 +201,10 @@ void main() {
     }
   });
 
-  testWidgets('SegmentedButtonTheme overrides ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('SegmentedButtonTheme overrides ThemeData and defaults', (final WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        backgroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.blue;
           }
@@ -213,7 +213,7 @@ void main() {
           }
           return null;
         }),
-        foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        foregroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.yellow;
           }
@@ -228,7 +228,7 @@ void main() {
     );
     final SegmentedButtonThemeData segmentedTheme = SegmentedButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        backgroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.lightBlue;
           }
@@ -237,7 +237,7 @@ void main() {
           }
           return null;
         }),
-        foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        foregroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.lime;
           }
@@ -268,7 +268,7 @@ void main() {
                   ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
                 ],
                 selected: const <int>{2},
-                onSelectionChanged: (Set<int> selected) { },
+                onSelectionChanged: (final Set<int> selected) { },
               ),
             ),
           ),
@@ -328,10 +328,10 @@ void main() {
     }
   });
 
-  testWidgets('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (WidgetTester tester) async {
+  testWidgets('Widget parameters overrides SegmentedTheme, ThemeData and defaults', (final WidgetTester tester) async {
     final SegmentedButtonThemeData global = SegmentedButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        backgroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.blue;
           }
@@ -340,7 +340,7 @@ void main() {
           }
           return null;
         }),
-        foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        foregroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.yellow;
           }
@@ -355,7 +355,7 @@ void main() {
     );
     final SegmentedButtonThemeData segmentedTheme = SegmentedButtonThemeData(
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        backgroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.lightBlue;
           }
@@ -364,7 +364,7 @@ void main() {
           }
           return null;
         }),
-        foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+        foregroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.disabled)) {
             return Colors.lime;
           }
@@ -395,9 +395,9 @@ void main() {
                   ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
                 ],
                 selected: const <int>{2},
-                onSelectionChanged: (Set<int> selected) { },
+                onSelectionChanged: (final Set<int> selected) { },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  backgroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                     if (states.contains(MaterialState.disabled)) {
                       return Colors.black12;
                     }
@@ -406,7 +406,7 @@ void main() {
                     }
                     return null;
                   }),
-                  foregroundColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                  foregroundColor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                     if (states.contains(MaterialState.disabled)) {
                       return Colors.amberAccent;
                     }

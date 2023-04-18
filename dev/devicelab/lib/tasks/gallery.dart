@@ -17,18 +17,18 @@ final Directory galleryDirectory = dir('${flutterDirectory.path}/dev/integration
 /// Temp function during gallery tests transition to build+test model.
 ///
 /// https://github.com/flutter/flutter/issues/103542
-TaskFunction createGalleryTransitionBuildTest(List<String> args, {bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionBuildTest(final List<String> args, {final bool semanticsEnabled = false}) {
   return GalleryTransitionBuildTest(args, semanticsEnabled: semanticsEnabled).call;
 }
 
-TaskFunction createGalleryTransitionTest({bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionTest({final bool semanticsEnabled = false}) {
   return GalleryTransitionTest(semanticsEnabled: semanticsEnabled).call;
 }
 
 TaskFunction createGalleryTransitionE2EBuildTest(
-  List<String> args, {
-  bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  final List<String> args, {
+  final bool semanticsEnabled = false,
+  final bool enableImpeller = false,
 }) {
   return GalleryTransitionBuildTest(
     args,
@@ -43,8 +43,8 @@ TaskFunction createGalleryTransitionE2EBuildTest(
 }
 
 TaskFunction createGalleryTransitionE2ETest({
-  bool semanticsEnabled = false,
-  bool enableImpeller = false,
+  final bool semanticsEnabled = false,
+  final bool enableImpeller = false,
 }) {
   return GalleryTransitionTest(
     testFile: semanticsEnabled
@@ -60,8 +60,8 @@ TaskFunction createGalleryTransitionE2ETest({
 }
 
 TaskFunction createGalleryTransitionHybridBuildTest(
-  List<String> args, {
-  bool semanticsEnabled = false,
+  final List<String> args, {
+  final bool semanticsEnabled = false,
 }) {
   return GalleryTransitionBuildTest(
     args,
@@ -70,7 +70,7 @@ TaskFunction createGalleryTransitionHybridBuildTest(
   ).call;
 }
 
-TaskFunction createGalleryTransitionHybridTest({bool semanticsEnabled = false}) {
+TaskFunction createGalleryTransitionHybridTest({final bool semanticsEnabled = false}) {
   return GalleryTransitionTest(
     semanticsEnabled: semanticsEnabled,
     driverFile: semanticsEnabled
@@ -262,7 +262,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   }
 
   @override
-  List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) {
+  List<String> getBuildArgs(final DeviceOperatingSystem deviceOperatingSystem) {
     return <String>[
       'apk',
       '--no-android-gradle-daemon',
@@ -275,7 +275,7 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   }
 
   @override
-  List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) {
+  List<String> getTestArgs(final DeviceOperatingSystem deviceOperatingSystem, final String deviceId) {
     final String testDriver = driverFile ?? (semanticsEnabled ? '${testFile}_with_semantics_test' : '${testFile}_test');
     return <String>[
       '--no-dds',
@@ -368,10 +368,10 @@ class GalleryTransitionBuildTest extends BuildTestTask {
   }
 }
 
-int _countMissedTransitions(Map<String, List<int>> transitions) {
+int _countMissedTransitions(final Map<String, List<int>> transitions) {
   const int kTransitionBudget = 100000; // µs
   int count = 0;
-  transitions.forEach((String demoName, List<int> durations) {
+  transitions.forEach((final String demoName, final List<int> durations) {
     final int longestDuration = durations.reduce(math.max);
     if (longestDuration > kTransitionBudget) {
       print('$demoName missed transition time budget ($longestDuration µs > $kTransitionBudget µs)');

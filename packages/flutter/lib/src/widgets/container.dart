@@ -73,7 +73,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   final DecorationPosition position;
 
   @override
-  RenderDecoratedBox createRenderObject(BuildContext context) {
+  RenderDecoratedBox createRenderObject(final BuildContext context) {
     return RenderDecoratedBox(
       decoration: decoration,
       position: position,
@@ -82,7 +82,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderDecoratedBox renderObject) {
     renderObject
       ..decoration = decoration
       ..configuration = createLocalImageConfiguration(context)
@@ -90,7 +90,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final String label;
     switch (position) {
@@ -253,9 +253,9 @@ class Container extends StatelessWidget {
     this.color,
     this.decoration,
     this.foregroundDecoration,
-    double? width,
-    double? height,
-    BoxConstraints? constraints,
+    final double? width,
+    final double? height,
+    final BoxConstraints? constraints,
     this.margin,
     this.transform,
     this.transformAlignment,
@@ -376,7 +376,7 @@ class Container extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget? current = child;
 
     if (child == null && (constraints == null || !constraints!.isTight)) {
@@ -438,7 +438,7 @@ class Container extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
@@ -458,7 +458,7 @@ class Container extends StatelessWidget {
 /// A clipper that uses [Decoration.getClipPath] to clip.
 class _DecorationClipper extends CustomClipper<Path> {
   _DecorationClipper({
-    TextDirection? textDirection,
+    final TextDirection? textDirection,
     required this.decoration,
   }) : textDirection = textDirection ?? TextDirection.ltr;
 
@@ -466,12 +466,12 @@ class _DecorationClipper extends CustomClipper<Path> {
   final Decoration decoration;
 
   @override
-  Path getClip(Size size) {
+  Path getClip(final Size size) {
     return decoration.getClipPath(Offset.zero & size, textDirection);
   }
 
   @override
-  bool shouldReclip(_DecorationClipper oldClipper) {
+  bool shouldReclip(final _DecorationClipper oldClipper) {
     return oldClipper.decoration != decoration
         || oldClipper.textDirection != textDirection;
   }

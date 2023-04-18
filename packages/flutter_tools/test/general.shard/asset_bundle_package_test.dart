@@ -18,7 +18,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  String fixPath(String path) {
+  String fixPath(final String path) {
     // The in-memory file system is strict about slashes on Windows being the
     // correct way so until https://github.com/google/file.dart/issues/112 is
     // fixed we fix them here.
@@ -26,7 +26,7 @@ void main() {
     // rolls into Flutter.
     return path.replaceAll('/', globals.fs.path.separator);
   }
-  void writePubspecFile(String path, String name, { List<String>? assets }) {
+  void writePubspecFile(final String path, final String name, { final List<String>? assets }) {
     String assetsSection;
     if (assets == null) {
       assetsSection = '';
@@ -56,20 +56,20 @@ $assetsSection
 ''');
   }
 
-  void writePackagesFile(String packages) {
+  void writePackagesFile(final String packages) {
     globals.fs.file('.packages')
       ..createSync()
       ..writeAsStringSync(packages);
   }
 
   Future<void> buildAndVerifyAssets(
-    List<String> assets,
-    List<String> packages,
-    String? expectedJsonAssetManifest,
-    String? expectedBinAssetManifestAsJson, {
-    bool expectExists = true,
+    final List<String> assets,
+    final List<String> packages,
+    final String? expectedJsonAssetManifest,
+    final String? expectedBinAssetManifestAsJson, {
+    final bool expectExists = true,
   }) async {
-    Future<String> extractAssetManifestBinFromBundleAsJson(AssetBundle bundle) async {
+    Future<String> extractAssetManifestBinFromBundleAsJson(final AssetBundle bundle) async {
       final List<int> manifestBytes = await bundle.entries['AssetManifest.bin']!.contentsAsBytes();
       return json.encode(const StandardMessageCodec().decodeMessage(
         ByteData.sublistView(Uint8List.fromList(manifestBytes))
@@ -105,7 +105,7 @@ $assetsSection
     }
   }
 
-  void writeAssets(String path, List<String> assets) {
+  void writeAssets(final String path, final List<String> assets) {
     for (final String asset in assets) {
       final String fullPath = fixPath(globals.fs.path.join(path, asset));
 

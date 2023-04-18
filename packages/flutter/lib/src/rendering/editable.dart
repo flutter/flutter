@@ -52,7 +52,7 @@ class TextSelectionPoint {
   final TextDirection? direction;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -170,7 +170,7 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
 
   final Map<int, MapEntry<Offset, TextPosition>> _positionCache = <int, MapEntry<Offset, TextPosition>>{};
 
-  MapEntry<Offset, TextPosition> _getTextPositionForLine(int lineNumber) {
+  MapEntry<Offset, TextPosition> _getTextPositionForLine(final int lineNumber) {
     assert(isValid);
     assert(lineNumber >= 0);
     final MapEntry<Offset, TextPosition>? cachedPosition = _positionCache[lineNumber];
@@ -226,7 +226,7 @@ class VerticalCaretMovementRun implements Iterator<TextPosition> {
   /// If [offset] is negative, move backward; otherwise move forward.
   ///
   /// Returns true and updates [current] if successful.
-  bool moveByOffset(double offset) {
+  bool moveByOffset(final double offset) {
     final Offset initialOffset = _currentOffset;
     if (offset >= 0.0) {
       while (_currentOffset.dy < initialOffset.dy + offset) {
@@ -281,49 +281,49 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The [offset] is required and must not be null. You can use [
   /// ViewportOffset.zero] if you have no need for scrolling.
   RenderEditable({
-    InlineSpan? text,
-    required TextDirection textDirection,
-    TextAlign textAlign = TextAlign.start,
-    Color? cursorColor,
-    Color? backgroundCursorColor,
-    ValueNotifier<bool>? showCursor,
-    bool? hasFocus,
-    required LayerLink startHandleLayerLink,
-    required LayerLink endHandleLayerLink,
-    int? maxLines = 1,
-    int? minLines,
-    bool expands = false,
-    StrutStyle? strutStyle,
-    Color? selectionColor,
-    double textScaleFactor = 1.0,
-    TextSelection? selection,
-    required ViewportOffset offset,
+    final InlineSpan? text,
+    required final TextDirection textDirection,
+    final TextAlign textAlign = TextAlign.start,
+    final Color? cursorColor,
+    final Color? backgroundCursorColor,
+    final ValueNotifier<bool>? showCursor,
+    final bool? hasFocus,
+    required final LayerLink startHandleLayerLink,
+    required final LayerLink endHandleLayerLink,
+    final int? maxLines = 1,
+    final int? minLines,
+    final bool expands = false,
+    final StrutStyle? strutStyle,
+    final Color? selectionColor,
+    final double textScaleFactor = 1.0,
+    final TextSelection? selection,
+    required final ViewportOffset offset,
     this.onCaretChanged,
     this.ignorePointer = false,
-    bool readOnly = false,
-    bool forceLine = true,
-    TextHeightBehavior? textHeightBehavior,
-    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    String obscuringCharacter = '•',
-    bool obscureText = false,
-    Locale? locale,
-    double cursorWidth = 1.0,
-    double? cursorHeight,
-    Radius? cursorRadius,
-    bool paintCursorAboveText = false,
-    Offset cursorOffset = Offset.zero,
-    double devicePixelRatio = 1.0,
-    ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
-    bool? enableInteractiveSelection,
+    final bool readOnly = false,
+    final bool forceLine = true,
+    final TextHeightBehavior? textHeightBehavior,
+    final TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    final String obscuringCharacter = '•',
+    final bool obscureText = false,
+    final Locale? locale,
+    final double cursorWidth = 1.0,
+    final double? cursorHeight,
+    final Radius? cursorRadius,
+    final bool paintCursorAboveText = false,
+    final Offset cursorOffset = Offset.zero,
+    final double devicePixelRatio = 1.0,
+    final ui.BoxHeightStyle selectionHeightStyle = ui.BoxHeightStyle.tight,
+    final ui.BoxWidthStyle selectionWidthStyle = ui.BoxWidthStyle.tight,
+    final bool? enableInteractiveSelection,
     this.floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
-    TextRange? promptRectRange,
-    Color? promptRectColor,
-    Clip clipBehavior = Clip.hardEdge,
+    final TextRange? promptRectRange,
+    final Color? promptRectColor,
+    final Clip clipBehavior = Clip.hardEdge,
     required this.textSelectionDelegate,
-    RenderEditablePainter? painter,
-    RenderEditablePainter? foregroundPainter,
-    List<RenderBox>? children,
+    final RenderEditablePainter? painter,
+    final RenderEditablePainter? foregroundPainter,
+    final List<RenderBox>? children,
   }) : assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
        assert(
@@ -389,7 +389,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! TextParentData) {
       child.parentData = TextParentData();
     }
@@ -417,7 +417,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     super.dispose();
   }
 
-  void _updateForegroundPainter(RenderEditablePainter? newPainter) {
+  void _updateForegroundPainter(final RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
       ? _builtInForegroundPainters
       : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[
@@ -436,9 +436,9 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   late List<PlaceholderSpan> _placeholderSpans;
-  void _extractPlaceholderSpans(InlineSpan? span) {
+  void _extractPlaceholderSpans(final InlineSpan? span) {
     _placeholderSpans = <PlaceholderSpan>[];
-    span?.visitChildren((InlineSpan span) {
+    span?.visitChildren((final InlineSpan span) {
       if (span is PlaceholderSpan) {
         _placeholderSpans.add(span);
       }
@@ -454,14 +454,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// `shouldRepaint` method returns true.
   RenderEditablePainter? get foregroundPainter => _foregroundPainter;
   RenderEditablePainter? _foregroundPainter;
-  set foregroundPainter(RenderEditablePainter? newPainter) {
+  set foregroundPainter(final RenderEditablePainter? newPainter) {
     if (newPainter == _foregroundPainter) {
       return;
     }
     _updateForegroundPainter(newPainter);
   }
 
-  void _updatePainter(RenderEditablePainter? newPainter) {
+  void _updatePainter(final RenderEditablePainter? newPainter) {
     final _CompositeRenderEditablePainter effectivePainter = newPainter == null
       ? _builtInPainters
       : _CompositeRenderEditablePainter(painters: <RenderEditablePainter>[_builtInPainters, newPainter]);
@@ -484,7 +484,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// method returns true.
   RenderEditablePainter? get painter => _painter;
   RenderEditablePainter? _painter;
-  set painter(RenderEditablePainter? newPainter) {
+  set painter(final RenderEditablePainter? newPainter) {
     if (newPainter == _painter) {
       return;
     }
@@ -539,7 +539,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // when the selection is not collapsed.
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler? onCaretChanged;
-  void _onCaretChanged(Rect caretRect) {
+  void _onCaretChanged(final Rect caretRect) {
     if (_lastCaretRect != caretRect) {
       onCaretChanged?.call(caretRect);
     }
@@ -561,7 +561,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro dart.ui.textHeightBehavior}
   TextHeightBehavior? get textHeightBehavior => _textPainter.textHeightBehavior;
-  set textHeightBehavior(TextHeightBehavior? value) {
+  set textHeightBehavior(final TextHeightBehavior? value) {
     if (_textPainter.textHeightBehavior == value) {
       return;
     }
@@ -571,7 +571,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   TextWidthBasis get textWidthBasis => _textPainter.textWidthBasis;
-  set textWidthBasis(TextWidthBasis value) {
+  set textWidthBasis(final TextWidthBasis value) {
     if (_textPainter.textWidthBasis == value) {
       return;
     }
@@ -584,7 +584,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Should be obtained by querying MediaQuery for the devicePixelRatio.
   double get devicePixelRatio => _devicePixelRatio;
   double _devicePixelRatio;
-  set devicePixelRatio(double value) {
+  set devicePixelRatio(final double value) {
     if (devicePixelRatio == value) {
       return;
     }
@@ -597,7 +597,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Cannot be null, and must have a length of exactly one.
   String get obscuringCharacter => _obscuringCharacter;
   String _obscuringCharacter;
-  set obscuringCharacter(String value) {
+  set obscuringCharacter(final String value) {
     if (_obscuringCharacter == value) {
       return;
     }
@@ -609,7 +609,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Whether to hide the text being edited (e.g., for passwords).
   bool get obscureText => _obscureText;
   bool _obscureText;
-  set obscureText(bool value) {
+  set obscureText(final bool value) {
     if (_obscureText == value) {
       return;
     }
@@ -622,7 +622,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// See [ui.BoxHeightStyle] for details on available styles.
   ui.BoxHeightStyle get selectionHeightStyle => _selectionPainter.selectionHeightStyle;
-  set selectionHeightStyle(ui.BoxHeightStyle value) {
+  set selectionHeightStyle(final ui.BoxHeightStyle value) {
     _selectionPainter.selectionHeightStyle = value;
   }
 
@@ -630,7 +630,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// See [ui.BoxWidthStyle] for details on available styles.
   ui.BoxWidthStyle get selectionWidthStyle => _selectionPainter.selectionWidthStyle;
-  set selectionWidthStyle(ui.BoxWidthStyle value) {
+  set selectionWidthStyle(final ui.BoxWidthStyle value) {
     _selectionPainter.selectionWidthStyle = value;
   }
 
@@ -668,7 +668,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   final ValueNotifier<bool> _selectionEndInViewport = ValueNotifier<bool>(true);
 
   /// Returns the TextPosition above or below the given offset.
-  TextPosition _getTextPositionVertical(TextPosition position, double verticalOffset) {
+  TextPosition _getTextPositionVertical(final TextPosition position, final double verticalOffset) {
     final Offset caretOffset = _textPainter.getOffsetForCaret(position, _caretPrototype);
     final Offset caretOffsetTranslated = caretOffset.translate(0.0, verticalOffset);
     return _textPainter.getPositionForOffset(caretOffsetTranslated);
@@ -678,7 +678,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.services.TextLayoutMetrics.getLineAtOffset}
   @override
-  TextSelection getLineAtOffset(TextPosition position) {
+  TextSelection getLineAtOffset(final TextPosition position) {
     debugAssertLayoutUpToDate();
     final TextRange line = _textPainter.getLineBoundary(position);
     // If text is obscured, the entire string should be treated as one line.
@@ -690,13 +690,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.painting.TextPainter.getWordBoundary}
   @override
-  TextRange getWordBoundary(TextPosition position) {
+  TextRange getWordBoundary(final TextPosition position) {
     return _textPainter.getWordBoundary(position);
   }
 
   /// {@macro flutter.services.TextLayoutMetrics.getTextPositionAbove}
   @override
-  TextPosition getTextPositionAbove(TextPosition position) {
+  TextPosition getTextPositionAbove(final TextPosition position) {
     // The caret offset gives a location in the upper left hand corner of
     // the caret so the middle of the line above is a half line above that
     // point and the line below is 1.5 lines below that point.
@@ -707,7 +707,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// {@macro flutter.services.TextLayoutMetrics.getTextPositionBelow}
   @override
-  TextPosition getTextPositionBelow(TextPosition position) {
+  TextPosition getTextPositionBelow(final TextPosition position) {
     // The caret offset gives a location in the upper left hand corner of
     // the caret so the middle of the line above is a half line above that
     // point and the line below is 1.5 lines below that point.
@@ -718,7 +718,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   // End TextLayoutMetrics.
 
-  void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
+  void _updateSelectionExtentsVisibility(final Offset effectiveOffset) {
     assert(selection != null);
     if (!selection!.isValid) {
       _selectionStartInViewport.value = false;
@@ -751,11 +751,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       .contains(endOffset + effectiveOffset);
   }
 
-  void _setTextEditingValue(TextEditingValue newValue, SelectionChangedCause cause) {
+  void _setTextEditingValue(final TextEditingValue newValue, final SelectionChangedCause cause) {
     textSelectionDelegate.userUpdateTextEditingValue(newValue, cause);
   }
 
-  void _setSelection(TextSelection nextSelection, SelectionChangedCause cause) {
+  void _setSelection(TextSelection nextSelection, final SelectionChangedCause cause) {
     if (nextSelection.isValid) {
       // The nextSelection is calculated based on plainText, which can be out
       // of sync with the textSelectionDelegate.textEditingValue by one frame.
@@ -818,7 +818,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   final TextPainter _textPainter;
   AttributedString? _cachedAttributedValue;
   List<InlineSpanSemanticsInformation>? _cachedCombinedSemanticsInfos;
-  set text(InlineSpan? value) {
+  set text(final InlineSpan? value) {
     if (_textPainter.text == value) {
       return;
     }
@@ -835,7 +835,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// This must not be null.
   TextAlign get textAlign => _textPainter.textAlign;
-  set textAlign(TextAlign value) {
+  set textAlign(final TextAlign value) {
     if (_textPainter.textAlign == value) {
       return;
     }
@@ -860,7 +860,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // non-null value in the RenderEditable constructor and we refuse to
   // set it to null here, so _textPainter.textDirection cannot be null.
   TextDirection get textDirection => _textPainter.textDirection!;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (_textPainter.textDirection == value) {
       return;
     }
@@ -880,7 +880,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// If this value is null, a system-dependent algorithm is used to select
   /// the font.
   Locale? get locale => _textPainter.locale;
-  set locale(Locale? value) {
+  set locale(final Locale? value) {
     if (_textPainter.locale == value) {
       return;
     }
@@ -891,7 +891,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The [StrutStyle] used by the renderer's internal [TextPainter] to
   /// determine the strut to use.
   StrutStyle? get strutStyle => _textPainter.strutStyle;
-  set strutStyle(StrutStyle? value) {
+  set strutStyle(final StrutStyle? value) {
     if (_textPainter.strutStyle == value) {
       return;
     }
@@ -901,7 +901,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// The color to use when painting the cursor.
   Color? get cursorColor => _caretPainter.caretColor;
-  set cursorColor(Color? value) {
+  set cursorColor(final Color? value) {
     _caretPainter.caretColor = value;
   }
 
@@ -910,14 +910,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// The default is light grey.
   Color? get backgroundCursorColor => _caretPainter.backgroundCursorColor;
-  set backgroundCursorColor(Color? value) {
+  set backgroundCursorColor(final Color? value) {
     _caretPainter.backgroundCursorColor = value;
   }
 
   /// Whether to paint the cursor.
   ValueNotifier<bool> get showCursor => _showCursor;
   ValueNotifier<bool> _showCursor;
-  set showCursor(ValueNotifier<bool> value) {
+  set showCursor(final ValueNotifier<bool> value) {
     if (_showCursor == value) {
       return;
     }
@@ -938,7 +938,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Whether the editable is currently focused.
   bool get hasFocus => _hasFocus;
   bool _hasFocus = false;
-  set hasFocus(bool value) {
+  set hasFocus(final bool value) {
     if (_hasFocus == value) {
       return;
     }
@@ -949,7 +949,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Whether this rendering object will take a full line regardless the text width.
   bool get forceLine => _forceLine;
   bool _forceLine = false;
-  set forceLine(bool value) {
+  set forceLine(final bool value) {
     if (_forceLine == value) {
       return;
     }
@@ -960,7 +960,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Whether this rendering object is read only.
   bool get readOnly => _readOnly;
   bool _readOnly = false;
-  set readOnly(bool value) {
+  set readOnly(final bool value) {
     if (_readOnly == value) {
       return;
     }
@@ -981,7 +981,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   int? get maxLines => _maxLines;
   int? _maxLines;
   /// The value may be null. If it is not null, then it must be greater than zero.
-  set maxLines(int? value) {
+  set maxLines(final int? value) {
     assert(value == null || value > 0);
     if (maxLines == value) {
       return;
@@ -999,7 +999,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   int? get minLines => _minLines;
   int? _minLines;
   /// The value may be null. If it is not null, then it must be greater than zero.
-  set minLines(int? value) {
+  set minLines(final int? value) {
     assert(value == null || value > 0);
     if (minLines == value) {
       return;
@@ -1011,7 +1011,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@macro flutter.widgets.editableText.expands}
   bool get expands => _expands;
   bool _expands;
-  set expands(bool value) {
+  set expands(final bool value) {
     if (expands == value) {
       return;
     }
@@ -1021,7 +1021,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// The color to use when painting the selection.
   Color? get selectionColor => _selectionPainter.highlightColor;
-  set selectionColor(Color? value) {
+  set selectionColor(final Color? value) {
     _selectionPainter.highlightColor = value;
   }
 
@@ -1030,7 +1030,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   double get textScaleFactor => _textPainter.textScaleFactor;
-  set textScaleFactor(double value) {
+  set textScaleFactor(final double value) {
     if (_textPainter.textScaleFactor == value) {
       return;
     }
@@ -1046,7 +1046,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// manipulate the selection will throw.
   TextSelection? get selection => _selection;
   TextSelection? _selection;
-  set selection(TextSelection? value) {
+  set selection(final TextSelection? value) {
     if (_selection == value) {
       return;
     }
@@ -1063,7 +1063,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// visible by shifting the text by the given offset before clipping.
   ViewportOffset get offset => _offset;
   ViewportOffset _offset;
-  set offset(ViewportOffset value) {
+  set offset(final ViewportOffset value) {
     if (_offset == value) {
       return;
     }
@@ -1080,7 +1080,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// How thick the cursor will be.
   double get cursorWidth => _cursorWidth;
   double _cursorWidth = 1.0;
-  set cursorWidth(double value) {
+  set cursorWidth(final double value) {
     if (_cursorWidth == value) {
       return;
     }
@@ -1097,7 +1097,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // TODO(ianh): This is a confusing API. We should have a separate getter for the effective cursor height.
   double get cursorHeight => _cursorHeight ?? preferredLineHeight;
   double? _cursorHeight;
-  set cursorHeight(double? value) {
+  set cursorHeight(final double? value) {
     if (_cursorHeight == value) {
       return;
     }
@@ -1113,7 +1113,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// {@endtemplate}
   bool get paintCursorAboveText => _paintCursorOnTop;
   bool _paintCursorOnTop;
-  set paintCursorAboveText(bool value) {
+  set paintCursorAboveText(final bool value) {
     if (_paintCursorOnTop == value) {
       return;
     }
@@ -1135,7 +1135,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// location where the cursor ends up being rendered from by default.
   /// {@endtemplate}
   Offset get cursorOffset => _caretPainter.cursorOffset;
-  set cursorOffset(Offset value) {
+  set cursorOffset(final Offset value) {
     _caretPainter.cursorOffset = value;
   }
 
@@ -1143,7 +1143,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// A null value is the same as [Radius.zero].
   Radius? get cursorRadius => _caretPainter.cursorRadius;
-  set cursorRadius(Radius? value) {
+  set cursorRadius(final Radius? value) {
     _caretPainter.cursorRadius = value;
   }
 
@@ -1153,7 +1153,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// [LayerLink], which will be used as [CompositedTransformTarget] of start handle.
   LayerLink get startHandleLayerLink => _startHandleLayerLink;
   LayerLink _startHandleLayerLink;
-  set startHandleLayerLink(LayerLink value) {
+  set startHandleLayerLink(final LayerLink value) {
     if (_startHandleLayerLink == value) {
       return;
     }
@@ -1167,7 +1167,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// [LayerLink], which will be used as [CompositedTransformTarget] of end handle.
   LayerLink get endHandleLayerLink => _endHandleLayerLink;
   LayerLink _endHandleLayerLink;
-  set endHandleLayerLink(LayerLink value) {
+  set endHandleLayerLink(final LayerLink value) {
     if (_endHandleLayerLink == value) {
       return;
     }
@@ -1199,7 +1199,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// [selectionEnabled] instead.
   bool? get enableInteractiveSelection => _enableInteractiveSelection;
   bool? _enableInteractiveSelection;
-  set enableInteractiveSelection(bool? value) {
+  set enableInteractiveSelection(final bool? value) {
     if (_enableInteractiveSelection == value) {
       return;
     }
@@ -1239,7 +1239,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // (otherwise, if you set it to null and then get it, you get back non-null).
   // Alternatively, we could stop supporting setting this to null.
   Color? get promptRectColor => _autocorrectHighlightPainter.highlightColor;
-  set promptRectColor(Color? newValue) {
+  set promptRectColor(final Color? newValue) {
     _autocorrectHighlightPainter.highlightColor = newValue;
   }
 
@@ -1250,7 +1250,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// When set to null, the currently displayed prompt rectangle (if any) will be dismissed.
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
-  void setPromptRectRange(TextRange? newRange) {
+  void setPromptRectRange(final TextRange? newRange) {
     _autocorrectHighlightPainter.highlightedRange = newRange;
   }
 
@@ -1269,7 +1269,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
-  set clipBehavior(Clip value) {
+  set clipBehavior(final Clip value) {
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -1290,10 +1290,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Returns a list of rects that bound the given selection.
   ///
   /// See [TextPainter.getBoxesForSelection] for more details.
-  List<TextBox> getBoxesForSelection(TextSelection selection) {
+  List<TextBox> getBoxesForSelection(final TextSelection selection) {
     _computeTextMetricsIfNeeded();
     return _textPainter.getBoxesForSelection(selection)
-                       .map((TextBox textBox) => TextBox.fromLTRBD(
+                       .map((final TextBox textBox) => TextBox.fromLTRBD(
                           textBox.left + _paintOffset.dx,
                           textBox.top + _paintOffset.dy,
                           textBox.right + _paintOffset.dx,
@@ -1303,14 +1303,14 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _semanticsInfo = _textPainter.text!.getSemanticsInformation();
     // TODO(chunhtai): the macOS does not provide a public API to support text
     // selections across multiple semantics nodes. Remove this platform check
     // once we can support it.
     // https://github.com/flutter/flutter/issues/77957
-    if (_semanticsInfo!.any((InlineSpanSemanticsInformation info) => info.recognizer != null) &&
+    if (_semanticsInfo!.any((final InlineSpanSemanticsInformation info) => info.recognizer != null) &&
         defaultTargetPlatform != TargetPlatform.macOS) {
       assert(readOnly && !obscureText);
       // For Selectable rich text with recognizer, we need to create a semantics
@@ -1375,7 +1375,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  void _handleSetText(String text) {
+  void _handleSetText(final String text) {
     textSelectionDelegate.userUpdateTextEditingValue(
       TextEditingValue(
         text: text,
@@ -1386,7 +1386,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+  void assembleSemanticsNode(final SemanticsNode node, final SemanticsConfiguration config, final Iterable<SemanticsNode> children) {
     assert(_semanticsInfo != null && _semanticsInfo!.isNotEmpty);
     final List<SemanticsNode> newChildren = <SemanticsNode>[];
     TextDirection currentDirection = textDirection;
@@ -1501,7 +1501,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }
 
-  VoidCallback? _createShowOnScreenFor(Key key) {
+  VoidCallback? _createShowOnScreenFor(final Key key) {
     return () {
       final SemanticsNode node = _cachedChildNodes![key]!;
       showOnScreen(descendant: this, rect: node.rect);
@@ -1512,11 +1512,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // we last called describeSemanticsConfiguration and when the
   // callbacks are invoked, in which case the callbacks will crash...
 
-  void _handleSetSelection(TextSelection selection) {
+  void _handleSetSelection(final TextSelection selection) {
     _setSelection(selection, SelectionChangedCause.keyboard);
   }
 
-  void _handleMoveCursorForwardByCharacter(bool extendSelection) {
+  void _handleMoveCursorForwardByCharacter(final bool extendSelection) {
     assert(selection != null);
     final int? extentOffset = _textPainter.getOffsetAfter(selection!.extentOffset);
     if (extentOffset == null) {
@@ -1529,7 +1529,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
-  void _handleMoveCursorBackwardByCharacter(bool extendSelection) {
+  void _handleMoveCursorBackwardByCharacter(final bool extendSelection) {
     assert(selection != null);
     final int? extentOffset = _textPainter.getOffsetBefore(selection!.extentOffset);
     if (extentOffset == null) {
@@ -1542,7 +1542,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
-  void _handleMoveCursorForwardByWord(bool extendSelection) {
+  void _handleMoveCursorForwardByWord(final bool extendSelection) {
     assert(selection != null);
     final TextRange currentWord = _textPainter.getWordBoundary(selection!.extent);
     final TextRange? nextWord = _getNextWord(currentWord.end);
@@ -1559,7 +1559,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
-  void _handleMoveCursorBackwardByWord(bool extendSelection) {
+  void _handleMoveCursorBackwardByWord(final bool extendSelection) {
     assert(selection != null);
     final TextRange currentWord = _textPainter.getWordBoundary(selection!.extent);
     final TextRange? previousWord = _getPreviousWord(currentWord.start - 1);
@@ -1609,7 +1609,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // Includes newline characters from ASCII and separators from the
   // [unicode separator category](https://www.compart.com/en/unicode/category/Zs)
   // TODO(zanderso): replace when we expose this ICU information.
-  bool _onlyWhitespace(TextRange range) {
+  bool _onlyWhitespace(final TextRange range) {
     for (int i = range.start; i < range.end; i++) {
       final int codeUnit = text!.codeUnitAt(i)!;
       if (!TextLayoutMetrics.isWhitespace(codeUnit)) {
@@ -1620,7 +1620,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
     _foregroundRenderObject?.attach(owner);
     _backgroundRenderObject?.attach(owner);
@@ -1659,7 +1659,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  void visitChildren(RenderObjectVisitor visitor) {
+  void visitChildren(final RenderObjectVisitor visitor) {
     final RenderObject? foregroundChild = _foregroundRenderObject;
     final RenderObject? backgroundChild = _backgroundRenderObject;
     if (foregroundChild != null) {
@@ -1694,7 +1694,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  double _getMaxScrollExtent(Size contentSize) {
+  double _getMaxScrollExtent(final Size contentSize) {
     assert(hasSize);
     switch (_viewportAxis) {
       case Axis.horizontal:
@@ -1720,7 +1720,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   ///  * [getLocalRectForCaret], which is the equivalent but for
   ///    a [TextPosition] rather than a [TextSelection].
-  List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
+  List<TextSelectionPoint> getEndpointsForSelection(final TextSelection selection) {
     _computeTextMetricsIfNeeded();
 
     final Offset paintOffset = _paintOffset;
@@ -1750,7 +1750,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// Returns null if [TextRange.isValid] is false for the given `range`, or the
   /// given `range` is collapsed.
-  Rect? getRectForComposingRange(TextRange range) {
+  Rect? getRectForComposingRange(final TextRange range) {
     if (!range.isValid || range.isCollapsed) {
       return null;
     }
@@ -1764,7 +1764,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
     return boxes.fold(
       null,
-      (Rect? accum, TextBox incoming) => accum?.expandToInclude(incoming.toRect()) ?? incoming.toRect(),
+      (final Rect? accum, final TextBox incoming) => accum?.expandToInclude(incoming.toRect()) ?? incoming.toRect(),
     )?.shift(_paintOffset);
   }
 
@@ -1793,7 +1793,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///    a selection rather than a particular text position.
   ///  * [TextPainter.getOffsetForCaret], the equivalent method for a
   ///    [TextPainter] object.
-  Rect getLocalRectForCaret(TextPosition caretPosition) {
+  Rect getLocalRectForCaret(final TextPosition caretPosition) {
     _computeTextMetricsIfNeeded();
     final Rect caretPrototype = _caretPrototype;
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, caretPrototype);
@@ -1836,13 +1836,13 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     _layoutText();
     return _textPainter.maxIntrinsicWidth + _caretMargin;
   }
@@ -1854,7 +1854,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   int? _cachedLineBreakCount;
   // TODO(LongCatIsLooong): see if we can let ui.Paragraph estimate the number
   // of lines
-  int _countHardLineBreaks(String text) {
+  int _countHardLineBreaks(final String text) {
     final int? cachedValue = _cachedLineBreakCount;
     if (cachedValue != null) {
       return cachedValue;
@@ -1874,7 +1874,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     return _cachedLineBreakCount = count;
   }
 
-  double _preferredHeight(double width) {
+  double _preferredHeight(final double width) {
     final int? maxLines = this.maxLines;
     final int? minLines = this.minLines ?? maxLines;
     final double minHeight = preferredLineHeight * (minLines ?? 0);
@@ -1910,27 +1910,27 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return _preferredHeight(width);
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return _preferredHeight(width);
   }
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(final TextBaseline baseline) {
     _computeTextMetricsIfNeeded();
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 
   @override
   @protected
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     // Hit test text spans.
     bool hitText = false;
 
@@ -1961,7 +1961,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
+        hitTest: (final BoxHitTestResult result, final Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale!;
             return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
@@ -1983,7 +1983,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   late LongPressGestureRecognizer _longPress;
 
   @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent) {
       assert(!debugNeedsLayout);
@@ -2009,7 +2009,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// Should be called before attempting to change the selection based on the
   /// position of a secondary tap.
-  void handleSecondaryTapDown(TapDownDetails details) {
+  void handleSecondaryTapDown(final TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition;
     _lastSecondaryTapDownPosition = details.globalPosition;
   }
@@ -2020,10 +2020,10 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// down events by calling this method.
-  void handleTapDown(TapDownDetails details) {
+  void handleTapDown(final TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition;
   }
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(final TapDownDetails details) {
     assert(!ignorePointer);
     handleTapDown(details);
   }
@@ -2076,7 +2076,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// If you have a [TextEditingController], it's generally easier to
   /// programmatically manipulate its `value` or `selection` directly.
   /// {@endtemplate}
-  void selectPosition({ required SelectionChangedCause cause }) {
+  void selectPosition({ required final SelectionChangedCause cause }) {
     selectPositionAt(from: _lastTapDownPosition!, cause: cause);
   }
 
@@ -2084,7 +2084,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   ///
   /// [from] corresponds to the [TextSelection.baseOffset], and [to] corresponds
   /// to the [TextSelection.extentOffset].
-  void selectPositionAt({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+  void selectPositionAt({ required final Offset from, final Offset? to, required final SelectionChangedCause cause }) {
     _layoutText(minWidth: constraints.minWidth, maxWidth: constraints.maxWidth);
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
     final TextPosition? toPosition = to == null
@@ -2109,7 +2109,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Select a word around the location of the last tap down.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void selectWord({ required SelectionChangedCause cause }) {
+  void selectWord({ required final SelectionChangedCause cause }) {
     selectWordsInRange(from: _lastTapDownPosition!, cause: cause);
   }
 
@@ -2121,7 +2121,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// beginning and end of a word respectively.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void selectWordsInRange({ required Offset from, Offset? to, required SelectionChangedCause cause }) {
+  void selectWordsInRange({ required final Offset from, final Offset? to, required final SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
     final TextPosition fromPosition = _textPainter.getPositionForOffset(globalToLocal(from - _paintOffset));
     final TextSelection fromWord = _getWordAtOffset(fromPosition);
@@ -2142,7 +2142,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// Move the selection to the beginning or end of a word.
   ///
   /// {@macro flutter.rendering.RenderEditable.selectPosition}
-  void selectWordEdge({ required SelectionChangedCause cause }) {
+  void selectWordEdge({ required final SelectionChangedCause cause }) {
     _computeTextMetricsIfNeeded();
     assert(_lastTapDownPosition != null);
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition! - _paintOffset));
@@ -2156,7 +2156,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _setSelection(newSelection, cause);
   }
 
-  TextSelection _getWordAtOffset(TextPosition position) {
+  TextSelection _getWordAtOffset(final TextPosition position) {
     debugAssertLayoutUpToDate();
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= plainText.length) {
@@ -2239,7 +2239,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   // children to _textPainter so that appropriate placeholders can be inserted
   // into the LibTxt layout. This does not do anything if no inline widgets were
   // specified.
-  List<PlaceholderDimensions> _layoutChildren(BoxConstraints constraints, {bool dry = false}) {
+  List<PlaceholderDimensions> _layoutChildren(final BoxConstraints constraints, {final bool dry = false}) {
     if (childCount == 0) {
       _textPainter.setPlaceholderDimensions(<PlaceholderDimensions>[]);
       return <PlaceholderDimensions>[];
@@ -2306,7 +2306,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  void _layoutText({ double minWidth = 0.0, double maxWidth = double.infinity }) {
+  void _layoutText({ final double minWidth = 0.0, final double maxWidth = double.infinity }) {
     final double availableMaxWidth = math.max(0.0, maxWidth - _caretMargin);
     final double availableMinWidth = math.min(minWidth, availableMaxWidth);
     final double textMaxWidth = _isMultiline ? availableMaxWidth : double.infinity;
@@ -2364,7 +2364,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   // Computes the offset to apply to the given [sourceOffset] so it perfectly
   // snaps to physical pixels.
-  Offset _snapToPhysicalPixel(Offset sourceOffset) {
+  Offset _snapToPhysicalPixel(final Offset sourceOffset) {
     final Offset globalOffset = localToGlobal(sourceOffset);
     final double pixelMultiple = 1.0 / _devicePixelRatio;
     return Offset(
@@ -2397,7 +2397,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     if (!_canComputeDryLayout()) {
       assert(debugCannotComputeDryLayout(
         reason: 'Dry layout not available for alignments that require baseline.',
@@ -2456,7 +2456,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   double? _resetFloatingCursorAnimationValue;
 
   /// Returns the position within the text field closest to the raw cursor offset.
-  Offset calculateBoundedFloatingCursorOffset(Offset rawCursorOffset) {
+  Offset calculateBoundedFloatingCursorOffset(final Offset rawCursorOffset) {
     Offset deltaPosition = Offset.zero;
     final double topBound = -floatingCursorAddedMargin.top;
     final double bottomBound = _textPainter.height - preferredLineHeight + floatingCursorAddedMargin.bottom;
@@ -2508,7 +2508,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   /// Sets the screen position of the floating cursor and the text position
   /// closest to the cursor.
-  void setFloatingCursor(FloatingCursorDragState state, Offset boundedOffset, TextPosition lastTextPosition, { double? resetLerpValue }) {
+  void setFloatingCursor(final FloatingCursorDragState state, final Offset boundedOffset, final TextPosition lastTextPosition, { final double? resetLerpValue }) {
     if (state == FloatingCursorDragState.Start) {
       _relativeOrigin = Offset.zero;
       _previousOffset = null;
@@ -2532,7 +2532,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     _caretPainter.showRegularCaret = _resetFloatingCursorAnimationValue == null;
   }
 
-  MapEntry<int, Offset> _lineNumberFor(TextPosition startPosition, List<ui.LineMetrics> metrics) {
+  MapEntry<int, Offset> _lineNumberFor(final TextPosition startPosition, final List<ui.LineMetrics> metrics) {
     // TODO(LongCatIsLooong): include line boundaries information in
     // ui.LineMetrics, then we can get rid of this.
     final Offset offset = _textPainter.getOffsetForCaret(startPosition, Rect.zero);
@@ -2562,7 +2562,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   /// The caller should typically discard a [VerticalCaretMovementRun] when
   /// its [VerticalCaretMovementRun.isValid] becomes false, or on other
   /// occasions where the vertical caret run should be interrupted.
-  VerticalCaretMovementRun startVerticalCaretMovement(TextPosition startPosition) {
+  VerticalCaretMovementRun startVerticalCaretMovement(final TextPosition startPosition) {
     final List<ui.LineMetrics> metrics = _textPainter.computeLineMetrics();
     final MapEntry<int, Offset> currentLine = _lineNumberFor(startPosition, metrics);
     return VerticalCaretMovementRun._(
@@ -2574,7 +2574,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     );
   }
 
-  void _paintContents(PaintingContext context, Offset offset) {
+  void _paintContents(final PaintingContext context, final Offset offset) {
     debugAssertLayoutUpToDate();
     final Offset effectiveOffset = offset + _paintOffset;
 
@@ -2607,7 +2607,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
         needsCompositing,
         effectiveOffset + textParentData.offset,
         Matrix4.diagonal3Values(scale, scale, scale),
-        (PaintingContext context, Offset offset) {
+        (final PaintingContext context, final Offset offset) {
           context.paintChild(
             child!,
             offset,
@@ -2623,7 +2623,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
     }
   }
 
-  void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints, Offset offset) {
+  void _paintHandleLayers(final PaintingContext context, final List<TextSelectionPoint> endpoints, final Offset offset) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
       clampDouble(startPoint.dx, 0.0, size.width),
@@ -2649,7 +2649,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     _computeTextMetricsIfNeeded();
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
       _clipRectLayer.layer = context.pushClipRect(
@@ -2673,7 +2673,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   final LayerHandle<ClipRectLayer> _clipRectLayer = LayerHandle<ClipRectLayer>();
 
   @override
-  Rect? describeApproximatePaintClip(RenderObject child) {
+  Rect? describeApproximatePaintClip(final RenderObject child) {
     switch (clipBehavior) {
       case Clip.none:
         return null;
@@ -2685,7 +2685,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
@@ -2713,7 +2713,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
 class _RenderEditableCustomPaint extends RenderBox {
   _RenderEditableCustomPaint({
-    RenderEditablePainter? painter,
+    final RenderEditablePainter? painter,
   }) : _painter = painter,
        super();
 
@@ -2728,7 +2728,7 @@ class _RenderEditableCustomPaint extends RenderBox {
 
   RenderEditablePainter? get painter => _painter;
   RenderEditablePainter? _painter;
-  set painter(RenderEditablePainter? newValue) {
+  set painter(final RenderEditablePainter? newValue) {
     if (newValue == painter) {
       return;
     }
@@ -2747,7 +2747,7 @@ class _RenderEditableCustomPaint extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final RenderEditable? parent = this.parent;
     assert(parent != null);
     final RenderEditablePainter? painter = this.painter;
@@ -2758,7 +2758,7 @@ class _RenderEditableCustomPaint extends RenderBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
     _painter?.addListener(markNeedsPaint);
   }
@@ -2770,7 +2770,7 @@ class _RenderEditableCustomPaint extends RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) => constraints.biggest;
+  Size computeDryLayout(final BoxConstraints constraints) => constraints.biggest;
 }
 
 /// An interface that paints within a [RenderEditable]'s bounds, above or
@@ -2810,7 +2810,7 @@ abstract class RenderEditablePainter extends ChangeNotifier {
   /// away. However, the [paint] method will get called whenever the
   /// [RenderEditable]s it attaches to repaint, even if [shouldRepaint] returns
   /// false.
-  bool shouldRepaint(RenderEditablePainter? oldDelegate);
+  bool shouldRepaint(final RenderEditablePainter? oldDelegate);
 
   /// Paints within the bounds of a [RenderEditable].
   ///
@@ -2821,13 +2821,13 @@ abstract class RenderEditablePainter extends ChangeNotifier {
   /// Paint operations performed outside of the region defined by the [canvas]'s
   /// origin and the [size] parameter may get clipped, when [RenderEditable]'s
   /// [RenderEditable.clipBehavior] is not [Clip.none].
-  void paint(Canvas canvas, Size size, RenderEditable renderEditable);
+  void paint(final Canvas canvas, final Size size, final RenderEditable renderEditable);
 }
 
 class _TextHighlightPainter extends RenderEditablePainter {
   _TextHighlightPainter({
-      TextRange? highlightedRange,
-      Color? highlightColor,
+      final TextRange? highlightedRange,
+      final Color? highlightColor,
   }) : _highlightedRange = highlightedRange,
        _highlightColor = highlightColor;
 
@@ -2835,7 +2835,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
   Color? get highlightColor => _highlightColor;
   Color? _highlightColor;
-  set highlightColor(Color? newValue) {
+  set highlightColor(final Color? newValue) {
     if (newValue == _highlightColor) {
       return;
     }
@@ -2845,7 +2845,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
 
   TextRange? get highlightedRange => _highlightedRange;
   TextRange? _highlightedRange;
-  set highlightedRange(TextRange? newValue) {
+  set highlightedRange(final TextRange? newValue) {
     if (newValue == _highlightedRange) {
       return;
     }
@@ -2858,7 +2858,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
   /// See [ui.BoxHeightStyle] for details on available styles.
   ui.BoxHeightStyle get selectionHeightStyle => _selectionHeightStyle;
   ui.BoxHeightStyle _selectionHeightStyle = ui.BoxHeightStyle.tight;
-  set selectionHeightStyle(ui.BoxHeightStyle value) {
+  set selectionHeightStyle(final ui.BoxHeightStyle value) {
     if (_selectionHeightStyle == value) {
       return;
     }
@@ -2871,7 +2871,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
   /// See [ui.BoxWidthStyle] for details on available styles.
   ui.BoxWidthStyle get selectionWidthStyle => _selectionWidthStyle;
   ui.BoxWidthStyle _selectionWidthStyle = ui.BoxWidthStyle.tight;
-  set selectionWidthStyle(ui.BoxWidthStyle value) {
+  set selectionWidthStyle(final ui.BoxWidthStyle value) {
     if (_selectionWidthStyle == value) {
       return;
     }
@@ -2880,7 +2880,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
+  void paint(final Canvas canvas, final Size size, final RenderEditable renderEditable) {
     final TextRange? range = highlightedRange;
     final Color? color = highlightColor;
     if (range == null || color == null || range.isCollapsed) {
@@ -2905,7 +2905,7 @@ class _TextHighlightPainter extends RenderEditablePainter {
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter? oldDelegate) {
+  bool shouldRepaint(final RenderEditablePainter? oldDelegate) {
     if (identical(oldDelegate, this)) {
       return false;
     }
@@ -2925,7 +2925,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
   bool get shouldPaint => _shouldPaint;
   bool _shouldPaint = true;
-  set shouldPaint(bool value) {
+  set shouldPaint(final bool value) {
     if (shouldPaint == value) {
       return;
     }
@@ -2942,7 +2942,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
   Color? get caretColor => _caretColor;
   Color? _caretColor;
-  set caretColor(Color? value) {
+  set caretColor(final Color? value) {
     if (caretColor?.value == value?.value) {
       return;
     }
@@ -2953,7 +2953,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
   Radius? get cursorRadius => _cursorRadius;
   Radius? _cursorRadius;
-  set cursorRadius(Radius? value) {
+  set cursorRadius(final Radius? value) {
     if (_cursorRadius == value) {
       return;
     }
@@ -2963,7 +2963,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
   Offset get cursorOffset => _cursorOffset;
   Offset _cursorOffset = Offset.zero;
-  set cursorOffset(Offset value) {
+  set cursorOffset(final Offset value) {
     if (_cursorOffset == value) {
       return;
     }
@@ -2973,7 +2973,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
   Color? get backgroundCursorColor => _backgroundCursorColor;
   Color? _backgroundCursorColor;
-  set backgroundCursorColor(Color? value) {
+  set backgroundCursorColor(final Color? value) {
     if (backgroundCursorColor?.value == value?.value) {
       return;
     }
@@ -2986,7 +2986,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
   Rect? get floatingCursorRect => _floatingCursorRect;
   Rect? _floatingCursorRect;
-  set floatingCursorRect(Rect? value) {
+  set floatingCursorRect(final Rect? value) {
     if (_floatingCursorRect == value) {
       return;
     }
@@ -2994,7 +2994,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
     notifyListeners();
   }
 
-  void paintRegularCursor(Canvas canvas, RenderEditable renderEditable, Color caretColor, TextPosition textPosition) {
+  void paintRegularCursor(final Canvas canvas, final RenderEditable renderEditable, final Color caretColor, final TextPosition textPosition) {
     final Rect integralRect = renderEditable.getLocalRectForCaret(textPosition);
     if (shouldPaint) {
       final Radius? radius = cursorRadius;
@@ -3010,7 +3010,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
   }
 
   @override
-  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
+  void paint(final Canvas canvas, final Size size, final RenderEditable renderEditable) {
     // Compute the caret location even when `shouldPaint` is false.
 
     final TextSelection? selection = renderEditable.selection;
@@ -3046,7 +3046,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter? oldDelegate) {
+  bool shouldRepaint(final RenderEditablePainter? oldDelegate) {
     if (identical(this, oldDelegate)) {
       return false;
     }
@@ -3071,28 +3071,28 @@ class _CompositeRenderEditablePainter extends RenderEditablePainter {
   final List<RenderEditablePainter> painters;
 
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     for (final RenderEditablePainter painter in painters) {
       painter.addListener(listener);
     }
   }
 
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     for (final RenderEditablePainter painter in painters) {
       painter.removeListener(listener);
     }
   }
 
   @override
-  void paint(Canvas canvas, Size size, RenderEditable renderEditable) {
+  void paint(final Canvas canvas, final Size size, final RenderEditable renderEditable) {
     for (final RenderEditablePainter painter in painters) {
       painter.paint(canvas, size, renderEditable);
     }
   }
 
   @override
-  bool shouldRepaint(RenderEditablePainter? oldDelegate) {
+  bool shouldRepaint(final RenderEditablePainter? oldDelegate) {
     if (identical(oldDelegate, this)) {
       return false;
     }

@@ -23,7 +23,7 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   });
 
   @override
-  void addAllowedPointer(PointerDownEvent event) {
+  void addAllowedPointer(final PointerDownEvent event) {
     super.addAllowedPointer(event);
     resolve(GestureDisposition.accepted);
     stopTrackingPointer(event.pointer);
@@ -33,8 +33,8 @@ class EagerGestureRecognizer extends OneSequenceGestureRecognizer {
   String get debugDescription => 'eager';
 
   @override
-  void didStopTrackingLastPointer(int pointer) { }
+  void didStopTrackingLastPointer(final int pointer) { }
 
   @override
-  void handleEvent(PointerEvent event) { }
+  void handleEvent(final PointerEvent event) { }
 }

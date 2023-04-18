@@ -17,7 +17,7 @@ class MockCanvas extends Fake implements Canvas {
   late Paint capturedPaint;
 
   @override
-  void drawPath(Path path, Paint paint) {
+  void drawPath(final Path path, final Paint paint) {
     capturedPath = path;
     capturedPaint = paint;
   }
@@ -26,7 +26,7 @@ class MockCanvas extends Fake implements Canvas {
   late double capturedSy;
 
   @override
-  void scale(double sx, [double? sy]) {
+  void scale(final double sx, [final double? sy]) {
     capturedSx = sx;
     capturedSy = sy!;
     invocations.add(RecordedScale(sx, sy));
@@ -35,12 +35,12 @@ class MockCanvas extends Fake implements Canvas {
   final List<RecordedCanvasCall> invocations = <RecordedCanvasCall>[];
 
   @override
-  void rotate(double radians) {
+  void rotate(final double radians) {
     invocations.add(RecordedRotate(radians));
   }
 
   @override
-  void translate(double dx, double dy) {
+  void translate(final double dx, final double dy) {
     invocations.add(RecordedTranslate(dx, dy));
   }
 }
@@ -56,7 +56,7 @@ class RecordedRotate extends RecordedCanvasCall {
   final double radians;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is RecordedRotate && other.radians == radians;
   }
 
@@ -71,7 +71,7 @@ class RecordedTranslate extends RecordedCanvasCall {
   final double dy;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is RecordedTranslate && other.dx == dx && other.dy == dy;
   }
 
@@ -86,7 +86,7 @@ class RecordedScale extends RecordedCanvasCall {
   final double sy;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is RecordedScale && other.sx == sx && other.sy == sy;
   }
 
@@ -95,7 +95,7 @@ class RecordedScale extends RecordedCanvasCall {
 }
 
 void main() {
-  testWidgets('IconTheme color', (WidgetTester tester) async {
+  testWidgets('IconTheme color', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -116,7 +116,7 @@ void main() {
     expect(canvas.capturedPaint, hasColor(0xFF666666));
   });
 
-  testWidgets('IconTheme opacity', (WidgetTester tester) async {
+  testWidgets('IconTheme opacity', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -138,7 +138,7 @@ void main() {
     expect(canvas.capturedPaint, hasColor(0x80666666));
   });
 
-  testWidgets('color overrides IconTheme color', (WidgetTester tester) async {
+  testWidgets('color overrides IconTheme color', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -160,7 +160,7 @@ void main() {
     expect(canvas.capturedPaint, hasColor(0xFF0000FF));
   });
 
-  testWidgets('IconTheme size', (WidgetTester tester) async {
+  testWidgets('IconTheme size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -184,7 +184,7 @@ void main() {
     expect(canvas.capturedSy, 0.25);
   });
 
-  testWidgets('size overridesIconTheme size', (WidgetTester tester) async {
+  testWidgets('size overridesIconTheme size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -209,7 +209,7 @@ void main() {
     expect(canvas.capturedSy, 2);
   });
 
-  testWidgets('Semantic label', (WidgetTester tester) async {
+  testWidgets('Semantic label', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -229,7 +229,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Inherited text direction rtl', (WidgetTester tester) async {
+  testWidgets('Inherited text direction rtl', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
@@ -258,7 +258,7 @@ void main() {
         matchesGoldenFile('animated_icons_test.icon.rtl.png'));
   });
 
-  testWidgets('Inherited text direction ltr', (WidgetTester tester) async {
+  testWidgets('Inherited text direction ltr', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -285,7 +285,7 @@ void main() {
         matchesGoldenFile('animated_icons_test.icon.ltr.png'));
   });
 
-  testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
+  testWidgets('Inherited text direction overridden', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -311,7 +311,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Direction has no effect on position of widget', (WidgetTester tester) async {
+  testWidgets('Direction has no effect on position of widget', (final WidgetTester tester) async {
     const AnimatedIcon icon = AnimatedIcon(
       progress: AlwaysStoppedAnimation<double>(0.0),
       icon: AnimatedIcons.arrow_menu,
@@ -328,7 +328,7 @@ void main() {
   });
 }
 
-PaintColorMatcher hasColor(int color) {
+PaintColorMatcher hasColor(final int color) {
   return PaintColorMatcher(color);
 }
 
@@ -338,11 +338,11 @@ class PaintColorMatcher extends Matcher {
   final int expectedColor;
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
     description.add('color was not $expectedColor');
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     final Paint actualPaint = item as Paint;
     return actualPaint.color == Color(expectedColor);
   }

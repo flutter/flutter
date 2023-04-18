@@ -21,7 +21,7 @@ class RealRoot extends AbstractNode {
   }
 
   @override
-  void attach(Object owner) {
+  void attach(final Object owner) {
     super.attach(owner);
     child.attach(owner as PipelineOwner);
   }

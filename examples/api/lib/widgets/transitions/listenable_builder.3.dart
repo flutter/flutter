@@ -15,7 +15,7 @@ class ListModel with ChangeNotifier {
   final List<int> _values = <int>[];
   List<int> get values => _values.toList(); // O(N), makes a new copy each time.
 
-  void add(int value) {
+  void add(final int value) {
     _values.add(value);
     notifyListeners();
   }
@@ -33,7 +33,7 @@ class _ListenableBuilderExampleState extends State<ListenableBuilderExample> {
   final math.Random _random = math.Random(0); // fixed seed for reproducability
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ListenableBuilder Example')),
@@ -53,7 +53,7 @@ class ListBody extends StatelessWidget {
   final ListModel listNotifier;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,12 +62,12 @@ class ListBody extends StatelessWidget {
           Expanded(
             child: ListenableBuilder(
               listenable: listNotifier,
-              builder: (BuildContext context, Widget? child) {
+              builder: (final BuildContext context, final Widget? child) {
                 // We rebuild the ListView each time the list changes,
                 // so that the framework knows to update the rendering.
                 final List<int> values = listNotifier.values; // copy the list
                 return ListView.builder(
-                  itemBuilder: (BuildContext context, int index) => ListTile(
+                  itemBuilder: (final BuildContext context, final int index) => ListTile(
                     title: Text('${values[index]}'),
                   ),
                   itemCount: values.length,

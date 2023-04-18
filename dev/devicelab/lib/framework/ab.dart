@@ -29,7 +29,7 @@ class ABTest {
         _aResults = <String, List<double>>{},
         _bResults = <String, List<double>>{};
 
-  ABTest.fromJsonMap(Map<String, dynamic> jsonResults)
+  ABTest.fromJsonMap(final Map<String, dynamic> jsonResults)
       : localEngine = jsonResults[kLocalEngineKeyName] as String,
         taskName = jsonResults[kTaskNameKeyName] as String,
         runStart = DateTime.parse(jsonResults[kRunStartKeyName] as String),
@@ -46,7 +46,7 @@ class ABTest {
   final Map<String, List<double>> _aResults;
   final Map<String, List<double>> _bResults;
 
-  static Map<String, List<double>> _convertFrom(dynamic results) {
+  static Map<String, List<double>> _convertFrom(final dynamic results) {
     final Map<String, dynamic> resultMap = results as Map<String, dynamic>;
     return <String, List<double>> {
       for (String key in resultMap.keys)
@@ -59,7 +59,7 @@ class ABTest {
   /// The result may contain multiple score keys.
   ///
   /// [result] is expected to be a serialization of [TaskResult].
-  void addAResult(TaskResult result) {
+  void addAResult(final TaskResult result) {
     if (_runEnd != null) {
       throw StateError('Cannot add results to ABTest after it is finalized');
     }
@@ -71,7 +71,7 @@ class ABTest {
   /// The result may contain multiple score keys.
   ///
   /// [result] is expected to be a serialization of [TaskResult].
-  void addBResult(TaskResult result) {
+  void addBResult(final TaskResult result) {
     if (_runEnd != null) {
       throw StateError('Cannot add results to ABTest after it is finalized');
     }
@@ -93,7 +93,7 @@ class ABTest {
     kBResultsKeyName:          _bResults,
   };
 
-  static void updateColumnLengths(List<int> lengths, List<String?> results) {
+  static void updateColumnLengths(final List<int> lengths, final List<String?> results) {
     for (int column = 0; column < lengths.length; column++) {
       if (results[column] != null) {
         lengths[column] = math.max(lengths[column], results[column]?.length ?? 0);
@@ -101,10 +101,10 @@ class ABTest {
     }
   }
 
-  static void formatResult(StringBuffer buffer,
-                           List<int> lengths,
-                           List<FieldJustification> aligns,
-                           List<String?> values) {
+  static void formatResult(final StringBuffer buffer,
+                           final List<int> lengths,
+                           final List<FieldJustification> aligns,
+                           final List<String?> values) {
     for (int column = 0; column < lengths.length; column++) {
       final int len = lengths[column];
       String? value = values[column];
@@ -269,20 +269,20 @@ class _ScoreSummary {
   String get averageString => average.toStringAsFixed(2);
   String get noiseString => '(${_ratioToPercent(noise)})';
 
-  String improvementOver(_ScoreSummary? other) {
+  String improvementOver(final _ScoreSummary? other) {
     return other == null ? '' : '${(average / other.average).toStringAsFixed(2)}x';
   }
 }
 
-void _addResult(TaskResult result, Map<String, List<double>> results) {
+void _addResult(final TaskResult result, final Map<String, List<double>> results) {
   for (final String scoreKey in result.benchmarkScoreKeys ?? <String>[]) {
     final double score = (result.data![scoreKey] as num).toDouble();
     results.putIfAbsent(scoreKey, () => <double>[]).add(score);
   }
 }
 
-Map<String, _ScoreSummary> _summarize(Map<String, List<double>> results) {
-  return results.map<String, _ScoreSummary>((String scoreKey, List<double> values) {
+Map<String, _ScoreSummary> _summarize(final Map<String, List<double>> results) {
+  return results.map<String, _ScoreSummary>((final String scoreKey, final List<double> values) {
     final double average = _computeAverage(values);
     return MapEntry<String, _ScoreSummary>(scoreKey, _ScoreSummary(
       average: average,
@@ -295,8 +295,8 @@ Map<String, _ScoreSummary> _summarize(Map<String, List<double>> results) {
 }
 
 /// Computes the arithmetic mean (or average) of given [values].
-double _computeAverage(Iterable<double> values) {
-  final double sum = values.reduce((double a, double b) => a + b);
+double _computeAverage(final Iterable<double> values) {
+  final double sum = values.reduce((final double a, final double b) => a + b);
   return sum / values.length;
 }
 
@@ -307,15 +307,15 @@ double _computeAverage(Iterable<double> values) {
 /// See also:
 ///
 /// * https://en.wikipedia.org/wiki/Standard_deviation
-double _computeStandardDeviationForPopulation(Iterable<double> population) {
+double _computeStandardDeviationForPopulation(final Iterable<double> population) {
   final double mean = _computeAverage(population);
   final double sumOfSquaredDeltas = population.fold<double>(
     0.0,
-    (double previous, num value) => previous += math.pow(value - mean, 2),
+    (double previous, final num value) => previous += math.pow(value - mean, 2),
   );
   return math.sqrt(sumOfSquaredDeltas / population.length);
 }
 
-String _ratioToPercent(double value) {
+String _ratioToPercent(final double value) {
   return '${(value * 100).toStringAsFixed(2)}%';
 }

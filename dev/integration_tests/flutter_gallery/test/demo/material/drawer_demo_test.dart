@@ -7,7 +7,7 @@ import 'package:flutter_gallery/demo/material/drawer_demo.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Drawer header does not scroll', (WidgetTester tester) async {
+  testWidgets('Drawer header does not scroll', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),
       home: const DrawerDemo(),

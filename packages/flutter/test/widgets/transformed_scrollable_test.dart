@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Scrollable scaled up', (WidgetTester tester) async {
+  testWidgets('Scrollable scaled up', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -20,7 +20,7 @@ void main() {
               child: ListView.builder(
                 controller: controller,
                 cacheExtent: 0.0,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   return Container(
                     height: 100.0,
                     color: index.isEven ? Colors.blue : Colors.red,
@@ -52,7 +52,7 @@ void main() {
     expect(controller.offset, 42.5); // 85.0 - (85.0 / 2)
   });
 
-  testWidgets('Scrollable scaled down', (WidgetTester tester) async {
+  testWidgets('Scrollable scaled down', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -64,7 +64,7 @@ void main() {
               child: ListView.builder(
                 controller: controller,
                 cacheExtent: 0.0,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   return Container(
                     height: 100.0,
                     color: index.isEven ? Colors.blue : Colors.red,
@@ -96,7 +96,7 @@ void main() {
     expect(controller.offset, 0.0); // 340.0 - (170.0 * 2)
   });
 
-  testWidgets('Scrollable rotated 90 degrees', (WidgetTester tester) async {
+  testWidgets('Scrollable rotated 90 degrees', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -108,7 +108,7 @@ void main() {
               child: ListView.builder(
                 controller: controller,
                 cacheExtent: 0.0,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   return Container(
                     height: 100.0,
                     color: index.isEven ? Colors.blue : Colors.red,
@@ -136,7 +136,7 @@ void main() {
     expect(controller.offset, 30.0); // 100.0 - 70.0
   });
 
-  testWidgets('Perspective transform on scrollable', (WidgetTester tester) async {
+  testWidgets('Perspective transform on scrollable', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -150,7 +150,7 @@ void main() {
               child: ListView.builder(
                 controller: controller,
                 cacheExtent: 0.0,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   return Container(
                     height: 100.0,
                     color: index.isEven ? Colors.blue : Colors.red,

@@ -12,7 +12,7 @@ class OfExampleApp extends StatelessWidget {
   const OfExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldMessenger.of Sample')),
@@ -28,7 +28,7 @@ class OfExample extends StatelessWidget {
   const OfExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ElevatedButton(
       child: const Text('SHOW A SNACKBAR'),
       onPressed: () {

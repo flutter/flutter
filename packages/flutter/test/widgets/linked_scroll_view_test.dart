@@ -23,7 +23,7 @@ class LinkedScrollController extends ScrollController {
 
   ScrollController? _parent;
 
-  void setParent(ScrollController? newParent) {
+  void setParent(final ScrollController? newParent) {
     if (_parent != null) {
       positions.forEach(_parent!.detach);
     }
@@ -34,7 +34,7 @@ class LinkedScrollController extends ScrollController {
   }
 
   @override
-  void attach(ScrollPosition position) {
+  void attach(final ScrollPosition position) {
     assert(position is LinkedScrollPosition, 'A LinkedScrollController must only be used with LinkedScrollPositions.');
     final LinkedScrollPosition linkedPosition = position as LinkedScrollPosition;
     assert(linkedPosition.owner == this, 'A LinkedScrollPosition cannot change controllers once created.');
@@ -43,7 +43,7 @@ class LinkedScrollController extends ScrollController {
   }
 
   @override
-  void detach(ScrollPosition position) {
+  void detach(final ScrollPosition position) {
     super.detach(position);
     _parent?.detach(position);
   }
@@ -57,7 +57,7 @@ class LinkedScrollController extends ScrollController {
   }
 
   @override
-  LinkedScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition? oldPosition) {
+  LinkedScrollPosition createScrollPosition(final ScrollPhysics physics, final ScrollContext context, final ScrollPosition? oldPosition) {
     return LinkedScrollPosition(
       this,
       physics: physics,
@@ -71,17 +71,17 @@ class LinkedScrollController extends ScrollController {
 
   bool get canLinkWithAfter => after != null && after!.hasClients;
 
-  Iterable<LinkedScrollActivity> linkWithBefore(LinkedScrollPosition driver) {
+  Iterable<LinkedScrollActivity> linkWithBefore(final LinkedScrollPosition driver) {
     assert(canLinkWithBefore);
     return before!.link(driver);
   }
 
-  Iterable<LinkedScrollActivity> linkWithAfter(LinkedScrollPosition driver) {
+  Iterable<LinkedScrollActivity> linkWithAfter(final LinkedScrollPosition driver) {
     assert(canLinkWithAfter);
     return after!.link(driver);
   }
 
-  Iterable<LinkedScrollActivity> link(LinkedScrollPosition driver) sync* {
+  Iterable<LinkedScrollActivity> link(final LinkedScrollPosition driver) sync* {
     assert(hasClients);
     for (final LinkedScrollPosition position in positions.cast<LinkedScrollPosition>()) {
       yield position.link(driver);
@@ -89,7 +89,7 @@ class LinkedScrollController extends ScrollController {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     if (before != null && after != null) {
       description.add('links: ⬌');
@@ -119,7 +119,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   Set<LinkedScrollActivity>? _afterActivities;
 
   @override
-  void beginActivity(ScrollActivity? newActivity) {
+  void beginActivity(final ScrollActivity? newActivity) {
     if (newActivity == null) {
       return;
     }
@@ -139,7 +139,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   @override
-  void applyUserOffset(double delta) {
+  void applyUserOffset(final double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
     final double value = pixels - physics.applyPhysicsToUserOffset(this, delta);
 
@@ -179,11 +179,11 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     assert(localOverscroll == 0.0 || (beforeOverscroll == 0.0 && afterOverscroll == 0.0));
   }
 
-  void _userMoved(ScrollDirection direction) {
+  void _userMoved(final ScrollDirection direction) {
     updateUserScrollDirection(direction);
   }
 
-  LinkedScrollActivity link(LinkedScrollPosition driver) {
+  LinkedScrollActivity link(final LinkedScrollPosition driver) {
     if (this.activity is! LinkedScrollActivity) {
       beginActivity(LinkedScrollActivity(this));
     }
@@ -192,7 +192,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     return activity;
   }
 
-  void unlink(LinkedScrollActivity activity) {
+  void unlink(final LinkedScrollActivity activity) {
     if (_beforeActivities != null) {
       _beforeActivities!.remove(activity);
     }
@@ -202,7 +202,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     description.add('owner: $owner');
   }
@@ -218,11 +218,11 @@ class LinkedScrollActivity extends ScrollActivity {
 
   final Set<LinkedScrollPosition> drivers = HashSet<LinkedScrollPosition>();
 
-  void link(LinkedScrollPosition driver) {
+  void link(final LinkedScrollPosition driver) {
     drivers.add(driver);
   }
 
-  void unlink(LinkedScrollPosition driver) {
+  void unlink(final LinkedScrollPosition driver) {
     drivers.remove(driver);
     if (drivers.isEmpty) {
       delegate.goIdle();
@@ -240,7 +240,7 @@ class LinkedScrollActivity extends ScrollActivity {
   @override
   double get velocity => 0.0;
 
-  double moveBy(double delta) {
+  double moveBy(final double delta) {
     assert(drivers.isNotEmpty);
     ScrollDirection? commonDirection;
     for (final LinkedScrollPosition driver in drivers) {
@@ -298,7 +298,7 @@ class _TestState extends State<Test> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Column(
@@ -381,7 +381,7 @@ class _TestState extends State<Test> {
 }
 
 void main() {
-  testWidgets('LinkedScrollController - 1', (WidgetTester tester) async {
+  testWidgets('LinkedScrollController - 1', (final WidgetTester tester) async {
     await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello 1'), findsOneWidget);
@@ -459,7 +459,7 @@ void main() {
     expect(find.text('Hello D'), findsNothing);
     expect(find.text('Hello 4'), findsOneWidget);
   });
-  testWidgets('LinkedScrollController - 2', (WidgetTester tester) async {
+  testWidgets('LinkedScrollController - 2', (final WidgetTester tester) async {
     await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello B'), findsOneWidget);

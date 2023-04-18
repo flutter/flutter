@@ -13,7 +13,7 @@ late final ui.FlutterView view;
 
 late ui.Color color;
 
-ui.Picture paint(ui.Rect paintBounds) {
+ui.Picture paint(final ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to
   // feed in the canvas. The PictureRecorder will eventually produce a Picture,
   // which is an immutable record of those commands.
@@ -41,7 +41,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   return recorder.endRecording();
 }
 
-ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
+ui.Scene composite(final ui.Picture picture, final ui.Rect paintBounds) {
   // The device pixel ratio gives an approximate ratio of the size of pixels on
   // the device's screen to "normal" sized pixels. We commonly work in logical
   // pixels, which are then scaled by the device pixel ratio before being drawn
@@ -69,7 +69,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   return sceneBuilder.build();
 }
 
-void beginFrame(Duration timeStamp) {
+void beginFrame(final Duration timeStamp) {
   final ui.Rect paintBounds = ui.Offset.zero & (view.physicalSize / view.devicePixelRatio);
   // First, record a picture with our painting commands.
   final ui.Picture picture = paint(paintBounds);
@@ -79,7 +79,7 @@ void beginFrame(Duration timeStamp) {
   view.render(scene);
 }
 
-void handlePointerDataPacket(ui.PointerDataPacket packet) {
+void handlePointerDataPacket(final ui.PointerDataPacket packet) {
   // The pointer packet contains a number of pointer movements, which we iterate
   // through and process.
   for (final ui.PointerData datum in packet.data) {

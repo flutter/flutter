@@ -20,7 +20,7 @@ import 'semantics_tester.dart';
 
 void main() {
   group('RawImage', () {
-    testWidgets('properties', (WidgetTester tester) async {
+    testWidgets('properties', (final WidgetTester tester) async {
       final ui.Image image1 = (await tester.runAsync<ui.Image>(() => createTestImage()))!;
 
       await tester.pumpWidget(
@@ -110,7 +110,7 @@ void main() {
   });
 
   group('PhysicalShape', () {
-    testWidgets('properties', (WidgetTester tester) async {
+    testWidgets('properties', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const PhysicalShape(
           clipper: ShapeBorderClipper(shape: CircleBorder()),
@@ -126,7 +126,7 @@ void main() {
       expect(renderObject.elevation, 2.0);
     });
 
-    testWidgets('hit test', (WidgetTester tester) async {
+    testWidgets('hit test', (final WidgetTester tester) async {
       await tester.pumpWidget(
         PhysicalShape(
           clipper: const ShapeBorderClipper(shape: CircleBorder()),
@@ -156,7 +156,7 @@ void main() {
   });
 
   group('FractionalTranslation', () {
-    testWidgets('hit test - entirely inside the bounding box', (WidgetTester tester) async {
+    testWidgets('hit test - entirely inside the bounding box', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
       bool pointerDown = false;
 
@@ -165,7 +165,7 @@ void main() {
           child: FractionalTranslation(
             translation: Offset.zero,
             child: Listener(
-              onPointerDown: (PointerDownEvent event) {
+              onPointerDown: (final PointerDownEvent event) {
                 pointerDown = true;
               },
               child: SizedBox(
@@ -185,7 +185,7 @@ void main() {
       expect(pointerDown, isTrue);
     });
 
-    testWidgets('hit test - partially inside the bounding box', (WidgetTester tester) async {
+    testWidgets('hit test - partially inside the bounding box', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
       bool pointerDown = false;
 
@@ -194,7 +194,7 @@ void main() {
           child: FractionalTranslation(
             translation: const Offset(0.5, 0.5),
             child: Listener(
-              onPointerDown: (PointerDownEvent event) {
+              onPointerDown: (final PointerDownEvent event) {
                 pointerDown = true;
               },
               child: SizedBox(
@@ -214,7 +214,7 @@ void main() {
       expect(pointerDown, isTrue);
     });
 
-    testWidgets('hit test - completely outside the bounding box', (WidgetTester tester) async {
+    testWidgets('hit test - completely outside the bounding box', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey();
       bool pointerDown = false;
 
@@ -223,7 +223,7 @@ void main() {
           child: FractionalTranslation(
             translation: const Offset(1.0, 1.0),
             child: Listener(
-              onPointerDown: (PointerDownEvent event) {
+              onPointerDown: (final PointerDownEvent event) {
                 pointerDown = true;
               },
               child: SizedBox(
@@ -243,14 +243,14 @@ void main() {
       expect(pointerDown, isTrue);
     });
 
-    testWidgets('semantics bounds are updated', (WidgetTester tester) async {
+    testWidgets('semantics bounds are updated', (final WidgetTester tester) async {
       final GlobalKey fractionalTranslationKey = GlobalKey();
       final GlobalKey textKey = GlobalKey();
       Offset offset = const Offset(0.4, 0.4);
 
       await tester.pumpWidget(
         StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Directionality(
               textDirection: TextDirection.ltr,
               child: Center(
@@ -307,7 +307,7 @@ void main() {
   });
 
   group('Semantics', () {
-    testWidgets('Semantics can set attributed Text', (WidgetTester tester) async {
+    testWidgets('Semantics can set attributed Text', (final WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -358,7 +358,7 @@ void main() {
       expect(attributedHint.attributes[0].range, const TextRange(start:1, end: 2));
     });
 
-    testWidgets('Semantics can merge attributed strings', (WidgetTester tester) async {
+    testWidgets('Semantics can merge attributed strings', (final WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -413,7 +413,7 @@ void main() {
       expect(attributedHint.attributes[1].range, const TextRange(start:6, end: 7));
     });
 
-    testWidgets('Semantics can merge attributed strings with non attributed string', (WidgetTester tester) async {
+    testWidgets('Semantics can merge attributed strings with non attributed string', (final WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
           MaterialApp(
@@ -453,7 +453,7 @@ void main() {
   });
 
   group('Row', () {
-    testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
+    testWidgets('multiple baseline aligned children', (final WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
       // The point size of the font must be a multiple of 4 until
@@ -506,7 +506,7 @@ void main() {
       expect(tester.getTopLeft(find.byKey(key2)).dy, aboveBaseline1 - aboveBaseline2);
     });
 
-    testWidgets('baseline aligned children account for a larger, no-baseline child size', (WidgetTester tester) async {
+    testWidgets('baseline aligned children account for a larger, no-baseline child size', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/58898
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
@@ -573,7 +573,7 @@ void main() {
     );
   });
 
-  testWidgets('UnconstrainedBox can set and update clipBehavior', (WidgetTester tester) async {
+  testWidgets('UnconstrainedBox can set and update clipBehavior', (final WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox());
     final RenderConstraintsTransformBox renderObject = tester.allRenderObjects.whereType<RenderConstraintsTransformBox>().first;
     expect(renderObject.clipBehavior, equals(Clip.none));
@@ -582,7 +582,7 @@ void main() {
     expect(renderObject.clipBehavior, equals(Clip.antiAlias));
   });
 
-  testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (WidgetTester tester) async {
+  testWidgets('UnconstrainedBox warns only when clipBehavior is Clip.none', (final WidgetTester tester) async {
     for (final Clip? clip in <Clip?>[null, ...Clip.values]) {
       // Clear any render objects that were there before so that we can see more
       // than one error. Otherwise, it just throws the first one and skips the
@@ -658,7 +658,7 @@ void main() {
       mockCanvas = mockContext.canvas;
     });
 
-    testWidgets('ColoredBox - no size, no child', (WidgetTester tester) async {
+    testWidgets('ColoredBox - no size, no child', (final WidgetTester tester) async {
       await tester.pumpWidget(const Flex(
         direction: Axis.horizontal,
         textDirection: TextDirection.ltr,
@@ -679,7 +679,7 @@ void main() {
       expect(mockContext.offsets, isEmpty);
     });
 
-    testWidgets('ColoredBox - no size, child', (WidgetTester tester) async {
+    testWidgets('ColoredBox - no size, child', (final WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
       await tester.pumpWidget(const Flex(
@@ -703,7 +703,7 @@ void main() {
       expect(mockContext.offsets.single, Offset.zero);
     });
 
-    testWidgets('ColoredBox - size, no child', (WidgetTester tester) async {
+    testWidgets('ColoredBox - size, no child', (final WidgetTester tester) async {
       await tester.pumpWidget(const ColoredBox(color: colorToPaint));
       expect(find.byType(ColoredBox), findsOneWidget);
       final RenderObject renderColoredBox = tester.renderObject(find.byType(ColoredBox));
@@ -716,7 +716,7 @@ void main() {
       expect(mockContext.offsets, isEmpty);
     });
 
-    testWidgets('ColoredBox - size, child', (WidgetTester tester) async {
+    testWidgets('ColoredBox - size, child', (final WidgetTester tester) async {
       const ValueKey<int> key = ValueKey<int>(0);
       const Widget child = SizedBox.expand(key: key);
       await tester.pumpWidget(const ColoredBox(color: colorToPaint, child: child));
@@ -732,7 +732,7 @@ void main() {
       expect(mockContext.offsets.single, Offset.zero);
     });
 
-    testWidgets('ColoredBox - debugFillProperties', (WidgetTester tester) async {
+    testWidgets('ColoredBox - debugFillProperties', (final WidgetTester tester) async {
       const ColoredBox box = ColoredBox(color: colorToPaint);
       final DiagnosticPropertiesBuilder properties = DiagnosticPropertiesBuilder();
       box.debugFillProperties(properties);
@@ -740,7 +740,7 @@ void main() {
       expect(properties.properties.first.value, colorToPaint);
     });
   });
-  testWidgets('Inconsequential golden test', (WidgetTester tester) async {
+  testWidgets('Inconsequential golden test', (final WidgetTester tester) async {
     // The test validates the Flutter Gold integration. Any changes to the
     // golden file can be approved at any time.
     await tester.pumpWidget(RepaintBoundary(
@@ -756,9 +756,9 @@ void main() {
     );
   });
 
-  testWidgets('IgnorePointer ignores pointers', (WidgetTester tester) async {
+  testWidgets('IgnorePointer ignores pointers', (final WidgetTester tester) async {
     final List<String> logs = <String>[];
-    Widget target({required bool ignoring}) => Align(
+    Widget target({required final bool ignoring}) => Align(
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -766,29 +766,29 @@ void main() {
           width: 100,
           height: 100,
           child: Listener(
-            onPointerDown: (_) { logs.add('down1'); },
+            onPointerDown: (final _) { logs.add('down1'); },
             child: MouseRegion(
-              onEnter: (_) { logs.add('enter1'); },
-              onExit: (_) { logs.add('exit1'); },
+              onEnter: (final _) { logs.add('enter1'); },
+              onExit: (final _) { logs.add('exit1'); },
               cursor: SystemMouseCursors.forbidden,
               child: Stack(
                 children: <Widget>[
                   Listener(
-                    onPointerDown: (_) { logs.add('down2'); },
+                    onPointerDown: (final _) { logs.add('down2'); },
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      onEnter: (_) { logs.add('enter2'); },
-                      onExit: (_) { logs.add('exit2'); },
+                      onEnter: (final _) { logs.add('enter2'); },
+                      onExit: (final _) { logs.add('exit2'); },
                     ),
                   ),
                   IgnorePointer(
                     ignoring: ignoring,
                     child: Listener(
-                      onPointerDown: (_) { logs.add('down3'); },
+                      onPointerDown: (final _) { logs.add('down3'); },
                       child: MouseRegion(
                         cursor: SystemMouseCursors.text,
-                        onEnter: (_) { logs.add('enter3'); },
-                        onExit: (_) { logs.add('exit3'); },
+                        onEnter: (final _) { logs.add('enter3'); },
+                        onExit: (final _) { logs.add('exit3'); },
                       ),
                     ),
                   ),
@@ -834,7 +834,7 @@ void main() {
   });
 
   group('IgnorePointer semantics', () {
-    testWidgets('does not change semantics when not ignoring', (WidgetTester tester) async {
+    testWidgets('does not change semantics when not ignoring', (final WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -861,7 +861,7 @@ void main() {
       );
     });
 
-    testWidgets('can toggle the ignoring.', (WidgetTester tester) async {
+    testWidgets('can toggle the ignoring.', (final WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
       final UniqueKey key2 = UniqueKey();
       final UniqueKey key3 = UniqueKey();
@@ -980,7 +980,7 @@ void main() {
       );
     });
 
-    testWidgets('drops semantics when its ignoringSemantics is true', (WidgetTester tester) async {
+    testWidgets('drops semantics when its ignoringSemantics is true', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
@@ -999,7 +999,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores user interactions', (WidgetTester tester) async {
+    testWidgets('ignores user interactions', (final WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -1026,9 +1026,9 @@ void main() {
     });
   });
 
-  testWidgets('AbsorbPointer absorbs pointers', (WidgetTester tester) async {
+  testWidgets('AbsorbPointer absorbs pointers', (final WidgetTester tester) async {
     final List<String> logs = <String>[];
-    Widget target({required bool absorbing}) => Align(
+    Widget target({required final bool absorbing}) => Align(
       alignment: Alignment.topLeft,
       child: Directionality(
         textDirection: TextDirection.ltr,
@@ -1036,29 +1036,29 @@ void main() {
           width: 100,
           height: 100,
           child: Listener(
-            onPointerDown: (_) { logs.add('down1'); },
+            onPointerDown: (final _) { logs.add('down1'); },
             child: MouseRegion(
-              onEnter: (_) { logs.add('enter1'); },
-              onExit: (_) { logs.add('exit1'); },
+              onEnter: (final _) { logs.add('enter1'); },
+              onExit: (final _) { logs.add('exit1'); },
               cursor: SystemMouseCursors.forbidden,
               child: Stack(
                 children: <Widget>[
                   Listener(
-                    onPointerDown: (_) { logs.add('down2'); },
+                    onPointerDown: (final _) { logs.add('down2'); },
                     child: MouseRegion(
                       cursor: SystemMouseCursors.click,
-                      onEnter: (_) { logs.add('enter2'); },
-                      onExit: (_) { logs.add('exit2'); },
+                      onEnter: (final _) { logs.add('enter2'); },
+                      onExit: (final _) { logs.add('exit2'); },
                     ),
                   ),
                   AbsorbPointer(
                     absorbing: absorbing,
                     child: Listener(
-                      onPointerDown: (_) { logs.add('down3'); },
+                      onPointerDown: (final _) { logs.add('down3'); },
                       child: MouseRegion(
                         cursor: SystemMouseCursors.text,
-                        onEnter: (_) { logs.add('enter3'); },
-                        onExit: (_) { logs.add('exit3'); },
+                        onEnter: (final _) { logs.add('enter3'); },
+                        onExit: (final _) { logs.add('exit3'); },
                       ),
                     ),
                   ),
@@ -1103,7 +1103,7 @@ void main() {
     logs.clear();
   });
 
-  testWidgets('Wrap implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Wrap implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Wrap(
       spacing: 8.0, // gap between adjacent Text widget
@@ -1118,8 +1118,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, unorderedMatches(<dynamic>[
@@ -1135,7 +1135,7 @@ void main() {
   });
 }
 
-HitsRenderBox hits(RenderBox renderBox) => HitsRenderBox(renderBox);
+HitsRenderBox hits(final RenderBox renderBox) => HitsRenderBox(renderBox);
 
 class HitsRenderBox extends Matcher {
   const HitsRenderBox(this.renderBox);
@@ -1143,19 +1143,19 @@ class HitsRenderBox extends Matcher {
   final RenderBox renderBox;
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
     description.add('hit test result contains ').addDescriptionOf(renderBox);
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox,
+      (final HitTestEntry entry) => entry.target == renderBox,
     ).isNotEmpty;
   }
 }
 
-DoesNotHitRenderBox doesNotHit(RenderBox renderBox) => DoesNotHitRenderBox(renderBox);
+DoesNotHitRenderBox doesNotHit(final RenderBox renderBox) => DoesNotHitRenderBox(renderBox);
 
 class DoesNotHitRenderBox extends Matcher {
   const DoesNotHitRenderBox(this.renderBox);
@@ -1163,14 +1163,14 @@ class DoesNotHitRenderBox extends Matcher {
   final RenderBox renderBox;
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
     description.add("hit test result doesn't contain ").addDescriptionOf(renderBox);
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
-      (HitTestEntry entry) => entry.target == renderBox,
+      (final HitTestEntry entry) => entry.target == renderBox,
     ).isEmpty;
   }
 }
@@ -1183,7 +1183,7 @@ class _MockPaintingContext extends Fake implements PaintingContext {
   final _MockCanvas canvas = _MockCanvas();
 
   @override
-  void paintChild(RenderObject child, Offset offset) {
+  void paintChild(final RenderObject child, final Offset offset) {
     children.add(child);
     offsets.add(offset);
   }
@@ -1195,7 +1195,7 @@ class _MockCanvas extends Fake implements Canvas {
   bool didPaint = false;
 
   @override
-  void drawRect(Rect rect, Paint paint) {
+  void drawRect(final Rect rect, final Paint paint) {
     rects.add(rect);
     paints.add(paint);
   }
@@ -1213,14 +1213,14 @@ class TestIgnorePointer extends StatefulWidget {
 class TestIgnorePointerState extends State<TestIgnorePointer> {
   bool ignore = true;
 
-  void setIgnore(bool newIgnore) {
+  void setIgnore(final bool newIgnore) {
     setState(() {
       ignore = newIgnore;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return IgnorePointer(
       ignoring: ignore,
       child: widget.child,

@@ -14,7 +14,7 @@ export 'dart:ui' show TextRange;
 export 'text_editing.dart' show TextSelection;
 export 'text_input.dart' show TextEditingValue;
 
-TextAffinity? _toTextAffinity(String? affinity) {
+TextAffinity? _toTextAffinity(final String? affinity) {
   switch (affinity) {
     case 'TextAffinity.downstream':
       return TextAffinity.downstream;
@@ -26,13 +26,13 @@ TextAffinity? _toTextAffinity(String? affinity) {
 
 // Replaces a range of text in the original string with the text given in the
 // replacement string.
-String _replace(String originalText, String replacementText, TextRange replacementRange) {
+String _replace(final String originalText, final String replacementText, final TextRange replacementRange) {
   assert(replacementRange.isValid);
   return originalText.replaceRange(replacementRange.start, replacementRange.end, replacementText);
 }
 
 // Verify that the given range is within the text.
-bool _debugTextRangeIsValid(TextRange range, String text) {
+bool _debugTextRangeIsValid(final TextRange range, final String text) {
   if (!range.isValid) {
     return true;
   }
@@ -68,7 +68,7 @@ abstract class TextEditingDelta with Diagnosticable {
 
   /// Creates an instance of this class from a JSON object by inferring the
   /// type of delta based on values sent from the engine.
-  factory TextEditingDelta.fromJSON(Map<String, dynamic> encoded) {
+  factory TextEditingDelta.fromJSON(final Map<String, dynamic> encoded) {
     // An insertion delta is one where replacement destination is collapsed.
     //
     // A deletion delta is one where the replacement source is empty.
@@ -242,7 +242,7 @@ abstract class TextEditingDelta with Diagnosticable {
 
   /// This method will take the given [TextEditingValue] and return a new
   /// [TextEditingValue] with that instance of [TextEditingDelta] applied to it.
-  TextEditingValue apply(TextEditingValue value);
+  TextEditingValue apply(final TextEditingValue value);
 }
 
 /// A structure representing an insertion of a single/or contiguous sequence of
@@ -275,7 +275,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   final int insertionOffset;
 
   @override
-  TextEditingValue apply(TextEditingValue value) {
+  TextEditingValue apply(final TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
@@ -288,7 +288,7 @@ class TextEditingDeltaInsertion extends TextEditingDelta {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('oldText', oldText));
     properties.add(DiagnosticsProperty<String>('textInserted', textInserted));
@@ -321,7 +321,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   String get textDeleted => oldText.substring(deletedRange.start, deletedRange.end);
 
   @override
-  TextEditingValue apply(TextEditingValue value) {
+  TextEditingValue apply(final TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
@@ -334,7 +334,7 @@ class TextEditingDeltaDeletion extends TextEditingDelta {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('oldText', oldText));
     properties.add(DiagnosticsProperty<String>('textDeleted', textDeleted));
@@ -377,7 +377,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   String get textReplaced => oldText.substring(replacedRange.start, replacedRange.end);
 
   @override
-  TextEditingValue apply(TextEditingValue value) {
+  TextEditingValue apply(final TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
@@ -390,7 +390,7 @@ class TextEditingDeltaReplacement extends TextEditingDelta {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('oldText', oldText));
     properties.add(DiagnosticsProperty<String>('textReplaced', textReplaced));
@@ -423,7 +423,7 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   });
 
   @override
-  TextEditingValue apply(TextEditingValue value) {
+  TextEditingValue apply(final TextEditingValue value) {
     // To stay inline with the plain text model we should follow a last write wins
     // policy and apply the delta to the oldText. This is due to the asynchronous
     // nature of the connection between the framework and platform text input plugins.
@@ -433,7 +433,7 @@ class TextEditingDeltaNonTextUpdate extends TextEditingDelta {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('oldText', oldText));
     properties.add(DiagnosticsProperty<TextSelection>('selection', selection));

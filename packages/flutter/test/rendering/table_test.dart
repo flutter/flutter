@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
-RenderBox sizedBox(double width, double height) {
+RenderBox sizedBox(final double width, final double height) {
   return RenderConstrainedBox(
     additionalConstraints: BoxConstraints.tight(Size(width, height)),
   );
@@ -51,7 +51,7 @@ void main() {
 
   test('Table control test: constrained flex columns', () {
     final RenderTable table = RenderTable(textDirection: TextDirection.ltr);
-    final List<RenderBox> children = List<RenderBox>.generate(6, (_) => RenderPositionedBox());
+    final List<RenderBox> children = List<RenderBox>.generate(6, (final _) => RenderPositionedBox());
 
     table.setFlatChildren(6, children);
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
@@ -238,7 +238,7 @@ void main() {
       children: <List<RenderBox>>[
         List<RenderBox>.generate(
           7,
-          (int _) => RenderConstrainedBox(additionalConstraints: cellConstraints),
+          (final int _) => RenderConstrainedBox(additionalConstraints: cellConstraints),
         ),
       ],
       columnWidths: const <int, TableColumnWidth>{

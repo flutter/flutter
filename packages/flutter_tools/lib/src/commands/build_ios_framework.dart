@@ -28,11 +28,11 @@ import 'build.dart';
 abstract class BuildFrameworkCommand extends BuildSubCommand {
   BuildFrameworkCommand({
     // Instantiating FlutterVersion kicks off networking, so delay until it's needed, but allow test injection.
-    @visibleForTesting FlutterVersion? flutterVersion,
-    required BuildSystem buildSystem,
-    required bool verboseHelp,
-    Cache? cache,
-    Platform? platform,
+    @visibleForTesting final FlutterVersion? flutterVersion,
+    required final BuildSystem buildSystem,
+    required final bool verboseHelp,
+    final Cache? cache,
+    final Platform? platform,
     required super.logger,
   }) : _injectedFlutterVersion = flutterVersion,
        _buildSystem = buildSystem,
@@ -138,10 +138,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
   }
 
   static Future<void> produceXCFramework(
-    Iterable<Directory> frameworks,
-    String frameworkBinaryName,
-    Directory outputDirectory,
-    ProcessManager processManager,
+    final Iterable<Directory> frameworks,
+    final String frameworkBinaryName,
+    final Directory outputDirectory,
+    final ProcessManager processManager,
   ) async {
     final List<String> xcframeworkCommand = <String>[
       'xcrun',
@@ -152,10 +152,10 @@ abstract class BuildFrameworkCommand extends BuildSubCommand {
         framework.path,
         ...framework.parent
             .listSync()
-            .where((FileSystemEntity entity) =>
+            .where((final FileSystemEntity entity) =>
         entity.basename.endsWith('dSYM'))
-            .map((FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
-            .expand<String>((List<String> parameter) => parameter),
+            .map((final FileSystemEntity entity) => <String>['-debug-symbols', entity.path])
+            .expand<String>((final List<String> parameter) => parameter),
       ],
       '-output',
       outputDirectory.childDirectory('$frameworkBinaryName.xcframework').path,
@@ -180,7 +180,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
     required super.logger,
     super.flutterVersion,
     required super.buildSystem,
-    required bool verboseHelp,
+    required final bool verboseHelp,
     super.cache,
     super.platform,
   }) : super(verboseHelp: verboseHelp) {
@@ -312,7 +312,7 @@ class BuildIOSFrameworkCommand extends BuildFrameworkCommand {
   /// Create podspec that will download and unzip remote engine assets so host apps can leverage CocoaPods
   /// vendored framework caching.
   @visibleForTesting
-  void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, { bool force = false }) {
+  void produceFlutterPodspec(final BuildMode mode, final Directory modeDirectory, { final bool force = false }) {
     final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...');
     try {
       final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
@@ -365,8 +365,8 @@ end
   }
 
   Future<void> _produceFlutterFramework(
-    BuildInfo buildInfo,
-    Directory modeDirectory,
+    final BuildInfo buildInfo,
+    final Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
       ' ├─Copying Flutter.xcframework...',
@@ -395,10 +395,10 @@ end
   }
 
   Future<void> _produceAppFramework(
-    BuildInfo buildInfo,
-    Directory outputDirectory,
-    Directory iPhoneBuildOutput,
-    Directory simulatorBuildOutput,
+    final BuildInfo buildInfo,
+    final Directory outputDirectory,
+    final Directory iPhoneBuildOutput,
+    final Directory simulatorBuildOutput,
   ) async {
     const String appFrameworkName = 'App.framework';
 
@@ -475,11 +475,11 @@ end
   }
 
   Future<void> _producePlugins(
-    BuildMode mode,
-    String xcodeBuildConfiguration,
-    Directory iPhoneBuildOutput,
-    Directory simulatorBuildOutput,
-    Directory modeDirectory,
+    final BuildMode mode,
+    final String xcodeBuildConfiguration,
+    final Directory iPhoneBuildOutput,
+    final Directory simulatorBuildOutput,
+    final Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
       ' ├─Building plugins...'

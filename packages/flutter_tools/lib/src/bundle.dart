@@ -16,7 +16,7 @@ const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
 String getDefaultApplicationKernelPath({
-  required bool trackWidgetCreation,
+  required final bool trackWidgetCreation,
 }) {
   return getKernelPathForTransformerOptions(
     globals.fs.path.join(getBuildDirectory(), 'app.dill'),
@@ -25,15 +25,15 @@ String getDefaultApplicationKernelPath({
 }
 
 String getDefaultCachedKernelPath({
-  required bool trackWidgetCreation,
-  required List<String> dartDefines,
-  List<String> extraFrontEndOptions = const <String>[],
-  FileSystem? fileSystem,
-  Config? config,
+  required final bool trackWidgetCreation,
+  required final List<String> dartDefines,
+  final List<String> extraFrontEndOptions = const <String>[],
+  final FileSystem? fileSystem,
+  final Config? config,
 }) {
   final StringBuffer buffer = StringBuffer();
    final List<String> cacheFrontEndOptions = extraFrontEndOptions.toList()
-     ..removeWhere((String arg) => arg.startsWith('--enable-experiment=') || arg == '--flutter-widget-cache');
+     ..removeWhere((final String arg) => arg.startsWith('--enable-experiment=') || arg == '--flutter-widget-cache');
   buffer.writeAll(dartDefines);
   buffer.writeAll(cacheFrontEndOptions);
   String buildPrefix = '';
@@ -53,7 +53,7 @@ String getDefaultCachedKernelPath({
 
 String getKernelPathForTransformerOptions(
   String path, {
-  required bool trackWidgetCreation,
+  required final bool trackWidgetCreation,
 }) {
   if (trackWidgetCreation) {
     path += '.track.dill';

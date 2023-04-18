@@ -41,7 +41,7 @@ abstract class AndroidAssetBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -206,7 +206,7 @@ class AndroidAot extends AotElfBase {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
@@ -332,7 +332,7 @@ class AndroidAotBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final Directory buildDir = environment.buildDir.childDirectory(_androidAbiName);
     final Directory outputDirectory = environment.outputDir
       .childDirectory(_androidAbiName);
@@ -376,7 +376,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
   /// Create an [AndroidAotDeferredComponentsBundle] implementation for a given [targetPlatform] and [buildMode].
   ///
   /// If [components] is not provided, it will be read from the pubspec.yaml manifest.
-  AndroidAotDeferredComponentsBundle(this.dependency, {List<DeferredComponent>? components}) : _components = components;
+  AndroidAotDeferredComponentsBundle(this.dependency, {final List<DeferredComponent>? components}) : _components = components;
 
   /// The [AndroidAotBundle] instance this bundle rule depends on.
   final AndroidAotBundle dependency;
@@ -419,7 +419,7 @@ class AndroidAotDeferredComponentsBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     _components ??= FlutterProject.current().manifest.deferredComponents ?? <DeferredComponent>[];
     final List<String> abis = <String>[_androidAbiName];
     final List<LoadingUnit> generatedLoadingUnits = LoadingUnit.parseGeneratedLoadingUnits(environment.outputDir, environment.logger, abis: abis);
@@ -469,12 +469,12 @@ Set<String> deferredComponentsTargets = <String>{
 /// Assigned components are components that have determined which loading units contains
 /// the dart libraries it has via the DeferredComponent.assignLoadingUnits method.
 Depfile copyDeferredComponentSoFiles(
-  Environment env,
-  List<DeferredComponent> components,
-  List<LoadingUnit> loadingUnits,
-  Directory buildDir, // generally `<projectDir>/build`
-  List<String> abis,
-  BuildMode buildMode,
+  final Environment env,
+  final List<DeferredComponent> components,
+  final List<LoadingUnit> loadingUnits,
+  final Directory buildDir, // generally `<projectDir>/build`
+  final List<String> abis,
+  final BuildMode buildMode,
 ) {
   final List<File> inputs = <File>[];
   final List<File> outputs = <File>[];

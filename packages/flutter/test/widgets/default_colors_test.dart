@@ -19,7 +19,7 @@ const String _expText = 'Éxp'; // renders in the test font as:
 // ÉÉÉÉxxxxpppp
 
 void main() {
-  testWidgets('Default background', (WidgetTester tester) async {
+  testWidgets('Default background', (final WidgetTester tester) async {
     await tester.pumpWidget(const Align(
       alignment: Alignment.topLeft,
       child: Text(_expText, textDirection: TextDirection.ltr, style: TextStyle(color: Color(0xFF345678), fontSize: _crispText))),
@@ -40,7 +40,7 @@ void main() {
     );
   }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
 
-  testWidgets('Default text color', (WidgetTester tester) async {
+  testWidgets('Default text color', (final WidgetTester tester) async {
     await tester.pumpWidget(const ColoredBox(
       color: Color(0xFFABCDEF),
       child: Align(
@@ -65,7 +65,7 @@ void main() {
     );
   }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
 
-  testWidgets('Default text selection color', (WidgetTester tester) async {
+  testWidgets('Default text selection color', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       ColoredBox(
@@ -77,7 +77,7 @@ void main() {
             child: Overlay(
               initialEntries: <OverlayEntry>[
                 OverlayEntry(
-                  builder: (BuildContext context) => SelectableRegion(
+                  builder: (final BuildContext context) => SelectableRegion(
                     focusNode: FocusNode(),
                     selectionControls: emptyTextSelectionControls,
                     child: Align(
@@ -119,7 +119,7 @@ void main() {
   }, skip: !canCaptureImage); // [intended] Test relies on captureImage, which is not supported on web currently.
 }
 
-Color _getPixel(ByteData bytes, int x, int y, int width) {
+Color _getPixel(final ByteData bytes, final int x, final int y, final int width) {
   final int offset = (x + y * width) * 4;
   return Color.fromARGB(
     bytes.getUint8(offset + 3),
@@ -129,7 +129,7 @@ Color _getPixel(ByteData bytes, int x, int y, int width) {
   );
 }
 
-Future<void> _expectColors(WidgetTester tester, Finder finder, Set<Color> allowedColors, [ Map<Offset, Color>? spotChecks ]) async {
+Future<void> _expectColors(final WidgetTester tester, final Finder finder, final Set<Color> allowedColors, [ final Map<Offset, Color>? spotChecks ]) async {
   final TestWidgetsFlutterBinding binding = tester.binding;
   final ui.Image image = (await binding.runAsync<ui.Image>(() => captureImage(finder.evaluate().single)))!;
   final ByteData bytes = (await binding.runAsync<ByteData?>(() => image.toByteData(format: ui.ImageByteFormat.rawStraightRgba)))!;
@@ -140,9 +140,9 @@ Future<void> _expectColors(WidgetTester tester, Finder finder, Set<Color> allowe
                           (bytes.getUint8(offset + 1) << 8) +
                           (bytes.getUint8(offset + 2)));
   }
-  final Set<Color> actualColors = actualColorValues.map((int value) => Color(value)).toSet();
+  final Set<Color> actualColors = actualColorValues.map((final int value) => Color(value)).toSet();
   expect(actualColors, allowedColors);
-  spotChecks?.forEach((Offset position, Color expected) {
+  spotChecks?.forEach((final Offset position, final Color expected) {
     assert(position.dx.round() >= 0);
     assert(position.dx.round() < image.width);
     assert(position.dy.round() >= 0);

@@ -15,22 +15,22 @@ import '../base/logger.dart';
 ///
 /// If [throwOnError] is false, in the event of an error an empty package
 /// config is returned.
-Future<PackageConfig> loadPackageConfigWithLogging(File file, {
-  required Logger logger,
-  bool throwOnError = true,
+Future<PackageConfig> loadPackageConfigWithLogging(final File file, {
+  required final Logger logger,
+  final bool throwOnError = true,
 }) async {
   final FileSystem fileSystem = file.fileSystem;
   bool didError = false;
   final PackageConfig result = await loadPackageConfigUri(
     file.absolute.uri,
-    loader: (Uri uri) async {
+    loader: (final Uri uri) async {
       final File configFile = fileSystem.file(uri);
       if (!configFile.existsSync()) {
         return null;
       }
       return Future<Uint8List>.value(configFile.readAsBytesSync());
     },
-    onError: (dynamic error) {
+    onError: (final dynamic error) {
       if (!throwOnError) {
         return;
       }

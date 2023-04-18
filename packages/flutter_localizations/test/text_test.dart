@@ -7,7 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Text baseline with CJK locale', (WidgetTester tester) async {
+  testWidgets('Text baseline with CJK locale', (final WidgetTester tester) async {
     // This test in combination with 'Text baseline with EN locale' verify the baselines
     // used to align text with ideographic baselines are reasonable. We are currently
     // using the alphabetic baseline to lay out as the ideographic baseline is not yet
@@ -18,7 +18,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         routes: <String, WidgetBuilder>{
-          '/next': (BuildContext context) {
+          '/next': (final BuildContext context) {
             return const Text('Next');
           },
         },
@@ -33,12 +33,12 @@ void main() {
           child: Center(
             child: Builder(
               key: targetKey,
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return PopupMenuButton<int>(
-                  onSelected: (int value) {
+                  onSelected: (final int value) {
                     Navigator.pushNamed(context, '/next');
                   },
-                  itemBuilder: (BuildContext context) {
+                  itemBuilder: (final BuildContext context) {
                     return <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1,
@@ -91,7 +91,7 @@ void main() {
     expect(bottomRight, const Offset(477.0, 364.5));
   });
 
-  testWidgets('Text baseline with EN locale', (WidgetTester tester) async {
+  testWidgets('Text baseline with EN locale', (final WidgetTester tester) async {
     // This test in combination with 'Text baseline with CJK locale' verify the baselines
     // used to align text with ideographic baselines are reasonable. We are currently
     // using the alphabetic baseline to lay out as the ideographic baseline is not yet
@@ -102,7 +102,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         routes: <String, WidgetBuilder>{
-          '/next': (BuildContext context) {
+          '/next': (final BuildContext context) {
             return const Text('Next');
           },
         },
@@ -117,12 +117,12 @@ void main() {
           child: Center(
             child: Builder(
               key: targetKey,
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return PopupMenuButton<int>(
-                  onSelected: (int value) {
+                  onSelected: (final int value) {
                     Navigator.pushNamed(context, '/next');
                   },
-                  itemBuilder: (BuildContext context) {
+                  itemBuilder: (final BuildContext context) {
                     return <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1,

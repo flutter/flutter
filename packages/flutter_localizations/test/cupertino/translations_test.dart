@@ -16,7 +16,7 @@ final String rootDirectoryPath = Directory.current.path;
 
 void main() {
   for (final String language in kCupertinoSupportedLanguages) {
-    testWidgets('translations exist for $language', (WidgetTester tester) async {
+    testWidgets('translations exist for $language', (final WidgetTester tester) async {
       final Locale locale = Locale(language);
 
       expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
@@ -108,7 +108,7 @@ void main() {
     });
   }
 
-  testWidgets('Spot check French', (WidgetTester tester) async {
+  testWidgets('Spot check French', (final WidgetTester tester) async {
     const Locale locale = Locale('fr');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
@@ -123,7 +123,7 @@ void main() {
     expect(localizations.timerPickerMinute(10), '10');
   });
 
-  testWidgets('Spot check Chinese', (WidgetTester tester) async {
+  testWidgets('Spot check Chinese', (final WidgetTester tester) async {
     const Locale locale = Locale('zh');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
@@ -139,7 +139,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/53036.
-  testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (WidgetTester tester) async {
+  testWidgets('`nb` uses `no` as its synonym when `nb` arb file is not present', (final WidgetTester tester) async {
     final File nbCupertinoArbFile = File(
       path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_nb.arb'),
     );
@@ -169,7 +169,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
-  testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
+  testWidgets('kn arb file should be properly Unicode escaped', (final WidgetTester tester) async {
     final File file = File(
       path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'cupertino_kn.arb'),
     );

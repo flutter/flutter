@@ -14,14 +14,14 @@ const double _kToolbarContentDistance = 8.0;
 class _CustomMaterialTextSelectionControls extends MaterialTextSelectionControls {
   @override
   Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
+    final BuildContext context,
+    final Rect globalEditableRegion,
+    final double textLineHeight,
+    final Offset selectionMidpoint,
+    final List<TextSelectionPoint> endpoints,
+    final TextSelectionDelegate delegate,
+    final ClipboardStatusNotifier? clipboardStatus,
+    final Offset? lastSecondaryTapDownPosition,
   ) {
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
     final TextSelectionPoint endTextSelectionPoint = endpoints.length > 1
@@ -61,10 +61,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // Find by a runtimeType String, including private types.
-  Finder findPrivate(String type) {
+  Finder findPrivate(final String type) {
     return find.descendant(
       of: find.byType(MaterialApp),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
+      matching: find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == type),
     );
   }
 
@@ -75,15 +75,15 @@ void main() {
 
   Finder findOverflowButton() => findPrivate('_TextSelectionToolbarOverflowButton');
 
-  testWidgets('puts children in an overflow menu if they overflow', (WidgetTester tester) async {
+  testWidgets('puts children in an overflow menu if they overflow', (final WidgetTester tester) async {
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final List<Widget> children = List<Widget>.generate(7, (final int i) => const TestBox());
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               return TextSelectionToolbar(
                 anchorAbove: const Offset(50.0, 100.0),
@@ -123,7 +123,7 @@ void main() {
     expect(findOverflowButton(), findsOneWidget);
   });
 
-  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits', (final WidgetTester tester) async {
     late StateSetter setState;
     const double height = 44.0;
     const double anchorBelowY = 500.0;
@@ -133,7 +133,7 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               return TextSelectionToolbar(
                 anchorAbove: Offset(50.0, anchorAboveY),
@@ -172,7 +172,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   });
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgets('can create and use a custom toolbar', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(

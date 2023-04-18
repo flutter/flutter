@@ -8,8 +8,8 @@ import 'xcode.dart';
 
 class XcodeValidator extends DoctorValidator {
   XcodeValidator({
-    required Xcode xcode,
-    required UserMessages userMessages,
+    required final Xcode xcode,
+    required final UserMessages userMessages,
   }) : _xcode = xcode,
       _userMessages = userMessages,
       super('Xcode - develop for iOS and macOS');

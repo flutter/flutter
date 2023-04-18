@@ -10,7 +10,7 @@ import 'package:web_e2e_tests/scroll_wheel_main.dart' as app;
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Test mousewheel scroll by line', (WidgetTester tester) async {
+  testWidgets('Test mousewheel scroll by line', (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
 

@@ -99,7 +99,7 @@ class BenchDynamicClipOnStaticPicture extends SceneBuilderRecorder {
   double pictureVerticalOffset = 0.0;
 
   @override
-  void onDrawFrame(SceneBuilder sceneBuilder) {
+  void onDrawFrame(final SceneBuilder sceneBuilder) {
     // Render the exact same picture, but offset it as if it's being scrolled.
     // This will move the clip along the Y axis in picture's local coordinates
     // causing a repaint. If we're not efficient at managing clips and/or

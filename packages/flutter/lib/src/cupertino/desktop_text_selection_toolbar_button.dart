@@ -43,9 +43,9 @@ class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
   /// a [Text] widget styled like the default Mac context menu button.
   CupertinoDesktopTextSelectionToolbarButton.text({
     super.key,
-    required BuildContext context,
+    required final BuildContext context,
     required this.onPressed,
-    required String text,
+    required final String text,
   }) : buttonItem = null,
        child = Text(
          text,
@@ -84,20 +84,20 @@ class CupertinoDesktopTextSelectionToolbarButton extends StatefulWidget {
 class _CupertinoDesktopTextSelectionToolbarButtonState extends State<CupertinoDesktopTextSelectionToolbarButton> {
   bool _isHovered = false;
 
-  void _onEnter(PointerEnterEvent event) {
+  void _onEnter(final PointerEnterEvent event) {
     setState(() {
       _isHovered = true;
     });
   }
 
-  void _onExit(PointerExitEvent event) {
+  void _onExit(final PointerExitEvent event) {
     setState(() {
       _isHovered = false;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget child = widget.child ?? Text(
       CupertinoTextSelectionToolbarButton.getButtonLabel(context, widget.buttonItem!),
       overflow: TextOverflow.ellipsis,

@@ -8,14 +8,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('toString control test', (WidgetTester tester) async {
+  testWidgets('toString control test', (final WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Text('Hello', textDirection: TextDirection.ltr)));
     final HitTestResult result = tester.hitTestOnBinding(Offset.zero);
     expect(result, hasOneLineDescription);
     expect(result.path.first, hasOneLineDescription);
   });
 
-  testWidgets('A mouse click should only cause one hit test', (WidgetTester tester) async {
+  testWidgets('A mouse click should only cause one hit test', (final WidgetTester tester) async {
     int hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
@@ -31,7 +31,7 @@ void main() {
     expect(hitCount, 1);
   });
 
-  testWidgets('Non-mouse events should not cause movement hit tests', (WidgetTester tester) async {
+  testWidgets('Non-mouse events should not cause movement hit tests', (final WidgetTester tester) async {
     int hitCount = 0;
     await tester.pumpWidget(
       _HitTestCounter(
@@ -61,15 +61,15 @@ class _HitTestCounter extends SingleChildRenderObjectWidget {
   final VoidCallback? onHitTestCallback;
 
   @override
-  _RenderHitTestCounter createRenderObject(BuildContext context) {
+  _RenderHitTestCounter createRenderObject(final BuildContext context) {
     return _RenderHitTestCounter()
       .._onHitTestCallback = onHitTestCallback;
   }
 
   @override
   void updateRenderObject(
-    BuildContext context,
-    _RenderHitTestCounter renderObject,
+    final BuildContext context,
+    final _RenderHitTestCounter renderObject,
   ) {
     renderObject._onHitTestCallback = onHitTestCallback;
   }
@@ -79,7 +79,7 @@ class _RenderHitTestCounter extends RenderProxyBox {
   VoidCallback? _onHitTestCallback;
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(final BoxHitTestResult result, {required final Offset position}) {
     _onHitTestCallback?.call();
     return super.hitTestChildren(result, position: position);
   }

@@ -29,7 +29,7 @@ class DialogDemoItem extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SimpleDialogOption(
       onPressed: onPressed,
       child: Row(
@@ -65,12 +65,12 @@ class DialogDemoState extends State<DialogDemo> {
     _selectedTime = TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
-  void showDemoDialog<T>({ required BuildContext context, Widget? child }) {
+  void showDemoDialog<T>({ required final BuildContext context, final Widget? child }) {
     showDialog<T>(
       context: context,
-      builder: (BuildContext context) => child!,
+      builder: (final BuildContext context) => child!,
     )
-    .then((T? value) { // The value passed to Navigator.pop() or null.
+    .then((final T? value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('You selected: $value'),
@@ -80,7 +80,7 @@ class DialogDemoState extends State<DialogDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.titleMedium!.copyWith(color: theme.textTheme.bodySmall!.color);
 
@@ -178,7 +178,7 @@ class DialogDemoState extends State<DialogDemo> {
                 context: context,
                 initialTime: _selectedTime!,
               )
-              .then((TimeOfDay? value) {
+              .then((final TimeOfDay? value) {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -192,14 +192,14 @@ class DialogDemoState extends State<DialogDemo> {
             child: const Text('FULLSCREEN'),
             onPressed: () {
               Navigator.push(context, MaterialPageRoute<DismissDialogAction>(
-                builder: (BuildContext context) => const FullScreenDialogDemo(),
+                builder: (final BuildContext context) => const FullScreenDialogDemo(),
                 fullscreenDialog: true,
               ));
             },
           ),
         ]
         // Add a little space between the buttons
-        .map<Widget>((Widget button) {
+        .map<Widget>((final Widget button) {
           return Container(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: button,

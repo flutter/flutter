@@ -14,20 +14,20 @@ export 'package:test_core/src/platform.dart' show PlatformPlugin;
 abstract class TestWrapper {
   const factory TestWrapper() = _DefaultTestWrapper;
 
-  Future<void> main(List<String> args);
-  void registerPlatformPlugin(Iterable<Runtime> runtimes, FutureOr<PlatformPlugin> Function() platforms);
+  Future<void> main(final List<String> args);
+  void registerPlatformPlugin(final Iterable<Runtime> runtimes, final FutureOr<PlatformPlugin> Function() platforms);
 }
 
 class _DefaultTestWrapper implements TestWrapper {
   const _DefaultTestWrapper();
 
   @override
-  Future<void> main(List<String> args) async {
+  Future<void> main(final List<String> args) async {
     await test.main(args);
   }
 
   @override
-  void registerPlatformPlugin(Iterable<Runtime> runtimes, FutureOr<PlatformPlugin> Function() platforms) {
+  void registerPlatformPlugin(final Iterable<Runtime> runtimes, final FutureOr<PlatformPlugin> Function() platforms) {
     hack.registerPlatformPlugin(runtimes, platforms);
   }
 }

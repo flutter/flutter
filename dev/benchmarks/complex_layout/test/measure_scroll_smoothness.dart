@@ -91,7 +91,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   Map<String, dynamic>? result;
 
   @override
-  String describeValue(TestScenario value) {
+  String describeValue(final TestScenario value) {
     switch(value) {
       case TestScenario.resampleOn90Hz:
         return 'resample on with 90Hz input';
@@ -105,7 +105,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   }
 
   @override
-  Future<bool> setUp(TestScenario value) async {
+  Future<bool> setUp(final TestScenario value) async {
     currentValue = value;
     final bool original = binding.resamplingEnabled;
     binding.resamplingEnabled = resample;
@@ -113,7 +113,7 @@ class ResampleFlagVariant extends TestVariant<TestScenario> {
   }
 
   @override
-  Future<void> tearDown(TestScenario value, bool memento) async {
+  Future<void> tearDown(final TestScenario value, final bool memento) async {
     binding.resamplingEnabled = memento;
     binding.reportData![describeValue(value)] = result;
   }
@@ -126,7 +126,7 @@ Future<void> main() async {
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
   binding.reportData ??= <String, dynamic>{};
   final ResampleFlagVariant variant = ResampleFlagVariant(binding);
-  testWidgets('Smoothness test', (WidgetTester tester) async {
+  testWidgets('Smoothness test', (final WidgetTester tester) async {
     app.main();
     await tester.pumpAndSettle();
     final Finder scrollerFinder = find.byKey(const ValueKey<String>('complex-scroll'));
@@ -135,7 +135,7 @@ Future<void> main() async {
     final List<int> frameTimestamp = <int>[];
     final List<double> scrollOffset = <double>[];
     final List<Duration> delays = <Duration>[];
-    binding.addPersistentFrameCallback((Duration timeStamp) {
+    binding.addPersistentFrameCallback((final Duration timeStamp) {
       if (controller?.hasClients ?? false) {
         // This if is necessary because by the end of the test the widget tree
         // is destroyed.
@@ -222,9 +222,9 @@ Future<void> main() async {
 /// `input_delay`: the list of maximum delay time of the input simulation during
 /// a frame. Its length is the same as `frame_timestamp`
 Map<String, dynamic> scrollSummary(
-  List<double> scrollOffset,
-  List<Duration> delays,
-  List<int> frameTimestamp,
+  final List<double> scrollOffset,
+  final List<Duration> delays,
+  final List<int> frameTimestamp,
 ) {
   double jankyCount = 0;
   double absJerkAvg = 0;
@@ -252,6 +252,6 @@ Map<String, dynamic> scrollSummary(
     'dropped_frame_count': lostFrame,
     'frame_timestamp': List<int>.from(frameTimestamp),
     'scroll_offset': List<double>.from(scrollOffset),
-    'input_delay': delays.map<int>((Duration data) => data.inMicroseconds).toList(),
+    'input_delay': delays.map<int>((final Duration data) => data.inMicroseconds).toList(),
   };
 }

@@ -17,11 +17,11 @@ import 'message_parser.dart';
 
 /// Run the localizations generation script with the configuration [options].
 LocalizationsGenerator generateLocalizations({
-  required Directory projectDir,
-  Directory? dependenciesDir,
-  required LocalizationOptions options,
-  required Logger logger,
-  required FileSystem fileSystem,
+  required final Directory projectDir,
+  final Directory? dependenciesDir,
+  required final LocalizationOptions options,
+  required final Logger logger,
+  required final FileSystem fileSystem,
 }) {
   // If generating a synthetic package, generate a warning if
   // flutter: generate is not set.
@@ -78,38 +78,38 @@ LocalizationsGenerator generateLocalizations({
 }
 
 /// The path for the synthetic package.
-String _defaultSyntheticPackagePath(FileSystem fileSystem) => fileSystem.path.join('.dart_tool', 'flutter_gen');
+String _defaultSyntheticPackagePath(final FileSystem fileSystem) => fileSystem.path.join('.dart_tool', 'flutter_gen');
 
 /// The default path used when the `_useSyntheticPackage` setting is set to true
 /// in [LocalizationsGenerator].
 ///
 /// See [LocalizationsGenerator.initialize] for where and how it is used by the
 /// localizations tool.
-String _syntheticL10nPackagePath(FileSystem fileSystem) => fileSystem.path.join(_defaultSyntheticPackagePath(fileSystem), 'gen_l10n');
+String _syntheticL10nPackagePath(final FileSystem fileSystem) => fileSystem.path.join(_defaultSyntheticPackagePath(fileSystem), 'gen_l10n');
 
 // Generate method parameters and also infer the correct types from the usage of the placeholders
 // For example, if placeholders are used for plurals and no type was specified, then the type will
 // automatically set to 'num'. Similarly, if such placeholders are used for selects, then the type
 // will be set to 'String'. For such placeholders that are used for both, we should throw an error.
-List<String> generateMethodParameters(Message message) {
-  return message.placeholders.values.map((Placeholder placeholder) {
+List<String> generateMethodParameters(final Message message) {
+  return message.placeholders.values.map((final Placeholder placeholder) {
     return '${placeholder.type} ${placeholder.name}';
   }).toList();
 }
 
 // Similar to above, but is used for passing arguments into helper functions.
-List<String> generateMethodArguments(Message message) {
-  return message.placeholders.values.map((Placeholder placeholder) => placeholder.name).toList();
+List<String> generateMethodArguments(final Message message) {
+  return message.placeholders.values.map((final Placeholder placeholder) => placeholder.name).toList();
 }
 
-String generateDateFormattingLogic(Message message) {
+String generateDateFormattingLogic(final Message message) {
   if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
     return '@(none)';
   }
 
   final Iterable<String> formatStatements = message.placeholders.values
-    .where((Placeholder placeholder) => placeholder.requiresDateFormatting)
-    .map((Placeholder placeholder) {
+    .where((final Placeholder placeholder) => placeholder.requiresDateFormatting)
+    .map((final Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
       if (placeholderFormat == null) {
         throw L10nException(
@@ -145,14 +145,14 @@ String generateDateFormattingLogic(Message message) {
   return formatStatements.isEmpty ? '@(none)' : formatStatements.join();
 }
 
-String generateNumberFormattingLogic(Message message) {
+String generateNumberFormattingLogic(final Message message) {
   if (message.placeholders.isEmpty || !message.placeholdersRequireFormatting) {
     return '@(none)';
   }
 
   final Iterable<String> formatStatements = message.placeholders.values
-    .where((Placeholder placeholder) => placeholder.requiresNumFormatting)
-    .map((Placeholder placeholder) {
+    .where((final Placeholder placeholder) => placeholder.requiresNumFormatting)
+    .map((final Placeholder placeholder) {
       final String? placeholderFormat = placeholder.format;
       if (!placeholder.hasValidNumberFormat || placeholderFormat == null) {
         throw L10nException(
@@ -163,7 +163,7 @@ String generateNumberFormattingLogic(Message message) {
         );
       }
       final Iterable<String> parameters =
-        placeholder.optionalParameters.map<String>((OptionalParameter parameter) {
+        placeholder.optionalParameters.map<String>((final OptionalParameter parameter) {
           if (parameter.value is num) {
             return '${parameter.name}: ${parameter.value}';
           } else {
@@ -200,11 +200,11 @@ Map<String, String> pluralCases = <String, String>{
   'other': 'other',
 };
 
-String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
+String generateBaseClassMethod(final Message message, final LocaleInfo? templateArbLocale) {
   final String comment = message
     .description
     ?.split('\n')
-    .map((String line) => '  /// $line')
+    .map((final String line) => '  /// $line')
     .join('\n') ?? '  /// No description provided for @${message.resourceId}.';
   final String templateLocaleTranslationComment = '''
   /// In $templateArbLocale, this message translates to:
@@ -225,11 +225,11 @@ String generateBaseClassMethod(Message message, LocaleInfo? templateArbLocale) {
 
 // Add spaces to pad the start of each line. Skips the first line
 // assuming that the padding is already present.
-String _addSpaces(String message, {int spaces = 0}) {
+String _addSpaces(final String message, {final int spaces = 0}) {
   bool isFirstLine = true;
   return message
     .split('\n')
-    .map((String value) {
+    .map((final String value) {
       if (isFirstLine) {
         isFirstLine = false;
         return value;
@@ -240,10 +240,10 @@ String _addSpaces(String message, {int spaces = 0}) {
 }
 
 String _generateLookupByAllCodes(
-  AppResourceBundleCollection allBundles,
-  String Function(LocaleInfo) generateSwitchClauseTemplate,
+  final AppResourceBundleCollection allBundles,
+  final String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
-  final Iterable<LocaleInfo> localesWithAllCodes = allBundles.locales.where((LocaleInfo locale) {
+  final Iterable<LocaleInfo> localesWithAllCodes = allBundles.locales.where((final LocaleInfo locale) {
     return locale.scriptCode != null && locale.countryCode != null;
   });
 
@@ -251,7 +251,7 @@ String _generateLookupByAllCodes(
     return '';
   }
 
-  final Iterable<String> switchClauses = localesWithAllCodes.map<String>((LocaleInfo locale) {
+  final Iterable<String> switchClauses = localesWithAllCodes.map<String>((final LocaleInfo locale) {
     return generateSwitchClauseTemplate(locale)
       .replaceAll('@(case)', locale.toString());
   });
@@ -263,12 +263,12 @@ String _generateLookupByAllCodes(
 }
 
 String _generateLookupByScriptCode(
-  AppResourceBundleCollection allBundles,
-  String Function(LocaleInfo) generateSwitchClauseTemplate,
+  final AppResourceBundleCollection allBundles,
+  final String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
-  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+  final Iterable<String> switchClauses = allBundles.languages.map((final String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-    final Iterable<LocaleInfo> localesWithScriptCodes = locales.where((LocaleInfo locale) {
+    final Iterable<LocaleInfo> localesWithScriptCodes = locales.where((final LocaleInfo locale) {
       return locale.scriptCode != null && locale.countryCode == null;
     });
 
@@ -281,7 +281,7 @@ String _generateLookupByScriptCode(
       .replaceAll('@(code)', 'scriptCode')
       .replaceAll('@(switchClauses)',
         _addSpaces(
-          localesWithScriptCodes.map((LocaleInfo locale) {
+          localesWithScriptCodes.map((final LocaleInfo locale) {
             return generateSwitchClauseTemplate(locale)
               .replaceAll('@(case)', locale.scriptCode!);
           }).join('\n'),
@@ -303,12 +303,12 @@ String _generateLookupByScriptCode(
 }
 
 String _generateLookupByCountryCode(
-  AppResourceBundleCollection allBundles,
-  String Function(LocaleInfo) generateSwitchClauseTemplate,
+  final AppResourceBundleCollection allBundles,
+  final String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
-  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+  final Iterable<String> switchClauses = allBundles.languages.map((final String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((LocaleInfo locale) {
+    final Iterable<LocaleInfo> localesWithCountryCodes = locales.where((final LocaleInfo locale) {
       return locale.countryCode != null && locale.scriptCode == null;
     });
 
@@ -321,7 +321,7 @@ String _generateLookupByCountryCode(
         .replaceAll('@(languageCode)', language)
         .replaceAll('@(code)', 'countryCode')
         .replaceAll('@(switchClauses)', _addSpaces(
-          localesWithCountryCodes.map((LocaleInfo locale) {
+          localesWithCountryCodes.map((final LocaleInfo locale) {
             return generateSwitchClauseTemplate(locale).replaceAll('@(case)', locale.countryCode!);
           }).join('\n'),
           spaces: 4,
@@ -340,12 +340,12 @@ String _generateLookupByCountryCode(
 }
 
 String _generateLookupByLanguageCode(
-  AppResourceBundleCollection allBundles,
-  String Function(LocaleInfo) generateSwitchClauseTemplate,
+  final AppResourceBundleCollection allBundles,
+  final String Function(LocaleInfo) generateSwitchClauseTemplate,
 ) {
-  final Iterable<String> switchClauses = allBundles.languages.map((String language) {
+  final Iterable<String> switchClauses = allBundles.languages.map((final String language) {
     final Iterable<LocaleInfo> locales = allBundles.localesForLanguage(language);
-    final Iterable<LocaleInfo> localesWithLanguageCode = locales.where((LocaleInfo locale) {
+    final Iterable<LocaleInfo> localesWithLanguageCode = locales.where((final LocaleInfo locale) {
       return locale.countryCode == null && locale.scriptCode == null;
     });
 
@@ -353,7 +353,7 @@ String _generateLookupByLanguageCode(
       return null;
     }
 
-    return localesWithLanguageCode.map((LocaleInfo locale) {
+    return localesWithLanguageCode.map((final LocaleInfo locale) {
       return generateSwitchClauseTemplate(locale)
         .replaceAll('@(case)', locale.languageCode);
     }).join('\n      ');
@@ -369,12 +369,12 @@ String _generateLookupByLanguageCode(
 }
 
 String _generateLookupBody(
-  AppResourceBundleCollection allBundles,
-  String className,
-  bool useDeferredLoading,
-  String fileName,
+  final AppResourceBundleCollection allBundles,
+  final String className,
+  final bool useDeferredLoading,
+  final String fileName,
 ) {
-  String generateSwitchClauseTemplate(LocaleInfo locale) {
+  String generateSwitchClauseTemplate(final LocaleInfo locale) {
     return (useDeferredLoading ?
       switchClauseDeferredLoadingTemplate : switchClauseTemplate)
       .replaceAll('@(localeClass)', '$className${locale.camelCase()}')
@@ -401,11 +401,11 @@ String _generateLookupBody(
 }
 
 String _generateDelegateClass({
-  required AppResourceBundleCollection allBundles,
-  required String className,
-  required Set<String> supportedLanguageCodes,
-  required bool useDeferredLoading,
-  required String fileName,
+  required final AppResourceBundleCollection allBundles,
+  required final String className,
+  required final Set<String> supportedLanguageCodes,
+  required final bool useDeferredLoading,
+  required final String fileName,
 }) {
 
   final String lookupBody = _generateLookupBody(
@@ -441,25 +441,25 @@ class LocalizationsGenerator {
   /// Throws a [FileSystemException] when a file operation necessary for setting
   /// up the [LocalizationsGenerator] cannot be completed.
   factory LocalizationsGenerator({
-    required FileSystem fileSystem,
-    required String inputPathString,
-    String? outputPathString,
-    required String templateArbFileName,
-    required String outputFileString,
-    required String classNameString,
-    List<String>? preferredSupportedLocales,
-    String? headerString,
-    String? headerFile,
-    bool useDeferredLoading = false,
-    String? inputsAndOutputsListPath,
-    bool useSyntheticPackage = true,
-    String? projectPathString,
-    bool areResourceAttributesRequired = false,
-    String? untranslatedMessagesFile,
-    bool usesNullableGetter = true,
-    bool useEscaping = false,
-    required Logger logger,
-    bool suppressWarnings = false,
+    required final FileSystem fileSystem,
+    required final String inputPathString,
+    final String? outputPathString,
+    required final String templateArbFileName,
+    required final String outputFileString,
+    required final String classNameString,
+    final List<String>? preferredSupportedLocales,
+    final String? headerString,
+    final String? headerFile,
+    final bool useDeferredLoading = false,
+    final String? inputsAndOutputsListPath,
+    final bool useSyntheticPackage = true,
+    final String? projectPathString,
+    final bool areResourceAttributesRequired = false,
+    final String? untranslatedMessagesFile,
+    final bool usesNullableGetter = true,
+    final bool useEscaping = false,
+    required final Logger logger,
+    final bool suppressWarnings = false,
   }) {
     final Directory? projectDirectory = projectDirFromPath(fileSystem, projectPathString);
     final Directory inputDirectory = inputDirectoryFromPath(fileSystem, inputPathString, projectDirectory);
@@ -514,7 +514,7 @@ class LocalizationsGenerator {
   late final AppResourceBundleCollection _allBundles = AppResourceBundleCollection(inputDirectory);
   late final AppResourceBundle _templateBundle = AppResourceBundle(templateArbFile);
   late final Map<LocaleInfo, String> _inputFileNames = Map<LocaleInfo, String>.fromEntries(
-    _allBundles.bundles.map((AppResourceBundle bundle) => MapEntry<LocaleInfo, String>(bundle.locale, bundle.file.basename))
+    _allBundles.bundles.map((final AppResourceBundle bundle) => MapEntry<LocaleInfo, String>(bundle.locale, bundle.file.basename))
   );
   late final LocaleInfo _templateArbLocale = _templateBundle.locale;
 
@@ -585,7 +585,7 @@ class LocalizationsGenerator {
 
   /// The list of all arb path strings in [inputDirectory].
   List<String> get arbPathStrings {
-    return _allBundles.bundles.map((AppResourceBundle bundle) => bundle.file.path).toList();
+    return _allBundles.bundles.map((final AppResourceBundle bundle) => bundle.file.path).toList();
   }
 
   List<String> get outputFileList {
@@ -648,14 +648,14 @@ class LocalizationsGenerator {
   /// Whether or not to suppress warnings or not.
   final bool suppressWarnings;
 
-  static bool _isNotReadable(FileStat fileStat) {
+  static bool _isNotReadable(final FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
     // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
     final String statString = rawStatString.substring(rawStatString.length - 9);
     return !(statString[0] == 'r' || statString[3] == 'r' || statString[6] == 'r');
   }
 
-  static bool _isNotWritable(FileStat fileStat) {
+  static bool _isNotWritable(final FileStat fileStat) {
     final String rawStatString = fileStat.modeString();
     // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
     final String statString = rawStatString.substring(rawStatString.length - 9);
@@ -663,7 +663,7 @@ class LocalizationsGenerator {
   }
 
   @visibleForTesting
-  static Directory? projectDirFromPath(FileSystem fileSystem, String? projectPathString) {
+  static Directory? projectDirFromPath(final FileSystem fileSystem, final String? projectPathString) {
     if (projectPathString == null) {
       return null;
     }
@@ -681,7 +681,7 @@ class LocalizationsGenerator {
 
   /// Sets the reference [Directory] for [inputDirectory].
   @visibleForTesting
-  static Directory inputDirectoryFromPath(FileSystem fileSystem, String inputPathString, Directory? projectDirectory) {
+  static Directory inputDirectoryFromPath(final FileSystem fileSystem, final String inputPathString, final Directory? projectDirectory) {
     final Directory inputDirectory = fileSystem.directory(
       projectDirectory != null
         ? _getAbsoluteProjectPath(inputPathString, projectDirectory)
@@ -707,7 +707,7 @@ class LocalizationsGenerator {
 
   /// Sets the reference [Directory] for [outputDirectory].
   @visibleForTesting
-  static Directory outputDirectoryFromPath(FileSystem fileSystem, String outputPathString, bool useSyntheticPackage, Directory? projectDirectory) {
+  static Directory outputDirectoryFromPath(final FileSystem fileSystem, final String outputPathString, final bool useSyntheticPackage, final Directory? projectDirectory) {
     Directory outputDirectory;
     if (useSyntheticPackage) {
       outputDirectory = fileSystem.directory(
@@ -727,7 +727,7 @@ class LocalizationsGenerator {
 
   /// Sets the reference [File] for [templateArbFile].
   @visibleForTesting
-  static File templateArbFileFromFileName(String templateArbFileName, Directory inputDirectory) {
+  static File templateArbFileFromFileName(final String templateArbFileName, final Directory inputDirectory) {
     final File templateArbFile = inputDirectory.childFile(templateArbFileName);
     final FileStat templateArbFileStat = templateArbFile.statSync();
     if (templateArbFileStat.type == FileSystemEntityType.notFound) {
@@ -745,7 +745,7 @@ class LocalizationsGenerator {
     return templateArbFile;
   }
 
-  static bool _isValidClassName(String className) {
+  static bool _isValidClassName(final String className) {
     // Public Dart class name cannot begin with an underscore
     if (className[0] == '_') {
       return false;
@@ -768,7 +768,7 @@ class LocalizationsGenerator {
   /// Sets the [className] for the localizations and localizations delegate
   /// classes.
   @visibleForTesting
-  static String classNameFromString(String classNameString) {
+  static String classNameFromString(final String classNameString) {
     if (classNameString.isEmpty) {
       throw L10nException('classNameString argument cannot be empty');
     }
@@ -783,16 +783,16 @@ class LocalizationsGenerator {
   /// Sets [preferredSupportedLocales] so that this particular list of locales
   /// will take priority over the other locales.
   @visibleForTesting
-  static List<LocaleInfo> preferredSupportedLocalesFromLocales(List<String>? inputLocales) {
+  static List<LocaleInfo> preferredSupportedLocalesFromLocales(final List<String>? inputLocales) {
     if (inputLocales == null || inputLocales.isEmpty) {
       return const <LocaleInfo>[];
     }
-    return inputLocales.map((String localeString) {
+    return inputLocales.map((final String localeString) {
       return LocaleInfo.fromString(localeString);
     }).toList();
   }
 
-  static String headerFromFile(String? headerString, String? headerFile, Directory inputDirectory) {
+  static String headerFromFile(final String? headerString, final String? headerFile, final Directory inputDirectory) {
     if (headerString != null && headerFile != null) {
       throw L10nException(
         'Cannot accept both header and header file arguments. \n'
@@ -815,10 +815,10 @@ class LocalizationsGenerator {
     return '';
   }
 
-  static String _getAbsoluteProjectPath(String relativePath, Directory projectDirectory) =>
+  static String _getAbsoluteProjectPath(final String relativePath, final Directory projectDirectory) =>
       projectDirectory.fileSystem.path.join(projectDirectory.path, relativePath);
 
-  static File? _untranslatedMessagesFileFromPath(FileSystem fileSystem, String? untranslatedMessagesFileString) {
+  static File? _untranslatedMessagesFileFromPath(final FileSystem fileSystem, String? untranslatedMessagesFileString) {
     if (untranslatedMessagesFileString == null || untranslatedMessagesFileString.isEmpty) {
       return null;
     }
@@ -826,7 +826,7 @@ class LocalizationsGenerator {
     return fileSystem.file(untranslatedMessagesFileString);
   }
 
-  static File? _inputsAndOutputsListFileFromPath(FileSystem fileSystem, String? inputsAndOutputsListPath) {
+  static File? _inputsAndOutputsListFileFromPath(final FileSystem fileSystem, final String? inputsAndOutputsListPath) {
     if (inputsAndOutputsListPath == null) {
       return null;
     }
@@ -836,7 +836,7 @@ class LocalizationsGenerator {
     );
   }
 
-  static bool _isValidGetterAndMethodName(String name) {
+  static bool _isValidGetterAndMethodName(final String name) {
     if (name.isEmpty) {
       return false;
     }
@@ -873,12 +873,12 @@ class LocalizationsGenerator {
       }
     }
     // The call to .toList() is absolutely necessary. Otherwise, it is an iterator and will call Message's constructor again.
-    _allMessages = _templateBundle.resourceIds.map((String id) => Message(
+    _allMessages = _templateBundle.resourceIds.map((final String id) => Message(
        _templateBundle, _allBundles, id, areResourceAttributesRequired, useEscaping: useEscaping, logger: logger,
     )).toList();
-    hadErrors = _allMessages.any((Message message) => message.hadErrors);
+    hadErrors = _allMessages.any((final Message message) => message.hadErrors);
     if (inputsAndOutputsListFile != null) {
-      _inputFileList.addAll(_allBundles.bundles.map((AppResourceBundle bundle) {
+      _inputFileList.addAll(_allBundles.bundles.map((final AppResourceBundle bundle) {
         return bundle.file.absolute.path;
       }));
     }
@@ -900,7 +900,7 @@ class LocalizationsGenerator {
     supportedLocales.addAll(allLocales);
   }
 
-  void _addUnimplementedMessage(LocaleInfo locale, String message) {
+  void _addUnimplementedMessage(final LocaleInfo locale, final String message) {
     if (_unimplementedMessages.containsKey(locale)) {
       _unimplementedMessages[locale]!.add(message);
     } else {
@@ -909,12 +909,12 @@ class LocalizationsGenerator {
   }
 
   String _generateBaseClassFile(
-    String className,
-    String fileName,
-    String header,
+    final String className,
+    final String fileName,
+    final String header,
     final LocaleInfo locale,
   ) {
-    final Iterable<String> methods = _allMessages.map((Message message) {
+    final Iterable<String> methods = _allMessages.map((final Message message) {
       LocaleInfo localeWithFallback = locale;
       if (message.messages[locale] == null) {
         _addUnimplementedMessage(locale, message.resourceId);
@@ -943,21 +943,21 @@ class LocalizationsGenerator {
   }
 
   String _generateSubclass(
-    String className,
-    AppResourceBundle bundle,
+    final String className,
+    final AppResourceBundle bundle,
   ) {
     final LocaleInfo locale = bundle.locale;
     final String baseClassName = '$className${LocaleInfo.fromString(locale.languageCode).camelCase()}';
 
     _allMessages
-      .where((Message message) => message.messages[locale] == null)
-      .forEach((Message message) {
+      .where((final Message message) => message.messages[locale] == null)
+      .forEach((final Message message) {
         _addUnimplementedMessage(locale, message.resourceId);
       });
 
     final Iterable<String> methods = _allMessages
-      .where((Message message) => message.parsedMessages[locale] != null)
-      .map((Message message) => _generateMethod(message, locale));
+      .where((final Message message) => message.parsedMessages[locale] != null)
+      .map((final Message message) => _generateMethod(message, locale));
 
     return subclassTemplate
       .replaceAll('@(language)', describeLocale(locale.toString()))
@@ -971,20 +971,20 @@ class LocalizationsGenerator {
   // and all AppLocalizations subclasses for every locale. This method by
   // itself does not generate the output files.
   String _generateCode() {
-    bool isBaseClassLocale(LocaleInfo locale, String language) {
+    bool isBaseClassLocale(final LocaleInfo locale, final String language) {
       return locale.languageCode == language
           && locale.countryCode == null
           && locale.scriptCode == null;
     }
 
-    List<LocaleInfo> getLocalesForLanguage(String language) {
+    List<LocaleInfo> getLocalesForLanguage(final String language) {
       return _allBundles.bundles
         // Return locales for the language specified, except for the base locale itself
-        .where((AppResourceBundle bundle) {
+        .where((final AppResourceBundle bundle) {
           final LocaleInfo locale = bundle.locale;
           return !isBaseClassLocale(locale, language) && locale.languageCode == language;
         })
-        .map((AppResourceBundle bundle) => bundle.locale).toList();
+        .map((final AppResourceBundle bundle) => bundle.locale).toList();
     }
 
     final String directory = _fs.path.basename(outputDirectory.path);
@@ -996,7 +996,7 @@ class LocalizationsGenerator {
       );
     }
 
-    final Iterable<String> supportedLocalesCode = supportedLocales.map((LocaleInfo locale) {
+    final Iterable<String> supportedLocalesCode = supportedLocales.map((final LocaleInfo locale) {
       final String languageCode = locale.languageCode;
       final String? countryCode = locale.countryCode;
       final String? scriptCode = locale.scriptCode;
@@ -1013,7 +1013,7 @@ class LocalizationsGenerator {
     });
 
     final Set<String> supportedLanguageCodes = Set<String>.from(
-      _allBundles.locales.map<String>((LocaleInfo locale) => "'${locale.languageCode}'")
+      _allBundles.locales.map<String>((final LocaleInfo locale) => "'${locale.languageCode}'")
     );
 
     final List<LocaleInfo> allLocales = _allBundles.locales.toList()..sort();
@@ -1044,7 +1044,7 @@ class LocalizationsGenerator {
         final List<LocaleInfo> localesForLanguage = getLocalesForLanguage(locale.languageCode);
 
         // Generate every subclass that is needed for the particular language
-        final Iterable<String> subclasses = localesForLanguage.map<String>((LocaleInfo locale) {
+        final Iterable<String> subclasses = localesForLanguage.map<String>((final LocaleInfo locale) {
           return _generateSubclass(
             className,
             _allBundles.bundleFor(locale)!,
@@ -1058,8 +1058,8 @@ class LocalizationsGenerator {
     }
 
     final List<String> sortedClassImports = supportedLocales
-      .where((LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
-      .map((LocaleInfo locale) {
+      .where((final LocaleInfo locale) => isBaseClassLocale(locale, locale.languageCode))
+      .map((final LocaleInfo locale) {
         final String library = '${fileName}_$locale';
         if (useDeferredLoading) {
           return "import '$library.$fileExtension' deferred as $library;";
@@ -1081,7 +1081,7 @@ class LocalizationsGenerator {
     return fileTemplate
       .replaceAll('@(header)', header.isEmpty ? '' : '$header\n')
       .replaceAll('@(class)', className)
-      .replaceAll('@(methods)', _allMessages.map((Message message) => generateBaseClassMethod(message, _templateArbLocale)).join('\n'))
+      .replaceAll('@(methods)', _allMessages.map((final Message message) => generateBaseClassMethod(message, _templateArbLocale)).join('\n'))
       .replaceAll('@(importFile)', '$directory/$outputFileName')
       .replaceAll('@(supportedLocales)', supportedLocalesCode.join(',\n    '))
       .replaceAll('@(supportedLanguageCodes)', supportedLanguageCodes.join(', '))
@@ -1092,12 +1092,12 @@ class LocalizationsGenerator {
       .replaceAll('@(canBeNullable)', usesNullableGetter ? '?' : '')
       .replaceAll('@(needsNullCheck)', usesNullableGetter ? '' : '!')
       // Removes all trailing whitespace from the generated file.
-      .split('\n').map((String line) => line.trimRight()).join('\n')
+      .split('\n').map((final String line) => line.trimRight()).join('\n')
       // Cleans out unnecessary newlines.
       .replaceAll('\n\n\n', '\n\n');
   }
 
-  String _generateMethod(Message message, LocaleInfo locale) {
+  String _generateMethod(final Message message, final LocaleInfo locale) {
     try {
       // Determine if we must import intl for date or number formatting.
       if (message.placeholdersRequireFormatting) {
@@ -1111,7 +1111,7 @@ class LocalizationsGenerator {
         // Use the parsed translation to handle escaping with the same behavior.
         return getterTemplate
           .replaceAll('@(name)', message.resourceId)
-          .replaceAll('@(message)', "'${generateString(node.children.map((Node child) => child.value!).join())}'");
+          .replaceAll('@(message)', "'${generateString(node.children.map((final Node child) => child.value!).join())}'");
       }
 
       final List<String> tempVariables = <String>[];
@@ -1126,10 +1126,10 @@ class LocalizationsGenerator {
       // When traversing through a pluralExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a selectExpr node, return "$tempVarN" and add variable declaration in "tempVariables".
       // When traversing through a message node, return concatenation of all of "generateVariables(child)" for each child.
-      String generateVariables(Node node, { bool isRoot = false }) {
+      String generateVariables(final Node node, { final bool isRoot = false }) {
         switch (node.type) {
           case ST.message:
-            final List<String> expressions = node.children.map<String>((Node node) {
+            final List<String> expressions = node.children.map<String>((final Node node) {
               if (node.type == ST.string) {
                 return node.value!;
               }
@@ -1249,7 +1249,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     }
   }
 
-  List<String> writeOutputFiles({ bool isFromYaml = false }) {
+  List<String> writeOutputFiles({ final bool isFromYaml = false }) {
     // First, generate the string contents of all necessary files.
     final String generatedLocalizationsFile = _generateCode();
 
@@ -1285,7 +1285,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     }
 
     // Generate the required files for localizations.
-    _languageFileMap.forEach((File file, String contents) {
+    _languageFileMap.forEach((final File file, final String contents) {
       file.writeAsStringSync(contents);
       _outputFileList.add(file.absolute.path);
     });
@@ -1295,7 +1295,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     if (messagesFile != null) {
       _generateUntranslatedMessagesFile(logger, messagesFile);
     } else if (_unimplementedMessages.isNotEmpty) {
-      _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+      _unimplementedMessages.forEach((final LocaleInfo locale, final List<String> messages) {
         logger.printStatus('"$locale": ${messages.length} untranslated message(s).');
       });
       if (isFromYaml) {
@@ -1338,7 +1338,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     return _outputFileList;
   }
 
-  void _generateUntranslatedMessagesFile(Logger logger, File untranslatedMessagesFile) {
+  void _generateUntranslatedMessagesFile(final Logger logger, final File untranslatedMessagesFile) {
     if (_unimplementedMessages.isEmpty) {
       untranslatedMessagesFile.writeAsStringSync('{}');
       _outputFileList.add(untranslatedMessagesFile.absolute.path);
@@ -1348,7 +1348,7 @@ The plural cases must be one of "=0", "=1", "=2", "zero", "one", "two", "few", "
     String resultingFile = '{\n';
     int count = 0;
     final int numberOfLocales = _unimplementedMessages.length;
-    _unimplementedMessages.forEach((LocaleInfo locale, List<String> messages) {
+    _unimplementedMessages.forEach((final LocaleInfo locale, final List<String> messages) {
       resultingFile += '  "$locale": [\n';
 
       for (int i = 0; i < messages.length; i += 1) {

@@ -30,7 +30,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
     final Random random = Random();
     randomizedContacts = List<List<String>>.generate(
       100,
-      (int index) {
+      (final int index) {
         return contacts[random.nextInt(contacts.length)]
             // Randomly adds a telephone icon next to the contact or not.
             ..add(random.nextBool().toString());
@@ -39,7 +39,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.textStyle,
       child: CupertinoPageScaffold(
@@ -66,7 +66,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
             CupertinoSliverRefreshControl(
               onRefresh: () {
                 return Future<void>.delayed(const Duration(seconds: 2))
-                ..then((_) {
+                ..then((final _) {
                     if (mounted) {
                       setState(() => repopulateList());
                     }
@@ -77,7 +77,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
               top: false, // Top safe area is consumed by the navigation bar.
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                  (final BuildContext context, final int index) {
                     return _ListItem(
                       name: randomizedContacts[index][0],
                       place: randomizedContacts[index][1],
@@ -157,7 +157,7 @@ class _ListItem extends StatelessWidget {
   final bool? called;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       color: CupertinoDynamicColor.resolve(CupertinoColors.systemBackground, context),
       height: 60.0,

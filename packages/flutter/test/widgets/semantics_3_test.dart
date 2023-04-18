@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics 3', (WidgetTester tester) async {
+  testWidgets('Semantics 3', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // implicit annotators

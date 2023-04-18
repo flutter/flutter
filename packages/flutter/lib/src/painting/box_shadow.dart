@@ -68,7 +68,7 @@ class BoxShadow extends ui.Shadow {
 
   /// Returns a new box shadow with its offset, blurRadius, and spreadRadius scaled by the given factor.
   @override
-  BoxShadow scale(double factor) {
+  BoxShadow scale(final double factor) {
     return BoxShadow(
       color: color,
       offset: offset * factor,
@@ -85,7 +85,7 @@ class BoxShadow extends ui.Shadow {
   /// offset and a zero blurRadius.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BoxShadow? lerp(BoxShadow? a, BoxShadow? b, double t) {
+  static BoxShadow? lerp(final BoxShadow? a, final BoxShadow? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -109,7 +109,7 @@ class BoxShadow extends ui.Shadow {
   /// If the lists differ in length, excess items are lerped with null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static List<BoxShadow>? lerpList(List<BoxShadow>? a, List<BoxShadow>? b, double t) {
+  static List<BoxShadow>? lerpList(List<BoxShadow>? a, List<BoxShadow>? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -124,7 +124,7 @@ class BoxShadow extends ui.Shadow {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

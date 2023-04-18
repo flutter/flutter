@@ -37,7 +37,7 @@ class Title extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     SystemChrome.setApplicationSwitcherDescription(
       ApplicationSwitcherDescription(
         label: title,
@@ -48,7 +48,7 @@ class Title extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('title', title, defaultValue: ''));
     properties.add(ColorProperty('color', color, defaultValue: null));

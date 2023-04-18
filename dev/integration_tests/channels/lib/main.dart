@@ -188,14 +188,14 @@ class _TestAppState extends State<TestApp> {
   }
 
   Widget _buildTestResultWidget(
-    BuildContext context,
-    AsyncSnapshot<TestStepResult> snapshot,
+    final BuildContext context,
+    final AsyncSnapshot<TestStepResult> snapshot,
   ) {
     return TestStepResult.fromSnapshot(snapshot).asWidget(context);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Channels Test',
       home: Scaffold(

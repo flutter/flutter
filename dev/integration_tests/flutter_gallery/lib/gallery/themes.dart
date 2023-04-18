@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 final ThemeData kLightGalleryTheme = _buildLightTheme();
 final ThemeData kDarkGalleryTheme = _buildDarkTheme();
 
-TextTheme _buildTextTheme(TextTheme base) {
+TextTheme _buildTextTheme(final TextTheme base) {
   return base.copyWith(
     titleLarge: base.titleLarge!.copyWith(
       fontFamily: 'GoogleSans',

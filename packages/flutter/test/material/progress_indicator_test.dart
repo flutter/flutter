@@ -26,7 +26,7 @@ void main() {
   // The "can be constructed" tests that follow are primarily to ensure that any
   // animations started by the progress indicators are stopped at dispose() time.
 
-  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: 0.0) can be constructed and has empty semantics by default', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Theme(
@@ -47,7 +47,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator(value: null) can be constructed and has empty semantics by default', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Theme(
@@ -68,7 +68,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator custom minHeight', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator custom minHeight', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -117,7 +117,7 @@ void main() {
     );
   });
 
-  testWidgets('LinearProgressIndicator paint (LTR)', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator paint (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -143,7 +143,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('LinearProgressIndicator paint (RTL)', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator paint (RTL)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -169,7 +169,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('LinearProgressIndicator indeterminate (LTR)', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator indeterminate (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -199,7 +199,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 1);
   });
 
-  testWidgets('LinearProgressIndicator paint (RTL)', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator paint (RTL)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -229,7 +229,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 1);
   });
 
-  testWidgets('LinearProgressIndicator with colors', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator with colors', (final WidgetTester tester) async {
     // With valueColor & color provided
     await tester.pumpWidget(
       Theme(
@@ -349,7 +349,7 @@ void main() {
 
   });
 
-  testWidgets('LinearProgressIndicator with animation with null colors', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator with animation with null colors', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -377,7 +377,7 @@ void main() {
     );
   });
 
-  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: 0.0) can be constructed and has value semantics by default', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Theme(
@@ -398,7 +398,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CircularProgressIndicator(value: null) can be constructed and has empty semantics by default', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator(value: null) can be constructed and has empty semantics by default', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       Theme(
@@ -413,7 +413,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator causes a repaint when it changes', (final WidgetTester tester) async {
     await tester.pumpWidget(Theme(
       data: theme,
       child: Directionality(
@@ -433,7 +433,7 @@ void main() {
     expect(layers1, isNot(equals(layers2)));
   });
 
-  testWidgets('CircularProgressIndicator stroke width', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator stroke width', (final WidgetTester tester) async {
     await tester.pumpWidget(Theme(data: theme, child: const CircularProgressIndicator()));
 
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 4.0));
@@ -443,7 +443,7 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeWidth: 16.0));
   });
 
-  testWidgets('CircularProgressIndicator with strokeCap', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator with strokeCap', (final WidgetTester tester) async {
     await tester.pumpWidget(const CircularProgressIndicator());
     expect(find.byType(CircularProgressIndicator),
         paints..arc(strokeCap: StrokeCap.square),
@@ -465,7 +465,7 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
-  testWidgets('CircularProgressIndicator paint colors', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator paint colors', (final WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);
     const Color red = Color(0xFFFF0000);
@@ -522,7 +522,7 @@ void main() {
     expect(find.byType(CircularProgressIndicator), paints..arc(color: blue)..arc(color: green));
   });
 
-  testWidgets('RefreshProgressIndicator paint colors', (WidgetTester tester) async {
+  testWidgets('RefreshProgressIndicator paint colors', (final WidgetTester tester) async {
     const Color green = Color(0xFF00FF00);
     const Color blue = Color(0xFF0000FF);
     const Color red = Color(0xFFFF0000);
@@ -591,7 +591,7 @@ void main() {
     expect(themeBackgroundMaterial.color, blue);
   });
 
-  testWidgets('RefreshProgressIndicator with a round indicator', (WidgetTester tester) async {
+  testWidgets('RefreshProgressIndicator with a round indicator', (final WidgetTester tester) async {
     await tester.pumpWidget(const RefreshProgressIndicator());
     expect(find.byType(RefreshProgressIndicator),
         paints..arc(strokeCap: StrokeCap.square),
@@ -614,7 +614,7 @@ void main() {
     expect(find.byType(RefreshProgressIndicator), paints..arc(strokeCap: StrokeCap.round));
   });
 
-  testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (WidgetTester tester) async {
+  testWidgets('Indeterminate RefreshProgressIndicator keeps spinning until end of time (approximate)', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/13782
 
     await tester.pumpWidget(
@@ -643,7 +643,7 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
-  testWidgets('RefreshProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('RefreshProgressIndicator uses expected animation', (final WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(50, 50));
 
     await tester.pumpFrames(animationSheet.record(
@@ -656,7 +656,7 @@ void main() {
     );
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/56001
 
-  testWidgets('Determinate CircularProgressIndicator stops the animator', (WidgetTester tester) async {
+  testWidgets('Determinate CircularProgressIndicator stops the animator', (final WidgetTester tester) async {
     double? progressValue;
     late StateSetter setState;
     await tester.pumpWidget(
@@ -666,7 +666,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
+              builder: (final BuildContext context, final StateSetter setter) {
                 setState = setter;
                 return CircularProgressIndicator(value: progressValue);
               },
@@ -686,7 +686,7 @@ void main() {
     expect(tester.hasRunningAnimations, isTrue);
   });
 
-  testWidgets('LinearProgressIndicator with height 12.0', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator with height 12.0', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -711,7 +711,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('LinearProgressIndicator with a height less than the minimum', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator with a height less than the minimum', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -736,7 +736,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('LinearProgressIndicator with default height', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator with default height', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Theme(
         data: theme,
@@ -761,7 +761,7 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
   });
 
-  testWidgets('LinearProgressIndicator can be made accessible', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator can be made accessible', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Label';
@@ -790,7 +790,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator that is determinate gets default a11y value', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator that is determinate gets default a11y value', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Label';
@@ -817,7 +817,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator that is determinate does not default a11y value when label is null', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator that is determinate does not default a11y value when label is null', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -838,7 +838,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('LinearProgressIndicator that is indeterminate does not default a11y value', (WidgetTester tester) async {
+  testWidgets('LinearProgressIndicator that is indeterminate does not default a11y value', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Progress';
@@ -864,7 +864,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CircularProgressIndicator can be made accessible', (WidgetTester tester) async {
+  testWidgets('CircularProgressIndicator can be made accessible', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Label';
@@ -893,7 +893,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('RefreshProgressIndicator can be made accessible', (WidgetTester tester) async {
+  testWidgets('RefreshProgressIndicator can be made accessible', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     final GlobalKey key = GlobalKey();
     const String label = 'Label';
@@ -921,7 +921,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (WidgetTester tester) async {
+  testWidgets('Indeterminate CircularProgressIndicator uses expected animation', (final WidgetTester tester) async {
     final AnimationSheetBuilder animationSheet = AnimationSheetBuilder(frameSize: const Size(40, 40));
 
     await tester.pumpFrames(animationSheet.record(
@@ -942,7 +942,7 @@ void main() {
 
   testWidgets(
     'Adaptive CircularProgressIndicator displays CupertinoActivityIndicator in iOS',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(),
@@ -964,7 +964,7 @@ void main() {
 
   testWidgets(
     'Adaptive CircularProgressIndicator can use backgroundColor to change tick color for iOS',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(),
@@ -993,7 +993,7 @@ void main() {
 
   testWidgets(
     'Adaptive CircularProgressIndicator does not display CupertinoActivityIndicator in non-iOS',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: theme,
@@ -1015,7 +1015,7 @@ void main() {
     }),
   );
 
-  testWidgets('ProgressIndicatorTheme.wrap() always creates a new ProgressIndicatorTheme', (WidgetTester tester) async {
+  testWidgets('ProgressIndicatorTheme.wrap() always creates a new ProgressIndicatorTheme', (final WidgetTester tester) async {
 
     late BuildContext builderContext;
 
@@ -1027,7 +1027,7 @@ void main() {
     final ProgressIndicatorTheme progressTheme = ProgressIndicatorTheme(
       data: themeData,
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           builderContext = context;
           return const LinearProgressIndicator(value: 0.5);
         }
@@ -1046,7 +1046,7 @@ void main() {
     expect((wrappedTheme as ProgressIndicatorTheme).data, themeData);
   });
 
-  testWidgets('default size of CircularProgressIndicator is 36x36 - M3', (WidgetTester tester) async {
+  testWidgets('default size of CircularProgressIndicator is 36x36 - M3', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: theme.copyWith(useMaterial3: true),
@@ -1078,7 +1078,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
     ..addListener(() {
         setState(() {});
       })
-    ..addStatusListener((AnimationStatus status) {
+    ..addStatusListener((final AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           indeterminate = true;
         }
@@ -1093,7 +1093,7 @@ class _RefreshProgressIndicatorGoldenState extends State<_RefreshProgressIndicat
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Directionality(
         textDirection: TextDirection.ltr,

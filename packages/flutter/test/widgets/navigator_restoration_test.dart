@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Restoration Smoke Test', (WidgetTester tester) async {
+  testWidgets('Restoration Smoke Test', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
 
     expect(findRoute('home', count: 0), findsOneWidget);
@@ -29,7 +29,7 @@ void main() {
     expect(findRoute('home', count: 2), findsOneWidget);
   });
 
-  testWidgets('restorablePushNamed', (WidgetTester tester) async {
+  testWidgets('restorablePushNamed', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -66,7 +66,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgets('restorablePushReplacementNamed', (WidgetTester tester) async {
+  testWidgets('restorablePushReplacementNamed', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -99,7 +99,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgets('restorablePopAndPushNamed', (WidgetTester tester) async {
+  testWidgets('restorablePopAndPushNamed', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -132,11 +132,11 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgets('restorablePushNamedAndRemoveUntil', (WidgetTester tester) async {
+  testWidgets('restorablePushNamedAndRemoveUntil', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamedAndRemoveUntil('Foo', (Route<dynamic> _) => false, arguments: 3);
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamedAndRemoveUntil('Foo', (final Route<dynamic> _) => false, arguments: 3);
     await tester.pumpAndSettle();
 
     expect(findRoute('home', skipOffstage: false), findsNothing);
@@ -165,7 +165,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   });
 
-  testWidgets('restorablePush', (WidgetTester tester) async {
+  testWidgets('restorablePush', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -202,7 +202,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('restorablePush adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorablePush adds route on all platforms', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -212,7 +212,7 @@ void main() {
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgets('restorablePushReplacement', (WidgetTester tester) async {
+  testWidgets('restorablePushReplacement', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -245,7 +245,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('restorablePushReplacement adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorablePushReplacement adds route on all platforms', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -255,11 +255,11 @@ void main() {
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgets('restorablePushAndRemoveUntil', (WidgetTester tester) async {
+  testWidgets('restorablePushAndRemoveUntil', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil(_routeBuilder, (Route<dynamic> _) => false, arguments: 'Foo');
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil(_routeBuilder, (final Route<dynamic> _) => false, arguments: 'Foo');
     await tester.pumpAndSettle();
 
     expect(findRoute('home', skipOffstage: false), findsNothing);
@@ -288,17 +288,17 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('restorablePushAndRemoveUntil adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorablePushAndRemoveUntil adds route on all platforms', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
 
-    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil(_routeBuilder, (Route<dynamic> _) => false, arguments: 'Foo');
+    tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil(_routeBuilder, (final Route<dynamic> _) => false, arguments: 'Foo');
     await tester.pumpAndSettle();
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgets('restorableReplace', (WidgetTester tester) async {
+  testWidgets('restorableReplace', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -334,7 +334,7 @@ void main() {
     expect(findRoute('Bar'), findsNothing);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('restorableReplace adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorableReplace adds route on all platforms', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -346,7 +346,7 @@ void main() {
     expect(findRoute('Foo'), findsOneWidget);
   });
 
-  testWidgets('restorableReplaceRouteBelow', (WidgetTester tester) async {
+  testWidgets('restorableReplaceRouteBelow', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -392,7 +392,7 @@ void main() {
     expect(findRoute('Anchor', count: 2), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('restorableReplaceRouteBelow adds route on all platforms', (WidgetTester tester) async {
+  testWidgets('restorableReplaceRouteBelow adds route on all platforms', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
 
@@ -412,7 +412,7 @@ void main() {
     expect(findRoute('Foo', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('restoring a popped route', (WidgetTester tester) async {
+  testWidgets('restoring a popped route', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -440,7 +440,7 @@ void main() {
     expect(findRoute('Foo', count: 2), findsOneWidget);
   });
 
-  testWidgets('popped routes are not restored', (WidgetTester tester) async {
+  testWidgets('popped routes are not restored', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -465,7 +465,7 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('routes that are in the process of push are restored', (WidgetTester tester) async {
+  testWidgets('routes that are in the process of push are restored', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -494,7 +494,7 @@ void main() {
     expect(route2.isActive, isTrue);
   });
 
-  testWidgets('routes that are in the process of pop are not restored', (WidgetTester tester) async {
+  testWidgets('routes that are in the process of pop are not restored', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -531,7 +531,7 @@ void main() {
     expect(notifyCount, 1);
   });
 
-  testWidgets('routes are restored in the right order', (WidgetTester tester) async {
+  testWidgets('routes are restored in the right order', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
@@ -569,7 +569,7 @@ void main() {
     expect(findRoute('home'), findsOneWidget);
   });
 
-  testWidgets('all routes up to first unrestorable are restored', (WidgetTester tester) async {
+  testWidgets('all routes up to first unrestorable are restored', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
@@ -599,7 +599,7 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('removing unrestorable routes restores all of them', (WidgetTester tester) async {
+  testWidgets('removing unrestorable routes restores all of them', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('route1');
@@ -633,7 +633,7 @@ void main() {
     expect(findRoute('home', skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('RestorableRouteFuture', (WidgetTester tester) async {
+  testWidgets('RestorableRouteFuture', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -673,7 +673,7 @@ void main() {
     expect(restoredRouteFuture.enabled, isFalse);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('RestorableRouteFuture in unrestorable context', (WidgetTester tester) async {
+  testWidgets('RestorableRouteFuture in unrestorable context', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     expect(findRoute('home'), findsOneWidget);
 
@@ -704,7 +704,7 @@ void main() {
     expect(findRoute('home'), findsOneWidget);
   });
 
-  testWidgets('Illegal arguments throw', (WidgetTester tester) async {
+  testWidgets('Illegal arguments throw', (final WidgetTester tester) async {
     await tester.pumpWidget(const TestWidget());
     tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamed('Bar');
     await tester.pumpAndSettle();
@@ -713,12 +713,12 @@ void main() {
     expect(oldRoute.settings.name, 'Bar');
 
     final Matcher throwsArgumentsAssertionError = throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
+      (final AssertionError e) => e.message,
       'message',
       'The arguments object must be serializable via the StandardMessageCodec.',
     ));
     final Matcher throwsBuilderAssertionError = throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
+      (final AssertionError e) => e.message,
       'message',
       'The provided routeBuilder must be a static function.',
     ));
@@ -736,7 +736,7 @@ void main() {
       throwsArgumentsAssertionError,
     );
     expect(
-      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamedAndRemoveUntil('Foo', (Route<Object?> _) => false, arguments: Object()),
+      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushNamedAndRemoveUntil('Foo', (final Route<Object?> _) => false, arguments: Object()),
       throwsArgumentsAssertionError,
     );
     expect(
@@ -748,7 +748,7 @@ void main() {
       throwsArgumentsAssertionError,
     );
     expect(
-      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil(_routeBuilder, (Route<Object?> _) => false, arguments: Object()),
+      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil(_routeBuilder, (final Route<Object?> _) => false, arguments: Object()),
       throwsArgumentsAssertionError,
     );
     expect(
@@ -761,33 +761,33 @@ void main() {
     );
 
     expect(
-      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePush((BuildContext _, Object? __) => FakeRoute()),
+      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePush((final BuildContext _, final Object? __) => FakeRoute()),
       throwsBuilderAssertionError,
       skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
-      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushReplacement((BuildContext _, Object? __) => FakeRoute()),
+      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushReplacement((final BuildContext _, final Object? __) => FakeRoute()),
       throwsBuilderAssertionError,
       skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
-      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil((BuildContext _, Object? __) => FakeRoute(), (Route<Object?> _) => false),
+      () => tester.state<NavigatorState>(find.byType(Navigator)).restorablePushAndRemoveUntil((final BuildContext _, final Object? __) => FakeRoute(), (final Route<Object?> _) => false),
       throwsBuilderAssertionError,
       skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
-      () => tester.state<NavigatorState>(find.byType(Navigator)).restorableReplace(newRouteBuilder: (BuildContext _, Object? __) => FakeRoute(), oldRoute: oldRoute),
+      () => tester.state<NavigatorState>(find.byType(Navigator)).restorableReplace(newRouteBuilder: (final BuildContext _, final Object? __) => FakeRoute(), oldRoute: oldRoute),
       throwsBuilderAssertionError,
       skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
     expect(
-      () => tester.state<NavigatorState>(find.byType(Navigator)).restorableReplaceRouteBelow(newRouteBuilder: (BuildContext _, Object? __) => FakeRoute(), anchorRoute: oldRoute),
+      () => tester.state<NavigatorState>(find.byType(Navigator)).restorableReplaceRouteBelow(newRouteBuilder: (final BuildContext _, final Object? __) => FakeRoute(), anchorRoute: oldRoute),
       throwsBuilderAssertionError,
       skip: isBrowser, // https://github.com/flutter/flutter/issues/33615
     );
   });
 
-  testWidgets('Moving scopes', (WidgetTester tester) async {
+  testWidgets('Moving scopes', (final WidgetTester tester) async {
     await tester.pumpWidget(const RootRestorationScope(
       restorationId: 'root',
       child: TestWidget(
@@ -840,7 +840,7 @@ void main() {
     expect(findRoute('home', count: 0), findsOneWidget);
   });
 
-  testWidgets('Restoring pages', (WidgetTester tester) async {
+  testWidgets('Restoring pages', (final WidgetTester tester) async {
     await tester.pumpWidget(const PagedTestWidget());
     expect(findRoute('home', count: 0), findsOneWidget);
     await tapRouteCounter('home', tester);
@@ -882,7 +882,7 @@ void main() {
     expect(findRoute('bar', count: 0), findsOneWidget);
   });
 
-  testWidgets('Unrestorable pages', (WidgetTester tester) async {
+  testWidgets('Unrestorable pages', (final WidgetTester tester) async {
     await tester.pumpWidget(const PagedTestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -936,7 +936,7 @@ void main() {
     expect(findRoute('home', count: 1), findsOneWidget);
   });
 
-  testWidgets('removed page is not restored', (WidgetTester tester) async {
+  testWidgets('removed page is not restored', (final WidgetTester tester) async {
     await tester.pumpWidget(const PagedTestWidget());
     await tapRouteCounter('home', tester);
     expect(findRoute('home', count: 1), findsOneWidget);
@@ -976,18 +976,18 @@ void main() {
     expect(findRoute('p1', count: 0), findsOneWidget);
   });
 
-  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (WidgetTester tester) async {
+  testWidgets('Helpful assert thrown all routes in onGenerateInitialRoutes are not restorable', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         restorationScopeId: 'material_app',
         initialRoute: '/',
         routes: <String, WidgetBuilder>{
-          '/': (BuildContext context) => Container(),
+          '/': (final BuildContext context) => Container(),
         },
-        onGenerateInitialRoutes: (String initialRoute) {
+        onGenerateInitialRoutes: (final String initialRoute) {
           return <MaterialPageRoute<void>>[
             MaterialPageRoute<void>(
-              builder: (BuildContext context) => Container(),
+              builder: (final BuildContext context) => Container(),
             ),
           ];
         },
@@ -1006,7 +1006,7 @@ void main() {
     // new widget tree.
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     dynamic remainingException;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       remainingException ??= details.exception;
     };
     await tester.pumpWidget(Container(key: UniqueKey()));
@@ -1016,9 +1016,9 @@ void main() {
 }
 
 @pragma('vm:entry-point')
-Route<void> _routeBuilder(BuildContext context, Object? arguments) {
+Route<void> _routeBuilder(final BuildContext context, final Object? arguments) {
   return MaterialPageRoute<void>(
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return RouteWidget(
         name: arguments! as String,
       );
@@ -1027,9 +1027,9 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
 }
 
 @pragma('vm:entry-point')
-Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
+Route<void> _routeFutureBuilder(final BuildContext context, final Object? arguments) {
   return MaterialPageRoute<void>(
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return const RouteFutureWidget();
     },
   );
@@ -1041,7 +1041,7 @@ class PagedTestWidget extends StatelessWidget {
   final String restorationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RootRestorationScope(
       restorationId: restorationId,
       child: Directionality(
@@ -1065,7 +1065,7 @@ class PagedTestNavigator extends StatefulWidget {
 class PagedTestNavigatorState extends State<PagedTestNavigator> with RestorationMixin {
   final RestorableString _routes = RestorableString('r-home');
 
-  void addPage(String name, {bool restoreState = true, int? index}) {
+  void addPage(String name, {final bool restoreState = true, final int? index}) {
     assert(!name.contains(','));
     assert(!name.startsWith('r-'));
     final List<String> routes = _routes.value.split(',');
@@ -1080,7 +1080,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
     });
   }
 
-  bool removePage(String name) {
+  bool removePage(final String name) {
     final List<String> routes = _routes.value.split(',');
     if (routes.remove(name) || routes.remove('r-$name')) {
       setState(() {
@@ -1092,10 +1092,10 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Navigator(
       restorationScopeId: 'nav',
-      onPopPage: (Route<dynamic> route, dynamic result) {
+      onPopPage: (final Route<dynamic> route, final dynamic result) {
         if (route.didPop(result)) {
           removePage(route.settings.name!);
           return true;
@@ -1116,10 +1116,10 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
           key: ValueKey<String>(name),
         );
       }).toList(),
-      onGenerateRoute: (RouteSettings settings) {
+      onGenerateRoute: (final RouteSettings settings) {
         return MaterialPageRoute<int>(
           settings: settings,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return RouteWidget(
               name: settings.name!,
               arguments: settings.arguments,
@@ -1134,7 +1134,7 @@ class PagedTestNavigatorState extends State<PagedTestNavigator> with Restoration
   String get restorationId => 'router';
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(_routes, 'routes');
   }
 
@@ -1149,10 +1149,10 @@ class TestPage extends Page<void> {
   const TestPage({super.key, required String super.name, super.restorationId});
 
   @override
-  Route<void> createRoute(BuildContext context) {
+  Route<void> createRoute(final BuildContext context) {
     return MaterialPageRoute<void>(
       settings: this,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return RouteWidget(
           name: name!,
         );
@@ -1167,7 +1167,7 @@ class TestWidget extends StatelessWidget {
   final String? restorationId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RootRestorationScope(
       restorationId: restorationId,
       child: Directionality(
@@ -1177,10 +1177,10 @@ class TestWidget extends StatelessWidget {
           child: Navigator(
             initialRoute: 'home',
             restorationScopeId: 'app',
-            onGenerateRoute: (RouteSettings settings) {
+            onGenerateRoute: (final RouteSettings settings) {
               return MaterialPageRoute<int>(
                 settings: settings,
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return RouteWidget(
                     name: settings.name!,
                     arguments: settings.arguments,
@@ -1209,7 +1209,7 @@ class RouteWidgetState extends State<RouteWidget> with RestorationMixin {
   final RestorableInt counter = RestorableInt(0);
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(counter, 'counter');
   }
 
@@ -1223,7 +1223,7 @@ class RouteWidgetState extends State<RouteWidget> with RestorationMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Column(
         children: <Widget>[
@@ -1259,10 +1259,10 @@ class RouteFutureWidgetState extends State<RouteFutureWidget> with RestorationMi
   void initState() {
     super.initState();
     routeFuture = RestorableRouteFuture<int>(
-      onPresent: (NavigatorState navigatorState, Object? arguments) {
+      onPresent: (final NavigatorState navigatorState, final Object? arguments) {
         return navigatorState.restorablePushNamed(arguments! as String);
       },
-      onComplete: (int i) {
+      onComplete: (final int i) {
         setState(() {
           value = i;
         });
@@ -1271,7 +1271,7 @@ class RouteFutureWidgetState extends State<RouteFutureWidget> with RestorationMi
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(routeFuture, 'routeFuture');
   }
 
@@ -1285,16 +1285,16 @@ class RouteFutureWidgetState extends State<RouteFutureWidget> with RestorationMi
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Text('Return value: $value'),
     );
   }
 }
 
-Finder findRoute(String name, { Object? arguments, int? count, bool skipOffstage = true }) => _RouteFinder(name, arguments: arguments, count: count, skipOffstage: skipOffstage);
+Finder findRoute(final String name, { final Object? arguments, final int? count, final bool skipOffstage = true }) => _RouteFinder(name, arguments: arguments, count: count, skipOffstage: skipOffstage);
 
-Future<void> tapRouteCounter(String name, WidgetTester tester) async {
+Future<void> tapRouteCounter(final String name, final WidgetTester tester) async {
   await tester.tap(find.text('Route: $name'));
   await tester.pump();
 }
@@ -1319,7 +1319,7 @@ class _RouteFinder extends MatchFinder {
   }
 
   @override
-  bool matches(Element candidate) {
+  bool matches(final Element candidate) {
     final Widget widget = candidate.widget;
     if (widget is RouteWidget) {
       if (widget.name != name) {

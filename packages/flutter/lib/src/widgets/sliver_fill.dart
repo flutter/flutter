@@ -59,7 +59,7 @@ class SliverFillViewport extends StatelessWidget {
   final SliverChildDelegate delegate;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _SliverFractionalPadding(
       viewportFraction: padEnds ? clampDouble(1 - viewportFraction, 0, 1) / 2 : 0,
       sliver: _SliverFillViewportRenderObjectWidget(
@@ -79,13 +79,13 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
   final double viewportFraction;
 
   @override
-  RenderSliverFillViewport createRenderObject(BuildContext context) {
+  RenderSliverFillViewport createRenderObject(final BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
   }
 }
@@ -93,7 +93,7 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
 class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
     this.viewportFraction = 0,
-    Widget? sliver,
+    final Widget? sliver,
   }) : assert(viewportFraction >= 0),
       assert(viewportFraction <= 0.5),
       super(child: sliver);
@@ -101,17 +101,17 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   final double viewportFraction;
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: viewportFraction);
+  RenderObject createRenderObject(final BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: viewportFraction);
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderSliverFractionalPadding renderObject) {
     renderObject.viewportFraction = viewportFraction;
   }
 }
 
 class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   _RenderSliverFractionalPadding({
-    double viewportFraction = 0,
+    final double viewportFraction = 0,
   }) : assert(viewportFraction <= 0.5),
       assert(viewportFraction >= 0),
       _viewportFraction = viewportFraction;
@@ -120,7 +120,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
-  set viewportFraction(double newValue) {
+  set viewportFraction(final double newValue) {
     if (_viewportFraction == newValue) {
       return;
     }
@@ -290,7 +290,7 @@ class SliverFillRemaining extends StatelessWidget {
   final bool fillOverscroll;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (hasScrollBody) {
       return _SliverFillRemainingWithScrollable(child: child);
     }
@@ -301,7 +301,7 @@ class SliverFillRemaining extends StatelessWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(
       DiagnosticsProperty<Widget>(
@@ -326,7 +326,7 @@ class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
   });
 
   @override
-  RenderSliverFillRemainingWithScrollable createRenderObject(BuildContext context) => RenderSliverFillRemainingWithScrollable();
+  RenderSliverFillRemainingWithScrollable createRenderObject(final BuildContext context) => RenderSliverFillRemainingWithScrollable();
 }
 
 class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidget {
@@ -335,7 +335,7 @@ class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidge
   });
 
   @override
-  RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
+  RenderSliverFillRemaining createRenderObject(final BuildContext context) => RenderSliverFillRemaining();
 }
 
 class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
@@ -344,5 +344,5 @@ class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
   });
 
   @override
-  RenderSliverFillRemainingAndOverscroll createRenderObject(BuildContext context) => RenderSliverFillRemainingAndOverscroll();
+  RenderSliverFillRemainingAndOverscroll createRenderObject(final BuildContext context) => RenderSliverFillRemainingAndOverscroll();
 }

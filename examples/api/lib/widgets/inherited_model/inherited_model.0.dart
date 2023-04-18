@@ -14,7 +14,7 @@ class InheritedModelApp extends StatelessWidget {
   const InheritedModelApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: InheritedModelExample(),
     );
@@ -32,21 +32,21 @@ class LogoModel extends InheritedModel<LogoAspect> {
   final Color? backgroundColor;
   final bool? large;
 
-  static Color? backgroundColorOf(BuildContext context) {
+  static Color? backgroundColorOf(final BuildContext context) {
     return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.backgroundColor)?.backgroundColor;
   }
 
-  static bool sizeOf(BuildContext context) {
+  static bool sizeOf(final BuildContext context) {
     return InheritedModel.inheritFrom<LogoModel>(context, aspect: LogoAspect.large)?.large ?? false;
   }
 
   @override
-  bool updateShouldNotify(LogoModel oldWidget) {
+  bool updateShouldNotify(final LogoModel oldWidget) {
     return backgroundColor != oldWidget.backgroundColor || large != oldWidget.large;
   }
 
   @override
-  bool updateShouldNotifyDependent(LogoModel oldWidget, Set<LogoAspect> dependencies) {
+  bool updateShouldNotifyDependent(final LogoModel oldWidget, final Set<LogoAspect> dependencies) {
     if (backgroundColor != oldWidget.backgroundColor && dependencies.contains(LogoAspect.backgroundColor)) {
       return true;
     }
@@ -69,7 +69,7 @@ class _InheritedModelExampleState extends State<InheritedModelExample> {
   Color color = Colors.blue;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('InheritedModel Sample')),
       body: Column(
@@ -133,7 +133,7 @@ class BackgroundWidget extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color color = LogoModel.backgroundColorOf(context)!;
 
     return AnimatedContainer(
@@ -150,7 +150,7 @@ class LogoWidget extends StatelessWidget {
   const LogoWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final bool largeLogo = LogoModel.sizeOf(context);
 
     return AnimatedContainer(

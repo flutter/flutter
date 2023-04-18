@@ -50,7 +50,7 @@ void main() {
     expect(c1.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 80.0, 190.0);
     expect(
-      (Canvas canvas) => c10.paint(canvas, rect),
+      (final Canvas canvas) => c10.paint(canvas, rect),
       paints
         ..drrect(
           outer: RRect.fromRectAndRadius(rect, const Radius.circular(100.0)),

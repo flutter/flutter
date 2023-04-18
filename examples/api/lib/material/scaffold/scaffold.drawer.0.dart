@@ -12,7 +12,7 @@ class DrawerExampleApp extends StatelessWidget {
   const DrawerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: DrawerExample(),
     );
@@ -38,7 +38,7 @@ class _DrawerExampleState extends State<DrawerExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(title: const Text('Drawer Demo')),

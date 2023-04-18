@@ -14,7 +14,7 @@ class ReorderableApp extends StatelessWidget {
   const ReorderableApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ReorderableListView Sample')),
@@ -32,19 +32,19 @@ class ReorderableExample extends StatefulWidget {
 }
 
 class _ReorderableExampleState extends State<ReorderableExample> {
-  final List<int> _items = List<int>.generate(50, (int index) => index);
+  final List<int> _items = List<int>.generate(50, (final int index) => index);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color oddItemColor = colorScheme.secondary.withOpacity(0.05);
     final Color evenItemColor = colorScheme.secondary.withOpacity(0.15);
     final Color draggableItemColor = colorScheme.secondary;
 
-    Widget proxyDecorator(Widget child, int index, Animation<double> animation) {
+    Widget proxyDecorator(final Widget child, final int index, final Animation<double> animation) {
       return AnimatedBuilder(
         animation: animation,
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           final double animValue = Curves.easeInOut.transform(animation.value);
           final double elevation = lerpDouble(0, 6, animValue)!;
           return Material(
@@ -69,7 +69,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
             title: Text('Item ${_items[index]}'),
           ),
       ],
-      onReorder: (int oldIndex, int newIndex) {
+      onReorder: (final int oldIndex, int newIndex) {
         setState(() {
           if (oldIndex < newIndex) {
             newIndex -= 1;

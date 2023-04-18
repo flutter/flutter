@@ -47,17 +47,17 @@ void main() {
     User(name: 'Charlie', email: 'charlie123@gmail.com'),
   ];
 
-  testWidgets('can filter and select a list of string options', (WidgetTester tester) async {
+  testWidgets('can filter and select a list of string options', (final WidgetTester tester) async {
     late String lastSelection;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<String>(
-            onSelected: (String selection) {
+            onSelected: (final String selection) {
               lastSelection = selection;
             },
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptions.where((final String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
@@ -107,13 +107,13 @@ void main() {
     expect(list.semanticChildCount, 6);
   });
 
-  testWidgets('can filter and select a list of custom User options', (WidgetTester tester) async {
+  testWidgets('can filter and select a list of custom User options', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<User>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptionsUsers.where((User option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptionsUsers.where((final User option) {
                 return option.toString().contains(textEditingValue.text.toLowerCase());
               });
             },
@@ -161,16 +161,16 @@ void main() {
     expect(list.semanticChildCount, 1);
   });
 
-  testWidgets('displayStringForOption is displayed in the options', (WidgetTester tester) async {
+  testWidgets('displayStringForOption is displayed in the options', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<User>(
-            displayStringForOption: (User option) {
+            displayStringForOption: (final User option) {
               return option.name;
             },
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptionsUsers.where((User option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptionsUsers.where((final User option) {
                 return option.toString().contains(textEditingValue.text.toLowerCase());
               });
             },
@@ -204,18 +204,18 @@ void main() {
     expect(field.controller!.text, kOptionsUsers.first.name);
   });
 
-  testWidgets('can build a custom field', (WidgetTester tester) async {
+  testWidgets('can build a custom field', (final WidgetTester tester) async {
     final GlobalKey fieldKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptions.where((final String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            fieldViewBuilder: (BuildContext context, TextEditingController textEditingController, FocusNode focusNode, VoidCallback onFieldSubmitted) {
+            fieldViewBuilder: (final BuildContext context, final TextEditingController textEditingController, final FocusNode focusNode, final VoidCallback onFieldSubmitted) {
               return Container(key: fieldKey);
             },
           ),
@@ -228,18 +228,18 @@ void main() {
     expect(find.byType(TextFormField), findsNothing);
   });
 
-  testWidgets('can build custom options', (WidgetTester tester) async {
+  testWidgets('can build custom options', (final WidgetTester tester) async {
     final GlobalKey optionsKey = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptions.where((final String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
-            optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<String> onSelected, Iterable<String> options) {
+            optionsViewBuilder: (final BuildContext context, final AutocompleteOnSelected<String> onSelected, final Iterable<String> options) {
               return Container(key: optionsKey);
             },
           ),
@@ -257,11 +257,11 @@ void main() {
     expect(find.byKey(optionsKey), findsOneWidget);
   });
 
-  testWidgets('the default Autocomplete options widget has a maximum height of 200', (WidgetTester tester) async {
+  testWidgets('the default Autocomplete options widget has a maximum height of 200', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(home: Scaffold(
       body: Autocomplete<String>(
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          return kOptions.where((String option) {
+        optionsBuilder: (final TextEditingValue textEditingValue) {
+          return kOptions.where((final String option) {
             return option.contains(textEditingValue.text.toLowerCase());
           });
         },
@@ -278,14 +278,14 @@ void main() {
     expect(resultingHeight, equals(200));
   });
 
-  testWidgets('the options height restricts to max desired height', (WidgetTester tester) async {
+  testWidgets('the options height restricts to max desired height', (final WidgetTester tester) async {
     const double desiredHeight = 150.0;
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
       body: Autocomplete<String>(
         optionsMaxHeight: desiredHeight,
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          return kOptions.where((String option) {
+        optionsBuilder: (final TextEditingValue textEditingValue) {
+          return kOptions.where((final String option) {
             return option.contains(textEditingValue.text.toLowerCase());
           });
         },
@@ -307,11 +307,11 @@ void main() {
     expect(resultingHeight, equals(desiredHeight));
   });
 
-  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (WidgetTester tester) async {
+  testWidgets('The height of options shrinks to height of resulting items, if less than maxHeight', (final WidgetTester tester) async {
     // Returns a Future with the height of the default [Autocomplete] options widget
     // after the provided text had been entered into the [Autocomplete] field.
     Future<double> getDefaultOptionsHeight(
-        WidgetTester tester, String enteredText) async {
+        final WidgetTester tester, final String enteredText) async {
       final Finder listFinder = find.byType(ListView);
       final Finder inputFinder = find.byType(TextFormField);
       final TextFormField field = inputFinder.evaluate().first.widget as TextFormField;
@@ -328,8 +328,8 @@ void main() {
       home: Scaffold(
       body: Autocomplete<String>(
         optionsMaxHeight: maxOptionsHeight,
-        optionsBuilder: (TextEditingValue textEditingValue) {
-          return kOptions.where((String option) {
+        optionsBuilder: (final TextEditingValue textEditingValue) {
+          return kOptions.where((final String option) {
             return option.contains(textEditingValue.text.toLowerCase());
           });
         },
@@ -355,18 +355,18 @@ void main() {
     expect(oneItemsHeight, lessThan(twoItemsHeight));
   });
 
-  testWidgets('initialValue sets initial text field value', (WidgetTester tester) async {
+  testWidgets('initialValue sets initial text field value', (final WidgetTester tester) async {
     late String lastSelection;
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Autocomplete<String>(
             initialValue: const TextEditingValue(text: 'lem'),
-            onSelected: (String selection) {
+            onSelected: (final String selection) {
               lastSelection = selection;
             },
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptions.where((final String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
@@ -404,7 +404,7 @@ void main() {
 
   // Ensures that the option with the given label has a given background color
   // if given, or no background if color is null.
-  void checkOptionHighlight(WidgetTester tester, String label, Color? color) {
+  void checkOptionHighlight(final WidgetTester tester, final String label, final Color? color) {
     final RenderBox renderBox = tester.renderObject<RenderBox>(find.ancestor(matching: find.byType(Container), of: find.text(label)));
     if (color != null) {
       // Check to see that the container is painted with the highlighted background color.
@@ -416,7 +416,7 @@ void main() {
     }
   }
 
-  testWidgets('keyboard navigation of the options properly highlights the option', (WidgetTester tester) async {
+  testWidgets('keyboard navigation of the options properly highlights the option', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
@@ -425,8 +425,8 @@ void main() {
         ),
         home: Scaffold(
           body: Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptions.where((final String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },
@@ -455,7 +455,7 @@ void main() {
     checkOptionHighlight(tester, 'elephant', highlightColor);
   });
 
-  testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (WidgetTester tester) async {
+  testWidgets('keyboard navigation keeps the highlighted option scrolled into view', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xFF112233);
     await tester.pumpWidget(
       MaterialApp(
@@ -464,8 +464,8 @@ void main() {
         ),
         home: Scaffold(
           body: Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              return kOptions.where((String option) {
+            optionsBuilder: (final TextEditingValue textEditingValue) {
+              return kOptions.where((final String option) {
                 return option.contains(textEditingValue.text.toLowerCase());
               });
             },

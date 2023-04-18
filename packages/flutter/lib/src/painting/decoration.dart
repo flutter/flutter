@@ -90,7 +90,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// Instead of calling this directly, use [Decoration.lerp].
   @protected
-  Decoration? lerpFrom(Decoration? a, double t) => null;
+  Decoration? lerpFrom(final Decoration? a, final double t) => null;
 
   /// Linearly interpolates from `this` to another [Decoration] (which may be of
   /// a different class).
@@ -119,7 +119,7 @@ abstract class Decoration with Diagnosticable {
   ///
   /// Instead of calling this directly, use [Decoration.lerp].
   @protected
-  Decoration? lerpTo(Decoration? b, double t) => null;
+  Decoration? lerpTo(final Decoration? b, final double t) => null;
 
   /// Linearly interpolates between two [Decoration]s.
   ///
@@ -128,7 +128,7 @@ abstract class Decoration with Diagnosticable {
   /// interpolated, then the interpolation is done via null (at `t == 0.5`).
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Decoration? lerp(Decoration? a, Decoration? b, double t) {
+  static Decoration? lerp(final Decoration? a, final Decoration? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -164,7 +164,7 @@ abstract class Decoration with Diagnosticable {
   /// is what [Container] uses), the `textDirection` parameter will be populated
   /// based on the ambient [Directionality] (by way of the [RenderDecoratedBox]
   /// renderer).
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) => true;
+  bool hitTest(final Size size, final Offset position, { final TextDirection? textDirection }) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
   ///
@@ -172,7 +172,7 @@ abstract class Decoration with Diagnosticable {
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   @factory
-  BoxPainter createBoxPainter([ VoidCallback onChanged ]);
+  BoxPainter createBoxPainter([ final VoidCallback onChanged ]);
 
   /// Returns a closed [Path] that describes the outer edge of this decoration.
   ///
@@ -184,7 +184,7 @@ abstract class Decoration with Diagnosticable {
   ///
   ///  * [Container.clipBehavior], which, if set, uses this method to determine
   ///    the clip path to use.
-  Path getClipPath(Rect rect, TextDirection textDirection) {
+  Path getClipPath(final Rect rect, final TextDirection textDirection) {
     throw UnsupportedError('${objectRuntimeType(this, 'This Decoration subclass')} does not expect to be used for clipping.');
   }
 }
@@ -228,7 +228,7 @@ abstract class BoxPainter {
   /// When a [Decoration] is painted in a [Container] or [DecoratedBox] (which
   /// is what [Container] uses), the [ImageConfiguration.textDirection] property
   /// will be populated based on the ambient [Directionality].
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration);
+  void paint(final Canvas canvas, final Offset offset, final ImageConfiguration configuration);
 
   /// Callback that is invoked if an asynchronously-loading resource used by the
   /// decoration finishes loading. For example, an image. When this is invoked,

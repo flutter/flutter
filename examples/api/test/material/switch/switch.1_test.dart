@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/switch/switch.1.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can toggle switch', (WidgetTester tester) async {
+  testWidgets('Can toggle switch', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SwitchApp(),
     );

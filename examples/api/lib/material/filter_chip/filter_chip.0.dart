@@ -14,7 +14,7 @@ class ChipApp extends StatelessWidget {
   const ChipApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -38,7 +38,7 @@ class _FilterChipExampleState extends State<FilterChipExample> {
   Set<ExerciseFilter> filters = <ExerciseFilter>{};
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Center(
@@ -49,11 +49,11 @@ class _FilterChipExampleState extends State<FilterChipExample> {
           const SizedBox(height: 5.0),
           Wrap(
             spacing: 5.0,
-            children: ExerciseFilter.values.map((ExerciseFilter exercise) {
+            children: ExerciseFilter.values.map((final ExerciseFilter exercise) {
               return FilterChip(
                 label: Text(exercise.name),
                 selected: filters.contains(exercise),
-                onSelected: (bool selected) {
+                onSelected: (final bool selected) {
                   setState(() {
                     if (selected) {
                       filters.add(exercise);
@@ -67,7 +67,7 @@ class _FilterChipExampleState extends State<FilterChipExample> {
           ),
           const SizedBox(height: 10.0),
           Text(
-            'Looking for: ${filters.map((ExerciseFilter e) => e.name).join(', ')}',
+            'Looking for: ${filters.map((final ExerciseFilter e) => e.name).join(', ')}',
             style: textTheme.labelLarge,
           ),
         ],

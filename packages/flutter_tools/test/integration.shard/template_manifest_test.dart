@@ -19,10 +19,10 @@ void main() {
     final Set<Uri> activeTemplateList = fileSystem.directory('templates')
       .listSync(recursive: true)
       .whereType<File>()
-      .where((File file) => fileSystem.path.basename(file.path) != 'template_manifest.json' &&
+      .where((final File file) => fileSystem.path.basename(file.path) != 'template_manifest.json' &&
         fileSystem.path.basename(file.path) != 'README.md' &&
         fileSystem.path.basename(file.path) != '.DS_Store')
-      .map((File file) => file.uri)
+      .map((final File file) => file.uri)
       .toSet();
 
     final Set<Uri> difference = activeTemplateList.difference(declaredFileList);

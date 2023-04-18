@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   static const String _title = 'Density Test';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       title: _title,
       home: MyHomePage(title: _title),
@@ -47,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 class OptionModel extends ChangeNotifier {
   double get size => _size;
   double _size = 1.0;
-  set size(double size) {
+  set size(final double size) {
     if (size != _size) {
       _size = size;
       notifyListeners();
@@ -56,7 +56,7 @@ class OptionModel extends ChangeNotifier {
 
   VisualDensity get density => _density;
   VisualDensity _density = VisualDensity.standard;
-  set density(VisualDensity density) {
+  set density(final VisualDensity density) {
     if (density != _density) {
       _density = density;
       notifyListeners();
@@ -65,7 +65,7 @@ class OptionModel extends ChangeNotifier {
 
   bool get enable => _enable;
   bool _enable = true;
-  set enable(bool enable) {
+  set enable(final bool enable) {
     if (enable != _enable) {
       _enable = enable;
       notifyListeners();
@@ -74,7 +74,7 @@ class OptionModel extends ChangeNotifier {
 
   bool get slowAnimations => _slowAnimations;
   bool _slowAnimations = false;
-  set slowAnimations(bool slowAnimations) {
+  set slowAnimations(final bool slowAnimations) {
     if (slowAnimations != _slowAnimations) {
       _slowAnimations = slowAnimations;
       notifyListeners();
@@ -83,7 +83,7 @@ class OptionModel extends ChangeNotifier {
 
   bool get rtl => _rtl;
   bool _rtl = false;
-  set rtl(bool rtl) {
+  set rtl(final bool rtl) {
     if (rtl != _rtl) {
       _rtl = rtl;
       notifyListeners();
@@ -92,7 +92,7 @@ class OptionModel extends ChangeNotifier {
 
   bool get longText => _longText;
   bool _longText = false;
-  set longText(bool longText) {
+  set longText(final bool longText) {
     if (longText != _longText) {
       _longText = longText;
       notifyListeners();
@@ -119,7 +119,7 @@ class LabeledCheckbox extends StatelessWidget {
   final bool? value;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -150,7 +150,7 @@ class _OptionsState extends State<Options> {
   }
 
   @override
-  void didUpdateWidget(Options oldWidget) {
+  void didUpdateWidget(final Options oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.model != oldWidget.model) {
       oldWidget.model.removeListener(_modelChanged);
@@ -170,7 +170,7 @@ class _OptionsState extends State<Options> {
 
   double sliderValue = 0.0;
 
-  String _densityToProfile(VisualDensity density) {
+  String _densityToProfile(final VisualDensity density) {
     if (density == VisualDensity.standard) {
       return 'standard';
     } else if (density == VisualDensity.compact) {
@@ -181,7 +181,7 @@ class _OptionsState extends State<Options> {
     return 'custom';
   }
 
-  VisualDensity _profileToDensity(String? profile) {
+  VisualDensity _profileToDensity(final String? profile) {
     switch (profile) {
       case 'standard':
         return VisualDensity.standard;
@@ -196,7 +196,7 @@ class _OptionsState extends State<Options> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final SliderThemeData controlTheme = SliderTheme.of(context).copyWith(
       thumbColor: Colors.grey[50],
       activeTickMarkColor: Colors.deepPurple[200],
@@ -206,7 +206,7 @@ class _OptionsState extends State<Options> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 10.0),
-      child: Builder(builder: (BuildContext context) {
+      child: Builder(builder: (final BuildContext context) {
         return DefaultTextStyle(
           style: TextStyle(color: Colors.grey[50]),
           child: Column(
@@ -223,7 +223,7 @@ class _OptionsState extends State<Options> {
                           label: '${widget.model.size}',
                           min: 0.5,
                           max: 3.0,
-                          onChanged: (double value) {
+                          onChanged: (final double value) {
                             widget.model.size = value;
                           },
                           value: widget.model.size,
@@ -249,7 +249,7 @@ class _OptionsState extends State<Options> {
                           label: widget.model.density.horizontal.toStringAsFixed(1),
                           min: VisualDensity.minimumDensity,
                           max: VisualDensity.maximumDensity,
-                          onChanged: (double value) {
+                          onChanged: (final double value) {
                             widget.model.density = widget.model.density.copyWith(
                               horizontal: value,
                               vertical: widget.model.density.vertical,
@@ -278,7 +278,7 @@ class _OptionsState extends State<Options> {
                           label: widget.model.density.vertical.toStringAsFixed(1),
                           min: VisualDensity.minimumDensity,
                           max: VisualDensity.maximumDensity,
-                          onChanged: (double value) {
+                          onChanged: (final double value) {
                             widget.model.density = widget.model.density.copyWith(
                               horizontal: widget.model.density.horizontal,
                               vertical: value,
@@ -304,7 +304,7 @@ class _OptionsState extends State<Options> {
                     child: DropdownButton<String>(
                       style: TextStyle(color: Colors.grey[50]),
                       isDense: true,
-                      onChanged: (String? value) {
+                      onChanged: (final String? value) {
                         widget.model.density = _profileToDensity(value);
                       },
                       items: const <DropdownMenuItem<String>>[
@@ -321,16 +321,16 @@ class _OptionsState extends State<Options> {
                   ),
                   LabeledCheckbox(
                     label: 'Enabled',
-                    onChanged: (bool? checked) {
+                    onChanged: (final bool? checked) {
                       widget.model.enable = checked ?? false;
                     },
                     value: widget.model.enable,
                   ),
                   LabeledCheckbox(
                     label: 'Slow',
-                    onChanged: (bool? checked) {
+                    onChanged: (final bool? checked) {
                       widget.model.slowAnimations = checked ?? false;
-                      Future<void>.delayed(const Duration(milliseconds: 150)).then((_) {
+                      Future<void>.delayed(const Duration(milliseconds: 150)).then((final _) {
                         if (widget.model.slowAnimations) {
                           timeDilation = 20.0;
                         } else {
@@ -342,7 +342,7 @@ class _OptionsState extends State<Options> {
                   ),
                   LabeledCheckbox(
                     label: 'RTL',
-                    onChanged: (bool? checked) {
+                    onChanged: (final bool? checked) {
                       widget.model.rtl = checked ?? false;
                     },
                     value: widget.model.rtl,
@@ -371,7 +371,7 @@ class _ControlTile extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -420,7 +420,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int radioValue = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = ThemeData(
       primarySwatch: m2Swatch,
     );
@@ -509,7 +509,7 @@ class _MyHomePageState extends State<MyHomePage> {
         label: _model.rtl ? 'رقائق' : 'Chips',
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(chipValues.length, (int index) {
+          children: List<Widget>.generate(chipValues.length, (final int index) {
             return InputChip(
               onPressed: _model.enable ? () {} : null,
               onDeleted: _model.enable ? () {} : null,
@@ -558,10 +558,10 @@ class _MyHomePageState extends State<MyHomePage> {
         label: _model.rtl ? 'خانات الاختيار' : 'Checkboxes',
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(checkboxValues.length, (int index) {
+          children: List<Widget>.generate(checkboxValues.length, (final int index) {
             return Checkbox(
               onChanged: _model.enable
-                  ? (bool? value) {
+                  ? (final bool? value) {
                       setState(() {
                         checkboxValues[index] = value ?? false;
                       });
@@ -576,10 +576,10 @@ class _MyHomePageState extends State<MyHomePage> {
         label: _model.rtl ? 'زر الراديو' : 'Radio Button',
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(4, (int index) {
+          children: List<Widget>.generate(4, (final int index) {
             return Radio<int>(
               onChanged: _model.enable
-                  ? (int? value) {
+                  ? (final int? value) {
                       setState(() {
                         radioValue = value!;
                       });
@@ -595,7 +595,7 @@ class _MyHomePageState extends State<MyHomePage> {
         label: _model.rtl ? 'زر الأيقونة' : 'Icon Button',
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(iconValues.length, (int index) {
+          children: List<Widget>.generate(iconValues.length, (final int index) {
             return IconButton(
               onPressed: _model.enable ? () {} : null,
               icon: Icon(iconValues[index]),

@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Flutter Deferred Components Example',
       theme: ThemeData(
@@ -57,7 +57,7 @@ class MyHomePageState extends State<MyHomePage> {
   void _pressHandler() {
     if (libraryFuture == null) {
       setState(() {
-        libraryFuture = component1.loadLibrary().then((dynamic _) {
+        libraryFuture = component1.loadLibrary().then((final dynamic _) {
           // Delay to give debug runs more than one frame to capture
           // the placeholder text.
           Future<void>.delayed(const Duration(milliseconds: 750), () {
@@ -71,11 +71,11 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget testWidget = libraryFuture == null ? const Text('preload', key: Key('PreloadText')) :
       FutureBuilder<void>(
         future: libraryFuture,
-        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+        builder: (final BuildContext context, final AsyncSnapshot<void> snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');

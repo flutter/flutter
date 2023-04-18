@@ -12,7 +12,7 @@ class BottomNavigationBarExampleApp extends StatelessWidget {
   const BottomNavigationBarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: BottomNavigationBarExample(),
     );
@@ -48,14 +48,14 @@ class _BottomNavigationBarExampleState extends State<BottomNavigationBarExample>
     ),
   ];
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(final int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('BottomNavigationBar Sample'),

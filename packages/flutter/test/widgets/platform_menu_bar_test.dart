@@ -19,20 +19,20 @@ void main() {
   final List<String> opened = <String>[];
   final List<String> closed = <String>[];
 
-  void onSelected(String item) {
+  void onSelected(final String item) {
     selected.add(item);
   }
 
-  void onOpen(String item) {
+  void onOpen(final String item) {
     opened.add(item);
   }
 
-  void onClose(String item) {
+  void onClose(final String item) {
     closed.add(item);
   }
 
   setUp(() {
-    fakeMenuChannel = FakeMenuChannel((MethodCall call) async {});
+    fakeMenuChannel = FakeMenuChannel((final MethodCall call) async {});
     delegate = DefaultPlatformMenuDelegate(channel: fakeMenuChannel);
     originalDelegate = WidgetsBinding.instance.platformMenuDelegate;
     WidgetsBinding.instance.platformMenuDelegate = delegate;
@@ -47,7 +47,7 @@ void main() {
 
   group('PlatformMenuBar', () {
     group('basic menu structure is transmitted to platform', () {
-      testWidgets('using onSelected', (WidgetTester tester) async {
+      testWidgets('using onSelected', (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
@@ -78,7 +78,7 @@ void main() {
           equals(expectedStructure),
         );
       });
-      testWidgets('using onSelectedIntent', (WidgetTester tester) async {
+      testWidgets('using onSelectedIntent', (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Material(
@@ -110,7 +110,7 @@ void main() {
         );
       });
     });
-    testWidgets('asserts when more than one has locked the delegate', (WidgetTester tester) async {
+    testWidgets('asserts when more than one has locked the delegate', (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -126,7 +126,7 @@ void main() {
       );
       expect(tester.takeException(), isA<AssertionError>());
     });
-    testWidgets('diagnostics', (WidgetTester tester) async {
+    testWidgets('diagnostics', (final WidgetTester tester) async {
       const PlatformMenuItem item = PlatformMenuItem(
         label: 'label2',
         shortcut: SingleActivator(LogicalKeyboardKey.keyA),
@@ -158,7 +158,7 @@ void main() {
     });
   });
   group('MenuBarItem', () {
-    testWidgets('diagnostics', (WidgetTester tester) async {
+    testWidgets('diagnostics', (final WidgetTester tester) async {
       const PlatformMenuItem childItem = PlatformMenuItem(
         label: 'label',
       );
@@ -171,8 +171,8 @@ void main() {
       item.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-          .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-          .map((DiagnosticsNode node) => node.toString())
+          .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+          .map((final DiagnosticsNode node) => node.toString())
           .toList();
 
       expect(description, <String>[
@@ -182,7 +182,7 @@ void main() {
   });
 
   group('ShortcutSerialization', () {
-    testWidgets('character constructor', (WidgetTester tester) async {
+    testWidgets('character constructor', (final WidgetTester tester) async {
       final ShortcutSerialization serialization = ShortcutSerialization.character('?');
       expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
         'shortcutCharacter': '?',
@@ -195,7 +195,7 @@ void main() {
       }));
     });
 
-    testWidgets('modifier constructor', (WidgetTester tester) async {
+    testWidgets('modifier constructor', (final WidgetTester tester) async {
       final ShortcutSerialization serialization = ShortcutSerialization.modifier(LogicalKeyboardKey.home);
       expect(serialization.toChannelRepresentation(), equals(<String, Object?>{
         'shortcutTrigger': LogicalKeyboardKey.home.keyId,
@@ -239,12 +239,12 @@ const List<String> subMenu2 = <String>[
 ];
 
 List<PlatformMenuItem> createTestMenus({
-  void Function(String)? onSelected,
-  Intent? onSelectedIntent,
-  void Function(String)? onOpen,
-  void Function(String)? onClose,
-  Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
-  bool includeStandard = false,
+  final void Function(String)? onSelected,
+  final Intent? onSelectedIntent,
+  final void Function(String)? onOpen,
+  final void Function(String)? onClose,
+  final Map<String, MenuSerializableShortcut> shortcuts = const <String, MenuSerializableShortcut>{},
+  final bool includeStandard = false,
 }) {
   final List<PlatformMenuItem> result = <PlatformMenuItem>[
     PlatformMenu(
@@ -450,13 +450,13 @@ class FakeMenuChannel implements MethodChannel {
   MethodCodec get codec => const StandardMethodCodec();
 
   @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<List<T>> invokeListMethod<T>(final String method, [final dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
+  Future<Map<K, V>> invokeMapMethod<K, V>(final String method, [final dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(final String method, [final dynamic arguments]) async {
     final MethodCall call = MethodCall(method, arguments);
     outgoingCalls.add(call);
     return await outgoing(call) as T;
@@ -466,5 +466,5 @@ class FakeMenuChannel implements MethodChannel {
   String get name => 'flutter/menu';
 
   @override
-  void setMethodCallHandler(Future<void> Function(MethodCall call)? handler) => incoming = handler;
+  void setMethodCallHandler(final Future<void> Function(MethodCall call)? handler) => incoming = handler;
 }

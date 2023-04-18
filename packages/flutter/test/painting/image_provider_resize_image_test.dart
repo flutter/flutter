@@ -328,8 +328,8 @@ void main() {
       final MemoryImage memoryImage = MemoryImage(bytes);
       final ResizeImage resizeImage = ResizeImage(memoryImage, width: 123, height: 321, allowUpscaling: true);
 
-      Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {ui.TargetImageSizeCallback? getTargetSize}) {
-        return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+      Future<ui.Codec> decode(final ui.ImmutableBuffer buffer, {final ui.TargetImageSizeCallback? getTargetSize}) {
+        return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (final int intrinsicWidth, final int intrinsicHeight) {
           expect(getTargetSize, isNotNull);
           final ui.TargetImageSize targetSize = getTargetSize!(intrinsicWidth, intrinsicHeight);
           expect(targetSize.width, 123);
@@ -348,7 +348,7 @@ void main() {
 
       bool isAsync = false;
       bool keyObtained = false;
-      resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
+      resizeImage.obtainKey(ImageConfiguration.empty).then((final Object key) {
         keyObtained = true;
         expect(isAsync, false);
       });
@@ -364,7 +364,7 @@ void main() {
 
       bool isAsync = false;
       final Completer<void> completer = Completer<void>();
-      resizeImage.obtainKey(ImageConfiguration.empty).then((Object key) {
+      resizeImage.obtainKey(ImageConfiguration.empty).then((final Object key) {
         try {
           expect(isAsync, true);
         } finally {
@@ -378,19 +378,19 @@ void main() {
   });
 }
 
-Future<void> _expectImageSize(ImageProvider<Object> imageProvider, Size size) async {
+Future<void> _expectImageSize(final ImageProvider<Object> imageProvider, final Size size) async {
   final Size actualSize = await _resolveAndGetSize(imageProvider);
   expect(actualSize, size);
 }
 
 Future<Size> _resolveAndGetSize(
-  ImageProvider imageProvider, {
-  ImageConfiguration configuration = ImageConfiguration.empty,
+  final ImageProvider imageProvider, {
+  final ImageConfiguration configuration = ImageConfiguration.empty,
 }) async {
   final ImageStream stream = imageProvider.resolve(configuration);
   final Completer<Size> completer = Completer<Size>();
   final ImageStreamListener listener =
-    ImageStreamListener((ImageInfo image, bool synchronousCall) {
+    ImageStreamListener((final ImageInfo image, final bool synchronousCall) {
       final int height = image.image.height;
       final int width = image.image.width;
       completer.complete(Size(width.toDouble(), height.toDouble()));
@@ -406,7 +406,7 @@ class _AsyncKeyMemoryImage extends MemoryImage {
   const _AsyncKeyMemoryImage(super.bytes);
 
   @override
-  Future<MemoryImage> obtainKey(ImageConfiguration configuration) {
+  Future<MemoryImage> obtainKey(final ImageConfiguration configuration) {
     return Future<MemoryImage>(() => this);
   }
 }

@@ -11,7 +11,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 
-void main(List<String> arguments) {
+void main(final List<String> arguments) {
   print(
     "Usage: find . -type d -name 'android' | dart dev/tools/bin/generate_gradle_lockfiles.dart\n"
     'If you would rather enter the files manually, just run `dart dev/tools/bin/generate_gradle_lockfiles.dart`,\n'
@@ -121,9 +121,9 @@ List<String> getFilesFromStdin() {
 }
 
 void exec(
-  String cmd,
-  List<String> args, {
-  String? workingDirectory,
+  final String cmd,
+  final List<String> args, {
+  final String? workingDirectory,
 }) {
   final ProcessResult result = Process.runSync(cmd, args, workingDirectory: workingDirectory);
   if (result.exitCode != 0) {

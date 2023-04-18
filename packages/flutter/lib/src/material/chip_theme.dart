@@ -83,18 +83,18 @@ class ChipTheme extends InheritedTheme {
   ///
   ///  * [ChipThemeData], which describes the actual configuration of a chip
   ///    theme.
-  static ChipThemeData of(BuildContext context) {
+  static ChipThemeData of(final BuildContext context) {
     final ChipTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<ChipTheme>();
     return inheritedTheme?.data ?? Theme.of(context).chipTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return ChipTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ChipTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ChipTheme oldWidget) => data != oldWidget.data;
 }
 
 /// Holds the color, shape, and text styles for a Material Design chip theme.
@@ -220,7 +220,7 @@ class ChipThemeData with Diagnosticable {
   factory ChipThemeData.fromDefaults({
     Brightness? brightness,
     Color? primaryColor,
-    required Color secondaryColor,
+    required final Color secondaryColor,
     required TextStyle labelStyle,
   }) {
     assert(primaryColor != null || brightness != null, 'One of primaryColor or brightness must be specified');
@@ -433,26 +433,26 @@ class ChipThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ChipThemeData copyWith({
-    Color? backgroundColor,
-    Color? deleteIconColor,
-    Color? disabledColor,
-    Color? selectedColor,
-    Color? secondarySelectedColor,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    Color? selectedShadowColor,
-    bool? showCheckmark,
-    Color? checkmarkColor,
-    EdgeInsetsGeometry? labelPadding,
-    EdgeInsetsGeometry? padding,
-    BorderSide? side,
-    OutlinedBorder? shape,
-    TextStyle? labelStyle,
-    TextStyle? secondaryLabelStyle,
-    Brightness? brightness,
-    double? elevation,
-    double? pressElevation,
-    IconThemeData? iconTheme,
+    final Color? backgroundColor,
+    final Color? deleteIconColor,
+    final Color? disabledColor,
+    final Color? selectedColor,
+    final Color? secondarySelectedColor,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final Color? selectedShadowColor,
+    final bool? showCheckmark,
+    final Color? checkmarkColor,
+    final EdgeInsetsGeometry? labelPadding,
+    final EdgeInsetsGeometry? padding,
+    final BorderSide? side,
+    final OutlinedBorder? shape,
+    final TextStyle? labelStyle,
+    final TextStyle? secondaryLabelStyle,
+    final Brightness? brightness,
+    final double? elevation,
+    final double? pressElevation,
+    final IconThemeData? iconTheme,
   }) {
     return ChipThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -483,7 +483,7 @@ class ChipThemeData with Diagnosticable {
   /// The arguments must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ChipThemeData? lerp(ChipThemeData? a, ChipThemeData? b, double t) {
+  static ChipThemeData? lerp(final ChipThemeData? a, final ChipThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -514,7 +514,7 @@ class ChipThemeData with Diagnosticable {
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments.
-  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+  static BorderSide? _lerpSides(final BorderSide? a, final BorderSide? b, final double t) {
     if (a == null && b == null) {
       return null;
     }
@@ -528,7 +528,7 @@ class ChipThemeData with Diagnosticable {
   }
 
   // TODO(perclasson): OutlinedBorder needs a lerp method - https://github.com/flutter/flutter/issues/60555.
-  static OutlinedBorder? _lerpShapes(OutlinedBorder? a, OutlinedBorder? b, double t) {
+  static OutlinedBorder? _lerpShapes(final OutlinedBorder? a, final OutlinedBorder? b, final double t) {
     if (a == null && b == null) {
       return null;
     }
@@ -560,7 +560,7 @@ class ChipThemeData with Diagnosticable {
   ]);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -591,7 +591,7 @@ class ChipThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: null));

@@ -81,7 +81,7 @@ void main() {
   });
 }
 
-Directory _flutterRootFromDartBinary(File dartBinary) {
+Directory _flutterRootFromDartBinary(final File dartBinary) {
   final Directory flutterDartSdkDir = dartBinary.parent.parent;
   final Directory flutterCache = flutterDartSdkDir.parent;
   final Directory flutterSdkDir = flutterCache.parent.parent;

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'restoration.dart';
 
 void main() {
-  testWidgets('claims bucket', (WidgetTester tester) async {
+  testWidgets('claims bucket', (final WidgetTester tester) async {
     const String id = 'hello world 1234';
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = <String, dynamic>{};
@@ -35,7 +35,7 @@ void main() {
     expect(state.restoreStateLog.single, isNull);
   });
 
-  testWidgets('claimed bucket with data', (WidgetTester tester) async {
+  testWidgets('claimed bucket with data', (final WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
@@ -57,7 +57,7 @@ void main() {
     expect(state.restoreStateLog.single, isNull);
   });
 
-  testWidgets('renames existing bucket when new ID is provided via widget', (WidgetTester tester) async {
+  testWidgets('renames existing bucket when new ID is provided via widget', (final WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
@@ -99,7 +99,7 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('renames existing bucket when didUpdateRestorationId is called', (WidgetTester tester) async {
+  testWidgets('renames existing bucket when didUpdateRestorationId is called', (final WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: _createRawDataSet());
 
@@ -134,7 +134,7 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('Disposing widget removes its data', (WidgetTester tester) async {
+  testWidgets('Disposing widget removes its data', (final WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
@@ -162,7 +162,7 @@ void main() {
     expect((rawData[childrenMapKey] as Map<String, dynamic>).containsKey('child1'), isFalse);
   });
 
-  testWidgets('toggling id between null and non-null', (WidgetTester tester) async {
+  testWidgets('toggling id between null and non-null', (final WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
@@ -222,7 +222,7 @@ void main() {
     expect(state.toggleBucketLog.single, same(bucket));
   });
 
-  testWidgets('move in and out of scope', (WidgetTester tester) async {
+  testWidgets('move in and out of scope', (final WidgetTester tester) async {
     final Key key = GlobalKey();
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = _createRawDataSet();
@@ -284,7 +284,7 @@ void main() {
     expect(state.toggleBucketLog.single, same(bucket));
   });
 
-  testWidgets('moving scope moves its data', (WidgetTester tester) async {
+  testWidgets('moving scope moves its data', (final WidgetTester tester) async {
     final MockRestorationManager manager = MockRestorationManager();
     final Map<String, dynamic> rawData = <String, dynamic>{};
     final RestorationBucket root = RestorationBucket.root(manager: manager, rawData: rawData);
@@ -349,7 +349,7 @@ void main() {
     expect((rawData[childrenMapKey] as Map<Object?, Object?>).containsKey('moving-child'), isTrue);
   });
 
-  testWidgets('restartAndRestore', (WidgetTester tester) async {
+  testWidgets('restartAndRestore', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -388,7 +388,7 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('restore while running', (WidgetTester tester) async {
+  testWidgets('restore while running', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -427,7 +427,7 @@ void main() {
     expect(state.toggleBucketLog, isEmpty);
   });
 
-  testWidgets('can register additional property outside of restoreState', (WidgetTester tester) async {
+  testWidgets('can register additional property outside of restoreState', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -464,7 +464,7 @@ void main() {
     expect(state.property.log, <String>['fromPrimitives', 'initWithValue']);
   });
 
-  testWidgets('cannot register same property twice', (WidgetTester tester) async {
+  testWidgets('cannot register same property twice', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -480,7 +480,7 @@ void main() {
     expect(() => state.registerAdditionalProperty(), throwsAssertionError);
   });
 
-  testWidgets('cannot register under ID that is already in use', (WidgetTester tester) async {
+  testWidgets('cannot register under ID that is already in use', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -494,7 +494,7 @@ void main() {
     expect(() => state.registerPropertyUnderSameId(), throwsAssertionError);
   });
 
-  testWidgets('data of disabled property is not stored', (WidgetTester tester) async {
+  testWidgets('data of disabled property is not stored', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -534,7 +534,7 @@ void main() {
     expect(state.property.value, 10); // Initialized to default value.
   });
 
-  testWidgets('Enabling property stores its data again', (WidgetTester tester) async {
+  testWidgets('Enabling property stores its data again', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -572,7 +572,7 @@ void main() {
     expect(state.property.value, 40);
   });
 
-  testWidgets('Unregistering a property removes its data', (WidgetTester tester) async {
+  testWidgets('Unregistering a property removes its data', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -598,7 +598,7 @@ void main() {
     expect(state.bucket!.read<int>('additional'), 11);
   });
 
-  testWidgets('Disposing a property unregisters it, but keeps data', (WidgetTester tester) async {
+  testWidgets('Disposing a property unregisters it, but keeps data', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -633,7 +633,7 @@ void main() {
   });
 }
 
-void _clearLogs(_TestRestorableWidgetState state) {
+void _clearLogs(final _TestRestorableWidgetState state) {
   state.property.log.clear();
   state.additionalProperty?.log.clear();
   state.restoreStateLog.clear();
@@ -659,7 +659,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   final List<RestorationBucket?> toggleBucketLog = <RestorationBucket?>[];
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     restoreStateLog.add(oldBucket);
     registerForRestoration(property, 'foo');
     if (_rerigisterAdditionalProperty && additionalProperty != null) {
@@ -668,7 +668,7 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   }
 
   @override
-  void didToggleBucket(RestorationBucket? oldBucket) {
+  void didToggleBucket(final RestorationBucket? oldBucket) {
     toggleBucketLog.add(oldBucket);
     super.didToggleBucket(oldBucket);
   }
@@ -681,19 +681,19 @@ class _TestRestorableWidgetState extends State<_TestRestorableWidget> with Resto
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 
-  void setProperties(VoidCallback fn) => setState(fn);
+  void setProperties(final VoidCallback fn) => setState(fn);
 
   String? _injectedId;
-  void injectId(String id) {
+  void injectId(final String id) {
     _injectedId = id;
     didUpdateRestorationId();
   }
 
-  void registerAdditionalProperty({bool reregister = true}) {
+  void registerAdditionalProperty({final bool reregister = true}) {
     additionalProperty ??= _TestRestorableProperty(11);
     registerForRestoration(additionalProperty!, 'additional');
     _rerigisterAdditionalProperty = reregister;
@@ -740,7 +740,7 @@ class _TestRestorableProperty extends RestorableProperty<Object?> {
   @override
   bool get enabled => _enabled;
   bool _enabled = true;
-  set enabled(bool value) {
+  set enabled(final bool value) {
     _enabled = value;
     notifyListeners();
   }
@@ -752,7 +752,7 @@ class _TestRestorableProperty extends RestorableProperty<Object?> {
   }
 
   @override
-  Object? fromPrimitives(Object? data) {
+  Object? fromPrimitives(final Object? data) {
     log.add('fromPrimitives');
     return data;
   }
@@ -762,13 +762,13 @@ class _TestRestorableProperty extends RestorableProperty<Object?> {
     return _value;
   }
   Object? _value;
-  set value(Object? value) {
+  set value(final Object? value) {
     _value = value;
     notifyListeners();
   }
 
   @override
-  void initWithValue(Object? v) {
+  void initWithValue(final Object? v) {
     log.add('initWithValue');
     _value = v;
   }

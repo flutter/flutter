@@ -69,7 +69,7 @@ Future<String> getGtkKeyCodes() async {
   return http.read(keyCodesUri);
 }
 
-String readDataFile(String fileName) {
+String readDataFile(final String fileName) {
   return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
@@ -82,7 +82,7 @@ bool _assertsEnabled() {
   return enabledAsserts;
 }
 
-Future<void> generate(String name, String outDir, BaseCodeGenerator generator) {
+Future<void> generate(final String name, final String outDir, final BaseCodeGenerator generator) {
   final File codeFile = File(outDir);
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
@@ -91,7 +91,7 @@ Future<void> generate(String name, String outDir, BaseCodeGenerator generator) {
   return codeFile.writeAsString(generator.generate());
 }
 
-Future<void> main(List<String> rawArguments) async {
+Future<void> main(final List<String> rawArguments) async {
   if (!_assertsEnabled()) {
     print('The gen_keycodes script must be run with --enable-asserts.');
     return;
@@ -265,7 +265,7 @@ Future<void> main(List<String> rawArguments) async {
       readDataFile('web_logical_location_mapping.json'),
     ),
   };
-  await Future.wait(platforms.entries.map((MapEntry<String, PlatformCodeGenerator> entry) {
+  await Future.wait(platforms.entries.map((final MapEntry<String, PlatformCodeGenerator> entry) {
     final String platform = entry.key;
     final PlatformCodeGenerator codeGenerator = entry.value;
     return generate('$platform map',

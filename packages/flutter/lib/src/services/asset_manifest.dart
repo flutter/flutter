@@ -15,7 +15,7 @@ const String _kAssetManifestFilename = 'AssetManifest.bin';
 abstract class AssetManifest {
   /// Loads asset manifest data from an [AssetBundle] object and creates an
   /// [AssetManifest] object from that data.
-  static Future<AssetManifest> loadFromAssetBundle(AssetBundle bundle) {
+  static Future<AssetManifest> loadFromAssetBundle(final AssetBundle bundle) {
     return bundle.loadStructuredBinaryData(_kAssetManifestFilename, _AssetManifestBin.fromStandardMessageCodecMessage);
   }
 
@@ -35,7 +35,7 @@ abstract class AssetManifest {
   ///
   /// This method considers a main asset to be a variant of itself and
   /// includes it in the returned list.
-  List<AssetMetadata>? getAssetVariants(String key);
+  List<AssetMetadata>? getAssetVariants(final String key);
 }
 
 // Lazily parses the binary asset manifest into a data structure that's easier to work
@@ -51,9 +51,9 @@ abstract class AssetManifest {
 // New fields could be added to this object schema to support new asset variation
 // features, such as themes, locale/region support, reading directions, and so on.
 class _AssetManifestBin implements AssetManifest {
-  _AssetManifestBin(Map<Object?, Object?> standardMessageData): _data = standardMessageData;
+  _AssetManifestBin(final Map<Object?, Object?> standardMessageData): _data = standardMessageData;
 
-  factory _AssetManifestBin.fromStandardMessageCodecMessage(ByteData message) {
+  factory _AssetManifestBin.fromStandardMessageCodecMessage(final ByteData message) {
     final dynamic data = const StandardMessageCodec().decodeMessage(message);
     return _AssetManifestBin(data as Map<Object?, Object?>);
   }
@@ -62,7 +62,7 @@ class _AssetManifestBin implements AssetManifest {
   final Map<String, List<AssetMetadata>> _typeCastedData = <String, List<AssetMetadata>>{};
 
   @override
-  List<AssetMetadata>? getAssetVariants(String key) {
+  List<AssetMetadata>? getAssetVariants(final String key) {
     // We lazily delay typecasting to prevent a performance hiccup when parsing
     // large asset manifests. This is important to keep an app's first asset
     // load fast.
@@ -73,7 +73,7 @@ class _AssetManifestBin implements AssetManifest {
       }
       _typeCastedData[key] = ((_data[key] ?? <Object?>[]) as Iterable<Object?>)
         .cast<Map<Object?, Object?>>()
-        .map((Map<Object?, Object?> data) => AssetMetadata(
+        .map((final Map<Object?, Object?> data) => AssetMetadata(
             key: data['asset']! as String,
             targetDevicePixelRatio: data['dpr']! as double,
             main: false,

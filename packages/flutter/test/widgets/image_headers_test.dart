@@ -13,7 +13,7 @@ import '../image_data.dart';
 void main() {
   final MockHttpClient client = MockHttpClient();
 
-  testWidgets('Headers', (WidgetTester tester) async {
+  testWidgets('Headers', (final WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
       await tester.pumpWidget(Image.network(
         'https://www.example.com/images/frame.png',
@@ -22,7 +22,7 @@ void main() {
 
       expect(MockHttpHeaders.headers['flutter'], <String>['flutter']);
 
-    }, createHttpClient: (SecurityContext? _) {
+    }, createHttpClient: (final SecurityContext? _) {
       return client;
     });
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/57187
@@ -30,7 +30,7 @@ void main() {
 
 class MockHttpClient extends Fake implements HttpClient {
   @override
-  Future<HttpClientRequest> getUrl(Uri url) async {
+  Future<HttpClientRequest> getUrl(final Uri url) async {
     return MockHttpClientRequest();
   }
 
@@ -59,7 +59,7 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
   HttpClientResponseCompressionState get compressionState => HttpClientResponseCompressionState.decompressed;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<List<int>> listen(final void Function(List<int> event)? onData, {final Function? onError, final void Function()? onDone, final bool? cancelOnError}) {
     return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(
       onData,
       onDone: onDone,
@@ -73,7 +73,7 @@ class MockHttpHeaders extends Fake implements HttpHeaders {
   static final Map<String, List<String>> headers = <String, List<String>>{};
 
   @override
-  void add(String key, Object value, { bool preserveHeaderCase = false }) {
+  void add(final String key, final Object value, { final bool preserveHeaderCase = false }) {
     headers[key] ??= <String>[];
     headers[key]!.add(value.toString());
   }

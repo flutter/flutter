@@ -13,7 +13,7 @@ export 'keyboard_key.g.dart' show LogicalKeyboardKey, PhysicalKeyboardKey;
 export 'raw_keyboard.dart' show KeyboardSide, ModifierKey;
 
 /// Convert a UTF32 rune to its lower case.
-int runeToLowerCase(int rune) {
+int runeToLowerCase(final int rune) {
   // Assume only Basic Multilingual Plane runes have lower and upper cases.
   // For other characters, return them as is.
   const int utf16BmpUpperBound = 0xD7FF;
@@ -136,7 +136,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     return LogicalKeyboardKey(keyCode | LogicalKeyboardKey.macosPlane);
   }
 
-  bool _isLeftRightModifierPressed(KeyboardSide side, int anyMask, int leftMask, int rightMask) {
+  bool _isLeftRightModifierPressed(final KeyboardSide side, final int anyMask, final int leftMask, final int rightMask) {
     if (modifiers & anyMask == 0) {
       return false;
     }
@@ -158,7 +158,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   }
 
   @override
-  bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
+  bool isModifierPressed(final ModifierKey key, {final KeyboardSide side = KeyboardSide.any}) {
     final int independentModifier = modifiers & deviceIndependentMask;
     final bool result;
     switch (key) {
@@ -188,8 +188,8 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   }
 
   @override
-  KeyboardSide? getModifierSide(ModifierKey key) {
-    KeyboardSide? findSide(int anyMask, int leftMask, int rightMask) {
+  KeyboardSide? getModifierSide(final ModifierKey key) {
+    KeyboardSide? findSide(final int anyMask, final int leftMask, final int rightMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
@@ -236,7 +236,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<String>('characters', characters));
     properties.add(DiagnosticsProperty<String>('charactersIgnoringModifiers', charactersIgnoringModifiers));
@@ -246,7 +246,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   }
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -277,7 +277,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// information.
   ///
   /// Used by [RawKeyEvent] subclasses to help construct IDs.
-  static bool _isUnprintableKey(String label) {
+  static bool _isUnprintableKey(final String label) {
     if (label.length != 1) {
       return false;
     }

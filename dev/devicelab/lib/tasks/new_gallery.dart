@@ -12,9 +12,9 @@ import 'perf_tests.dart';
 class NewGalleryPerfTest extends PerfTest {
   NewGalleryPerfTest(
     this.galleryDir, {
-    String timelineFileName = 'transitions',
-    String dartDefine = '',
-    bool enableImpeller = false,
+    final String timelineFileName = 'transitions',
+    final String dartDefine = '',
+    final bool enableImpeller = false,
     super.timeoutSeconds,
   }) : super(
     galleryDir.path,

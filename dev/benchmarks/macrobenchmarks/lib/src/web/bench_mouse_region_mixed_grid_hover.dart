@@ -20,11 +20,11 @@ class _NestedMouseRegion extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget current = child;
     for (int i = 0; i < nests; i++) {
       current = MouseRegion(
-        onEnter: (_) {},
+        onEnter: (final _) {},
         child: child,
       );
     }
@@ -39,11 +39,11 @@ class _NestedListener extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget current = child;
     for (int i = 0; i < nests; i++) {
       current = Listener(
-        onPointerDown: (_) {},
+        onPointerDown: (final _) {},
         child: child,
       );
     }
@@ -63,12 +63,12 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
 
   late _Tester _tester;
 
-  void handleDataPoint(Duration duration) {
+  void handleDataPoint(final Duration duration) {
     profile!.addDataPoint('hitTestDuration', duration, reported: true);
   }
 
   // Use a non-trivial border to force Web to switch painter
-  Border _getBorder(int columnIndex, int rowIndex) {
+  Border _getBorder(final int columnIndex, final int rowIndex) {
     const BorderSide defaultBorderSide = BorderSide();
 
     return Border(
@@ -85,7 +85,7 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
   void frameDidDraw() {
     if (!started) {
       started = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) async {
+      SchedulerBinding.instance.addPostFrameCallback((final Duration timeStamp) async {
         _tester.start();
         registerDidStop(_tester.stop);
       });
@@ -109,12 +109,12 @@ class BenchMouseRegionMixedGridHover extends WidgetRecorder {
             itemCount: rowsCount,
             cacheExtent: rowsCount * containerSize,
             physics: const ClampingScrollPhysics(),
-            itemBuilder: (BuildContext context, int rowIndex) => _NestedMouseRegion(
+            itemBuilder: (final BuildContext context, final int rowIndex) => _NestedMouseRegion(
               nests: 10,
               child: Row(
                 children: List<Widget>.generate(
                   columnsCount,
-                  (int columnIndex) => _NestedListener(
+                  (final int columnIndex) => _NestedListener(
                     nests: 40,
                     child: _NestedMouseRegion(
                       nests: 10,
@@ -146,7 +146,7 @@ class _UntilNextFrame {
   static Future<void> wait() {
     if (_UntilNextFrame._completer == null) {
       _UntilNextFrame._completer = Completer<void>();
-      SchedulerBinding.instance.addPostFrameCallback((_) {
+      SchedulerBinding.instance.addPostFrameCallback((final _) {
         _UntilNextFrame._completer!.complete(null);
         _UntilNextFrame._completer = null;
       });
@@ -166,7 +166,7 @@ class _Tester {
 
   TestGesture get gesture {
     return _gesture ??= TestGesture(
-      dispatcher: (PointerEvent event) async {
+      dispatcher: (final PointerEvent event) async {
         RendererBinding.instance.handlePointerEvent(event);
       },
       kind: PointerDeviceKind.mouse,
@@ -176,7 +176,7 @@ class _Tester {
 
   Duration currentTime = Duration.zero;
 
-  Future<void> _hoverTo(Offset location, Duration duration) async {
+  Future<void> _hoverTo(final Offset location, final Duration duration) async {
     currentTime += duration;
     final Stopwatch stopwatch = Stopwatch()..start();
     await gesture.moveTo(location, timeStamp: currentTime);

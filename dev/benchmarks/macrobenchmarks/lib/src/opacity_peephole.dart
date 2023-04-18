@@ -15,7 +15,7 @@ class OpacityPeepholePage extends StatelessWidget {
   const OpacityPeepholePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Opacity Peephole tests')),
       body: ListView(
@@ -38,30 +38,30 @@ class OpacityPeepholePage extends StatelessWidget {
 typedef ValueBuilder = Widget Function(double v);
 typedef AnimationBuilder = Widget Function(Animation<double> animation);
 
-double _opacity(double v) => v * 0.5 + 0.25;
-int _red(double v) => (v * 255).round();
-int _green(double v) => _red(1 - v);
-int _blue(double v) => 0;
+double _opacity(final double v) => v * 0.5 + 0.25;
+int _red(final double v) => (v * 255).round();
+int _green(final double v) => _red(1 - v);
+int _blue(final double v) => 0;
 
 class OpacityPeepholeCase {
-  OpacityPeepholeCase.forValue({required String route, required String name, required ValueBuilder builder})
+  OpacityPeepholeCase.forValue({required final String route, required final String name, required final ValueBuilder builder})
       : this.forAnimation(
     route: route,
     name: name,
-    builder: (Animation<double> animation) => AnimatedBuilder(
+    builder: (final Animation<double> animation) => AnimatedBuilder(
       animation: animation,
-      builder: (BuildContext context, Widget? child) => builder(animation.value),
+      builder: (final BuildContext context, final Widget? child) => builder(animation.value),
     ),
   );
 
-  OpacityPeepholeCase.forAnimation({required this.route, required this.name, required AnimationBuilder builder})
+  OpacityPeepholeCase.forAnimation({required this.route, required this.name, required final AnimationBuilder builder})
       : animationBuilder = builder;
 
   final String route;
   final String name;
   final AnimationBuilder animationBuilder;
 
-  Widget buildPage(BuildContext context) {
+  Widget buildPage(final BuildContext context) {
     return VariantPage(variant: this);
   }
 }
@@ -71,7 +71,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOneRectRouteName,
     name: 'One Big Rectangle',
-    builder: (double v) {
+    builder: (final double v) {
       return Opacity(
         opacity: _opacity(v),
         child: Container(
@@ -110,7 +110,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   OpacityPeepholeCase.forValue(
       route: kOpacityPeepholeOpacityOfCachedChildRouteName,
       name: 'Opacity of Cached Child',
-      builder: (double v) {
+      builder: (final double v) {
         // ChildV starts as a constant so the same color pattern always appears and the child will be cached
         double childV = 0;
         return Opacity(
@@ -166,7 +166,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeGridOfOpacityRouteName,
     name: 'Grid of Opacity',
-    builder: (double v) {
+    builder: (final double v) {
       double rowV = v;
       double colV = rowV;
       return Column(
@@ -199,7 +199,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOpacityOfGridRouteName,
     name: 'Opacity of Grid',
-    builder: (double v) {
+    builder: (final double v) {
       double rowV = v;
       double colV = rowV;
       return Opacity(
@@ -231,7 +231,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   OpacityPeepholeCase.forValue(
     route: kOpacityPeepholeOpacityOfColOfRowsRouteName,
     name: 'Opacity of Column of Rows',
-    builder: (double v) {
+    builder: (final double v) {
       double rowV = v;
       double colV = v;
       return Opacity(
@@ -271,7 +271,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
   OpacityPeepholeCase.forAnimation(
     route: kOpacityPeepholeFadeTransitionTextRouteName,
     name: 'FadeTransition text',
-    builder: (Animation<double> animation) {
+    builder: (final Animation<double> animation) {
       return FadeTransition(
         opacity: Tween<double>(begin: 0.25, end: 0.75).animate(animation),
         child: const SizedBox(
@@ -294,7 +294,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         opacity: _opacity(v),
         child: SizedBox.expand(
           child: CustomPaint(
-            painter: RectGridPainter((Canvas canvas, Size size) {
+            painter: RectGridPainter((final Canvas canvas, final Size size) {
               const int numRows = 10;
               const int numCols = 7;
               const double rectWidth = 30;
@@ -329,7 +329,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         opacity: _opacity(v),
         child: SizedBox.expand(
           child: CustomPaint(
-            painter: RectGridPainter((Canvas canvas, Size size) {
+            painter: RectGridPainter((final Canvas canvas, final Size size) {
               const int numRows = 10;
               const int numCols = 7;
               const double rectWidth = 30;
@@ -368,7 +368,7 @@ List<OpacityPeepholeCase> allOpacityPeepholeCases = <OpacityPeepholeCase>[
         opacity: _opacity(v),
         child: SizedBox.expand(
           child: CustomPaint(
-            painter: RectGridPainter((Canvas canvas, Size size) {
+            painter: RectGridPainter((final Canvas canvas, final Size size) {
               const int numRows = 10;
               const int numCols = 7;
               const double rectWidth = 30;
@@ -407,10 +407,10 @@ class RectGridPainter extends CustomPainter {
   final void Function(Canvas canvas, Size size) painter;
 
   @override
-  void paint(Canvas canvas, Size size) => painter(canvas, size);
+  void paint(final Canvas canvas, final Size size) => painter(canvas, size);
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(final CustomPainter oldDelegate) => true;
 }
 
 Map<String, WidgetBuilder> opacityPeepholeRoutes = <String, WidgetBuilder>{
@@ -446,7 +446,7 @@ class VariantPageState extends State<VariantPage> with SingleTickerProviderState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.variant.name),

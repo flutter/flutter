@@ -59,7 +59,7 @@ import 'src/web/web_runner.dart';
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
-Future<void> main(List<String> args) async {
+Future<void> main(final List<String> args) async {
   final bool veryVerbose = args.contains('-vv');
   final bool verbose = args.contains('-v') || args.contains('--verbose') || veryVerbose;
   final bool prefixedErrors = args.contains('--prefixed-errors');
@@ -132,8 +132,8 @@ Future<void> main(List<String> args) async {
 }
 
 List<FlutterCommand> generateCommands({
-  required bool verboseHelp,
-  required bool verbose,
+  required final bool verboseHelp,
+  required final bool verbose,
 }) => <FlutterCommand>[
   AnalyzeCommand(
     verboseHelp: verboseHelp,
@@ -240,10 +240,10 @@ List<FlutterCommand> generateCommands({
 /// Our logger class hierarchy and runtime requirements are overly complicated.
 class LoggerFactory {
   LoggerFactory({
-    required Terminal terminal,
-    required Stdio stdio,
-    required OutputPreferences outputPreferences,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    required final Terminal terminal,
+    required final Stdio stdio,
+    required final OutputPreferences outputPreferences,
+    final StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _terminal = terminal,
        _stdio = stdio,
        _stopwatchFactory = stopwatchFactory,
@@ -256,11 +256,11 @@ class LoggerFactory {
 
   /// Create the appropriate logger for the current platform and configuration.
   Logger createLogger({
-    required bool verbose,
-    required bool prefixedErrors,
-    required bool machine,
-    required bool daemon,
-    required bool windows,
+    required final bool verbose,
+    required final bool prefixedErrors,
+    required final bool machine,
+    required final bool daemon,
+    required final bool windows,
   }) {
     Logger logger;
     if (windows) {

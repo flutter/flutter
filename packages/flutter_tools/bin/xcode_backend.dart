@@ -4,7 +4,7 @@
 
 import 'dart:io';
 
-void main(List<String> arguments) {
+void main(final List<String> arguments) {
   File? scriptOutputStreamFile;
   final String? scriptOutputStreamFileEnv = Platform.environment['SCRIPT_OUTPUT_STREAM_FILE'];
   if (scriptOutputStreamFileEnv != null && scriptOutputStreamFileEnv.isNotEmpty) {
@@ -25,7 +25,7 @@ class Context {
   Context({
     required this.arguments,
     required this.environment,
-    File? scriptOutputStreamFile,
+    final File? scriptOutputStreamFile,
   }) {
     if (scriptOutputStreamFile != null) {
       scriptOutputStream = scriptOutputStreamFile.openSync(mode: FileMode.write);
@@ -63,12 +63,12 @@ class Context {
     }
   }
 
-  bool existsDir(String path) {
+  bool existsDir(final String path) {
     final Directory dir = Directory(path);
     return dir.existsSync();
   }
 
-  bool existsFile(String path) {
+  bool existsFile(final String path) {
     final File file = File(path);
     return file.existsSync();
   }
@@ -77,11 +77,11 @@ class Context {
   ///
   /// Will throw [Exception] if the exit code is not 0.
   ProcessResult runSync(
-    String bin,
-    List<String> args, {
-    bool verbose = false,
-    bool allowFail = false,
-    String? workingDirectory,
+    final String bin,
+    final List<String> args, {
+    final bool verbose = false,
+    final bool allowFail = false,
+    final String? workingDirectory,
   }) {
     if (verbose) {
       print('♦ $bin ${args.join(' ')}');
@@ -113,24 +113,24 @@ class Context {
   }
 
   /// Log message to stderr.
-  void echoError(String message) {
+  void echoError(final String message) {
     stderr.writeln(message);
   }
 
   /// Log message to stdout.
-  void echo(String message) {
+  void echo(final String message) {
     stdout.write(message);
   }
 
   /// Exit the application with the given exit code.
   ///
   /// Exists to allow overriding in tests.
-  Never exitApp(int code) {
+  Never exitApp(final int code) {
     exit(code);
   }
 
   /// Return value from environment if it exists, else throw [Exception].
-  String environmentEnsure(String key) {
+  String environmentEnsure(final String key) {
     final String? value = environment[key];
     if (value == null) {
       throw Exception(
@@ -142,7 +142,7 @@ class Context {
 
   // When provided with a pipe by the host Flutter build process, output to the
   // pipe goes to stdout of the Flutter build process directly.
-  void streamOutput(String output) {
+  void streamOutput(final String output) {
     scriptOutputStream?.writeStringSync('$output\n');
   }
 

@@ -10,7 +10,7 @@ import 'package:manual_tests/color_testing_demo.dart' as color_testing_demo;
 import 'mock_image_http.dart';
 
 void main() {
-  testWidgets('Color testing demo smoke test', (WidgetTester tester) async {
+  testWidgets('Color testing demo smoke test', (final WidgetTester tester) async {
     HttpOverrides.runZoned<Future<void>>(() async {
       color_testing_demo.main(); // builds the app and schedules a frame but doesn't trigger one
       await tester.pump(); // see https://github.com/flutter/flutter/issues/1865

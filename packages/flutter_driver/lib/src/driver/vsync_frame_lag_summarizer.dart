@@ -35,13 +35,13 @@ class VsyncFrameLagSummarizer {
       return 0;
     }
 
-    final double total = vsyncFrameLags.reduce((double a, double b) => a + b);
+    final double total = vsyncFrameLags.reduce((final double a, final double b) => a + b);
     return total / vsyncFrameLags.length;
   }
 
   /// Computes the [percentile]-th percentile `VsyncFrameLag` over the
   /// period of the timeline.
-  double computePercentileVsyncFrameLag(double percentile) {
+  double computePercentileVsyncFrameLag(final double percentile) {
     final List<double> vsyncFrameLags =
         _computePlatformToFlutterVsyncBeginLags();
     if (vsyncFrameLags.isEmpty) {

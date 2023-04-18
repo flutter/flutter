@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Spacer takes up space.', (WidgetTester tester) async {
+  testWidgets('Spacer takes up space.', (final WidgetTester tester) async {
     await tester.pumpWidget(const Column(
       children: <Widget>[
         SizedBox(width: 10.0, height: 10.0),
@@ -19,7 +19,7 @@ void main() {
     expect(spacerRect.topLeft, const Offset(400.0, 10.0));
   });
 
-  testWidgets('Spacer takes up space proportional to flex.', (WidgetTester tester) async {
+  testWidgets('Spacer takes up space proportional to flex.', (final WidgetTester tester) async {
     const Spacer spacer1 = Spacer();
     const Spacer spacer2 = Spacer();
     const Spacer spacer3 = Spacer(flex: 2);
@@ -53,7 +53,7 @@ void main() {
     expect(spacer4Rect.left, moreOrLessEquals(10.0, epsilon: 0.1));
   });
 
-  testWidgets('Spacer takes up space.', (WidgetTester tester) async {
+  testWidgets('Spacer takes up space.', (final WidgetTester tester) async {
     await tester.pumpWidget(const UnconstrainedBox(
       constrainedAxis: Axis.vertical,
       child: Column(

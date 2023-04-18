@@ -12,7 +12,7 @@ class MaterialStateBorderSideExampleApp extends StatelessWidget {
   const MaterialStateBorderSideExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MaterialStateBorderSide Sample')),
@@ -35,16 +35,16 @@ class _MaterialStateBorderSideExampleState extends State<MaterialStateBorderSide
   bool isSelected = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FilterChip(
       label: const Text('Select chip'),
       selected: isSelected,
-      onSelected: (bool value) {
+      onSelected: (final bool value) {
         setState(() {
           isSelected = value;
         });
       },
-      side: MaterialStateBorderSide.resolveWith((Set<MaterialState> states) {
+      side: MaterialStateBorderSide.resolveWith((final Set<MaterialState> states) {
         if (states.contains(MaterialState.selected)) {
           return const BorderSide(color: Colors.red);
         }

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ClampingScrollSimulation has a stable initial conditions', () {
-    void checkInitialConditions(double position, double velocity) {
+    void checkInitialConditions(final double position, final double velocity) {
       final ClampingScrollSimulation simulation = ClampingScrollSimulation(position: position, velocity: velocity);
       expect(simulation.x(0.0), moreOrLessEquals(position));
       expect(simulation.dx(0.0), moreOrLessEquals(velocity));
@@ -117,21 +117,21 @@ void main() {
     // The rate of deceleration when dx(time) == referenceVelocity.
     final double referenceDeceleration = (kDecelerationRate - 1) * referenceVelocity / referenceDuration;
 
-    double acceleration(double velocity) {
+    double acceleration(final double velocity) {
       return - velocity.sign
                  * referenceDeceleration *
                  math.pow(velocity.abs() / referenceVelocity,
                           (kDecelerationRate - 2) / (kDecelerationRate - 1));
     }
 
-    double jerk(double velocity) {
+    double jerk(final double velocity) {
       return referenceVelocity / referenceDuration / referenceDuration
                * (kDecelerationRate - 1) * (kDecelerationRate - 2)
                * math.pow(velocity.abs() / referenceVelocity,
                           (kDecelerationRate - 3) / (kDecelerationRate - 1));
     }
 
-    void checkAcceleration(double position, double velocity) {
+    void checkAcceleration(final double position, final double velocity) {
       final ClampingScrollSimulation simulation =
           ClampingScrollSimulation(position: position, velocity: velocity);
       double time = 0.0;

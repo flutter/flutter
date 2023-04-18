@@ -39,7 +39,7 @@ abstract class AlignmentGeometry {
   /// this is not reflected in the type system). Otherwise, an object
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [Alignment] using [resolve].
-  AlignmentGeometry add(AlignmentGeometry other) {
+  AlignmentGeometry add(final AlignmentGeometry other) {
     return _MixedAlignment(
       _x + other._x,
       _start + other._start,
@@ -57,22 +57,22 @@ abstract class AlignmentGeometry {
   /// Scales the [AlignmentGeometry] object in each dimension by the given factor.
   ///
   /// This operator returns an object of the same type as the operand.
-  AlignmentGeometry operator *(double other);
+  AlignmentGeometry operator *(final double other);
 
   /// Divides the [AlignmentGeometry] object in each dimension by the given factor.
   ///
   /// This operator returns an object of the same type as the operand.
-  AlignmentGeometry operator /(double other);
+  AlignmentGeometry operator /(final double other);
 
   /// Integer divides the [AlignmentGeometry] object in each dimension by the given factor.
   ///
   /// This operator returns an object of the same type as the operand.
-  AlignmentGeometry operator ~/(double other);
+  AlignmentGeometry operator ~/(final double other);
 
   /// Computes the remainder in each dimension by the given factor.
   ///
   /// This operator returns an object of the same type as the operand.
-  AlignmentGeometry operator %(double other);
+  AlignmentGeometry operator %(final double other);
 
   /// Linearly interpolate between two [AlignmentGeometry] objects.
   ///
@@ -86,7 +86,7 @@ abstract class AlignmentGeometry {
   /// into a concrete [Alignment] using [resolve].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static AlignmentGeometry? lerp(AlignmentGeometry? a, AlignmentGeometry? b, double t) {
+  static AlignmentGeometry? lerp(final AlignmentGeometry? a, final AlignmentGeometry? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -118,7 +118,7 @@ abstract class AlignmentGeometry {
   ///  * [Alignment], for which this is a no-op (returns itself).
   ///  * [AlignmentDirectional], which flips the horizontal direction
   ///    based on the `direction` argument.
-  Alignment resolve(TextDirection? direction);
+  Alignment resolve(final TextDirection? direction);
 
   @override
   String toString() {
@@ -132,7 +132,7 @@ abstract class AlignmentGeometry {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is AlignmentGeometry
         && other._x == _x
         && other._start == _start
@@ -243,7 +243,7 @@ class Alignment extends AlignmentGeometry {
   static const Alignment bottomRight = Alignment(1.0, 1.0);
 
   @override
-  AlignmentGeometry add(AlignmentGeometry other) {
+  AlignmentGeometry add(final AlignmentGeometry other) {
     if (other is Alignment) {
       return this + other;
     }
@@ -251,12 +251,12 @@ class Alignment extends AlignmentGeometry {
   }
 
   /// Returns the difference between two [Alignment]s.
-  Alignment operator -(Alignment other) {
+  Alignment operator -(final Alignment other) {
     return Alignment(x - other.x, y - other.y);
   }
 
   /// Returns the sum of two [Alignment]s.
-  Alignment operator +(Alignment other) {
+  Alignment operator +(final Alignment other) {
     return Alignment(x + other.x, y + other.y);
   }
 
@@ -268,44 +268,44 @@ class Alignment extends AlignmentGeometry {
 
   /// Scales the [Alignment] in each dimension by the given factor.
   @override
-  Alignment operator *(double other) {
+  Alignment operator *(final double other) {
     return Alignment(x * other, y * other);
   }
 
   /// Divides the [Alignment] in each dimension by the given factor.
   @override
-  Alignment operator /(double other) {
+  Alignment operator /(final double other) {
     return Alignment(x / other, y / other);
   }
 
   /// Integer divides the [Alignment] in each dimension by the given factor.
   @override
-  Alignment operator ~/(double other) {
+  Alignment operator ~/(final double other) {
     return Alignment((x ~/ other).toDouble(), (y ~/ other).toDouble());
   }
 
   /// Computes the remainder in each dimension by the given factor.
   @override
-  Alignment operator %(double other) {
+  Alignment operator %(final double other) {
     return Alignment(x % other, y % other);
   }
 
   /// Returns the offset that is this fraction in the direction of the given offset.
-  Offset alongOffset(Offset other) {
+  Offset alongOffset(final Offset other) {
     final double centerX = other.dx / 2.0;
     final double centerY = other.dy / 2.0;
     return Offset(centerX + x * centerX, centerY + y * centerY);
   }
 
   /// Returns the offset that is this fraction within the given size.
-  Offset alongSize(Size other) {
+  Offset alongSize(final Size other) {
     final double centerX = other.width / 2.0;
     final double centerY = other.height / 2.0;
     return Offset(centerX + x * centerX, centerY + y * centerY);
   }
 
   /// Returns the point that is this fraction within the given rect.
-  Offset withinRect(Rect rect) {
+  Offset withinRect(final Rect rect) {
     final double halfWidth = rect.width / 2.0;
     final double halfHeight = rect.height / 2.0;
     return Offset(
@@ -320,7 +320,7 @@ class Alignment extends AlignmentGeometry {
   /// For example, a 100×100 size inscribed on a 200×200 rect using
   /// [Alignment.topLeft] would be the 100×100 rect at the top left of
   /// the 200×200 rect.
-  Rect inscribe(Size size, Rect rect) {
+  Rect inscribe(final Size size, final Rect rect) {
     final double halfWidthDelta = (rect.width - size.width) / 2.0;
     final double halfHeightDelta = (rect.height - size.height) / 2.0;
     return Rect.fromLTWH(
@@ -336,7 +336,7 @@ class Alignment extends AlignmentGeometry {
   /// If either is null, this function interpolates from [Alignment.center].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Alignment? lerp(Alignment? a, Alignment? b, double t) {
+  static Alignment? lerp(final Alignment? a, final Alignment? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -350,9 +350,9 @@ class Alignment extends AlignmentGeometry {
   }
 
   @override
-  Alignment resolve(TextDirection? direction) => this;
+  Alignment resolve(final TextDirection? direction) => this;
 
-  static String _stringify(double x, double y) {
+  static String _stringify(final double x, final double y) {
     if (x == -1.0 && y == -1.0) {
       return 'Alignment.topLeft';
     }
@@ -475,7 +475,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   static const AlignmentDirectional bottomEnd = AlignmentDirectional(1.0, 1.0);
 
   @override
-  AlignmentGeometry add(AlignmentGeometry other) {
+  AlignmentGeometry add(final AlignmentGeometry other) {
     if (other is AlignmentDirectional) {
       return this + other;
     }
@@ -483,12 +483,12 @@ class AlignmentDirectional extends AlignmentGeometry {
   }
 
   /// Returns the difference between two [AlignmentDirectional]s.
-  AlignmentDirectional operator -(AlignmentDirectional other) {
+  AlignmentDirectional operator -(final AlignmentDirectional other) {
     return AlignmentDirectional(start - other.start, y - other.y);
   }
 
   /// Returns the sum of two [AlignmentDirectional]s.
-  AlignmentDirectional operator +(AlignmentDirectional other) {
+  AlignmentDirectional operator +(final AlignmentDirectional other) {
     return AlignmentDirectional(start + other.start, y + other.y);
   }
 
@@ -500,25 +500,25 @@ class AlignmentDirectional extends AlignmentGeometry {
 
   /// Scales the [AlignmentDirectional] in each dimension by the given factor.
   @override
-  AlignmentDirectional operator *(double other) {
+  AlignmentDirectional operator *(final double other) {
     return AlignmentDirectional(start * other, y * other);
   }
 
   /// Divides the [AlignmentDirectional] in each dimension by the given factor.
   @override
-  AlignmentDirectional operator /(double other) {
+  AlignmentDirectional operator /(final double other) {
     return AlignmentDirectional(start / other, y / other);
   }
 
   /// Integer divides the [AlignmentDirectional] in each dimension by the given factor.
   @override
-  AlignmentDirectional operator ~/(double other) {
+  AlignmentDirectional operator ~/(final double other) {
     return AlignmentDirectional((start ~/ other).toDouble(), (y ~/ other).toDouble());
   }
 
   /// Computes the remainder in each dimension by the given factor.
   @override
-  AlignmentDirectional operator %(double other) {
+  AlignmentDirectional operator %(final double other) {
     return AlignmentDirectional(start % other, y % other);
   }
 
@@ -527,7 +527,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   /// If either is null, this function interpolates from [AlignmentDirectional.center].
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static AlignmentDirectional? lerp(AlignmentDirectional? a, AlignmentDirectional? b, double t) {
+  static AlignmentDirectional? lerp(final AlignmentDirectional? a, final AlignmentDirectional? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -541,7 +541,7 @@ class AlignmentDirectional extends AlignmentGeometry {
   }
 
   @override
-  Alignment resolve(TextDirection? direction) {
+  Alignment resolve(final TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
     switch (direction!) {
       case TextDirection.rtl:
@@ -551,7 +551,7 @@ class AlignmentDirectional extends AlignmentGeometry {
     }
   }
 
-  static String _stringify(double start, double y) {
+  static String _stringify(final double start, final double y) {
     if (start == -1.0 && y == -1.0) {
       return 'AlignmentDirectional.topStart';
     }
@@ -609,7 +609,7 @@ class _MixedAlignment extends AlignmentGeometry {
   }
 
   @override
-  _MixedAlignment operator *(double other) {
+  _MixedAlignment operator *(final double other) {
     return _MixedAlignment(
       _x * other,
       _start * other,
@@ -618,7 +618,7 @@ class _MixedAlignment extends AlignmentGeometry {
   }
 
   @override
-  _MixedAlignment operator /(double other) {
+  _MixedAlignment operator /(final double other) {
     return _MixedAlignment(
       _x / other,
       _start / other,
@@ -627,7 +627,7 @@ class _MixedAlignment extends AlignmentGeometry {
   }
 
   @override
-  _MixedAlignment operator ~/(double other) {
+  _MixedAlignment operator ~/(final double other) {
     return _MixedAlignment(
       (_x ~/ other).toDouble(),
       (_start ~/ other).toDouble(),
@@ -636,7 +636,7 @@ class _MixedAlignment extends AlignmentGeometry {
   }
 
   @override
-  _MixedAlignment operator %(double other) {
+  _MixedAlignment operator %(final double other) {
     return _MixedAlignment(
       _x % other,
       _start % other,
@@ -645,7 +645,7 @@ class _MixedAlignment extends AlignmentGeometry {
   }
 
   @override
-  Alignment resolve(TextDirection? direction) {
+  Alignment resolve(final TextDirection? direction) {
     assert(direction != null, 'Cannot resolve $runtimeType without a TextDirection.');
     switch (direction!) {
       case TextDirection.rtl:

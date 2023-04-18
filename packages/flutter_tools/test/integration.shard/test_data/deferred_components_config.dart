@@ -24,7 +24,7 @@ abstract class DeferredComponentsConfig {
   String get asset2;
   List<DeferredComponentModule> get deferredComponents;
 
-  void setUpIn(Directory dir) {
+  void setUpIn(final Directory dir) {
     writeFile(fileSystem.path.join(dir.path, 'lib', 'deferred_library.dart'), deferredLibrary);
     final String? golden = deferredComponentsGolden;
     if (golden != null) {
@@ -54,7 +54,7 @@ class DeferredComponentModule {
 
   String name;
 
-  void setUpIn(Directory dir) {
+  void setUpIn(final Directory dir) {
     writeFile(fileSystem.path.join(dir.path, 'android', name, 'build.gradle'), r'''
     def localProperties = new Properties()
     def localPropertiesFile = rootProject.file('local.properties')

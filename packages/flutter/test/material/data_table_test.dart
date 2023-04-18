@@ -17,14 +17,14 @@ import '../rendering/mock_canvas.dart';
 import 'data_table_test_utils.dart';
 
 void main() {
-  testWidgets('DataTable control test', (WidgetTester tester) async {
+  testWidgets('DataTable control test', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ int? sortColumnIndex, bool sortAscending = true }) {
+    Widget buildTable({ final int? sortColumnIndex, final bool sortAscending = true }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool? value) {
+        onSelectAll: (final bool? value) {
           log.add('select-all: $value');
         },
         columns: <DataColumn>[
@@ -36,15 +36,15 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {
+            onSort: (final int columnIndex, final bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
             },
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool? selected) {
+            onSelectChanged: (final bool? selected) {
               log.add('row-selected: ${dessert.name}');
             },
             onLongPress: () {
@@ -69,7 +69,7 @@ void main() {
                 onTapCancel: () {
                   log.add('cell-tapCancel: ${dessert.calories}');
                 },
-                onTapDown: (TapDownDetails details) {
+                onTapDown: (final TapDownDetails details) {
                   log.add('cell-tapDown: ${dessert.calories}');
                 },
               ),
@@ -160,12 +160,12 @@ void main() {
     log.clear();
   });
 
-  testWidgets('DataTable control test - tristate', (WidgetTester tester) async {
+  testWidgets('DataTable control test - tristate', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     const int numItems = 3;
-    Widget buildTable(List<bool> selected, {int? disabledIndex}) {
+    Widget buildTable(final List<bool> selected, {final int? disabledIndex}) {
       return DataTable(
-        onSelectAll: (bool? value) {
+        onSelectAll: (final bool? value) {
           log.add('select-all: $value');
         },
         columns: const <DataColumn>[
@@ -176,10 +176,10 @@ void main() {
         ],
         rows: List<DataRow>.generate(
           numItems,
-          (int index) => DataRow(
+          (final int index) => DataRow(
             cells: <DataCell>[DataCell(Text('Row $index'))],
             selected: selected[index],
-            onSelectChanged: index == disabledIndex ? null : (bool? value) {
+            onSelectChanged: index == disabledIndex ? null : (final bool? value) {
               log.add('row-selected: $index');
             },
           ),
@@ -230,13 +230,13 @@ void main() {
     log.clear();
   });
 
-  testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
+  testWidgets('DataTable control test - no checkboxes', (final WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ bool checkboxes = false }) {
+    Widget buildTable({ final bool checkboxes = false }) {
       return DataTable(
         showCheckboxColumn: checkboxes,
-        onSelectAll: (bool? value) {
+        onSelectAll: (final bool? value) {
           log.add('select-all: $value');
         },
         columns: const <DataColumn>[
@@ -250,10 +250,10 @@ void main() {
             numeric: true,
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool? selected) {
+            onSelectChanged: (final bool? selected) {
               log.add('row-selected: ${dessert.name}');
             },
             cells: <DataCell>[
@@ -296,7 +296,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test - header', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -329,7 +329,7 @@ void main() {
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
   });
 
-  testWidgets('DataTable overflow test - header with spaces', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test - header with spaces', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -357,7 +357,7 @@ void main() {
     expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
   }, skip: true); // https://github.com/flutter/flutter/issues/13512
 
-  testWidgets('DataTable overflow test', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -385,7 +385,7 @@ void main() {
     expect(tester.takeException(), isNull); // cell overflows table, but text doesn't overflow cell
   });
 
-  testWidgets('DataTable overflow test', (WidgetTester tester) async {
+  testWidgets('DataTable overflow test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -413,7 +413,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable column onSort test', (WidgetTester tester) async {
+  testWidgets('DataTable column onSort test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -441,8 +441,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable sort indicator orientation', (WidgetTester tester) async {
-    Widget buildTable({ bool sortAscending = true }) {
+  testWidgets('DataTable sort indicator orientation', (final WidgetTester tester) async {
+    Widget buildTable({ final bool sortAscending = true }) {
       return DataTable(
         sortColumnIndex: 0,
         sortAscending: sortAscending,
@@ -450,10 +450,10 @@ void main() {
           DataColumn(
             label: const Text('Name'),
             tooltip: 'Name',
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             cells: <DataCell>[
               DataCell(
@@ -493,19 +493,19 @@ void main() {
     );
   });
 
-  testWidgets('DataTable sort indicator orientation does not change on state update', (WidgetTester tester) async {
+  testWidgets('DataTable sort indicator orientation does not change on state update', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43724
-    Widget buildTable({String title = 'Name1'}) {
+    Widget buildTable({final String title = 'Name1'}) {
       return DataTable(
         sortColumnIndex: 0,
         columns: <DataColumn>[
           DataColumn(
             label: Text(title),
             tooltip: 'Name',
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             cells: <DataCell>[
               DataCell(
@@ -545,9 +545,9 @@ void main() {
     );
   });
 
-  testWidgets('DataTable sort indicator orientation does not change on state update - reverse', (WidgetTester tester) async {
+  testWidgets('DataTable sort indicator orientation does not change on state update - reverse', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/43724
-    Widget buildTable({String title = 'Name1'}) {
+    Widget buildTable({final String title = 'Name1'}) {
       return DataTable(
         sortColumnIndex: 0,
         sortAscending: false,
@@ -555,10 +555,10 @@ void main() {
           DataColumn(
             label: Text(title),
             tooltip: 'Name',
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             cells: <DataCell>[
               DataCell(
@@ -598,7 +598,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable row onSelectChanged test', (WidgetTester tester) async {
+  testWidgets('DataTable row onSelectChanged test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -626,18 +626,18 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable custom row height', (WidgetTester tester) async {
+  testWidgets('DataTable custom row height', (final WidgetTester tester) async {
     Widget buildCustomTable({
-      int? sortColumnIndex,
-      bool sortAscending = true,
-      double? dataRowMinHeight,
-      double? dataRowMaxHeight,
-      double headingRowHeight = 56.0,
+      final int? sortColumnIndex,
+      final bool sortAscending = true,
+      final double? dataRowMinHeight,
+      final double? dataRowMaxHeight,
+      final double headingRowHeight = 56.0,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool? value) {},
+        onSelectAll: (final bool? value) {},
         dataRowMinHeight: dataRowMinHeight,
         dataRowMaxHeight: dataRowMaxHeight,
         headingRowHeight: headingRowHeight,
@@ -650,13 +650,13 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool? selected) {},
+            onSelectChanged: (final bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -676,7 +676,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: DataTable(
-          onSelectAll: (bool? value) {},
+          onSelectAll: (final bool? value) {},
           columns: <DataColumn>[
             const DataColumn(
               label: Text('Name'),
@@ -686,13 +686,13 @@ void main() {
               label: const Text('Calories'),
               tooltip: 'Calories',
               numeric: true,
-              onSort: (int columnIndex, bool ascending) {},
+              onSort: (final int columnIndex, final bool ascending) {},
             ),
           ],
-          rows: kDesserts.map<DataRow>((Dessert dessert) {
+          rows: kDesserts.map<DataRow>((final Dessert dessert) {
             return DataRow(
               key: ValueKey<String>(dessert.name),
-              onSelectChanged: (bool? selected) {},
+              onSelectChanged: (final bool? selected) {},
               cells: <DataCell>[
                 DataCell(
                   Text(dessert.name),
@@ -712,7 +712,7 @@ void main() {
     // The finder matches with the Container of the cell content, as well as the
     // Container wrapping the whole table. The first one is used to test row
     // heights.
-    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+    Finder findFirstContainerFor(final String text) => find.widgetWithText(Container, text).first;
 
     expect(tester.getSize(findFirstContainerFor('Name')).height, 56.0);
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, kMinInteractiveDimension);
@@ -739,12 +739,12 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, greaterThan(0.0));
   });
 
-  testWidgets('DataTable custom row height one row taller than others', (WidgetTester tester) async {
+  testWidgets('DataTable custom row height one row taller than others', (final WidgetTester tester) async {
     const String multilineText = 'Line one.\nLine two.\nLine three.\nLine four.';
 
     Widget buildCustomTable({
-      double? dataRowMinHeight,
-      double? dataRowMaxHeight,
+      final double? dataRowMinHeight,
+      final double? dataRowMaxHeight,
     }) {
       return DataTable(
         dataRowMinHeight: dataRowMinHeight,
@@ -768,7 +768,7 @@ void main() {
       );
     }
 
-    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+    Finder findFirstContainerFor(final String text) => find.widgetWithText(Container, text).first;
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildCustomTable(dataRowMinHeight: 0.0, dataRowMaxHeight: double.infinity)),
@@ -780,12 +780,12 @@ void main() {
     expect(multilineRowHeight, greaterThan(singleLineRowHeight));
   });
 
-  testWidgets('DataTable custom row height - separate test for deprecated dataRowHeight', (WidgetTester tester) async {
+  testWidgets('DataTable custom row height - separate test for deprecated dataRowHeight', (final WidgetTester tester) async {
     Widget buildCustomTable({
-      double dataRowHeight = 48.0,
+      final double dataRowHeight = 48.0,
     }) {
       return DataTable(
-        onSelectAll: (bool? value) {},
+        onSelectAll: (final bool? value) {},
         dataRowHeight: dataRowHeight,
         columns: <DataColumn>[
           const DataColumn(
@@ -796,13 +796,13 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool? selected) {},
+            onSelectChanged: (final bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -821,7 +821,7 @@ void main() {
     // The finder matches with the Container of the cell content, as well as the
     // Container wrapping the whole table. The first one is used to test row
     // heights.
-    Finder findFirstContainerFor(String text) => find.widgetWithText(Container, text).first;
+    Finder findFirstContainerFor(final String text) => find.widgetWithText(Container, text).first;
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
@@ -830,7 +830,7 @@ void main() {
     expect(tester.getSize(findFirstContainerFor('Frozen yogurt')).height, 30.0);
   });
 
-  testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
+  testWidgets('DataTable custom horizontal padding - checkbox', (final WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -840,13 +840,13 @@ void main() {
     Finder padding;
 
     Widget buildDefaultTable({
-      int? sortColumnIndex,
-      bool sortAscending = true,
+      final int? sortColumnIndex,
+      final bool sortAscending = true,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool? value) {},
+        onSelectAll: (final bool? value) {},
         columns: <DataColumn>[
           const DataColumn(
             label: Text('Name'),
@@ -856,19 +856,19 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
           DataColumn(
             label: const Text('Fat'),
             tooltip: 'Fat',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool? selected) {},
+            onSelectChanged: (final bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -943,15 +943,15 @@ void main() {
     );
 
     Widget buildCustomTable({
-      int? sortColumnIndex,
-      bool sortAscending = true,
-      double? horizontalMargin,
-      double? columnSpacing,
+      final int? sortColumnIndex,
+      final bool sortAscending = true,
+      final double? horizontalMargin,
+      final double? columnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool? value) {},
+        onSelectAll: (final bool? value) {},
         horizontalMargin: horizontalMargin,
         columnSpacing: columnSpacing,
         columns: <DataColumn>[
@@ -963,19 +963,19 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
           DataColumn(
             label: const Text('Fat'),
             tooltip: 'Fat',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool? selected) {},
+            onSelectChanged: (final bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -1053,7 +1053,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
+  testWidgets('DataTable custom horizontal padding - no checkbox', (final WidgetTester tester) async {
     const double defaultHorizontalMargin = 24.0;
     const double defaultColumnSpacing = 56.0;
     const double customHorizontalMargin = 10.0;
@@ -1062,8 +1062,8 @@ void main() {
     Finder padding;
 
     Widget buildDefaultTable({
-      int? sortColumnIndex,
-      bool sortAscending = true,
+      final int? sortColumnIndex,
+      final bool sortAscending = true,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -1077,16 +1077,16 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
           DataColumn(
             label: const Text('Fat'),
             tooltip: 'Fat',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
             cells: <DataCell>[
@@ -1151,10 +1151,10 @@ void main() {
     );
 
     Widget buildCustomTable({
-      int? sortColumnIndex,
-      bool sortAscending = true,
-      double? horizontalMargin,
-      double? columnSpacing,
+      final int? sortColumnIndex,
+      final bool sortAscending = true,
+      final double? horizontalMargin,
+      final double? columnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -1170,16 +1170,16 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
           DataColumn(
             label: const Text('Fat'),
             tooltip: 'Fat',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
             cells: <DataCell>[
@@ -1247,7 +1247,7 @@ void main() {
     );
   });
 
-  testWidgets('DataTable set border width test', (WidgetTester tester) async {
+  testWidgets('DataTable set border width test', (final WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1299,7 +1299,7 @@ void main() {
     expect(boxDecoration.border!.top.width, thickness);
   });
 
-  testWidgets('DataTable set show bottom border', (WidgetTester tester) async {
+  testWidgets('DataTable set show bottom border', (final WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1348,15 +1348,15 @@ void main() {
     expect(boxDecoration.border!.bottom.width, 0.0);
   });
 
-  testWidgets('DataTable column heading cell - with and without sorting', (WidgetTester tester) async {
-    Widget buildTable({ int? sortColumnIndex, bool sortEnabled = true }) {
+  testWidgets('DataTable column heading cell - with and without sorting', (final WidgetTester tester) async {
+    Widget buildTable({ final int? sortColumnIndex, final bool sortEnabled = true }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         columns: <DataColumn>[
           DataColumn(
             label: const Expanded(child: Center(child: Text('Name'))),
             tooltip: 'Name',
-            onSort: sortEnabled ? (_, __) {} : null,
+            onSort: sortEnabled ? (final _, final __) {} : null,
           ),
         ],
         rows: const <DataRow>[
@@ -1412,11 +1412,11 @@ void main() {
     }
   });
 
-  testWidgets('DataTable correctly renders with a mouse', (WidgetTester tester) async {
+  testWidgets('DataTable correctly renders with a mouse', (final WidgetTester tester) async {
     // Regression test for a bug described in
     // https://github.com/flutter/flutter/pull/43735#issuecomment-589459947
     // Filed at https://github.com/flutter/flutter/issues/51152
-    Widget buildTable({ int? sortColumnIndex }) {
+    Widget buildTable({ final int? sortColumnIndex }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         columns: <DataColumn>[
@@ -1427,7 +1427,7 @@ void main() {
           DataColumn(
             label: const Expanded(child: Center(child: Text('column2'))),
             tooltip: 'Column2',
-            onSort: (_, __) {},
+            onSort: (final _, final __) {},
           ),
         ],
         rows: const <DataRow>[
@@ -1460,9 +1460,9 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
   });
 
-  testWidgets('DataRow renders default selected row colors', (WidgetTester tester) async {
+  testWidgets('DataRow renders default selected row colors', (final WidgetTester tester) async {
     final ThemeData themeData = ThemeData.light();
-    Widget buildTable({bool selected = false}) {
+    Widget buildTable({final bool selected = false}) {
       return MaterialApp(
         theme: themeData,
         home: Material(
@@ -1474,7 +1474,7 @@ void main() {
             ],
             rows: <DataRow>[
               DataRow(
-                onSelectChanged: (bool? checked) {},
+                onSelectChanged: (final bool? checked) {},
                 selected: selected,
                 cells: const <DataCell>[
                   DataCell(Text('Content1')),
@@ -1502,7 +1502,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow renders checkbox with colors from CheckboxTheme', (WidgetTester tester) async {
+  testWidgets('DataRow renders checkbox with colors from CheckboxTheme', (final WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
     const Color checkColor = Color(0xFF0000FF);
 
@@ -1525,7 +1525,7 @@ void main() {
             rows: <DataRow>[
               DataRow(
                 selected: true,
-                onSelectChanged: (bool? checked) {},
+                onSelectChanged: (final bool? checked) {},
                 cells: const <DataCell>[
                   DataCell(Text('Content1')),
                 ],
@@ -1547,11 +1547,11 @@ void main() {
     );
   });
 
-  testWidgets('DataRow renders custom colors when selected', (WidgetTester tester) async {
+  testWidgets('DataRow renders custom colors when selected', (final WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
 
-    Widget buildTable({bool selected = false}) {
+    Widget buildTable({final bool selected = false}) {
       return Material(
         child: DataTable(
           columns: const <DataColumn>[
@@ -1563,7 +1563,7 @@ void main() {
             DataRow(
               selected: selected,
               color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
+                    (final Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return selectedColor;
                   }
@@ -1596,11 +1596,11 @@ void main() {
     expect(lastTableRowBoxDecoration().color, selectedColor);
   });
 
-  testWidgets('DataRow renders custom colors when disabled', (WidgetTester tester) async {
+  testWidgets('DataRow renders custom colors when disabled', (final WidgetTester tester) async {
     const Color disabledColor = Colors.grey;
     const Color defaultColor = Colors.red;
 
-    Widget buildTable({bool disabled = false}) {
+    Widget buildTable({final bool disabled = false}) {
       return Material(
         child: DataTable(
           columns: const <DataColumn>[
@@ -1613,11 +1613,11 @@ void main() {
               cells: const <DataCell>[
                 DataCell(Text('Content1')),
               ],
-              onSelectChanged: (bool? value) {},
+              onSelectChanged: (final bool? value) {},
             ),
             DataRow(
               color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
+                    (final Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return disabledColor;
                   }
@@ -1627,7 +1627,7 @@ void main() {
               cells: const <DataCell>[
                 DataCell(Text('Content2')),
               ],
-              onSelectChanged: disabled ? null : (bool? value) {},
+              onSelectChanged: disabled ? null : (final bool? value) {},
             ),
           ],
         ),
@@ -1651,7 +1651,7 @@ void main() {
     expect(lastTableRowBoxDecoration().color, disabledColor);
   });
 
-  testWidgets('DataRow renders custom colors when pressed', (WidgetTester tester) async {
+  testWidgets('DataRow renders custom colors when pressed', (final WidgetTester tester) async {
     const Color pressedColor = Color(0xff4caf50);
     Widget buildTable() {
       return DataTable(
@@ -1663,14 +1663,14 @@ void main() {
         rows: <DataRow>[
           DataRow(
             color: MaterialStateProperty.resolveWith<Color>(
-              (Set<MaterialState> states) {
+              (final Set<MaterialState> states) {
                 if (states.contains(MaterialState.pressed)) {
                   return pressedColor;
                 }
                 return Colors.transparent;
               },
             ),
-            onSelectChanged: (bool? value) {},
+            onSelectChanged: (final bool? value) {},
             cells: const <DataCell>[
               DataCell(Text('Content1')),
             ],
@@ -1690,7 +1690,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('DataTable can render inside an AlertDialog', (WidgetTester tester) async {
+  testWidgets('DataTable can render inside an AlertDialog', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1712,7 +1712,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable renders with border and background decoration', (WidgetTester tester) async {
+  testWidgets('DataTable renders with border and background decoration', (final WidgetTester tester) async {
     const double width = 800;
     const double height = 600;
     const double borderHorizontal = 5.0;
@@ -1761,7 +1761,7 @@ void main() {
     );
   });
 
-  testWidgets('checkboxHorizontalMargin properly applied', (WidgetTester tester) async {
+  testWidgets('checkboxHorizontalMargin properly applied', (final WidgetTester tester) async {
     const double customCheckboxHorizontalMargin = 15.0;
     const double customHorizontalMargin = 10.0;
     Finder cellContent;
@@ -1769,15 +1769,15 @@ void main() {
     Finder padding;
 
     Widget buildCustomTable({
-      int? sortColumnIndex,
-      bool sortAscending = true,
-      double? horizontalMargin,
-      double? checkboxHorizontalMargin,
+      final int? sortColumnIndex,
+      final bool sortAscending = true,
+      final double? horizontalMargin,
+      final double? checkboxHorizontalMargin,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool? value) {},
+        onSelectAll: (final bool? value) {},
         horizontalMargin: horizontalMargin,
         checkboxHorizontalMargin: checkboxHorizontalMargin,
         columns: <DataColumn>[
@@ -1789,19 +1789,19 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
           DataColumn(
             label: const Text('Fat'),
             tooltip: 'Fat',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {},
+            onSort: (final int columnIndex, final bool ascending) {},
           ),
         ],
-        rows: kDesserts.map<DataRow>((Dessert dessert) {
+        rows: kDesserts.map<DataRow>((final Dessert dessert) {
           return DataRow(
             key: ValueKey<String>(dessert.name),
-            onSelectChanged: (bool? selected) {},
+            onSelectChanged: (final bool? selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -1850,7 +1850,7 @@ void main() {
     );
   });
 
-  testWidgets('DataRow is disabled when onSelectChanged is not set', (WidgetTester tester) async {
+  testWidgets('DataRow is disabled when onSelectChanged is not set', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -1864,7 +1864,7 @@ void main() {
                 DataCell(Text('Hello')),
                 DataCell(Text('world')),
               ],
-              onSelectChanged: (bool? value) {},
+              onSelectChanged: (final bool? value) {},
               ),
               const DataRow(cells: <DataCell>[
                 DataCell(Text('Bug')),
@@ -1885,7 +1885,7 @@ void main() {
     expect(find.widgetWithText(TableRowInkWell, 'GitHub'), findsNothing);
   });
 
-  testWidgets('DataTable set interior border test', (WidgetTester tester) async {
+  testWidgets('DataTable set interior border test', (final WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1951,7 +1951,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/100952
-  testWidgets('Do not crashes when paint borders in a narrow space', (WidgetTester tester) async {
+  testWidgets('Do not crashes when paint borders in a narrow space', (final WidgetTester tester) async {
     const List<DataColumn> columns = <DataColumn>[
       DataColumn(label: Text('column1')),
       DataColumn(label: Text('column2')),
@@ -1988,12 +1988,12 @@ void main() {
 
   });
 
-  testWidgets('DataTable clip behavior', (WidgetTester tester) async {
+  testWidgets('DataTable clip behavior', (final WidgetTester tester) async {
     const Color selectedColor = Colors.green;
     const Color defaultColor = Colors.red;
     const BorderRadius borderRadius = BorderRadius.all(Radius.circular(30));
 
-    Widget buildTable({bool selected = false, required Clip clipBehavior}) {
+    Widget buildTable({final bool selected = false, required final Clip clipBehavior}) {
       return Material(
         child: DataTable(
           clipBehavior: clipBehavior,
@@ -2007,7 +2007,7 @@ void main() {
             DataRow(
               selected: selected,
               color: MaterialStateProperty.resolveWith<Color>(
-                    (Set<MaterialState> states) {
+                    (final Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return selectedColor;
                   }
@@ -2037,7 +2037,7 @@ void main() {
     expect(material.borderRadius, borderRadius);
   });
 
-  testWidgets('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (WidgetTester tester) async {
+  testWidgets('DataTable dataRowMinHeight smaller or equal dataRowMaxHeight validation', (final WidgetTester tester) async {
     DataTable createDataTable() =>
       DataTable(
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
@@ -2046,12 +2046,12 @@ void main() {
         dataRowMaxHeight: 1.0,
       );
 
-    expect(() => createDataTable(), throwsA(predicate((AssertionError e) =>
+    expect(() => createDataTable(), throwsA(predicate((final AssertionError e) =>
       e.toString().contains('dataRowMaxHeight >= dataRowMinHeight'))));
   });
 
-  testWidgets('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (WidgetTester tester) async {
-    DataTable createDataTable({double? dataRowHeight, double? dataRowMinHeight, double? dataRowMaxHeight}) =>
+  testWidgets('DataTable dataRowHeight is not used together with dataRowMinHeight or dataRowMaxHeight', (final WidgetTester tester) async {
+    DataTable createDataTable({final double? dataRowHeight, final double? dataRowMinHeight, final double? dataRowMaxHeight}) =>
       DataTable(
         columns: const <DataColumn>[DataColumn(label: Text('Column1'))],
         rows: const <DataRow>[],
@@ -2060,18 +2060,18 @@ void main() {
         dataRowMaxHeight: dataRowMaxHeight,
       );
 
-    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0, dataRowMaxHeight: 2.0), throwsA(predicate((AssertionError e) =>
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0, dataRowMaxHeight: 2.0), throwsA(predicate((final AssertionError e) =>
       e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
 
-    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMaxHeight: 2.0), throwsA(predicate((AssertionError e) =>
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMaxHeight: 2.0), throwsA(predicate((final AssertionError e) =>
       e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
 
-    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0), throwsA(predicate((AssertionError e) =>
+    expect(() => createDataTable(dataRowHeight: 1.0, dataRowMinHeight: 2.0), throwsA(predicate((final AssertionError e) =>
       e.toString().contains('dataRowHeight == null || (dataRowMinHeight == null && dataRowMaxHeight == null)'))));
   });
 
   group('TableRowInkWell', () {
-    testWidgets('can handle secondary taps', (WidgetTester tester) async {
+    testWidgets('can handle secondary taps', (final WidgetTester tester) async {
       bool secondaryTapped = false;
       bool secondaryTappedDown = false;
 
@@ -2085,7 +2085,7 @@ void main() {
                     onSecondaryTap: () {
                       secondaryTapped = true;
                     },
-                    onSecondaryTapDown: (TapDownDetails details) {
+                    onSecondaryTapDown: (final TapDownDetails details) {
                       secondaryTappedDown = true;
                     },
                     child: const SizedBox(
@@ -2115,7 +2115,7 @@ void main() {
     });
   });
 
-  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+  testWidgets('Heading cell cursor resolves MaterialStateMouseCursor correctly', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2124,19 +2124,19 @@ void main() {
             columns: <DataColumn>[
               // This column can be sorted.
               DataColumn(
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                mouseCursor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
                   return SystemMouseCursors.copy;
                 }),
 
-                onSort: (int columnIndex, bool ascending) {},
+                onSort: (final int columnIndex, final bool ascending) {},
                 label: const Text('A'),
               ),
               // This column cannot be sorted.
               DataColumn(
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                mouseCursor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.disabled)) {
                     return SystemMouseCursors.forbidden;
                   }
@@ -2176,7 +2176,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.forbidden);
   });
 
-  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (WidgetTester tester) async {
+  testWidgets('DataRow cursor resolves MaterialStateMouseCursor correctly', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2185,20 +2185,20 @@ void main() {
             columns: <DataColumn>[
               DataColumn(
                 label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
+                onSort: (final int columnIndex, final bool ascending) {},
               ),
               const DataColumn(label: Text('B')),
             ],
             rows: <DataRow>[
               // This row can be selected.
               DataRow(
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                mouseCursor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return SystemMouseCursors.copy;
                   }
                   return SystemMouseCursors.forbidden;
                 }),
-                onSelectChanged: (bool? selected) {},
+                onSelectChanged: (final bool? selected) {},
                 cells: const <DataCell>[
                   DataCell(Text('Data 1')),
                   DataCell(Text('Data 2')),
@@ -2207,8 +2207,8 @@ void main() {
               // This row is selected.
               DataRow(
                 selected: true,
-                onSelectChanged: (bool? selected) {},
-                mouseCursor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+                onSelectChanged: (final bool? selected) {},
+                mouseCursor: MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
                   if (states.contains(MaterialState.selected)) {
                     return SystemMouseCursors.copy;
                   }
@@ -2237,7 +2237,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.copy);
   });
 
-  testWidgets("DataRow cursor doesn't update checkbox cursor", (WidgetTester tester) async {
+  testWidgets("DataRow cursor doesn't update checkbox cursor", (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -2246,13 +2246,13 @@ void main() {
             columns: <DataColumn>[
               DataColumn(
                 label: const Text('A'),
-                onSort: (int columnIndex, bool ascending) {},
+                onSort: (final int columnIndex, final bool ascending) {},
               ),
               const DataColumn(label: Text('B')),
             ],
             rows: <DataRow>[
               DataRow(
-                onSelectChanged: (bool? selected) {},
+                onSelectChanged: (final bool? selected) {},
                 mouseCursor: const MaterialStatePropertyAll<MouseCursor>(SystemMouseCursors.copy),
                 cells: const <DataCell>[
                   DataCell(Text('Data')),

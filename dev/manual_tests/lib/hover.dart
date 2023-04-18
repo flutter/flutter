@@ -20,10 +20,10 @@ class HoverDemo extends StatefulWidget {
 
 class _HoverDemoState extends State<HoverDemo> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ButtonStyle overrideFocusColor = ButtonStyle(
-      overlayColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+      overlayColor: MaterialStateProperty.resolveWith<Color>((final Set<MaterialState> states) {
         return states.contains(MaterialState.focused) ? Colors.deepOrangeAccent : Colors.transparent;
       })
     );
@@ -39,7 +39,7 @@ class _HoverDemoState extends State<HoverDemo> {
           onPressed: () {},
         ),
         body: Center(
-          child: Builder(builder: (BuildContext context) {
+          child: Builder(builder: (final BuildContext context) {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

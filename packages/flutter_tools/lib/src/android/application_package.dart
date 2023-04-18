@@ -33,12 +33,12 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
   ///
   /// Returns `null` if the APK was invalid or any required tooling was missing.
   static AndroidApk? fromApk(
-    File apk, {
-    required AndroidSdk androidSdk,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
-    required Logger logger,
-    required ProcessUtils processUtils,
+    final File apk, {
+    required final AndroidSdk androidSdk,
+    required final ProcessManager processManager,
+    required final UserMessages userMessages,
+    required final Logger logger,
+    required final ProcessUtils processUtils,
   }) {
     final String? aaptPath = androidSdk.latestVersion?.aaptPath;
     if (aaptPath == null || !processManager.canRun(aaptPath)) {
@@ -95,14 +95,14 @@ class AndroidApk extends ApplicationPackage implements PrebuiltApplicationPackag
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
   static Future<AndroidApk?> fromAndroidProject(
-    AndroidProject androidProject, {
-    required AndroidSdk? androidSdk,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
-    required ProcessUtils processUtils,
-    required Logger logger,
-    required FileSystem fileSystem,
-    BuildInfo? buildInfo,
+    final AndroidProject androidProject, {
+    required final AndroidSdk? androidSdk,
+    required final ProcessManager processManager,
+    required final UserMessages userMessages,
+    required final ProcessUtils processUtils,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    final BuildInfo? buildInfo,
   }) async {
     final File apkFile;
     final String filename;
@@ -231,9 +231,9 @@ abstract class _Entry {
 }
 
 class _Element extends _Entry {
-  _Element._(this.name, _Element? parent, int level) : super(parent, level);
+  _Element._(this.name, final _Element? parent, final int level) : super(parent, level);
 
-  factory _Element.fromLine(String line, _Element? parent) {
+  factory _Element.fromLine(final String line, final _Element? parent) {
     //      E: application (line=29)
     final List<String> parts = line.trimLeft().split(' ');
     return _Element._(parts[1], parent, line.length - line.trimLeft().length);
@@ -242,11 +242,11 @@ class _Element extends _Entry {
   final List<_Entry> children = <_Entry>[];
   final String? name;
 
-  void addChild(_Entry child) {
+  void addChild(final _Entry child) {
     children.add(child);
   }
 
-  _Attribute? firstAttribute(String name) {
+  _Attribute? firstAttribute(final String name) {
     for (final _Attribute child in children.whereType<_Attribute>()) {
       if (child.key?.startsWith(name) ?? false) {
         return child;
@@ -255,7 +255,7 @@ class _Element extends _Entry {
     return null;
   }
 
-  _Element? firstElement(String name) {
+  _Element? firstElement(final String name) {
     for (final _Element child in children.whereType<_Element>()) {
       if (child.name?.startsWith(name) ?? false) {
         return child;
@@ -264,15 +264,15 @@ class _Element extends _Entry {
     return null;
   }
 
-  Iterable<_Element> allElements(String name) {
-    return children.whereType<_Element>().where((_Element e) => e.name?.startsWith(name) ?? false);
+  Iterable<_Element> allElements(final String name) {
+    return children.whereType<_Element>().where((final _Element e) => e.name?.startsWith(name) ?? false);
   }
 }
 
 class _Attribute extends _Entry {
-  const _Attribute._(this.key, this.value, _Element? parent, int level) : super(parent, level);
+  const _Attribute._(this.key, this.value, final _Element? parent, final int level) : super(parent, level);
 
-  factory _Attribute.fromLine(String line, _Element parent) {
+  factory _Attribute.fromLine(final String line, final _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const String attributePrefix = 'A: ';
     final List<String> keyVal = line.substring(line.indexOf(attributePrefix) + attributePrefix.length).split('=');
@@ -287,7 +287,7 @@ class ApkManifestData {
   ApkManifestData._(this._data);
 
   static bool _isAttributeWithValuePresent(
-      _Element baseElement, String childElement, String attributeName, String attributeValue) {
+      final _Element baseElement, final String childElement, final String attributeName, final String attributeValue) {
     final Iterable<_Element> allElements = baseElement.allElements(childElement);
     for (final _Element oneElement in allElements) {
       final String? elementAttributeValue = oneElement
@@ -301,7 +301,7 @@ class ApkManifestData {
     return false;
   }
 
-  static ApkManifestData? parseFromXmlDump(String data, Logger logger) {
+  static ApkManifestData? parseFromXmlDump(final String data, final Logger logger) {
     if (data.trim().isEmpty) {
       return null;
     }
@@ -309,7 +309,7 @@ class ApkManifestData {
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);
 
-    final int manifestLine = lines.indexWhere((String line) => line.contains('E: manifest'));
+    final int manifestLine = lines.indexWhere((final String line) => line.contains('E: manifest'));
     final _Element manifest = _Element.fromLine(lines[manifestLine], null);
     _Element currentElement = manifest;
 

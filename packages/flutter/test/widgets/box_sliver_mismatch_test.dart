@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Sliver in a box', (WidgetTester tester) async {
+  testWidgets('Sliver in a box', (final WidgetTester tester) async {
     await tester.pumpWidget(
       DecoratedBox(
         decoration: const BoxDecoration(),
@@ -32,7 +32,7 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('Box in a sliver', (WidgetTester tester) async {
+  testWidgets('Box in a sliver', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Viewport(
         crossAxisDirection: AxisDirection.right,

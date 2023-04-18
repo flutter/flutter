@@ -13,10 +13,10 @@ import 'restoration.dart';
 
 void main() {
   group('RestorationManager', () {
-    testWidgets('root bucket retrieval', (WidgetTester tester) async {
+    testWidgets('root bucket retrieval', (final WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (final MethodCall call) {
         callsToEngine.add(call);
         return result.future;
       });
@@ -24,7 +24,7 @@ void main() {
       final RestorationManager manager = RestorationManager();
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
-      rootBucketFuture.then((RestorationBucket? bucket) {
+      rootBucketFuture.then((final RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       expect(rootBucketFuture, isNotNull);
@@ -52,17 +52,17 @@ void main() {
 
       // Accessing the root bucket again completes synchronously with same bucket.
       RestorationBucket? synchronousBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         synchronousBucket = bucket;
       });
       expect(synchronousBucket, isNotNull);
       expect(synchronousBucket, same(rootBucket));
     });
 
-    testWidgets('root bucket received from engine before retrieval', (WidgetTester tester) async {
+    testWidgets('root bucket received from engine before retrieval', (final WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (final MethodCall call) async {
         callsToEngine.add(call);
         return null;
       });
@@ -71,25 +71,25 @@ void main() {
       await _pushDataFromEngine(_createEncodedRestorationData1());
 
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
+      manager.rootBucket.then((final RestorationBucket? bucket) => rootBucket = bucket);
       // Root bucket is available synchronously.
       expect(rootBucket, isNotNull);
       // Engine was never asked.
       expect(callsToEngine, isEmpty);
     });
 
-    testWidgets('root bucket received while engine retrieval is pending', (WidgetTester tester) async {
+    testWidgets('root bucket received while engine retrieval is pending', (final WidgetTester tester) async {
       SystemChannels.restoration.setMethodCallHandler(null);
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (final MethodCall call) {
         callsToEngine.add(call);
         return result.future;
       });
       final RestorationManager manager = RestorationManager();
 
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket = bucket);
+      manager.rootBucket.then((final RestorationBucket? bucket) => rootBucket = bucket);
       expect(rootBucket, isNull);
       expect(callsToEngine.single.method, 'get');
 
@@ -101,20 +101,20 @@ void main() {
       await tester.pump();
 
       RestorationBucket? rootBucket2;
-      manager.rootBucket.then((RestorationBucket? bucket) => rootBucket2 = bucket);
+      manager.rootBucket.then((final RestorationBucket? bucket) => rootBucket2 = bucket);
       expect(rootBucket2, isNotNull);
       expect(rootBucket2, same(rootBucket));
       expect(rootBucket2!.read<int>('value1'), 10);
       expect(rootBucket2!.contains('foo'), isFalse);
     });
 
-    testWidgets('root bucket is properly replaced when new data is available', (WidgetTester tester) async {
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) async {
+    testWidgets('root bucket is properly replaced when new data is available', (final WidgetTester tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (final MethodCall call) async {
         return _createEncodedRestorationData1();
       });
       final RestorationManager manager = RestorationManager();
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       await tester.pump();
@@ -127,7 +127,7 @@ void main() {
       RestorationBucket? newRoot;
       manager.addListener(() {
         rootReplaced = true;
-        manager.rootBucket.then((RestorationBucket? bucket) {
+        manager.rootBucket.then((final RestorationBucket? bucket) {
           newRoot = bucket;
         });
         // The new bucket is available synchronously.
@@ -148,10 +148,10 @@ void main() {
       expect(newChild.read<String>('bar'), 'Hello');
     });
 
-    testWidgets('returns null as root bucket when restoration is disabled', (WidgetTester tester) async {
+    testWidgets('returns null as root bucket when restoration is disabled', (final WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call)  {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (final MethodCall call)  {
         callsToEngine.add(call);
         return result.future;
       });
@@ -161,7 +161,7 @@ void main() {
       });
       RestorationBucket? rootBucket;
       bool rootBucketResolved = false;
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         rootBucketResolved = true;
         rootBucket = bucket;
       });
@@ -177,7 +177,7 @@ void main() {
       // Switch to non-null.
       await _pushDataFromEngine(_createEncodedRestorationData1());
       expect(listenerCount, 1);
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       expect(rootBucket, isNotNull);
@@ -185,16 +185,16 @@ void main() {
       // Switch to null again.
       await _pushDataFromEngine(_packageRestorationData(enabled: false));
       expect(listenerCount, 2);
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       expect(rootBucket, isNull);
     });
 
-    testWidgets('flushData', (WidgetTester tester) async {
+    testWidgets('flushData', (final WidgetTester tester) async {
       final List<MethodCall> callsToEngine = <MethodCall>[];
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (final MethodCall call) {
         callsToEngine.add(call);
         return result.future;
       });
@@ -202,7 +202,7 @@ void main() {
       final RestorationManager manager = RestorationManager();
       final Future<RestorationBucket?> rootBucketFuture = manager.rootBucket;
       RestorationBucket? rootBucket;
-      rootBucketFuture.then((RestorationBucket? bucket) {
+      rootBucketFuture.then((final RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       result.complete(_createEncodedRestorationData1());
@@ -227,9 +227,9 @@ void main() {
       expect(callsToEngine, hasLength(1));
     });
 
-    testWidgets('isReplacing', (WidgetTester tester) async {
+    testWidgets('isReplacing', (final WidgetTester tester) async {
       final Completer<Map<dynamic, dynamic>> result = Completer<Map<dynamic, dynamic>>();
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (MethodCall call) {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.restoration, (final MethodCall call) {
         return result.future;
       });
 
@@ -237,7 +237,7 @@ void main() {
       expect(manager.isReplacing, isFalse);
 
       RestorationBucket? rootBucket;
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         rootBucket = bucket;
       });
       result.complete(_createEncodedRestorationData1());
@@ -252,7 +252,7 @@ void main() {
 
       manager.receiveDataFromEngine(enabled: true, data: null);
       RestorationBucket? rootBucket2;
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         rootBucket2 = bucket;
       });
       expect(rootBucket2, isNotNull);
@@ -269,7 +269,7 @@ void main() {
 
       manager.receiveDataFromEngine(enabled: false, data: null);
       RestorationBucket? rootBucket3;
-      manager.rootBucket.then((RestorationBucket? bucket) {
+      manager.rootBucket.then((final RestorationBucket? bucket) {
         rootBucket3 = bucket;
       });
       expect(rootBucket3, isNull);
@@ -303,11 +303,11 @@ void main() {
   });
 }
 
-Future<void> _pushDataFromEngine(Map<dynamic, dynamic> data) async {
+Future<void> _pushDataFromEngine(final Map<dynamic, dynamic> data) async {
   await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
     'flutter/restoration',
     const StandardMethodCodec().encodeMethodCall(MethodCall('push', data)),
-    (_) { },
+    (final _) { },
   );
 }
 
@@ -344,7 +344,7 @@ Map<dynamic, dynamic> _createEncodedRestorationData2() {
   return _packageRestorationData(data: data);
 }
 
-Map<dynamic, dynamic> _packageRestorationData({bool enabled = true, Map<dynamic, dynamic>? data}) {
+Map<dynamic, dynamic> _packageRestorationData({final bool enabled = true, final Map<dynamic, dynamic>? data}) {
   final ByteData? encoded = const StandardMessageCodec().encodeMessage(data);
   return <dynamic, dynamic>{
     'enabled': enabled,
@@ -353,7 +353,7 @@ Map<dynamic, dynamic> _packageRestorationData({bool enabled = true, Map<dynamic,
 }
 
 class TestRestorationManager extends RestorationManager {
-  void receiveDataFromEngine({required bool enabled, required Uint8List? data}) {
+  void receiveDataFromEngine({required final bool enabled, required final Uint8List? data}) {
     handleRestorationUpdateFromEngine(enabled: enabled, data: data);
   }
 }

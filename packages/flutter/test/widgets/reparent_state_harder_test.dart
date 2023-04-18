@@ -32,7 +32,7 @@ class OrderSwitcherState extends State<OrderSwitcher> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       textDirection: TextDirection.ltr,
       children: _aFirst
@@ -49,7 +49,7 @@ class OrderSwitcherState extends State<OrderSwitcher> {
 }
 
 class DummyStatefulWidget extends StatefulWidget {
-  const DummyStatefulWidget(Key? key) : super(key: key);
+  const DummyStatefulWidget(final Key? key) : super(key: key);
 
   @override
   DummyStatefulWidgetState createState() => DummyStatefulWidgetState();
@@ -57,7 +57,7 @@ class DummyStatefulWidget extends StatefulWidget {
 
 class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
   @override
-  Widget build(BuildContext context) => const Text('LEAF', textDirection: TextDirection.ltr);
+  Widget build(final BuildContext context) => const Text('LEAF', textDirection: TextDirection.ltr);
 }
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {
@@ -81,20 +81,20 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
     _key = widget.initialKey;
   }
 
-  void _setChild(GlobalKey? value) {
+  void _setChild(final GlobalKey? value) {
     setState(() {
       _key = value;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DummyStatefulWidget(_key);
   }
 }
 
 void main() {
-  testWidgets('Handle GlobalKey reparenting in weird orders', (WidgetTester tester) async {
+  testWidgets('Handle GlobalKey reparenting in weird orders', (final WidgetTester tester) async {
 
     // This is a bit of a weird test so let's try to explain it a bit.
     //
@@ -134,13 +134,13 @@ void main() {
       b: KeyedSubtree(
         key: keyB,
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return Builder(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
+                      builder: (final BuildContext context, final BoxConstraints constraints) {
                         return RekeyableDummyStatefulWidgetWrapper(
                           initialKey: keyD,
                         );

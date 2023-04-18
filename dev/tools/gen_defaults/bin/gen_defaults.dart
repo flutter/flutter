@@ -57,11 +57,11 @@ import 'package:gen_defaults/text_field_template.dart';
 import 'package:gen_defaults/time_picker_template.dart';
 import 'package:gen_defaults/typography_template.dart';
 
-Map<String, dynamic> _readTokenFile(String fileName) {
+Map<String, dynamic> _readTokenFile(final String fileName) {
   return jsonDecode(File('dev/tools/gen_defaults/data/$fileName').readAsStringSync()) as Map<String, dynamic>;
 }
 
-Future<void> main(List<String> args) async {
+Future<void> main(final List<String> args) async {
   const String materialLib = 'packages/flutter/lib/src/material';
   const List<String> tokenFiles = <String>[
     'badge.json',

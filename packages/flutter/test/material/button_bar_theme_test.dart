@@ -36,7 +36,7 @@ void main() {
     expect(const ButtonBarThemeData().hashCode, const ButtonBarThemeData().copyWith().hashCode);
   });
 
-  testWidgets('ButtonBarThemeData lerps correctly', (WidgetTester tester) async {
+  testWidgets('ButtonBarThemeData lerps correctly', (final WidgetTester tester) async {
     const ButtonBarThemeData barThemePrimary = ButtonBarThemeData(
       alignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
@@ -72,19 +72,19 @@ void main() {
     expect(lerp.overflowDirection, equals(VerticalDirection.up));
   });
 
-  testWidgets('Default ButtonBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ButtonBarThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('ButtonBarThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ButtonBarThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ButtonBarThemeData(
       alignment: MainAxisAlignment.center,
@@ -99,8 +99,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -116,14 +116,14 @@ void main() {
     ]);
   });
 
-  testWidgets('ButtonBarTheme.of falls back to ThemeData.buttonBarTheme', (WidgetTester tester) async {
+  testWidgets('ButtonBarTheme.of falls back to ThemeData.buttonBarTheme', (final WidgetTester tester) async {
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
     late BuildContext capturedContext;
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(buttonBarTheme: buttonBarTheme),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             capturedContext = context;
             return Container();
           },
@@ -134,7 +134,7 @@ void main() {
     expect(ButtonBarTheme.of(capturedContext).buttonMinWidth, equals(42.0));
   });
 
-  testWidgets('ButtonBarTheme overrides ThemeData.buttonBarTheme', (WidgetTester tester) async {
+  testWidgets('ButtonBarTheme overrides ThemeData.buttonBarTheme', (final WidgetTester tester) async {
     const ButtonBarThemeData defaultBarTheme = ButtonBarThemeData(buttonMinWidth: 42.0);
     const ButtonBarThemeData buttonBarTheme = ButtonBarThemeData(buttonMinWidth: 84.0);
     late BuildContext capturedContext;
@@ -142,11 +142,11 @@ void main() {
       MaterialApp(
         theme: ThemeData(buttonBarTheme: defaultBarTheme),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return ButtonBarTheme(
               data: buttonBarTheme,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   capturedContext = context;
                   return Container();
                 },

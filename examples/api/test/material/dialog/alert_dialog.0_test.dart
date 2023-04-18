@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/dialog/alert_dialog.0.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Show Alert dialog', (WidgetTester tester) async {
+  testWidgets('Show Alert dialog', (final WidgetTester tester) async {
     const String dialogTitle = 'AlertDialog Title';
     await tester.pumpWidget(
       const MaterialApp(

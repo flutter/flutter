@@ -132,7 +132,7 @@ class ExpansionTileController {
   /// would have an outer widget that creates the [ExpansionTile]
   /// populated by instances of your new inner widgets, and then in
   /// these inner widgets you would use [ExpansionTileController.of].
-  static ExpansionTileController of(BuildContext context) {
+  static ExpansionTileController of(final BuildContext context) {
     final _ExpansionTileState? result = context.findAncestorStateOfType<_ExpansionTileState>();
     if (result != null) {
       return result._tileController;
@@ -176,7 +176,7 @@ class ExpansionTileController {
   ///  * [of], a similar function to this one that throws if no [ExpansionTile]
   ///    encloses the given context. Also includes some sample code in its
   ///    documentation.
-  static ExpansionTileController? maybeOf(BuildContext context) {
+  static ExpansionTileController? maybeOf(final BuildContext context) {
     return context.findAncestorStateOfType<_ExpansionTileState>()?._tileController;
   }
 }
@@ -553,7 +553,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
       if (_isExpanded) {
         _animationController.forward();
       } else {
-        _animationController.reverse().then<void>((void value) {
+        _animationController.reverse().then<void>((final void value) {
           if (!mounted) {
             return;
           }
@@ -573,7 +573,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   // Platform or null affinity defaults to trailing.
-  ListTileControlAffinity _effectiveAffinity(ListTileControlAffinity? affinity) {
+  ListTileControlAffinity _effectiveAffinity(final ListTileControlAffinity? affinity) {
     switch (affinity ?? ListTileControlAffinity.trailing) {
       case ListTileControlAffinity.leading:
         return ListTileControlAffinity.leading;
@@ -583,28 +583,28 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     }
   }
 
-  Widget? _buildIcon(BuildContext context) {
+  Widget? _buildIcon(final BuildContext context) {
     return RotationTransition(
       turns: _iconTurns,
       child: const Icon(Icons.expand_more),
     );
   }
 
-  Widget? _buildLeadingIcon(BuildContext context) {
+  Widget? _buildLeadingIcon(final BuildContext context) {
     if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.leading) {
       return null;
     }
     return _buildIcon(context);
   }
 
-  Widget? _buildTrailingIcon(BuildContext context) {
+  Widget? _buildTrailingIcon(final BuildContext context) {
     if (_effectiveAffinity(widget.controlAffinity) != ListTileControlAffinity.trailing) {
       return null;
     }
     return _buildIcon(context);
   }
 
-  Widget _buildChildren(BuildContext context, Widget? child) {
+  Widget _buildChildren(final BuildContext context, final Widget? child) {
     final ThemeData theme = Theme.of(context);
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final ShapeBorder expansionTileBorder = _border.value ?? const Border(
@@ -705,7 +705,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ExpansionTileThemeData expansionTileTheme = ExpansionTileTheme.of(context);
     final bool closed = !_isExpanded && _animationController.isDismissed;
     final bool shouldRemoveChildren = closed && !widget.maintainState;

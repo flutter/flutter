@@ -8,12 +8,12 @@ import 'package:flutter_api_samples/widgets/magnifier/magnifier.0.dart'
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('should update magnifier position on drag', (WidgetTester tester) async {
+  testWidgets('should update magnifier position on drag', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.MagnifierExampleApp());
 
-    Matcher isPositionedAt(Offset at) {
+    Matcher isPositionedAt(final Offset at) {
       return isA<Positioned>().having(
-        (Positioned positioned) => Offset(positioned.left!, positioned.top!),
+        (final Positioned positioned) => Offset(positioned.left!, positioned.top!),
         'magnifier position',
         at,
       );
@@ -39,7 +39,7 @@ void main() {
     );
   });
 
-  testWidgets('should match golden', (WidgetTester tester) async {
+  testWidgets('should match golden', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.MagnifierExampleApp());
 
     final Offset centerOfFlutterLogo = tester.getCenter(find.byType(Positioned));

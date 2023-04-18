@@ -15,7 +15,7 @@ const String nothing = '-';
 class TestStepResult {
   const TestStepResult(this.name, this.description, this.status);
 
-  factory TestStepResult.fromSnapshot(AsyncSnapshot<TestStepResult> snapshot) {
+  factory TestStepResult.fromSnapshot(final AsyncSnapshot<TestStepResult> snapshot) {
     switch (snapshot.connectionState) {
       case ConnectionState.none:
         return const TestStepResult('Not started', nothing, TestStatus.ok);
@@ -44,7 +44,7 @@ class TestStepResult {
     TestStatus.complete,
   );
 
-  Widget asWidget(BuildContext context) {
+  Widget asWidget(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

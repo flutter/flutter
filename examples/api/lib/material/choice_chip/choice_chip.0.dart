@@ -12,7 +12,7 @@ class ChipApp extends StatelessWidget {
   const ChipApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: const ActionChoiceExample(),
@@ -31,7 +31,7 @@ class _ActionChoiceExampleState extends State<ActionChoiceExample> {
   int? _value = 1;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -49,11 +49,11 @@ class _ActionChoiceExampleState extends State<ActionChoiceExample> {
               spacing: 5.0,
               children: List<Widget>.generate(
                 3,
-                (int index) {
+                (final int index) {
                   return ChoiceChip(
                     label: Text('Item $index'),
                     selected: _value == index,
-                    onSelected: (bool selected) {
+                    onSelected: (final bool selected) {
                       setState(() {
                         _value = selected ? index : null;
                       });

@@ -31,7 +31,7 @@ void main() {
     expect(identical(ScrollbarThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Passing no ScrollbarTheme returns defaults', (WidgetTester tester) async {
+  testWidgets('Passing no ScrollbarTheme returns defaults', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -121,7 +121,7 @@ void main() {
     }),
   );
 
-  testWidgets('Scrollbar uses values from ScrollbarTheme', (WidgetTester tester) async {
+  testWidgets('Scrollbar uses values from ScrollbarTheme', (final WidgetTester tester) async {
     final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
@@ -214,7 +214,7 @@ void main() {
 
   testWidgets(
     'Scrollbar uses values from ScrollbarTheme if exists instead of values from Theme',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final ScrollbarThemeData scrollbarTheme = _scrollbarTheme();
       final ScrollController scrollController = ScrollController();
       await tester.pumpWidget(
@@ -256,7 +256,7 @@ void main() {
     },
   );
 
-  testWidgets('ScrollbarTheme can disable gestures', (WidgetTester tester) async {
+  testWidgets('ScrollbarTheme can disable gestures', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
@@ -303,7 +303,7 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgets('Scrollbar.interactive takes priority over ScrollbarTheme', (WidgetTester tester) async {
+  testWidgets('Scrollbar.interactive takes priority over ScrollbarTheme', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(scrollbarTheme: const ScrollbarThemeData(interactive: false)),
@@ -351,7 +351,7 @@ void main() {
     );
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.fuchsia }));
 
-  testWidgets('Scrollbar widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('Scrollbar widget properties take priority over theme', (final WidgetTester tester) async {
     const double thickness = 4.0;
     const double hoverThickness = 4.0;
     const bool showTrackOnHover = true;
@@ -453,8 +453,8 @@ void main() {
     }),
   );
 
-  testWidgets('ThemeData colorScheme is used when no ScrollbarTheme is set', (WidgetTester tester) async {
-    Widget buildFrame(ThemeData appTheme) {
+  testWidgets('ThemeData colorScheme is used when no ScrollbarTheme is set', (final WidgetTester tester) async {
+    Widget buildFrame(final ThemeData appTheme) {
       final ScrollController scrollController = ScrollController();
       return MaterialApp(
         theme: appTheme,
@@ -621,9 +621,9 @@ void main() {
     }),
   );
 
-  testWidgets('ScrollbarThemeData.trackVisibility test', (WidgetTester tester) async {
+  testWidgets('ScrollbarThemeData.trackVisibility test', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
-    bool? getTrackVisibility(Set<MaterialState> states) {
+    bool? getTrackVisibility(final Set<MaterialState> states) {
       return true;
     }
     await tester.pumpWidget(
@@ -667,19 +667,19 @@ void main() {
   }),
   );
 
-  testWidgets('Default ScrollbarTheme debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default ScrollbarTheme debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ScrollbarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('ScrollbarTheme implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('ScrollbarTheme implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     ScrollbarThemeData(
       thickness: MaterialStateProperty.resolveWith(_getThickness),
@@ -695,8 +695,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[
@@ -724,21 +724,21 @@ class NoScrollbarBehavior extends ScrollBehavior {
   const NoScrollbarBehavior();
 
   @override
-  Widget buildScrollbar(BuildContext context, Widget child, ScrollableDetails details) => child;
+  Widget buildScrollbar(final BuildContext context, final Widget child, final ScrollableDetails details) => child;
 }
 
 ScrollbarThemeData _scrollbarTheme({
-  MaterialStateProperty<double?>? thickness,
-  MaterialStateProperty<bool?>? trackVisibility,
-  bool showTrackOnHover = true,
-  MaterialStateProperty<bool?>? thumbVisibility,
-  Radius radius = const Radius.circular(6.0),
-  MaterialStateProperty<Color?>? thumbColor,
-  MaterialStateProperty<Color?>? trackColor,
-  MaterialStateProperty<Color?>? trackBorderColor,
-  double crossAxisMargin = 5.0,
-  double mainAxisMargin = 10.0,
-  double minThumbLength = 50.0,
+  final MaterialStateProperty<double?>? thickness,
+  final MaterialStateProperty<bool?>? trackVisibility,
+  final bool showTrackOnHover = true,
+  final MaterialStateProperty<bool?>? thumbVisibility,
+  final Radius radius = const Radius.circular(6.0),
+  final MaterialStateProperty<Color?>? thumbColor,
+  final MaterialStateProperty<Color?>? trackColor,
+  final MaterialStateProperty<Color?>? trackBorderColor,
+  final double crossAxisMargin = 5.0,
+  final double mainAxisMargin = 10.0,
+  final double minThumbLength = 50.0,
 }) {
   return ScrollbarThemeData(
     thickness: thickness ?? MaterialStateProperty.resolveWith(_getThickness),
@@ -755,16 +755,16 @@ ScrollbarThemeData _scrollbarTheme({
   );
 }
 
-double? _getThickness(Set<MaterialState> states) {
+double? _getThickness(final Set<MaterialState> states) {
   if (states.contains(MaterialState.hovered)) {
     return 20.0;
   }
   return 10.0;
 }
 
-bool? _getThumbVisibility(Set<MaterialState> states) => true;
+bool? _getThumbVisibility(final Set<MaterialState> states) => true;
 
-Color? _getThumbColor(Set<MaterialState> states) {
+Color? _getThumbColor(final Set<MaterialState> states) {
   if (states.contains(MaterialState.dragged)) {
     return Colors.red;
   }
@@ -774,14 +774,14 @@ Color? _getThumbColor(Set<MaterialState> states) {
   return Colors.green;
 }
 
-Color? _getTrackColor(Set<MaterialState> states) {
+Color? _getTrackColor(final Set<MaterialState> states) {
   if (states.contains(MaterialState.hovered)) {
     return Colors.black;
   }
   return null;
 }
 
-Color? _getTrackBorderColor(Set<MaterialState> states) {
+Color? _getTrackBorderColor(final Set<MaterialState> states) {
   if (states.contains(MaterialState.hovered)) {
     return Colors.yellow;
   }

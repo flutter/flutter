@@ -12,7 +12,7 @@ class ExpandedApp extends StatelessWidget {
   const ExpandedApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -28,7 +28,7 @@ class ExpandedExample extends StatelessWidget {
   const ExpandedExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Row(
         children: <Widget>[

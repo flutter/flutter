@@ -13,14 +13,14 @@ const Key avatarC = Key('C');
 const Key avatarD = Key('D');
 
 Future<void> pumpTestWidget(
-  WidgetTester tester, {
-      bool withName = true,
-      bool withEmail = true,
-      bool withOnDetailsPressedHandler = true,
-      Size otherAccountsPictureSize = const Size.square(40.0),
-      Size currentAccountPictureSize  = const Size.square(72.0),
-      Color? primaryColor,
-      Color? colorSchemePrimary,
+  final WidgetTester tester, {
+      final bool withName = true,
+      final bool withEmail = true,
+      final bool withOnDetailsPressedHandler = true,
+      final Size otherAccountsPictureSize = const Size.square(40.0),
+      final Size currentAccountPictureSize  = const Size.square(72.0),
+      final Color? primaryColor,
+      final Color? colorSchemePrimary,
     }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -82,7 +82,7 @@ void main() {
     matching: find.byType(Transform),
   );
 
-  testWidgets('UserAccountsDrawerHeader inherits ColorScheme.primary', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader inherits ColorScheme.primary', (final WidgetTester tester) async {
     const Color primaryColor = Color(0xff00ff00);
     const Color colorSchemePrimary = Color(0xff0000ff);
 
@@ -95,7 +95,7 @@ void main() {
     expect(boxDecoration?.color == colorSchemePrimary, true);
   });
 
-  testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader test', (final WidgetTester tester) async {
     await pumpTestWidget(tester);
 
     expect(find.text('A'), findsOneWidget);
@@ -133,7 +133,7 @@ void main() {
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
-  testWidgets('UserAccountsDrawerHeader change default size test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader change default size test', (final WidgetTester tester) async {
     const Size currentAccountPictureSize = Size.square(60.0);
     const Size otherAccountsPictureSize = Size.square(30.0);
 
@@ -150,7 +150,7 @@ void main() {
     expect(otherAccountRenderBox.size, otherAccountsPictureSize);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon rotation test', (final WidgetTester tester) async {
     await pumpTestWidget(tester);
     Transform transformWidget = tester.firstWidget(findTransform);
 
@@ -186,12 +186,12 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/25801.
-  testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon does not rotate after setState', (final WidgetTester tester) async {
     late StateSetter testSetState;
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             testSetState = setState;
             return UserAccountsDrawerHeader(
               onDetailsPressed: () { },
@@ -221,7 +221,7 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon rotation test speeeeeedy', (final WidgetTester tester) async {
     await pumpTestWidget(tester);
     Transform transformWidget = tester.firstWidget(findTransform);
 
@@ -262,7 +262,7 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
-  testWidgets('UserAccountsDrawerHeader icon color changes', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader icon color changes', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Material(
         child: UserAccountsDrawerHeader(
@@ -293,14 +293,14 @@ void main() {
     expect(iconWidget.color, arrowColor);
   });
 
-  testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader null parameters LTR', (final WidgetTester tester) async {
     Widget buildFrame({
-      Widget? currentAccountPicture,
-      List<Widget>? otherAccountsPictures,
-      Widget? accountName,
-      Widget? accountEmail,
-      VoidCallback? onDetailsPressed,
-      EdgeInsets? margin,
+      final Widget? currentAccountPicture,
+      final List<Widget>? otherAccountsPictures,
+      final Widget? accountName,
+      final Widget? accountEmail,
+      final VoidCallback? onDetailsPressed,
+      final EdgeInsets? margin,
     }) {
       return MaterialApp(
         home: Material(
@@ -401,14 +401,14 @@ void main() {
     );
   });
 
-  testWidgets('UserAccountsDrawerHeader null parameters RTL', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader null parameters RTL', (final WidgetTester tester) async {
     Widget buildFrame({
-      Widget? currentAccountPicture,
-      List<Widget>? otherAccountsPictures,
-      Widget? accountName,
-      Widget? accountEmail,
-      VoidCallback? onDetailsPressed,
-      EdgeInsets? margin,
+      final Widget? currentAccountPicture,
+      final List<Widget>? otherAccountsPictures,
+      final Widget? accountName,
+      final Widget? accountEmail,
+      final VoidCallback? onDetailsPressed,
+      final EdgeInsets? margin,
     }) {
       return MaterialApp(
         home: Directionality(
@@ -512,7 +512,7 @@ void main() {
     );
   });
 
-  testWidgets('UserAccountsDrawerHeader provides semantics', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader provides semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(tester);
 
@@ -568,7 +568,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('alternative account selectors have sufficient tap targets', (WidgetTester tester) async {
+  testWidgets('alternative account selectors have sufficient tap targets', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await pumpTestWidget(tester);
 
@@ -589,7 +589,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await pumpTestWidget(
       tester,

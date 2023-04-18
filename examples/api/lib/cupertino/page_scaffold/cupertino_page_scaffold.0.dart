@@ -12,7 +12,7 @@ class PageScaffoldApp extends StatelessWidget {
   const PageScaffoldApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: PageScaffoldExample(),
@@ -31,7 +31,7 @@ class _PageScaffoldExampleState extends State<PageScaffoldExample> {
   int _count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       // Uncomment to change the background color
       // backgroundColor: CupertinoColors.systemPink,

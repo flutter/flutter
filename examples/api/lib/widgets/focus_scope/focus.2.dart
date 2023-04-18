@@ -12,7 +12,7 @@ class FocusExampleApp extends StatelessWidget {
   const FocusExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FocusExample(),
     );
@@ -62,7 +62,7 @@ class _FocusExampleState extends State<FocusExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: Wrap(

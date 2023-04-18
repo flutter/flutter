@@ -94,16 +94,16 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationDrawerThemeData copyWith({
-    double? tileHeight,
-    Color? backgroundColor,
-    double? elevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    Color? indicatorColor,
-    ShapeBorder? indicatorShape,
-    Size? indicatorSize,
-    MaterialStateProperty<TextStyle?>? labelTextStyle,
-    MaterialStateProperty<IconThemeData?>? iconTheme,
+    final double? tileHeight,
+    final Color? backgroundColor,
+    final double? elevation,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final Color? indicatorColor,
+    final ShapeBorder? indicatorShape,
+    final Size? indicatorSize,
+    final MaterialStateProperty<TextStyle?>? labelTextStyle,
+    final MaterialStateProperty<IconThemeData?>? iconTheme,
   }) {
     return NavigationDrawerThemeData(
       tileHeight: tileHeight ?? this.tileHeight,
@@ -124,7 +124,7 @@ class NavigationDrawerThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationDrawerThemeData? lerp(NavigationDrawerThemeData? a, NavigationDrawerThemeData? b, double t) {
+  static NavigationDrawerThemeData? lerp(final NavigationDrawerThemeData? a, final NavigationDrawerThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -159,7 +159,7 @@ class NavigationDrawerThemeData with Diagnosticable {
       );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -180,7 +180,7 @@ class NavigationDrawerThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
         .add(DoubleProperty('tileHeight', tileHeight, defaultValue: null));
@@ -235,7 +235,7 @@ class NavigationDrawerTheme extends InheritedTheme {
   ///
   /// If there is no enclosing [NavigationDrawerTheme] widget, then
   /// [ThemeData.navigationDrawerTheme] is used.
-  static NavigationDrawerThemeData of(BuildContext context) {
+  static NavigationDrawerThemeData of(final BuildContext context) {
     final NavigationDrawerTheme? navigationDrawerTheme =
         context.dependOnInheritedWidgetOfExactType<NavigationDrawerTheme>();
     return navigationDrawerTheme?.data ??
@@ -243,11 +243,11 @@ class NavigationDrawerTheme extends InheritedTheme {
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return NavigationDrawerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(NavigationDrawerTheme oldWidget) =>
+  bool updateShouldNotify(final NavigationDrawerTheme oldWidget) =>
       data != oldWidget.data;
 }

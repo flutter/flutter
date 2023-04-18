@@ -51,10 +51,10 @@ void main() {
     );
     final List<String> log = <String>[];
 
-    void listener1(AnimationStatus status) { log.add('listener1'); }
-    void listener3(AnimationStatus status) { log.add('listener3'); }
-    void listener4(AnimationStatus status) { log.add('listener4'); }
-    void listener2(AnimationStatus status) {
+    void listener1(final AnimationStatus status) { log.add('listener1'); }
+    void listener3(final AnimationStatus status) { log.add('listener3'); }
+    void listener4(final AnimationStatus status) { log.add('listener4'); }
+    void listener2(final AnimationStatus status) {
       log.add('listener2');
       controller.removeStatusListener(listener1);
       controller.removeStatusListener(listener3);
@@ -79,7 +79,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('AnimationController with throwing listener', (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing listener', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
@@ -102,19 +102,19 @@ void main() {
     log.clear();
   });
 
-  testWidgets('AnimationController with throwing status listener', (WidgetTester tester) async {
+  testWidgets('AnimationController with throwing status listener', (final WidgetTester tester) async {
     final AnimationController controller = AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
     final List<String> log = <String>[];
 
-    void listener1(AnimationStatus status) { log.add('listener1'); }
-    void badListener(AnimationStatus status) {
+    void listener1(final AnimationStatus status) { log.add('listener1'); }
+    void badListener(final AnimationStatus status) {
       log.add('badListener');
       throw ArgumentError();
     }
-    void listener2(AnimationStatus status) { log.add('listener2'); }
+    void listener2(final AnimationStatus status) { log.add('listener2'); }
 
     controller.addStatusListener(listener1);
     controller.addStatusListener(badListener);

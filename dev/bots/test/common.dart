@@ -11,7 +11,7 @@ export 'package:test/test.dart' hide isInstanceOf;
 /// A matcher that compares the type of the actual value to the type argument T.
 TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
-void tryToDelete(Directory directory) {
+void tryToDelete(final Directory directory) {
   // This should not be necessary, but it turns out that
   // on Windows it's common for deletions to fail due to
   // bogus (we think) "access denied" errors.

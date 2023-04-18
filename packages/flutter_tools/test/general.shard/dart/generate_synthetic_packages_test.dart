@@ -45,7 +45,7 @@ void main() {
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
       'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
-    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
+    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (final Target target, final Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
       expect(environment, environment);
       completer.complete();
@@ -94,7 +94,7 @@ void main() {
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
       'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
-    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
+    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (final Target target, final Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
       expect(environment, environment);
       completer.complete();
@@ -141,7 +141,7 @@ void main() {
     final BuildResult exception = BuildResult(success: false, exceptions: <String, ExceptionMeasurement>{
       'hello': ExceptionMeasurement('hello', const FormatException('illegal character in input string'), StackTrace.current),
     });
-    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (Target target, Environment environment) {
+    final TestBuildSystem buildSystem = TestBuildSystem.all(exception, (final Target target, final Environment environment) {
       expect(target, const GenerateLocalizationsTarget());
       expect(environment, environment);
       completer.complete();

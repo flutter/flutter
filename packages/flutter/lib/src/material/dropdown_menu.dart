@@ -299,9 +299,9 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     _textEditingController = widget.controller ?? TextEditingController();
     _enableFilter = widget.enableFilter;
     filteredEntries = widget.dropdownMenuEntries;
-    _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
+    _menuHasEnabledItem = filteredEntries.any((final DropdownMenuEntry<T> entry) => entry.enabled);
 
-    final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
+    final int index = filteredEntries.indexWhere((final DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
     if (index != -1) {
       _textEditingController.text = filteredEntries[index].label;
       _textEditingController.selection =
@@ -311,16 +311,16 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   @override
-  void didUpdateWidget(DropdownMenu<T> oldWidget) {
+  void didUpdateWidget(final DropdownMenu<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.dropdownMenuEntries != widget.dropdownMenuEntries) {
-      _menuHasEnabledItem = filteredEntries.any((DropdownMenuEntry<T> entry) => entry.enabled);
+      _menuHasEnabledItem = filteredEntries.any((final DropdownMenuEntry<T> entry) => entry.enabled);
     }
     if (oldWidget.leadingIcon != widget.leadingIcon) {
       refreshLeadingPadding();
     }
     if (oldWidget.initialSelection != widget.initialSelection) {
-      final int index = filteredEntries.indexWhere((DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
+      final int index = filteredEntries.indexWhere((final DropdownMenuEntry<T> entry) => entry.value == widget.initialSelection);
       if (index != -1) {
         _textEditingController.text = filteredEntries[index].label;
         _textEditingController.selection =
@@ -347,14 +347,14 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   void refreshLeadingPadding() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       setState(() {
         leadingPadding = getWidth(_leadingKey);
       });
     });
   }
 
-  double? getWidth(GlobalKey key) {
+  double? getWidth(final GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
       final RenderBox box = context.findRenderObject()! as RenderBox;
@@ -363,28 +363,28 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return null;
   }
 
-  List<DropdownMenuEntry<T>> filter(List<DropdownMenuEntry<T>> entries, TextEditingController textEditingController) {
+  List<DropdownMenuEntry<T>> filter(final List<DropdownMenuEntry<T>> entries, final TextEditingController textEditingController) {
     final String filterText = textEditingController.text.toLowerCase();
     return entries
-      .where((DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(filterText))
+      .where((final DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(filterText))
       .toList();
   }
 
-  int? search(List<DropdownMenuEntry<T>> entries, TextEditingController textEditingController) {
+  int? search(final List<DropdownMenuEntry<T>> entries, final TextEditingController textEditingController) {
     final String searchText = textEditingController.value.text.toLowerCase();
     if (searchText.isEmpty) {
       return null;
     }
-    final int index = entries.indexWhere((DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(searchText));
+    final int index = entries.indexWhere((final DropdownMenuEntry<T> entry) => entry.label.toLowerCase().contains(searchText));
 
     return index != -1 ? index : null;
   }
 
   List<Widget> _buildButtons(
-    List<DropdownMenuEntry<T>> filteredEntries,
-    TextEditingController textEditingController,
-    TextDirection textDirection,
-    { int? focusedIndex }
+    final List<DropdownMenuEntry<T>> filteredEntries,
+    final TextEditingController textEditingController,
+    final TextDirection textDirection,
+    { final int? focusedIndex }
   ) {
     final List<Widget> result = <Widget>[];
     final double padding = leadingPadding ?? _kDefaultHorizontalPadding;
@@ -437,7 +437,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     return result;
   }
 
-  void handleUpKeyInvoke(_) => setState(() {
+  void handleUpKeyInvoke(final _) => setState(() {
     if (!_menuHasEnabledItem || !_controller.isOpen) {
       return;
     }
@@ -453,7 +453,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       TextSelection.collapsed(offset: _textEditingController.text.length);
   });
 
-  void handleDownKeyInvoke(_) => setState(() {
+  void handleDownKeyInvoke(final _) => setState(() {
     if (!_menuHasEnabledItem || !_controller.isOpen) {
       return;
     }
@@ -469,7 +469,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
       TextSelection.collapsed(offset: _textEditingController.text.length);
   });
 
-  void handlePressed(MenuController controller) {
+  void handlePressed(final MenuController controller) {
     if (controller.isOpen) {
       currentHighlight = null;
       controller.close();
@@ -488,7 +488,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     _initialMenu ??= _buildButtons(widget.dropdownMenuEntries, _textEditingController, textDirection);
     final DropdownMenuThemeData theme = DropdownMenuTheme.of(context);
@@ -543,7 +543,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           menuChildren: menu,
           crossAxisUnconstrained: false,
           onClose: () { setState(() {}); }, // To update the status of the IconButton
-          builder: (BuildContext context, MenuController controller, Widget? child) {
+          builder: (final BuildContext context, final MenuController controller, final Widget? child) {
             assert(_initialMenu != null);
             final Widget trailingButton = Padding(
               padding: const EdgeInsets.all(4.0),
@@ -595,7 +595,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
                   onTap: () {
                     handlePressed(controller);
                   },
-                  onChanged: (String text) {
+                  onChanged: (final String text) {
                     controller.open();
                     setState(() {
                       filteredEntries = widget.dropdownMenuEntries;
@@ -644,7 +644,7 @@ class _DropdownMenuBody extends MultiChildRenderObjectWidget {
   final double? width;
 
   @override
-  _RenderDropdownMenuBody createRenderObject(BuildContext context) {
+  _RenderDropdownMenuBody createRenderObject(final BuildContext context) {
     return _RenderDropdownMenuBody(
       width: width,
     );
@@ -664,7 +664,7 @@ class _RenderDropdownMenuBody extends RenderBox
   final double? width;
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! _DropdownMenuBodyParentData) {
       child.parentData = _DropdownMenuBodyParentData();
     }
@@ -705,7 +705,7 @@ class _RenderDropdownMenuBody extends RenderBox
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final RenderBox? child = firstChild;
     if (child != null) {
       final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
@@ -714,7 +714,7 @@ class _RenderDropdownMenuBody extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     final BoxConstraints constraints = this.constraints;
     double maxWidth = 0.0;
     double? maxHeight;
@@ -748,7 +748,7 @@ class _RenderDropdownMenuBody extends RenderBox
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     RenderBox? child = firstChild;
     double width = 0;
     while (child != null) {
@@ -773,7 +773,7 @@ class _RenderDropdownMenuBody extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     RenderBox? child = firstChild;
     double width = 0;
     while (child != null) {
@@ -800,7 +800,7 @@ class _RenderDropdownMenuBody extends RenderBox
   }
 
   @override
-  double computeMinIntrinsicHeight(double height) {
+  double computeMinIntrinsicHeight(final double height) {
     final RenderBox? child = firstChild;
     double width = 0;
     if (child != null) {
@@ -810,7 +810,7 @@ class _RenderDropdownMenuBody extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicHeight(double height) {
+  double computeMaxIntrinsicHeight(final double height) {
     final RenderBox? child = firstChild;
     double width = 0;
     if (child != null) {
@@ -820,14 +820,14 @@ class _RenderDropdownMenuBody extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     final RenderBox? child = firstChild;
     if (child != null) {
       final _DropdownMenuBodyParentData childParentData = child.parentData! as _DropdownMenuBodyParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
+        hitTest: (final BoxHitTestResult result, final Offset transformed) {
           assert(transformed == position - childParentData.offset);
           return child.hitTest(result, position: transformed);
         },

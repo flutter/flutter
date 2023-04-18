@@ -62,7 +62,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
   Object? getExpectationForTestThrowable;
   @override
-  Future<String> getExpectationForTest(String testName) async {
+  Future<String> getExpectationForTest(final String testName) async {
     if (getExpectationForTestThrowable != null) {
       throw getExpectationForTestThrowable!;
     }
@@ -71,9 +71,9 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override
-  Future<List<int>> getImageBytes(String imageHash) async => imageBytesValues[imageHash]!;
+  Future<List<int>> getImageBytes(final String imageHash) async => imageBytesValues[imageHash]!;
 
   Map<String, String> cleanTestNameValues = <String, String>{};
   @override
-  String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
+  String cleanTestName(final String fileName) => cleanTestNameValues[fileName] ?? '';
 }

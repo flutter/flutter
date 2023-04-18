@@ -7,7 +7,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/task_result.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-Future<String> _runWithMode(String mode, String deviceId) async {
+Future<String> _runWithMode(final String mode, final String deviceId) async {
   final StringBuffer stderr = StringBuffer();
   await evalFlutter('drive', stderr: stderr, options: <String>[
     mode,

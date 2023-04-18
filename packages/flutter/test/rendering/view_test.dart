@@ -13,8 +13,8 @@ void main() {
   // Create non-const instances, otherwise tests pass even if the
   // operator override is incorrect.
   ViewConfiguration createViewConfiguration({
-    Size size = const Size(20, 20),
-    double devicePixelRatio = 2.0,
+    final Size size = const Size(20, 20),
+    final double devicePixelRatio = 2.0,
   }) {
     return ViewConfiguration(size: size, devicePixelRatio: devicePixelRatio);
   }

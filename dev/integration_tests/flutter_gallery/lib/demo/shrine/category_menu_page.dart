@@ -17,11 +17,11 @@ class CategoryMenuPage extends StatelessWidget {
 
   final VoidCallback? onCategoryTap;
 
-  Widget _buildCategory(Category category, BuildContext context) {
+  Widget _buildCategory(final Category category, final BuildContext context) {
     final String categoryString = category.toString().replaceAll('Category.', '').toUpperCase();
     final ThemeData theme = Theme.of(context);
     return ScopedModelDescendant<AppStateModel>(
-      builder: (BuildContext context, Widget? child, AppStateModel model) =>
+      builder: (final BuildContext context, final Widget? child, final AppStateModel model) =>
           GestureDetector(
             onTap: () {
               model.setCategory(category);
@@ -59,13 +59,13 @@ class CategoryMenuPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Container(
         padding: const EdgeInsets.only(top: 40.0),
         color: kShrinePink100,
         child: ListView(
-          children: Category.values.map((Category c) => _buildCategory(c, context)).toList(),
+          children: Category.values.map((final Category c) => _buildCategory(c, context)).toList(),
         ),
       ),
     );

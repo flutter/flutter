@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('relayout boundary change does not trigger relayout', (WidgetTester tester) async {
+  testWidgets('relayout boundary change does not trigger relayout', (final WidgetTester tester) async {
     final RenderLayoutCount renderLayoutCount = RenderLayoutCount();
     final Widget layoutCounter = Center(
       key: GlobalKey(),

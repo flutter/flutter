@@ -12,7 +12,7 @@ class LabeledRadioApp extends StatelessWidget {
   const LabeledRadioApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -40,7 +40,7 @@ class LabeledRadio extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return InkWell(
       onTap: () {
         if (value != groupValue) {
@@ -54,7 +54,7 @@ class LabeledRadio extends StatelessWidget {
             Radio<bool>(
               groupValue: groupValue,
               value: value,
-              onChanged: (bool? newValue) {
+              onChanged: (final bool? newValue) {
                 onChanged(newValue!);
               },
             ),
@@ -77,7 +77,7 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
   bool _isRadioSelected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -87,7 +87,7 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             value: true,
             groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
+            onChanged: (final bool newValue) {
               setState(() {
                 _isRadioSelected = newValue;
               });
@@ -98,7 +98,7 @@ class _LabeledRadioExampleState extends State<LabeledRadioExample> {
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             value: false,
             groupValue: _isRadioSelected,
-            onChanged: (bool newValue) {
+            onChanged: (final bool newValue) {
               setState(() {
                 _isRadioSelected = newValue;
               });

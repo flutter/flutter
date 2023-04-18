@@ -10,7 +10,7 @@ class DatePickerTemplate extends TokenTemplate {
     super.textThemePrefix = '_textTheme.'
   });
 
-  String _layerOpacity(String layerToken) {
+  String _layerOpacity(final String layerToken) {
     if (tokens.containsKey(layerToken)) {
       final String? layerValue = tokens[layerToken] as String?;
       if (tokens.containsKey(layerValue)) {
@@ -23,7 +23,7 @@ class DatePickerTemplate extends TokenTemplate {
     return '';
   }
 
-  String _stateColor(String componentToken, String? type, String state) {
+  String _stateColor(final String componentToken, final String? type, final String state) {
     final String baseColor = color(
       type != null
         ? '$componentToken.$type.$state.state-layer.color'

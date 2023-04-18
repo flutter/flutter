@@ -31,7 +31,7 @@ abstract class FlowPaintingContext {
   /// The size of the [i]th child.
   ///
   /// If [i] is negative or exceeds [childCount], returns null.
-  Size? getChildSize(int i);
+  Size? getChildSize(final int i);
 
   /// Paint the [i]th child using the given transform.
   ///
@@ -41,7 +41,7 @@ abstract class FlowPaintingContext {
   /// x increasing rightward and y increasing downward.
   ///
   /// The container will clip the children to its bounds.
-  void paintChild(int i, { Matrix4 transform, double opacity = 1.0 });
+  void paintChild(final int i, { final Matrix4 transform, final double opacity = 1.0 });
 }
 
 /// A delegate that controls the appearance of a flow layout.
@@ -58,7 +58,7 @@ abstract class FlowPaintingContext {
 ///  * [RenderFlow]
 abstract class FlowDelegate {
   /// The flow will repaint whenever [repaint] notifies its listeners.
-  const FlowDelegate({ Listenable? repaint }) : _repaint = repaint;
+  const FlowDelegate({ final Listenable? repaint }) : _repaint = repaint;
 
   final Listenable? _repaint;
 
@@ -72,7 +72,7 @@ abstract class FlowDelegate {
   /// If this function depends on information other than the given constraints,
   /// override [shouldRelayout] to indicate when the container should
   /// relayout.
-  Size getSize(BoxConstraints constraints) => constraints.biggest;
+  Size getSize(final BoxConstraints constraints) => constraints.biggest;
 
   /// Override to control the layout constraints given to each child.
   ///
@@ -87,7 +87,7 @@ abstract class FlowDelegate {
   /// If this function depends on information other than the given constraints,
   /// override [shouldRelayout] to indicate when the container should
   /// relayout.
-  BoxConstraints getConstraintsForChild(int i, BoxConstraints constraints) => constraints;
+  BoxConstraints getConstraintsForChild(final int i, final BoxConstraints constraints) => constraints;
 
   /// Override to paint the children of the flow.
   ///
@@ -105,13 +105,13 @@ abstract class FlowDelegate {
   /// If this function depends on information other than the given context,
   /// override [shouldRepaint] to indicate when the container should
   /// relayout.
-  void paintChildren(FlowPaintingContext context);
+  void paintChildren(final FlowPaintingContext context);
 
   /// Override this method to return true when the children need to be laid out.
   /// This should compare the fields of the current delegate and the given
   /// oldDelegate and return true if the fields are such that the layout would
   /// be different.
-  bool shouldRelayout(covariant FlowDelegate oldDelegate) => false;
+  bool shouldRelayout(covariant final FlowDelegate oldDelegate) => false;
 
   /// Override this method to return true when the children need to be
   /// repainted. This should compare the fields of the current delegate and the
@@ -126,7 +126,7 @@ abstract class FlowDelegate {
   /// The flow container might repaint even if this function returns false, for
   /// example if layout triggers painting (e.g., if [shouldRelayout] returns
   /// true).
-  bool shouldRepaint(covariant FlowDelegate oldDelegate);
+  bool shouldRepaint(covariant final FlowDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.
@@ -180,16 +180,16 @@ class RenderFlow extends RenderBox
   /// For optimal performance, consider using children that return true from
   /// [isRepaintBoundary].
   RenderFlow({
-    List<RenderBox>? children,
-    required FlowDelegate delegate,
-    Clip clipBehavior = Clip.hardEdge,
+    final List<RenderBox>? children,
+    required final FlowDelegate delegate,
+    final Clip clipBehavior = Clip.hardEdge,
   }) : _delegate = delegate,
        _clipBehavior = clipBehavior {
     addAll(children);
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     final ParentData? childParentData = child.parentData;
     if (childParentData is FlowParentData) {
       childParentData._transform = null;
@@ -206,7 +206,7 @@ class RenderFlow extends RenderBox
   /// [FlowDelegate.shouldRelayout] and [FlowDelegate.shouldRepaint] functions
   /// to determine whether the new delegate requires this object to update its
   /// layout or painting.
-  set delegate(FlowDelegate newDelegate) {
+  set delegate(final FlowDelegate newDelegate) {
     if (_delegate == newDelegate) {
       return;
     }
@@ -230,7 +230,7 @@ class RenderFlow extends RenderBox
   /// Defaults to [Clip.hardEdge], and must not be null.
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
-  set clipBehavior(Clip value) {
+  set clipBehavior(final Clip value) {
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -239,7 +239,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
     _delegate._repaint?.addListener(markNeedsPaint);
   }
@@ -250,7 +250,7 @@ class RenderFlow extends RenderBox
     super.detach();
   }
 
-  Size _getSize(BoxConstraints constraints) {
+  Size _getSize(final BoxConstraints constraints) {
     assert(constraints.debugAssertIsValid());
     return constraints.constrain(_delegate.getSize(constraints));
   }
@@ -263,7 +263,7 @@ class RenderFlow extends RenderBox
   // or we should expose intrinsic delegate callbacks and throw if they're not implemented.
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite) {
       return width;
@@ -272,7 +272,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     final double width = _getSize(BoxConstraints.tightForFinite(height: height)).width;
     if (width.isFinite) {
       return width;
@@ -281,7 +281,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite) {
       return height;
@@ -290,7 +290,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     final double height = _getSize(BoxConstraints.tightForFinite(width: width)).height;
     if (height.isFinite) {
       return height;
@@ -299,7 +299,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _getSize(constraints);
   }
 
@@ -332,7 +332,7 @@ class RenderFlow extends RenderBox
   Offset? _paintingOffset;
 
   @override
-  Size? getChildSize(int i) {
+  Size? getChildSize(final int i) {
     if (i < 0 || i >= _randomAccessChildren.length) {
       return null;
     }
@@ -340,7 +340,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  void paintChild(int i, { Matrix4? transform, double opacity = 1.0 }) {
+  void paintChild(final int i, { Matrix4? transform, final double opacity = 1.0 }) {
     transform ??= Matrix4.identity();
     final RenderBox child = _randomAccessChildren[i];
     final FlowParentData childParentData = child.parentData! as FlowParentData;
@@ -363,19 +363,19 @@ class RenderFlow extends RenderBox
       return;
     }
 
-    void painter(PaintingContext context, Offset offset) {
+    void painter(final PaintingContext context, final Offset offset) {
       context.paintChild(child, offset);
     }
     if (opacity == 1.0) {
       _paintingContext!.pushTransform(needsCompositing, _paintingOffset!, transform, painter);
     } else {
-      _paintingContext!.pushOpacity(_paintingOffset!, ui.Color.getAlphaFromOpacity(opacity), (PaintingContext context, Offset offset) {
+      _paintingContext!.pushOpacity(_paintingOffset!, ui.Color.getAlphaFromOpacity(opacity), (final PaintingContext context, final Offset offset) {
         context.pushTransform(needsCompositing, offset, transform!, painter);
       });
     }
   }
 
-  void _paintWithDelegate(PaintingContext context, Offset offset) {
+  void _paintWithDelegate(final PaintingContext context, final Offset offset) {
     _lastPaintOrder.clear();
     _paintingContext = context;
     _paintingOffset = offset;
@@ -392,7 +392,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     _clipRectLayer.layer = context.pushClipRect(
       needsCompositing,
       offset,
@@ -412,7 +412,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     final List<RenderBox> children = getChildrenAsList();
     for (int i = _lastPaintOrder.length - 1; i >= 0; --i) {
       final int childIndex = _lastPaintOrder[i];
@@ -428,7 +428,7 @@ class RenderFlow extends RenderBox
       final bool absorbed = result.addWithPaintTransform(
         transform: transform,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset position) {
+        hitTest: (final BoxHitTestResult result, final Offset position) {
           return child.hitTest(result, position: position);
         },
       );
@@ -440,7 +440,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  void applyPaintTransform(final RenderBox child, final Matrix4 transform) {
     final FlowParentData childParentData = child.parentData! as FlowParentData;
     if (childParentData._transform != null) {
       transform.multiply(childParentData._transform!);

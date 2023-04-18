@@ -15,7 +15,7 @@ void main() {
 
   test('Publishers dispatch events in debug mode', () async {
     int eventCount = 0;
-    void listener(ObjectEvent event) => eventCount++;
+    void listener(final ObjectEvent event) => eventCount++;
     ma.addListener(listener);
 
     final int expectedEventCount = await _activateFlutterObjectsAndReturnCountOfEvents();
@@ -25,11 +25,11 @@ void main() {
     expect(ma.hasListeners, isFalse);
   });
 
-  testWidgets('State dispatches events in debug mode', (WidgetTester tester) async {
+  testWidgets('State dispatches events in debug mode', (final WidgetTester tester) async {
     bool stateCreated = false;
     bool stateDisposed = false;
 
-    void listener(ObjectEvent event) {
+    void listener(final ObjectEvent event) {
       if (event is ObjectCreated && event.object is State) {
         stateCreated = true;
       }
@@ -53,7 +53,7 @@ void main() {
 
 class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _TestRenderObject();
   }
 }
@@ -68,13 +68,13 @@ class _TestElement extends RenderObjectElement with RootElementMixin {
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void insertRenderObjectChild(covariant final RenderObject child, covariant final Object? slot) { }
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+  void moveRenderObjectChild(covariant final RenderObject child, covariant final Object? oldSlot, covariant final Object? newSlot) { }
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void removeRenderObjectChild(covariant final RenderObject child, covariant final Object? slot) { }
 }
 
 class _TestRenderObject extends RenderObject {
@@ -104,7 +104,7 @@ class _TestStatefulWidget extends StatefulWidget {
 
 class _TestStatefulWidgetState extends State<_TestStatefulWidget> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }

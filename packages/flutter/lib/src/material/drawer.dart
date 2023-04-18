@@ -247,7 +247,7 @@ class Drawer extends StatelessWidget {
   final Clip? clipBehavior;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final DrawerThemeData drawerTheme = DrawerTheme.of(context);
     String? label = semanticLabel;
@@ -301,7 +301,7 @@ class _DrawerControllerScope extends InheritedWidget {
   final DrawerController controller;
 
   @override
-  bool updateShouldNotify(_DrawerControllerScope old) {
+  bool updateShouldNotify(final _DrawerControllerScope old) {
     return controller != old.controller;
   }
 }
@@ -327,7 +327,7 @@ class DrawerController extends StatefulWidget {
   ///
   /// The [child] argument must not be null and is typically a [Drawer].
   const DrawerController({
-    GlobalKey? key,
+    final GlobalKey? key,
     required this.child,
     required this.alignment,
     this.isDrawerOpen = false,
@@ -422,7 +422,7 @@ class DrawerController extends StatefulWidget {
   ///
   /// * [DrawerController.of], which is similar to this method, but asserts
   ///   if no [DrawerController] ancestor is found.
-  static DrawerController? maybeOf(BuildContext context) {
+  static DrawerController? maybeOf(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_DrawerControllerScope>()?.controller;
   }
 
@@ -441,7 +441,7 @@ class DrawerController extends StatefulWidget {
   /// DrawerController controller = DrawerController.of(context);
   /// ```
   /// {@end-tool}
-  static DrawerController of(BuildContext context) {
+  static DrawerController of(final BuildContext context) {
     final DrawerController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
@@ -496,7 +496,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   @override
-  void didUpdateWidget(DrawerController oldWidget) {
+  void didUpdateWidget(final DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrimColor != oldWidget.scrimColor) {
       _scrimColorTween = _buildScrimColorTween();
@@ -533,7 +533,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
-  void _animationStatusChanged(AnimationStatus status) {
+  void _animationStatusChanged(final AnimationStatus status) {
     switch (status) {
       case AnimationStatus.forward:
         _ensureHistoryEntry();
@@ -554,7 +554,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   late AnimationController _controller;
 
-  void _handleDragDown(DragDownDetails details) {
+  void _handleDragDown(final DragDownDetails details) {
     _controller.stop();
     _ensureHistoryEntry();
   }
@@ -582,7 +582,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   bool _previouslyOpened = false;
 
-  void _move(DragUpdateDetails details) {
+  void _move(final DragUpdateDetails details) {
     double delta = details.primaryDelta! / _width;
     switch (widget.alignment) {
       case DrawerAlignment.start:
@@ -604,7 +604,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _previouslyOpened = opened;
   }
 
-  void _settle(DragEndDetails details) {
+  void _settle(final DragEndDetails details) {
     if (_controller.isDismissed) {
       return;
     }
@@ -675,7 +675,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
-  Widget _buildDrawer(BuildContext context) {
+  Widget _buildDrawer(final BuildContext context) {
     final bool drawerIsStart = widget.alignment == DrawerAlignment.start;
     final TextDirection textDirection = Directionality.of(context);
     final bool isDesktop;
@@ -790,7 +790,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return ListTileTheme.merge(
       style: ListTileStyle.drawer,

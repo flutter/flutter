@@ -189,22 +189,22 @@ class FakeWebDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
+    final ApplicationPackage? app, {
+    final String? userIdentifier,
   }) async {
     return true;
   }
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    DebuggingOptions? debuggingOptions,
-    Map<String, dynamic>? platformArgs,
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    final DebuggingOptions? debuggingOptions,
+    final Map<String, dynamic>? platformArgs,
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     return LaunchResult.succeeded();
   }
@@ -223,7 +223,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   DevFS? get devFS => _devFS;
 
   @override
-  set devFS(DevFS? value) { }
+  set devFS(final DevFS? value) { }
 
   @override
   FlutterVmService? vmService;

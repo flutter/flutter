@@ -12,7 +12,7 @@ class CupertinoRadioApp extends StatelessWidget {
   const CupertinoRadioApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       home: CupertinoPageScaffold(
         navigationBar: CupertinoNavigationBar(
@@ -39,7 +39,7 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
   SingingCharacter? _character = SingingCharacter.mulligan;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoListSection(
       children: <Widget>[
         CupertinoListTile(
@@ -50,7 +50,7 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
             // TRY THIS: Try setting the toggleable value to false and
             // see how that changes the behavior of the widget.
             toggleable: true,
-            onChanged: (SingingCharacter? value) {
+            onChanged: (final SingingCharacter? value) {
               setState(() {
                 _character = value;
               });
@@ -63,7 +63,7 @@ class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
             value: SingingCharacter.hamilton,
             groupValue: _character,
             toggleable: true,
-            onChanged: (SingingCharacter? value) {
+            onChanged: (final SingingCharacter? value) {
               setState(() {
                 _character = value;
               });

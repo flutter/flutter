@@ -108,7 +108,7 @@ class PlaceholderDimensions {
   final TextBaseline? baseline;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -164,11 +164,11 @@ class WordBoundary extends TextBoundary {
   final ui.Paragraph _paragraph;
 
   @override
-  TextRange getTextBoundaryAt(int position) => _paragraph.getWordBoundary(TextPosition(offset: max(position, 0)));
+  TextRange getTextBoundaryAt(final int position) => _paragraph.getWordBoundary(TextPosition(offset: max(position, 0)));
 
   // Combines two UTF-16 code units (high surrogate + low surrogate) into a
   // single code point that represents a supplementary character.
-  static int _codePointFromSurrogates(int highSurrogate, int lowSurrogate) {
+  static int _codePointFromSurrogates(final int highSurrogate, final int lowSurrogate) {
     assert(
       TextPainter._isHighSurrogate(highSurrogate),
       'U+${highSurrogate.toRadixString(16).toUpperCase().padLeft(4, "0")}) is not a high surrogate.',
@@ -182,7 +182,7 @@ class WordBoundary extends TextBoundary {
   }
 
   // The Runes class does not provide random access with a code unit offset.
-  int? _codePointAt(int index) {
+  int? _codePointAt(final int index) {
     final int? codeUnitAtIndex = _text.codeUnitAt(index);
     if (codeUnitAtIndex == null) {
       return null;
@@ -197,7 +197,7 @@ class WordBoundary extends TextBoundary {
     }
   }
 
-  static bool _isNewline(int codePoint) {
+  static bool _isNewline(final int codePoint) {
     switch (codePoint) {
       case 0x000A:
       case 0x0085:
@@ -211,7 +211,7 @@ class WordBoundary extends TextBoundary {
     }
   }
 
-  bool _skipSpacesAndPunctuations(int offset, bool forward) {
+  bool _skipSpacesAndPunctuations(final int offset, final bool forward) {
     // Use code point since some punctuations are supplementary characters.
     // "inner" here refers to the code unit that's before the break in the
     // search direction (`forward`).
@@ -251,7 +251,7 @@ class _UntilTextBoundary extends TextBoundary {
   final TextBoundary _textBoundary;
 
   @override
-  int? getLeadingTextBoundaryAt(int position) {
+  int? getLeadingTextBoundaryAt(final int position) {
     if (position < 0) {
       return null;
     }
@@ -262,7 +262,7 @@ class _UntilTextBoundary extends TextBoundary {
   }
 
   @override
-  int? getTrailingTextBoundaryAt(int position) {
+  int? getTrailingTextBoundaryAt(final int position) {
     final int? offset = _textBoundary.getTrailingTextBoundaryAt(max(position, 0));
     return offset == null || _predicate(offset, true)
       ? offset
@@ -335,16 +335,16 @@ class TextPainter {
   ///
   /// The [maxLines] property, if non-null, must be greater than zero.
   TextPainter({
-    InlineSpan? text,
-    TextAlign textAlign = TextAlign.start,
-    TextDirection? textDirection,
-    double textScaleFactor = 1.0,
-    int? maxLines,
-    String? ellipsis,
-    Locale? locale,
-    StrutStyle? strutStyle,
-    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
+    final InlineSpan? text,
+    final TextAlign textAlign = TextAlign.start,
+    final TextDirection? textDirection,
+    final double textScaleFactor = 1.0,
+    final int? maxLines,
+    final String? ellipsis,
+    final Locale? locale,
+    final StrutStyle? strutStyle,
+    final TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    final ui.TextHeightBehavior? textHeightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(maxLines == null || maxLines > 0),
        _text = text,
@@ -367,18 +367,18 @@ class TextPainter {
   /// whenever it is possible to preserve the [TextPainter] to paint the
   /// text or get other information about it.
   static double computeWidth({
-    required InlineSpan text,
-    required TextDirection textDirection,
-    TextAlign textAlign = TextAlign.start,
-    double textScaleFactor = 1.0,
-    int? maxLines,
-    String? ellipsis,
-    Locale? locale,
-    StrutStyle? strutStyle,
-    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
-    double minWidth = 0.0,
-    double maxWidth = double.infinity,
+    required final InlineSpan text,
+    required final TextDirection textDirection,
+    final TextAlign textAlign = TextAlign.start,
+    final double textScaleFactor = 1.0,
+    final int? maxLines,
+    final String? ellipsis,
+    final Locale? locale,
+    final StrutStyle? strutStyle,
+    final TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    final ui.TextHeightBehavior? textHeightBehavior,
+    final double minWidth = 0.0,
+    final double maxWidth = double.infinity,
   }) {
     final TextPainter painter = TextPainter(
       text: text,
@@ -409,18 +409,18 @@ class TextPainter {
   /// whenever it is possible to preserve the [TextPainter] to paint the
   /// text or get other information about it.
   static double computeMaxIntrinsicWidth({
-    required InlineSpan text,
-    required TextDirection textDirection,
-    TextAlign textAlign = TextAlign.start,
-    double textScaleFactor = 1.0,
-    int? maxLines,
-    String? ellipsis,
-    Locale? locale,
-    StrutStyle? strutStyle,
-    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.TextHeightBehavior? textHeightBehavior,
-    double minWidth = 0.0,
-    double maxWidth = double.infinity,
+    required final InlineSpan text,
+    required final TextDirection textDirection,
+    final TextAlign textAlign = TextAlign.start,
+    final double textScaleFactor = 1.0,
+    final int? maxLines,
+    final String? ellipsis,
+    final Locale? locale,
+    final StrutStyle? strutStyle,
+    final TextWidthBasis textWidthBasis = TextWidthBasis.parent,
+    final ui.TextHeightBehavior? textHeightBehavior,
+    final double minWidth = 0.0,
+    final double maxWidth = double.infinity,
   }) {
     final TextPainter painter = TextPainter(
       text: text,
@@ -496,7 +496,7 @@ class TextPainter {
   /// representation of the contents of this [TextPainter], use [plainText].
   InlineSpan? get text => _text;
   InlineSpan? _text;
-  set text(InlineSpan? value) {
+  set text(final InlineSpan? value) {
     assert(value == null || value.debugAssertIsValid());
     if (_text == value) {
       return;
@@ -539,7 +539,7 @@ class TextPainter {
   /// The [textAlign] property must not be null. It defaults to [TextAlign.start].
   TextAlign get textAlign => _textAlign;
   TextAlign _textAlign;
-  set textAlign(TextAlign value) {
+  set textAlign(final TextAlign value) {
     if (_textAlign == value) {
       return;
     }
@@ -564,7 +564,7 @@ class TextPainter {
   /// This and [text] must be non-null before you call [layout].
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  set textDirection(final TextDirection? value) {
     if (_textDirection == value) {
       return;
     }
@@ -582,7 +582,7 @@ class TextPainter {
   /// After this is set, you must call [layout] before the next call to [paint].
   double get textScaleFactor => _textScaleFactor;
   double _textScaleFactor;
-  set textScaleFactor(double value) {
+  set textScaleFactor(final double value) {
     if (_textScaleFactor == value) {
       return;
     }
@@ -610,7 +610,7 @@ class TextPainter {
   /// U+2026 HORIZONTAL ELLIPSIS (…).
   String? get ellipsis => _ellipsis;
   String? _ellipsis;
-  set ellipsis(String? value) {
+  set ellipsis(final String? value) {
     assert(value == null || value.isNotEmpty);
     if (_ellipsis == value) {
       return;
@@ -622,7 +622,7 @@ class TextPainter {
   /// The locale used to select region-specific glyphs.
   Locale? get locale => _locale;
   Locale? _locale;
-  set locale(Locale? value) {
+  set locale(final Locale? value) {
     if (_locale == value) {
       return;
     }
@@ -640,7 +640,7 @@ class TextPainter {
   int? get maxLines => _maxLines;
   int? _maxLines;
   /// The value may be null. If it is not null, then it must be greater than zero.
-  set maxLines(int? value) {
+  set maxLines(final int? value) {
     assert(value == null || value > 0);
     if (_maxLines == value) {
       return;
@@ -663,7 +663,7 @@ class TextPainter {
   /// {@endtemplate}
   StrutStyle? get strutStyle => _strutStyle;
   StrutStyle? _strutStyle;
-  set strutStyle(StrutStyle? value) {
+  set strutStyle(final StrutStyle? value) {
     if (_strutStyle == value) {
       return;
     }
@@ -676,7 +676,7 @@ class TextPainter {
   /// {@endtemplate}
   TextWidthBasis get textWidthBasis => _textWidthBasis;
   TextWidthBasis _textWidthBasis;
-  set textWidthBasis(TextWidthBasis value) {
+  set textWidthBasis(final TextWidthBasis value) {
     if (_textWidthBasis == value) {
       return;
     }
@@ -687,7 +687,7 @@ class TextPainter {
   /// {@macro dart.ui.textHeightBehavior}
   ui.TextHeightBehavior? get textHeightBehavior => _textHeightBehavior;
   ui.TextHeightBehavior? _textHeightBehavior;
-  set textHeightBehavior(ui.TextHeightBehavior? value) {
+  set textHeightBehavior(final ui.TextHeightBehavior? value) {
     if (_textHeightBehavior == value) {
       return;
     }
@@ -722,13 +722,13 @@ class TextPainter {
   /// If [layout] is attempted without setting the placeholder dimensions, the
   /// placeholders will be ignored in the text layout and no valid
   /// [inlinePlaceholderBoxes] will be returned.
-  void setPlaceholderDimensions(List<PlaceholderDimensions>? value) {
+  void setPlaceholderDimensions(final List<PlaceholderDimensions>? value) {
     if (value == null || value.isEmpty || listEquals(value, _placeholderDimensions)) {
       return;
     }
     assert(() {
       int placeholderCount = 0;
-      text!.visitChildren((InlineSpan span) {
+      text!.visitChildren((final InlineSpan span) {
         if (span is PlaceholderSpan) {
           placeholderCount += 1;
         }
@@ -741,7 +741,7 @@ class TextPainter {
   }
   List<PlaceholderDimensions>? _placeholderDimensions;
 
-  ui.ParagraphStyle _createParagraphStyle([ TextDirection? defaultTextDirection ]) {
+  ui.ParagraphStyle _createParagraphStyle([ final TextDirection? defaultTextDirection ]) {
     // The defaultTextDirection argument is used for preferredLineHeight in case
     // textDirection hasn't yet been set.
     assert(textDirection != null || defaultTextDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
@@ -803,7 +803,7 @@ class TextPainter {
   // differently. To work around this problem for now, we round fractional pixel
   // values up to the nearest whole pixel value. The right long-term fix is to do
   // layout using fixed precision arithmetic.
-  double _applyFloatingPointHack(double layoutValue) {
+  double _applyFloatingPointHack(final double layoutValue) {
     return layoutValue.ceilToDouble();
   }
 
@@ -854,7 +854,7 @@ class TextPainter {
   /// given type.
   ///
   /// Valid only after [layout] has been called.
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(final TextBaseline baseline) {
     assert(_debugAssertTextLayoutIsValid);
     switch (baseline) {
       case TextBaseline.alphabetic:
@@ -903,7 +903,7 @@ class TextPainter {
     return paragraph;
   }
 
-  void _layoutParagraph(double minWidth, double maxWidth) {
+  void _layoutParagraph(final double minWidth, final double maxWidth) {
     _paragraph!.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
       double newWidth;
@@ -933,7 +933,7 @@ class TextPainter {
   ///
   /// The [text] and [textDirection] properties must be non-null before this is
   /// called.
-  void layout({ double minWidth = 0.0, double maxWidth = double.infinity }) {
+  void layout({ final double minWidth = 0.0, final double maxWidth = double.infinity }) {
     assert(text != null, 'TextPainter.text must be set to a non-null value before using the TextPainter.');
     assert(textDirection != null, 'TextPainter.textDirection must be set to a non-null value before using the TextPainter.');
     // Return early if the current layout information is not outdated, even if
@@ -966,7 +966,7 @@ class TextPainter {
   ///
   /// To set the text style, specify a [TextStyle] when creating the [TextSpan]
   /// that you pass to the [TextPainter] constructor or to the [text] property.
-  void paint(Canvas canvas, Offset offset) {
+  void paint(final Canvas canvas, final Offset offset) {
     final double? minWidth = _lastMinWidth;
     final double? maxWidth = _lastMaxWidth;
     if (_paragraph == null || minWidth == null || maxWidth == null) {
@@ -999,12 +999,12 @@ class TextPainter {
   //
   // See also:
   //   * https://en.wikipedia.org/wiki/UTF-16#Code_points_from_U+010000_to_U+10FFFF
-  static bool _isHighSurrogate(int value) {
+  static bool _isHighSurrogate(final int value) {
     return value & 0xFC00 == 0xD800;
   }
 
   // Whether the given UTF-16 code unit is a low (second) surrogate.
-  static bool _isLowSurrogate(int value) {
+  static bool _isLowSurrogate(final int value) {
     return value & 0xFC00 == 0xDC00;
   }
 
@@ -1012,13 +1012,13 @@ class TextPainter {
   // up zero space and do not have valid bounding boxes around them.
   //
   // We do not directly use the [Unicode] constants since they are strings.
-  static bool _isUnicodeDirectionality(int value) {
+  static bool _isUnicodeDirectionality(final int value) {
     return value == 0x200F || value == 0x200E;
   }
 
   /// Returns the closest offset after `offset` at which the input cursor can be
   /// positioned.
-  int? getOffsetAfter(int offset) {
+  int? getOffsetAfter(final int offset) {
     final int? nextCodeUnit = _text!.codeUnitAt(offset);
     if (nextCodeUnit == null) {
       return null;
@@ -1029,7 +1029,7 @@ class TextPainter {
 
   /// Returns the closest offset before `offset` at which the input cursor can
   /// be positioned.
-  int? getOffsetBefore(int offset) {
+  int? getOffsetBefore(final int offset) {
     final int? prevCodeUnit = _text!.codeUnitAt(offset - 1);
     if (prevCodeUnit == null) {
       return null;
@@ -1043,7 +1043,7 @@ class TextPainter {
 
   // Get the caret metrics (in logical pixels) based off the near edge of the
   // character upstream from the given string offset.
-  _CaretMetrics? _getMetricsFromUpstream(int offset) {
+  _CaretMetrics? _getMetricsFromUpstream(final int offset) {
     assert(offset >= 0);
     final int plainTextLength = plainText.length;
     if (plainTextLength == 0 || offset > plainTextLength) {
@@ -1096,7 +1096,7 @@ class TextPainter {
 
   // Get the caret metrics (in logical pixels) based off the near edge of the
   // character downstream from the given string offset.
-  _CaretMetrics? _getMetricsFromDownstream(int offset) {
+  _CaretMetrics? _getMetricsFromDownstream(final int offset) {
     assert(offset >= 0);
     final int plainTextLength = plainText.length;
     if (plainTextLength == 0) {
@@ -1143,7 +1143,7 @@ class TextPainter {
     return null;
   }
 
-  static double _computePaintOffsetFraction(TextAlign textAlign, TextDirection textDirection) {
+  static double _computePaintOffsetFraction(final TextAlign textAlign, final TextDirection textDirection) {
     switch (textAlign) {
       case TextAlign.left:
         return 0.0;
@@ -1172,7 +1172,7 @@ class TextPainter {
   /// Returns the offset at which to paint the caret.
   ///
   /// Valid only after [layout] has been called.
-  Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
+  Offset getOffsetForCaret(final TextPosition position, final Rect caretPrototype) {
     final _CaretMetrics caretMetrics;
     if (position.offset < 0) {
       // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
@@ -1211,7 +1211,7 @@ class TextPainter {
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double? getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+  double? getFullHeightForCaret(final TextPosition position, final Rect caretPrototype) {
     if (position.offset < 0) {
       // TODO(LongCatIsLooong): make this case impossible; see https://github.com/flutter/flutter/issues/79495
       return null;
@@ -1232,7 +1232,7 @@ class TextPainter {
 
   // Checks if the [position] and [caretPrototype] have changed from the cached
   // version and recomputes the metrics required to position the caret.
-  _CaretMetrics _computeCaretMetrics(TextPosition position) {
+  _CaretMetrics _computeCaretMetrics(final TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     if (position == _previousCaretPosition) {
       return _caretMetrics;
@@ -1273,9 +1273,9 @@ class TextPainter {
   /// the given `selection`: a multi-code-unit glyph will be excluded if only
   /// part of its code units are in `selection`.
   List<TextBox> getBoxesForSelection(
-    TextSelection selection, {
-    ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
-    ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
+    final TextSelection selection, {
+    final ui.BoxHeightStyle boxHeightStyle = ui.BoxHeightStyle.tight,
+    final ui.BoxWidthStyle boxWidthStyle = ui.BoxWidthStyle.tight,
   }) {
     assert(_debugAssertTextLayoutIsValid);
     assert(selection.isValid);
@@ -1288,7 +1288,7 @@ class TextPainter {
   }
 
   /// Returns the position within the text for the given pixel offset.
-  TextPosition getPositionForOffset(Offset offset) {
+  TextPosition getPositionForOffset(final Offset offset) {
     assert(_debugAssertTextLayoutIsValid);
     return _paragraph!.getPositionForOffset(offset);
   }
@@ -1302,7 +1302,7 @@ class TextPainter {
   /// Word boundaries are defined more precisely in Unicode Standard Annex #29
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   /// {@endtemplate}
-  TextRange getWordBoundary(TextPosition position) {
+  TextRange getWordBoundary(final TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     return _paragraph!.getWordBoundary(position);
   }
@@ -1322,7 +1322,7 @@ class TextPainter {
   /// Returns the text range of the line at the given offset.
   ///
   /// The newline (if any) is not returned as part of the range.
-  TextRange getLineBoundary(TextPosition position) {
+  TextRange getLineBoundary(final TextPosition position) {
     assert(_debugAssertTextLayoutIsValid);
     return _paragraph!.getLineBoundary(position);
   }

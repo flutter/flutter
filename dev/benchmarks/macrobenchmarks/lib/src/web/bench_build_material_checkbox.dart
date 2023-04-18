@@ -22,7 +22,7 @@ class BenchBuildMaterialCheckbox extends WidgetBuildRecorder {
       textDirection: TextDirection.ltr,
       child: Material(
         child: Column(
-          children: List<Widget>.generate(10, (int i) {
+          children: List<Widget>.generate(10, (final int i) {
             return _buildRow();
           }),
         ),
@@ -40,12 +40,12 @@ class BenchBuildMaterialCheckbox extends WidgetBuildRecorder {
     }
 
     return Row(
-      children: List<Widget>.generate(10, (int i) {
+      children: List<Widget>.generate(10, (final int i) {
         return Expanded(
           child: Checkbox(
             value: _isChecked,
             tristate: true,
-            onChanged: (bool? newValue) {
+            onChanged: (final bool? newValue) {
               // Intentionally empty.
             },
           ),

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Rendering Error', (WidgetTester tester) async {
+  testWidgets('Rendering Error', (final WidgetTester tester) async {
     // This should fail with user created widget = Row.
     await tester.pumpWidget(
       MaterialApp(

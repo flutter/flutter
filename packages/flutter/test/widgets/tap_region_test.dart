@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('TapRegionSurface detects outside taps', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects outside taps', (final WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -22,21 +22,21 @@ void main() {
                 children: <Widget>[
                   const Text('Outside'),
                   TapRegion(
-                    onTapOutside: (PointerEvent event) {
+                    onTapOutside: (final PointerEvent event) {
                       tappedOutside.add('No Group');
                     },
                     child: const Text('No Group'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapOutside: (PointerEvent event) {
+                    onTapOutside: (final PointerEvent event) {
                       tappedOutside.add('Group 1 A');
                     },
                     child: const Text('Group 1 A'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapOutside: (PointerEvent event) {
+                    onTapOutside: (final PointerEvent event) {
                       tappedOutside.add('Group 1 B');
                     },
                     child: const Text('Group 1 B'),
@@ -51,7 +51,7 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder) async {
+    Future<void> click(final Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
@@ -101,7 +101,7 @@ void main() {
     expect(tappedOutside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside taps', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside taps', (final WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -114,21 +114,21 @@ void main() {
                 children: <Widget>[
                   const Text('Outside'),
                   TapRegion(
-                    onTapInside: (PointerEvent event) {
+                    onTapInside: (final PointerEvent event) {
                       tappedInside.add('No Group');
                     },
                     child: const Text('No Group'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapInside: (PointerEvent event) {
+                    onTapInside: (final PointerEvent event) {
                       tappedInside.add('Group 1 A');
                     },
                     child: const Text('Group 1 A'),
                   ),
                   TapRegion(
                     groupId: 1,
-                    onTapInside: (PointerEvent event) {
+                    onTapInside: (final PointerEvent event) {
                       tappedInside.add('Group 1 B');
                     },
                     child: const Text('Group 1 B'),
@@ -143,7 +143,7 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder) async {
+    Future<void> click(final Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
@@ -188,7 +188,7 @@ void main() {
     expect(tappedInside, isEmpty);
   });
 
-  testWidgets('TapRegionSurface detects inside taps correctly with behavior', (WidgetTester tester) async {
+  testWidgets('TapRegionSurface detects inside taps correctly with behavior', (final WidgetTester tester) async {
     final Set<String> tappedInside = <String>{};
     const ValueKey<String> noGroupKey = ValueKey<String>('No Group');
     const ValueKey<String> group1AKey = ValueKey<String>('Group 1 A');
@@ -207,7 +207,7 @@ void main() {
                     child: TapRegion(
                       // ignore: avoid_redundant_argument_values
                       behavior: HitTestBehavior.deferToChild,
-                      onTapInside: (PointerEvent event) {
+                      onTapInside: (final PointerEvent event) {
                         tappedInside.add(noGroupKey.value);
                       },
                       child: const Stack(key: noGroupKey),
@@ -218,7 +218,7 @@ void main() {
                     child: TapRegion(
                       groupId: 1,
                       behavior: HitTestBehavior.opaque,
-                      onTapInside: (PointerEvent event) {
+                      onTapInside: (final PointerEvent event) {
                         tappedInside.add(group1AKey.value);
                       },
                       child: const Stack(key: group1AKey),
@@ -229,7 +229,7 @@ void main() {
                     child: TapRegion(
                       groupId: 1,
                       behavior: HitTestBehavior.translucent,
-                      onTapInside: (PointerEvent event) {
+                      onTapInside: (final PointerEvent event) {
                         tappedInside.add(group1BKey.value);
                       },
                       child: const Stack(key: group1BKey),
@@ -245,7 +245,7 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder) async {
+    Future<void> click(final Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
@@ -275,7 +275,7 @@ void main() {
     tappedInside.clear();
   });
 
-  testWidgets('Setting the group updates the registration', (WidgetTester tester) async {
+  testWidgets('Setting the group updates the registration', (final WidgetTester tester) async {
     final Set<String> tappedOutside = <String>{};
     await tester.pumpWidget(
       Directionality(
@@ -286,14 +286,14 @@ void main() {
               const Text('Outside'),
               TapRegion(
                 groupId: 1,
-                onTapOutside: (PointerEvent event) {
+                onTapOutside: (final PointerEvent event) {
                   tappedOutside.add('Group 1 A');
                 },
                 child: const Text('Group 1 A'),
               ),
               TapRegion(
                 groupId: 1,
-                onTapOutside: (PointerEvent event) {
+                onTapOutside: (final PointerEvent event) {
                   tappedOutside.add('Group 1 B');
                 },
                 child: const Text('Group 1 B'),
@@ -306,7 +306,7 @@ void main() {
 
     await tester.pump();
 
-    Future<void> click(Finder finder) async {
+    Future<void> click(final Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
@@ -340,14 +340,14 @@ void main() {
               const Text('Outside'),
               TapRegion(
                 groupId: 1,
-                onTapOutside: (PointerEvent event) {
+                onTapOutside: (final PointerEvent event) {
                   tappedOutside.add('Group 1 A');
                 },
                 child: const Text('Group 1 A'),
               ),
               TapRegion(
                 groupId: 2,
-                onTapOutside: (PointerEvent event) {
+                onTapOutside: (final PointerEvent event) {
                   tappedOutside.add('Group 2 A');
                 },
                 child: const Text('Group 2 A'),

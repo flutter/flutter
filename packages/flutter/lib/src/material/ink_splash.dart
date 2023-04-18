@@ -15,7 +15,7 @@ const Duration _kSplashFadeDuration = Duration(milliseconds: 200);
 const double _kSplashInitialSize = 0.0; // logical pixels
 const double _kSplashConfirmedVelocity = 1.0; // logical pixels per millisecond
 
-RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback) {
+RectCallback? _getClipCallback(final RenderBox referenceBox, final bool containedInkWell, final RectCallback? rectCallback) {
   if (rectCallback != null) {
     assert(containedInkWell);
     return rectCallback;
@@ -26,7 +26,7 @@ RectCallback? _getClipCallback(RenderBox referenceBox, bool containedInkWell, Re
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback? rectCallback, Offset position) {
+double _getTargetRadius(final RenderBox referenceBox, final bool containedInkWell, final RectCallback? rectCallback, final Offset position) {
   if (containedInkWell) {
     final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
     return _getSplashRadiusForPositionInSize(size, position);
@@ -34,7 +34,7 @@ double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallb
   return Material.defaultSplashRadius;
 }
 
-double _getSplashRadiusForPositionInSize(Size bounds, Offset position) {
+double _getSplashRadiusForPositionInSize(final Size bounds, final Offset position) {
   final double d1 = (position - bounds.topLeft(Offset.zero)).distance;
   final double d2 = (position - bounds.topRight(Offset.zero)).distance;
   final double d3 = (position - bounds.bottomLeft(Offset.zero)).distance;
@@ -47,17 +47,17 @@ class _InkSplashFactory extends InteractiveInkFeatureFactory {
 
   @override
   InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Offset position,
-    required Color color,
-    required TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    VoidCallback? onRemoved,
+    required final MaterialInkController controller,
+    required final RenderBox referenceBox,
+    required final Offset position,
+    required final Color color,
+    required final TextDirection textDirection,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final double? radius,
+    final VoidCallback? onRemoved,
   }) {
     return InkSplash(
       controller: controller,
@@ -114,16 +114,16 @@ class InkSplash extends InteractiveInkFeature {
   ///
   /// When the splash is removed, `onRemoved` will be called.
   InkSplash({
-    required MaterialInkController controller,
+    required final MaterialInkController controller,
     required super.referenceBox,
-    required TextDirection textDirection,
-    Offset? position,
-    required Color color,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
+    required final TextDirection textDirection,
+    final Offset? position,
+    required final Color color,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
     super.customBorder,
-    double? radius,
+    final double? radius,
     super.onRemoved,
   }) : _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
@@ -181,7 +181,7 @@ class InkSplash extends InteractiveInkFeature {
     _alphaController?.forward();
   }
 
-  void _handleAlphaStatusChanged(AnimationStatus status) {
+  void _handleAlphaStatusChanged(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       dispose();
     }
@@ -196,7 +196,7 @@ class InkSplash extends InteractiveInkFeature {
   }
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {
+  void paintFeature(final Canvas canvas, final Matrix4 transform) {
     final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     Offset? center = _position;
     if (_repositionToReferenceBox) {

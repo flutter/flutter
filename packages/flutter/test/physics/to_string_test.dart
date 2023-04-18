@@ -7,13 +7,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 class TestSimulation extends Simulation {
   @override
-  double x(double t) => 0.0;
+  double x(final double t) => 0.0;
 
   @override
-  double dx(double t) => 0.0;
+  double dx(final double t) => 0.0;
 
   @override
-  bool isDone(double t) => true;
+  bool isDone(final double t) => true;
 }
 
 void main() {

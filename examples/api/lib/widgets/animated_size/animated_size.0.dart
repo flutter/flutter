@@ -12,7 +12,7 @@ class AnimatedSizeExampleApp extends StatelessWidget {
   const AnimatedSizeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedSize Sample')),
@@ -43,7 +43,7 @@ class _AnimatedSizeExampleState extends State<AnimatedSizeExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: () => _updateSize(),
       child: ColoredBox(

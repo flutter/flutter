@@ -34,7 +34,7 @@ class _StorageEntryIdentifier {
   bool get isNotEmpty => keys.isNotEmpty;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -56,7 +56,7 @@ class _StorageEntryIdentifier {
 /// Useful for storing per-page state that persists across navigations from one
 /// page to another.
 class PageStorageBucket {
-  static bool _maybeAddKey(BuildContext context, List<PageStorageKey<dynamic>> keys) {
+  static bool _maybeAddKey(final BuildContext context, final List<PageStorageKey<dynamic>> keys) {
     final Widget widget = context.widget;
     final Key? key = widget.key;
     if (key is PageStorageKey) {
@@ -65,17 +65,17 @@ class PageStorageBucket {
     return widget is! PageStorage;
   }
 
-  List<PageStorageKey<dynamic>> _allKeys(BuildContext context) {
+  List<PageStorageKey<dynamic>> _allKeys(final BuildContext context) {
     final List<PageStorageKey<dynamic>> keys = <PageStorageKey<dynamic>>[];
     if (_maybeAddKey(context, keys)) {
-      context.visitAncestorElements((Element element) {
+      context.visitAncestorElements((final Element element) {
         return _maybeAddKey(element, keys);
       });
     }
     return keys;
   }
 
-  _StorageEntryIdentifier _computeIdentifier(BuildContext context) {
+  _StorageEntryIdentifier _computeIdentifier(final BuildContext context) {
     return _StorageEntryIdentifier(_allKeys(context));
   }
 
@@ -89,7 +89,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then the `data` is not saved.
-  void writeState(BuildContext context, dynamic data, { Object? identifier }) {
+  void writeState(final BuildContext context, final dynamic data, { final Object? identifier }) {
     _storage ??= <Object, dynamic>{};
     if (identifier != null) {
       _storage![identifier] = data;
@@ -109,7 +109,7 @@ class PageStorageBucket {
   ///
   /// If an explicit identifier is not provided and no [PageStorageKey]s
   /// are found, then null is returned.
-  dynamic readState(BuildContext context, { Object? identifier }) {
+  dynamic readState(final BuildContext context, { final Object? identifier }) {
     if (_storage == null) {
       return null;
     }
@@ -190,7 +190,7 @@ class PageStorage extends StatelessWidget {
   ///
   /// * [PageStorage.of], which is similar to this method, but
   ///   asserts if no [PageStorage] ancestor is found.
-  static PageStorageBucket? maybeOf(BuildContext context) {
+  static PageStorageBucket? maybeOf(final BuildContext context) {
     final PageStorage? widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;
   }
@@ -213,7 +213,7 @@ class PageStorage extends StatelessWidget {
   ///
   /// * [PageStorage.maybeOf], which is similar to this method, but
   ///   returns null if no [PageStorage] ancestor is found.
-  static PageStorageBucket of(BuildContext context) {
+  static PageStorageBucket of(final BuildContext context) {
     final PageStorageBucket? bucket = maybeOf(context);
     assert(() {
       if (bucket == null) {
@@ -234,5 +234,5 @@ class PageStorage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }

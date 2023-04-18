@@ -20,7 +20,7 @@ abstract class StatusTransitionWidget extends StatefulWidget {
 
   /// Override this method to build widgets that depend on the current status
   /// of the animation.
-  Widget build(BuildContext context);
+  Widget build(final BuildContext context);
 
   @override
   State<StatusTransitionWidget> createState() => _StatusTransitionState();
@@ -34,7 +34,7 @@ class _StatusTransitionState extends State<StatusTransitionWidget> {
   }
 
   @override
-  void didUpdateWidget(StatusTransitionWidget oldWidget) {
+  void didUpdateWidget(final StatusTransitionWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation.removeStatusListener(_animationStatusChanged);
@@ -48,14 +48,14 @@ class _StatusTransitionState extends State<StatusTransitionWidget> {
     super.dispose();
   }
 
-  void _animationStatusChanged(AnimationStatus status) {
+  void _animationStatusChanged(final AnimationStatus status) {
     setState(() {
       // The animation's state is our build state, and it changed already.
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.build(context);
   }
 }

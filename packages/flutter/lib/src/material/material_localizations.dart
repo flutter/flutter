@@ -63,16 +63,16 @@ abstract class MaterialLocalizations {
   String get showMenuTooltip;
 
   /// The default title for [AboutListTile].
-  String aboutListTileTitle(String applicationName);
+  String aboutListTileTitle(final String applicationName);
 
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
   /// Subtitle for a package in the [LicensePage] widget.
-  String licensesPackageDetailText(int licenseCount);
+  String licensesPackageDetailText(final int licenseCount);
 
   /// Title for the [PaginatedDataTable]'s row info footer.
-  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate);
+  String pageRowsInfoTitle(final int firstRow, final int lastRow, final int rowCount, final bool rowCountIsApproximate);
 
   /// Title for the [PaginatedDataTable]'s "rows per page" footer.
   String get rowsPerPageTitle;
@@ -83,10 +83,10 @@ abstract class MaterialLocalizations {
   /// there are, e.g. 'Tab 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({ required int tabIndex, required int tabCount });
+  String tabLabel({ required final int tabIndex, required final int tabCount });
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
-  String selectedRowCountTitle(int selectedRowCount);
+  String selectedRowCountTitle(final int selectedRowCount);
 
   /// Label for "cancel" buttons and menu items.
   String get cancelButtonLabel;
@@ -171,13 +171,13 @@ abstract class MaterialLocalizations {
 
   /// Hint text announced when tapping on the scrim underneath the content of
   /// a modal route.
-  String scrimOnTapHint(String modalRouteContentName);
+  String scrimOnTapHint(final String modalRouteContentName);
 
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false });
+  TimeOfDayFormat timeOfDayFormat({ final bool alwaysUse24HourFormat = false });
 
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
@@ -193,18 +193,18 @@ abstract class MaterialLocalizations {
 
   /// Formats [number] as a decimal, inserting locale-appropriate thousands
   /// separators as necessary.
-  String formatDecimal(int number);
+  String formatDecimal(final int number);
 
   /// Formats [TimeOfDay.hour] in the given time of day according to the value
   /// of [timeOfDayFormat].
   ///
   /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
   /// rather than the default for the current locale.
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
+  String formatHour(final TimeOfDay timeOfDay, { final bool alwaysUse24HourFormat = false });
 
   /// Formats [TimeOfDay.minute] in the given time of day according to the value
   /// of [timeOfDayFormat].
-  String formatMinute(TimeOfDay timeOfDay);
+  String formatMinute(final TimeOfDay timeOfDay);
 
   /// Formats [timeOfDay] according to the value of [timeOfDayFormat].
   ///
@@ -212,10 +212,10 @@ abstract class MaterialLocalizations {
   /// rather than the default for the current locale. This value is usually
   /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
   /// specific behavior.
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false });
+  String formatTimeOfDay(final TimeOfDay timeOfDay, { final bool alwaysUse24HourFormat = false });
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
-  String formatYear(DateTime date);
+  String formatYear(final DateTime date);
 
   /// Formats the date in a compact format.
   ///
@@ -228,7 +228,7 @@ abstract class MaterialLocalizations {
   ///
   /// See also:
   ///   * [parseCompactDate], which will convert a compact date string to a [DateTime].
-  String formatCompactDate(DateTime date);
+  String formatCompactDate(final DateTime date);
 
   /// Formats the date using a short-width format.
   ///
@@ -238,7 +238,7 @@ abstract class MaterialLocalizations {
   ///
   /// - US English: Feb 21, 2019
   /// - Russian: 21 февр. 2019 г.
-  String formatShortDate(DateTime date);
+  String formatShortDate(final DateTime date);
 
   /// Formats the date using a medium-width format.
   ///
@@ -249,7 +249,7 @@ abstract class MaterialLocalizations {
   ///
   /// - US English: Wed, Sep 27
   /// - Russian: ср, сент. 27
-  String formatMediumDate(DateTime date);
+  String formatMediumDate(final DateTime date);
 
   /// Formats day of week, month, day of month and year in a long-width format.
   ///
@@ -260,13 +260,13 @@ abstract class MaterialLocalizations {
   ///
   /// - US English: Wednesday, September 27, 2017
   /// - Russian: Среда, Сентябрь 27, 2017
-  String formatFullDate(DateTime date);
+  String formatFullDate(final DateTime date);
 
   /// Formats the month and the year of the given [date].
   ///
   /// The returned string does not contain the day of the month. This appears
   /// in the date picker invoked using [showDatePicker].
-  String formatMonthYear(DateTime date);
+  String formatMonthYear(final DateTime date);
 
   /// Formats the month and day of the given [date].
   ///
@@ -274,7 +274,7 @@ abstract class MaterialLocalizations {
   ///
   /// - US English: Feb 21
   /// - Russian: 21 февр.
-  String formatShortMonthDay(DateTime date);
+  String formatShortMonthDay(final DateTime date);
 
   /// Converts the given compact date formatted string into a [DateTime].
   ///
@@ -284,7 +284,7 @@ abstract class MaterialLocalizations {
   ///
   /// See also:
   ///   * [formatCompactDate], which will convert a [DateTime] into a string in the compact format.
-  DateTime? parseCompactDate(String? inputString);
+  DateTime? parseCompactDate(final String? inputString);
 
   /// List of week day names in narrow format, usually 1- or 2-letter
   /// abbreviations of full names.
@@ -346,11 +346,11 @@ abstract class MaterialLocalizations {
 
   /// The semantics label used for the selected start date in the date range
   /// picker's day grid.
-  String dateRangeStartDateSemanticLabel(String formattedDate);
+  String dateRangeStartDateSemanticLabel(final String formattedDate);
 
   /// The semantics label used for the selected end date in the date range
   /// picker's day grid.
-  String dateRangeEndDateSemanticLabel(String formattedDate);
+  String dateRangeEndDateSemanticLabel(final String formattedDate);
 
   /// Error message displayed to the user when they have entered a text string
   /// in an [InputDatePickerFormField] that is not in a valid date format.
@@ -501,7 +501,7 @@ abstract class MaterialLocalizations {
   String get collapsedHint => 'Expanded';
 
   /// The label for the [TextField]'s character counter.
-  String remainingTextFieldCharacterCount(int remaining);
+  String remainingTextFieldCharacterCount(final int remaining);
 
   /// The default semantics label for a [RefreshIndicator].
   String get refreshIndicatorSemanticLabel;
@@ -662,7 +662,7 @@ abstract class MaterialLocalizations {
   /// ```dart
   /// tooltip: MaterialLocalizations.of(context).backButtonTooltip,
   /// ```
-  static MaterialLocalizations of(BuildContext context) {
+  static MaterialLocalizations of(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     return Localizations.of<MaterialLocalizations>(context, MaterialLocalizations)!;
   }
@@ -672,13 +672,13 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   const _MaterialLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => locale.languageCode == 'en';
+  bool isSupported(final Locale locale) => locale.languageCode == 'en';
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(final Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
-  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+  bool shouldReload(final _MaterialLocalizationsDelegate old) => false;
 
   @override
   String toString() => 'DefaultMaterialLocalizations.delegate(en_US)';
@@ -767,7 +767,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
-  int _getDaysInMonth(int year, int month) {
+  int _getDaysInMonth(final int year, final int month) {
     if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) ||
           (year % 400 == 0);
@@ -781,7 +781,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatHour(final TimeOfDay timeOfDay, { final bool alwaysUse24HourFormat = false }) {
     final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
     switch (format) {
       case TimeOfDayFormat.h_colon_mm_space_a:
@@ -798,7 +798,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   /// Formats [number] using two digits, assuming it's in the 0-99 inclusive
   /// range. Not designed to format values outside this range.
-  String _formatTwoDigitZeroPad(int number) {
+  String _formatTwoDigitZeroPad(final int number) {
     assert(0 <= number && number < 100);
 
     if (number < 10) {
@@ -809,16 +809,16 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatMinute(TimeOfDay timeOfDay) {
+  String formatMinute(final TimeOfDay timeOfDay) {
     final int minute = timeOfDay.minute;
     return minute < 10 ? '0$minute' : minute.toString();
   }
 
   @override
-  String formatYear(DateTime date) => date.year.toString();
+  String formatYear(final DateTime date) => date.year.toString();
 
   @override
-  String formatCompactDate(DateTime date) {
+  String formatCompactDate(final DateTime date) {
     // Assumes US mm/dd/yyyy format
     final String month = _formatTwoDigitZeroPad(date.month);
     final String day = _formatTwoDigitZeroPad(date.day);
@@ -827,39 +827,39 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatShortDate(DateTime date) {
+  String formatShortDate(final DateTime date) {
     final String month = _shortMonths[date.month - DateTime.january];
     return '$month ${date.day}, ${date.year}';
   }
 
   @override
-  String formatMediumDate(DateTime date) {
+  String formatMediumDate(final DateTime date) {
     final String day = _shortWeekdays[date.weekday - DateTime.monday];
     final String month = _shortMonths[date.month - DateTime.january];
     return '$day, $month ${date.day}';
   }
 
   @override
-  String formatFullDate(DateTime date) {
+  String formatFullDate(final DateTime date) {
     final String month = _months[date.month - DateTime.january];
     return '${_weekdays[date.weekday - DateTime.monday]}, $month ${date.day}, ${date.year}';
   }
 
   @override
-  String formatMonthYear(DateTime date) {
+  String formatMonthYear(final DateTime date) {
     final String year = formatYear(date);
     final String month = _months[date.month - DateTime.january];
     return '$month $year';
   }
 
   @override
-  String formatShortMonthDay(DateTime date) {
+  String formatShortMonthDay(final DateTime date) {
     final String month = _shortMonths[date.month - DateTime.january];
     return '$month ${date.day}';
   }
 
   @override
-  DateTime? parseCompactDate(String? inputString) {
+  DateTime? parseCompactDate(final String? inputString) {
     if (inputString == null) {
       return null;
     }
@@ -918,10 +918,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndLabel => 'End Date';
 
   @override
-  String dateRangeStartDateSemanticLabel(String formattedDate) => 'Start date $formattedDate';
+  String dateRangeStartDateSemanticLabel(final String formattedDate) => 'Start date $formattedDate';
 
   @override
-  String dateRangeEndDateSemanticLabel(String formattedDate) => 'End date $formattedDate';
+  String dateRangeEndDateSemanticLabel(final String formattedDate) => 'End date $formattedDate';
 
   @override
   String get invalidDateFormatLabel => 'Invalid format.';
@@ -968,7 +968,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String get inputTimeModeButtonLabel => 'Switch to text input mode';
 
-  String _formatDayPeriod(TimeOfDay timeOfDay) {
+  String _formatDayPeriod(final TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
       case DayPeriod.am:
         return anteMeridiemAbbreviation;
@@ -978,7 +978,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatDecimal(int number) {
+  String formatDecimal(final int number) {
     if (number > -1000 && number < 1000) {
       return number.toString();
     }
@@ -996,7 +996,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatTimeOfDay(final TimeOfDay timeOfDay, { final bool alwaysUse24HourFormat = false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -1089,16 +1089,16 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get bottomSheetLabel => 'Bottom Sheet';
 
   @override
-  String scrimOnTapHint(String modalRouteContentName) => 'Close $modalRouteContentName';
+  String scrimOnTapHint(final String modalRouteContentName) => 'Close $modalRouteContentName';
 
   @override
-  String aboutListTileTitle(String applicationName) => 'About $applicationName';
+  String aboutListTileTitle(final String applicationName) => 'About $applicationName';
 
   @override
   String get licensesPageTitle => 'Licenses';
 
   @override
-  String licensesPackageDetailText(int licenseCount) {
+  String licensesPackageDetailText(final int licenseCount) {
     assert(licenseCount >= 0);
     switch (licenseCount) {
       case 0:
@@ -1111,7 +1111,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
+  String pageRowsInfoTitle(final int firstRow, final int lastRow, final int rowCount, final bool rowCountIsApproximate) {
     return rowCountIsApproximate
       ? '$firstRow–$lastRow of about $rowCount'
       : '$firstRow–$lastRow of $rowCount';
@@ -1121,14 +1121,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String tabLabel({ required int tabIndex, required int tabCount }) {
+  String tabLabel({ required final int tabIndex, required final int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';
   }
 
   @override
-  String selectedRowCountTitle(int selectedRowCount) {
+  String selectedRowCountTitle(final int selectedRowCount) {
     switch (selectedRowCount) {
       case 0:
         return 'No items selected';
@@ -1185,7 +1185,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
 
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
+  TimeOfDayFormat timeOfDayFormat({ final bool alwaysUse24HourFormat = false }) {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
       : TimeOfDayFormat.h_colon_mm_space_a;
@@ -1252,7 +1252,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [MaterialApp] does so by default.
-  static Future<MaterialLocalizations> load(Locale locale) {
+  static Future<MaterialLocalizations> load(final Locale locale) {
     return SynchronousFuture<MaterialLocalizations>(const DefaultMaterialLocalizations());
   }
 
@@ -1263,7 +1263,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   static const LocalizationsDelegate<MaterialLocalizations> delegate = _MaterialLocalizationsDelegate();
 
   @override
-  String remainingTextFieldCharacterCount(int remaining) {
+  String remainingTextFieldCharacterCount(final int remaining) {
     switch (remaining) {
       case 0:
         return 'No characters remaining';

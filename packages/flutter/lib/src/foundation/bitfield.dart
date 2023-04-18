@@ -21,7 +21,7 @@ abstract class BitField<T extends dynamic> {
   /// Creates a bit field of all zeros.
   ///
   /// The given length must be at most 62.
-  factory BitField(int length) = bitfield.BitField<T>;
+  factory BitField(final int length) = bitfield.BitField<T>;
 
   /// Creates a bit field filled with a particular value.
   ///
@@ -29,20 +29,20 @@ abstract class BitField<T extends dynamic> {
   /// the bits are filled with zeros.
   ///
   /// The given length must be at most 62.
-  factory BitField.filled(int length, bool value) = bitfield.BitField<T>.filled;
+  factory BitField.filled(final int length, final bool value) = bitfield.BitField<T>.filled;
 
   /// Returns whether the bit with the given index is set to one.
-  bool operator [](T index);
+  bool operator [](final T index);
 
   /// Sets the bit with the given index to the given value.
   ///
   /// If value is true, the bit with the given index is set to one. Otherwise,
   /// the bit is set to zero.
-  void operator []=(T index, bool value);
+  void operator []=(final T index, final bool value);
 
   /// Sets all the bits to the given value.
   ///
   /// If the value is true, the bits are all set to one. Otherwise, the bits are
   /// all set to zero. Defaults to setting all the bits to zero.
-  void reset([ bool value = false ]);
+  void reset([ final bool value = false ]);
 }

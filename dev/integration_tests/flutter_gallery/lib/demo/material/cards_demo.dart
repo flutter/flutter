@@ -72,7 +72,7 @@ class TravelDestinationItem extends StatelessWidget {
   final ShapeBorder? shape;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SafeArea(
       top: false,
       bottom: false,
@@ -106,7 +106,7 @@ class TappableTravelDestinationItem extends StatelessWidget {
   final ShapeBorder? shape;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SafeArea(
       top: false,
       bottom: false,
@@ -157,7 +157,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
   bool _isSelected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return SafeArea(
@@ -226,7 +226,7 @@ class SectionTitle extends StatelessWidget {
   final String? title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 12.0),
       child: Align(
@@ -243,7 +243,7 @@ class TravelDestinationContent extends StatelessWidget {
   final TravelDestination destination;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle titleStyle = theme.textTheme.headlineSmall!.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.titleMedium!;
@@ -347,7 +347,7 @@ class _CardsDemoState extends State<CardsDemo> {
   ShapeBorder? _shape;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cards'),
@@ -377,7 +377,7 @@ class _CardsDemoState extends State<CardsDemo> {
         child: ListView(
           primary: true,
           padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-          children: destinations.map<Widget>((TravelDestination destination) {
+          children: destinations.map<Widget>((final TravelDestination destination) {
             Widget? child;
             switch (destination.type) {
               case CardDemoType.standard:

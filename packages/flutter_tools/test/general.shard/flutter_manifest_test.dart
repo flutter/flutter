@@ -1508,34 +1508,34 @@ name: test
 }
 
 Matcher matchesManifest({
-  String? appVersion,
-  String? buildName,
-  String? buildNumber,
+  final String? appVersion,
+  final String? buildName,
+  final String? buildNumber,
 }) {
   return isA<FlutterManifest>()
-    .having((FlutterManifest manifest) => manifest.appVersion, 'appVersion', appVersion)
-    .having((FlutterManifest manifest) => manifest.buildName, 'buildName', buildName)
-    .having((FlutterManifest manifest) => manifest.buildNumber, 'buildNumber', buildNumber);
+    .having((final FlutterManifest manifest) => manifest.appVersion, 'appVersion', appVersion)
+    .having((final FlutterManifest manifest) => manifest.buildName, 'buildName', buildName)
+    .having((final FlutterManifest manifest) => manifest.buildNumber, 'buildNumber', buildNumber);
 }
 
 Matcher matchesFontAsset({
-  required Uri assetUri,
-  int? weight,
-  String? style,
+  required final Uri assetUri,
+  final int? weight,
+  final String? style,
 }) {
   return isA<FontAsset>()
-    .having((FontAsset fontAsset) => fontAsset.assetUri, 'assetUri', assetUri)
-    .having((FontAsset fontAsset) => fontAsset.weight, 'weight', weight)
-    .having((FontAsset fontAsset) => fontAsset.style, 'style', style);
+    .having((final FontAsset fontAsset) => fontAsset.assetUri, 'assetUri', assetUri)
+    .having((final FontAsset fontAsset) => fontAsset.weight, 'weight', weight)
+    .having((final FontAsset fontAsset) => fontAsset.style, 'style', style);
 }
 
 Matcher matchesFont({
-  required Map<String, Object> descriptor,
-  required String familyName,
-  required List<Matcher> fontAssets,
+  required final Map<String, Object> descriptor,
+  required final String familyName,
+  required final List<Matcher> fontAssets,
 }) {
   return isA<Font>()
-    .having((Font font) => font.descriptor, 'descriptor', descriptor)
-    .having((Font font) => font.familyName, 'familyName', familyName)
-    .having((Font font) => font.fontAssets, 'fontAssets', containsAll(fontAssets));
+    .having((final Font font) => font.descriptor, 'descriptor', descriptor)
+    .having((final Font font) => font.familyName, 'familyName', familyName)
+    .having((final Font font) => font.fontAssets, 'fontAssets', containsAll(fontAssets));
 }

@@ -67,9 +67,9 @@ class AppContext {
   /// Bootstrap context.
   static final AppContext _root = AppContext._(null, 'ROOT');
 
-  dynamic _boxNull(dynamic value) => value ?? _BoxedNull.instance;
+  dynamic _boxNull(final dynamic value) => value ?? _BoxedNull.instance;
 
-  dynamic _unboxNull(dynamic value) => value == _BoxedNull.instance ? null : value;
+  dynamic _unboxNull(final dynamic value) => value == _BoxedNull.instance ? null : value;
 
   /// Returns the generated value for [type] if such a generator exists.
   ///
@@ -84,7 +84,7 @@ class AppContext {
   ///
   /// If the generator ends up triggering a reentrant call, it signals a
   /// dependency cycle, and a [ContextDependencyCycleException] will be thrown.
-  dynamic _generateIfNecessary(Type type, Map<Type, Generator> generators) {
+  dynamic _generateIfNecessary(final Type type, final Map<Type, Generator> generators) {
     if (!generators.containsKey(type)) {
       return null;
     }
@@ -134,11 +134,11 @@ class AppContext {
   /// name. This is useful for debugging purposes and is analogous to naming a
   /// thread in Java.
   Future<V> run<V>({
-    required FutureOr<V> Function() body,
-    String? name,
-    Map<Type, Generator>? overrides,
-    Map<Type, Generator>? fallbacks,
-    ZoneSpecification? zoneSpecification,
+    required final FutureOr<V> Function() body,
+    final String? name,
+    final Map<Type, Generator>? overrides,
+    final Map<Type, Generator>? fallbacks,
+    final ZoneSpecification? zoneSpecification,
   }) async {
     final AppContext child = AppContext._(
       this,

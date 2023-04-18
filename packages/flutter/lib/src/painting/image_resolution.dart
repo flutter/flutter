@@ -270,7 +270,7 @@ class AssetImage extends AssetBundleImageProvider {
   static const double _naturalResolution = 1.0;
 
   @override
-  Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration) {
+  Future<AssetBundleImageKey> obtainKey(final ImageConfiguration configuration) {
     // This function tries to return a SynchronousFuture if possible. We do this
     // because otherwise showing an image would always take at least one frame,
     // which would be sad. (This code is called from inside build/layout/paint,
@@ -282,7 +282,7 @@ class AssetImage extends AssetBundleImageProvider {
     Future<AssetBundleImageKey>? result;
 
     AssetManifest.loadFromAssetBundle(chosenBundle)
-      .then((AssetManifest manifest) {
+      .then((final AssetManifest manifest) {
         final Iterable<AssetMetadata>? candidateVariants = manifest.getAssetVariants(keyName);
         final AssetMetadata chosenVariant = _chooseVariant(
           keyName,
@@ -307,7 +307,7 @@ class AssetImage extends AssetBundleImageProvider {
           result = SynchronousFuture<AssetBundleImageKey>(key);
         }
       })
-      .onError((Object error, StackTrace stack) {
+      .onError((final Object error, final StackTrace stack) {
         // We had an error. (This guarantees we weren't called synchronously.)
         // Forward the error to the caller.
         assert(completer != null);
@@ -326,13 +326,13 @@ class AssetImage extends AssetBundleImageProvider {
     return completer.future;
   }
 
-  AssetMetadata _chooseVariant(String mainAssetKey, ImageConfiguration config, Iterable<AssetMetadata>? candidateVariants) {
+  AssetMetadata _chooseVariant(final String mainAssetKey, final ImageConfiguration config, final Iterable<AssetMetadata>? candidateVariants) {
     if (candidateVariants == null) {
       return AssetMetadata(key: mainAssetKey, targetDevicePixelRatio: null, main: true);
     }
 
     if (config.devicePixelRatio == null) {
-      return candidateVariants.firstWhere((AssetMetadata variant) => variant.main);
+      return candidateVariants.firstWhere((final AssetMetadata variant) => variant.main);
     }
 
     final SplayTreeMap<double, AssetMetadata> candidatesByDevicePixelRatio =
@@ -358,7 +358,7 @@ class AssetImage extends AssetBundleImageProvider {
   //   lowest key higher than `value`.
   // - If the screen has high device pixel ratio, choose the variant with the
   //   key nearest to `value`.
-  AssetMetadata _findBestVariant(SplayTreeMap<double, AssetMetadata> candidatesByDpr, double value) {
+  AssetMetadata _findBestVariant(final SplayTreeMap<double, AssetMetadata> candidatesByDpr, final double value) {
     if (candidatesByDpr.containsKey(value)) {
       return candidatesByDpr[value]!;
     }
@@ -383,7 +383,7 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

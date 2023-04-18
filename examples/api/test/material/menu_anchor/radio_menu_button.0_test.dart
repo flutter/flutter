@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/menu_anchor/radio_menu_button.0.dar
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can open menu', (WidgetTester tester) async {
+  testWidgets('Can open menu', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MenuApp(),
     );
@@ -29,7 +29,7 @@ void main() {
     expect(tester.widget<Container>(find.byType(Container)).color, equals(Colors.green));
   });
 
-  testWidgets('Shortcuts work', (WidgetTester tester) async {
+  testWidgets('Shortcuts work', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MenuApp(),
     );

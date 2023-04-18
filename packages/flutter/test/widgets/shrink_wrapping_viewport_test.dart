@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/rendering_tester.dart' show TestClipPaintingContext;
 
 void main() {
-  testWidgets('ShrinkWrappingViewport respects clipBehavior', (WidgetTester tester) async {
-    Widget build(ShrinkWrappingViewport child) {
+  testWidgets('ShrinkWrappingViewport respects clipBehavior', (final WidgetTester tester) async {
+    Widget build(final ShrinkWrappingViewport child) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: child,

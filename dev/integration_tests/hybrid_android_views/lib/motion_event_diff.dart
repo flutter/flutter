@@ -16,8 +16,8 @@ const List<int> kPointerActions = <int>[
 const double kDoubleErrorMargin = 1e-4;
 
 String diffMotionEvents(
-  Map<String, dynamic> originalEvent,
-  Map<String, dynamic> synthesizedEvent,
+  final Map<String, dynamic> originalEvent,
+  final Map<String, dynamic> synthesizedEvent,
 ) {
   final StringBuffer diff = StringBuffer();
 
@@ -36,8 +36,8 @@ String diffMotionEvents(
   return diff.toString();
 }
 
-void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
-    Map<String, dynamic> synthesizedEvent) {
+void diffActions(final StringBuffer diffBuffer, final Map<String, dynamic> originalEvent,
+    final Map<String, dynamic> synthesizedEvent) {
   final int synthesizedActionMasked =
       getActionMasked(synthesizedEvent['action'] as int);
   final int originalActionMasked = getActionMasked(originalEvent['action'] as int);
@@ -62,8 +62,8 @@ void diffActions(StringBuffer diffBuffer, Map<String, dynamic> originalEvent,
   }
 }
 
-void diffPointerProperties(StringBuffer diffBuffer,
-    Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
+void diffPointerProperties(final StringBuffer diffBuffer,
+    final Map<String, dynamic> originalEvent, final Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
       (originalEvent['pointerProperties'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
@@ -84,8 +84,8 @@ void diffPointerProperties(StringBuffer diffBuffer,
   }
 }
 
-void diffPointerCoordsList(StringBuffer diffBuffer,
-    Map<String, dynamic> originalEvent, Map<String, dynamic> synthesizedEvent) {
+void diffPointerCoordsList(final StringBuffer diffBuffer,
+    final Map<String, dynamic> originalEvent, final Map<String, dynamic> synthesizedEvent) {
   final List<Map<dynamic, dynamic>> expectedList =
       (originalEvent['pointerCoords'] as List<dynamic>).cast<Map<dynamic, dynamic>>();
   final List<Map<dynamic, dynamic>> actualList =
@@ -105,17 +105,17 @@ void diffPointerCoordsList(StringBuffer diffBuffer,
   }
 }
 
-void diffPointerCoords(Map<String, dynamic> expected,
-    Map<String, dynamic> actual, int pointerIdx, StringBuffer diffBuffer) {
+void diffPointerCoords(final Map<String, dynamic> expected,
+    final Map<String, dynamic> actual, final int pointerIdx, final StringBuffer diffBuffer) {
   diffMaps(expected, actual, diffBuffer, messagePrefix: '[pointerCoord $pointerIdx] ');
 }
 
 void diffMaps(
-  Map<String, dynamic> expected,
-  Map<String, dynamic> actual,
-  StringBuffer diffBuffer, {
-  List<String> excludeKeys = const <String>[],
-  String messagePrefix = '',
+  final Map<String, dynamic> expected,
+  final Map<String, dynamic> actual,
+  final StringBuffer diffBuffer, {
+  final List<String> excludeKeys = const <String>[],
+  final String messagePrefix = '',
 }) {
   const IterableEquality<String> eq = IterableEquality<String>();
   if (!eq.equals(expected.keys, actual.keys)) {
@@ -138,11 +138,11 @@ void diffMaps(
   }
 }
 
-int getActionMasked(int action) => action & 0xff;
+int getActionMasked(final int action) => action & 0xff;
 
-int getPointerIdx(int action) => (action >> 8) & 0xff;
+int getPointerIdx(final int action) => (action >> 8) & 0xff;
 
-String getActionName(int actionMasked, int action) {
+String getActionName(final int actionMasked, final int action) {
   const List<String> actionNames = <String>[
     'DOWN',
     'UP',
@@ -165,5 +165,5 @@ String getActionName(int actionMasked, int action) {
   }
 }
 
-bool doublesApproximatelyMatch(dynamic a, dynamic b) =>
+bool doublesApproximatelyMatch(final dynamic a, final dynamic b) =>
     a is double && b is double && (a - b).abs() < kDoubleErrorMargin;

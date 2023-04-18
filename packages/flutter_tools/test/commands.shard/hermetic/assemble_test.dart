@@ -40,7 +40,7 @@ void main() {
 
   testUsingContext('flutter assemble can parse defines whose values contain =', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      buildSystem: TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
         expect(environment.defines, containsPair('FooBar', 'fizz=2'));
       })
     ));
@@ -55,7 +55,7 @@ void main() {
 
   testUsingContext('flutter assemble can parse inputs', () async {
     final AssembleCommand command = AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      buildSystem: TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
         expect(environment.inputs, containsPair('Foo', 'Bar.txt'));
     }));
     final CommandRunner<void> commandRunner = createTestCommandRunner(command);
@@ -186,7 +186,7 @@ void main() {
 
   testUsingContext('flutter assemble does not inject engine revision with local-engine', () async {
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
-      buildSystem: TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+      buildSystem: TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
         expect(environment.engineVersion, isNull);
       })
     ));

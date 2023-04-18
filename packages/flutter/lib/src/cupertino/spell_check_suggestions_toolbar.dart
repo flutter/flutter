@@ -45,8 +45,8 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-    BuildContext context,
-    EditableTextState editableTextState,
+    final BuildContext context,
+    final EditableTextState editableTextState,
   ) {
     // Determine if composing region is misspelled.
     final SuggestionSpan? spanAtCursorIndex =
@@ -94,7 +94,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     return buttonItems;
   }
 
-  static void _replaceText(EditableTextState editableTextState, String text, TextRange replacementRange) {
+  static void _replaceText(final EditableTextState editableTextState, final String text, final TextRange replacementRange) {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
 
@@ -105,7 +105,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     editableTextState.userUpdateTextEditingValue(newValue,SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((final Duration duration) {
       if (editableTextState.mounted) {
         editableTextState.bringIntoView(editableTextState.textEditingValue.selection.extent);
       }
@@ -115,8 +115,8 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   }
 
   /// Builds the toolbar buttons based on the [buttonItems].
-  List<Widget> _buildToolbarButtons(BuildContext context) {
-    return buttonItems.map((ContextMenuButtonItem buttonItem) {
+  List<Widget> _buildToolbarButtons(final BuildContext context) {
+    return buttonItems.map((final ContextMenuButtonItem buttonItem) {
       return CupertinoTextSelectionToolbarButton.buttonItem(
         buttonItem: buttonItem,
       );
@@ -124,7 +124,7 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<Widget> children = _buildToolbarButtons(context);
     return CupertinoTextSelectionToolbar(
       anchorAbove: anchors.primaryAnchor,

@@ -45,7 +45,7 @@ class BenchDrawRect extends SceneBuilderRecorder {
 
   static final Paint _staticPaint = Paint()..color = const Color.fromARGB(255, 255, 0, 0);
 
-  Paint makePaint(int row, int col) {
+  Paint makePaint(final int row, final int col) {
     if (benchmarkPaint) {
       final Paint paint = Paint();
       final double rowRatio = row / kRows;
@@ -64,7 +64,7 @@ class BenchDrawRect extends SceneBuilderRecorder {
   }
 
   @override
-  void onDrawFrame(SceneBuilder sceneBuilder) {
+  void onDrawFrame(final SceneBuilder sceneBuilder) {
     final PictureRecorder pictureRecorder = PictureRecorder();
     final Canvas canvas = Canvas(pictureRecorder);
     final Size viewSize = view.physicalSize;

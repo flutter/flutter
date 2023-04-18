@@ -22,7 +22,7 @@ void main() {
   const Duration kScrollbarResizeDuration = Duration(milliseconds: 100);
   const Duration kLongPressDuration = Duration(milliseconds: 100);
 
-  testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
+  testWidgets('Scrollbar never goes away until finger lift', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -60,14 +60,14 @@ void main() {
     ));
   });
 
-  testWidgets('Scrollbar dark mode', (WidgetTester tester) async {
+  testWidgets('Scrollbar dark mode', (final WidgetTester tester) async {
     Brightness brightness = Brightness.light;
     late StateSetter setState;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (final BuildContext context, final StateSetter setter) {
             setState = setter;
             return MediaQuery(
               data: MediaQueryData(platformBrightness: brightness),
@@ -97,7 +97,7 @@ void main() {
     ));
   });
 
-  testWidgets('Scrollbar thumb can be dragged with long press', (WidgetTester tester) async {
+  testWidgets('Scrollbar thumb can be dragged with long press', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -133,7 +133,7 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -169,7 +169,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgets('Scrollbar thumb can be dragged with long press - reverse', (WidgetTester tester) async {
+  testWidgets('Scrollbar thumb can be dragged with long press - reverse', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -208,7 +208,7 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -244,7 +244,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgets('Scrollbar changes thickness and radius when dragged', (WidgetTester tester) async {
+  testWidgets('Scrollbar changes thickness and radius when dragged', (final WidgetTester tester) async {
     const double thickness = 20;
     const double thicknessWhileDragging = 40;
     const double radius = 10;
@@ -341,7 +341,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController', (final WidgetTester tester) async {
       Widget viewWithScroll() {
         return const Directionality(
           textDirection: TextDirection.ltr,
@@ -366,7 +366,7 @@ void main() {
     },
   );
 
-  testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
+  testWidgets('When thumbVisibility is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {
         return Directionality(
@@ -389,7 +389,7 @@ void main() {
 
       final FlutterExceptionHandler? handler = FlutterError.onError;
       FlutterErrorDetails? error;
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         error = details;
       };
 
@@ -400,7 +400,7 @@ void main() {
     },
   );
 
-  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController', (final WidgetTester tester) async {
       Widget viewWithScroll() {
         return const Directionality(
           textDirection: TextDirection.ltr,
@@ -425,7 +425,7 @@ void main() {
     },
   );
 
-  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (WidgetTester tester) async {
+  testWidgets('When isAlwaysShown is true, must pass a controller or find PrimaryScrollController that is attached to a scroll view', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {
         return Directionality(
@@ -448,7 +448,7 @@ void main() {
 
       final FlutterExceptionHandler? handler = FlutterError.onError;
       FlutterErrorDetails? error;
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         error = details;
       };
 
@@ -459,7 +459,7 @@ void main() {
     },
   );
 
-  testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: true, the thumb shows with PrimaryScrollController', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {
         return Directionality(
@@ -469,7 +469,7 @@ void main() {
             child: PrimaryScrollController(
               controller: controller,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return const CupertinoScrollbar(
                     thumbVisibility: true,
                     child: SingleChildScrollView(
@@ -493,7 +493,7 @@ void main() {
     },
   );
 
-  testWidgets('On first render with thumbVisibility: true, the thumb shows', (WidgetTester tester) async {
+  testWidgets('On first render with thumbVisibility: true, the thumb shows', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return Directionality(
@@ -526,7 +526,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows with PrimaryScrollController', (WidgetTester tester) async {
+  testWidgets('On first render with isAlwaysShown: true, the thumb shows with PrimaryScrollController', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       Widget viewWithScroll() {
         return Directionality(
@@ -536,7 +536,7 @@ void main() {
             child: PrimaryScrollController(
               controller: controller,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return const CupertinoScrollbar(
                     isAlwaysShown: true,
                     child: SingleChildScrollView(
@@ -560,7 +560,7 @@ void main() {
     },
   );
 
-  testWidgets('On first render with isAlwaysShown: true, the thumb shows', (WidgetTester tester) async {
+  testWidgets('On first render with isAlwaysShown: true, the thumb shows', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return Directionality(
@@ -593,7 +593,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
-  testWidgets('On first render with isAlwaysShown: false, the thumb is hidden', (WidgetTester tester) async {
+  testWidgets('On first render with isAlwaysShown: false, the thumb is hidden', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     Widget viewWithScroll() {
       return Directionality(
@@ -621,12 +621,12 @@ void main() {
     expect(find.byType(CupertinoScrollbar), isNot(paints..rect()));
   });
 
-  testWidgets('With isAlwaysShown: true, fling a scroll. While it is still scrolling, set isAlwaysShown: false. The thumb should not fade out until the scrolling stops.', (WidgetTester tester) async {
+  testWidgets('With isAlwaysShown: true, fling a scroll. While it is still scrolling, set isAlwaysShown: false. The thumb should not fade out until the scrolling stops.', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       bool isAlwaysShown = true;
       Widget viewWithScroll() {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
@@ -680,12 +680,12 @@ void main() {
 
   testWidgets(
     'With isAlwaysShown: false, set isAlwaysShown: true. The thumb should be always shown directly',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       bool isAlwaysShown = false;
       Widget viewWithScroll() {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
@@ -735,12 +735,12 @@ void main() {
   testWidgets(
     'With isAlwaysShown: false, fling a scroll. While it is still scrolling, set isAlwaysShown: true. '
     'The thumb should not fade even after the scrolling stops',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       bool isAlwaysShown = false;
       Widget viewWithScroll() {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
@@ -802,12 +802,12 @@ void main() {
   testWidgets(
     'Toggling isAlwaysShown while not scrolling fades the thumb in/out. '
     'This works even when you have never scrolled at all yet',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       bool isAlwaysShown = true;
       Widget viewWithScroll() {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Directionality(
               textDirection: TextDirection.ltr,
               child: MediaQuery(
@@ -854,7 +854,7 @@ void main() {
     },
   );
 
-  testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis', (WidgetTester tester) async {
+  testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -892,7 +892,7 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -928,7 +928,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis, reverse', (WidgetTester tester) async {
+  testWidgets('Scrollbar thumb can be dragged with long press - horizontal axis, reverse', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -967,7 +967,7 @@ void main() {
     await tester.pump();
 
     int hapticFeedbackCalls = 0;
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       if (methodCall.method == 'HapticFeedback.vibrate') {
         hapticFeedbackCalls += 1;
       }
@@ -1003,7 +1003,7 @@ void main() {
     await tester.pump(kScrollbarFadeDuration);
   });
 
-  testWidgets('Tapping the track area pages the Scroll View', (WidgetTester tester) async {
+  testWidgets('Tapping the track area pages the Scroll View', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -1062,7 +1062,7 @@ void main() {
     );
   });
 
-  testWidgets('Throw if interactive with the bar when no position attached', (WidgetTester tester) async {
+  testWidgets('Throw if interactive with the bar when no position attached', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
 
     await tester.pumpWidget(
@@ -1092,7 +1092,7 @@ void main() {
 
     final FlutterExceptionHandler? handler = FlutterError.onError;
     FlutterErrorDetails? error;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       error = details;
     };
 
@@ -1106,7 +1106,7 @@ void main() {
     FlutterError.onError = handler;
   });
 
-  testWidgets('Interactive scrollbars should have a valid scroll controller', (WidgetTester tester) async {
+  testWidgets('Interactive scrollbars should have a valid scroll controller', (final WidgetTester tester) async {
     final ScrollController primaryScrollController = ScrollController();
     final ScrollController scrollController = ScrollController();
 
@@ -1147,7 +1147,7 @@ void main() {
     );
   });
 
-  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (WidgetTester tester) async {
+  testWidgets('Simultaneous dragging and pointer scrolling does not cause a crash', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/70105
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
@@ -1258,7 +1258,7 @@ void main() {
     );
   });
 
-  testWidgets('CupertinoScrollbar scrollOrientation works correctly', (WidgetTester tester) async {
+  testWidgets('CupertinoScrollbar scrollOrientation works correctly', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
 
     await tester.pumpWidget(

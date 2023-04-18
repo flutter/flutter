@@ -22,40 +22,40 @@ class StockSettingsState extends State<StockSettings> {
     sendUpdates(widget.configuration.copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
   }
 
-  void _handleBackupChanged(bool value) {
+  void _handleBackupChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
   }
 
-  void _handleShowGridChanged(bool value) {
+  void _handleShowGridChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(debugShowGrid: value));
   }
 
-  void _handleShowSizesChanged(bool value) {
+  void _handleShowSizesChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(debugShowSizes: value));
   }
 
-  void _handleShowBaselinesChanged(bool value) {
+  void _handleShowBaselinesChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(debugShowBaselines: value));
   }
 
-  void _handleShowLayersChanged(bool value) {
+  void _handleShowLayersChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(debugShowLayers: value));
   }
 
-  void _handleShowPointersChanged(bool value) {
+  void _handleShowPointersChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(debugShowPointers: value));
   }
 
-  void _handleShowRainbowChanged(bool value) {
+  void _handleShowRainbowChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(debugShowRainbow: value));
   }
 
 
-  void _handleShowPerformanceOverlayChanged(bool value) {
+  void _handleShowPerformanceOverlayChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(showPerformanceOverlay: value));
   }
 
-  void _handleShowSemanticsDebuggerChanged(bool value) {
+  void _handleShowSemanticsDebuggerChanged(final bool value) {
     sendUpdates(widget.configuration.copyWith(showSemanticsDebugger: value));
   }
 
@@ -66,7 +66,7 @@ class StockSettingsState extends State<StockSettings> {
       case StockMode.pessimistic:
         showDialog<bool>(
           context: context,
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return AlertDialog(
               title: const Text('Change mode?'),
               content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
@@ -90,17 +90,17 @@ class StockSettingsState extends State<StockSettings> {
     }
   }
 
-  void sendUpdates(StockConfiguration value) {
+  void sendUpdates(final StockConfiguration value) {
     widget.updater(value);
   }
 
-  AppBar buildAppBar(BuildContext context) {
+  AppBar buildAppBar(final BuildContext context) {
     return AppBar(
       title: const Text('Settings'),
     );
   }
 
-  Widget buildSettingsPane(BuildContext context) {
+  Widget buildSettingsPane(final BuildContext context) {
     final List<Widget> rows = <Widget>[
       ListTile(
         leading: const Icon(Icons.thumb_up),
@@ -108,7 +108,7 @@ class StockSettingsState extends State<StockSettings> {
         onTap: _confirmOptimismChange,
         trailing: Checkbox(
           value: widget.configuration.stockMode == StockMode.optimistic,
-          onChanged: (bool? value) => _confirmOptimismChange(),
+          onChanged: (final bool? value) => _confirmOptimismChange(),
         ),
       ),
       ListTile(
@@ -206,7 +206,7 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(context),
       body: buildSettingsPane(context),

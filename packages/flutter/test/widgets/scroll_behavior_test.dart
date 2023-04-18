@@ -14,26 +14,26 @@ class TestScrollBehavior extends ScrollBehavior {
   final bool flag;
 
   @override
-  ScrollPhysics getScrollPhysics(BuildContext context) {
+  ScrollPhysics getScrollPhysics(final BuildContext context) {
     return flag
       ? const ClampingScrollPhysics()
       : const BouncingScrollPhysics();
   }
 
   @override
-  bool shouldNotify(TestScrollBehavior old) => flag != old.flag;
+  bool shouldNotify(final TestScrollBehavior old) => flag != old.flag;
 
   @override
-  GestureVelocityTrackerBuilder velocityTrackerBuilder(BuildContext context) {
+  GestureVelocityTrackerBuilder velocityTrackerBuilder(final BuildContext context) {
       lastCreatedBuilder = flag
-        ? (PointerEvent ev) => VelocityTracker.withKind(ev.kind)
-        : (PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
+        ? (final PointerEvent ev) => VelocityTracker.withKind(ev.kind)
+        : (final PointerEvent ev) => IOSScrollViewFlingVelocityTracker(ev.kind);
       return lastCreatedBuilder;
   }
 }
 
 void main() {
-  testWidgets('Assert in buildScrollbar that controller != null when using it', (WidgetTester tester) async {
+  testWidgets('Assert in buildScrollbar that controller != null when using it', (final WidgetTester tester) async {
     const ScrollBehavior defaultBehavior = ScrollBehavior();
     late BuildContext capturedContext;
 
@@ -42,7 +42,7 @@ void main() {
       behavior: const ScrollBehavior().copyWith(scrollbars: false),
       child: SingleChildScrollView(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             capturedContext = context;
             return Container(height: 1000.0);
           },
@@ -67,7 +67,7 @@ void main() {
             defaultBehavior.buildScrollbar(capturedContext, child, details);
           },
           throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
+            isA<AssertionError>().having((final AssertionError error) => error.toString(),
               'description', contains('details.controller != null')),
           ),
         );
@@ -75,14 +75,14 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   // Regression test for https://github.com/flutter/flutter/issues/89681
-  testWidgets('_WrappedScrollBehavior shouldNotify test', (WidgetTester tester) async {
+  testWidgets('_WrappedScrollBehavior shouldNotify test', (final WidgetTester tester) async {
     final ScrollBehavior behavior1 = const ScrollBehavior().copyWith();
     final ScrollBehavior behavior2 = const ScrollBehavior().copyWith();
 
     expect(behavior1.shouldNotify(behavior2), false);
   });
 
-  testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
+  testWidgets('Inherited ScrollConfiguration changed', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey(debugLabel: 'scrollable');
     TestScrollBehavior? behavior;
     late ScrollPositionWithSingleContext position;
@@ -90,7 +90,7 @@ void main() {
     final Widget scrollView = SingleChildScrollView(
       key: key,
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           behavior = ScrollConfiguration.of(context) as TestScrollBehavior;
           position = Scrollable.of(context).position as ScrollPositionWithSingleContext;
           return Container(height: 1000.0);
@@ -131,7 +131,7 @@ void main() {
     expect(metrics.viewportDimension, equals(600.0));
   });
 
-  testWidgets('ScrollBehavior default android overscroll indicator', (WidgetTester tester) async {
+  testWidgets('ScrollBehavior default android overscroll indicator', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -154,7 +154,7 @@ void main() {
     expect(find.byType(GlowingOverscrollIndicator), findsOneWidget);
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-  testWidgets('ScrollBehavior stretch android overscroll indicator', (WidgetTester tester) async {
+  testWidgets('ScrollBehavior stretch android overscroll indicator', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -181,7 +181,7 @@ void main() {
   }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
   group('ScrollBehavior configuration is maintained over multiple copies', () {
-    testWidgets('dragDevices', (WidgetTester tester) async {
+    testWidgets('dragDevices', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
       const ScrollBehavior defaultBehavior = ScrollBehavior();
       expect(defaultBehavior.dragDevices, <PointerDeviceKind>{
@@ -203,7 +203,7 @@ void main() {
       expect(twiceCopiedBehavior.dragDevices, PointerDeviceKind.values.toSet());
     });
 
-    testWidgets('androidOverscrollIndicator', (WidgetTester tester) async {
+    testWidgets('androidOverscrollIndicator', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
       const ScrollBehavior defaultBehavior = ScrollBehavior();
       expect(defaultBehavior.androidOverscrollIndicator, AndroidOverscrollIndicator.glow);
@@ -219,7 +219,7 @@ void main() {
       expect(twiceCopiedBehavior.androidOverscrollIndicator, AndroidOverscrollIndicator.stretch);
     });
 
-    testWidgets('physics', (WidgetTester tester) async {
+    testWidgets('physics', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
       late ScrollPhysics defaultPhysics;
       late ScrollPhysics onceCopiedPhysics;
@@ -229,21 +229,21 @@ void main() {
         // Default ScrollBehavior
         behavior: const ScrollBehavior(),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             final ScrollBehavior defaultBehavior = ScrollConfiguration.of(context);
             // Copy once to change physics
             defaultPhysics = defaultBehavior.getScrollPhysics(context);
             return ScrollConfiguration(
               behavior: defaultBehavior.copyWith(physics: const BouncingScrollPhysics()),
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   final ScrollBehavior onceCopiedBehavior = ScrollConfiguration.of(context);
                   onceCopiedPhysics = onceCopiedBehavior.getScrollPhysics(context);
                   return ScrollConfiguration(
                     // Copy again, physics should follow
                     behavior: onceCopiedBehavior.copyWith(),
                     child: Builder(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         twiceCopiedPhysics = ScrollConfiguration.of(context).getScrollPhysics(context);
                         return SingleChildScrollView(child: Container(height: 1000));
                       }
@@ -261,7 +261,7 @@ void main() {
       expect(twiceCopiedPhysics, const BouncingScrollPhysics());
     });
 
-    testWidgets('platform', (WidgetTester tester) async {
+    testWidgets('platform', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
       late TargetPlatform defaultPlatform;
       late TargetPlatform onceCopiedPlatform;
@@ -271,21 +271,21 @@ void main() {
         // Default ScrollBehavior
         behavior: const ScrollBehavior(),
         child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               final ScrollBehavior defaultBehavior = ScrollConfiguration.of(context);
               // Copy once to change physics
               defaultPlatform = defaultBehavior.getPlatform(context);
               return ScrollConfiguration(
                   behavior: defaultBehavior.copyWith(platform: TargetPlatform.fuchsia),
                   child: Builder(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         final ScrollBehavior onceCopiedBehavior = ScrollConfiguration.of(context);
                         onceCopiedPlatform = onceCopiedBehavior.getPlatform(context);
                         return ScrollConfiguration(
                           // Copy again, physics should follow
                             behavior: onceCopiedBehavior.copyWith(),
                             child: Builder(
-                                builder: (BuildContext context) {
+                                builder: (final BuildContext context) {
                                   twiceCopiedPlatform = ScrollConfiguration.of(context).getPlatform(context);
                                   return SingleChildScrollView(child: Container(height: 1000));
                                 }
@@ -303,7 +303,7 @@ void main() {
       expect(twiceCopiedPlatform, TargetPlatform.fuchsia);
     });
 
-    Widget wrap(ScrollBehavior behavior) {
+    Widget wrap(final ScrollBehavior behavior) {
       return Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
@@ -311,14 +311,14 @@ void main() {
             child: ScrollConfiguration(
                 behavior: behavior,
                 child: Builder(
-                    builder: (BuildContext context) => SingleChildScrollView(child: Container(height: 1000))
+                    builder: (final BuildContext context) => SingleChildScrollView(child: Container(height: 1000))
                 )
             ),
           )
       );
     }
 
-    testWidgets('scrollbar', (WidgetTester tester) async {
+    testWidgets('scrollbar', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
       const  ScrollBehavior defaultBehavior = ScrollBehavior();
       await tester.pumpWidget(wrap(defaultBehavior));
@@ -338,7 +338,7 @@ void main() {
       // For default scrollbars
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('overscroll', (WidgetTester tester) async {
+    testWidgets('overscroll', (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/91673
       const  ScrollBehavior defaultBehavior = ScrollBehavior();
       await tester.pumpWidget(wrap(defaultBehavior));

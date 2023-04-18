@@ -29,7 +29,7 @@ void main() {
     });
 
     CommandRunner<void> createRunner({
-      required Checkouts checkouts,
+      required final Checkouts checkouts,
     }) {
       final CandidatesCommand command = CandidatesCommand(
         checkouts: checkouts,

@@ -13,7 +13,7 @@ class _TooltipVisibilityScope extends InheritedWidget {
   final bool visible;
 
   @override
-  bool updateShouldNotify(_TooltipVisibilityScope old) {
+  bool updateShouldNotify(final _TooltipVisibilityScope old) {
     return old.visible != visible;
   }
 }
@@ -47,13 +47,13 @@ class TooltipVisibility extends StatelessWidget {
 
   /// The [visible] of the closest instance of this class that encloses the
   /// given context. Defaults to `true` if none are found.
-  static bool of(BuildContext context) {
+  static bool of(final BuildContext context) {
     final _TooltipVisibilityScope? visibility = context.dependOnInheritedWidgetOfExactType<_TooltipVisibilityScope>();
     return visibility?.visible ?? true;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _TooltipVisibilityScope(
       visible: visible,
       child: child,

@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Align smoke test', (WidgetTester tester) async {
+  testWidgets('Align smoke test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Align(
         alignment: const Alignment(0.50, 0.50),
@@ -38,7 +38,7 @@ void main() {
     );
   });
 
-  testWidgets('Align control test (LTR)', (WidgetTester tester) async {
+  testWidgets('Align control test (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: Align(
@@ -62,7 +62,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
-  testWidgets('Align control test (RTL)', (WidgetTester tester) async {
+  testWidgets('Align control test (RTL)', (final WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: Align(
@@ -86,7 +86,7 @@ void main() {
     expect(tester.getBottomRight(find.byType(SizedBox)).dx, 100.0);
   });
 
-  testWidgets('Shrink wraps in finite space', (WidgetTester tester) async {
+  testWidgets('Shrink wraps in finite space', (final WidgetTester tester) async {
     final GlobalKey alignKey = GlobalKey();
     await tester.pumpWidget(
       SingleChildScrollView(
@@ -105,7 +105,7 @@ void main() {
     expect(size.height, equals(10.0));
   });
 
-  testWidgets('Align widthFactor', (WidgetTester tester) async {
+  testWidgets('Align widthFactor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -128,7 +128,7 @@ void main() {
     expect(box.size.width, equals(50.0));
   });
 
-  testWidgets('Align heightFactor', (WidgetTester tester) async {
+  testWidgets('Align heightFactor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,

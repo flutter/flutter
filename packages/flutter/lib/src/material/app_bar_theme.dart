@@ -27,8 +27,8 @@ import 'theme.dart';
 class AppBarTheme with Diagnosticable {
   /// Creates a theme that can be used for [ThemeData.appBarTheme].
   const AppBarTheme({
-    Color? color,
-    Color? backgroundColor,
+    final Color? color,
+    final Color? backgroundColor,
     this.foregroundColor,
     this.elevation,
     this.scrolledUnderElevation,
@@ -153,22 +153,22 @@ class AppBarTheme with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   AppBarTheme copyWith({
-    IconThemeData? actionsIconTheme,
-    Color? color,
-    Color? backgroundColor,
-    Color? foregroundColor,
-    double? elevation,
-    double? scrolledUnderElevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    ShapeBorder? shape,
-    IconThemeData? iconTheme,
-    bool? centerTitle,
-    double? titleSpacing,
-    double? toolbarHeight,
-    TextStyle? toolbarTextStyle,
-    TextStyle? titleTextStyle,
-    SystemUiOverlayStyle? systemOverlayStyle,
+    final IconThemeData? actionsIconTheme,
+    final Color? color,
+    final Color? backgroundColor,
+    final Color? foregroundColor,
+    final double? elevation,
+    final double? scrolledUnderElevation,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final ShapeBorder? shape,
+    final IconThemeData? iconTheme,
+    final bool? centerTitle,
+    final double? titleSpacing,
+    final double? toolbarHeight,
+    final TextStyle? toolbarTextStyle,
+    final TextStyle? titleTextStyle,
+    final SystemUiOverlayStyle? systemOverlayStyle,
   }) {
     assert(
       color == null || backgroundColor == null,
@@ -194,7 +194,7 @@ class AppBarTheme with Diagnosticable {
   }
 
   /// The [ThemeData.appBarTheme] property of the ambient [Theme].
-  static AppBarTheme of(BuildContext context) {
+  static AppBarTheme of(final BuildContext context) {
     return Theme.of(context).appBarTheme;
   }
 
@@ -203,7 +203,7 @@ class AppBarTheme with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static AppBarTheme lerp(AppBarTheme? a, AppBarTheme? b, double t) {
+  static AppBarTheme lerp(final AppBarTheme? a, final AppBarTheme? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -246,7 +246,7 @@ class AppBarTheme with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -272,7 +272,7 @@ class AppBarTheme with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));

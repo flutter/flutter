@@ -14,7 +14,7 @@ class AnimatedBuilderExampleApp extends StatelessWidget {
   const AnimatedBuilderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: AnimatedBuilderExample(),
     );
@@ -43,7 +43,7 @@ class _AnimatedBuilderExampleState extends State<AnimatedBuilderExample> with Ti
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
       child: Container(
@@ -54,7 +54,7 @@ class _AnimatedBuilderExampleState extends State<AnimatedBuilderExample> with Ti
           child: Text('Whee!'),
         ),
       ),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return Transform.rotate(
           angle: _controller.value * 2.0 * math.pi,
           child: child,

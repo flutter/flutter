@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('GridPaper control test', (WidgetTester tester) async {
+  testWidgets('GridPaper control test', (final WidgetTester tester) async {
     await tester.pumpWidget(const GridPaper());
     final List<Layer> layers1 = tester.layers;
     await tester.pumpWidget(const GridPaper());

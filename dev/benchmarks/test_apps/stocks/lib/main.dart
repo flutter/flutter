@@ -40,7 +40,7 @@ class StocksAppState extends State<StocksApp> {
     showSemanticsDebugger: false,
   );
 
-  void configurationUpdater(StockConfiguration value) {
+  void configurationUpdater(final StockConfiguration value) {
     setState(() {
       _configuration = value;
     });
@@ -61,12 +61,12 @@ class StocksAppState extends State<StocksApp> {
     }
   }
 
-  Route<dynamic>? _getRoute(RouteSettings settings) {
+  Route<dynamic>? _getRoute(final RouteSettings settings) {
     if (settings.name == '/stock') {
       final String? symbol = settings.arguments as String?;
       return MaterialPageRoute<void>(
         settings: settings,
-        builder: (BuildContext context) => StockSymbolPage(symbol: symbol!, stocks: stocks),
+        builder: (final BuildContext context) => StockSymbolPage(symbol: symbol!, stocks: stocks),
       );
     }
     // The other paths we support are in the routes table.
@@ -74,7 +74,7 @@ class StocksAppState extends State<StocksApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(() {
       debugPaintSizeEnabled = _configuration.debugShowSizes;
       debugPaintBaselinesEnabled = _configuration.debugShowBaselines;
@@ -92,8 +92,8 @@ class StocksAppState extends State<StocksApp> {
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
-         '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater),
+         '/':         (final BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
+         '/settings': (final BuildContext context) => StockSettings(_configuration, configurationUpdater),
       },
       onGenerateRoute: _getRoute,
     );

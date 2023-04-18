@@ -214,7 +214,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// reversed.
   ///
   /// This is an [AnimatedSwitcherTransitionBuilder] function.
-  static Widget defaultTransitionBuilder(Widget child, Animation<double> animation) {
+  static Widget defaultTransitionBuilder(final Widget child, final Animation<double> animation) {
     return FadeTransition(
       key: ValueKey<Key?>(child.key),
       opacity: animation,
@@ -229,7 +229,7 @@ class AnimatedSwitcher extends StatefulWidget {
   /// each other.
   ///
   /// This is an [AnimatedSwitcherLayoutBuilder] function.
-  static Widget defaultLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+  static Widget defaultLayoutBuilder(final Widget? currentChild, final List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
@@ -240,7 +240,7 @@ class AnimatedSwitcher extends StatefulWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
     properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
@@ -260,7 +260,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }
 
   @override
-  void didUpdateWidget(AnimatedSwitcher oldWidget) {
+  void didUpdateWidget(final AnimatedSwitcher oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // If the transition builder changed, then update all of the previous
@@ -293,7 +293,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     }
   }
 
-  void _addEntryForNewChild({ required bool animate }) {
+  void _addEntryForNewChild({ required final bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
@@ -331,10 +331,10 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }
 
   _ChildEntry _newEntry({
-    required Widget child,
-    required AnimatedSwitcherTransitionBuilder builder,
-    required AnimationController controller,
-    required Animation<double> animation,
+    required final Widget child,
+    required final AnimatedSwitcherTransitionBuilder builder,
+    required final AnimationController controller,
+    required final Animation<double> animation,
   }) {
     final _ChildEntry entry = _ChildEntry(
       widgetChild: child,
@@ -342,7 +342,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       animation: animation,
       controller: controller,
     );
-    animation.addStatusListener((AnimationStatus status) {
+    animation.addStatusListener((final AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
         setState(() {
           assert(mounted);
@@ -360,7 +360,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     _outgoingWidgets = null;
   }
 
-  void _updateTransitionForEntry(_ChildEntry entry) {
+  void _updateTransitionForEntry(final _ChildEntry entry) {
     entry.transition = KeyedSubtree(
       key: entry.transition.key,
       child: widget.transitionBuilder(entry.widgetChild, entry.animation),
@@ -369,7 +369,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
 
   void _rebuildOutgoingWidgetsIfNeeded() {
     _outgoingWidgets ??= List<Widget>.unmodifiable(
-      _outgoingEntries.map<Widget>((_ChildEntry entry) => entry.transition),
+      _outgoingEntries.map<Widget>((final _ChildEntry entry) => entry.transition),
     );
     assert(_outgoingEntries.length == _outgoingWidgets!.length);
     assert(_outgoingEntries.isEmpty || _outgoingEntries.last.transition == _outgoingWidgets!.last);
@@ -387,8 +387,8 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     _rebuildOutgoingWidgetsIfNeeded();
-    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
+    return widget.layoutBuilder(_currentEntry?.transition, _outgoingWidgets!.where((final Widget outgoing) => outgoing.key != _currentEntry?.transition.key).toSet().toList());
   }
 }

@@ -76,7 +76,7 @@ Map<ST, List<List<ST>>> grammar = <ST, List<List<ST>>>{
 };
 
 class Node {
-  Node(this.type, this.positionInMessage, { this.expectedSymbolCount = 0, this.value, List<Node>? children }): children = children ?? <Node>[];
+  Node(this.type, this.positionInMessage, { this.expectedSymbolCount = 0, this.value, final List<Node>? children }): children = children ?? <Node>[];
 
   // Token constructors.
   Node.openBrace(this.positionInMessage): type = ST.openBrace, value = '{';
@@ -112,13 +112,13 @@ class Node {
     return _toStringHelper(0);
   }
 
-  String _toStringHelper(int indentLevel) {
+  String _toStringHelper(final int indentLevel) {
     final String indent = List<String>.filled(indentLevel, '  ').join();
     if (children.isEmpty) {
       return '''
 ${indent}Node($type, $positionInMessage${value == null ? '' : ", value: '$value'"})''';
     }
-    final String childrenString = children.map((Node child) => child._toStringHelper(indentLevel + 1)).join(',\n');
+    final String childrenString = children.map((final Node child) => child._toStringHelper(indentLevel + 1)).join(',\n');
     return '''
 ${indent}Node($type, $positionInMessage${value == null ? '' : ", value: '$value'"}, children: <Node>[
 $childrenString,
@@ -130,7 +130,7 @@ $indent])''';
   // have meaning after calling compress.
   @override
   // ignore: avoid_equals_and_hash_code_on_mutable_classes, hash_and_equals
-  bool operator==(covariant Node other) {
+  bool operator==(covariant final Node other) {
     if(value != other.value
       || type != other.type
       || positionInMessage != other.positionInMessage
@@ -189,7 +189,7 @@ class Parser {
   final bool useEscaping;
   final Logger? logger;
 
-  static String indentForError(int position) {
+  static String indentForError(final int position) {
     return '${List<String>.filled(position, ' ').join()}^';
   }
 
@@ -329,7 +329,7 @@ class Parser {
     final List<Node> treeTraversalStack = <Node>[syntaxTree];
 
     // Helper function for parsing and constructing tree.
-    void parseAndConstructNode(ST nonterminal, int ruleIndex) {
+    void parseAndConstructNode(final ST nonterminal, final int ruleIndex) {
       final Node parent = treeTraversalStack.last;
       final List<ST> grammarRule = grammar[nonterminal]![ruleIndex];
 
@@ -506,7 +506,7 @@ class Parser {
   //
   // Keep in mind that this modifies the tree in place and the values of
   // expectedSymbolCount and isFull is no longer useful after this operation.
-  Node compress(Node syntaxTree) {
+  Node compress(final Node syntaxTree) {
     Node node = syntaxTree;
     final List<Node> children = <Node>[];
     switch (syntaxTree.type) {
@@ -528,12 +528,12 @@ class Parser {
 
   // Takes in a compressed syntax tree and checks extra rules on
   // plural parts and select parts.
-  void checkExtraRules(Node syntaxTree) {
+  void checkExtraRules(final Node syntaxTree) {
     final List<Node> children = syntaxTree.children;
     switch(syntaxTree.type) {
       case ST.pluralParts:
         // Must have an "other" case.
-        if (children.every((Node node) => node.children[0].type != ST.other)) {
+        if (children.every((final Node node) => node.children[0].type != ST.other)) {
           throw L10nParserException(
             'ICU Syntax Error: Plural expressions must have an "other" case.',
             filename,
@@ -557,7 +557,7 @@ class Parser {
           }
         }
       case ST.selectParts:
-        if (children.every((Node node) => node.children[0].type != ST.other)) {
+        if (children.every((final Node node) => node.children[0].type != ST.other)) {
           throw L10nParserException(
             'ICU Syntax Error: Select expressions must have an "other" case.',
             filename,

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/switch/cupertino_switch.0.dart' as
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Toggling cupertino switch updates icon', (WidgetTester tester) async {
+  testWidgets('Toggling cupertino switch updates icon', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoSwitchApp(),
     );

@@ -101,15 +101,15 @@ class InkSparkle extends InteractiveInkFeature {
     required super.controller,
     required super.referenceBox,
     required super.color,
-    required Offset position,
-    required TextDirection textDirection,
-    bool containedInkWell = true,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
+    required final Offset position,
+    required final TextDirection textDirection,
+    final bool containedInkWell = true,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
     super.customBorder,
-    double? radius,
+    final double? radius,
     super.onRemoved,
-    double? turbulenceSeed,
+    final double? turbulenceSeed,
   }) : assert(containedInkWell || rectCallback == null),
        _color = color,
        _position = position,
@@ -207,7 +207,7 @@ class InkSparkle extends InteractiveInkFeature {
     _turbulenceSeed = turbulenceSeed ?? math.Random().nextDouble() * 1000.0;
   }
 
-  void _handleStatusChanged(AnimationStatus status) {
+  void _handleStatusChanged(final AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       dispose();
     }
@@ -267,7 +267,7 @@ class InkSparkle extends InteractiveInkFeature {
   }
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {
+  void paintFeature(final Canvas canvas, final Matrix4 transform) {
     assert(_animationController.isAnimating);
 
     // InkSparkle can only paint if its shader has been compiled.
@@ -386,8 +386,8 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// For examples on how the function is used, see [InkSparkle] and [paintInkCircle].
   void _transformCanvas({
-    required Canvas canvas,
-    required Matrix4 transform,
+    required final Canvas canvas,
+    required final Matrix4 transform,
   }) {
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
@@ -413,11 +413,11 @@ class InkSparkle extends InteractiveInkFeature {
   ///
   /// For examples on how the function is used, see [InkSparkle].
   void _clipCanvas({
-    required Canvas canvas,
-    required RectCallback clipCallback,
-    TextDirection? textDirection,
-    ShapeBorder? customBorder,
-    BorderRadius borderRadius = BorderRadius.zero,
+    required final Canvas canvas,
+    required final RectCallback clipCallback,
+    final TextDirection? textDirection,
+    final ShapeBorder? customBorder,
+    final BorderRadius borderRadius = BorderRadius.zero,
   }) {
     final Rect rect = clipCallback();
     if (customBorder != null) {
@@ -445,7 +445,7 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
   static void initializeShader() {
     if (!_initCalled) {
       ui.FragmentProgram.fromAsset('shaders/ink_sparkle.frag').then(
-        (ui.FragmentProgram program) {
+        (final ui.FragmentProgram program) {
           _program = program;
         },
       );
@@ -460,17 +460,17 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
 
   @override
   InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required ui.Offset position,
-    required ui.Color color,
-    required ui.TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    ui.VoidCallback? onRemoved,
+    required final MaterialInkController controller,
+    required final RenderBox referenceBox,
+    required final ui.Offset position,
+    required final ui.Color color,
+    required final ui.TextDirection textDirection,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final double? radius,
+    final ui.VoidCallback? onRemoved,
   }) {
     return InkSparkle(
       controller: controller,
@@ -490,9 +490,9 @@ class _InkSparkleFactory extends InteractiveInkFeatureFactory {
 }
 
 RectCallback? _getClipCallback(
-  RenderBox referenceBox,
-  bool containedInkWell,
-  RectCallback? rectCallback,
+  final RenderBox referenceBox,
+  final bool containedInkWell,
+  final RectCallback? rectCallback,
 ) {
   if (rectCallback != null) {
     assert(containedInkWell);
@@ -505,10 +505,10 @@ RectCallback? _getClipCallback(
 }
 
 double _getTargetRadius(
-  RenderBox referenceBox,
-  bool containedInkWell,
-  RectCallback? rectCallback,
-  Offset position,
+  final RenderBox referenceBox,
+  final bool containedInkWell,
+  final RectCallback? rectCallback,
+  final Offset position,
 ) {
   final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
   final double d1 = size.bottomRight(Offset.zero).distance;

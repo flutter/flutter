@@ -187,12 +187,12 @@ class FakeArgs implements ArgResults {
   Iterable<String> get options => throw Exception('Unimplemented');
 
   @override
-  bool wasParsed(String name) {
+  bool wasParsed(final String name) {
     return results[name] != null;
   }
 
   @override
-  Object? operator[](String name) {
+  Object? operator[](final String name) {
     return results[name];
   }
 }

@@ -18,7 +18,7 @@ class MyColors extends ThemeExtension<MyColors> {
   final Color? danger;
 
   @override
-  MyColors copyWith({Color? brandColor, Color? danger}) {
+  MyColors copyWith({final Color? brandColor, final Color? danger}) {
     return MyColors(
       brandColor: brandColor ?? this.brandColor,
       danger: danger ?? this.danger,
@@ -26,7 +26,7 @@ class MyColors extends ThemeExtension<MyColors> {
   }
 
   @override
-  MyColors lerp(MyColors? other, double t) {
+  MyColors lerp(final MyColors? other, final double t) {
     if (other is! MyColors) {
       return this;
     }
@@ -62,7 +62,7 @@ class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light().copyWith(
         extensions: <ThemeExtension<dynamic>>[
@@ -100,7 +100,7 @@ class Home extends StatelessWidget {
   final void Function() toggleTheme;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final MyColors myColors = Theme.of(context).extension<MyColors>()!;
     return Material(
       child: Center(

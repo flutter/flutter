@@ -12,8 +12,8 @@ import '../features.dart';
 /// repository to the flutter repo.
 class LinuxWorkflow implements Workflow {
   const LinuxWorkflow({
-    required Platform platform,
-    required FeatureFlags featureFlags,
+    required final Platform platform,
+    required final FeatureFlags featureFlags,
   }) : _platform = platform,
        _featureFlags = featureFlags;
 

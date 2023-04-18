@@ -53,17 +53,17 @@ void main() {
   });
 
   Future<void> preparePicker(
-    WidgetTester tester,
-    Future<void> Function(Future<DateTimeRange?> date) callback, {
-    TextDirection textDirection = TextDirection.ltr,
-    bool useMaterial3 = false,
+    final WidgetTester tester,
+    final Future<void> Function(Future<DateTimeRange?> date) callback, {
+    final TextDirection textDirection = TextDirection.ltr,
+    final bool useMaterial3 = false,
   }) async {
     late BuildContext buttonContext;
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(useMaterial3: useMaterial3),
       home: Material(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return ElevatedButton(
               onPressed: () {
                 buttonContext = context;
@@ -96,7 +96,7 @@ void main() {
       fieldEndLabelText: fieldEndLabelText,
       helpText: helpText,
       saveText: saveText,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return Directionality(
           textDirection: textDirection,
           child: child ?? const SizedBox(),
@@ -115,22 +115,22 @@ void main() {
     const Size kCommonScreenSizePortrait = Size(1070, 1770);
     const Size kCommonScreenSizeLandscape = Size(1770, 1070);
 
-    Future<void> showPicker(WidgetTester tester, Size size) async {
+    Future<void> showPicker(final WidgetTester tester, final Size size) async {
       addTearDown(tester.view.reset);
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1.0;
       initialEntryMode = DatePickerEntryMode.input;
-      await preparePicker(tester, (Future<DateTimeRange?> range) async { }, useMaterial3: true);
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async { }, useMaterial3: true);
     }
 
-    testWidgets('portrait', (WidgetTester tester) async {
+    testWidgets('portrait', (final WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizePortrait);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 32);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
     });
 
-    testWidgets('landscape', (WidgetTester tester) async {
+    testWidgets('landscape', (final WidgetTester tester) async {
       await showPicker(tester, kCommonScreenSizeLandscape);
       expect(tester.widget<Text>(find.text('Jan 15 – Jan 25, 2016')).style?.fontSize, 24);
       await tester.tap(find.text('Cancel'));
@@ -138,24 +138,24 @@ void main() {
     });
   });
 
-  testWidgets('Save and help text is used', (WidgetTester tester) async {
+  testWidgets('Save and help text is used', (final WidgetTester tester) async {
     helpText = 'help';
     saveText = 'make it so';
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       expect(find.text(helpText!), findsOneWidget);
       expect(find.text(saveText!), findsOneWidget);
     });
   });
 
-  testWidgets('Material3 has sentence case labels', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Material3 has sentence case labels', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       expect(find.text('Save'), findsOneWidget);
       expect(find.text('Select range'), findsOneWidget);
     }, useMaterial3: true);
   });
 
-  testWidgets('Initial date is the default', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Initial date is the default', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       await tester.tap(find.text('SAVE'));
       expect(
         await range,
@@ -167,28 +167,28 @@ void main() {
     });
   });
 
-  testWidgets('Last month header should be visible if last date is selected', (WidgetTester tester) async {
+  testWidgets('Last month header should be visible if last date is selected', (final WidgetTester tester) async {
     firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
       start: lastDate,
       end: lastDate,
     );
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       // December header should be showing, but no November
       expect(find.text('December 2016'), findsOneWidget);
       expect(find.text('November 2016'), findsNothing);
     });
   });
 
-  testWidgets('First month header should be visible if first date is selected', (WidgetTester tester) async {
+  testWidgets('First month header should be visible if first date is selected', (final WidgetTester tester) async {
     firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     initialDateRange = DateTimeRange(
       start: firstDate,
       end: firstDate,
     );
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       // January and February headers should be showing, but no March
       expect(find.text('January 2015'), findsOneWidget);
       expect(find.text('February 2015'), findsOneWidget);
@@ -196,13 +196,13 @@ void main() {
     });
   });
 
-  testWidgets('Current month header should be visible if no date is selected', (WidgetTester tester) async {
+  testWidgets('Current month header should be visible if no date is selected', (final WidgetTester tester) async {
     firstDate = DateTime(2015);
     lastDate = DateTime(2016, DateTime.december, 31);
     currentDate = DateTime(2016, DateTime.september);
     initialDateRange = null;
 
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       // September and October headers should be showing, but no August
       expect(find.text('September 2016'), findsOneWidget);
       expect(find.text('October 2016'), findsOneWidget);
@@ -210,15 +210,15 @@ void main() {
     });
   });
 
-  testWidgets('Can cancel', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Can cancel', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       await tester.tap(find.byIcon(Icons.close));
       expect(await range, isNull);
     });
   });
 
-  testWidgets('Can select a range', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Can select a range', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('14').first);
       await tester.tap(find.text('SAVE'));
@@ -229,8 +229,8 @@ void main() {
     });
   });
 
-  testWidgets('Tapping earlier date resets selected range', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Tapping earlier date resets selected range', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('11').first);
       await tester.tap(find.text('15').first);
@@ -242,8 +242,8 @@ void main() {
     });
   });
 
-  testWidgets('Can select single day range', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Can select single day range', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('SAVE'));
@@ -254,14 +254,14 @@ void main() {
     });
   });
 
-  testWidgets('Cannot select a day outside bounds', (WidgetTester tester) async {
+  testWidgets('Cannot select a day outside bounds', (final WidgetTester tester) async {
     initialDateRange = DateTimeRange(
       start: DateTime(2017, DateTime.january, 13),
       end: DateTime(2017, DateTime.january, 15),
     );
     firstDate = DateTime(2017, DateTime.january, 12);
     lastDate = DateTime(2017, DateTime.january, 16);
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       // Earlier than firstDate. Should be ignored.
       await tester.tap(find.text('10'));
       // Later than lastDate. Should be ignored.
@@ -272,8 +272,8 @@ void main() {
     });
   });
 
-  testWidgets('Can switch from calendar to input entry mode', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Can switch from calendar to input entry mode', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNothing);
       await tester.tap(find.byIcon(Icons.edit));
       await tester.pumpAndSettle();
@@ -281,9 +281,9 @@ void main() {
     });
   });
 
-  testWidgets('Can switch from input to calendar entry mode', (WidgetTester tester) async {
+  testWidgets('Can switch from input to calendar entry mode', (final WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.input;
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNWidgets(2));
       await tester.tap(find.byIcon(Icons.calendar_today));
       await tester.pumpAndSettle();
@@ -291,26 +291,26 @@ void main() {
     });
   });
 
-  testWidgets('Can not switch out of calendarOnly mode', (WidgetTester tester) async {
+  testWidgets('Can not switch out of calendarOnly mode', (final WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.calendarOnly;
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNothing);
       expect(find.byIcon(Icons.edit), findsNothing);
     });
   });
 
-  testWidgets('Can not switch out of inputOnly mode', (WidgetTester tester) async {
+  testWidgets('Can not switch out of inputOnly mode', (final WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.inputOnly;
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       expect(find.byType(TextField), findsNWidgets(2));
       expect(find.byIcon(Icons.calendar_today), findsNothing);
     });
   });
 
-  testWidgets('Input only mode should validate date', (WidgetTester tester) async {
+  testWidgets('Input only mode should validate date', (final WidgetTester tester) async {
     initialEntryMode = DatePickerEntryMode.inputOnly;
     errorInvalidText = 'oops';
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       await tester.enterText(find.byType(TextField).at(0), '08/08/2014');
       await tester.enterText(find.byType(TextField).at(1), '08/08/2014');
       expect(find.text(errorInvalidText!), findsNothing);
@@ -321,8 +321,8 @@ void main() {
     });
   });
 
-  testWidgets('Switching to input mode keeps selected date', (WidgetTester tester) async {
-    await preparePicker(tester, (Future<DateTimeRange?> range) async {
+  testWidgets('Switching to input mode keeps selected date', (final WidgetTester tester) async {
+    await preparePicker(tester, (final Future<DateTimeRange?> range) async {
       await tester.tap(find.text('12').first);
       await tester.tap(find.text('14').first);
       await tester.tap(find.byIcon(Icons.edit));
@@ -340,10 +340,10 @@ void main() {
       initialEntryMode = DatePickerEntryMode.input;
     });
 
-    testWidgets('Invalid start date', (WidgetTester tester) async {
+    testWidgets('Invalid start date', (final WidgetTester tester) async {
       // Invalid start date should have neither a start nor end date selected in
       // calendar mode
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/27/1918');
         await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
         await tester.tap(find.byIcon(Icons.calendar_today));
@@ -354,9 +354,9 @@ void main() {
       });
     });
 
-    testWidgets('Invalid end date', (WidgetTester tester) async {
+    testWidgets('Invalid end date', (final WidgetTester tester) async {
       // Invalid end date should only have a start date selected
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/24/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/25/2050');
         await tester.tap(find.byIcon(Icons.calendar_today));
@@ -367,9 +367,9 @@ void main() {
       });
     });
 
-    testWidgets('Invalid range', (WidgetTester tester) async {
+    testWidgets('Invalid range', (final WidgetTester tester) async {
       // Start date after end date should just use the start date
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/24/2016');
         await tester.tap(find.byIcon(Icons.calendar_today));
@@ -381,13 +381,13 @@ void main() {
     });
   });
 
-  testWidgets('OK Cancel button layout', (WidgetTester tester) async {
-     Widget buildFrame(TextDirection textDirection) {
+  testWidgets('OK Cancel button layout', (final WidgetTester tester) async {
+     Widget buildFrame(final TextDirection textDirection) {
        return MaterialApp(
          home: Material(
            child: Center(
              child: Builder(
-               builder: (BuildContext context) {
+               builder: (final BuildContext context) {
                  return ElevatedButton(
                    child: const Text('X'),
                    onPressed: () {
@@ -395,7 +395,7 @@ void main() {
                        context: context,
                        firstDate:DateTime(2001),
                        lastDate: DateTime(2031, DateTime.december, 31),
-                       builder: (BuildContext context, Widget? child) {
+                       builder: (final BuildContext context, final Widget? child) {
                          return Directionality(
                            textDirection: textDirection,
                            child: child ?? const SizedBox(),
@@ -411,7 +411,7 @@ void main() {
        );
      }
 
-    Future<void> showOkCancelDialog(TextDirection textDirection) async {
+    Future<void> showOkCancelDialog(final TextDirection textDirection) async {
       await tester.pumpWidget(buildFrame(textDirection));
       await tester.tap(find.text('X'));
       await tester.pumpAndSettle();
@@ -455,8 +455,8 @@ void main() {
       feedback.dispose();
     });
 
-    testWidgets('Selecting dates vibrates', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Selecting dates vibrates', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.tap(find.text('10').first);
         await tester.pump(hapticFeedbackInterval);
         expect(feedback.hapticCount, 1);
@@ -469,8 +469,8 @@ void main() {
       });
     });
 
-    testWidgets('Tapping unselectable date does not vibrate', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Tapping unselectable date does not vibrate', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.tap(find.text('8').first);
         await tester.pump(hapticFeedbackInterval);
         expect(feedback.hapticCount, 0);
@@ -479,8 +479,8 @@ void main() {
   });
 
   group('Keyboard navigation', () {
-    testWidgets('Can toggle to calendar entry mode', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Can toggle to calendar entry mode', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         expect(find.byType(TextField), findsNothing);
         // Navigate to the entry toggle button and activate it
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -492,8 +492,8 @@ void main() {
       });
     });
 
-    testWidgets('Can navigate date grid with arrow keys', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Can navigate date grid with arrow keys', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -544,8 +544,8 @@ void main() {
       });
     });
 
-    testWidgets('Navigating with arrow keys scrolls as needed', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Navigating with arrow keys scrolls as needed', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         // Jan and Feb headers should be showing, but no March
         expect(find.text('January 2016'), findsOneWidget);
         expect(find.text('February 2016'), findsOneWidget);
@@ -609,8 +609,8 @@ void main() {
       });
     });
 
-    testWidgets('RTL text direction reverses the horizontal arrow key navigation', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('RTL text direction reverses the horizontal arrow key navigation', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         // Navigate to the grid
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
         await tester.sendKeyEvent(LogicalKeyboardKey.tab);
@@ -668,13 +668,13 @@ void main() {
       initialEntryMode = DatePickerEntryMode.input;
     });
 
-    testWidgets('Initial entry mode is used', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Initial entry mode is used', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         expect(find.byType(TextField), findsNWidgets(2));
       });
     });
 
-    testWidgets('All custom strings are used', (WidgetTester tester) async {
+    testWidgets('All custom strings are used', (final WidgetTester tester) async {
       initialDateRange = null;
       cancelText = 'nope';
       confirmText = 'yep';
@@ -683,7 +683,7 @@ void main() {
       fieldStartLabelText = 'label1';
       fieldEndLabelText = 'label2';
       helpText = 'help';
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         expect(find.text(cancelText!), findsOneWidget);
         expect(find.text(confirmText!), findsOneWidget);
         expect(find.text(fieldStartHintText!), findsOneWidget);
@@ -694,8 +694,8 @@ void main() {
       });
     });
 
-    testWidgets('Initial date is the default', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Initial date is the default', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.tap(find.text('OK'));
         expect(await range, DateTimeRange(
           start: DateTime(2017, DateTime.january, 15),
@@ -704,8 +704,8 @@ void main() {
       });
     });
 
-    testWidgets('Can toggle to calendar entry mode', (WidgetTester tester) async {
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+    testWidgets('Can toggle to calendar entry mode', (final WidgetTester tester) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         expect(find.byType(TextField), findsNWidgets(2));
         await tester.tap(find.byIcon(Icons.calendar_today));
         await tester.pumpAndSettle();
@@ -713,9 +713,9 @@ void main() {
       });
     });
 
-    testWidgets('Toggle to calendar mode keeps selected date', (WidgetTester tester) async {
+    testWidgets('Toggle to calendar mode keeps selected date', (final WidgetTester tester) async {
       initialDateRange = null;
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/27/2016');
         await tester.tap(find.byIcon(Icons.calendar_today));
@@ -729,9 +729,9 @@ void main() {
       });
     });
 
-    testWidgets('Entered text returns range', (WidgetTester tester) async {
+    testWidgets('Entered text returns range', (final WidgetTester tester) async {
       initialDateRange = null;
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/27/2016');
         await tester.tap(find.text('OK'));
@@ -743,10 +743,10 @@ void main() {
       });
     });
 
-    testWidgets('Too short entered text shows error', (WidgetTester tester) async {
+    testWidgets('Too short entered text shows error', (final WidgetTester tester) async {
       initialDateRange = null;
       errorFormatText = 'oops';
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/25');
         await tester.enterText(find.byType(TextField).at(1), '12/25');
         expect(find.text(errorFormatText!), findsNothing);
@@ -757,10 +757,10 @@ void main() {
       });
     });
 
-    testWidgets('Bad format entered text shows error', (WidgetTester tester) async {
+    testWidgets('Bad format entered text shows error', (final WidgetTester tester) async {
       initialDateRange = null;
       errorFormatText = 'oops';
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '20202014');
         await tester.enterText(find.byType(TextField).at(1), '20212014');
         expect(find.text(errorFormatText!), findsNothing);
@@ -771,10 +771,10 @@ void main() {
       });
     });
 
-    testWidgets('Invalid entered text shows error', (WidgetTester tester) async {
+    testWidgets('Invalid entered text shows error', (final WidgetTester tester) async {
       initialDateRange = null;
       errorInvalidText = 'oops';
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '08/08/2014');
         await tester.enterText(find.byType(TextField).at(1), '08/08/2014');
         expect(find.text(errorInvalidText!), findsNothing);
@@ -785,10 +785,10 @@ void main() {
       });
     });
 
-    testWidgets('End before start date shows error', (WidgetTester tester) async {
+    testWidgets('End before start date shows error', (final WidgetTester tester) async {
       initialDateRange = null;
       errorInvalidRangeText = 'oops';
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/27/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
         expect(find.text(errorInvalidRangeText!), findsNothing);
@@ -799,10 +799,10 @@ void main() {
       });
     });
 
-    testWidgets('Error text only displayed for invalid date', (WidgetTester tester) async {
+    testWidgets('Error text only displayed for invalid date', (final WidgetTester tester) async {
       initialDateRange = null;
       errorInvalidText = 'oops';
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/27/2016');
         await tester.enterText(find.byType(TextField).at(1), '01/01/2018');
         expect(find.text(errorInvalidText!), findsNothing);
@@ -813,9 +813,9 @@ void main() {
       });
     });
 
-    testWidgets('End before start date does not get passed to calendar mode', (WidgetTester tester) async {
+    testWidgets('End before start date does not get passed to calendar mode', (final WidgetTester tester) async {
       initialDateRange = null;
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         await tester.enterText(find.byType(TextField).at(0), '12/27/2016');
         await tester.enterText(find.byType(TextField).at(1), '12/25/2016');
 
@@ -831,11 +831,11 @@ void main() {
       });
     });
 
-    testWidgets('InputDecorationTheme is honored', (WidgetTester tester) async {
+    testWidgets('InputDecorationTheme is honored', (final WidgetTester tester) async {
 
       // Given a custom paint for an input decoration, extract the border and
       // fill color and test them against the expected values.
-      void testInputDecorator(CustomPaint decoratorPaint, InputBorder expectedBorder, Color expectedContainerColor) {
+      void testInputDecorator(final CustomPaint decoratorPaint, final InputBorder expectedBorder, final Color expectedContainerColor) {
         final dynamic/*_InputBorderPainter*/ inputBorderPainter = decoratorPaint.foregroundPainter;
         // ignore: avoid_dynamic_calls
         final dynamic/*_InputBorderTween*/ inputBorderTween = inputBorderPainter.border;
@@ -860,7 +860,7 @@ void main() {
         ),
         home: Material(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
                   buttonContext = context;
@@ -885,8 +885,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final Finder borderContainers = find.descendant(
-        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
-        matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+        of: find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+        matching: find.byWidgetPredicate((final Widget w) => w is CustomPaint),
       );
 
       // Test the start date text field
@@ -897,7 +897,7 @@ void main() {
     });
   });
 
-  testWidgets('DatePickerDialog is state restorable', (WidgetTester tester) async {
+  testWidgets('DatePickerDialog is state restorable', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -952,7 +952,7 @@ void main() {
     expect(find.text('12/1/2021 to 14/1/2021'), findsOneWidget);
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
-  testWidgets('DateRangePickerDialog state restoration - DatePickerEntryMode', (WidgetTester tester) async {
+  testWidgets('DateRangePickerDialog state restoration - DatePickerEntryMode', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -1002,10 +1002,10 @@ void main() {
   }, skip: isBrowser); // https://github.com/flutter/flutter/issues/33615
 
   group('showDateRangePicker avoids overlapping display features', () {
-    testWidgets('positioning with anchorPoint', (WidgetTester tester) async {
+    testWidgets('positioning with anchorPoint', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
@@ -1039,10 +1039,10 @@ void main() {
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
     });
 
-    testWidgets('positioning with Directionality', (WidgetTester tester) async {
+    testWidgets('positioning with Directionality', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
@@ -1079,10 +1079,10 @@ void main() {
       expect(tester.getBottomRight(find.byType(DateRangePickerDialog)), const Offset(800.0, 600.0));
     });
 
-    testWidgets('positioning with defaults', (WidgetTester tester) async {
+    testWidgets('positioning with defaults', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          builder: (BuildContext context, Widget? child) {
+          builder: (final BuildContext context, final Widget? child) {
             return MediaQuery(
               // Display has a vertical hinge down the middle
               data: const MediaQueryData(
@@ -1117,10 +1117,10 @@ void main() {
   });
 
   group('Semantics', () {
-    testWidgets('calendar mode', (WidgetTester tester) async {
+    testWidgets('calendar mode', (final WidgetTester tester) async {
       final SemanticsHandle semantics = tester.ensureSemantics();
       currentDate = DateTime(2016, DateTime.january, 30);
-      await preparePicker(tester, (Future<DateTimeRange?> range) async {
+      await preparePicker(tester, (final Future<DateTimeRange?> range) async {
         expect(
           tester.getSemantics(find.text('30')),
           matchesSemantics(
@@ -1135,7 +1135,7 @@ void main() {
   });
 
   for (final TextInputType? keyboardType in <TextInputType?>[null, TextInputType.emailAddress]) {
-    testWidgets('DateRangePicker takes keyboardType $keyboardType', (WidgetTester  tester) async {
+    testWidgets('DateRangePicker takes keyboardType $keyboardType', (final WidgetTester  tester) async {
       late BuildContext buttonContext;
       const InputBorder border = InputBorder.none;
       await tester.pumpWidget(MaterialApp(
@@ -1146,7 +1146,7 @@ void main() {
         ),
         home: Material(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return ElevatedButton(
                 onPressed: () {
                   buttonContext = context;
@@ -1208,7 +1208,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
   final RestorableDateTimeN _endDate = RestorableDateTimeN(DateTime(2021, 1, 5));
   late final RestorableRouteFuture<DateTimeRange?> _restorableDateRangePickerRouteFuture = RestorableRouteFuture<DateTimeRange?>(
     onComplete: _selectDateRange,
-    onPresent: (NavigatorState navigator, Object? arguments) {
+    onPresent: (final NavigatorState navigator, final Object? arguments) {
       return navigator.restorablePush(
         _dateRangePickerRoute,
         arguments: <String, dynamic>{
@@ -1219,13 +1219,13 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
   );
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(_startDate, 'start_date');
     registerForRestoration(_endDate, 'end_date');
     registerForRestoration(_restorableDateRangePickerRouteFuture, 'date_picker_route_future');
   }
 
-  void _selectDateRange(DateTimeRange? newSelectedDate) {
+  void _selectDateRange(final DateTimeRange? newSelectedDate) {
     if (newSelectedDate != null) {
       setState(() {
         _startDate.value = newSelectedDate.start;
@@ -1236,12 +1236,12 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
 
   @pragma('vm:entry-point')
   static Route<DateTimeRange?> _dateRangePickerRoute(
-    BuildContext context,
-    Object? arguments,
+    final BuildContext context,
+    final Object? arguments,
   ) {
     return DialogRoute<DateTimeRange?>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         final Map<dynamic, dynamic> args = arguments! as Map<dynamic, dynamic>;
         return DateRangePickerDialog(
           restorationId: 'date_picker_dialog',
@@ -1255,7 +1255,7 @@ class _RestorableDateRangePickerDialogTestWidgetState extends State<_RestorableD
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final DateTime? startDateTime = _startDate.value;
     final DateTime? endDateTime = _endDate.value;
     // Example: "25/7/1994"

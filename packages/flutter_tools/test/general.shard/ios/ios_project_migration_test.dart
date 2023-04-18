@@ -1249,7 +1249,7 @@ class FakeIOSMigrator extends ProjectMigrator {
   void migrate() {}
 
   @override
-  String migrateLine(String line) {
+  String migrateLine(final String line) {
     return line;
   }
 }

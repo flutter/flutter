@@ -176,12 +176,12 @@ class DecorationImage {
   /// The `onChanged` argument must not be null. It will be called whenever the
   /// image needs to be repainted, e.g. because it is loading incrementally or
   /// because it is animated.
-  DecorationImagePainter createPainter(VoidCallback onChanged) {
+  DecorationImagePainter createPainter(final VoidCallback onChanged) {
     return DecorationImagePainter._(this, onChanged);
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -282,7 +282,7 @@ class DecorationImagePainter {
   /// because it had not yet been loaded the first time this method was called,
   /// then the `onChanged` callback passed to [DecorationImage.createPainter]
   /// will be called.
-  void paint(Canvas canvas, Rect rect, Path? clipPath, ImageConfiguration configuration) {
+  void paint(final Canvas canvas, final Rect rect, final Path? clipPath, final ImageConfiguration configuration) {
 
     bool flipHorizontally = false;
     if (_details.matchTextDirection) {
@@ -349,7 +349,7 @@ class DecorationImagePainter {
     }
   }
 
-  void _handleImage(ImageInfo value, bool synchronousCall) {
+  void _handleImage(final ImageInfo value, final bool synchronousCall) {
     if (_image == value) {
       return;
     }
@@ -475,21 +475,21 @@ void debugFlushLastFrameImageSizeInfo() {
 ///  * [DecorationImage], which holds a configuration for calling this function.
 ///  * [BoxDecoration], which uses this function to paint a [DecorationImage].
 void paintImage({
-  required Canvas canvas,
-  required Rect rect,
-  required ui.Image image,
-  String? debugImageLabel,
-  double scale = 1.0,
-  double opacity = 1.0,
-  ColorFilter? colorFilter,
+  required final Canvas canvas,
+  required final Rect rect,
+  required final ui.Image image,
+  final String? debugImageLabel,
+  final double scale = 1.0,
+  final double opacity = 1.0,
+  final ColorFilter? colorFilter,
   BoxFit? fit,
-  Alignment alignment = Alignment.center,
-  Rect? centerSlice,
+  final Alignment alignment = Alignment.center,
+  final Rect? centerSlice,
   ImageRepeat repeat = ImageRepeat.noRepeat,
-  bool flipHorizontally = false,
-  bool invertColors = false,
-  FilterQuality filterQuality = FilterQuality.low,
-  bool isAntiAlias = false,
+  final bool flipHorizontally = false,
+  final bool invertColors = false,
+  final FilterQuality filterQuality = FilterQuality.low,
+  final bool isAntiAlias = false,
 }) {
   assert(
     image.debugGetOpenHandleStackTraces()?.isNotEmpty ?? true,
@@ -552,7 +552,7 @@ void paintImage({
     // as an upper bound for the display size of the image.
     final double maxDevicePixelRatio = PaintingBinding.instance.platformDispatcher.views.fold(
       0.0,
-      (double previousValue, ui.FlutterView view) => math.max(previousValue, view.devicePixelRatio),
+      (final double previousValue, final ui.FlutterView view) => math.max(previousValue, view.devicePixelRatio),
     );
 
     final ImageSizeInfo sizeInfo = ImageSizeInfo(
@@ -605,7 +605,7 @@ void paintImage({
         _pendingImageSizeInfo[sizeInfo.source!] = sizeInfo;
       }
       debugOnPaintImage?.call(sizeInfo);
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((final Duration timeStamp) {
         _lastFrameImageSizeInfo = _pendingImageSizeInfo.values.toSet();
         if (_pendingImageSizeInfo.isEmpty) {
           return;
@@ -665,7 +665,7 @@ void paintImage({
   }
 }
 
-Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, ImageRepeat repeat) {
+Iterable<Rect> _generateImageTileRects(final Rect outputRect, final Rect fundamentalRect, final ImageRepeat repeat) {
   int startX = 0;
   int startY = 0;
   int stopX = 0;
@@ -690,4 +690,4 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   ];
 }
 
-Rect _scaleRect(Rect rect, double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);
+Rect _scaleRect(final Rect rect, final double scale) => Rect.fromLTRB(rect.left * scale, rect.top * scale, rect.right * scale, rect.bottom * scale);

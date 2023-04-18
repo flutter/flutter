@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedSwitcher fades in a new child.', (WidgetTester tester) async {
+  testWidgets('AnimatedSwitcher fades in a new child.', (final WidgetTester tester) async {
     final UniqueKey containerOne = UniqueKey();
     final UniqueKey containerTwo = UniqueKey();
     final UniqueKey containerThree = UniqueKey();
@@ -50,7 +50,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('AnimatedSwitcher can handle back-to-back changes.', (WidgetTester tester) async {
+  testWidgets('AnimatedSwitcher can handle back-to-back changes.', (final WidgetTester tester) async {
     final UniqueKey container1 = UniqueKey();
     final UniqueKey container2 = UniqueKey();
     final UniqueKey container3 = UniqueKey();
@@ -85,7 +85,7 @@ void main() {
     expect(find.byKey(container3), findsOneWidget);
   });
 
-  testWidgets("AnimatedSwitcher doesn't transition in a new child of the same type.", (WidgetTester tester) async {
+  testWidgets("AnimatedSwitcher doesn't transition in a new child of the same type.", (final WidgetTester tester) async {
     await tester.pumpWidget(
       AnimatedSwitcher(
         duration: const Duration(milliseconds: 100),
@@ -111,7 +111,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('AnimatedSwitcher handles null children.', (WidgetTester tester) async {
+  testWidgets('AnimatedSwitcher handles null children.', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const AnimatedSwitcher(
         duration: Duration(milliseconds: 100),
@@ -166,7 +166,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets("AnimatedSwitcher doesn't start any animations after dispose.", (WidgetTester tester) async {
+  testWidgets("AnimatedSwitcher doesn't start any animations after dispose.", (final WidgetTester tester) async {
     await tester.pumpWidget(AnimatedSwitcher(
       duration: const Duration(milliseconds: 100),
       child: Container(color: const Color(0xff000000)),
@@ -178,8 +178,8 @@ void main() {
     expect(await tester.pumpAndSettle(), equals(1));
   });
 
-  testWidgets('AnimatedSwitcher uses custom layout.', (WidgetTester tester) async {
-    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+  testWidgets('AnimatedSwitcher uses custom layout.', (final WidgetTester tester) async {
+    Widget newLayoutBuilder(final Widget? currentChild, final List<Widget> previousChildren) {
       return Column(
         children: <Widget>[
           ...previousChildren,
@@ -199,9 +199,9 @@ void main() {
     expect(find.byType(Column), findsOneWidget);
   });
 
-  testWidgets('AnimatedSwitcher uses custom transitions.', (WidgetTester tester) async {
+  testWidgets('AnimatedSwitcher uses custom transitions.', (final WidgetTester tester) async {
     late List<Widget> foundChildren;
-    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+    Widget newLayoutBuilder(final Widget? currentChild, final List<Widget> previousChildren) {
       foundChildren = <Widget>[
         if (currentChild != null) currentChild,
         ...previousChildren,
@@ -209,7 +209,7 @@ void main() {
       return Column(children: foundChildren);
     }
 
-    Widget newTransitionBuilder(Widget child, Animation<double> animation) {
+    Widget newTransitionBuilder(final Widget child, final Animation<double> animation) {
       return SizeTransition(
         sizeFactor: animation,
         child: child,
@@ -254,7 +254,7 @@ void main() {
     }
   });
 
-  testWidgets("AnimatedSwitcher doesn't reset state of the children in transitions.", (WidgetTester tester) async {
+  testWidgets("AnimatedSwitcher doesn't reset state of the children in transitions.", (final WidgetTester tester) async {
     final UniqueKey statefulOne = UniqueKey();
     final UniqueKey statefulTwo = UniqueKey();
     final UniqueKey statefulThree = UniqueKey();
@@ -305,8 +305,8 @@ void main() {
     expect(StatefulTestState.generation, equals(3));
   });
 
-  testWidgets('AnimatedSwitcher updates widgets without animating if they are isomorphic.', (WidgetTester tester) async {
-    Future<void> pumpChild(Widget child) async {
+  testWidgets('AnimatedSwitcher updates widgets without animating if they are isomorphic.', (final WidgetTester tester) async {
+    Future<void> pumpChild(final Widget child) async {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.rtl,
@@ -332,13 +332,13 @@ void main() {
     expect(find.text('2'), findsOneWidget);
   });
 
-  testWidgets('AnimatedSwitcher updates previous child transitions if the transitionBuilder changes.', (WidgetTester tester) async {
+  testWidgets('AnimatedSwitcher updates previous child transitions if the transitionBuilder changes.', (final WidgetTester tester) async {
     final UniqueKey containerOne = UniqueKey();
     final UniqueKey containerTwo = UniqueKey();
     final UniqueKey containerThree = UniqueKey();
 
     late List<Widget> foundChildren;
-    Widget newLayoutBuilder(Widget? currentChild, List<Widget> previousChildren) {
+    Widget newLayoutBuilder(final Widget? currentChild, final List<Widget> previousChildren) {
       foundChildren = <Widget>[
         if (currentChild != null) currentChild,
         ...previousChildren,
@@ -386,7 +386,7 @@ void main() {
       );
     }
 
-    Widget newTransitionBuilder(Widget child, Animation<double> animation) {
+    Widget newTransitionBuilder(final Widget child, final Animation<double> animation) {
       return ScaleTransition(
         scale: animation,
         child: child,
@@ -416,8 +416,8 @@ void main() {
     }
   });
 
-  testWidgets('AnimatedSwitcher does not duplicate animations if the same child is entered twice.', (WidgetTester tester) async {
-    Future<void> pumpChild(Widget child) async {
+  testWidgets('AnimatedSwitcher does not duplicate animations if the same child is entered twice.', (final WidgetTester tester) async {
+    Future<void> pumpChild(final Widget child) async {
       return tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -454,5 +454,5 @@ class StatefulTestState extends State<StatefulTest> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }

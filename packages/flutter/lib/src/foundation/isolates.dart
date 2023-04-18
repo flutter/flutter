@@ -72,6 +72,6 @@ typedef ComputeImpl = Future<R> Function<M, R>(ComputeCallback<M, R> callback, M
 /// The `debugLabel` - if provided - is used as name for the isolate that
 /// executes `callback`. [Timeline] events produced by that isolate will have
 /// the name associated with them. This is useful when profiling an application.
-Future<R> compute<M, R>(ComputeCallback<M, R> callback, M message, {String? debugLabel}) {
+Future<R> compute<M, R>(final ComputeCallback<M, R> callback, final M message, {final String? debugLabel}) {
   return isolates.compute<M, R>(callback, message, debugLabel: debugLabel);
 }

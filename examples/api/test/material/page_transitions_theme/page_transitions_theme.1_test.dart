@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/page_transitions_theme/page_transit
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('MaterialApp defines a custom PageTransitionsTheme', (WidgetTester tester) async {
+  testWidgets('MaterialApp defines a custom PageTransitionsTheme', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PageTransitionsThemeApp(),
     );

@@ -12,7 +12,7 @@ class AnimatedPaddingExampleApp extends StatelessWidget {
   const AnimatedPaddingExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AnimatedPadding Sample')),
@@ -31,14 +31,14 @@ class AnimatedPaddingExample extends StatefulWidget {
 
 class _AnimatedPaddingExampleState extends State<AnimatedPaddingExample> {
   double padValue = 0.0;
-  void _updatePadding(double value) {
+  void _updatePadding(final double value) {
     setState(() {
       padValue = value;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[

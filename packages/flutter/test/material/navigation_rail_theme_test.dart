@@ -12,7 +12,7 @@ void main() {
     expect(const NavigationRailThemeData().hashCode, const NavigationRailThemeData().copyWith().hashCode);
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified', (final WidgetTester tester) async {
     // Material 3 defaults
     await tester.pumpWidget(
       MaterialApp(
@@ -42,11 +42,11 @@ void main() {
     expect(find.byType(NavigationIndicator), findsWidgets);
     expect(_indicatorDecoration(tester)?.color, ThemeData().colorScheme.secondaryContainer);
     expect(_indicatorDecoration(tester)?.shape, const StadiumBorder());
-    final InkResponse inkResponse = tester.allWidgets.firstWhere((Widget object) => object.runtimeType.toString() == '_IndicatorInkWell') as InkResponse;
+    final InkResponse inkResponse = tester.allWidgets.firstWhere((final Widget object) => object.runtimeType.toString() == '_IndicatorInkWell') as InkResponse;
     expect(inkResponse.customBorder, const StadiumBorder());
   });
 
-  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (WidgetTester tester) async {
+  testWidgets('Default values are used when no NavigationRail or NavigationRailThemeData properties are specified (Material 2)', (final WidgetTester tester) async {
     // This test can be removed when `useMaterial3` is deprecated.
     await tester.pumpWidget(
       MaterialApp(
@@ -76,7 +76,7 @@ void main() {
     expect(find.byType(NavigationIndicator), findsNothing);
   });
 
-  testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (WidgetTester tester) async {
+  testWidgets('NavigationRailThemeData values are used when no NavigationRail properties are specified', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -144,7 +144,7 @@ void main() {
     expect(_indicatorDecoration(tester)?.shape, indicatorShape);
   });
 
-  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('NavigationRail values take priority over NavigationRailThemeData values when both properties are specified', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const double elevation = 7.0;
     const double selectedIconSize = 25.0;
@@ -228,26 +228,26 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/118618.
-  testWidgets('NavigationRailThemeData lerps correctly with null iconThemes', (WidgetTester tester) async {
+  testWidgets('NavigationRailThemeData lerps correctly with null iconThemes', (final WidgetTester tester) async {
     final NavigationRailThemeData lerp = NavigationRailThemeData.lerp(const NavigationRailThemeData(), const NavigationRailThemeData(), 0.5)!;
 
     expect(lerp.selectedIconTheme, isNull);
     expect(lerp.unselectedIconTheme, isNull);
   });
 
-  testWidgets('Default debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('Custom debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Custom debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const NavigationRailThemeData(
       backgroundColor: Color(0x00000099),
@@ -264,8 +264,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description[0], 'backgroundColor: Color(0x00000099)');
@@ -302,7 +302,7 @@ List<NavigationRailDestination> _destinations() {
   ];
 }
 
-Material _railMaterial(WidgetTester tester) {
+Material _railMaterial(final WidgetTester tester) {
   // The first material is for the rail, and the rest are for the destinations.
   return tester.firstWidget<Material>(
     find.descendant(
@@ -313,7 +313,7 @@ Material _railMaterial(WidgetTester tester) {
 }
 
 
-ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
+ShapeDecoration? _indicatorDecoration(final WidgetTester tester) {
   return tester.firstWidget<Container>(
     find.descendant(
       of: find.byType(NavigationIndicator),
@@ -322,15 +322,15 @@ ShapeDecoration? _indicatorDecoration(WidgetTester tester) {
   ).decoration as ShapeDecoration?;
 }
 
-IconThemeData _selectedIconTheme(WidgetTester tester) {
+IconThemeData _selectedIconTheme(final WidgetTester tester) {
   return _iconTheme(tester, Icons.favorite);
 }
 
-IconThemeData _unselectedIconTheme(WidgetTester tester) {
+IconThemeData _unselectedIconTheme(final WidgetTester tester) {
   return _iconTheme(tester, Icons.star_border);
 }
 
-IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
+IconThemeData _iconTheme(final WidgetTester tester, final IconData icon) {
   // The first IconTheme is the one added by the navigation rail.
   return tester.firstWidget<IconTheme>(
     find.ancestor(
@@ -340,7 +340,7 @@ IconThemeData _iconTheme(WidgetTester tester, IconData icon) {
   ).data;
 }
 
-TextStyle _selectedLabelStyle(WidgetTester tester) {
+TextStyle _selectedLabelStyle(final WidgetTester tester) {
   return tester.widget<RichText>(
     find.descendant(
       of: find.text('Abc'),
@@ -349,7 +349,7 @@ TextStyle _selectedLabelStyle(WidgetTester tester) {
   ).text.style!;
 }
 
-TextStyle _unselectedLabelStyle(WidgetTester tester) {
+TextStyle _unselectedLabelStyle(final WidgetTester tester) {
   return tester.widget<RichText>(
     find.descendant(
       of: find.text('Def'),
@@ -358,7 +358,7 @@ TextStyle _unselectedLabelStyle(WidgetTester tester) {
   ).text.style!;
 }
 
-Size _destinationSize(WidgetTester tester) {
+Size _destinationSize(final WidgetTester tester) {
   return tester.getSize(
     find.ancestor(
       of: find.byIcon(Icons.favorite),
@@ -368,7 +368,7 @@ Size _destinationSize(WidgetTester tester) {
   );
 }
 
-Align _destinationsAlign(WidgetTester tester) {
+Align _destinationsAlign(final WidgetTester tester) {
   // The first Expanded widget is the one within the main Column for the rail
   // content.
   return tester.firstWidget<Align>(
@@ -379,7 +379,7 @@ Align _destinationsAlign(WidgetTester tester) {
   );
 }
 
-NavigationRailLabelType _labelType(WidgetTester tester) {
+NavigationRailLabelType _labelType(final WidgetTester tester) {
   if (_visibilityAboveLabel('Abc').evaluate().isNotEmpty && _visibilityAboveLabel('Def').evaluate().isNotEmpty) {
     return _labelVisibility(tester, 'Abc') ? NavigationRailLabelType.selected : NavigationRailLabelType.none;
   } else {
@@ -387,7 +387,7 @@ NavigationRailLabelType _labelType(WidgetTester tester) {
   }
 }
 
-Finder _visibilityAboveLabel(String text) {
+Finder _visibilityAboveLabel(final String text) {
   return find.ancestor(
     of: find.text(text),
     matching: find.byType(Visibility),
@@ -395,7 +395,7 @@ Finder _visibilityAboveLabel(String text) {
 }
 
 // Only valid when labelType != all.
-bool _labelVisibility(WidgetTester tester, String text) {
+bool _labelVisibility(final WidgetTester tester, final String text) {
   final Visibility visibilityWidget = tester.widget<Visibility>(
     find.ancestor(
       of: find.text(text),

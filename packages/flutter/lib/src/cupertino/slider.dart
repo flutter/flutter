@@ -211,7 +211,7 @@ class CupertinoSlider extends StatefulWidget {
   State<CupertinoSlider> createState() => _CupertinoSliderState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('value', value));
     properties.add(DoubleProperty('min', min));
@@ -220,7 +220,7 @@ class CupertinoSlider extends StatefulWidget {
 }
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
-  void _handleChanged(double value) {
+  void _handleChanged(final double value) {
     assert(widget.onChanged != null);
     final double lerpValue = lerpDouble(widget.min, widget.max, value)!;
     if (lerpValue != widget.value) {
@@ -228,18 +228,18 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
     }
   }
 
-  void _handleDragStart(double value) {
+  void _handleDragStart(final double value) {
     assert(widget.onChangeStart != null);
     widget.onChangeStart!(lerpDouble(widget.min, widget.max, value)!);
   }
 
-  void _handleDragEnd(double value) {
+  void _handleDragEnd(final double value) {
     assert(widget.onChangeEnd != null);
     widget.onChangeEnd!(lerpDouble(widget.min, widget.max, value)!);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _CupertinoSliderRenderObjectWidget(
       value: (widget.value - widget.min) / (widget.max - widget.min),
       divisions: widget.divisions,
@@ -278,7 +278,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final TickerProvider vsync;
 
   @override
-  _RenderCupertinoSlider createRenderObject(BuildContext context) {
+  _RenderCupertinoSlider createRenderObject(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     return _RenderCupertinoSlider(
       value: value,
@@ -296,7 +296,7 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoSlider renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderCupertinoSlider renderObject) {
     assert(debugCheckHasDirectionality(context));
     renderObject
       ..value = value
@@ -322,17 +322,17 @@ const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material s
 
 class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTrackerAnnotation {
   _RenderCupertinoSlider({
-    required double value,
-    int? divisions,
-    required Color activeColor,
-    required Color thumbColor,
-    required Color trackColor,
-    ValueChanged<double>? onChanged,
+    required final double value,
+    final int? divisions,
+    required final Color activeColor,
+    required final Color thumbColor,
+    required final Color trackColor,
+    final ValueChanged<double>? onChanged,
     this.onChangeStart,
     this.onChangeEnd,
-    required TickerProvider vsync,
-    required TextDirection textDirection,
-    MouseCursor cursor = MouseCursor.defer,
+    required final TickerProvider vsync,
+    required final TextDirection textDirection,
+    final MouseCursor cursor = MouseCursor.defer,
   }) : assert(value >= 0.0 && value <= 1.0),
        _cursor = cursor,
        _value = value,
@@ -356,7 +356,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   double get value => _value;
   double _value;
-  set value(double newValue) {
+  set value(final double newValue) {
     assert(newValue >= 0.0 && newValue <= 1.0);
     if (newValue == _value) {
       return;
@@ -372,7 +372,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   int? get divisions => _divisions;
   int? _divisions;
-  set divisions(int? value) {
+  set divisions(final int? value) {
     if (value == _divisions) {
       return;
     }
@@ -382,7 +382,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   Color get activeColor => _activeColor;
   Color _activeColor;
-  set activeColor(Color value) {
+  set activeColor(final Color value) {
     if (value == _activeColor) {
       return;
     }
@@ -392,7 +392,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   Color get thumbColor => _thumbColor;
   Color _thumbColor;
-  set thumbColor(Color value) {
+  set thumbColor(final Color value) {
     if (value == _thumbColor) {
       return;
     }
@@ -402,7 +402,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   Color get trackColor => _trackColor;
   Color _trackColor;
-  set trackColor(Color value) {
+  set trackColor(final Color value) {
     if (value == _trackColor) {
       return;
     }
@@ -412,7 +412,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   ValueChanged<double>? get onChanged => _onChanged;
   ValueChanged<double>? _onChanged;
-  set onChanged(ValueChanged<double>? value) {
+  set onChanged(final ValueChanged<double>? value) {
     if (value == _onChanged) {
       return;
     }
@@ -428,7 +428,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
-  set textDirection(TextDirection value) {
+  set textDirection(final TextDirection value) {
     if (_textDirection == value) {
       return;
     }
@@ -464,9 +464,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
 
   bool get isInteractive => onChanged != null;
 
-  void _handleDragStart(DragStartDetails details) => _startInteraction(details.globalPosition);
+  void _handleDragStart(final DragStartDetails details) => _startInteraction(details.globalPosition);
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     if (isInteractive) {
       final double extent = math.max(_kPadding, size.width - 2.0 * (_kPadding + CupertinoThumbPainter.radius));
       final double valueDelta = details.primaryDelta! / extent;
@@ -480,9 +480,9 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     }
   }
 
-  void _handleDragEnd(DragEndDetails details) => _endInteraction();
+  void _handleDragEnd(final DragEndDetails details) => _endInteraction();
 
-  void _startInteraction(Offset globalPosition) {
+  void _startInteraction(final Offset globalPosition) {
     if (isInteractive) {
       onChangeStart?.call(_discretizedCurrentDragValue);
       _currentDragValue = _value;
@@ -496,12 +496,12 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   }
 
   @override
-  bool hitTestSelf(Offset position) {
+  bool hitTestSelf(final Offset position) {
     return (position.dx - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
   }
 
   @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final BoxHitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive) {
       _drag.addPointer(event);
@@ -509,7 +509,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final double visualPosition;
     final Color leftColor;
     final Color rightColor;
@@ -548,7 +548,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isInteractive;
@@ -580,7 +580,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
   @override
   MouseCursor get cursor => _cursor;
   MouseCursor _cursor;
-  set cursor(MouseCursor value) {
+  set cursor(final MouseCursor value) {
     if (_cursor != value) {
       _cursor = value;
       // A repaint is needed in order to trigger a device update of

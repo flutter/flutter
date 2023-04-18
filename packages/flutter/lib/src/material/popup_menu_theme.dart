@@ -98,16 +98,16 @@ class PopupMenuThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   PopupMenuThemeData copyWith({
-    Color? color,
-    ShapeBorder? shape,
-    double? elevation,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    TextStyle? textStyle,
-    MaterialStateProperty<TextStyle?>? labelTextStyle,
-    bool? enableFeedback,
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    PopupMenuPosition? position,
+    final Color? color,
+    final ShapeBorder? shape,
+    final double? elevation,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final TextStyle? textStyle,
+    final MaterialStateProperty<TextStyle?>? labelTextStyle,
+    final bool? enableFeedback,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final PopupMenuPosition? position,
   }) {
     return PopupMenuThemeData(
       color: color ?? this.color,
@@ -128,7 +128,7 @@ class PopupMenuThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static PopupMenuThemeData? lerp(PopupMenuThemeData? a, PopupMenuThemeData? b, double t) {
+  static PopupMenuThemeData? lerp(final PopupMenuThemeData? a, final PopupMenuThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -161,7 +161,7 @@ class PopupMenuThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -182,7 +182,7 @@ class PopupMenuThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
@@ -225,16 +225,16 @@ class PopupMenuTheme extends InheritedTheme {
   /// ```dart
   /// PopupMenuThemeData theme = PopupMenuTheme.of(context);
   /// ```
-  static PopupMenuThemeData of(BuildContext context) {
+  static PopupMenuThemeData of(final BuildContext context) {
     final PopupMenuTheme? popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
     return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return PopupMenuTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(PopupMenuTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final PopupMenuTheme oldWidget) => data != oldWidget.data;
 }

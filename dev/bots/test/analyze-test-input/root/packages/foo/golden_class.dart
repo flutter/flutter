@@ -4,6 +4,6 @@
 
 /// Mack class definition for testing.
 /// Should not be tag-enforced, no analysis failures should be found.
-void matchesGoldenFile(Object key) {
+void matchesGoldenFile(final Object key) {
   return;
 }

@@ -12,7 +12,7 @@ class DefaultTextStyleTransitionExampleApp extends StatelessWidget {
   const DefaultTextStyleTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: DefaultTextStyleTransitionExample(),
     );
@@ -58,7 +58,7 @@ class _DefaultTextStyleTransitionExampleState extends State<DefaultTextStyleTran
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: DefaultTextStyleTransition(
         style: _styleTween.animate(_curvedAnimation),

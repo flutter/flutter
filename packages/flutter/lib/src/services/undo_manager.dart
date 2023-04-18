@@ -46,7 +46,7 @@ class UndoManager {
   /// will break the ability to set the undo status or receive undo and redo
   /// events from the system. This has no effect if asserts are disabled.
   @visibleForTesting
-  static void setChannel(MethodChannel newChannel) {
+  static void setChannel(final MethodChannel newChannel) {
     assert(() {
       _instance._channel = newChannel..setMethodCallHandler(_instance._handleUndoManagerInvocation);
       return true;
@@ -60,7 +60,7 @@ class UndoManager {
   /// Setting the [client] will cause [UndoManagerClient.handlePlatformUndo]
   /// to be called when a system undo or redo is triggered, such as by tapping
   /// the undo/redo keyboard buttons or using the 3-finger swipe gestures.
-  static set client(UndoManagerClient? client) {
+  static set client(final UndoManagerClient? client) {
     _instance._currentClient = client;
   }
 
@@ -69,7 +69,7 @@ class UndoManager {
 
   /// Set the current state of the system UndoManager. [canUndo] and [canRedo]
   /// control the respective "undo" and "redo" buttons of the system UndoManager.
-  static void setUndoState({bool canUndo = false, bool canRedo = false}) {
+  static void setUndoState({final bool canUndo = false, final bool canRedo = false}) {
     _instance._setUndoState(canUndo: canUndo, canRedo: canRedo);
   }
 
@@ -77,7 +77,7 @@ class UndoManager {
 
   UndoManagerClient? _currentClient;
 
-  Future<dynamic> _handleUndoManagerInvocation(MethodCall methodCall) async {
+  Future<dynamic> _handleUndoManagerInvocation(final MethodCall methodCall) async {
     final String method = methodCall.method;
     final List<dynamic> args = methodCall.arguments as List<dynamic>;
     if (method == 'UndoManagerClient.handleUndo') {
@@ -90,14 +90,14 @@ class UndoManager {
     throw MissingPluginException();
   }
 
-  void _setUndoState({bool canUndo = false, bool canRedo = false}) {
+  void _setUndoState({final bool canUndo = false, final bool canRedo = false}) {
     _channel.invokeMethod<void>(
       'UndoManager.setUndoState',
       <String, bool>{'canUndo': canUndo, 'canRedo': canRedo}
     );
   }
 
-  UndoDirection _toUndoDirection(String direction) {
+  UndoDirection _toUndoDirection(final String direction) {
     switch (direction) {
       case 'undo':
         return UndoDirection.undo;
@@ -115,7 +115,7 @@ mixin UndoManagerClient {
   /// Currently only used on iOS 9+ when the undo or redo methods are invoked
   /// by the platform. For example, when using three-finger swipe gestures,
   /// the iPad keyboard, or voice control.
-  void handlePlatformUndo(UndoDirection direction);
+  void handlePlatformUndo(final UndoDirection direction);
 
   /// Reverts the value on the stack to the previous value.
   void undo();

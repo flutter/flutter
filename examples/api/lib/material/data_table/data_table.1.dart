@@ -12,7 +12,7 @@ class DataTableExampleApp extends StatelessWidget {
   const DataTableExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('DataTable Sample')),
@@ -31,10 +31,10 @@ class DataTableExample extends StatefulWidget {
 
 class _DataTableExampleState extends State<DataTableExample> {
   static const int numItems = 10;
-  List<bool> selected = List<bool>.generate(numItems, (int index) => false);
+  List<bool> selected = List<bool>.generate(numItems, (final int index) => false);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: DataTable(
@@ -45,8 +45,8 @@ class _DataTableExampleState extends State<DataTableExample> {
         ],
         rows: List<DataRow>.generate(
           numItems,
-          (int index) => DataRow(
-            color: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+          (final int index) => DataRow(
+            color: MaterialStateProperty.resolveWith<Color?>((final Set<MaterialState> states) {
               // All rows will have the same selected color.
               if (states.contains(MaterialState.selected)) {
                 return Theme.of(context).colorScheme.primary.withOpacity(0.08);
@@ -59,7 +59,7 @@ class _DataTableExampleState extends State<DataTableExample> {
             }),
             cells: <DataCell>[DataCell(Text('Row $index'))],
             selected: selected[index],
-            onSelectChanged: (bool? value) {
+            onSelectChanged: (final bool? value) {
               setState(() {
                 selected[index] = value!;
               });

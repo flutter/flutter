@@ -71,7 +71,7 @@ class ImageSizeInfo {
   /// The number of bytes used by the image in memory.
   int get decodedSizeInBytes => _sizeToBytes(imageSize);
 
-  int _sizeToBytes(Size size) {
+  int _sizeToBytes(final Size size) {
     // Assume 4 bytes per pixel and that mipmapping will be used, which adds
     // 4/3.
     return (size.width * size.height * 4 * (4/3)).toInt();
@@ -95,7 +95,7 @@ class ImageSizeInfo {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -180,7 +180,7 @@ int debugImageOverheadAllowance = _imageOverheadAllowanceDefault;
 /// The `debugDisableShadowsOverride` argument can be provided to override
 /// the expected value for [debugDisableShadows]. (This exists because the
 /// test framework itself overrides this value in some cases.)
-bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
+bool debugAssertAllPaintingVarsUnset(final String reason, { final bool debugDisableShadowsOverride = false }) {
   assert(() {
     if (debugDisableShadows != debugDisableShadowsOverride ||
         debugNetworkImageHttpClientProvider != null ||
@@ -212,10 +212,10 @@ typedef ShaderWarmUpImageCallback = bool Function(Image);
 ///
 /// Tests may use this to capture the picture and run assertions on it.
 ShaderWarmUpPictureCallback debugCaptureShaderWarmUpPicture = _defaultPictureCapture;
-bool _defaultPictureCapture(Picture picture) => true;
+bool _defaultPictureCapture(final Picture picture) => true;
 
 /// Called by [ShaderWarmUp.execute] immediately after it creates an [Image].
 ///
 /// Tests may use this to capture the picture and run assertions on it.
 ShaderWarmUpImageCallback debugCaptureShaderWarmUpImage = _defaultImageCapture;
-bool _defaultImageCapture(Image image) => true;
+bool _defaultImageCapture(final Image image) => true;

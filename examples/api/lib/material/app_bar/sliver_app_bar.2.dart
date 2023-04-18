@@ -14,7 +14,7 @@ class AppBarMediumApp extends StatelessWidget {
   const AppBarMediumApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         useMaterial3: true,

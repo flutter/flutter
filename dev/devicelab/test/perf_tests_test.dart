@@ -59,7 +59,7 @@ void main() {
       '99th_percentile_vsync_transitions_missed': 1,
     };
     const String resultFileName = 'fake_result';
-    void driveCallback(List<String> arguments) {
+    void driveCallback(final List<String> arguments) {
       final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }
@@ -108,7 +108,7 @@ void main() {
       'illegal_refresh_rate_frame_count': 10,
     };
     const String resultFileName = 'fake_result';
-    void driveCallback(List<String> arguments) {
+    void driveCallback(final List<String> arguments) {
       final File resultFile = File('${testDirectory.absolute.path}/build/$resultFileName.json')..createSync(recursive: true);
       resultFile.writeAsStringSync(json.encode(fakeData));
     }

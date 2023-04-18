@@ -66,7 +66,7 @@ class NewGalleryChromeRunTest {
       process.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
         if (line.contains(successfullyLoadedString)) {
           // Successfully started.
           Future<void>.delayed(
@@ -85,7 +85,7 @@ class NewGalleryChromeRunTest {
       process.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
         print('stderr: $line');
       }, onDone: () {
         stderrDone.complete();

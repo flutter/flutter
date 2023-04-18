@@ -21,24 +21,24 @@ class Wrapper extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }
 
 void main() {
-  testWidgets('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
+  testWidgets('Moving a global key from another LayoutBuilder at layout time', (final WidgetTester tester) async {
     final GlobalKey victimKey = GlobalKey();
 
     await tester.pumpWidget(Row(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Wrapper(
-          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+          child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
             return const SizedBox();
           }),
         ),
         Wrapper(
           child: Wrapper(
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
               return Wrapper(
                 child: SizedBox(key: victimKey),
               );
@@ -52,7 +52,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <Widget>[
         Wrapper(
-          child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+          child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
             return Wrapper(
               child: SizedBox(key: victimKey),
             );
@@ -60,7 +60,7 @@ void main() {
         ),
         Wrapper(
           child: Wrapper(
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
               return const SizedBox();
             }),
           ),
@@ -71,7 +71,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('Moving a global key from another SliverLayoutBuilder at layout time', (WidgetTester tester) async {
+  testWidgets('Moving a global key from another SliverLayoutBuilder at layout time', (final WidgetTester tester) async {
     final GlobalKey victimKey1 = GlobalKey();
     final GlobalKey victimKey2 = GlobalKey();
 
@@ -81,17 +81,17 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return SliverPadding(key: victimKey1, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return SliverPadding(key: victimKey2, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return const SliverPadding(padding: EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
@@ -106,17 +106,17 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return SliverPadding(key: victimKey2, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return const SliverPadding(padding: EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return SliverPadding(key: victimKey1, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
@@ -128,7 +128,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('LayoutBuilder does not layout twice', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder does not layout twice', (final WidgetTester tester) async {
     // This widget marks itself dirty when the closest MediaQuery changes.
     final _LayoutCount widget = _LayoutCount();
     late StateSetter setState;
@@ -138,14 +138,14 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (final BuildContext context, final StateSetter setter) {
             setState = setter;
             return MediaQuery(
               data: updated
                 ? const MediaQueryData(platformBrightness: Brightness.dark)
                 : const MediaQueryData(),
               child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
+                builder: (final BuildContext context, final BoxConstraints constraints) {
                   return Center(
                     child: SizedBox.square(
                       dimension: 20,
@@ -177,12 +177,12 @@ class _LayoutCount extends LeafRenderObjectWidget {
   late final _RenderLayoutCount _renderObject;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _renderObject = _RenderLayoutCount(MediaQuery.of(context));
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderLayoutCount renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderLayoutCount renderObject) {
     renderObject.mediaQuery = MediaQuery.of(context);
   }
 }
@@ -193,7 +193,7 @@ class _RenderLayoutCount extends RenderProxyBox {
 
   MediaQueryData get mediaQuery => _mediaQuery;
   MediaQueryData _mediaQuery;
-  set mediaQuery(MediaQueryData newValue) {
+  set mediaQuery(final MediaQueryData newValue) {
     if (newValue != _mediaQuery) {
       _mediaQuery = newValue;
       markNeedsLayout();

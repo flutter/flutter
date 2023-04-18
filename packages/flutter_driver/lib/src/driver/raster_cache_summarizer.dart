@@ -58,16 +58,16 @@ class RasterCacheSummarizer {
   double computeAveragePictureMemory() => _computeAverage(_pictureMemories);
 
   /// The [percentile]-th percentile `LayerCount` over the cache events.
-  double computePercentileLayerCount(double percentile) => _computePercentile(_layerCounts, percentile);
+  double computePercentileLayerCount(final double percentile) => _computePercentile(_layerCounts, percentile);
 
   /// The [percentile]-th percentile `LayerMemory` over the cache events.
-  double computePercentileLayerMemory(double percentile) => _computePercentile(_layerMemories, percentile);
+  double computePercentileLayerMemory(final double percentile) => _computePercentile(_layerMemories, percentile);
 
   /// The [percentile]-th percentile `PictureCount` over the cache events.
-  double computePercentilePictureCount(double percentile) => _computePercentile(_pictureCounts, percentile);
+  double computePercentilePictureCount(final double percentile) => _computePercentile(_pictureCounts, percentile);
 
   /// The [percentile]-th percentile `PictureMemory` over the cache events.
-  double computePercentilePictureMemory(double percentile) => _computePercentile(_pictureMemories, percentile);
+  double computePercentilePictureMemory(final double percentile) => _computePercentile(_pictureMemories, percentile);
 
   /// Computes the worst of the `LayerCount` values over the cache events.
   double computeWorstLayerCount() => _computeWorst(_layerCounts);
@@ -81,16 +81,16 @@ class RasterCacheSummarizer {
   /// Computes the worst of the `PictureMemory` values over the cache events.
   double computeWorstPictureMemory() => _computeWorst(_pictureMemories);
 
-  static double _computeAverage(List<double> values) {
+  static double _computeAverage(final List<double> values) {
     if (values.isEmpty) {
       return 0;
     }
 
-    final double total = values.reduce((double a, double b) => a + b);
+    final double total = values.reduce((final double a, final double b) => a + b);
     return total / values.length;
   }
 
-  static double _computePercentile(List<double> values, double percentile) {
+  static double _computePercentile(final List<double> values, final double percentile) {
     if (values.isEmpty) {
       return 0;
     }
@@ -98,7 +98,7 @@ class RasterCacheSummarizer {
     return findPercentile(values, percentile);
   }
 
-  static double _computeWorst(List<double> values) {
+  static double _computeWorst(final List<double> values) {
     if (values.isEmpty) {
       return 0;
     }
@@ -107,10 +107,10 @@ class RasterCacheSummarizer {
     return values.last;
   }
 
-  List<double> _extractValues(String name) =>
-      rasterCacheEvents.map((TimelineEvent e) => _getValue(e, name)).toList();
+  List<double> _extractValues(final String name) =>
+      rasterCacheEvents.map((final TimelineEvent e) => _getValue(e, name)).toList();
 
-  double _getValue(TimelineEvent e, String name) {
+  double _getValue(final TimelineEvent e, final String name) {
     assert(e.name == kRasterCacheEvent);
     assert(e.arguments!.containsKey(name));
     final dynamic valueString = e.arguments![name];

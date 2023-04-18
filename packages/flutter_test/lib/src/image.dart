@@ -25,9 +25,9 @@ final Map<int, ui.Image> _cache = <int, ui.Image>{};
 /// as a setup step before [testWidgets] are run, such as [setUp] or [setUpAll].
 /// If needed, it can be invoked using [WidgetTester.runAsync].
 Future<ui.Image> createTestImage({
-  int width = 1,
-  int height = 1,
-  bool cache = true,
+  final int width = 1,
+  final int height = 1,
+  final bool cache = true,
 }) => TestAsyncUtils.guard(() async {
   assert(width > 0);
   assert(height > 0);
@@ -44,14 +44,14 @@ Future<ui.Image> createTestImage({
   return image;
 });
 
-Future<ui.Image> _createImage(int width, int height) async {
+Future<ui.Image> _createImage(final int width, final int height) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(
     Uint8List.fromList(List<int>.filled(width * height * 4, 0)),
     width,
     height,
     ui.PixelFormat.rgba8888,
-    (ui.Image image) {
+    (final ui.Image image) {
       completer.complete(image);
     },
   );

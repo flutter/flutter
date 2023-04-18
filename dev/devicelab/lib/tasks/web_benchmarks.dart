@@ -20,7 +20,7 @@ import '../framework/utils.dart';
 const int benchmarkServerPort = 9999;
 const int chromeDebugPort = 10000;
 
-Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
+Future<TaskResult> runWebBenchmark({ required final bool useCanvasKit }) async {
   // Reduce logging level. Otherwise, package:webkit_inspection_protocol is way too spammy.
   Logger.root.level = Level.INFO;
   final String macrobenchmarksDirectory = path.join(flutterDirectory.path, 'dev', 'benchmarks', 'macrobenchmarks');
@@ -48,7 +48,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
     late io.HttpServer server;
     Cascade cascade = Cascade();
     List<Map<String, dynamic>>? latestPerformanceTrace;
-    cascade = cascade.add((Request request) async {
+    cascade = cascade.add((final Request request) async {
       try {
         chrome ??= await whenChromeIsReady;
         if (request.requestedUri.path.endsWith('/profile-data')) {
@@ -142,7 +142,7 @@ Future<TaskResult> runWebBenchmark({ required bool useCanvasKit }) async {
       print('Launching Chrome.');
       whenChromeIsReady = Chrome.launch(
         options,
-        onError: (String error) {
+        onError: (final String error) {
           profileData.completeError(Exception(error));
         },
         workingDirectory: cwd,

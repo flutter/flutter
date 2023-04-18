@@ -10,7 +10,7 @@ final AnchorElement _urlParsingNode = AnchorElement();
 ///
 /// Example: for the url `http://example.com/foo`, the extracted pathname will
 /// be `/foo`.
-String extractPathname(String url) {
+String extractPathname(final String url) {
   _urlParsingNode.href = url; // ignore: unsafe_html, node is never exposed to the user
   final String pathname = _urlParsingNode.pathname ?? '';
   return (pathname.isEmpty || pathname[0] == '/') ? pathname : '/$pathname';
@@ -27,7 +27,7 @@ String? getBaseElementHrefFromDom() => _baseElement?.getAttribute('href');
 /// Checks that [baseHref] is set.
 ///
 /// Throws an exception otherwise.
-String checkBaseHref(String? baseHref) {
+String checkBaseHref(final String? baseHref) {
   if (baseHref == null) {
     throw Exception('Please add a <base> element to your index.html');
   }
@@ -40,7 +40,7 @@ String checkBaseHref(String? baseHref) {
 /// Prepends a forward slash to [path] if it doesn't start with one already.
 ///
 /// Returns [path] unchanged if it already starts with a forward slash.
-String ensureLeadingSlash(String path) {
+String ensureLeadingSlash(final String path) {
   if (!path.startsWith('/')) {
     return '/$path';
   }
@@ -48,7 +48,7 @@ String ensureLeadingSlash(String path) {
 }
 
 /// Removes the trailing forward slash from [path] if any.
-String stripTrailingSlash(String path) {
+String stripTrailingSlash(final String path) {
   if (path.endsWith('/')) {
     return path.substring(0, path.length - 1);
   }

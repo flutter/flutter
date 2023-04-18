@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
-RenderBox getMaterialBox(WidgetTester tester) {
+RenderBox getMaterialBox(final WidgetTester tester) {
   return tester.firstRenderObject<RenderBox>(
     find.descendant(
       of: find.byType(RawChip),
@@ -16,7 +16,7 @@ RenderBox getMaterialBox(WidgetTester tester) {
   );
 }
 
-Material getMaterial(WidgetTester tester) {
+Material getMaterial(final WidgetTester tester) {
   return tester.widget<Material>(
     find.descendant(
       of: find.byType(RawChip),
@@ -25,7 +25,7 @@ Material getMaterial(WidgetTester tester) {
   );
 }
 
-DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
+DefaultTextStyle getLabelStyle(final WidgetTester tester, final String labelText) {
   return tester.widget(
     find.ancestor(
       of: find.text(labelText),
@@ -36,10 +36,10 @@ DefaultTextStyle getLabelStyle(WidgetTester tester, String labelText) {
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
-  required Widget child,
-  TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
+  required final Widget child,
+  final TextDirection textDirection = TextDirection.ltr,
+  final double textScaleFactor = 1.0,
+  final Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     theme: ThemeData(brightness: brightness),
@@ -53,7 +53,7 @@ Widget wrapForChip({
   );
 }
 
-void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+void checkChipMaterialClipBehavior(final WidgetTester tester, final Clip clipBehavior) {
   final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
   // last Material is from the "RawChip".
@@ -63,8 +63,8 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ChoiceChip defaults', (WidgetTester tester) async {
-    Widget buildFrame(Brightness brightness) {
+  testWidgets('ChoiceChip defaults', (final WidgetTester tester) async {
+    Widget buildFrame(final Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: const Scaffold(
@@ -96,7 +96,7 @@ void main() {
     expect(getLabelStyle(tester, 'Chip A').style.color?.value, 0xdeffffff);
   });
 
-  testWidgets('ChoiceChip can be tapped', (WidgetTester tester) async {
+  testWidgets('ChoiceChip can be tapped', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -112,7 +112,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('ChoiceChip clipBehavior properly passes through to the Material', (final WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: const ChoiceChip(label: label, selected: false)));
     checkChipMaterialClipBehavior(tester, Clip.none);
@@ -121,7 +121,7 @@ void main() {
     checkChipMaterialClipBehavior(tester, Clip.antiAlias);
   });
 
-  testWidgets('ChoiceChip passes iconTheme property to RawChip', (WidgetTester tester) async {
+  testWidgets('ChoiceChip passes iconTheme property to RawChip', (final WidgetTester tester) async {
     const IconThemeData iconTheme = IconThemeData(color: Colors.red);
     await tester.pumpWidget(wrapForChip(
       child: const ChoiceChip(

@@ -12,7 +12,7 @@ class AutocompleteExampleApp extends StatelessWidget {
   const AutocompleteExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -36,31 +36,31 @@ class AutocompleteBasicExample extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RawAutocomplete<String>(
-      optionsBuilder: (TextEditingValue textEditingValue) {
-        return _options.where((String option) {
+      optionsBuilder: (final TextEditingValue textEditingValue) {
+        return _options.where((final String option) {
           return option.contains(textEditingValue.text.toLowerCase());
         });
       },
       fieldViewBuilder: (
-        BuildContext context,
-        TextEditingController textEditingController,
-        FocusNode focusNode,
-        VoidCallback onFieldSubmitted,
+        final BuildContext context,
+        final TextEditingController textEditingController,
+        final FocusNode focusNode,
+        final VoidCallback onFieldSubmitted,
       ) {
         return TextFormField(
           controller: textEditingController,
           focusNode: focusNode,
-          onFieldSubmitted: (String value) {
+          onFieldSubmitted: (final String value) {
             onFieldSubmitted();
           },
         );
       },
       optionsViewBuilder: (
-        BuildContext context,
-        AutocompleteOnSelected<String> onSelected,
-        Iterable<String> options,
+        final BuildContext context,
+        final AutocompleteOnSelected<String> onSelected,
+        final Iterable<String> options,
       ) {
         return Align(
           alignment: Alignment.topLeft,
@@ -71,7 +71,7 @@ class AutocompleteBasicExample extends StatelessWidget {
               child: ListView.builder(
                 padding: const EdgeInsets.all(8.0),
                 itemCount: options.length,
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   final String option = options.elementAt(index);
                   return GestureDetector(
                     onTap: () {

@@ -25,7 +25,7 @@ class BottomNavigationBarItem {
   const BottomNavigationBarItem({
     required this.icon,
     this.label,
-    Widget? activeIcon,
+    final Widget? activeIcon,
     this.backgroundColor,
     this.tooltip,
   }) : activeIcon = activeIcon ?? icon;

@@ -34,7 +34,7 @@ void main() {
     for (final Channel channel in Channel.values) {
       expect(getNameForChannel(channel), kOfficialChannels.toList()[channel.index]);
     }
-    expect(kOfficialChannels.toList().map((String str) => getChannelForName(str)).toList(),
+    expect(kOfficialChannels.toList().map((final String str) => getChannelForName(str)).toList(),
       Channel.values);
   });
 
@@ -272,7 +272,7 @@ void main() {
       });
 
       group('$VersionCheckStamp for $channel', () {
-        void expectDefault(VersionCheckStamp stamp) {
+        void expectDefault(final VersionCheckStamp stamp) {
           expect(stamp.lastKnownRemoteVersion, isNull);
           expect(stamp.lastTimeVersionWasChecked, isNull);
           expect(stamp.lastTimeWarningWasPrinted, isNull);
@@ -322,8 +322,8 @@ void main() {
       const String flutterStandardSshUrlDotGit = 'git@github.com:flutter/flutter.git';
 
       VersionCheckError? runUpstreamValidator({
-        String? versionUpstreamUrl,
-        String? flutterGitUrl,
+        final String? versionUpstreamUrl,
+        final String? flutterGitUrl,
       }){
         final Platform testPlatform = FakePlatform(environment: <String, String> {
           if (flutterGitUrl != null) 'FLUTTER_GIT_URL': flutterGitUrl,
@@ -687,7 +687,7 @@ class FakeCache extends Fake implements Cache {
   void checkLockAcquired() { }
 
   @override
-  String? getStampFor(String artifactName) {
+  String? getStampFor(final String artifactName) {
     if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
       return versionStamp;
     }
@@ -695,7 +695,7 @@ class FakeCache extends Fake implements Cache {
   }
 
   @override
-  void setStampFor(String artifactName, String version) {
+  void setStampFor(final String artifactName, final String version) {
     if (artifactName == VersionCheckStamp.flutterVersionCheckStampFile) {
       setVersionStamp = true;
     }

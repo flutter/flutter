@@ -13,7 +13,7 @@ enum RadiusType {
   Round
 }
 
-void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
+void matches(final BorderRadius? borderRadius, final RadiusType top, final RadiusType bottom) {
   final Radius cardRadius = kMaterialEdges[MaterialType.card]!.topLeft;
 
   if (top == RadiusType.Sharp) {
@@ -54,7 +54,7 @@ void matches(BorderRadius? borderRadius, RadiusType top, RadiusType bottom) {
 // Returns the border radius decoration of an item within a MergeableMaterial.
 // This depends on the exact structure of objects built by the Material and
 // MergeableMaterial widgets.
-BorderRadius? getBorderRadius(WidgetTester tester, int index) {
+BorderRadius? getBorderRadius(final WidgetTester tester, final int index) {
   final List<Element> containers = tester.elementList(find.byType(Container))
                                    .toList();
 
@@ -65,7 +65,7 @@ BorderRadius? getBorderRadius(WidgetTester tester, int index) {
 }
 
 void main() {
-  testWidgets('MergeableMaterial empty', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial empty', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -80,7 +80,7 @@ void main() {
     expect(box.size.height, equals(0));
   });
 
-  testWidgets('MergeableMaterial update slice', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial update slice', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -128,7 +128,7 @@ void main() {
     expect(box.size.height, equals(200.0));
   });
 
-  testWidgets('MergeableMaterial swap slices', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial swap slices', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -199,7 +199,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial paints shadows', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial paints shadows', (final WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const MaterialApp(
@@ -233,7 +233,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('MergeableMaterial skips shadow for zero elevation', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial skips shadow for zero elevation', (final WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const MaterialApp(
@@ -263,7 +263,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('MergeableMaterial merge gap', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial merge gap', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -340,7 +340,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial separate slices', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial separate slices', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -417,7 +417,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial separate merge separate', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial separate merge separate', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -576,7 +576,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial insert slice', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial insert slice', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -651,7 +651,7 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial remove slice', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial remove slice', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -727,7 +727,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial insert chunk', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial insert chunk', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -816,7 +816,7 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial remove chunk', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial remove chunk', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -904,7 +904,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Sharp, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial replace gap with chunk', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial replace gap with chunk', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -996,7 +996,7 @@ void main() {
     matches(getBorderRadius(tester, 2), RadiusType.Round, RadiusType.Round);
   });
 
-  testWidgets('MergeableMaterial replace chunk with gap', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial replace chunk with gap', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1087,7 +1087,7 @@ void main() {
     matches(getBorderRadius(tester, 1), RadiusType.Round, RadiusType.Round);
   });
 
-  bool isDivider(BoxDecoration decoration, bool top, bool bottom) {
+  bool isDivider(final BoxDecoration decoration, final bool top, final bool bottom) {
     const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
     return decoration == BoxDecoration(
@@ -1098,7 +1098,7 @@ void main() {
     );
   }
 
-  testWidgets('MergeableMaterial dividers', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial dividers', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -1221,7 +1221,7 @@ void main() {
     expect(isDivider(boxes[offset + 3], true, false), isTrue);
   });
 
-  testWidgets('MergeableMaterial respects dividerColor', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial respects dividerColor', (final WidgetTester tester) async {
     const Color dividerColor = Colors.red;
     await tester.pumpWidget(
       const MaterialApp(
@@ -1258,7 +1258,7 @@ void main() {
     expect(decoration.border!.top.color, dividerColor);
   });
 
-  testWidgets('MergeableMaterial respects MaterialSlice.color', (WidgetTester tester) async {
+  testWidgets('MergeableMaterial respects MaterialSlice.color', (final WidgetTester tester) async {
     const Color themeCardColor = Colors.red;
     const Color materialSliceColor = Colors.green;
 

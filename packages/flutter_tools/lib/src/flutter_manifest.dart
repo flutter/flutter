@@ -22,15 +22,15 @@ const Set<String> _kValidPluginPlatforms = <String>{
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
 class FlutterManifest {
-  FlutterManifest._({required Logger logger}) : _logger = logger;
+  FlutterManifest._({required final Logger logger}) : _logger = logger;
 
   /// Returns an empty manifest.
-  factory FlutterManifest.empty({ required Logger logger }) = FlutterManifest._;
+  factory FlutterManifest.empty({ required final Logger logger }) = FlutterManifest._;
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
-  static FlutterManifest? createFromPath(String path, {
-    required FileSystem fileSystem,
-    required Logger logger,
+  static FlutterManifest? createFromPath(final String path, {
+    required final FileSystem fileSystem,
+    required final Logger logger,
   }) {
     if (!fileSystem.isFileSync(path)) {
       return _createFromYaml(null, logger);
@@ -41,11 +41,11 @@ class FlutterManifest {
 
   /// Returns null on missing or invalid manifest.
   @visibleForTesting
-  static FlutterManifest? createFromString(String manifest, { required Logger logger }) {
+  static FlutterManifest? createFromString(final String manifest, { required final Logger logger }) {
     return _createFromYaml(loadYaml(manifest), logger);
   }
 
-  static FlutterManifest? _createFromYaml(Object? yamlDocument, Logger logger) {
+  static FlutterManifest? _createFromYaml(final Object? yamlDocument, final Logger logger) {
     if (yamlDocument != null && !_validate(yamlDocument, logger)) {
       return null;
     }
@@ -162,7 +162,7 @@ class FlutterManifest {
   List<String> get additionalLicenses {
     final Object? licenses = _flutterDescriptor['licenses'];
     if (licenses is YamlList) {
-      return licenses.map((Object? element) => element.toString()).toList();
+      return licenses.map((final Object? element) => element.toString()).toList();
     }
     return <String>[];
   }
@@ -293,7 +293,7 @@ class FlutterManifest {
       return null;
     }
     final Map<String, Object?> platforms = <String, Object?>{}..addAll(allPlatforms);
-    platforms.removeWhere((String key, Object? _) => !_kValidPluginPlatforms.contains(key));
+    platforms.removeWhere((final String key, final Object? _) => !_kValidPluginPlatforms.contains(key));
     if (platforms.isEmpty) {
       return null;
     }
@@ -301,7 +301,7 @@ class FlutterManifest {
   }
 
   List<Map<String, Object?>> get fontsDescriptor {
-    return fonts.map((Font font) => font.descriptor).toList();
+    return fonts.map((final Font font) => font.descriptor).toList();
   }
 
   List<Map<String, Object?>> get _rawFontsDescriptor {
@@ -376,7 +376,7 @@ class FlutterManifest {
   late final List<Uri> shaders = _extractAssetUris('shaders', 'Shader');
   late final List<Uri> models = kIs3dSceneSupported ? _extractAssetUris('models', 'Model') : <Uri>[];
 
-  List<Uri> _extractAssetUris(String key, String singularName) {
+  List<Uri> _extractAssetUris(final String key, final String singularName) {
     if (!_flutterDescriptor.containsKey(key)) {
       return <Uri>[];
     }
@@ -430,7 +430,7 @@ class Font {
   Map<String, Object?> get descriptor {
     return <String, Object?>{
       'family': familyName,
-      'fonts': fontAssets.map<Map<String, Object?>>((FontAsset a) => a.descriptor).toList(),
+      'fonts': fontAssets.map<Map<String, Object?>>((final FontAsset a) => a.descriptor).toList(),
     };
   }
 
@@ -464,7 +464,7 @@ class FontAsset {
 }
 
 
-bool _validate(Object? manifest, Logger logger) {
+bool _validate(final Object? manifest, final Logger logger) {
   final List<String> errors = <String>[];
   if (manifest is! YamlMap) {
     errors.add('Expected YAML map');
@@ -504,7 +504,7 @@ bool _validate(Object? manifest, Logger logger) {
   return true;
 }
 
-void _validateFlutter(YamlMap? yaml, List<String> errors) {
+void _validateFlutter(final YamlMap? yaml, final List<String> errors) {
   if (yaml == null) {
     return;
   }
@@ -607,7 +607,7 @@ void _validateFlutter(YamlMap? yaml, List<String> errors) {
   }
 }
 
-void _validateListType<T>(YamlList yamlList, List<String> errors, String context, String typeAlias) {
+void _validateListType<T>(final YamlList yamlList, final List<String> errors, final String context, final String typeAlias) {
   for (int i = 0; i < yamlList.length; i++) {
     if (yamlList[i] is! T) {
       // ignore: avoid_dynamic_calls
@@ -616,7 +616,7 @@ void _validateListType<T>(YamlList yamlList, List<String> errors, String context
   }
 }
 
-void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> errors) {
+void _validateDeferredComponents(final MapEntry<Object?, Object?> kvp, final List<String> errors) {
   final Object? yamlList = kvp.value;
   if (yamlList != null && (yamlList is! YamlList || yamlList[0] is! YamlMap)) {
     errors.add('Expected "${kvp.key}" to be a list, but got $yamlList (${yamlList.runtimeType}).');
@@ -651,7 +651,7 @@ void _validateDeferredComponents(MapEntry<Object?, Object?> kvp, List<String> er
   }
 }
 
-void _validateFonts(YamlList fonts, List<String> errors) {
+void _validateFonts(final YamlList fonts, final List<String> errors) {
   const Set<int> fontWeights = <int>{
     100, 200, 300, 400, 500, 600, 700, 800, 900,
   };
@@ -660,7 +660,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       errors.add('Unexpected child "$fontMap" found under "fonts". Expected a map.');
       continue;
     }
-    for (final Object? key in fontMap.keys.where((Object? key) => key != 'family' && key != 'fonts')) {
+    for (final Object? key in fontMap.keys.where((final Object? key) => key != 'family' && key != 'fonts')) {
       errors.add('Unexpected child "$key" found under "fonts".');
     }
     if (fontMap['family'] != null && fontMap['family'] is! String) {

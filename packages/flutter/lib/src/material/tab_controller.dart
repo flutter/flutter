@@ -102,10 +102,10 @@ class TabController extends ChangeNotifier {
   /// The `initialIndex` must be valid given [length] and must not be null. If
   /// [length] is zero, then `initialIndex` must be 0 (the default).
   TabController({
-    int initialIndex = 0,
-    Duration? animationDuration,
+    final int initialIndex = 0,
+    final Duration? animationDuration,
     required this.length,
-    required TickerProvider vsync,
+    required final TickerProvider vsync,
   }) : assert(length >= 0),
        assert(initialIndex >= 0 && (length == 0 || initialIndex < length)),
        _index = initialIndex,
@@ -119,10 +119,10 @@ class TabController extends ChangeNotifier {
   // Private constructor used by `_copyWith`. This allows a new TabController to
   // be created without having to create a new animationController.
   TabController._({
-    required int index,
-    required int previousIndex,
-    required AnimationController? animationController,
-    required Duration animationDuration,
+    required final int index,
+    required final int previousIndex,
+    required final AnimationController? animationController,
+    required final Duration animationDuration,
     required this.length,
   }) : _index = index,
        _previousIndex = previousIndex,
@@ -138,10 +138,10 @@ class TabController extends ChangeNotifier {
   /// When [DefaultTabController.length] is updated, this method is called to
   /// create a new [TabController] without creating a new [AnimationController].
   TabController _copyWith({
-    required int? index,
-    required int? length,
-    required int? previousIndex,
-    required Duration? animationDuration,
+    required final int? index,
+    required final int? length,
+    required final int? previousIndex,
+    required final Duration? animationDuration,
   }) {
     if (index != null) {
       _animationController!.value = index.toDouble();
@@ -180,7 +180,7 @@ class TabController extends ChangeNotifier {
   /// [TabBarView.children]'s length.
   final int length;
 
-  void _changeIndex(int value, { Duration? duration, Curve? curve }) {
+  void _changeIndex(final int value, { final Duration? duration, final Curve? curve }) {
     assert(value >= 0 && (value < length || length == 0));
     assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
@@ -219,7 +219,7 @@ class TabController extends ChangeNotifier {
   /// then [index] will also be zero.
   int get index => _index;
   int _index;
-  set index(int value) {
+  set index(final int value) {
     _changeIndex(value);
   }
 
@@ -243,7 +243,7 @@ class TabController extends ChangeNotifier {
   ///
   /// While the animation is running [indexIsChanging] is true. When the
   /// animation completes [offset] will be 0.0.
-  void animateTo(int value, { Duration? duration, Curve curve = Curves.ease }) {
+  void animateTo(final int value, { final Duration? duration, final Curve curve = Curves.ease }) {
     _changeIndex(value, duration: duration ?? _animationDuration, curve: curve);
   }
 
@@ -256,7 +256,7 @@ class TabController extends ChangeNotifier {
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController!.value - _index.toDouble();
-  set offset(double value) {
+  set offset(final double value) {
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
     if (value == offset) {
@@ -284,7 +284,7 @@ class _TabControllerScope extends InheritedWidget {
   final bool enabled;
 
   @override
-  bool updateShouldNotify(_TabControllerScope old) {
+  bool updateShouldNotify(final _TabControllerScope old) {
     return enabled != old.enabled || controller != old.controller;
   }
 }
@@ -393,7 +393,7 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// * [DefaultTabController.of], which is similar to this method, but asserts
   ///   if no [DefaultTabController] ancestor is found.
-  static TabController? maybeOf(BuildContext context) {
+  static TabController? maybeOf(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_TabControllerScope>()?.controller;
   }
 
@@ -417,7 +417,7 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// * [DefaultTabController.maybeOf], which is similar to this method, but
   ///   returns null if no [DefaultTabController] ancestor is found.
-  static TabController of(BuildContext context) {
+  static TabController of(final BuildContext context) {
     final TabController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
@@ -462,7 +462,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _TabControllerScope(
       controller: _controller,
       enabled: TickerMode.of(context),
@@ -471,7 +471,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
   }
 
   @override
-  void didUpdateWidget(DefaultTabController oldWidget) {
+  void didUpdateWidget(final DefaultTabController oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.length != widget.length) {
       // If the length is shortened while the last tab is selected, we should

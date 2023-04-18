@@ -12,7 +12,7 @@ class Curve2DExampleApp extends StatelessWidget {
   const Curve2DExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Curve2DExample(),
     );
@@ -81,7 +81,7 @@ class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateM
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Scale the path values to match the -1.0 to 1.0 domain of the Alignment widget.
     final Offset position = widget.path.transform(animation.value) * 2.0 - const Offset(1.0, 1.0);
     return Align(
@@ -95,7 +95,7 @@ class Curve2DExample extends StatelessWidget {
   const Curve2DExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       color: Colors.white,
       alignment: Alignment.center,

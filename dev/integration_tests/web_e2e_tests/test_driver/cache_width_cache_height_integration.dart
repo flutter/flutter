@@ -16,17 +16,17 @@ class LoadTestImageProvider extends ImageProvider<Object> {
 
   final ImageProvider provider;
 
-  ImageStreamCompleter testLoad(Object key, ImageDecoderCallback decode) {
+  ImageStreamCompleter testLoad(final Object key, final ImageDecoderCallback decode) {
     return provider.loadImage(key, decode);
   }
 
   @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
+  Future<Object> obtainKey(final ImageConfiguration configuration) {
     throw UnimplementedError();
   }
 
   @override
-  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(final Object key, final ImageDecoderCallback decode) {
     throw UnimplementedError();
   }
 }
@@ -34,7 +34,7 @@ class LoadTestImageProvider extends ImageProvider<Object> {
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Image.network uses cacheWidth and cacheHeight', (WidgetTester tester) async {
+  testWidgets('Image.network uses cacheWidth and cacheHeight', (final WidgetTester tester) async {
     const int expectedCacheHeight = 9;
     const int expectedCacheWidth = 11;
     await tester.pumpAndSettle();
@@ -47,8 +47,8 @@ void main() {
 
     bool called = false;
 
-    Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {ui.TargetImageSizeCallback? getTargetSize}) {
-      return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+    Future<ui.Codec> decode(final ui.ImmutableBuffer buffer, {final ui.TargetImageSizeCallback? getTargetSize}) {
+      return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (final int intrinsicWidth, final int intrinsicHeight) {
         expect(getTargetSize, isNotNull);
         final ui.TargetImageSize targetSize = getTargetSize!(intrinsicWidth, intrinsicHeight);
         expect(targetSize.width, expectedCacheWidth);
@@ -67,7 +67,7 @@ void main() {
     final Completer<void> completer = Completer<void>();
     int? imageInfoCachedWidth;
     int? imageInfoCachedHeight;
-    streamCompleter.addListener(ImageStreamListener((ImageInfo imageInfo, bool syncCall) {
+    streamCompleter.addListener(ImageStreamListener((final ImageInfo imageInfo, final bool syncCall) {
       imageInfoCachedWidth = imageInfo.image.width;
       imageInfoCachedHeight = imageInfo.image.height;
       completer.complete();

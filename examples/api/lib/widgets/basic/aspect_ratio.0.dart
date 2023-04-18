@@ -12,7 +12,7 @@ class AspectRatioApp extends StatelessWidget {
   const AspectRatioApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AspectRatio Sample')),
@@ -26,7 +26,7 @@ class AspectRatioExample extends StatelessWidget {
   const AspectRatioExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       color: Colors.blue,
       alignment: Alignment.center,

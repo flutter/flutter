@@ -211,13 +211,13 @@ class FakePub extends Fake implements Pub {
 
   @override
   Future<void> interactively(
-    List<String> arguments, {
-    FlutterProject? project,
-    required PubContext context,
-    required String command,
-    bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.all,
+    final List<String> arguments, {
+    final FlutterProject? project,
+    required final PubContext context,
+    required final String command,
+    final bool touchesPackageConfig = false,
+    final bool generateSyntheticPackage = false,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     if (expectedArguments != null) {
       expect(arguments, expectedArguments);

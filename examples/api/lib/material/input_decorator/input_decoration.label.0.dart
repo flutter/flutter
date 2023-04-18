@@ -12,7 +12,7 @@ class LabelExampleApp extends StatelessWidget {
   const LabelExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration.label Sample')),
@@ -26,7 +26,7 @@ class LabelExample extends StatelessWidget {
   const LabelExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Center(
       child: TextField(
         decoration: InputDecoration(

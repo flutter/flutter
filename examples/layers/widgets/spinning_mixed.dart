@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import '../rendering/src/solid_color_box.dart';
 
 // Solid color, RenderObject version
-void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
+void addFlexChildSolidColor(final RenderFlex parent, final Color backgroundColor, { final int flex = 0 }) {
   final RenderSolidColorBox child = RenderSolidColorBox(backgroundColor);
   parent.add(child);
   final FlexParentData childParentData = child.parentData! as FlexParentData;
@@ -22,7 +22,7 @@ class Rectangle extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Expanded(
       child: Container(
         color: color,
@@ -33,7 +33,7 @@ class Rectangle extends StatelessWidget {
 
 double? value;
 RenderObjectToWidgetElement<RenderBox>? element;
-void attachWidgetTreeToRenderTree(RenderProxyBox container) {
+void attachWidgetTreeToRenderTree(final RenderProxyBox container) {
   element = RenderObjectToWidgetAdapter<RenderBox>(
     container: container,
     child: Directionality(
@@ -79,7 +79,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
 Duration? timeBase;
 late RenderTransform transformBox;
 
-void rotate(Duration timeStamp) {
+void rotate(final Duration timeStamp) {
   timeBase ??= timeStamp;
   final double delta = (timeStamp - timeBase!).inMicroseconds.toDouble() / Duration.microsecondsPerSecond; // radians
 

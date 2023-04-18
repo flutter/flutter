@@ -10,12 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 
-Iterable<SingleActivator> allModifierVariants(LogicalKeyboardKey trigger) {
+Iterable<SingleActivator> allModifierVariants(final LogicalKeyboardKey trigger) {
   const Iterable<bool> trueFalse = <bool>[false, true];
-  return trueFalse.expand((bool shift) {
-    return trueFalse.expand((bool control) {
-      return trueFalse.expand((bool alt) {
-        return trueFalse.map((bool meta) => SingleActivator(trigger, shift: shift, control: control, alt: alt, meta: meta));
+  return trueFalse.expand((final bool shift) {
+    return trueFalse.expand((final bool control) {
+      return trueFalse.expand((final bool alt) {
+        return trueFalse.map((final bool meta) => SingleActivator(trigger, shift: shift, control: control, alt: alt, meta: meta));
       });
     });
   });
@@ -53,11 +53,11 @@ void main() {
 
   final FocusNode focusNode = FocusNode();
   Widget buildEditableText({
-    TextAlign textAlign = TextAlign.left,
-    bool readOnly = false,
-    bool obscured = false,
-    TextStyle style = const TextStyle(fontSize: 10.0),
-    bool enableInteractiveSelection = true
+    final TextAlign textAlign = TextAlign.left,
+    final bool readOnly = false,
+    final bool obscured = false,
+    final TextStyle style = const TextStyle(fontSize: 10.0),
+    final bool enableInteractiveSelection = true
   }) {
     return MaterialApp(
       home: Align(
@@ -97,7 +97,7 @@ void main() {
       group('backspace', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.backspace;
 
-        testWidgets('backspace', (WidgetTester tester) async {
+        testWidgets('backspace', (final WidgetTester tester) async {
           controller.text = testText;
           // Move the selection to the beginning of the 2nd line (after the newline
           // character).
@@ -122,7 +122,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace readonly', (WidgetTester tester) async {
+        testWidgets('backspace readonly', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 20,
@@ -140,7 +140,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('backspace at start', (WidgetTester tester) async {
+        testWidgets('backspace at start', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -163,7 +163,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('backspace at end', (WidgetTester tester) async {
+        testWidgets('backspace at end', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -187,7 +187,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace inside of a cluster', (WidgetTester tester) async {
+        testWidgets('backspace inside of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -208,7 +208,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('backspace at cluster boundary', (WidgetTester tester) async {
+        testWidgets('backspace at cluster boundary', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -233,7 +233,7 @@ void main() {
       group('delete: ', () {
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
 
-        testWidgets('delete', (WidgetTester tester) async {
+        testWidgets('delete', (final WidgetTester tester) async {
           controller.text = testText;
           // Move the selection to the beginning of the 2nd line (after the newline
           // character).
@@ -259,7 +259,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete readonly', (WidgetTester tester) async {
+        testWidgets('delete readonly', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 20,
@@ -277,7 +277,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at start', (WidgetTester tester) async {
+        testWidgets('delete at start', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -300,7 +300,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at end', (WidgetTester tester) async {
+        testWidgets('delete at end', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -324,7 +324,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('delete inside of a cluster', (WidgetTester tester) async {
+        testWidgets('delete inside of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -345,7 +345,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('delete at cluster boundary', (WidgetTester tester) async {
+        testWidgets('delete at cluster boundary', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -371,7 +371,7 @@ void main() {
         // This shares the same logic as backspace.
         const LogicalKeyboardKey trigger = LogicalKeyboardKey.delete;
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgets('inside of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 9,
@@ -392,7 +392,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at the boundaries of a cluster', (WidgetTester tester) async {
+        testWidgets('at the boundaries of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 8,
@@ -413,7 +413,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('cross-cluster', (WidgetTester tester) async {
+        testWidgets('cross-cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 1,
@@ -434,7 +434,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('cross-cluster obscured text', (WidgetTester tester) async {
+        testWidgets('cross-cluster obscured text', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection(
             baseOffset: 1,
@@ -463,7 +463,7 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets('WordModifier-backspace', (WidgetTester tester) async {
+        testWidgets('WordModifier-backspace', (final WidgetTester tester) async {
           controller.text = testText;
           // Place the caret before "people".
           controller.selection = const TextSelection.collapsed(
@@ -488,7 +488,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgets('readonly', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 29,
@@ -506,7 +506,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgets('at start', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -529,7 +529,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgets('at end', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -553,7 +553,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgets('inside of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -574,7 +574,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgets('at cluster boundary', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -603,7 +603,7 @@ void main() {
           return SingleActivator(trigger, control: !isApple, alt: isApple);
         }
 
-        testWidgets('WordModifier-delete', (WidgetTester tester) async {
+        testWidgets('WordModifier-delete', (final WidgetTester tester) async {
           controller.text = testText;
           // Place the caret after "all".
           controller.selection = const TextSelection.collapsed(
@@ -628,7 +628,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgets('readonly', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 23,
@@ -646,7 +646,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgets('at start', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -669,7 +669,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgets('at end', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -686,7 +686,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgets('inside of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -707,7 +707,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{ TargetPlatform.iOS }));
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgets('at cluster boundary', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -736,7 +736,7 @@ void main() {
           return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
-        testWidgets('alt-backspace', (WidgetTester tester) async {
+        testWidgets('alt-backspace', (final WidgetTester tester) async {
           controller.text = testText;
           // Place the caret before "people".
           controller.selection = const TextSelection.collapsed(
@@ -761,7 +761,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
+        testWidgets('softwrap line boundary, upstream', (final WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
@@ -785,7 +785,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
+        testWidgets('softwrap line boundary, downstream', (final WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
@@ -802,7 +802,7 @@ void main() {
           expect(controller.text, testSoftwrapText);
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgets('readonly', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 29,
@@ -820,7 +820,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgets('at start', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -843,7 +843,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgets('at end', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -866,7 +866,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgets('inside of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -887,7 +887,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgets('at cluster boundary', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -916,7 +916,7 @@ void main() {
           return SingleActivator(trigger, meta: isApple, alt: !isApple);
         }
 
-        testWidgets('alt-delete', (WidgetTester tester) async {
+        testWidgets('alt-delete', (final WidgetTester tester) async {
           controller.text = testText;
           // Place the caret after "all".
           controller.selection = const TextSelection.collapsed(
@@ -941,7 +941,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, upstream', (WidgetTester tester) async {
+        testWidgets('softwrap line boundary, upstream', (final WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the end of the 2nd line.
           controller.selection = const TextSelection.collapsed(
@@ -960,7 +960,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('softwrap line boundary, downstream', (WidgetTester tester) async {
+        testWidgets('softwrap line boundary, downstream', (final WidgetTester tester) async {
           controller.text = testSoftwrapText;
           // Place the caret at the beginning of the 3rd line.
           controller.selection = const TextSelection.collapsed(
@@ -983,7 +983,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('readonly', (WidgetTester tester) async {
+        testWidgets('readonly', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 23,
@@ -1001,7 +1001,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at start', (WidgetTester tester) async {
+        testWidgets('at start', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 0,
@@ -1024,7 +1024,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at end', (WidgetTester tester) async {
+        testWidgets('at end', (final WidgetTester tester) async {
           controller.text = testText;
           controller.selection = const TextSelection.collapsed(
             offset: 72,
@@ -1041,7 +1041,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('inside of a cluster', (WidgetTester tester) async {
+        testWidgets('inside of a cluster', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 1,
@@ -1062,7 +1062,7 @@ void main() {
           );
         }, variant: TargetPlatformVariant.all());
 
-        testWidgets('at cluster boundary', (WidgetTester tester) async {
+        testWidgets('at cluster boundary', (final WidgetTester tester) async {
           controller.text = testCluster;
           controller.selection = const TextSelection.collapsed(
             offset: 8,
@@ -1088,7 +1088,7 @@ void main() {
         group('left', () {
           const LogicalKeyboardKey trigger = LogicalKeyboardKey.arrowLeft;
 
-          testWidgets('at start', (WidgetTester tester) async {
+          testWidgets('at start', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
@@ -1108,7 +1108,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgets('base arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
@@ -1122,7 +1122,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgets('word modifier + arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
@@ -1136,7 +1136,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-          testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgets('line modifier + arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
@@ -1154,7 +1154,7 @@ void main() {
         group('right', () {
           const LogicalKeyboardKey trigger = LogicalKeyboardKey.arrowRight;
 
-          testWidgets('at end', (WidgetTester tester) async {
+          testWidgets('at end', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
@@ -1171,7 +1171,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgets('base arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 20,
@@ -1185,7 +1185,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgets('word modifier + arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 7,   // Before the first "the"
@@ -1199,7 +1199,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-         testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+         testWidgets('line modifier + arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 24,   // Before the "good".
@@ -1216,7 +1216,7 @@ void main() {
         });
 
         group('With initial non-collapsed selection', () {
-          testWidgets('base arrow key movement', (WidgetTester tester) async {
+          testWidgets('base arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             // The word "all" is selected.
             controller.selection = const TextSelection(
@@ -1268,7 +1268,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+          testWidgets('word modifier + arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             // "good" to "come" is selected.
             controller.selection = const TextSelection(
@@ -1321,7 +1321,7 @@ void main() {
             ));
           }, variant: allExceptApple);
 
-         testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+         testWidgets('line modifier + arrow key movement', (final WidgetTester tester) async {
             controller.text = testText;
             // "good" to "come" is selected.
             controller.selection = const TextSelection(
@@ -1377,7 +1377,7 @@ void main() {
         });
 
         group('vertical movement', () {
-          testWidgets('at start', (WidgetTester tester) async {
+          testWidgets('at start', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 0,
@@ -1410,7 +1410,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('at end', (WidgetTester tester) async {
+          testWidgets('at end', (final WidgetTester tester) async {
             controller.text = testText;
             controller.selection = const TextSelection.collapsed(
               offset: 72,
@@ -1437,7 +1437,7 @@ void main() {
             }
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run', (WidgetTester tester) async {
+          testWidgets('run', (final WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1524,7 +1524,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run with page down/up', (WidgetTester tester) async {
+          testWidgets('run with page down/up', (final WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1559,7 +1559,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all(excluding: <TargetPlatform>{TargetPlatform.iOS, TargetPlatform.macOS})); // intended: on macOS Page Up/Down only scrolls
 
-          testWidgets('run can be interrupted by layout changes', (WidgetTester tester) async {
+          testWidgets('run can be interrupted by layout changes', (final WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1588,7 +1588,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('run can be interrupted by selection changes', (WidgetTester tester) async {
+          testWidgets('run can be interrupted by selection changes', (final WidgetTester tester) async {
             controller.text =
               'aa\n'     // 3
               'a\n'      // 3 + 2 = 5
@@ -1623,7 +1623,7 @@ void main() {
             ));
           }, variant: TargetPlatformVariant.all());
 
-          testWidgets('long run with fractional text height', (WidgetTester tester) async {
+          testWidgets('long run with fractional text height', (final WidgetTester tester) async {
             controller.text = "${'źdźbło\n' * 49}źdźbło";
             controller.selection = const TextSelection.collapsed(offset: 2);
             await tester.pumpWidget(buildEditableText(style: const TextStyle(fontSize: 13.0, height: 1.17)));
@@ -1657,7 +1657,7 @@ void main() {
   group('macOS shortcuts', () {
     final TargetPlatformVariant macOSOnly = TargetPlatformVariant.only(TargetPlatform.macOS);
 
-    testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowLeft', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
@@ -1671,7 +1671,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('word modifier + arrowRight', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 7,   // Before the first "the"
@@ -1685,7 +1685,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowLeft', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
@@ -1699,7 +1699,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+    testWidgets('line modifier + arrowRight', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 24,   // Before the "good".
@@ -1714,7 +1714,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('word modifier + arrow key movement', (final WidgetTester tester) async {
       controller.text = testText;
       // "good" to "come" is selected.
       controller.selection = const TextSelection(
@@ -1767,7 +1767,7 @@ void main() {
       ));
     }, variant: macOSOnly);
 
-    testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+    testWidgets('line modifier + arrow key movement', (final WidgetTester tester) async {
       controller.text = testText;
       // "good" to "come" is selected.
       controller.selection = const TextSelection(
@@ -1827,7 +1827,7 @@ void main() {
     const TargetPlatformVariant appleOnly = TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS, TargetPlatform.iOS });
     group('macOS shortcuts', () {
 
-      testWidgets('word modifier + arrowLeft', (WidgetTester tester) async {
+      testWidgets('word modifier + arrowLeft', (final WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 7,   // Before the first "the"
@@ -1839,7 +1839,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 7));
       }, variant: appleOnly);
 
-      testWidgets('word modifier + arrowRight', (WidgetTester tester) async {
+      testWidgets('word modifier + arrowRight', (final WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 7,   // Before the first "the"
@@ -1851,7 +1851,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 7));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrowLeft', (WidgetTester tester) async {
+      testWidgets('line modifier + arrowLeft', (final WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 24,   // Before the "good".
@@ -1863,7 +1863,7 @@ void main() {
         expect(controller.selection, const TextSelection.collapsed(offset: 24,));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrowRight', (WidgetTester tester) async {
+      testWidgets('line modifier + arrowRight', (final WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection.collapsed(
           offset: 24,   // Before the "good".
@@ -1877,7 +1877,7 @@ void main() {
         ));
       }, variant: appleOnly);
 
-      testWidgets('word modifier + arrow key movement', (WidgetTester tester) async {
+      testWidgets('word modifier + arrow key movement', (final WidgetTester tester) async {
         controller.text = testText;
         controller.selection = const TextSelection(
           baseOffset: 24,
@@ -1930,7 +1930,7 @@ void main() {
         ));
       }, variant: appleOnly);
 
-      testWidgets('line modifier + arrow key movement', (WidgetTester tester) async {
+      testWidgets('line modifier + arrow key movement', (final WidgetTester tester) async {
         controller.text = testText;
         // "good" to "come" is selected.
         controller.selection = const TextSelection(
@@ -1988,7 +1988,7 @@ void main() {
     });
 
     testWidgets('vertical movement outside of selection',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2013,7 +2013,7 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
 
-    testWidgets('select all non apple', (WidgetTester tester) async {
+    testWidgets('select all non apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2026,7 +2026,7 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(offset: 0));
     }, variant: allExceptApple);
 
-    testWidgets('select all apple', (WidgetTester tester) async {
+    testWidgets('select all apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(
         offset: 0,
@@ -2039,7 +2039,7 @@ void main() {
       expect(controller.selection, const TextSelection.collapsed(offset: 0));
     }, variant: appleOnly);
 
-    testWidgets('copy non apple', (WidgetTester tester) async {
+    testWidgets('copy non apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2054,7 +2054,7 @@ void main() {
       expect(clipboardData['text'], 'empty');
     }, variant: allExceptApple);
 
-    testWidgets('copy apple', (WidgetTester tester) async {
+    testWidgets('copy apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2069,7 +2069,7 @@ void main() {
       expect(clipboardData['text'], 'empty');
     }, variant: appleOnly);
 
-    testWidgets('cut non apple', (WidgetTester tester) async {
+    testWidgets('cut non apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2088,7 +2088,7 @@ void main() {
       ));
     }, variant: allExceptApple);
 
-    testWidgets('cut apple', (WidgetTester tester) async {
+    testWidgets('cut apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection(
         baseOffset: 0,
@@ -2107,7 +2107,7 @@ void main() {
       ));
     }, variant: appleOnly);
 
-    testWidgets('paste non apple', (WidgetTester tester) async {
+    testWidgets('paste non apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(offset: 0);
       mockClipboard.clipboardData = <String, dynamic>{
@@ -2120,7 +2120,7 @@ void main() {
       expect(controller.text, testText);
     }, variant: allExceptApple);
 
-    testWidgets('paste apple', (WidgetTester tester) async {
+    testWidgets('paste apple', (final WidgetTester tester) async {
       controller.text = testText;
       controller.selection = const TextSelection.collapsed(offset: 0);
       mockClipboard.clipboardData = <String, dynamic>{
@@ -2136,7 +2136,7 @@ void main() {
   }, skip: !kIsWeb);// [intended] specific tests target web.
 
   group('Web does accept', () {
-      testWidgets('select up', (WidgetTester tester) async {
+      testWidgets('select up', (final WidgetTester tester) async {
         const SingleActivator selectUp =
             SingleActivator(LogicalKeyboardKey.arrowUp, shift: true);
         controller.text = testVerticalText;
@@ -2158,7 +2158,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select down', (WidgetTester tester) async {
+      testWidgets('select down', (final WidgetTester tester) async {
         const SingleActivator selectDown =
             SingleActivator(LogicalKeyboardKey.arrowDown, shift: true);
         controller.text = testVerticalText;
@@ -2180,7 +2180,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select all up', (WidgetTester tester) async {
+      testWidgets('select all up', (final WidgetTester tester) async {
         final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
         final SingleActivator selectAllUp = isMacOS
             ? const SingleActivator(LogicalKeyboardKey.arrowUp,
@@ -2206,7 +2206,7 @@ void main() {
         );
       }, variant: TargetPlatformVariant.desktop());
 
-      testWidgets('select all down', (WidgetTester tester) async {
+      testWidgets('select all down', (final WidgetTester tester) async {
         final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
         final SingleActivator selectAllDown = isMacOS
             ? const SingleActivator(LogicalKeyboardKey.arrowDown,
@@ -2232,7 +2232,7 @@ void main() {
         );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select left', (WidgetTester tester) async {
+    testWidgets('select left', (final WidgetTester tester) async {
       const SingleActivator selectLeft =
           SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
       controller.text = 'testing';
@@ -2252,7 +2252,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select right', (WidgetTester tester) async {
+    testWidgets('select right', (final WidgetTester tester) async {
       const SingleActivator selectRight =
           SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
       controller.text = 'testing';
@@ -2274,7 +2274,7 @@ void main() {
 
     testWidgets(
         'select left should not expand selection if selection is disabled',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       const SingleActivator selectLeft =
           SingleActivator(LogicalKeyboardKey.arrowLeft, shift: true);
       controller.text = 'testing';
@@ -2297,7 +2297,7 @@ void main() {
 
     testWidgets(
         'select right should not expand selection if selection is disabled',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       const SingleActivator selectRight =
           SingleActivator(LogicalKeyboardKey.arrowRight, shift: true);
       controller.text = 'testing';
@@ -2316,7 +2316,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select all left', (WidgetTester tester) async {
+    testWidgets('select all left', (final WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
       final SingleActivator selectAllLeft = isMacOS
           ? const SingleActivator(LogicalKeyboardKey.arrowLeft,
@@ -2340,7 +2340,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.desktop());
 
-    testWidgets('select all right', (WidgetTester tester) async {
+    testWidgets('select all right', (final WidgetTester tester) async {
       final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS;
       final SingleActivator selectAllRight = isMacOS
           ? const SingleActivator(LogicalKeyboardKey.arrowRight,

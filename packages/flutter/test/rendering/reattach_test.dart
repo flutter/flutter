@@ -47,7 +47,7 @@ class TestTree {
 }
 
 class MutableCompositor extends RenderProxyBox {
-  MutableCompositor({ required RenderBox child }) : super(child);
+  MutableCompositor({ required final RenderBox child }) : super(child);
   bool _alwaysComposite = false;
   @override
   bool get alwaysNeedsCompositing => _alwaysComposite;

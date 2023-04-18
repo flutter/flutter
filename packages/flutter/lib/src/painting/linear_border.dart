@@ -58,7 +58,7 @@ class LinearBorderEdge {
   /// then we interpolate to `b` varying [size] from 0.0 to `b.size`. If `b`
   /// is null then we interpolate from `a` varying size from `a.size` to zero.
   /// Otherwise both values are interpolated.
-  static LinearBorderEdge? lerp(LinearBorderEdge? a, LinearBorderEdge? b, double t) {
+  static LinearBorderEdge? lerp(LinearBorderEdge? a, LinearBorderEdge? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -73,7 +73,7 @@ class LinearBorderEdge {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -146,8 +146,8 @@ class LinearBorder extends OutlinedBorder {
   /// or on the right for [TextDirection.rtl].
   LinearBorder.start({
     super.side,
-    double alignment = 0.0,
-    double size = 1.0
+    final double alignment = 0.0,
+    final double size = 1.0
   }) : start = LinearBorderEdge(alignment: alignment, size: size),
        end = null,
        top = null,
@@ -157,8 +157,8 @@ class LinearBorder extends OutlinedBorder {
   /// or on the left for [TextDirection.rtl].
   LinearBorder.end({
     super.side,
-    double alignment = 0.0,
-    double size = 1.0
+    final double alignment = 0.0,
+    final double size = 1.0
   }) : start = null,
        end = LinearBorderEdge(alignment: alignment, size: size),
        top = null,
@@ -167,8 +167,8 @@ class LinearBorder extends OutlinedBorder {
   /// Creates a rectangular box border with an edge on the top.
   LinearBorder.top({
     super.side,
-    double alignment = 0.0,
-    double size = 1.0
+    final double alignment = 0.0,
+    final double size = 1.0
   }) : start = null,
        end = null,
        top = LinearBorderEdge(alignment: alignment, size: size),
@@ -177,8 +177,8 @@ class LinearBorder extends OutlinedBorder {
   /// Creates a rectangular box border with an edge on the bottom.
   LinearBorder.bottom({
     super.side,
-    double alignment = 0.0,
-    double size = 1.0
+    final double alignment = 0.0,
+    final double size = 1.0
   }) : start = null,
        end = null,
        top = null,
@@ -202,7 +202,7 @@ class LinearBorder extends OutlinedBorder {
   final LinearBorderEdge? bottom;
 
   @override
-  LinearBorder scale(double t) {
+  LinearBorder scale(final double t) {
     return LinearBorder(
       side: side.scale(t),
     );
@@ -220,7 +220,7 @@ class LinearBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (a is LinearBorder) {
       return LinearBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -234,7 +234,7 @@ class LinearBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (b is LinearBorder) {
       return LinearBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -251,11 +251,11 @@ class LinearBorder extends OutlinedBorder {
   /// the new values.
   @override
   LinearBorder copyWith({
-    BorderSide? side,
-    LinearBorderEdge? start,
-    LinearBorderEdge? end,
-    LinearBorderEdge? top,
-    LinearBorderEdge? bottom,
+    final BorderSide? side,
+    final LinearBorderEdge? start,
+    final LinearBorderEdge? end,
+    final LinearBorderEdge? top,
+    final LinearBorderEdge? bottom,
   }) {
     return LinearBorder(
       side: side ?? this.side,
@@ -267,20 +267,20 @@ class LinearBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(final Rect rect, { final TextDirection? textDirection }) {
     final Rect adjustedRect = dimensions.resolve(textDirection).deflateRect(rect);
     return Path()
       ..addRect(adjustedRect);
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(final Rect rect, { final TextDirection? textDirection }) {
     return Path()
       ..addRect(rect);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+  void paint(final Canvas canvas, final Rect rect, { final TextDirection? textDirection }) {
     final EdgeInsets insets = dimensions.resolve(textDirection);
     final bool rtl = textDirection == TextDirection.rtl;
 
@@ -288,7 +288,7 @@ class LinearBorder extends OutlinedBorder {
     final Paint paint = Paint()
       ..strokeWidth = 0.0;
 
-    void drawEdge(Rect rect, Color color) {
+    void drawEdge(final Rect rect, final Color color) {
       paint.color = color;
       path.reset();
       path.moveTo(rect.left, rect.top);
@@ -345,7 +345,7 @@ class LinearBorder extends OutlinedBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

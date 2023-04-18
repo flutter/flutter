@@ -17,7 +17,7 @@
 ///     index.toSimpleName(Vote.nay); // returns 'nay'
 class EnumIndex<E> {
   /// Creates an index of [enumValues].
-  EnumIndex(List<E> enumValues)
+  EnumIndex(final List<E> enumValues)
     : _nameToValue = Map<String, E>.fromIterable(
         enumValues,
         key: _getSimpleName,
@@ -31,12 +31,12 @@ class EnumIndex<E> {
   final Map<E, String> _valueToName;
 
   /// Given a [simpleName] finds the corresponding enum value.
-  E lookupBySimpleName(String simpleName) => _nameToValue[simpleName]!;
+  E lookupBySimpleName(final String simpleName) => _nameToValue[simpleName]!;
 
   /// Returns the simple name for [enumValue].
-  String toSimpleName(E enumValue) => _valueToName[enumValue]!;
+  String toSimpleName(final E enumValue) => _valueToName[enumValue]!;
 }
 
-String _getSimpleName(dynamic enumValue) {
+String _getSimpleName(final dynamic enumValue) {
   return enumValue.toString().split('.').last;
 }

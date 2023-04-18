@@ -347,7 +347,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     super.initState();
     _keys = List<GlobalKey>.generate(
       widget.steps.length,
-      (int i) => GlobalKey(),
+      (final int i) => GlobalKey(),
     );
 
     for (int i = 0; i < widget.steps.length; i += 1) {
@@ -356,7 +356,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateWidget(Stepper oldWidget) {
+  void didUpdateWidget(final Stepper oldWidget) {
     super.didUpdateWidget(oldWidget);
     assert(widget.steps.length == oldWidget.steps.length);
 
@@ -365,15 +365,15 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  bool _isFirst(int index) {
+  bool _isFirst(final int index) {
     return index == 0;
   }
 
-  bool _isLast(int index) {
+  bool _isLast(final int index) {
     return widget.steps.length - 1 == index;
   }
 
-  bool _isCurrent(int index) {
+  bool _isCurrent(final int index) {
     return widget.currentStep == index;
   }
 
@@ -390,7 +390,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return false;
   }
 
-  Color _connectorColor(bool isActive) {
+  Color _connectorColor(final bool isActive) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Set<MaterialState> states = <MaterialState>{
       if (isActive) MaterialState.selected else MaterialState.disabled,
@@ -402,7 +402,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return isActive ? colorScheme.primary : Colors.grey.shade400;
   }
 
-  Widget _buildLine(bool visible, bool isActive) {
+  Widget _buildLine(final bool visible, final bool isActive) {
     return Container(
       width: visible ? widget.connectorThickness ?? 1.0 : 0.0,
       height: 16.0,
@@ -410,7 +410,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildCircleChild(int index, bool oldState) {
+  Widget _buildCircleChild(final int index, final bool oldState) {
     final StepState state = oldState ? _oldStates[index]! : widget.steps[index].state;
     final bool isDarkActive = _isDark() && widget.steps[index].isActive;
     final Widget? icon = widget.stepIconBuilder?.call(index, state);
@@ -441,7 +441,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  Color _circleColor(int index) {
+  Color _circleColor(final int index) {
     final bool isActive = widget.steps[index].isActive;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Set<MaterialState> states = <MaterialState>{
@@ -458,7 +458,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  Widget _buildCircle(int index, bool oldState) {
+  Widget _buildCircle(final int index, final bool oldState) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       width: _kStepSize,
@@ -477,7 +477,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildTriangle(int index, bool oldState) {
+  Widget _buildTriangle(final int index, final bool oldState) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       width: _kStepSize,
@@ -500,7 +500,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildIcon(int index) {
+  Widget _buildIcon(final int index) {
     if (widget.steps[index].state != _oldStates[index]) {
       return AnimatedCrossFade(
         firstChild: _buildCircle(index, true),
@@ -520,7 +520,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  Widget _buildVerticalControls(int stepIndex) {
+  Widget _buildVerticalControls(final int stepIndex) {
     if (widget.controlsBuilder != null) {
       return widget.controlsBuilder!(
         context,
@@ -560,10 +560,10 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             TextButton(
               onPressed: widget.onStepContinue,
               style: ButtonStyle(
-                foregroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                foregroundColor: MaterialStateProperty.resolveWith<Color?>((final Set<MaterialState> states) {
                   return states.contains(MaterialState.disabled) ? null : (_isDark() ? colorScheme.onSurface : colorScheme.onPrimary);
                 }),
-                backgroundColor: MaterialStateProperty.resolveWith<Color?>((Set<MaterialState> states) {
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>((final Set<MaterialState> states) {
                   return _isDark() || states.contains(MaterialState.disabled) ? null : colorScheme.primary;
                 }),
                 padding: const MaterialStatePropertyAll<EdgeInsetsGeometry>(buttonPadding),
@@ -597,7 +597,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  TextStyle _titleStyle(int index) {
+  TextStyle _titleStyle(final int index) {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
@@ -617,7 +617,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  TextStyle _subtitleStyle(int index) {
+  TextStyle _subtitleStyle(final int index) {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
@@ -637,7 +637,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  TextStyle _labelStyle(int index) {
+  TextStyle _labelStyle(final int index) {
     final ThemeData themeData = Theme.of(context);
     final TextTheme textTheme = themeData.textTheme;
 
@@ -657,7 +657,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     }
   }
 
-  Widget _buildHeaderText(int index) {
+  Widget _buildHeaderText(final int index) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -682,7 +682,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildLabelText(int index) {
+  Widget _buildLabelText(final int index) {
     if (widget.steps[index].label != null) {
       return AnimatedDefaultTextStyle(
         style: _labelStyle(index),
@@ -693,7 +693,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return const SizedBox.shrink();
   }
 
-  Widget _buildVerticalHeader(int index) {
+  Widget _buildVerticalHeader(final int index) {
     final bool isActive = widget.steps[index].isActive;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -719,7 +719,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildVerticalBody(int index) {
+  Widget _buildVerticalBody(final int index) {
     return Stack(
       children: <Widget>[
         PositionedDirectional(
@@ -875,7 +875,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(() {
@@ -908,15 +908,15 @@ class _TrianglePainter extends CustomPainter {
   final Color color;
 
   @override
-  bool hitTest(Offset point) => true; // Hitting the rectangle is fine enough.
+  bool hitTest(final Offset point) => true; // Hitting the rectangle is fine enough.
 
   @override
-  bool shouldRepaint(_TrianglePainter oldPainter) {
+  bool shouldRepaint(final _TrianglePainter oldPainter) {
     return oldPainter.color != color;
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final double base = size.width;
     final double halfBase = size.width / 2.0;
     final double height = size.height;

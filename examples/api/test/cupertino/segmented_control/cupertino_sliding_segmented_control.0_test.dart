@@ -6,7 +6,7 @@ import 'package:flutter_api_samples/cupertino/segmented_control/cupertino_slidin
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can change a selected segmented control', (WidgetTester tester) async {
+  testWidgets('Can change a selected segmented control', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SegmentedControlApp(),
     );

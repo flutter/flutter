@@ -11,7 +11,7 @@ void main() {
   runApp(MaterialApp(
     home: Material(
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return TextButton(
             child: const Text(
               'flutter drive lib/xxx.dart',
@@ -21,7 +21,7 @@ void main() {
               Navigator.push<Object?>(
                 context,
                 MaterialPageRoute<Object?>(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return const Material(
                       child: Center(
                         child: Text(

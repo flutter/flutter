@@ -12,7 +12,7 @@ class AboutListTileExampleApp extends StatelessWidget {
   const AboutListTileExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: AboutListTileExample(),
     );
@@ -23,7 +23,7 @@ class AboutListTileExample extends StatelessWidget {
   const AboutListTileExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle textStyle = theme.textTheme.bodyMedium!;
     final List<Widget> aboutBoxChildren = <Widget>[

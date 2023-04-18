@@ -33,13 +33,13 @@ class FontLoader {
   ///
   /// The [bytes] argument specifies the actual font asset bytes. Currently,
   /// only OpenType (OTF) and TrueType (TTF) fonts are supported.
-  void addFont(Future<ByteData> bytes) {
+  void addFont(final Future<ByteData> bytes) {
     if (_loaded) {
       throw StateError('FontLoader is already loaded');
     }
 
     _fontFutures.add(bytes.then(
-        (ByteData data) => Uint8List.view(data.buffer, data.offsetInBytes, data.lengthInBytes),
+        (final ByteData data) => Uint8List.view(data.buffer, data.offsetInBytes, data.lengthInBytes),
     ));
   }
 
@@ -60,8 +60,8 @@ class FontLoader {
     _loaded = true;
 
     final Iterable<Future<void>> loadFutures = _fontFutures.map(
-        (Future<Uint8List> f) => f.then<void>(
-            (Uint8List list) => loadFont(list, family),
+        (final Future<Uint8List> f) => f.then<void>(
+            (final Uint8List list) => loadFont(list, family),
         ),
     );
     await Future.wait(loadFutures.toList());
@@ -73,7 +73,7 @@ class FontLoader {
   /// custom logic (for example, to mock the underlying engine API in tests).
   @protected
   @visibleForTesting
-  Future<void> loadFont(Uint8List list, String family) {
+  Future<void> loadFont(final Uint8List list, final String family) {
     return loadFontFromList(list, fontFamily: family);
   }
 

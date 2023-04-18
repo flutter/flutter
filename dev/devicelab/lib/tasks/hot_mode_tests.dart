@@ -22,7 +22,7 @@ const String kReplacementLine = 'fontSize: (orientation == Orientation.portrait)
 
 TaskFunction createHotModeTest({
   String? deviceIdOverride,
-  bool checkAppRunningOnLocalDevice = false,
+  final bool checkAppRunningOnLocalDevice = false,
 }) {
   // This file is modified during the test and needs to be restored at the end.
   final File flutterFrameworkSource = file(path.join(
@@ -65,7 +65,7 @@ TaskFunction createHotModeTest({
           smallReloadData = await captureReloadData(
             options: options,
             benchmarkFile: benchmarkFile,
-            onLine: (String line, Process process) {
+            onLine: (final String line, final Process process) {
               if (!line.contains('Reloaded ')) {
                 return;
               }
@@ -90,7 +90,7 @@ TaskFunction createHotModeTest({
           mediumReloadData = await captureReloadData(
             options: options,
             benchmarkFile: benchmarkFile,
-            onLine: (String line, Process process) {
+            onLine: (final String line, final Process process) {
               if (!line.contains('Reloaded ')) {
                 return;
               }
@@ -113,7 +113,7 @@ TaskFunction createHotModeTest({
           largeReloadData = await captureReloadData(
             options: options,
             benchmarkFile: benchmarkFile,
-            onLine: (String line, Process process) async {
+            onLine: (final String line, final Process process) async {
               if (!line.contains('Reloaded ')) {
                 return;
               }
@@ -145,7 +145,7 @@ TaskFunction createHotModeTest({
             process.stdout
                 .transform<String>(utf8.decoder)
                 .transform<String>(const LineSplitter())
-                .listen((String line) {
+                .listen((final String line) {
               if (line.contains('Reloaded ')) {
                 process.stdin.writeln('q');
               }
@@ -156,7 +156,7 @@ TaskFunction createHotModeTest({
             process.stderr
                 .transform<String>(utf8.decoder)
                 .transform<String>(const LineSplitter())
-                .listen((String line) {
+                .listen((final String line) {
               print('stderr: $line');
             }, onDone: () {
               stderrDone.complete();
@@ -245,9 +245,9 @@ TaskFunction createHotModeTest({
 }
 
 Future<Map<String, dynamic>> captureReloadData({
-  required List<String> options,
-  required File benchmarkFile,
-  required void Function(String, Process) onLine,
+  required final List<String> options,
+  required final File benchmarkFile,
+  required final void Function(String, Process) onLine,
 }) async {
   final Process process = await startFlutter(
     'run',
@@ -259,7 +259,7 @@ Future<Map<String, dynamic>> captureReloadData({
   process.stdout
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .listen((String line) {
+    .listen((final String line) {
       onLine(line, process);
       print('stdout: $line');
     }, onDone: stdoutDone.complete);
@@ -268,7 +268,7 @@ Future<Map<String, dynamic>> captureReloadData({
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
     .listen(
-      (String line) => print('stderr: $line'),
+      (final String line) => print('stderr: $line'),
       onDone: stderrDone.complete,
     );
 
@@ -279,7 +279,7 @@ Future<Map<String, dynamic>> captureReloadData({
   return result;
 }
 
-Future<void> _checkAppRunning(bool shouldBeRunning) async {
+Future<void> _checkAppRunning(final bool shouldBeRunning) async {
   late Set<RunningProcessInfo> galleryProcesses;
   for (int i = 0; i < 10; i++) {
     final String exe = Platform.isWindows ? '.exe' : '';

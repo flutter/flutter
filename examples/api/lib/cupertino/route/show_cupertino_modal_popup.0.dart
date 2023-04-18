@@ -12,7 +12,7 @@ class ModalPopupApp extends StatelessWidget {
   const ModalPopupApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       restorationScopeId: 'app',
@@ -25,7 +25,7 @@ class ModalPopupExample extends StatelessWidget {
   const ModalPopupExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Home'),
@@ -42,9 +42,9 @@ class ModalPopupExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<void> _modalBuilder(BuildContext context, Object? arguments) {
+  static Route<void> _modalBuilder(final BuildContext context, final Object? arguments) {
     return CupertinoModalPopupRoute<void>(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return CupertinoActionSheet(
           title: const Text('Title'),
           message: const Text('Message'),

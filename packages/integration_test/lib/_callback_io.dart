@@ -27,7 +27,7 @@ final IOCallbackManager _singletonCallbackManager = IOCallbackManager();
 class IOCallbackManager implements CallbackManager {
   @override
   Future<Map<String, dynamic>> callback(
-      Map<String, String> params, IntegrationTestResults testRunner) async {
+      final Map<String, String> params, final IntegrationTestResults testRunner) async {
     final String command = params['command']!;
     Map<String, String> response;
     switch (command) {
@@ -84,7 +84,7 @@ class IOCallbackManager implements CallbackManager {
   }
 
   @override
-  Future<Map<String, dynamic>> takeScreenshot(String screenshot, [Map<String, Object?>? args]) async {
+  Future<Map<String, dynamic>> takeScreenshot(final String screenshot, [final Map<String, Object?>? args]) async {
     assert(args == null, '[args] handling has not been implemented for this platform');
     if (Platform.isAndroid && !_isSurfaceRendered) {
       throw StateError('Call convertFlutterSurfaceToImage() before taking a screenshot');
@@ -103,7 +103,7 @@ class IOCallbackManager implements CallbackManager {
     };
   }
 
-  Future<dynamic> _onMethodChannelCall(MethodCall call) async {
+  Future<dynamic> _onMethodChannelCall(final MethodCall call) async {
     switch (call.method) {
       case 'scheduleFrame':
         PlatformDispatcher.instance.scheduleFrame();

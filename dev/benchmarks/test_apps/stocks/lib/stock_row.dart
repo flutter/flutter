@@ -24,12 +24,12 @@ class StockRow extends StatelessWidget {
 
   static const double kHeight = 79.0;
 
-  GestureTapCallback? _getHandler(StockRowActionCallback? callback) {
+  GestureTapCallback? _getHandler(final StockRowActionCallback? callback) {
     return callback == null ? null : () => callback(stock);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
     String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0) {

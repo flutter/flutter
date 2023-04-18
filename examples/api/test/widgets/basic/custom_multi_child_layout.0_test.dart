@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/widgets/basic/custom_multi_child_layout.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('has four containers', (WidgetTester tester) async {
+  testWidgets('has four containers', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -20,7 +20,7 @@ void main() {
     expect(containerFinder, findsNWidgets(4));
   });
 
-  testWidgets('containers are the same size', (WidgetTester tester) async {
+  testWidgets('containers are the same size', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -36,7 +36,7 @@ void main() {
     expect(containerFinder, findsNWidgets(4));
   });
 
-  testWidgets('containers are offset', (WidgetTester tester) async {
+  testWidgets('containers are offset', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(

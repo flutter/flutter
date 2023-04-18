@@ -12,7 +12,7 @@ class MaterialStateOutlinedBorderExampleApp extends StatelessWidget {
   const MaterialStateOutlinedBorderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: MaterialStateOutlinedBorderExample(),
     );
@@ -23,7 +23,7 @@ class SelectedBorder extends RoundedRectangleBorder implements MaterialStateOutl
   const SelectedBorder();
 
   @override
-  OutlinedBorder? resolve(Set<MaterialState> states) {
+  OutlinedBorder? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.selected)) {
       return const RoundedRectangleBorder();
     }
@@ -42,12 +42,12 @@ class _MaterialStateOutlinedBorderExampleState extends State<MaterialStateOutlin
   bool isSelected = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: FilterChip(
         label: const Text('Select chip'),
         selected: isSelected,
-        onSelected: (bool value) {
+        onSelected: (final bool value) {
           setState(() {
             isSelected = value;
           });

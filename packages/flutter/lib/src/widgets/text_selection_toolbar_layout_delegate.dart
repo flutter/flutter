@@ -43,7 +43,7 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
 
   /// Return the value that centers width as closely as possible to position
   /// while fitting inside of min and max.
-  static double centerOn(double position, double width, double max) {
+  static double centerOn(final double position, final double width, final double max) {
     // If it overflows on the left, put it as far left as possible.
     if (position - width / 2.0 < 0.0) {
       return 0.0;
@@ -59,12 +59,12 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   }
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     return constraints.loosen();
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     final bool fitsAbove = this.fitsAbove ?? anchorAbove.dy >= childSize.height;
     final Offset anchor = fitsAbove ? anchorAbove : anchorBelow;
 
@@ -81,7 +81,7 @@ class TextSelectionToolbarLayoutDelegate extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(TextSelectionToolbarLayoutDelegate oldDelegate) {
+  bool shouldRelayout(final TextSelectionToolbarLayoutDelegate oldDelegate) {
     return anchorAbove != oldDelegate.anchorAbove
         || anchorBelow != oldDelegate.anchorBelow
         || fitsAbove != oldDelegate.fitsAbove;

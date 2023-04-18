@@ -12,7 +12,7 @@ void main() {
     'timeoutInMinutes': '1',
   };
   late List<String> printLog;
-  void print(String s) => printLog.add(s);
+  void print(final String s) => printLog.add(s);
 
   group('run.dart script', () {
     test('Reruns - Test passes the first time.', () async {

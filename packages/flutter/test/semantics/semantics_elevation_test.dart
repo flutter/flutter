@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('SemanticsNodes overlapping in z', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes overlapping in z', (final WidgetTester tester) async {
     // Cards are semantic boundaries that always own their own SemanticNode,
     // PhysicalModels merge their semantics information into parent.
     //
@@ -97,7 +97,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SemanticsNodes overlapping in z with switched children', (WidgetTester tester) async {
+  testWidgets('SemanticsNodes overlapping in z with switched children', (final WidgetTester tester) async {
     // Same as 'SemanticsNodes overlapping in z', but the order of children
     // is reversed
 
@@ -173,7 +173,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('single node thickness', (WidgetTester tester) async {
+  testWidgets('single node thickness', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const MaterialApp(
@@ -193,7 +193,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('force-merge', (WidgetTester tester) async {
+  testWidgets('force-merge', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -234,7 +234,7 @@ void main() {
     // TODO(goderbauer): remove awkward workaround when accessing force-merged
     //   SemanticsData becomes easier, https://github.com/flutter/flutter/issues/25669
     SemanticsData? mergedChildData;
-    elevation10.visitChildren((SemanticsNode child) {
+    elevation10.visitChildren((final SemanticsNode child) {
       expect(mergedChildData, isNull);
       mergedChildData = child.getSemanticsData();
       return true;
@@ -247,7 +247,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('force-merge with inversed children', (WidgetTester tester) async {
+  testWidgets('force-merge with inversed children', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(MaterialApp(
@@ -289,7 +289,7 @@ void main() {
     // TODO(goderbauer): remove awkward workaround when accessing force-merged
     //   SemanticsData becomes easier, https://github.com/flutter/flutter/issues/25669
     SemanticsData? mergedChildData;
-    elevation10.visitChildren((SemanticsNode child) {
+    elevation10.visitChildren((final SemanticsNode child) {
       expect(mergedChildData, isNull);
       mergedChildData = child.getSemanticsData();
       return true;

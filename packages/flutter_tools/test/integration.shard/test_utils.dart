@@ -24,13 +24,13 @@ const ProcessManager processManager = LocalProcessManager();
 /// Creates a temporary directory but resolves any symlinks to return the real
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
-Directory createResolvedTempDirectorySync(String prefix) {
+Directory createResolvedTempDirectorySync(final String prefix) {
   assert(prefix.endsWith('.'));
   final Directory tempDirectory = fileSystem.systemTempDirectory.createTempSync('flutter_$prefix');
   return fileSystem.directory(tempDirectory.resolveSymbolicLinksSync());
 }
 
-void writeFile(String path, String content, {bool writeFutureModifiedDate = false}) {
+void writeFile(final String path, final String content, {final bool writeFutureModifiedDate = false}) {
   final File file = fileSystem.file(path)
     ..createSync(recursive: true)
     ..writeAsStringSync(content, flush: true);
@@ -42,19 +42,19 @@ void writeFile(String path, String content, {bool writeFutureModifiedDate = fals
     }
 }
 
-void writeBytesFile(String path, List<int> content) {
+void writeBytesFile(final String path, final List<int> content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
     ..writeAsBytesSync(content, flush: true);
 }
 
-void writePackages(String folder) {
+void writePackages(final String folder) {
   writeFile(fileSystem.path.join(folder, '.packages'), '''
 test:${fileSystem.path.join(fileSystem.currentDirectory.path, 'lib')}/
 ''');
 }
 
-Future<void> getPackages(String folder) async {
+Future<void> getPackages(final String folder) async {
   final List<String> command = <String>[
     fileSystem.path.join(getFlutterRoot(), 'bin', 'flutter'),
     'pub',
@@ -79,11 +79,11 @@ List<String> getLocalEngineArguments() {
 }
 
 Future<void> pollForServiceExtensionValue<T>({
-  required FlutterTestDriver testDriver,
-  required String extension,
-  required T continuePollingValue,
-  required Matcher matches,
-  String valueKey = 'value',
+  required final FlutterTestDriver testDriver,
+  required final String extension,
+  required final T continuePollingValue,
+  required final Matcher matches,
+  final String valueKey = 'value',
 }) async {
   for (int i = 0; i < 10; i++) {
     final Response response = await testDriver.callServiceExtension(extension);
@@ -108,7 +108,7 @@ abstract final class AppleTestUtils {
     '_kDartVmSnapshotInstructions'
   ];
 
-  static List<String> getExportedSymbols(String dwarfPath) {
+  static List<String> getExportedSymbols(final String dwarfPath) {
     final ProcessResult nm = processManager.runSync(
       <String>[
         'nm',

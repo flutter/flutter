@@ -20,7 +20,7 @@ HAL: This mission is too important for me to allow you to jeopardize it.''';
 // [["Dave", "Open the pod bay..."] ...]
 final List<List<String>> _kNameLines = _kDialogText
   .split('\n')
-  .map<List<String>>((String line) => line.split(':'))
+  .map<List<String>>((final String line) => line.split(':'))
   .toList();
 
 final TextStyle _kDaveStyle = TextStyle(color: Colors.indigo.shade400, height: 1.8);
@@ -32,7 +32,7 @@ const TextStyle _kUnderline = TextStyle(
   decorationStyle: TextDecorationStyle.wavy,
 );
 
-Widget toStyledText(String name, String text) {
+Widget toStyledText(final String name, final String text) {
   final TextStyle lineStyle = (name == 'Dave') ? _kDaveStyle : _kHalStyle;
   return RichText(
     key: Key(text),
@@ -55,13 +55,13 @@ Widget toStyledText(String name, String text) {
   );
 }
 
-Widget toPlainText(String name, String text) => Text('$name:$text');
+Widget toPlainText(final String name, final String text) => Text('$name:$text');
 
 class SpeakerSeparator extends StatelessWidget {
   const SpeakerSeparator({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       constraints: const BoxConstraints.expand(height: 0.0),
       margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 64.0),
@@ -91,7 +91,7 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: _handleTap,
       child: Container(
@@ -100,8 +100,8 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: _kNameLines
-            .map<Widget>((List<String> nameAndText) => _toText(nameAndText[0], nameAndText[1]))
-            .expand((Widget line) => <Widget>[
+            .map<Widget>((final List<String> nameAndText) => _toText(nameAndText[0], nameAndText[1]))
+            .expand((final Widget line) => <Widget>[
               line,
               const SpeakerSeparator(),
             ])

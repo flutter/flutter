@@ -215,7 +215,7 @@ void main() {
       testWithoutContext('uris in the stream are throttled', () async {
         const Duration kThrottleDuration = Duration(milliseconds: 10);
 
-        FakeAsync().run((FakeAsync time) {
+        FakeAsync().run((final FakeAsync time) {
           discoverer = ProtocolDiscovery.vmService(
             logReader,
             ipv6: false,
@@ -224,7 +224,7 @@ void main() {
           );
 
           final List<Uri> discoveredUris = <Uri>[];
-          discoverer.uris.listen((Uri uri) {
+          discoverer.uris.listen((final Uri uri) {
             discoveredUris.add(uri);
           });
 
@@ -249,7 +249,7 @@ void main() {
       testWithoutContext('uris in the stream are throttled when they match the port', () async {
         const Duration kThrottleTimeInMilliseconds = Duration(milliseconds: 10);
 
-        FakeAsync().run((FakeAsync time) {
+        FakeAsync().run((final FakeAsync time) {
           discoverer = ProtocolDiscovery.vmService(
             logReader,
             ipv6: false,
@@ -259,7 +259,7 @@ void main() {
           );
 
           final List<Uri> discoveredUris = <Uri>[];
-          discoverer.uris.listen((Uri uri) {
+          discoverer.uris.listen((final Uri uri) {
             discoveredUris.add(uri);
           });
 
@@ -396,7 +396,7 @@ class MockPortForwarder extends DevicePortForwarder {
   final int? availablePort;
 
   @override
-  Future<int> forward(int devicePort, { int? hostPort }) async {
+  Future<int> forward(final int devicePort, { int? hostPort }) async {
     hostPort ??= 0;
     if (hostPort == 0) {
       return availablePort!;
@@ -408,7 +408,7 @@ class MockPortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => throw UnimplementedError();
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) {
+  Future<void> unforward(final ForwardedPort forwardedPort) {
     throw UnimplementedError();
   }
 

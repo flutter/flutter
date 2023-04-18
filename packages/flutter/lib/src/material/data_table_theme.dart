@@ -44,9 +44,9 @@ class DataTableThemeData with Diagnosticable {
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.7.0-5.0.pre.',
     )
-    double? dataRowHeight,
-    double? dataRowMinHeight,
-    double? dataRowMaxHeight,
+    final double? dataRowHeight,
+    final double? dataRowMinHeight,
+    final double? dataRowMaxHeight,
     this.dataTextStyle,
     this.headingRowColor,
     this.headingRowHeight,
@@ -117,25 +117,25 @@ class DataTableThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   DataTableThemeData copyWith({
-    Decoration? decoration,
-    MaterialStateProperty<Color?>? dataRowColor,
+    final Decoration? decoration,
+    final MaterialStateProperty<Color?>? dataRowColor,
     @Deprecated(
       'Migrate to use dataRowMinHeight and dataRowMaxHeight instead. '
       'This feature was deprecated after v3.7.0-5.0.pre.',
     )
-    double? dataRowHeight,
-    double? dataRowMinHeight,
-    double? dataRowMaxHeight,
-    TextStyle? dataTextStyle,
-    MaterialStateProperty<Color?>? headingRowColor,
-    double? headingRowHeight,
-    TextStyle? headingTextStyle,
-    double? horizontalMargin,
-    double? columnSpacing,
-    double? dividerThickness,
-    double? checkboxHorizontalMargin,
-    MaterialStateProperty<MouseCursor?>? headingCellCursor,
-    MaterialStateProperty<MouseCursor?>? dataRowCursor,
+    final double? dataRowHeight,
+    final double? dataRowMinHeight,
+    final double? dataRowMaxHeight,
+    final TextStyle? dataTextStyle,
+    final MaterialStateProperty<Color?>? headingRowColor,
+    final double? headingRowHeight,
+    final TextStyle? headingTextStyle,
+    final double? horizontalMargin,
+    final double? columnSpacing,
+    final double? dividerThickness,
+    final double? checkboxHorizontalMargin,
+    final MaterialStateProperty<MouseCursor?>? headingCellCursor,
+    final MaterialStateProperty<MouseCursor?>? dataRowCursor,
   }) {
     return DataTableThemeData(
       decoration: decoration ?? this.decoration,
@@ -161,7 +161,7 @@ class DataTableThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static DataTableThemeData lerp(DataTableThemeData a, DataTableThemeData b, double t) {
+  static DataTableThemeData lerp(final DataTableThemeData a, final DataTableThemeData b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -202,7 +202,7 @@ class DataTableThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -227,7 +227,7 @@ class DataTableThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('dataRowColor', dataRowColor, defaultValue: null));
@@ -283,11 +283,11 @@ class DataTableTheme extends InheritedWidget {
   /// ```dart
   /// DataTableThemeData theme = DataTableTheme.of(context);
   /// ```
-  static DataTableThemeData of(BuildContext context) {
+  static DataTableThemeData of(final BuildContext context) {
     final DataTableTheme? dataTableTheme = context.dependOnInheritedWidgetOfExactType<DataTableTheme>();
     return dataTableTheme?.data ?? Theme.of(context).dataTableTheme;
   }
 
   @override
-  bool updateShouldNotify(DataTableTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final DataTableTheme oldWidget) => data != oldWidget.data;
 }

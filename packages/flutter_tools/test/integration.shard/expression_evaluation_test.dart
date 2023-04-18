@@ -29,14 +29,14 @@ void batch1() {
     tryToDelete(tempDir);
   }
 
-  Future<void> breakInBuildMethod(FlutterTestDriver flutter) async {
+  Future<void> breakInBuildMethod(final FlutterTestDriver flutter) async {
     await flutter.breakAt(
       project.buildMethodBreakpointUri,
       project.buildMethodBreakpointLine,
     );
   }
 
-  Future<void> breakInTopLevelFunction(FlutterTestDriver flutter) async {
+  Future<void> breakInTopLevelFunction(final FlutterTestDriver flutter) async {
     await flutter.breakAt(
       project.topLevelFunctionBreakpointUri,
       project.topLevelFunctionBreakpointLine,
@@ -185,7 +185,7 @@ void batch3() {
 
 }
 
-Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
+Future<void> evaluateTrivialExpressions(final FlutterTestDriver flutter) async {
   ObjRef res;
 
   res = await flutter.evaluateInFrame('"test"');
@@ -198,12 +198,12 @@ Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
   expectValueOfType(res, InstanceKind.kBool, true.toString());
 }
 
-Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
+Future<void> evaluateComplexExpressions(final FlutterTestDriver flutter) async {
   final ObjRef res = await flutter.evaluateInFrame('new DateTime(2000).year');
   expectValueOfType(res, InstanceKind.kInt, '2000');
 }
 
-Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
+Future<void> evaluateComplexReturningExpressions(final FlutterTestDriver flutter) async {
   final DateTime date = DateTime(2000);
   final ObjRef resp = await flutter.evaluateInFrame('new DateTime(2000)');
   expectInstanceOfClass(resp, 'DateTime');
@@ -211,23 +211,23 @@ Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) asyn
   expectValue(res, '${date.year}-${date.month}-${date.day}');
 }
 
-void expectInstanceOfClass(ObjRef result, String name) {
+void expectInstanceOfClass(final ObjRef result, final String name) {
   expect(result,
     const TypeMatcher<InstanceRef>()
-      .having((InstanceRef instance) => instance.classRef!.name, 'resp.classRef.name', name));
+      .having((final InstanceRef instance) => instance.classRef!.name, 'resp.classRef.name', name));
 }
 
-void expectValueOfType(ObjRef result, String kind, String message) {
+void expectValueOfType(final ObjRef result, final String kind, final String message) {
   expect(result,
     const TypeMatcher<InstanceRef>()
-      .having((InstanceRef instance) => instance.kind, 'kind', kind)
-      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
+      .having((final InstanceRef instance) => instance.kind, 'kind', kind)
+      .having((final InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
 }
 
-void expectValue(ObjRef result, String message) {
+void expectValue(final ObjRef result, final String message) {
   expect(result,
     const TypeMatcher<InstanceRef>()
-      .having((InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
+      .having((final InstanceRef instance) => instance.valueAsString, 'valueAsString', message));
 }
 
 void main() {

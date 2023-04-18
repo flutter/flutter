@@ -13,14 +13,14 @@ class Inside extends StatefulWidget {
 
 class InsideState extends State<Inside> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Listener(
       onPointerDown: _handlePointerDown,
       child: const Text('INSIDE', textDirection: TextDirection.ltr),
     );
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
+  void _handlePointerDown(final PointerDownEvent event) {
     setState(() { });
   }
 }
@@ -39,14 +39,14 @@ class Middle extends StatefulWidget {
 
 class MiddleState extends State<Middle> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Listener(
       onPointerDown: _handlePointerDown,
       child: widget.child,
     );
   }
 
-  void _handlePointerDown(PointerDownEvent event) {
+  void _handlePointerDown(final PointerDownEvent event) {
     setState(() { });
   }
 }
@@ -59,13 +59,13 @@ class Outside extends StatefulWidget {
 
 class OutsideState extends State<Outside> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Middle(child: Inside());
   }
 }
 
 void main() {
-  testWidgets('setState() smoke test', (WidgetTester tester) async {
+  testWidgets('setState() smoke test', (final WidgetTester tester) async {
     await tester.pumpWidget(const Outside());
     final Offset location = tester.getCenter(find.text('INSIDE'));
     final TestGesture gesture = await tester.startGesture(location);

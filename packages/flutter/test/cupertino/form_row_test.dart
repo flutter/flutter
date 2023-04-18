@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Shows prefix', (WidgetTester tester) async {
+  testWidgets('Shows prefix', (final WidgetTester tester) async {
     const Widget prefix = Text('Enter Value');
 
     await tester.pumpWidget(
@@ -25,7 +25,7 @@ void main() {
     expect(prefix, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows child', (WidgetTester tester) async {
+  testWidgets('Shows child', (final WidgetTester tester) async {
     const Widget child = CupertinoTextField();
 
     await tester.pumpWidget(
@@ -41,7 +41,7 @@ void main() {
     expect(child, tester.widget(find.byType(CupertinoTextField)));
   });
 
-  testWidgets('RTL puts prefix after child', (WidgetTester tester) async {
+  testWidgets('RTL puts prefix after child', (final WidgetTester tester) async {
     const Widget prefix = Text('Enter Value');
     const Widget child = CupertinoTextField();
 
@@ -62,7 +62,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, true);
   });
 
-  testWidgets('LTR puts child after prefix', (WidgetTester tester) async {
+  testWidgets('LTR puts child after prefix', (final WidgetTester tester) async {
     const Widget prefix = Text('Enter Value');
     const Widget child = CupertinoTextField();
 
@@ -83,7 +83,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Text)).dx > tester.getTopLeft(find.byType(CupertinoTextField)).dx, false);
   });
 
-  testWidgets('Shows error widget', (WidgetTester tester) async {
+  testWidgets('Shows error widget', (final WidgetTester tester) async {
     const Widget error = Text('Error');
 
     await tester.pumpWidget(
@@ -100,7 +100,7 @@ void main() {
     expect(error, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows helper widget', (WidgetTester tester) async {
+  testWidgets('Shows helper widget', (final WidgetTester tester) async {
     const Widget helper = Text('Helper');
 
     await tester.pumpWidget(
@@ -117,7 +117,7 @@ void main() {
     expect(helper, tester.widget(find.byType(Text)));
   });
 
-  testWidgets('Shows helper text above error text', (WidgetTester tester) async {
+  testWidgets('Shows helper text above error text', (final WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = CupertinoActivityIndicator();
 
@@ -139,7 +139,7 @@ void main() {
     );
   });
 
-  testWidgets('Shows helper in label color and error text in red color', (WidgetTester tester) async {
+  testWidgets('Shows helper in label color and error text in red color', (final WidgetTester tester) async {
     const Widget helper = Text('Helper');
     const Widget error = Text('Error');
 
@@ -166,11 +166,11 @@ void main() {
     expect(errorTextStyle.style.color, CupertinoColors.destructiveRed);
   });
 
-  testWidgets('CupertinoFormRow adapts to MaterialApp dark mode', (WidgetTester tester) async {
+  testWidgets('CupertinoFormRow adapts to MaterialApp dark mode', (final WidgetTester tester) async {
     const Widget prefix = Text('Prefix');
     const Widget helper = Text('Helper');
 
-    Widget buildFormRow(Brightness brightness) {
+    Widget buildFormRow(final Brightness brightness) {
       return MaterialApp(
         theme: ThemeData(brightness: brightness),
         home: const Center(

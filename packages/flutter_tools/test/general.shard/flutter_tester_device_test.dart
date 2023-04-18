@@ -37,8 +37,8 @@ void main() {
   });
 
   FlutterTesterTestDevice createDevice({
-    List<String> dartEntrypointArgs = const <String>[],
-    bool enableVmService = false,
+    final List<String> dartEntrypointArgs = const <String>[],
+    final bool enableVmService = false,
   }) =>
     TestFlutterTesterDevice(
       platform: platform,
@@ -46,7 +46,7 @@ void main() {
       processManager: processManager,
       enableVmService: enableVmService,
       dartEntrypointArgs: dartEntrypointArgs,
-      uriConverter: (String input) => '$input/converted',
+      uriConverter: (final String input) => '$input/converted',
     );
 
   group('The FLUTTER_TEST environment variable is passed to the test process', () {
@@ -60,7 +60,7 @@ void main() {
         ..writeAsStringSync('{"configVersion":2,"packages":[]}');
     });
 
-    FakeCommand flutterTestCommand(String expectedFlutterTestValue) {
+    FakeCommand flutterTestCommand(final String expectedFlutterTestValue) {
       return FakeCommand(command: const <String>[
         '/',
         '--disable-vm-service',
@@ -207,8 +207,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
     required super.fileSystem,
     required super.processManager,
     required super.enableVmService,
-    required List<String> dartEntrypointArgs,
-    required UriConverter uriConverter,
+    required final List<String> dartEntrypointArgs,
+    required final UriConverter uriConverter,
   }) : super(
     id: 999,
     shellPath: '/',
@@ -239,8 +239,8 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
 
   @override
   Future<DartDevelopmentService> startDds(
-    Uri uri, {
-    UriConverter? uriConverter,
+    final Uri uri, {
+    final UriConverter? uriConverter,
   }) async {
     _ddsServiceUriCompleter.complete(uri);
     dds = FakeDartDevelopmentService(
@@ -252,7 +252,7 @@ class TestFlutterTesterDevice extends FlutterTesterTestDevice {
   }
 
   @override
-  Future<HttpServer> bind(InternetAddress? host, int port) async => FakeHttpServer();
+  Future<HttpServer> bind(final InternetAddress? host, final int port) async => FakeHttpServer();
 
   @override
   Future<StreamChannel<String>> get remoteChannel async => StreamChannelController<String>().foreign;

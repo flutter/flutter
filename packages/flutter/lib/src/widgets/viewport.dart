@@ -66,8 +66,8 @@ class Viewport extends MultiChildRenderObjectWidget {
     this.cacheExtent,
     this.cacheExtentStyle = CacheExtentStyle.pixel,
     this.clipBehavior = Clip.hardEdge,
-    List<Widget> slivers = const <Widget>[],
-  }) : assert(center == null || slivers.where((Widget child) => child.key == center).length == 1),
+    final List<Widget> slivers = const <Widget>[],
+  }) : assert(center == null || slivers.where((final Widget child) => child.key == center).length == 1),
        assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        super(children: slivers);
 
@@ -141,7 +141,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   ///
   /// This depends on the [Directionality] if the `axisDirection` is vertical;
   /// otherwise, the default cross axis direction is downwards.
-  static AxisDirection getDefaultCrossAxisDirection(BuildContext context, AxisDirection axisDirection) {
+  static AxisDirection getDefaultCrossAxisDirection(final BuildContext context, final AxisDirection axisDirection) {
     switch (axisDirection) {
       case AxisDirection.up:
         assert(debugCheckHasDirectionality(
@@ -165,7 +165,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  RenderViewport createRenderObject(BuildContext context) {
+  RenderViewport createRenderObject(final BuildContext context) {
     return RenderViewport(
       axisDirection: axisDirection,
       crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
@@ -178,7 +178,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderViewport renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderViewport renderObject) {
     renderObject
       ..axisDirection = axisDirection
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
@@ -193,7 +193,7 @@ class Viewport extends MultiChildRenderObjectWidget {
   MultiChildRenderObjectElement createElement() => _ViewportElement(this);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(EnumProperty<AxisDirection>('crossAxisDirection', crossAxisDirection, defaultValue: null));
@@ -220,7 +220,7 @@ class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElem
   RenderViewport get renderObject => super.renderObject as RenderViewport;
 
   @override
-  void mount(Element? parent, Object? newSlot) {
+  void mount(final Element? parent, final Object? newSlot) {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
@@ -230,7 +230,7 @@ class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElem
   }
 
   @override
-  void update(MultiChildRenderObjectWidget newWidget) {
+  void update(final MultiChildRenderObjectWidget newWidget) {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
     super.update(newWidget);
@@ -263,7 +263,7 @@ class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElem
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, IndexedSlot<Element?> slot) {
+  void insertRenderObjectChild(final RenderObject child, final IndexedSlot<Element?> slot) {
     super.insertRenderObjectChild(child, slot);
     // Once [mount]/[update] are done, the `renderObject.center` will be updated
     // in [_updateCenter].
@@ -273,13 +273,13 @@ class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElem
   }
 
   @override
-  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element?> oldSlot, IndexedSlot<Element?> newSlot) {
+  void moveRenderObjectChild(final RenderObject child, final IndexedSlot<Element?> oldSlot, final IndexedSlot<Element?> newSlot) {
     super.moveRenderObjectChild(child, oldSlot, newSlot);
     assert(_doingMountOrUpdate);
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, Object? slot) {
+  void removeRenderObjectChild(final RenderObject child, final Object? slot) {
     super.removeRenderObjectChild(child, slot);
     if (!_doingMountOrUpdate && renderObject.center == child) {
       renderObject.center = null;
@@ -287,8 +287,8 @@ class _ViewportElement extends MultiChildRenderObjectElement with NotifiableElem
   }
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
-    children.where((Element e) {
+  void debugVisitOnstageChildren(final ElementVisitor visitor) {
+    children.where((final Element e) {
       final RenderSliver renderSliver = e.renderObject! as RenderSliver;
       return renderSliver.geometry!.visible;
     }).forEach(visitor);
@@ -334,7 +334,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     this.crossAxisDirection,
     required this.offset,
     this.clipBehavior = Clip.hardEdge,
-    List<Widget> slivers = const <Widget>[],
+    final List<Widget> slivers = const <Widget>[],
   }) : super(children: slivers);
 
   /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
@@ -371,7 +371,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   final Clip clipBehavior;
 
   @override
-  RenderShrinkWrappingViewport createRenderObject(BuildContext context) {
+  RenderShrinkWrappingViewport createRenderObject(final BuildContext context) {
     return RenderShrinkWrappingViewport(
       axisDirection: axisDirection,
       crossAxisDirection: crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection),
@@ -381,7 +381,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderShrinkWrappingViewport renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderShrinkWrappingViewport renderObject) {
     renderObject
       ..axisDirection = axisDirection
       ..crossAxisDirection = crossAxisDirection ?? Viewport.getDefaultCrossAxisDirection(context, axisDirection)
@@ -390,7 +390,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
     properties.add(EnumProperty<AxisDirection>('crossAxisDirection', crossAxisDirection, defaultValue: null));

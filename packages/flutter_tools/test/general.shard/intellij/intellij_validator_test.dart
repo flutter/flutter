@@ -309,11 +309,11 @@ void main() {
     ).whereType<IntelliJValidatorOnMac>();
     expect(validators.length, 2);
 
-    final IntelliJValidatorOnMac ce = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IdeaIC').single;
+    final IntelliJValidatorOnMac ce = validators.where((final IntelliJValidatorOnMac validator) => validator.id == 'IdeaIC').single;
     expect(ce.title, 'IntelliJ IDEA Community Edition');
     expect(ce.installPath, ceRandomLocation);
 
-    final IntelliJValidatorOnMac ultimate = validators.where((IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea').single;
+    final IntelliJValidatorOnMac ultimate = validators.where((final IntelliJValidatorOnMac validator) => validator.id == 'IntelliJIdea').single;
     expect(ultimate.title, 'IntelliJ IDEA Ultimate Edition');
     expect(ultimate.installPath, ultimateRandomLocation);
   });
@@ -374,7 +374,7 @@ void main() {
 }
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
-  IntelliJValidatorTestTarget(super.title, super.installPath,  FileSystem fileSystem)
+  IntelliJValidatorTestTarget(super.title, super.installPath,  final FileSystem fileSystem)
     : super(fileSystem: fileSystem, userMessages: UserMessages());
 
   @override
@@ -394,7 +394,7 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
 ///
 /// If more XML contents are needed, prefer modifying these contents over checking
 /// in another JAR.
-void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem, {String version = '0.1.3'}) {
+void createIntellijFlutterPluginJar(final String pluginJarPath, final FileSystem fileSystem, {final String version = '0.1.3'}) {
   final String intellijFlutterPluginXml = '''
 <idea-plugin version="2">
   <id>io.flutter</id>
@@ -430,7 +430,7 @@ void createIntellijFlutterPluginJar(String pluginJarPath, FileSystem fileSystem,
 ///
 /// If more XML contents are needed, prefer modifying these contents over checking
 /// in another JAR.
-void createIntellijDartPluginJar(String pluginJarPath, FileSystem fileSystem) {
+void createIntellijDartPluginJar(final String pluginJarPath, final FileSystem fileSystem) {
   const String intellijDartPluginXml = r'''
 <idea-plugin version="2">
   <name>Dart</name>

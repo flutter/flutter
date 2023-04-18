@@ -166,12 +166,12 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
   void Function(String, Uri, Directory)? onDownloadZipTarball;
 
   @override
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) async {
+  Future<void> downloadZippedTarball(final String message, final Uri url, final Directory location) async {
     onDownloadZipTarball?.call(message, url, location);
   }
 
   @override
-  Future<void> downloadZipArchive(String message, Uri url, Directory location) async {
+  Future<void> downloadZipArchive(final String message, final Uri url, final Directory location) async {
     onDownloadZipArchive?.call(message, url, location);
   }
 
@@ -180,7 +180,7 @@ class FakeArtifactUpdater extends Fake implements ArtifactUpdater {
 }
 
 class FakeVersionlessArtifact extends CachedArtifact {
-  FakeVersionlessArtifact(Cache cache) : super(
+  FakeVersionlessArtifact(final Cache cache) : super(
     'fake',
     cache,
     DevelopmentArtifact.universal,
@@ -190,5 +190,5 @@ class FakeVersionlessArtifact extends CachedArtifact {
   String? get version => null;
 
   @override
-  Future<void> updateInner(ArtifactUpdater artifactUpdater, FileSystem fileSystem, OperatingSystemUtils operatingSystemUtils) async { }
+  Future<void> updateInner(final ArtifactUpdater artifactUpdater, final FileSystem fileSystem, final OperatingSystemUtils operatingSystemUtils) async { }
 }

@@ -25,18 +25,18 @@ class BarState extends State<Bar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (_mode) {
       return SizedBox(
         child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
+          builder: (final BuildContext context, final BoxConstraints constraints) {
             return StatefulCreationCounter(key: _fooKey);
           },
         ),
       );
     } else {
       return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (final BuildContext context, final BoxConstraints constraints) {
           return StatefulCreationCounter(key: _fooKey);
         },
       );
@@ -61,11 +61,11 @@ class StatefulCreationCounterState extends State<StatefulCreationCounter> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }
 
 void main() {
-  testWidgets('reparent state with layout builder', (WidgetTester tester) async {
+  testWidgets('reparent state with layout builder', (final WidgetTester tester) async {
     expect(StatefulCreationCounterState.creationCount, 0);
     await tester.pumpWidget(const Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
@@ -75,7 +75,7 @@ void main() {
     expect(StatefulCreationCounterState.creationCount, 1);
   });
 
-  testWidgets('Clean then reparent with dependencies', (WidgetTester tester) async {
+  testWidgets('Clean then reparent with dependencies', (final WidgetTester tester) async {
     int layoutBuilderBuildCount = 0;
 
     late StateSetter keyedSetState;
@@ -85,7 +85,7 @@ void main() {
     final GlobalKey key = GlobalKey();
     final Widget keyedWidget = StatefulBuilder(
       key: key,
-      builder: (BuildContext context, StateSetter setState) {
+      builder: (final BuildContext context, final StateSetter setState) {
         keyedSetState = setState;
         MediaQuery.of(context);
         return Container();
@@ -99,10 +99,10 @@ void main() {
       data: MediaQueryData.fromView(tester.view),
       child: Column(
         children: <Widget>[
-          StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
             layoutBuilderSetState = setState;
             return LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
+              builder: (final BuildContext context, final BoxConstraints constraints) {
                 layoutBuilderBuildCount += 1;
                 return layoutBuilderChild; // initially keyedWidget above, but then a new Container
               },
@@ -121,7 +121,7 @@ void main() {
                     child: ColoredBox(
                       color: Colors.green,
                       child: StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
+                        builder: (final BuildContext context, final StateSetter setState) {
                           childSetState = setState;
                           return deepChild; // initially a Container, but then the keyedWidget above
                         },

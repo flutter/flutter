@@ -126,7 +126,7 @@ class Table extends RenderObjectWidget {
     this.textBaseline, // NO DEFAULT: we don't know what the text's baseline should be
   }) : assert(defaultVerticalAlignment != TableCellVerticalAlignment.baseline || textBaseline != null, 'textBaseline is required if you specify the defaultVerticalAlignment with TableCellVerticalAlignment.baseline'),
        assert(() {
-         if (children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key))) {
+         if (children.any((final TableRow row1) => row1.key != null && children.any((final TableRow row2) => row1 != row2 && row1.key == row2.key))) {
            throw FlutterError(
              'Two or more TableRow children of this Table had the same key.\n'
              'All the keyed TableRow children of a Table must have different Keys.',
@@ -137,14 +137,14 @@ class Table extends RenderObjectWidget {
        assert(() {
          if (children.isNotEmpty) {
            final int cellCount = children.first.children.length;
-           if (children.any((TableRow row) => row.children.length != cellCount)) {
+           if (children.any((final TableRow row) => row.children.length != cellCount)) {
              throw FlutterError(
                'Table contains irregular row lengths.\n'
                'Every TableRow in a Table must have the same number of children, so that every cell is filled. '
                'Otherwise, the table will contain holes.',
              );
            }
-           if (children.any((TableRow row) => row.children.isEmpty)) {
+           if (children.any((final TableRow row) => row.children.isEmpty)) {
              throw FlutterError(
                'One or more TableRow have no children.\n'
                'Every TableRow in a Table must have at least one child, so there is no empty row. ',
@@ -153,11 +153,11 @@ class Table extends RenderObjectWidget {
          }
          return true;
        }()),
-       _rowDecorations = children.any((TableRow row) => row.decoration != null)
-                              ? children.map<Decoration?>((TableRow row) => row.decoration).toList(growable: false)
+       _rowDecorations = children.any((final TableRow row) => row.decoration != null)
+                              ? children.map<Decoration?>((final TableRow row) => row.decoration).toList(growable: false)
                               : null {
     assert(() {
-      final List<Widget> flatChildren = children.expand<Widget>((TableRow row) => row.children).toList(growable: false);
+      final List<Widget> flatChildren = children.expand<Widget>((final TableRow row) => row.children).toList(growable: false);
       return !debugChildrenHaveDuplicateKeys(this, flatChildren, message:
         'Two or more cells in this Table contain widgets with the same key.\n'
         'Every widget child of every TableRow in a Table must have different keys. The cells of a Table are '
@@ -230,7 +230,7 @@ class Table extends RenderObjectWidget {
   RenderObjectElement createElement() => _TableElement(this);
 
   @override
-  RenderTable createRenderObject(BuildContext context) {
+  RenderTable createRenderObject(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     return RenderTable(
       columns: children.isNotEmpty ? children[0].children.length : 0,
@@ -247,7 +247,7 @@ class Table extends RenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderTable renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderTable renderObject) {
     assert(debugCheckHasDirectionality(context));
     assert(renderObject.columns == (children.isNotEmpty ? children[0].children.length : 0));
     assert(renderObject.rows == children.length);
@@ -274,17 +274,17 @@ class _TableElement extends RenderObjectElement {
   bool _doingMountOrUpdate = false;
 
   @override
-  void mount(Element? parent, Object? newSlot) {
+  void mount(final Element? parent, final Object? newSlot) {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
     super.mount(parent, newSlot);
     int rowIndex = -1;
-    _children = (widget as Table).children.map<_TableElementRow>((TableRow row) {
+    _children = (widget as Table).children.map<_TableElementRow>((final TableRow row) {
       int columnIndex = 0;
       rowIndex += 1;
       return _TableElementRow(
         key: row.key,
-        children: row.children.map<Element>((Widget child) {
+        children: row.children.map<Element>((final Widget child) {
           return inflateWidget(child, _TableSlot(columnIndex++, rowIndex));
         }).toList(growable: false),
       );
@@ -295,7 +295,7 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderBox child, _TableSlot slot) {
+  void insertRenderObjectChild(final RenderBox child, final _TableSlot slot) {
     renderObject.setupParentData(child);
     // Once [mount]/[update] are done, the children are getting set all at once
     // in [_updateRenderObjectChildren].
@@ -305,20 +305,20 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void moveRenderObjectChild(RenderBox child, _TableSlot oldSlot, _TableSlot newSlot) {
+  void moveRenderObjectChild(final RenderBox child, final _TableSlot oldSlot, final _TableSlot newSlot) {
     assert(_doingMountOrUpdate);
     // Child gets moved at the end of [update] in [_updateRenderObjectChildren].
   }
 
   @override
-  void removeRenderObjectChild(RenderBox child, _TableSlot slot) {
+  void removeRenderObjectChild(final RenderBox child, final _TableSlot slot) {
     renderObject.setChild(slot.column, slot.row, null);
   }
 
   final Set<Element> _forgottenChildren = HashSet<Element>();
 
   @override
-  void update(Table newWidget) {
+  void update(final Table newWidget) {
     assert(!_doingMountOrUpdate);
     _doingMountOrUpdate = true;
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
@@ -327,7 +327,7 @@ class _TableElement extends RenderObjectElement {
         oldKeyedRows[row.key!] = row.children;
       }
     }
-    final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
+    final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((final _TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
     for (int rowIndex = 0; rowIndex < newWidget.children.length; rowIndex++) {
@@ -343,7 +343,7 @@ class _TableElement extends RenderObjectElement {
       }
       final List<_TableSlot> slots = List<_TableSlot>.generate(
         row.children.length,
-        (int columnIndex) => _TableSlot(columnIndex, rowIndex),
+        (final int columnIndex) => _TableSlot(columnIndex, rowIndex),
       );
       newChildren.add(_TableElementRow(
         key: row.key,
@@ -353,7 +353,7 @@ class _TableElement extends RenderObjectElement {
     while (oldUnkeyedRows.moveNext()) {
       updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
     }
-    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list))) {
+    for (final List<Element> oldChildren in oldKeyedRows.values.where((final List<Element> list) => !taken.contains(list))) {
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
     }
 
@@ -369,8 +369,8 @@ class _TableElement extends RenderObjectElement {
   void _updateRenderObjectChildren() {
     renderObject.setFlatChildren(
       _children.isNotEmpty ? _children[0].children.length : 0,
-      _children.expand<RenderBox>((_TableElementRow row) {
-        return row.children.map<RenderBox>((Element child) {
+      _children.expand<RenderBox>((final _TableElementRow row) {
+        return row.children.map<RenderBox>((final Element child) {
           final RenderBox box = child.renderObject! as RenderBox;
           return box;
         });
@@ -379,8 +379,8 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  void visitChildren(ElementVisitor visitor) {
-    for (final Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
+  void visitChildren(final ElementVisitor visitor) {
+    for (final Element child in _children.expand<Element>((final _TableElementRow row) => row.children)) {
       if (!_forgottenChildren.contains(child)) {
         visitor(child);
       }
@@ -388,7 +388,7 @@ class _TableElement extends RenderObjectElement {
   }
 
   @override
-  bool forgetChild(Element child) {
+  bool forgetChild(final Element child) {
     _forgottenChildren.add(child);
     super.forgetChild(child);
     return true;
@@ -413,7 +413,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
   final TableCellVerticalAlignment? verticalAlignment;
 
   @override
-  void applyParentData(RenderObject renderObject) {
+  void applyParentData(final RenderObject renderObject) {
     final TableCellParentData parentData = renderObject.parentData! as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
@@ -428,7 +428,7 @@ class TableCell extends ParentDataWidget<TableCellParentData> {
   Type get debugTypicalAncestorWidgetClass => Table;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<TableCellVerticalAlignment>('verticalAlignment', verticalAlignment));
   }
@@ -442,7 +442,7 @@ class _TableSlot with Diagnosticable {
   final int row;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -455,7 +455,7 @@ class _TableSlot with Diagnosticable {
   int get hashCode => Object.hash(column, row);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('x', column));
     properties.add(IntProperty('y', row));

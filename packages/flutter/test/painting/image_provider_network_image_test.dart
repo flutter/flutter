@@ -17,7 +17,7 @@ import '../rendering/rendering_tester.dart';
 void main() {
   TestRenderingFlutterBinding.ensureInitialized();
 
-  Future<Codec>  basicDecoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) {
+  Future<Codec>  basicDecoder(final ImmutableBuffer buffer, {final int? cacheWidth, final int? cacheHeight, final bool? allowUpscaling}) {
     return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling ?? false);
   }
 
@@ -51,8 +51,8 @@ void main() {
     expect(imageCache.pendingImageCount, 1);
     expect(imageCache.statusForKey(imageProvider).pending, true);
 
-    result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-    }, onError: (dynamic error, StackTrace? stackTrace) {
+    result.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {
+    }, onError: (final dynamic error, final StackTrace? stackTrace) {
       caughtError.complete(error);
     }));
 
@@ -64,8 +64,8 @@ void main() {
     expect(
       err,
       isA<NetworkImageLoadException>()
-        .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
-        .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
+        .having((final NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
+        .having((final NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl)),
     );
     expect(httpClient.request.response.drained, true);
   }, skip: isBrowser); // [intended] Browser implementation does not use HTTP client but an <img> tag.
@@ -78,8 +78,8 @@ void main() {
       final NetworkImage networkImage = NetworkImage(nonconst('foo'));
       final ImageStreamCompleter completer = networkImage.loadBuffer(networkImage, basicDecoder);
       completer.addListener(ImageStreamListener(
-        (ImageInfo image, bool synchronousCall) { },
-        onError: (dynamic error, StackTrace? stackTrace) {
+        (final ImageInfo image, final bool synchronousCall) { },
+        onError: (final dynamic error, final StackTrace? stackTrace) {
           capturedErrors.add(error);
         },
       ));
@@ -103,17 +103,17 @@ void main() {
     await runZoned(() async {
       const ImageProvider imageProvider = NetworkImage('asdasdasdas');
       final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.onError = (final FlutterErrorDetails details) {
         throw Error();
       };
       final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace? stackTrace) {
+      result.addListener(ImageStreamListener((final ImageInfo info, final bool syncCall) {
+      }, onError: (final dynamic error, final StackTrace? stackTrace) {
         caughtError.complete(true);
       }));
       expect(await caughtError.future, true);
     }, zoneSpecification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
+      handleUncaughtError: (final Zone zone, final ZoneDelegate zoneDelegate, final Zone parent, final Object error, final StackTrace stackTrace) {
         uncaught = true;
       },
     ));
@@ -138,13 +138,13 @@ void main() {
     final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
     final List<ImageChunkEvent> events = <ImageChunkEvent>[];
     result.addListener(ImageStreamListener(
-      (ImageInfo image, bool synchronousCall) {
+      (final ImageInfo image, final bool synchronousCall) {
         imageAvailable.complete();
       },
-      onChunk: (ImageChunkEvent event) {
+      onChunk: (final ImageChunkEvent event) {
         events.add(event);
       },
-      onError: (dynamic error, StackTrace? stackTrace) {
+      onError: (final dynamic error, final StackTrace? stackTrace) {
         imageAvailable.completeError(error as Object, stackTrace);
       },
     ));
@@ -171,8 +171,8 @@ void main() {
     expect(imageCache.statusForKey(imageProvider).pending, true);
     final Completer<dynamic> caughtError = Completer<dynamic>();
     result.addListener(ImageStreamListener(
-      (ImageInfo info, bool syncCall) {},
-      onError: (dynamic error, StackTrace? stackTrace) {
+      (final ImageInfo info, final bool syncCall) {},
+      onError: (final dynamic error, final StackTrace? stackTrace) {
         caughtError.complete(error);
       },
     ));
@@ -188,7 +188,7 @@ void main() {
     debugNetworkImageHttpClientProvider = null;
   }, skip: isBrowser); // [intended] Browser does not resolve images this way.
 
-  Future<Codec> decoder(ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool? allowUpscaling}) async {
+  Future<Codec> decoder(final ImmutableBuffer buffer, {final int? cacheWidth, final int? cacheHeight, final bool? allowUpscaling}) async {
     return FakeCodec();
   }
 
@@ -217,7 +217,7 @@ class _FakeHttpClient extends Fake implements HttpClient {
   Object? thrownError;
 
   @override
-  Future<HttpClientRequest> getUrl(Uri url) async {
+  Future<HttpClientRequest> getUrl(final Uri url) async {
     if (thrownError != null) {
       throw thrownError!;
     }
@@ -248,7 +248,7 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   late List<List<int>> content;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<List<int>> listen(final void Function(List<int> event)? onData, {final Function? onError, final void Function()? onDone, final bool? cancelOnError}) {
     return Stream<List<int>>.fromIterable(content).listen(
       onData,
       onDone: onDone,
@@ -258,7 +258,7 @@ class _FakeHttpClientResponse extends Fake implements HttpClientResponse {
   }
 
   @override
-  Future<E> drain<E>([E? futureValue]) async {
+  Future<E> drain<E>([final E? futureValue]) async {
     drained = true;
     return futureValue ?? futureValue as E; // Mirrors the implementation in Stream.
   }

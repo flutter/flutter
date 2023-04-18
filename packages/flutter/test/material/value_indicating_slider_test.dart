@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Slider value indicator', (WidgetTester tester) async {
+  testWidgets('Slider value indicator', (final WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -52,7 +52,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
+  testWidgets('Slider value indicator wide text', (final WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -96,7 +96,7 @@ void main() {
     );
   });
 
-  testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+  testWidgets('Slider value indicator large text scale', (final WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -141,7 +141,7 @@ void main() {
   });
 
   testWidgets('Slider value indicator large text scale and wide text',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     await _buildValueIndicatorStaticSlider(
       tester,
       value: 0,
@@ -192,7 +192,7 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgets('Slider value indicator', (WidgetTester tester) async {
+    testWidgets('Slider value indicator', (final WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -230,7 +230,7 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator wide text', (WidgetTester tester) async {
+    testWidgets('Slider value indicator wide text', (final WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -271,7 +271,7 @@ void main() {
       );
     });
 
-    testWidgets('Slider value indicator large text scale', (WidgetTester tester) async {
+    testWidgets('Slider value indicator large text scale', (final WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -313,7 +313,7 @@ void main() {
     });
 
     testWidgets('Slider value indicator large text scale and wide text',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await _buildValueIndicatorStaticSlider(
         tester,
         value: 0,
@@ -359,7 +359,7 @@ void main() {
   });
 }
 
-Future<void> _pressStartThumb(WidgetTester tester) async {
+Future<void> _pressStartThumb(final WidgetTester tester) async {
   final Offset bottomLeft = tester.getBottomLeft(find.byType(Slider));
   final Offset topLeft = tester.getTopLeft(find.byType(Slider));
   final Offset left = (bottomLeft + topLeft) / 2;
@@ -368,12 +368,12 @@ Future<void> _pressStartThumb(WidgetTester tester) async {
   await tester.pumpAndSettle();
 }
 
-Future<void> _pressMiddleThumb(WidgetTester tester) async {
+Future<void> _pressMiddleThumb(final WidgetTester tester) async {
   await tester.press(find.byType(Slider));
   await tester.pumpAndSettle();
 }
 
-Future<void> _pressEndThumb(WidgetTester tester) async {
+Future<void> _pressEndThumb(final WidgetTester tester) async {
   final Offset bottomRight = tester.getBottomRight(find.byType(Slider));
   final Offset topRight = tester.getTopRight(find.byType(Slider));
   final Offset right = (bottomRight + topRight) / 2;
@@ -383,18 +383,18 @@ Future<void> _pressEndThumb(WidgetTester tester) async {
 }
 
 Future<void> _buildValueIndicatorStaticSlider(
-  WidgetTester tester, {
-  required double value,
-  double textScale = 1.0,
-  int decimalCount = 0,
-  bool useMaterial3 = false,
+  final WidgetTester tester, {
+  required final double value,
+  final double textScale = 1.0,
+  final int decimalCount = 0,
+  final bool useMaterial3 = false,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(useMaterial3: useMaterial3),
       home: Scaffold(
         body: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Center(
               child: MediaQuery(
                 data: MediaQueryData(textScaleFactor: textScale),
@@ -405,7 +405,7 @@ Future<void> _buildValueIndicatorStaticSlider(
                   child: Slider(
                     value: value,
                     label: value.toStringAsFixed(decimalCount),
-                    onChanged: (double newValue) {},
+                    onChanged: (final double newValue) {},
                   ),
                 ),
               ),

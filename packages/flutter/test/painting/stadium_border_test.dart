@@ -38,7 +38,7 @@ void main() {
     expect(c2.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
     expect(
-            (Canvas canvas) => c10.paint(canvas, rect),
+            (final Canvas canvas) => c10.paint(canvas, rect),
         paints
           ..rrect(
             rrect: RRect.fromRectAndRadius(rect.deflate(5.0), Radius.circular(rect.shortestSide / 2.0 - 5.0)),
@@ -56,7 +56,7 @@ void main() {
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
 
     expect(
-      (Canvas canvas) => center.paint(canvas, rect),
+      (final Canvas canvas) => center.paint(canvas, rect),
       paints
         ..rrect(
           rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)),
@@ -65,7 +65,7 @@ void main() {
     );
 
     expect(
-      (Canvas canvas) => outside.paint(canvas, rect),
+      (final Canvas canvas) => outside.paint(canvas, rect),
       paints
         ..rrect(
           rrect: RRect.fromRectAndRadius(rect, Radius.circular(rect.shortestSide / 2.0)).inflate(5.0),

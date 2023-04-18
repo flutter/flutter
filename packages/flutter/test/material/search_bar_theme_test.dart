@@ -48,20 +48,20 @@ void main() {
     expect(theme.data.constraints, null);
   });
 
-  testWidgets('Default SearchBarThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SearchBarThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('SearchBarThemeData implements debugFillProperties', (
-      WidgetTester tester) async {
+      final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchBarThemeData(
       elevation: MaterialStatePropertyAll<double>(3.0),
@@ -78,8 +78,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description[0], 'elevation: MaterialStatePropertyAll(3.0)');
@@ -134,12 +134,12 @@ void main() {
     );
 
     Widget buildFrame({
-      bool useSearchBarProperties = false,
-      SearchBarThemeData? searchBarThemeData,
-      SearchBarThemeData? overallTheme
+      final bool useSearchBarProperties = false,
+      final SearchBarThemeData? searchBarThemeData,
+      final SearchBarThemeData? overallTheme
     }) {
       final Widget child = Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           if (!useSearchBarProperties) {
             return const SearchBar(
               hintText: 'hint',
@@ -198,7 +198,7 @@ void main() {
     const Set<MaterialState> focused = <MaterialState>{ MaterialState.focused};
     const Set<MaterialState> pressed = <MaterialState>{ MaterialState.pressed};
 
-    Future<void> checkSearchBar(WidgetTester tester) async {
+    Future<void> checkSearchBar(final WidgetTester tester) async {
       final Material material = tester.widget<Material>(findMaterial);
       final InkWell inkWell = tester.widget<InkWell>(findInkWell);
       expect(material.elevation, elevationValue);
@@ -233,19 +233,19 @@ void main() {
       expect(trailingRect.right, barRect.right - 16.0);
     }
 
-    testWidgets('SearchBar properties overrides defaults', (WidgetTester tester) async {
+    testWidgets('SearchBar properties overrides defaults', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchBarProperties: true));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);
     });
 
-    testWidgets('SearchBar theme data overrides defaults', (WidgetTester tester) async {
+    testWidgets('SearchBar theme data overrides defaults', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchBarThemeData: searchBarTheme));
       await tester.pumpAndSettle();
       checkSearchBar(tester);
     });
 
-    testWidgets('Overall Theme SearchBar theme overrides defaults', (WidgetTester tester) async {
+    testWidgets('Overall Theme SearchBar theme overrides defaults', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle();
       checkSearchBar(tester);
@@ -253,7 +253,7 @@ void main() {
 
     // Same as the previous tests with empty SearchBarThemeData's instead of null.
 
-    testWidgets('SearchBar properties overrides defaults, empty theme and overall theme', (WidgetTester tester) async {
+    testWidgets('SearchBar properties overrides defaults, empty theme and overall theme', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchBarProperties: true,
         searchBarThemeData: const SearchBarThemeData(),
         overallTheme: const SearchBarThemeData()));
@@ -261,14 +261,14 @@ void main() {
       checkSearchBar(tester);
     });
 
-    testWidgets('SearchBar theme overrides defaults and overall theme', (WidgetTester tester) async {
+    testWidgets('SearchBar theme overrides defaults and overall theme', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchBarThemeData: searchBarTheme,
         overallTheme: const SearchBarThemeData()));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);
     });
 
-    testWidgets('Overall Theme SearchBar theme overrides defaults and null theme', (WidgetTester tester) async {
+    testWidgets('Overall Theme SearchBar theme overrides defaults and null theme', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchBarTheme));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchBar(tester);

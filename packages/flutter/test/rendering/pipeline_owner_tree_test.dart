@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  FlutterError.presentError = (FlutterErrorDetails details) {
+  FlutterError.presentError = (final FlutterErrorDetails details) {
     // Make tests fail on FlutterErrors.
     throw details.exception;
   };
@@ -227,7 +227,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         rootRenderObject.scheduleInitialSemantics();
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
     );
     root.rootNode = rootRenderObject;
 
@@ -240,7 +240,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         childRenderObject.scheduleInitialSemantics();
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
     );
     child.rootNode = childRenderObject;
 
@@ -263,7 +263,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         rootRenderObject.scheduleInitialSemantics();
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
     );
     root.rootNode = rootRenderObject;
 
@@ -278,7 +278,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         childRenderObject.scheduleInitialSemantics();
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
     );
     child.rootNode = childRenderObject;
 
@@ -300,7 +300,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         rootOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         rootOnSemanticsOwnerDisposed++;
       },
@@ -312,7 +312,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         childOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         childOnSemanticsOwnerDisposed++;
       },
@@ -355,7 +355,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         rootOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         rootOnSemanticsOwnerDisposed++;
       },
@@ -367,7 +367,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         childOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         childOnSemanticsOwnerDisposed++;
       },
@@ -421,7 +421,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         rootOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         rootOnSemanticsOwnerDisposed++;
       },
@@ -433,7 +433,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         childOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         childOnSemanticsOwnerDisposed++;
       },
@@ -487,7 +487,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         rootOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         rootOnSemanticsOwnerDisposed++;
       },
@@ -499,7 +499,7 @@ void main() {
       onSemanticsOwnerCreated: () {
         childOnSemanticsOwnerCreatedCount++;
       },
-      onSemanticsUpdate: (SemanticsUpdate update) { },
+      onSemanticsUpdate: (final SemanticsUpdate update) { },
       onSemanticsOwnerDisposed: () {
         childOnSemanticsOwnerDisposed++;
       },
@@ -564,7 +564,7 @@ void main() {
     final TestPipelineManifold manifold = TestPipelineManifold()
       ..semanticsEnabled = true;
     final PipelineOwner owner = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
 
     expect(owner.semanticsOwner, isNull);
@@ -607,13 +607,13 @@ void main() {
   test('adopting creates semantics owner if necessary', () {
     final TestPipelineManifold manifold = TestPipelineManifold();
     final PipelineOwner root = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
     final PipelineOwner child = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
     final PipelineOwner childOfChild = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
     root.attach(manifold);
 
@@ -658,13 +658,13 @@ void main() {
     final TestPipelineManifold manifold = TestPipelineManifold()
       ..semanticsEnabled = true;
     final PipelineOwner root = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
     final PipelineOwner child = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
     final PipelineOwner childOfChild = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
     root.attach(manifold);
     root.adoptChild(child);
@@ -761,8 +761,8 @@ void main() {
 
     root.flushLayout();
 
-    expect(adoptingError, isAssertionError.having((AssertionError e) => e.message, 'message', contains('Cannot modify child list after layout.')));
-    expect(droppingError, isAssertionError.having((AssertionError e) => e.message, 'message', contains('Cannot modify child list after layout.')));
+    expect(adoptingError, isAssertionError.having((final AssertionError e) => e.message, 'message', contains('Cannot modify child list after layout.')));
+    expect(droppingError, isAssertionError.having((final AssertionError e) => e.message, 'message', contains('Cannot modify child list after layout.')));
   });
 
   test('visitChildren visits all children', () {
@@ -778,13 +778,13 @@ void main() {
     child3.adoptChild(childOfChild3);
 
     final List<PipelineOwner> children = <PipelineOwner>[];
-    root.visitChildren((PipelineOwner child) {
+    root.visitChildren((final PipelineOwner child) {
       children.add(child);
     });
     expect(children, <PipelineOwner>[child1, child2, child3]);
 
     children.clear();
-    child3.visitChildren((PipelineOwner child) {
+    child3.visitChildren((final PipelineOwner child) {
       children.add(child);
     });
     expect(children.single, childOfChild3);
@@ -802,7 +802,7 @@ class TestPipelineManifold extends ChangeNotifier implements PipelineManifold {
   @override
   bool get semanticsEnabled => _semanticsEnabled;
   bool _semanticsEnabled = false;
-  set semanticsEnabled(bool value) {
+  set semanticsEnabled(final bool value) {
     if (value == _semanticsEnabled) {
       return;
     }
@@ -833,12 +833,12 @@ class TestRenderObject extends RenderObject {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     onPaint?.call();
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     onSemantics?.call();
   }
 
@@ -849,10 +849,10 @@ class TestRenderObject extends RenderObject {
   Rect get semanticBounds => Rect.zero;
 }
 
-List<PipelineOwner> _treeWalk(PipelineOwner root) {
+List<PipelineOwner> _treeWalk(final PipelineOwner root) {
   final List<PipelineOwner> results = <PipelineOwner>[root];
 
-  void visitor(PipelineOwner child) {
+  void visitor(final PipelineOwner child) {
     results.add(child);
     child.visitChildren(visitor);
   }

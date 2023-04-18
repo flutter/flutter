@@ -39,12 +39,12 @@ test 1 1
 
 class TestAssetBundle extends AssetBundle {
   @override
-  Future<ByteData> load(String key) async {
+  Future<ByteData> load(final String key) async {
     return ByteData.sublistView(Uint8List(0));
   }
 
   @override
-  Future<String> loadString(String key, { bool cache = true }) async {
+  Future<String> loadString(final String key, { final bool cache = true }) async {
     if (key == 'lib/gallery/example_code.dart') {
       return testCodeFile;
     }
@@ -52,7 +52,7 @@ class TestAssetBundle extends AssetBundle {
   }
 
   @override
-  Future<T> loadStructuredData<T>(String key, Future<T> Function(String value) parser) async {
+  Future<T> loadStructuredData<T>(final String key, final Future<T> Function(String value) parser) async {
     return parser(await loadString(key));
   }
 

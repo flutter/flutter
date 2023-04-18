@@ -29,6 +29,6 @@ void main() {
     await flutter.run();
     project.removeFieldFromConstClass();
 
-    expect(flutter.hotReload(), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', contains('Try performing a hot restart instead.'))));
+    expect(flutter.hotReload(), throwsA(isA<Exception>().having((final Exception e) => e.toString(), 'message', contains('Try performing a hot restart instead.'))));
   });
 }

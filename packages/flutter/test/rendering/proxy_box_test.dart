@@ -32,7 +32,7 @@ void main() {
 
   test('RenderFittedBox does not paint with empty sizes', () {
     bool painted;
-    RenderFittedBox makeFittedBox(Size size) {
+    RenderFittedBox makeFittedBox(final Size size) {
       return RenderFittedBox(
         child: RenderCustomPaint(
           preferredSize: size,
@@ -78,7 +78,7 @@ void main() {
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
     final RenderSemanticsGestureHandler renderObj = RenderSemanticsGestureHandler(
       onTap: () { },
-      onHorizontalDragUpdate: (DragUpdateDetails details) { },
+      onHorizontalDragUpdate: (final DragUpdateDetails details) { },
     );
 
     SemanticsConfiguration config = SemanticsConfiguration();
@@ -193,7 +193,7 @@ void main() {
     expect(image.height, equals(20));
     ByteData data = (await image.toByteData())!;
 
-    int getPixel(int x, int y) => data.getUint32((x + y * image.width) * 4);
+    int getPixel(final int x, final int y) => data.getUint32((x + y * image.width) * 4);
 
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
@@ -281,7 +281,7 @@ void main() {
     expect(image.height, equals(20));
     ByteData data = (await image.toByteData())!;
 
-    int getPixel(int x, int y) => data.getUint32((x + y * image.width) * 4);
+    int getPixel(final int x, final int y) => data.getUint32((x + y * image.width) * 4);
 
     expect(data.lengthInBytes, equals(20 * 20 * 4));
     expect(data.elementSizeInBytes, equals(1));
@@ -411,7 +411,7 @@ void main() {
 
   test('RenderShaderMask reuses its layer', () {
     _testLayerReuse<ShaderMaskLayer>(RenderShaderMask(
-      shaderCallback: (Rect rect) {
+      shaderCallback: (final Rect rect) {
         return ui.Gradient.radial(
           rect.center,
           rect.shortestSide / 2.0,
@@ -559,9 +559,9 @@ void main() {
     final RenderMouseRegion object = RenderMouseRegion();
     object
       ..opaque = false
-      ..onEnter = (_) {}
-      ..onExit = (_) {}
-      ..onHover = (_) {};
+      ..onEnter = (final _) {}
+      ..onExit = (final _) {}
+      ..onHover = (final _) {};
     // Passes if no error is thrown
   });
 
@@ -689,7 +689,7 @@ void main() {
     final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
 
     // Ignore old layer.
-    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+    childBox.offsetLayerFactory = (final OffsetLayer? oldLayer) {
       return TestOffsetLayerA();
     };
 
@@ -708,7 +708,7 @@ void main() {
     final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
 
     // Ignore old layer.
-    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+    childBox.offsetLayerFactory = (final OffsetLayer? oldLayer) {
       return TestOffsetLayerA();
     };
 
@@ -726,7 +726,7 @@ void main() {
     final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
 
     // Ignore old layer.
-    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+    childBox.offsetLayerFactory = (final OffsetLayer? oldLayer) {
       return (oldLayer ?? TestOffsetLayerA())..offset = const Offset(2133, 4422);
     };
 
@@ -744,7 +744,7 @@ void main() {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
     final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
     // Ignore old layer.
-    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+    childBox.offsetLayerFactory = (final OffsetLayer? oldLayer) {
       return oldLayer ?? TestOffsetLayerA();
     };
 
@@ -765,7 +765,7 @@ void main() {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
     final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
     // Ignore old layer.
-    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+    childBox.offsetLayerFactory = (final OffsetLayer? oldLayer) {
       return oldLayer ?? TestOffsetLayerA();
     };
 
@@ -786,7 +786,7 @@ void main() {
     final ConditionalRepaintBoundary childBox = ConditionalRepaintBoundary(isRepaintBoundary: true);
     final ConditionalRepaintBoundary renderBox = ConditionalRepaintBoundary(child: childBox);
     // Ignore old layer.
-    childBox.offsetLayerFactory = (OffsetLayer? oldLayer) {
+    childBox.offsetLayerFactory = (final OffsetLayer? oldLayer) {
       return oldLayer ?? TestOffsetLayerA();
     };
 
@@ -888,17 +888,17 @@ void main() {
   });
 
   // Simulate painting a RenderBox as if 'debugPaintSizeEnabled == true'
-  Function(PaintingContext, Offset) debugPaint(RenderBox renderBox) {
+  Function(PaintingContext, Offset) debugPaint(final RenderBox renderBox) {
     layout(renderBox);
     pumpFrame(phase: EnginePhase.compositingBits);
-    return (PaintingContext context, Offset offset) {
+    return (final PaintingContext context, final Offset offset) {
       renderBox.paint(context, offset);
       renderBox.debugPaintSize(context, offset);
     };
   }
 
   test('RenderClipPath.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipRect(Clip clip) {
+    Function(PaintingContext, Offset) debugPaintClipRect(final Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipPath renderClipPath = RenderClipPath(clipBehavior: clip, child: child);
       return debugPaint(renderClipPath);
@@ -915,7 +915,7 @@ void main() {
   });
 
   test('RenderClipRect.debugPaintSize draws a rect and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipRect(Clip clip) {
+    Function(PaintingContext, Offset) debugPaintClipRect(final Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipRect renderClipRect = RenderClipRect(clipBehavior: clip, child: child);
       return debugPaint(renderClipRect);
@@ -931,7 +931,7 @@ void main() {
   });
 
   test('RenderClipRRect.debugPaintSize draws a rounded rect and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipRRect(Clip clip) {
+    Function(PaintingContext, Offset) debugPaintClipRRect(final Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipRRect renderClipRRect = RenderClipRRect(clipBehavior: clip, child: child);
       return debugPaint(renderClipRRect);
@@ -947,7 +947,7 @@ void main() {
   });
 
   test('RenderClipOval.debugPaintSize draws a path and a debug text when clipBehavior is not Clip.none', () {
-    Function(PaintingContext, Offset) debugPaintClipOval(Clip clip) {
+    Function(PaintingContext, Offset) debugPaintClipOval(final Clip clip) {
       final RenderBox child = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 200, height: 200));
       final RenderClipOval renderClipOval = RenderClipOval(clipBehavior: clip, child: child);
       return debugPaint(renderClipOval);
@@ -976,34 +976,34 @@ void main() {
 
 class _TestRectClipper extends CustomClipper<Rect> {
   @override
-  Rect getClip(Size size) {
+  Rect getClip(final Size size) {
     return Rect.zero;
   }
 
   @override
-  Rect getApproximateClipRect(Size size) => getClip(size);
+  Rect getApproximateClipRect(final Size size) => getClip(size);
 
   @override
-  bool shouldReclip(_TestRectClipper oldClipper) => true;
+  bool shouldReclip(final _TestRectClipper oldClipper) => true;
 }
 
 class _TestRRectClipper extends CustomClipper<RRect> {
   @override
-  RRect getClip(Size size) {
+  RRect getClip(final Size size) {
     return RRect.zero;
   }
 
   @override
-  Rect getApproximateClipRect(Size size) => getClip(size).outerRect;
+  Rect getApproximateClipRect(final Size size) => getClip(size).outerRect;
 
   @override
-  bool shouldReclip(_TestRRectClipper oldClipper) => true;
+  bool shouldReclip(final _TestRRectClipper oldClipper) => true;
 }
 
 // Forces two frames and checks that:
 // - a layer is created on the first frame
 // - the layer is reused on the second frame
-void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
+void _testLayerReuse<L extends Layer>(final RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
@@ -1021,12 +1021,12 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
 
 class _TestPathClipper extends CustomClipper<Path> {
   @override
-  Path getClip(Size size) {
+  Path getClip(final Size size) {
     return Path()
       ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
   @override
-  bool shouldReclip(_TestPathClipper oldClipper) => false;
+  bool shouldReclip(final _TestPathClipper oldClipper) => false;
 }
 
 class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTranslation {
@@ -1044,7 +1044,7 @@ class _TestSemanticsUpdateRenderFractionalTranslation extends RenderFractionalTr
 }
 
 class ConditionalRepaintBoundary extends RenderProxyBox {
-  ConditionalRepaintBoundary({this.isRepaintBoundary = false, RenderBox? child}) : super(child);
+  ConditionalRepaintBoundary({this.isRepaintBoundary = false, final RenderBox? child}) : super(child);
 
   @override
   bool isRepaintBoundary = false;
@@ -1054,7 +1054,7 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
   int paintCount = 0;
 
   @override
-  OffsetLayer updateCompositedLayer({required covariant OffsetLayer? oldLayer}) {
+  OffsetLayer updateCompositedLayer({required covariant final OffsetLayer? oldLayer}) {
     if (offsetLayerFactory != null) {
       return offsetLayerFactory!.call(oldLayer);
     }
@@ -1062,7 +1062,7 @@ class ConditionalRepaintBoundary extends RenderProxyBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     paintCount += 1;
     super.paint(context, offset);
   }

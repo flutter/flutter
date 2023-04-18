@@ -7,19 +7,19 @@ import 'package:flutter_api_samples/material/time_picker/show_time_picker.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can open and modify time picker', (WidgetTester tester) async {
+  testWidgets('Can open and modify time picker', (final WidgetTester tester) async {
     const String openPicker = 'Open time picker';
     final List<String> options = <String>[
       '$TimePickerEntryMode',
-      ... TimePickerEntryMode.values.map<String>((TimePickerEntryMode value) => value.name),
+      ... TimePickerEntryMode.values.map<String>((final TimePickerEntryMode value) => value.name),
       '$ThemeMode',
-      ... ThemeMode.values.map<String>((ThemeMode value) => value.name),
+      ... ThemeMode.values.map<String>((final ThemeMode value) => value.name),
       '$TextDirection',
-      ... TextDirection.values.map<String>((TextDirection value) => value.name),
+      ... TextDirection.values.map<String>((final TextDirection value) => value.name),
       '$MaterialTapTargetSize',
-      ... MaterialTapTargetSize.values.map<String>((MaterialTapTargetSize value) => value.name),
+      ... MaterialTapTargetSize.values.map<String>((final MaterialTapTargetSize value) => value.name),
       '$Orientation',
-      ... Orientation.values.map<String>((Orientation value) => value.name),
+      ... Orientation.values.map<String>((final Orientation value) => value.name),
       'Time Mode',
       '12-hour am/pm time',
       '24-hour time',

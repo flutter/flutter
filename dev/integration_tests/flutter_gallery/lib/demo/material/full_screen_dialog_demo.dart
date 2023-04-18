@@ -15,7 +15,7 @@ enum DismissDialogAction {
 }
 
 class DateTimeItem extends StatelessWidget {
-  DateTimeItem({ super.key, required DateTime dateTime, required this.onChanged })
+  DateTimeItem({ super.key, required final DateTime dateTime, required this.onChanged })
     : date = DateTime(dateTime.year, dateTime.month, dateTime.day),
       time = TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
 
@@ -24,7 +24,7 @@ class DateTimeItem extends StatelessWidget {
   final ValueChanged<DateTime> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     return DefaultTextStyle(
@@ -45,7 +45,7 @@ class DateTimeItem extends StatelessWidget {
                     firstDate: date.subtract(const Duration(days: 30)),
                     lastDate: date.add(const Duration(days: 30)),
                   )
-                  .then((DateTime? value) {
+                  .then((final DateTime? value) {
                     if (value != null) {
                       onChanged(DateTime(value.year, value.month, value.day, time.hour, time.minute));
                     }
@@ -73,7 +73,7 @@ class DateTimeItem extends StatelessWidget {
                   context: context,
                   initialTime: time,
                 )
-                .then((TimeOfDay? value) {
+                .then((final TimeOfDay? value) {
                   if (value != null) {
                     onChanged(DateTime(date.year, date.month, date.day, value.hour, value.minute));
                   }
@@ -120,7 +120,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return showDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return AlertDialog(
           content: Text(
             'Discard new event?',
@@ -146,7 +146,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
@@ -177,7 +177,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                     filled: true,
                   ),
                   style: theme.textTheme.headlineSmall,
-                  onChanged: (String value) {
+                  onChanged: (final String value) {
                     setState(() {
                       _hasName = value.isNotEmpty;
                       if (_hasName) {
@@ -196,7 +196,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                     hintText: 'Where is the event?',
                     filled: true,
                   ),
-                  onChanged: (String value) {
+                  onChanged: (final String value) {
                     setState(() {
                       _hasLocation = value.isNotEmpty;
                     });
@@ -209,7 +209,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   Text('From', style: theme.textTheme.bodySmall),
                   DateTimeItem(
                     dateTime: _fromDateTime,
-                    onChanged: (DateTime value) {
+                    onChanged: (final DateTime value) {
                       setState(() {
                         _fromDateTime = value;
                         _saveNeeded = true;
@@ -224,7 +224,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   Text('To', style: theme.textTheme.bodySmall),
                   DateTimeItem(
                     dateTime: _toDateTime,
-                    onChanged: (DateTime value) {
+                    onChanged: (final DateTime value) {
                       setState(() {
                         _toDateTime = value;
                         _saveNeeded = true;
@@ -242,7 +242,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                   children: <Widget> [
                     Checkbox(
                       value: _allDayValue,
-                      onChanged: (bool? value) {
+                      onChanged: (final bool? value) {
                         setState(() {
                           _allDayValue = value;
                           _saveNeeded = true;
@@ -254,7 +254,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                 ),
               ),
             ]
-            .map<Widget>((Widget child) {
+            .map<Widget>((final Widget child) {
               return Container(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 height: 96.0,

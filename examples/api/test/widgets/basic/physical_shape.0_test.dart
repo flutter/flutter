@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/basic/physical_shape.0.dart' as exam
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('PhysicalShape is an ancestor of the text widget', (WidgetTester tester) async {
+  testWidgets('PhysicalShape is an ancestor of the text widget', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: example.PhysicalShapeApp()),
     );

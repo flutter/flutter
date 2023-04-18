@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       key: Key('mainapp'),
       title: 'Platform Test',
@@ -24,7 +24,7 @@ class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: Column(

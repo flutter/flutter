@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 // This file is for testings that require a `LiveTestWidgetsFlutterBinding`
 void main() {
   final LiveTestWidgetsFlutterBinding binding = LiveTestWidgetsFlutterBinding();
-  testWidgets('Input PointerAddedEvent', (WidgetTester tester) async {
+  testWidgets('Input PointerAddedEvent', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Text('Test')));
     await tester.pump();
     final TestGesture gesture = await tester.createGesture();
@@ -19,11 +19,11 @@ void main() {
     // The expected result of the test is not to trigger any assert.
   });
 
-  testWidgets('Input PointerHoverEvent', (WidgetTester tester) async {
+  testWidgets('Input PointerHoverEvent', (final WidgetTester tester) async {
     PointerHoverEvent? hoverEvent;
     await tester.pumpWidget(MaterialApp(home: MouseRegion(
       child: const Text('Test'),
-      onHover: (PointerHoverEvent event) {
+      onHover: (final PointerHoverEvent event) {
         hoverEvent = event;
       },
     )));
@@ -36,7 +36,7 @@ void main() {
     expect(hoverEvent!.position, location);
   });
 
-  testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
+  testWidgets('hitTesting works when using setSurfaceSize', (final WidgetTester tester) async {
     int invocations = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -68,7 +68,7 @@ void main() {
     expect(invocations, 3);
   });
 
-  testWidgets('setSurfaceSize works', (WidgetTester tester) async {
+  testWidgets('setSurfaceSize works', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
     final Size windowCenter = tester.view.physicalSize /
@@ -94,13 +94,13 @@ void main() {
     expect(widgetCenter.dy, windowCenterY);
   });
 
-  testWidgets("reassembleApplication doesn't get stuck", (WidgetTester tester) async {
+  testWidgets("reassembleApplication doesn't get stuck", (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/79150
 
     await expectLater(tester.binding.reassembleApplication(), completes);
   }, timeout: const Timeout(Duration(seconds: 30)));
 
-  testWidgets('shouldPropagateDevicePointerEvents can override events from ${TestBindingEventSource.device}', (WidgetTester tester) async {
+  testWidgets('shouldPropagateDevicePointerEvents can override events from ${TestBindingEventSource.device}', (final WidgetTester tester) async {
     binding.shouldPropagateDevicePointerEvents = true;
 
     await tester.pumpWidget(_ShowNumTaps());
@@ -139,7 +139,7 @@ class _ShowNumTapsState extends State<_ShowNumTaps> {
   int _counter = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GestureDetector(
       onTap: () {
         setState(() {

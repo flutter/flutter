@@ -44,20 +44,20 @@ void main() {
     expect(theme.data.dividerColor, null);
   });
 
-  testWidgets('Default SearchViewThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default SearchViewThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('SearchViewThemeData implements debugFillProperties', (
-      WidgetTester tester) async {
+      final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const SearchViewThemeData(
       backgroundColor: Color(0xfffffff1),
@@ -71,8 +71,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description[0], 'backgroundColor: Color(0xfffffff1)');
@@ -107,19 +107,19 @@ void main() {
     );
 
     Widget buildFrame({
-      bool useSearchViewProperties = false,
-      SearchViewThemeData? searchViewThemeData,
-      SearchViewThemeData? overallTheme
+      final bool useSearchViewProperties = false,
+      final SearchViewThemeData? searchViewThemeData,
+      final SearchViewThemeData? overallTheme
     }) {
       final Widget child = Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           if (!useSearchViewProperties) {
             return SearchAnchor(
               viewHintText: 'hint text',
-              builder: (BuildContext context, SearchController controller) {
+              builder: (final BuildContext context, final SearchController controller) {
                 return const Icon(Icons.search);
               },
-              suggestionsBuilder: (BuildContext context, SearchController controller) {
+              suggestionsBuilder: (final BuildContext context, final SearchController controller) {
                 return <Widget>[];
               },
               isFullScreen: false,
@@ -127,10 +127,10 @@ void main() {
           }
           return SearchAnchor(
             viewHintText: 'hint text',
-            builder: (BuildContext context, SearchController controller) {
+            builder: (final BuildContext context, final SearchController controller) {
               return const Icon(Icons.search);
             },
-            suggestionsBuilder: (BuildContext context, SearchController controller) {
+            suggestionsBuilder: (final BuildContext context, final SearchController controller) {
               return <Widget>[];
             },
             isFullScreen: false,
@@ -165,16 +165,16 @@ void main() {
     }
 
     Finder findViewContent() {
-      return find.byWidgetPredicate((Widget widget) {
+      return find.byWidgetPredicate((final Widget widget) {
         return widget.runtimeType.toString() == '_ViewContent';
       });
     }
 
-    Material getSearchViewMaterial(WidgetTester tester) {
+    Material getSearchViewMaterial(final WidgetTester tester) {
       return tester.widget<Material>(find.descendant(of: findViewContent(), matching: find.byType(Material)).first);
     }
 
-    Future<void> checkSearchView(WidgetTester tester) async {
+    Future<void> checkSearchView(final WidgetTester tester) async {
       final Material material = getSearchViewMaterial(tester);
       expect(material.elevation, elevation);
       expect(material.color, backgroundColor);
@@ -195,21 +195,21 @@ void main() {
       expect(inputText.style.fontSize, headerTextStyle.fontSize);
     }
 
-    testWidgets('SearchView properties overrides defaults', (WidgetTester tester) async {
+    testWidgets('SearchView properties overrides defaults', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchViewProperties: true));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish
       checkSearchView(tester);
     });
 
-    testWidgets('SearchView theme data overrides defaults', (WidgetTester tester) async {
+    testWidgets('SearchView theme data overrides defaults', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchViewThemeData: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
       checkSearchView(tester);
     });
 
-    testWidgets('Overall Theme SearchView theme overrides defaults', (WidgetTester tester) async {
+    testWidgets('Overall Theme SearchView theme overrides defaults', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
@@ -218,7 +218,7 @@ void main() {
 
     // Same as the previous tests with empty SearchViewThemeData's instead of null.
 
-    testWidgets('SearchView properties overrides defaults, empty theme and overall theme', (WidgetTester tester) async {
+    testWidgets('SearchView properties overrides defaults, empty theme and overall theme', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(useSearchViewProperties: true,
         searchViewThemeData: const SearchViewThemeData(),
         overallTheme: const SearchViewThemeData()));
@@ -227,7 +227,7 @@ void main() {
       checkSearchView(tester);
     });
 
-    testWidgets('SearchView theme overrides defaults and overall theme', (WidgetTester tester) async {
+    testWidgets('SearchView theme overrides defaults and overall theme', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(searchViewThemeData: searchViewTheme,
           overallTheme: const SearchViewThemeData()));
       await tester.tap(find.byIcon(Icons.search));
@@ -235,7 +235,7 @@ void main() {
       checkSearchView(tester);
     });
 
-    testWidgets('Overall Theme SearchView theme overrides defaults and null theme', (WidgetTester tester) async {
+    testWidgets('Overall Theme SearchView theme overrides defaults and null theme', (final WidgetTester tester) async {
       await tester.pumpWidget(buildFrame(overallTheme: searchViewTheme));
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle(); // allow the animations to finish

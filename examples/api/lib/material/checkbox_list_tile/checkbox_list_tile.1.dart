@@ -12,7 +12,7 @@ class CheckboxListTileApp extends StatelessWidget {
   const CheckboxListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const CheckboxListTileExample(),
@@ -33,14 +33,14 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
   bool checkboxValue3 = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('CheckboxListTile Sample')),
       body: Column(
         children: <Widget>[
           CheckboxListTile(
             value: checkboxValue1,
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 checkboxValue1 = value!;
               });
@@ -51,7 +51,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
           const Divider(height: 0),
           CheckboxListTile(
             value: checkboxValue2,
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 checkboxValue2 = value!;
               });
@@ -63,7 +63,7 @@ class _CheckboxListTileExampleState extends State<CheckboxListTileExample> {
           const Divider(height: 0),
           CheckboxListTile(
             value: checkboxValue3,
-            onChanged: (bool? value) {
+            onChanged: (final bool? value) {
               setState(() {
                 checkboxValue3 = value!;
               });

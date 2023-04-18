@@ -31,7 +31,7 @@ String adbPath() {
 void main() {
   group('AccessibilityBridge', () {
     late FlutterDriver driver;
-    Future<AndroidSemanticsNode> getSemantics(SerializableFinder finder) async {
+    Future<AndroidSemanticsNode> getSemantics(final SerializableFinder finder) async {
       final int id = await driver.getSemanticsId(finder);
       final String data = await driver.requestData('getSemanticsNode#$id');
       return AndroidSemanticsNode.deserialize(data);
@@ -277,7 +277,7 @@ void main() {
       });
 
       test('Checkbox has correct Android semantics', () async {
-        Future<AndroidSemanticsNode> getCheckboxSemantics(String key) async {
+        Future<AndroidSemanticsNode> getCheckboxSemantics(final String key) async {
           return getSemantics(find.byValueKey(key));
         }
         expect(
@@ -323,7 +323,7 @@ void main() {
         );
       }, timeout: Timeout.none);
       test('Radio has correct Android semantics', () async {
-        Future<AndroidSemanticsNode> getRadioSemantics(String key) async {
+        Future<AndroidSemanticsNode> getRadioSemantics(final String key) async {
           return getSemantics(find.byValueKey(key));
         }
         expect(
@@ -359,7 +359,7 @@ void main() {
         );
       }, timeout: Timeout.none);
       test('Switch has correct Android semantics', () async {
-        Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
+        Future<AndroidSemanticsNode> getSwitchSemantics(final String key) async {
           return getSemantics(find.byValueKey(key));
         }
         expect(
@@ -397,7 +397,7 @@ void main() {
 
       // Regression test for https://github.com/flutter/flutter/issues/20820.
       test('Switch can be labeled', () async {
-        Future<AndroidSemanticsNode> getSwitchSemantics(String key) async {
+        Future<AndroidSemanticsNode> getSwitchSemantics(final String key) async {
           return getSemantics(find.byValueKey(key));
         }
         expect(

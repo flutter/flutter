@@ -10,7 +10,7 @@ import '../xcode_project.dart';
 // as an input file to ensure it has been created before inserting the NSBonjourServices key
 // to avoid an mDNS error.
 class XcodeThinBinaryBuildPhaseInputPathsMigration extends ProjectMigrator {
-  XcodeThinBinaryBuildPhaseInputPathsMigration(XcodeBasedProject project, super.logger)
+  XcodeThinBinaryBuildPhaseInputPathsMigration(final XcodeBasedProject project, super.logger)
     : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
   final File _xcodeProjectInfoFile;

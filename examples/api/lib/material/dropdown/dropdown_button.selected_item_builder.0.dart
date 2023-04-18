@@ -20,7 +20,7 @@ class DropdownButtonApp extends StatelessWidget {
   const DropdownButtonApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('DropdownButton Sample')),
@@ -41,7 +41,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
   String selectedItem = cities.keys.first;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -51,12 +51,12 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: DropdownButton<String>(
               value: selectedItem,
-              onChanged: (String? value) {
+              onChanged: (final String? value) {
                 // This is called when the user selects an item.
                 setState(() => selectedItem = value!);
               },
-              selectedItemBuilder: (BuildContext context) {
-                return cities.values.map<Widget>((String item) {
+              selectedItemBuilder: (final BuildContext context) {
+                return cities.values.map<Widget>((final String item) {
                   // This is the widget that will be shown when you select an item.
                   // Here custom text style, alignment and layout size can be applied
                   // to selected item string.
@@ -70,7 +70,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                   );
                 }).toList();
               },
-              items: cities.keys.map<DropdownMenuItem<String>>((String item) {
+              items: cities.keys.map<DropdownMenuItem<String>>((final String item) {
                 return DropdownMenuItem<String>(
                   value: item,
                   child: Text(item),

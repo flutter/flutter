@@ -137,11 +137,11 @@ void main() {
       theme.labelMedium!,
       theme.labelSmall!,
     ];
-    expect(themeStyles.every((TextStyle style) => style.fontFamily == fontFamily), true);
-    expect(themeStyles.every((TextStyle style) => style.fontFamilyFallback == fontFamilyFallback), true);
-    expect(themeStyles.every((TextStyle style) => style.decorationColor == decorationColor), true);
-    expect(themeStyles.every((TextStyle style) => style.decorationStyle == decorationStyle), true);
-    expect(themeStyles.every((TextStyle style) => style.decoration == decoration), true);
+    expect(themeStyles.every((final TextStyle style) => style.fontFamily == fontFamily), true);
+    expect(themeStyles.every((final TextStyle style) => style.fontFamilyFallback == fontFamilyFallback), true);
+    expect(themeStyles.every((final TextStyle style) => style.decorationColor == decorationColor), true);
+    expect(themeStyles.every((final TextStyle style) => style.decorationStyle == decorationStyle), true);
+    expect(themeStyles.every((final TextStyle style) => style.decoration == decoration), true);
   });
 
   test('TextTheme apply fontSizeFactor fontSizeDelta', () {

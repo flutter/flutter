@@ -12,7 +12,7 @@ import 'dart:ui' as ui;
 // The FlutterView into which this example will draw; set in the main method.
 late final ui.FlutterView view;
 
-void beginFrame(Duration timeStamp) {
+void beginFrame(final Duration timeStamp) {
   // The timeStamp argument to beginFrame indicates the timing information we
   // should use to clock our animations. It's important to use timeStamp rather
   // than reading the system time because we want all the parts of the system to

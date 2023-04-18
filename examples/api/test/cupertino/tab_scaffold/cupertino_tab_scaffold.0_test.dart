@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/tab_scaffold/cupertino_tab_scaffol
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can use CupertinoTabView as the root widget', (WidgetTester tester) async {
+  testWidgets('Can use CupertinoTabView as the root widget', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.TabScaffoldApp(),
     );

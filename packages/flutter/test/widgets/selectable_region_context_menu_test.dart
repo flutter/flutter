@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   html.Element? element;
   final RegisterViewFactory originalFactory = PlatformSelectableRegionContextMenu.registerViewFactory;
-  PlatformSelectableRegionContextMenu.registerViewFactory = (String viewType, Object Function(int viewId) fn, {bool isVisible = true}) {
+  PlatformSelectableRegionContextMenu.registerViewFactory = (final String viewType, final Object Function(int viewId) fn, {final bool isVisible = true}) {
     element = fn(0) as html.Element;
     // The element needs to be attached to the document body to receive mouse
     // events.
@@ -41,12 +41,12 @@ void main() {
         continue;
       }
       final html.CssStyleSheet sheet = element.sheet! as html.CssStyleSheet;
-      foundStyle = sheet.rules!.any((html.CssRule rule) => rule.cssText!.contains(className));
+      foundStyle = sheet.rules!.any((final html.CssRule rule) => rule.cssText!.contains(className));
     }
     expect(foundStyle, isTrue);
   });
 
-  testWidgets('right click can trigger select word', (WidgetTester tester) async {
+  testWidgets('right click can trigger select word', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final UniqueKey spy = UniqueKey();
     await tester.pumpWidget(
@@ -94,20 +94,20 @@ class SelectionSpy extends LeafRenderObjectWidget {
   });
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return RenderSelectionSpy(
       SelectionContainer.maybeOf(context),
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
+  void updateRenderObject(final BuildContext context, covariant final RenderObject renderObject) { }
 }
 
 class RenderSelectionSpy extends RenderProxyBox
     with Selectable, SelectionRegistrant {
   RenderSelectionSpy(
-      SelectionRegistrar? registrar,
+      final SelectionRegistrar? registrar,
       ) {
     this.registrar = registrar;
   }
@@ -120,19 +120,19 @@ class RenderSelectionSpy extends RenderProxyBox
   Size _size = Size.zero;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     _size = Size(constraints.maxWidth, constraints.maxHeight);
     return _size;
   }
 
   @override
-  void addListener(VoidCallback listener) => listeners.add(listener);
+  void addListener(final VoidCallback listener) => listeners.add(listener);
 
   @override
-  void removeListener(VoidCallback listener) => listeners.remove(listener);
+  void removeListener(final VoidCallback listener) => listeners.remove(listener);
 
   @override
-  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+  SelectionResult dispatchSelectionEvent(final SelectionEvent event) {
     events.add(event);
     return SelectionResult.end;
   }
@@ -158,7 +158,7 @@ class RenderSelectionSpy extends RenderProxyBox
       handleType: TextSelectionHandleType.left,
     ),
   );
-  set value(SelectionGeometry other) {
+  set value(final SelectionGeometry other) {
     if (other == _value) {
       return;
     }
@@ -169,5 +169,5 @@ class RenderSelectionSpy extends RenderProxyBox
   }
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) { }
+  void pushHandleLayers(final LayerLink? startHandle, final LayerLink? endHandle) { }
 }

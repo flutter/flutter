@@ -25,29 +25,29 @@ import '../widgets/semantics_tester.dart';
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(final Locale locale) => true;
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+  Future<MaterialLocalizations> load(final Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
-  bool shouldReload(MaterialLocalizationsDelegate old) => false;
+  bool shouldReload(final MaterialLocalizationsDelegate old) => false;
 }
 
 class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(final Locale locale) => true;
 
   @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+  Future<WidgetsLocalizations> load(final Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
   @override
-  bool shouldReload(WidgetsLocalizationsDelegate old) => false;
+  bool shouldReload(final WidgetsLocalizationsDelegate old) => false;
 }
 
-Widget overlay({ Widget? child }) {
+Widget overlay({ final Widget? child }) {
   final OverlayEntry entry = OverlayEntry(
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return Center(
         child: Material(
           child: child,
@@ -58,7 +58,7 @@ Widget overlay({ Widget? child }) {
   return overlayWithEntry(entry);
 }
 
-Widget overlayWithEntry(OverlayEntry entry) {
+Widget overlayWithEntry(final OverlayEntry entry) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
@@ -79,7 +79,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
   );
 }
 
-Widget boilerplate({ Widget? child }) {
+Widget boilerplate({ final Widget? child }) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
@@ -100,7 +100,7 @@ Widget boilerplate({ Widget? child }) {
   );
 }
 
-Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
+Future<void> skipPastScrollingAnimation(final WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }
@@ -118,12 +118,12 @@ void main() {
       "Fourth line won't display and ends at";
 
   // Returns the first RenderEditable.
-  RenderEditable findRenderEditable(WidgetTester tester) {
+  RenderEditable findRenderEditable(final WidgetTester tester) {
     final RenderObject root = tester.renderObject(find.byType(EditableText));
     expect(root, isNotNull);
 
     late RenderEditable renderEditable;
-    void recursiveFinder(RenderObject child) {
+    void recursiveFinder(final RenderObject child) {
       if (child is RenderEditable) {
         renderEditable = child;
         return;
@@ -135,8 +135,8 @@ void main() {
     return renderEditable;
   }
 
-  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+  List<TextSelectionPoint> globalize(final Iterable<TextSelectionPoint> points, final RenderBox box) {
+    return points.map<TextSelectionPoint>((final TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
         point.direction,
@@ -163,9 +163,9 @@ void main() {
   });
 
   Widget selectableTextBuilder({
-    String text = '',
-    int? maxLines = 1,
-    int? minLines,
+    final String text = '',
+    final int? maxLines = 1,
+    final int? minLines,
   }) {
     return boilerplate(
       child: SelectableText(
@@ -177,7 +177,7 @@ void main() {
     );
   }
 
-  testWidgets('throw if no Overlay widget exists above', (WidgetTester tester) async {
+  testWidgets('throw if no Overlay widget exists above', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -208,7 +208,7 @@ void main() {
     expect(tester.takeException(), isNotNull);  // side effect exception
   });
 
-  testWidgets('Do not crash when remove SelectableText during handle drag', (WidgetTester tester) async {
+  testWidgets('Do not crash when remove SelectableText during handle drag', (final WidgetTester tester) async {
     // Regression test https://github.com/flutter/flutter/issues/108242
     bool isShow = true;
     late StateSetter setter;
@@ -216,7 +216,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               setter = setState;
               if (isShow) {
                 return const SelectableText(
@@ -276,7 +276,7 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('has expected defaults', (WidgetTester tester) async {
+  testWidgets('has expected defaults', (final WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
           child: const SelectableText('selectable text'),
@@ -292,7 +292,7 @@ void main() {
     expect(selectableText.enableInteractiveSelection, true);
   });
 
-  testWidgets('Rich selectable text has expected defaults', (WidgetTester tester) async {
+  testWidgets('Rich selectable text has expected defaults', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -337,7 +337,7 @@ void main() {
     expect(selectableText.enableInteractiveSelection, true);
   });
 
-  testWidgets('Rich selectable text supports WidgetSpan', (WidgetTester tester) async {
+  testWidgets('Rich selectable text supports WidgetSpan', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(),
@@ -378,7 +378,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('no text keyboard when widget is focused', (WidgetTester tester) async {
+  testWidgets('no text keyboard when widget is focused', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable text'),
@@ -389,7 +389,7 @@ void main() {
     expect(tester.testTextInput.hasAnyClients, false);
   });
 
-  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (WidgetTester tester) async {
+  testWidgets('uses DefaultSelectionStyle for selection and cursor colors if provided', (final WidgetTester tester) async {
     const Color selectionColor = Colors.orange;
     const Color cursorColor = Colors.red;
 
@@ -410,7 +410,7 @@ void main() {
     expect(state.widget.cursorColor, cursorColor);
   });
 
-  testWidgets('Selectable Text has adaptive size', (WidgetTester tester) async {
+  testWidgets('Selectable Text has adaptive size', (final WidgetTester tester) async {
     await tester.pumpWidget(
         boilerplate(
           child: const SelectableText('s'),
@@ -432,7 +432,7 @@ void main() {
     expect(longtextBox.size, const Size(199.0, 14.0));
   });
 
-  testWidgets('can scale with textScaleFactor', (WidgetTester tester) async {
+  testWidgets('can scale with textScaleFactor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         child: const SelectableText('selectable text'),
@@ -455,7 +455,7 @@ void main() {
     expect(scaledBox.size.height, 27.0);
   });
 
-  testWidgets('can switch between textWidthBasis', (WidgetTester tester) async {
+  testWidgets('can switch between textWidthBasis', (final WidgetTester tester) async {
     RenderBox findTextBox() => tester.renderObject(find.byType(SelectableText));
     const String text = 'I can face roll keyboardkeyboardaszzaaaaszzaaaaszzaaaaszzaaaa';
     await tester.pumpWidget(
@@ -481,7 +481,7 @@ void main() {
     expect(textBox.size, const Size(633.0, 28.0));
   });
 
-  testWidgets('can switch between textHeightBehavior', (WidgetTester tester) async {
+  testWidgets('can switch between textHeightBehavior', (final WidgetTester tester) async {
     const String text = 'selectable text';
     const TextHeightBehavior textHeightBehavior = TextHeightBehavior(
       applyHeightToFirstAscent: false,
@@ -505,7 +505,7 @@ void main() {
     expect(findRenderEditable(tester).textHeightBehavior, textHeightBehavior);
   });
 
-  testWidgets('Cursor blinks when showCursor is true', (WidgetTester tester) async {
+  testWidgets('Cursor blinks when showCursor is true', (final WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SelectableText(
@@ -533,7 +533,7 @@ void main() {
     expect(editableText.cursorCurrentlyVisible, equals(initialShowCursor));
   });
 
-  testWidgets('selectable text selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
+  testWidgets('selectable text selection toolbar renders correctly inside opacity', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -564,7 +564,7 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
   });
 
-  testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
+  testWidgets('Caret position is updated on tap', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -584,7 +584,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, tapIndex);
   });
 
-  testWidgets('enableInteractiveSelection = false, tap', (WidgetTester tester) async {
+  testWidgets('enableInteractiveSelection = false, tap', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText(
@@ -607,7 +607,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, -1);
   });
 
-  testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
+  testWidgets('enableInteractiveSelection = false, long-press', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText(
@@ -632,7 +632,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, -1);
   });
 
-  testWidgets('Can long press to select', (WidgetTester tester) async {
+  testWidgets('Can long press to select', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -661,7 +661,7 @@ void main() {
     expect(editableText.controller.selection.baseOffset, 9);
   });
 
-  testWidgets("Slight movements in longpress don't hide/show handles", (WidgetTester tester) async {
+  testWidgets("Slight movements in longpress don't hide/show handles", (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -688,7 +688,7 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
-  testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
+  testWidgets('Mouse long press is just like a tap', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
@@ -710,7 +710,7 @@ void main() {
     expect(editableText.controller.selection.extentOffset, eIndex);
   });
 
-  testWidgets('selectable text basic', (WidgetTester tester) async {
+  testWidgets('selectable text basic', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable'),
@@ -742,7 +742,7 @@ void main() {
     expect(find.text('Cut'), findsNothing);
   });
 
-  testWidgets('selectable text can disable toolbar options', (WidgetTester tester) async {
+  testWidgets('selectable text can disable toolbar options', (final WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SelectableText(
@@ -762,7 +762,7 @@ void main() {
     expect(find.text('Select all'), findsOneWidget);
   });
 
-  testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
+  testWidgets('Can select text by dragging with a mouse', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -790,7 +790,7 @@ void main() {
     expect(controller.selection.extentOffset, 8);
   });
 
-  testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
+  testWidgets('Continuous dragging does not cause flickering', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -842,7 +842,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
   });
 
-  testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
+  testWidgets('Dragging in opposite direction also works', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -870,7 +870,7 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
-  testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
+  testWidgets('Slow mouse dragging also selects text', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -897,7 +897,7 @@ void main() {
     expect(controller.selection.extentOffset,8);
   });
 
-  testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
+  testWidgets('Can drag handles to change selection', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -959,7 +959,7 @@ void main() {
     expect(controller.selection.extentOffset, 11);
   });
 
-  testWidgets('Dragging handles calls onSelectionChanged', (WidgetTester tester) async {
+  testWidgets('Dragging handles calls onSelectionChanged', (final WidgetTester tester) async {
     TextSelection? newSelection;
     await tester.pumpWidget(
       MaterialApp(
@@ -967,7 +967,7 @@ void main() {
           child: SelectableText(
             'abc def ghi',
             dragStartBehavior: DragStartBehavior.down,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            onSelectionChanged: (final TextSelection selection, final SelectionChangedCause? cause) {
               expect(newSelection, isNull);
               newSelection = selection;
             },
@@ -1011,7 +1011,7 @@ void main() {
     expect(newSelection!.extentOffset, 9);
   });
 
-  testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
+  testWidgets('Cannot drag one handle past the other', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -1069,7 +1069,7 @@ void main() {
     expect(controller.selection.extentOffset, 5);
   });
 
-  testWidgets('Can use selection toolbar', (WidgetTester tester) async {
+  testWidgets('Can use selection toolbar', (final WidgetTester tester) async {
     const String testValue = 'abc def ghi';
     await tester.pumpWidget(
       const MaterialApp(
@@ -1111,7 +1111,7 @@ void main() {
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgets('Selectable height with maxLine', (WidgetTester tester) async {
+  testWidgets('Selectable height with maxLine', (final WidgetTester tester) async {
     await tester.pumpWidget(selectableTextBuilder());
 
     RenderBox findTextBox() => tester.renderObject(find.byType(SelectableText));
@@ -1163,7 +1163,7 @@ void main() {
     expect(textBox.size.height, greaterThan(fourLineInputSize.height));
   });
 
-  testWidgets('Can drag handles to change selection in multiline', (WidgetTester tester) async {
+  testWidgets('Can drag handles to change selection in multiline', (final WidgetTester tester) async {
     const String testValue = kThreeLines;
     await tester.pumpWidget(
       overlay(
@@ -1251,7 +1251,7 @@ void main() {
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgets('Can scroll multiline input', (WidgetTester tester) async {
+  testWidgets('Can scroll multiline input', (final WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SelectableText(
@@ -1345,7 +1345,7 @@ void main() {
     expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
 
-  testWidgets('minLines cannot be greater than maxLines', (WidgetTester tester) async {
+  testWidgets('minLines cannot be greater than maxLines', (final WidgetTester tester) async {
     expect(
       () async {
         await tester.pumpWidget(
@@ -1362,14 +1362,14 @@ void main() {
         );
       },
       throwsA(isA<AssertionError>().having(
-        (AssertionError error) => error.toString(),
+        (final AssertionError error) => error.toString(),
         '.toString()',
         contains("minLines can't be greater than maxLines"),
       )),
     );
   });
 
-  testWidgets('Selectable height with minLine', (WidgetTester tester) async {
+  testWidgets('Selectable height with minLine', (final WidgetTester tester) async {
     await tester.pumpWidget(selectableTextBuilder());
 
     RenderBox findTextBox() => tester.renderObject(find.byType(SelectableText));
@@ -1383,7 +1383,7 @@ void main() {
     expect(textBox.size.height, emptyInputSize.height * 2);
   });
 
-  testWidgets('Can align to center', (WidgetTester tester) async {
+  testWidgets('Can align to center', (final WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -1405,7 +1405,7 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgets('Can align to center within center', (WidgetTester tester) async {
+  testWidgets('Can align to center within center', (final WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -1429,7 +1429,7 @@ void main() {
     expect(topLeft.dx, equals(399.0));
   });
 
-  testWidgets('Selectable text is skipped during focus traversal', (WidgetTester tester) async {
+  testWidgets('Selectable text is skipped during focus traversal', (final WidgetTester tester) async {
     final FocusNode firstFieldFocus = FocusNode();
     final FocusNode lastFieldFocus = FocusNode();
 
@@ -1467,7 +1467,7 @@ void main() {
     expect(lastFieldFocus.hasFocus, isTrue);
   });
 
-  testWidgets('Selectable text identifies as text field in semantics', (WidgetTester tester) async {
+  testWidgets('Selectable text identifies as text field in semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1494,7 +1494,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Selectable text rich text with spell out in semantics', (WidgetTester tester) async {
+  testWidgets('Selectable text rich text with spell out in semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1527,7 +1527,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Selectable text rich text with locale in semantics', (WidgetTester tester) async {
+  testWidgets('Selectable text rich text with locale in semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1560,7 +1560,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Selectable rich text with gesture recognizer has correct semantics', (WidgetTester tester) async {
+  testWidgets('Selectable rich text with gesture recognizer has correct semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       overlay(
@@ -1614,7 +1614,7 @@ void main() {
   group('Keyboard Tests', () {
     late TextEditingController controller;
 
-    Future<void> setupWidget(WidgetTester tester, String text) async {
+    Future<void> setupWidget(final WidgetTester tester, final String text) async {
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         MaterialApp(
@@ -1635,7 +1635,7 @@ void main() {
       controller = editableTextWidget.controller;
     }
 
-    testWidgets('Shift test 1', (WidgetTester tester) async {
+    testWidgets('Shift test 1', (final WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
@@ -1643,7 +1643,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Shift test 2', (WidgetTester tester) async {
+    testWidgets('Shift test 2', (final WidgetTester tester) async {
       await setupWidget(tester, 'abcdefghi');
 
       controller.selection = const TextSelection.collapsed(offset: 3);
@@ -1655,7 +1655,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Control Shift test', (WidgetTester tester) async {
+    testWidgets('Control Shift test', (final WidgetTester tester) async {
       await setupWidget(tester, 'their big house');
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
@@ -1667,7 +1667,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Down and up test', (WidgetTester tester) async {
+    testWidgets('Down and up test', (final WidgetTester tester) async {
       await setupWidget(tester, 'a big house');
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
@@ -1685,7 +1685,7 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
     }, variant: KeySimulatorTransitModeVariant.all());
 
-    testWidgets('Down and up test 2', (WidgetTester tester) async {
+    testWidgets('Down and up test 2', (final WidgetTester tester) async {
       await setupWidget(tester, 'a big house\njumped over a mouse\nOne more line yay');
 
       controller.selection = const TextSelection.collapsed(offset: 0);
@@ -1737,11 +1737,11 @@ void main() {
     }, variant: KeySimulatorTransitModeVariant.all());
   });
 
-  testWidgets('Copy test', (WidgetTester tester) async {
+  testWidgets('Copy test', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     String clipboardContent = '';
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (final MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData') {
         clipboardContent = (methodCall.arguments as Map<String, dynamic>)['text'] as String;
       } else if (methodCall.method == 'Clipboard.getData') {
@@ -1795,7 +1795,7 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Select all test', (WidgetTester tester) async {
+  testWidgets('Select all test', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     const String testValue = 'a big house\njumped over a mouse';
     await tester.pumpWidget(
@@ -1829,7 +1829,7 @@ void main() {
     expect(controller.selection.extentOffset, 31);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('keyboard selection should call onSelectionChanged', (WidgetTester tester) async {
+  testWidgets('keyboard selection should call onSelectionChanged', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     TextSelection? newSelection;
     const String testValue = 'a big house\njumped over a mouse';
@@ -1841,7 +1841,7 @@ void main() {
             child: SelectableText(
               testValue,
               maxLines: 3,
-              onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+              onSelectionChanged: (final TextSelection selection, final SelectionChangedCause? cause) {
                 expect(newSelection, isNull);
                 newSelection = selection;
               },
@@ -1875,7 +1875,7 @@ void main() {
     }
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Changing positions of selectable text', (WidgetTester tester) async {
+  testWidgets('Changing positions of selectable text', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
@@ -1965,7 +1965,7 @@ void main() {
     expect(c1.selection.extentOffset - c1.selection.baseOffset, -10);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Changing focus test', (WidgetTester tester) async {
+  testWidgets('Changing focus test', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
@@ -2034,7 +2034,7 @@ void main() {
     expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
+  testWidgets('Caret works when maxLines is null', (final WidgetTester tester) async {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText(
@@ -2057,7 +2057,7 @@ void main() {
     expect(controller.selection.baseOffset, 0);
   });
 
-  testWidgets('SelectableText baseline alignment no-strut', (WidgetTester tester) async {
+  testWidgets('SelectableText baseline alignment no-strut', (final WidgetTester tester) async {
     final Key keyA = UniqueKey();
     final Key keyB = UniqueKey();
 
@@ -2106,7 +2106,7 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
-  testWidgets('SelectableText baseline alignment', (WidgetTester tester) async {
+  testWidgets('SelectableText baseline alignment', (final WidgetTester tester) async {
     final Key keyA = UniqueKey();
     final Key keyB = UniqueKey();
 
@@ -2153,7 +2153,7 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
   });
 
-  testWidgets('SelectableText semantics', (WidgetTester tester) async {
+  testWidgets('SelectableText semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2273,7 +2273,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText semantics, with semanticsLabel', (WidgetTester tester) async {
+  testWidgets('SelectableText semantics, with semanticsLabel', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2300,7 +2300,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText semantics, enableInteractiveSelection = false', (WidgetTester tester) async {
+  testWidgets('SelectableText semantics, enableInteractiveSelection = false', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2346,7 +2346,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText semantics for selections', (WidgetTester tester) async {
+  testWidgets('SelectableText semantics for selections', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
 
@@ -2442,7 +2442,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (WidgetTester tester) async {
+  testWidgets('semantic nodes of offscreen recognizers are marked hidden', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/100395.
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontSize: 200);
@@ -2535,7 +2535,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SelectableText change selection with semantics', (WidgetTester tester) async {
+  testWidgets('SelectableText change selection with semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner!;
     final Key key = UniqueKey();
@@ -2634,7 +2634,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Can activate SelectableText with explicit controller via semantics', (WidgetTester tester) async {
+  testWidgets('Can activate SelectableText with explicit controller via semantics', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17801
 
     const String testValue = 'Hello';
@@ -2708,7 +2708,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+  testWidgets('onTap is called upon tap', (final WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(
       overlay(
@@ -2732,12 +2732,12 @@ void main() {
     expect(tapCount, 3);
   });
 
-  testWidgets('SelectableText style is merged with default text style', (WidgetTester tester) async {
+  testWidgets('SelectableText style is merged with default text style', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/23994
     final TextStyle defaultStyle = TextStyle(
       color: Colors.blue[500],
     );
-    Widget buildFrame(TextStyle style) {
+    Widget buildFrame(final TextStyle style) {
       return MaterialApp(
         home: Material(
           child: DefaultTextStyle (
@@ -2779,8 +2779,8 @@ void main() {
     expect(editableText.style.color, isNull);
   });
 
-  testWidgets('style enforces required fields', (WidgetTester tester) async {
-    Widget buildFrame(TextStyle style) {
+  testWidgets('style enforces required fields', (final WidgetTester tester) async {
+    Widget buildFrame(final TextStyle style) {
       return MaterialApp(
         home: Material(
           child: SelectableText(
@@ -2813,7 +2813,7 @@ void main() {
 
   testWidgets(
     'tap moves cursor to the edge of the word it tapped',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2845,7 +2845,7 @@ void main() {
 
   testWidgets(
     'tap moves cursor to the position tapped (Android)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2877,7 +2877,7 @@ void main() {
 
   testWidgets(
     'two slow taps do not trigger a word selection',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2912,7 +2912,7 @@ void main() {
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -2958,7 +2958,7 @@ void main() {
 
   testWidgets(
     'double tap selects word and first tap of double tap moves cursor and shows toolbar (Android)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3003,7 +3003,7 @@ void main() {
 
   testWidgets(
     'double tap on top of cursor also selects word (Android)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3052,7 +3052,7 @@ void main() {
 
   testWidgets(
     'double tap hold selects word',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3099,7 +3099,7 @@ void main() {
 
   testWidgets(
     'double tap selects word with semantics label',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3132,7 +3132,7 @@ void main() {
 
   testWidgets(
     'tap after a double tap select is not affected (iOS)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3179,7 +3179,7 @@ void main() {
 
   testWidgets(
     'long press selects word and shows toolbar (iOS)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3215,7 +3215,7 @@ void main() {
 
   testWidgets(
     'long press selects word and shows toolbar (Android)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
 
       await tester.pumpWidget(
         const MaterialApp(
@@ -3247,7 +3247,7 @@ void main() {
 
   testWidgets(
     'long press selects word and shows custom toolbar (Android)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -3285,7 +3285,7 @@ void main() {
 
   testWidgets(
     'long press selects word and shows custom toolbar (iOS)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
 
       await tester.pumpWidget(
         MaterialApp(
@@ -3320,7 +3320,7 @@ void main() {
 
   testWidgets(
     'textSelectionControls is passed to EditableText',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Material(
@@ -3340,7 +3340,7 @@ void main() {
 
   testWidgets(
     'long press tap cannot initiate a double tap',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3382,7 +3382,7 @@ void main() {
 
   testWidgets(
     'long press drag extends the selection to the word under the drag and shows toolbar on lift on non-Apple platforms',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3458,7 +3458,7 @@ void main() {
 
   testWidgets(
     'long press drag extends the selection to the word under the drag and shows toolbar on lift (iOS)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3550,7 +3550,7 @@ void main() {
 
   testWidgets(
     'long press drag moves the cursor under the drag and shows toolbar on lift (macOS)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3626,7 +3626,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS }),
   );
 
-  testWidgets('long press drag can edge scroll', (WidgetTester tester) async {
+  testWidgets('long press drag can edge scroll', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -3732,7 +3732,7 @@ void main() {
 
   testWidgets(
     'long tap still selects after a double tap select (iOS)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3778,7 +3778,7 @@ void main() {
 
   testWidgets(
     'long tap still selects after a double tap select (macOS)',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3822,7 +3822,7 @@ void main() {
 //convert
   testWidgets(
     'double tap after a long tap is not affected',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3869,7 +3869,7 @@ void main() {
 
   testWidgets(
     'double tap chains work',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -3941,7 +3941,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }),
   );
 
-  testWidgets('force press does not select a word on (android)', (WidgetTester tester) async {
+  testWidgets('force press does not select a word on (android)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -3977,7 +3977,7 @@ void main() {
     expect(find.byType(TextButton), findsNothing);
   });
 
-  testWidgets('force press selects word', (WidgetTester tester) async {
+  testWidgets('force press selects word', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4018,7 +4018,7 @@ void main() {
     expect(find.byType(CupertinoButton), findsNWidgets(1));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }));
 
-  testWidgets('tap on non-force-press-supported devices work', (WidgetTester tester) async {
+  testWidgets('tap on non-force-press-supported devices work', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4066,19 +4066,19 @@ void main() {
     // https://github.com/flutter/flutter/issues/43445
   }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-  testWidgets('default SelectableText debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default SelectableText debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     const SelectableText('something').debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>['data: something']);
   });
 
-  testWidgets('SelectableText implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('SelectableText implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
     // Not checking controller, inputFormatters, focusNode
@@ -4102,8 +4102,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString()).toList();
 
     expect(description, <String>[
       'data: something',
@@ -4127,7 +4127,7 @@ void main() {
 
   testWidgets(
     'strut basic single line',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -4150,7 +4150,7 @@ void main() {
 
   testWidgets(
     'strut TextStyle increases height',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -4197,7 +4197,7 @@ void main() {
 
   testWidgets(
     'strut basic multi line',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -4221,7 +4221,7 @@ void main() {
 
   testWidgets(
     'strut no force small strut',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -4253,7 +4253,7 @@ void main() {
 
   testWidgets(
     'strut no force large strut',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -4282,7 +4282,7 @@ void main() {
 
   testWidgets(
     'strut height override',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -4311,7 +4311,7 @@ void main() {
 
   testWidgets(
     'strut forces field taller',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
@@ -4340,7 +4340,7 @@ void main() {
     },
   );
 
-  testWidgets('Caret center position', (WidgetTester tester) async {
+  testWidgets('Caret center position', (final WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -4376,7 +4376,7 @@ void main() {
     expect(topLeft.dx, equals(385));
   });
 
-  testWidgets('Caret indexes into trailing whitespace center align', (WidgetTester tester) async {
+  testWidgets('Caret indexes into trailing whitespace center align', (final WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
         child: const SizedBox(
@@ -4422,7 +4422,7 @@ void main() {
     expect(topLeft.dx, equals(385));
   });
 
-  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
+  testWidgets('selection handles are rendered and not faded away', (final WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     await tester.pumpWidget(
       const MaterialApp(
@@ -4441,9 +4441,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final List<FadeTransition> transitions = find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+      of: find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
       matching: find.byType(FadeTransition),
-    ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+    ).evaluate().map((final Element e) => e.widget).cast<FadeTransition>().toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];
@@ -4452,7 +4452,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   });
 
-  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
+  testWidgets('selection handles are rendered and not faded away', (final WidgetTester tester) async {
     const String testText = 'lorem ipsum';
 
     await tester.pumpWidget(
@@ -4471,7 +4471,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final List<Widget> transitions =
-    find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    find.byType(FadeTransition).evaluate().map((final Element e) => e.widget).toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0] as FadeTransition;
     final FadeTransition right = transitions[1] as FadeTransition;
@@ -4480,7 +4480,7 @@ void main() {
     expect(right.opacity.value, equals(1.0));
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
+  testWidgets('Long press shows handles and toolbar', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4499,7 +4499,7 @@ void main() {
     expect(editableText.selectionOverlay!.toolbarIsVisible, isTrue);
   });
 
-  testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
+  testWidgets('Double tap shows handles and toolbar', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4522,7 +4522,7 @@ void main() {
 
   testWidgets(
     'Mouse tap does not show handles nor toolbar',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -4550,7 +4550,7 @@ void main() {
 
   testWidgets(
     'Mouse long press does not show handles nor toolbar',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -4578,7 +4578,7 @@ void main() {
 
   testWidgets(
     'Mouse double tap does not show handles nor toolbar',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -4608,7 +4608,7 @@ void main() {
     },
   );
 
-  testWidgets('text span with tap gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+  testWidgets('text span with tap gesture recognizer works in selectable rich text', (final WidgetTester tester) async {
     int spyTaps = 0;
     final TapGestureRecognizer spyRecognizer = TapGestureRecognizer()
       ..onTap = () {
@@ -4658,7 +4658,7 @@ void main() {
     expect(spyTaps, 1);
   });
 
-  testWidgets('text span with long press gesture recognizer works in selectable rich text', (WidgetTester tester) async {
+  testWidgets('text span with long press gesture recognizer works in selectable rich text', (final WidgetTester tester) async {
     int spyLongPress = 0;
     final LongPressGestureRecognizer spyRecognizer = LongPressGestureRecognizer()
       ..onLongPress = () {
@@ -4709,7 +4709,7 @@ void main() {
     expect(spyLongPress, 1);
   });
 
-  testWidgets('SelectableText changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('SelectableText changes mouse cursor when hovered', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4728,7 +4728,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgets('The handles show after pressing Select All', (WidgetTester tester) async {
+  testWidgets('The handles show after pressing Select All', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4765,14 +4765,14 @@ void main() {
     }),
   );
 
-  testWidgets('The Select All calls on selection changed', (WidgetTester tester) async {
+  testWidgets('The Select All calls on selection changed', (final WidgetTester tester) async {
     TextSelection? newSelection;
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: SelectableText(
             'abc def ghi',
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            onSelectionChanged: (final TextSelection selection, final SelectionChangedCause? cause) {
               expect(newSelection, isNull);
               newSelection = selection;
             },
@@ -4801,7 +4801,7 @@ void main() {
     }),
   );
 
-  testWidgets('The Select All calls on selection changed with a mouse on windows and linux', (WidgetTester tester) async {
+  testWidgets('The Select All calls on selection changed with a mouse on windows and linux', (final WidgetTester tester) async {
     const String string = 'abc def ghi';
     TextSelection? newSelection;
     await tester.pumpWidget(
@@ -4809,7 +4809,7 @@ void main() {
         home: Material(
           child: SelectableText(
             string,
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            onSelectionChanged: (final TextSelection selection, final SelectionChangedCause? cause) {
               expect(newSelection, isNull);
               newSelection = selection;
             },
@@ -4843,7 +4843,7 @@ void main() {
     }),
   );
 
-  testWidgets('Does not show handles when updated from the web engine', (WidgetTester tester) async {
+  testWidgets('Does not show handles when updated from the web engine', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -4883,7 +4883,7 @@ void main() {
     }
   });
 
-  testWidgets('onSelectionChanged is called when selection changes', (WidgetTester tester) async {
+  testWidgets('onSelectionChanged is called when selection changes', (final WidgetTester tester) async {
     int onSelectionChangedCallCount = 0;
 
     await tester.pumpWidget(
@@ -4891,7 +4891,7 @@ void main() {
         home: Material(
           child: SelectableText(
             'abc def ghi',
-            onSelectionChanged: (TextSelection selection, SelectionChangedCause? cause) {
+            onSelectionChanged: (final TextSelection selection, final SelectionChangedCause? cause) {
               onSelectionChangedCallCount += 1;
             },
           ),
@@ -4913,14 +4913,14 @@ void main() {
     expect(onSelectionChangedCallCount, equals(3));
   });
 
-  testWidgets('selecting a space selects the previous word on mobile', (WidgetTester tester) async {
+  testWidgets('selecting a space selects the previous word on mobile', (final WidgetTester tester) async {
     TextSelection? selection;
 
     await tester.pumpWidget(
       MaterialApp(
         home: SelectableText(
           ' blah blah',
-          onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
+          onSelectionChanged: (final TextSelection newSelection, final SelectionChangedCause? cause) {
             selection = newSelection;
           },
         ),
@@ -4957,7 +4957,7 @@ void main() {
     expect(selection!.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
-  testWidgets('selecting a space selects the space on non-mobile platforms', (WidgetTester tester) async {
+  testWidgets('selecting a space selects the space on non-mobile platforms', (final WidgetTester tester) async {
     TextSelection? selection;
 
     await tester.pumpWidget(
@@ -4966,7 +4966,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
+              onSelectionChanged: (final TextSelection newSelection, final SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
@@ -5014,7 +5014,7 @@ void main() {
     expect(selection!.extentOffset, 1);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.macOS,  TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-  testWidgets('double tapping a space selects the previous word on mobile', (WidgetTester tester) async {
+  testWidgets('double tapping a space selects the previous word on mobile', (final WidgetTester tester) async {
     TextSelection? selection;
 
     await tester.pumpWidget(
@@ -5023,7 +5023,7 @@ void main() {
           child: Center(
             child: SelectableText(
               ' blah blah  \n  blah',
-              onSelectionChanged: (TextSelection newSelection, SelectionChangedCause? cause) {
+              onSelectionChanged: (final TextSelection newSelection, final SelectionChangedCause? cause) {
                 selection = newSelection;
               },
             ),
@@ -5078,7 +5078,7 @@ void main() {
     expect(selection!.extentOffset, 14);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }));
 
-  testWidgets('text selection style 1', (WidgetTester tester) async {
+  testWidgets('text selection style 1', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -5130,7 +5130,7 @@ void main() {
     );
   });
 
-  testWidgets('text selection style 2', (WidgetTester tester) async {
+  testWidgets('text selection style 2', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -5181,7 +5181,7 @@ void main() {
     );
   });
 
-  testWidgets('keeps alive when has focus', (WidgetTester tester) async {
+  testWidgets('keeps alive when has focus', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: DefaultTabController(
@@ -5189,7 +5189,7 @@ void main() {
           child: Scaffold(
             body: NestedScrollView(
               headerSliverBuilder:
-                (BuildContext context, bool innerBoxIsScrolled) {
+                (final BuildContext context, final bool innerBoxIsScrolled) {
                   return <Widget>[
                     SliverToBoxAdapter(
                       child: Container(
@@ -5274,15 +5274,15 @@ void main() {
 
     testWidgets(
         'Can drag handles to show, unshow, and update magnifier',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       const String testValue = 'abc def ghi';
       final SelectableText selectableText = SelectableText(
             testValue,
             magnifierConfiguration: TextMagnifierConfiguration(
         magnifierBuilder: (
-          _,
-          MagnifierController controller,
-          ValueNotifier<MagnifierInfo> localMagnifierInfo
+          final _,
+          final MagnifierController controller,
+          final ValueNotifier<MagnifierInfo> localMagnifierInfo
         ) {
           magnifierInfo = localMagnifierInfo;
           return fakeMagnifier;
@@ -5341,7 +5341,7 @@ void main() {
     });
   });
 
-  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+  testWidgets('SelectableText text span style is merged with default text style', (final WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/71389
 
     const TextStyle textStyle = TextStyle(color: Color(0xff00ff00), fontSize: 12.0);
@@ -5361,7 +5361,7 @@ void main() {
     expect(editableText.style.fontSize, textStyle.fontSize);
   });
 
-  testWidgets('SelectableText text span style is merged with default text style', (WidgetTester tester) async {
+  testWidgets('SelectableText text span style is merged with default text style', (final WidgetTester tester) async {
     TextSelection? selection;
     int count = 0;
 
@@ -5369,7 +5369,7 @@ void main() {
       MaterialApp(
         home: SelectableText(
           'I love Flutter!',
-          onSelectionChanged: (TextSelection s, _) {
+          onSelectionChanged: (final TextSelection s, final _) {
             selection = s;
             count++;
           },
@@ -5400,7 +5400,7 @@ void main() {
     expect(count, 1); // The `onSelectionChanged` will not be triggered.
   });
 
-  testWidgets("Off-screen selected text doesn't throw exception", (WidgetTester tester) async {
+  testWidgets("Off-screen selected text doesn't throw exception", (final WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/123527
 
     TextSelection? selection;
@@ -5408,16 +5408,16 @@ void main() {
       MaterialApp(
         home: Material(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Column(
                 children: <Widget>[
                   Expanded(
                     child: ListView.builder(
                       itemCount: 100,
-                      itemBuilder: (BuildContext context, int index) {
+                      itemBuilder: (final BuildContext context, final int index) {
                         return SelectableText(
                           'I love Flutter! $index',
-                          onSelectionChanged: (TextSelection s, _) {
+                          onSelectionChanged: (final TextSelection s, final _) {
                             selection = s;
                           },
                         );

@@ -401,7 +401,7 @@ Extraneous debug information that should be ignored.
   });
 }
 
-String generateMockDeps(String dartRevision) {
+String generateMockDeps(final String dartRevision) {
   return '''
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',

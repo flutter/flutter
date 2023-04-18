@@ -14,7 +14,7 @@ class KeyExampleApp extends StatelessWidget {
   const KeyExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('PhysicalKeyboardKey Example')),
@@ -46,7 +46,7 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
 
 // Handles the key events from the RawKeyboardListener and update the
 // _message.
-  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(final FocusNode node, final RawKeyEvent event) {
     setState(() {
       if (event.physicalKey == PhysicalKeyboardKey.keyA) {
         _message = 'Pressed the key next to CAPS LOCK!';
@@ -64,7 +64,7 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
       color: Colors.white,
@@ -76,7 +76,7 @@ class _MyPhysicalKeyExampleState extends State<MyPhysicalKeyExample> {
           onKey: _handleKeyEvent,
           child: AnimatedBuilder(
             animation: _focusNode,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               if (!_focusNode.hasFocus) {
                 return GestureDetector(
                   onTap: () {

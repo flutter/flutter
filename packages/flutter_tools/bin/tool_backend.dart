@@ -7,7 +7,7 @@ import 'dart:convert'; // flutter_ignore: dart_convert_import.
 import 'dart:io'; // flutter_ignore: dart_io_import.
 
 /// Executes the required Flutter tasks for a desktop build.
-Future<void> main(List<String> arguments) async {
+Future<void> main(final List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1].toLowerCase();
 
@@ -113,7 +113,7 @@ or
 /// Perform a simple path join on the segments based on the current platform.
 ///
 /// Does not normalize paths that have repeated separators.
-String pathJoin(List<String> segments) {
+String pathJoin(final List<String> segments) {
   final String separator = Platform.isWindows ? r'\' : '/';
   return segments.join(separator);
 }

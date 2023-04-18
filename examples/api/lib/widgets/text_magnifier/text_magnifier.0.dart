@@ -20,7 +20,7 @@ class TextMagnifierExampleApp extends StatelessWidget {
   static const Size loupeSize = Size(200, 200);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: Padding(
@@ -31,7 +31,7 @@ class TextMagnifierExampleApp extends StatelessWidget {
               // Create a custom magnifier configuration that
               // this `TextField` will use to build a magnifier with.
               magnifierConfiguration: TextMagnifierConfiguration(
-                magnifierBuilder: (_, __, ValueNotifier<MagnifierInfo> magnifierInfo) => CustomMagnifier(
+                magnifierBuilder: (final _, final __, final ValueNotifier<MagnifierInfo> magnifierInfo) => CustomMagnifier(
                   magnifierInfo: magnifierInfo,
                 ),
               ),
@@ -54,7 +54,7 @@ class CustomMagnifier extends StatelessWidget {
   final ValueNotifier<MagnifierInfo> magnifierInfo;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Use a value listenable builder because we want to rebuild
     // every time the text selection info changes.
     // `CustomMagnifier` could also be a `StatefulWidget` and call `setState`
@@ -62,7 +62,7 @@ class CustomMagnifier extends StatelessWidget {
     // positioning cases.
     return ValueListenableBuilder<MagnifierInfo>(
         valueListenable: magnifierInfo,
-        builder: (BuildContext context, MagnifierInfo currentMagnifierInfo, _) {
+        builder: (final BuildContext context, final MagnifierInfo currentMagnifierInfo, final _) {
           // We want to position the magnifier at the global position of the gesture.
           Offset magnifierPosition = currentMagnifierInfo.globalGesturePosition;
 

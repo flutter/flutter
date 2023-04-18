@@ -11,12 +11,12 @@ import 'package:path/path.dart' as path;
 
 import 'lib/runner.dart';
 
-Future<void> main(List<String> arguments) async {
+Future<void> main(final List<String> arguments) async {
   exit(await run(arguments) ? 0 : 1);
 }
 
 // Return true if successful, false if failed.
-Future<bool> run(List<String> arguments) async {
+Future<bool> run(final List<String> arguments) async {
   final ArgParser argParser = ArgParser(
     allowTrailingOptions: false,
     usageLineLength: 72,
@@ -84,9 +84,9 @@ Future<bool> run(List<String> arguments) async {
   final int? shardIndex = int.tryParse(parsedArguments['shard-index'] as String);
   final List<File> files = parsedArguments
     .rest
-    .expand((String path) => Glob(path).listFileSystemSync(const LocalFileSystem()))
+    .expand((final String path) => Glob(path).listFileSystemSync(const LocalFileSystem()))
     .whereType<File>()
-    .where((File file) => !skipTemplate || path.basename(file.path) != 'template.test')
+    .where((final File file) => !skipTemplate || path.basename(file.path) != 'template.test')
     .toList();
 
   if (help || repeat == null || files.isEmpty || numberShards == null || numberShards <= 0 || shardIndex == null || shardIndex < 0) {

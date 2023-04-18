@@ -12,7 +12,7 @@ class ChipApp extends StatelessWidget {
   const ChipApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: const InputChipExample(),
@@ -32,7 +32,7 @@ class _InputChipExampleState extends State<InputChipExample> {
   int? selectedIndex;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('InputChip Sample'),
@@ -47,11 +47,11 @@ class _InputChipExampleState extends State<InputChipExample> {
               spacing: 5.0,
               children: List<Widget>.generate(
                 inputs,
-                (int index) {
+                (final int index) {
                   return InputChip(
                     label: Text('Person ${index + 1}'),
                     selected: selectedIndex == index,
-                    onSelected: (bool selected) {
+                    onSelected: (final bool selected) {
                       setState(() {
                         if (selectedIndex == index) {
                           selectedIndex = null;

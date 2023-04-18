@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-List<Widget> children(int n) {
-  return List<Widget>.generate(n, (int i) {
+List<Widget> children(final int n) {
+  return List<Widget>.generate(n, (final int i) {
     return SizedBox(height: 100.0, child: Text('$i'));
   });
 }
 
 void main() {
-  testWidgets('Scrolling with list view changes, leaving the overscroll', (WidgetTester tester) async {
+  testWidgets('Scrolling with list view changes, leaving the overscroll', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
@@ -28,7 +28,7 @@ void main() {
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
-  testWidgets('Scrolling with list view changes, remaining overscrolled', (WidgetTester tester) async {
+  testWidgets('Scrolling with list view changes, remaining overscrolled', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(home: ListView(controller: controller, children: children(30))));
     final double thirty = controller.position.maxScrollExtent;
@@ -42,7 +42,7 @@ void main() {
     expect(controller.position.pixels, thirty + 100.0); // and ends up at the end
   });
 
-  testWidgets('Ability to keep a PageView at the end manually (issue 62209)', (WidgetTester tester) async {
+  testWidgets('Ability to keep a PageView at the end manually (issue 62209)', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: PageView62209()));
     expect(find.text('Page 1'), findsOneWidget);
     expect(find.text('Page 100'), findsNothing);
@@ -129,16 +129,16 @@ void main() {
     expect(find.text('Page 9'), findsOneWidget);
   });
 
-  testWidgets('Pointer is not ignored during trackpad scrolling.', (WidgetTester tester) async {
+  testWidgets('Pointer is not ignored during trackpad scrolling.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     int? lastTapped;
     int? lastHovered;
     await tester.pumpWidget(MaterialApp(
       home: ListView(
         controller: controller,
-        children: List<Widget>.generate(30, (int i) {
+        children: List<Widget>.generate(30, (final int i) {
           return SizedBox(height: 100.0, child: MouseRegion(
-            onHover: (PointerHoverEvent event) {
+            onHover: (final PointerHoverEvent event) {
               lastHovered = i;
             },
             child: GestureDetector(
@@ -234,7 +234,7 @@ class _PageView62209State extends State<PageView62209> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -265,7 +265,7 @@ class Carousel62209Page extends StatelessWidget {
   final int number;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(child: Text('Page $number'));
   }
 }
@@ -296,7 +296,7 @@ class _Carousel62209State extends State<Carousel62209> {
   }
 
   @override
-  void didUpdateWidget(Carousel62209 oldWidget) {
+  void didUpdateWidget(final Carousel62209 oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!_jumpingToPage) {
       int newPage = -1;
@@ -309,13 +309,13 @@ class _Carousel62209State extends State<Carousel62209> {
         _pages = widget.pages.toList();
       } else {
         _jumpingToPage = true;
-        SchedulerBinding.instance.addPostFrameCallback((_) {
+        SchedulerBinding.instance.addPostFrameCallback((final _) {
           if (mounted) {
             setState(() {
               _pages = widget.pages.toList();
               _currentPage = newPage;
               _pageController.jumpToPage(_currentPage);
-              SchedulerBinding.instance.addPostFrameCallback((_) {
+              SchedulerBinding.instance.addPostFrameCallback((final _) {
                 _jumpingToPage = false;
               });
             });
@@ -331,7 +331,7 @@ class _Carousel62209State extends State<Carousel62209> {
     super.dispose();
   }
 
-  bool _handleScrollNotification(ScrollNotification notification) {
+  bool _handleScrollNotification(final ScrollNotification notification) {
     if (notification is ScrollUpdateNotification) {
       final int page = _pageController.page!.round();
       if (!_jumpingToPage && _currentPage != page) {
@@ -342,13 +342,13 @@ class _Carousel62209State extends State<Carousel62209> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView.builder(
         controller: _pageController,
         itemCount: _pages.length,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return _pages[index];
         },
       ),

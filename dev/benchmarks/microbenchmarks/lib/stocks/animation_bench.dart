@@ -17,7 +17,7 @@ class BenchmarkingBinding extends LiveTestWidgetsFlutterBinding {
   final Stopwatch stopwatch;
 
   @override
-  void handleBeginFrame(Duration? rawTimeStamp) {
+  void handleBeginFrame(final Duration? rawTimeStamp) {
     stopwatch.start();
     super.handleBeginFrame(rawTimeStamp);
   }
@@ -44,7 +44,7 @@ Future<void> main() async {
   int totalSubsequentFramesElapsedMicroseconds = 0;
   int totalSubsequentFramesIterationCount = 0;
 
-  await benchmarkWidgets((WidgetTester tester) async {
+  await benchmarkWidgets((final WidgetTester tester) async {
     stocks.main();
     await tester.pump(); // Start startup animation
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation

@@ -29,12 +29,12 @@ class BouncingScrollSimulation extends Simulation {
   /// for the `spring` description if it is omitted; these defaults assume
   /// that the unit of length is the logical pixel.
   BouncingScrollSimulation({
-    required double position,
-    required double velocity,
+    required final double position,
+    required final double velocity,
     required this.leadingExtent,
     required this.trailingExtent,
     required this.spring,
-    double constantDeceleration = 0,
+    final double constantDeceleration = 0,
     super.tolerance,
   }) : assert(leadingExtent <= trailingExtent) {
     if (position < leadingExtent) {
@@ -88,15 +88,15 @@ class BouncingScrollSimulation extends Simulation {
   late double _springTime;
   double _timeOffset = 0.0;
 
-  Simulation _underscrollSimulation(double x, double dx) {
+  Simulation _underscrollSimulation(final double x, final double dx) {
     return ScrollSpringSimulation(spring, x, leadingExtent, dx);
   }
 
-  Simulation _overscrollSimulation(double x, double dx) {
+  Simulation _overscrollSimulation(final double x, final double dx) {
     return ScrollSpringSimulation(spring, x, trailingExtent, dx);
   }
 
-  Simulation _simulation(double time) {
+  Simulation _simulation(final double time) {
     final Simulation simulation;
     if (time > _springTime) {
       _timeOffset = _springTime.isFinite ? _springTime : 0.0;
@@ -109,13 +109,13 @@ class BouncingScrollSimulation extends Simulation {
   }
 
   @override
-  double x(double time) => _simulation(time).x(time - _timeOffset);
+  double x(final double time) => _simulation(time).x(time - _timeOffset);
 
   @override
-  double dx(double time) => _simulation(time).dx(time - _timeOffset);
+  double dx(final double time) => _simulation(time).dx(time - _timeOffset);
 
   @override
-  bool isDone(double time) => _simulation(time).isDone(time - _timeOffset);
+  bool isDone(final double time) => _simulation(time).isDone(time - _timeOffset);
 
   @override
   String toString() {
@@ -237,19 +237,19 @@ class ClampingScrollSimulation extends Simulation {
   }
 
   @override
-  double x(double time) {
+  double x(final double time) {
     final double t = clampDouble(time / _duration, 0.0, 1.0);
     return position + _distance * (1.0 - math.pow(1.0 - t, _kDecelerationRate));
   }
 
   @override
-  double dx(double time) {
+  double dx(final double time) {
     final double t = clampDouble(time / _duration, 0.0, 1.0);
     return velocity * math.pow(1.0 - t, _kDecelerationRate - 1.0);
   }
 
   @override
-  bool isDone(double time) {
+  bool isDone(final double time) {
     return time >= _duration;
   }
 }

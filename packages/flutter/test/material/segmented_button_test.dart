@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget boilerplate({required Widget child}) {
+Widget boilerplate({required final Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(child: child),
@@ -19,7 +19,7 @@ Widget boilerplate({required Widget child}) {
 
 void main() {
 
-  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (WidgetTester tester) async {
+  testWidgets('SegmentedButton is built with Material of type MaterialType.transparency', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData(useMaterial3: true);
     await tester.pumpWidget(
       MaterialApp(
@@ -33,7 +33,7 @@ void main() {
                 ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
               ],
               selected: const <int>{2},
-              onSelectionChanged: (Set<int> selected) { },
+              onSelectionChanged: (final Set<int> selected) { },
             ),
           ),
         ),
@@ -48,11 +48,11 @@ void main() {
     expect(material.type, MaterialType.transparency);
   });
 
-  testWidgets('SegmentedButton supports exclusive choice by default', (WidgetTester tester) async {
+  testWidgets('SegmentedButton supports exclusive choice by default', (final WidgetTester tester) async {
     int callbackCount = 0;
     int selectedSegment = 2;
 
-    Widget frameWithSelection(int selected) {
+    Widget frameWithSelection(final int selected) {
       return Material(
         child: boilerplate(
           child: SegmentedButton<int>(
@@ -62,7 +62,7 @@ void main() {
               ButtonSegment<int>(value: 3, label: Text('3')),
             ],
             selected: <int>{selected},
-            onSelectionChanged: (Set<int> selected) {
+            onSelectionChanged: (final Set<int> selected) {
               assert(selected.length == 1);
               selectedSegment = selected.first;
               callbackCount += 1;
@@ -98,11 +98,11 @@ void main() {
     expect(selectedSegment, 3);
   });
 
-  testWidgets('SegmentedButton supports multiple selected segments', (WidgetTester tester) async {
+  testWidgets('SegmentedButton supports multiple selected segments', (final WidgetTester tester) async {
     int callbackCount = 0;
     Set<int> selection = <int>{1};
 
-    Widget frameWithSelection(Set<int> selected) {
+    Widget frameWithSelection(final Set<int> selected) {
       return Material(
         child: boilerplate(
           child: SegmentedButton<int>(
@@ -113,7 +113,7 @@ void main() {
               ButtonSegment<int>(value: 3, label: Text('3')),
             ],
             selected: selected,
-            onSelectionChanged: (Set<int> selected) {
+            onSelectionChanged: (final Set<int> selected) {
               selection = selected;
               callbackCount += 1;
             },
@@ -153,11 +153,11 @@ void main() {
     expect(selection, <int>{2, 3});
   });
 
-testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) async {
+testWidgets('SegmentedButton allows for empty selection', (final WidgetTester tester) async {
     int callbackCount = 0;
     int? selectedSegment = 1;
 
-    Widget frameWithSelection(int? selected) {
+    Widget frameWithSelection(final int? selected) {
       return Material(
         child: boilerplate(
           child: SegmentedButton<int>(
@@ -168,7 +168,7 @@ testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) 
               ButtonSegment<int>(value: 3, label: Text('3')),
             ],
             selected: <int>{if (selected != null) selected},
-            onSelectionChanged: (Set<int> selected) {
+            onSelectionChanged: (final Set<int> selected) {
               selectedSegment = selected.isEmpty ? null : selected.first;
               callbackCount += 1;
             },
@@ -206,8 +206,8 @@ testWidgets('SegmentedButton allows for empty selection', (WidgetTester tester) 
     expect(selectedSegment, 3);
   });
 
-testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTester tester) async {
-    Widget frameWithSelection(int selected) {
+testWidgets('SegmentedButton shows checkboxes for selected segments', (final WidgetTester tester) async {
+    Widget frameWithSelection(final int selected) {
       return Material(
         child: boilerplate(
           child: SegmentedButton<int>(
@@ -217,13 +217,13 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
               ButtonSegment<int>(value: 3, label: Text('3')),
             ],
             selected: <int>{selected},
-            onSelectionChanged: (Set<int> selected) {},
+            onSelectionChanged: (final Set<int> selected) {},
           ),
         ),
       );
     }
 
-    Finder textHasIcon(String text, IconData icon) {
+    Finder textHasIcon(final String text, final IconData icon) {
       return find.descendant(
         of: find.widgetWithText(Row, text),
         matching: find.byIcon(icon)
@@ -243,8 +243,8 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byIcon(Icons.check), findsOneWidget);
   });
 
-  testWidgets('SegmentedButton shows selected checkboxes in place of icon if it has a label as well', (WidgetTester tester) async {
-    Widget frameWithSelection(int selected) {
+  testWidgets('SegmentedButton shows selected checkboxes in place of icon if it has a label as well', (final WidgetTester tester) async {
+    Widget frameWithSelection(final int selected) {
       return Material(
         child: boilerplate(
           child: SegmentedButton<int>(
@@ -254,13 +254,13 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
               ButtonSegment<int>(value: 3, icon: Icon(Icons.add_alarm), label: Text('3')),
             ],
             selected: <int>{selected},
-            onSelectionChanged: (Set<int> selected) {},
+            onSelectionChanged: (final Set<int> selected) {},
           ),
         ),
       );
     }
 
-    Finder textHasIcon(String text, IconData icon) {
+    Finder textHasIcon(final String text, final IconData icon) {
       return find.descendant(
         of: find.widgetWithText(Row, text),
         matching: find.byIcon(icon)
@@ -286,8 +286,8 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
     expect(find.byIcon(Icons.add_alarm), findsNothing);
   });
 
-  testWidgets('SegmentedButton shows selected checkboxes next to icon if there is no label', (WidgetTester tester) async {
-    Widget frameWithSelection(int selected) {
+  testWidgets('SegmentedButton shows selected checkboxes next to icon if there is no label', (final WidgetTester tester) async {
+    Widget frameWithSelection(final int selected) {
       return Material(
         child: boilerplate(
           child: SegmentedButton<int>(
@@ -297,13 +297,13 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
               ButtonSegment<int>(value: 3, icon: Icon(Icons.add_alarm)),
             ],
             selected: <int>{selected},
-            onSelectionChanged: (Set<int> selected) {},
+            onSelectionChanged: (final Set<int> selected) {},
           ),
         ),
       );
     }
 
-    Finder rowWithIcons(IconData icon1, IconData icon2) {
+    Finder rowWithIcons(final IconData icon1, final IconData icon2) {
       return find.descendant(
         of: find.widgetWithIcon(Row, icon1),
         matching: find.byIcon(icon2)
@@ -327,7 +327,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
 
   });
 
-  testWidgets('SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('SegmentedButtons have correct semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -340,7 +340,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
               ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
             ],
             selected: const <int>{2},
-            onSelectionChanged: (Set<int> selected) {},
+            onSelectionChanged: (final Set<int> selected) {},
           ),
         ),
       ),
@@ -406,7 +406,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
   });
 
 
-  testWidgets('Multi-select SegmentedButtons have correct semantics', (WidgetTester tester) async {
+  testWidgets('Multi-select SegmentedButtons have correct semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -419,7 +419,7 @@ testWidgets('SegmentedButton shows checkboxes for selected segments', (WidgetTes
               ButtonSegment<int>(value: 3, label: Text('3'), enabled: false),
             ],
             selected: const <int>{1, 3},
-            onSelectionChanged: (Set<int> selected) {},
+            onSelectionChanged: (final Set<int> selected) {},
             multiSelectionEnabled: true,
           ),
         ),

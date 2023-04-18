@@ -14,11 +14,11 @@ const String chars = '1234567890'
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     '!@#%^&()[]{}<>,./?;:"`~-_=+|';
 
-String _randomize(String text) {
+String _randomize(final String text) {
   return text.replaceAllMapped(
     '*',
     // Passing a seed so the results are reproducible.
-    (_) => chars[Random(0).nextInt(chars.length)],
+    (final _) => chars[Random(0).nextInt(chars.length)],
   );
 }
 
@@ -28,9 +28,9 @@ class ParagraphGenerator {
   /// Randomizes the given [text] and creates a paragraph with a unique
   /// font-size so that the engine doesn't reuse a cached ruler.
   ui.Paragraph generate(
-    String text, {
-    int? maxLines,
-    bool hasEllipsis = false,
+    final String text, {
+    final int? maxLines,
+    final bool hasEllipsis = false,
   }) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(
       fontFamily: 'sans-serif',
@@ -76,7 +76,7 @@ class BenchTextLayout extends RawRecorder {
       '** * *** ******* ***********';
 
   @override
-  void body(Profile profile) {
+  void body(final Profile profile) {
     recordParagraphOperations(
       profile: profile,
       paragraph: generator.generate(singleLineText),
@@ -111,11 +111,11 @@ class BenchTextLayout extends RawRecorder {
   }
 
   void recordParagraphOperations({
-    required Profile profile,
-    required ui.Paragraph paragraph,
-    required String text,
-    required String keyPrefix,
-    required double maxWidth,
+    required final Profile profile,
+    required final ui.Paragraph paragraph,
+    required final String text,
+    required final String keyPrefix,
+    required final double maxWidth,
   }) {
     profile.record('$keyPrefix.layout', () {
       paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
@@ -153,7 +153,7 @@ class BenchTextCachedLayout extends RawRecorder {
   static const String canvasKitBenchmarkName = 'text_canvas_kit_cached_layout';
 
   @override
-  void body(Profile profile) {
+  void body(final Profile profile) {
     final ui.ParagraphBuilder builder = ui.ParagraphBuilder(ui.ParagraphStyle(fontFamily: 'sans-serif'))
         ..pushStyle(ui.TextStyle(fontSize: 12.0))
         ..addText(
@@ -203,7 +203,7 @@ class BenchBuildColorsGrid extends WidgetBuildRecorder {
 
   @override
   Future<void> setUpAll() async {
-    registerEngineBenchmarkValueListener('text_layout', (num value) {
+    registerEngineBenchmarkValueListener('text_layout', (final num value) {
       _textLayoutMicros += value;
     });
   }
@@ -350,7 +350,7 @@ class ColorItem extends StatelessWidget {
       "$_counter:#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}";
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Semantics(
       container: true,
       child: Container(
@@ -396,7 +396,7 @@ class PaletteTabView extends StatelessWidget {
   static const List<int> accentKeys = <int>[100, 200, 400, 700];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle =
         textTheme.bodyMedium!.copyWith(color: Colors.white);
@@ -406,14 +406,14 @@ class PaletteTabView extends StatelessWidget {
       child: ListView(
         itemExtent: kColorItemHeight,
         children: <Widget>[
-          ...primaryKeys.map<Widget>((int index) {
+          ...primaryKeys.map<Widget>((final int index) {
             return DefaultTextStyle(
               style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
               child: ColorItem(index: index, color: colors.primary[index]!),
             );
           }),
           if (colors.accent != null)
-            ...accentKeys.map<Widget>((int index) {
+            ...accentKeys.map<Widget>((final int index) {
               return DefaultTextStyle(
                 style:
                     index > colors.threshold ? whiteTextStyle : blackTextStyle,
@@ -431,7 +431,7 @@ class ColorsDemo extends StatelessWidget {
   const ColorsDemo({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: allPalettes.length,
       child: Scaffold(
@@ -442,12 +442,12 @@ class ColorsDemo extends StatelessWidget {
             isScrollable: true,
             tabs: allPalettes
                 .map<Widget>(
-                    (Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
+                    (final Palette swatch) => Tab(text: '$_counter:${swatch.name}'))
                 .toList(),
           ),
         ),
         body: TabBarView(
-          children: allPalettes.map<Widget>((Palette colors) {
+          children: allPalettes.map<Widget>((final Palette colors) {
             return PaletteTabView(colors: colors);
           }).toList(),
         ),

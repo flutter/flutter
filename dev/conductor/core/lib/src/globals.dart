@@ -42,7 +42,7 @@ final RegExp releaseCandidateBranchRegex = RegExp(
 );
 
 /// Cast a dynamic to String and trim.
-String stdoutToString(dynamic input) {
+String stdoutToString(final dynamic input) {
   final String str = input as String;
   return str.trim();
 }
@@ -75,10 +75,10 @@ bool assertsEnabled() {
 /// The environment is favored over CLI args since the latter can have a default
 /// value, which the environment should be able to override.
 String? getValueFromEnvOrArgs(
-  String name,
-  ArgResults argResults,
-  Map<String, String> env, {
-  bool allowNull = false,
+  final String name,
+  final ArgResults argResults,
+  final Map<String, String> env, {
+  final bool allowNull = false,
 }) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null) {
@@ -97,9 +97,9 @@ String? getValueFromEnvOrArgs(
 }
 
 bool getBoolFromEnvOrArgs(
-  String name,
-  ArgResults argResults,
-  Map<String, String> env,
+  final String name,
+  final ArgResults argResults,
+  final Map<String, String> env,
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null) {
@@ -118,9 +118,9 @@ bool getBoolFromEnvOrArgs(
 /// The environment is favored over CLI args since the latter can have a default
 /// value, which the environment should be able to override.
 List<String> getValuesFromEnvOrArgs(
-  String name,
-  ArgResults argResults,
-  Map<String, String> env,
+  final String name,
+  final ArgResults argResults,
+  final Map<String, String> env,
 ) {
   final String envName = fromArgToEnvName(name);
   if (env[envName] != null && env[envName] != '') {
@@ -138,7 +138,7 @@ List<String> getValuesFromEnvOrArgs(
 /// Translate CLI arg names to env variable names.
 ///
 /// For example, 'state-file' -> 'STATE_FILE'.
-String fromArgToEnvName(String argName) {
+String fromArgToEnvName(final String argName) {
   return argName.toUpperCase().replaceAll(r'-', r'_');
 }
 
@@ -146,9 +146,9 @@ String fromArgToEnvName(String argName) {
 ///
 /// Includes PR title and body via query params.
 String getNewPrLink({
-  required String userName,
-  required String repoName,
-  required pb.ConductorState state,
+  required final String userName,
+  required final String repoName,
+  required final pb.ConductorState state,
 }) {
   assert(state.releaseChannel.isNotEmpty);
   assert(state.releaseVersion.isNotEmpty);

@@ -22,7 +22,7 @@ void main() {
 
   test('debugDumpSemantics prints explanation when semantics are unavailable', () {
     final List<String?> log = <String?>[];
-    debugPrint = (String? message, {int? wrapWidth}) {
+    debugPrint = (final String? message, {final int? wrapWidth}) {
       log.add(message);
     };
     debugDumpSemanticsTree();

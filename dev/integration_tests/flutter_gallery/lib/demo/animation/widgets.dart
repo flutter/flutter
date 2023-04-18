@@ -15,7 +15,7 @@ class SectionCard extends StatelessWidget {
   final Section section;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Semantics(
       label: section.title,
       button: true,
@@ -68,7 +68,7 @@ class SectionTitle extends StatelessWidget {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return IgnorePointer(
       child: Opacity(
         opacity: opacity,
@@ -97,7 +97,7 @@ class SectionIndicator extends StatelessWidget {
   final double opacity;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return IgnorePointer(
       child: Container(
         width: kSectionIndicatorWidth,
@@ -117,7 +117,7 @@ class SectionDetailView extends StatelessWidget {
   final SectionDetail detail;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget image = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6.0),

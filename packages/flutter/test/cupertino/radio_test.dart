@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Radio control test', (WidgetTester tester) async {
+  testWidgets('Radio control test', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -63,7 +63,7 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('Radio can be toggled when toggleable is set', (WidgetTester tester) async {
+  testWidgets('Radio can be toggled when toggleable is set', (final WidgetTester tester) async {
     final Key key = UniqueKey();
     final List<int?> log = <int?>[];
 
@@ -118,7 +118,7 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
-  testWidgets('Radio semantics', (WidgetTester tester) async {
+  testWidgets('Radio semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(CupertinoApp(
@@ -126,7 +126,7 @@ void main() {
         child: CupertinoRadio<int>(
           value: 1,
           groupValue: 2,
-          onChanged: (int? i) { },
+          onChanged: (final int? i) { },
         ),
       ),
     ));
@@ -145,7 +145,7 @@ void main() {
         child: CupertinoRadio<int>(
           value: 2,
           groupValue: 2,
-          onChanged: (int? i) { },
+          onChanged: (final int? i) { },
         ),
       ),
     ));
@@ -206,12 +206,12 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('has semantic events', (WidgetTester tester) async {
+  testWidgets('has semantic events', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final Key key = UniqueKey();
     dynamic semanticEvent;
     int? radioValue = 2;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (final dynamic message) async {
       semanticEvent = message;
     });
 
@@ -221,7 +221,7 @@ void main() {
           key: key,
           value: 1,
           groupValue: radioValue,
-          onChanged: (int? i) {
+          onChanged: (final int? i) {
             radioValue = i;
           },
         ),
@@ -243,17 +243,17 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('Radio can be controlled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('Radio can be controlled by keyboard shortcuts', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     int? groupValue = 1;
     const Key radioKey0 = Key('radio0');
     const Key radioKey1 = Key('radio1');
     const Key radioKey2 = Key('radio2');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'radio2');
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
             return SizedBox(
               width: 200,
               height: 100,
@@ -262,7 +262,7 @@ void main() {
                   CupertinoRadio<int>(
                     key: radioKey0,
                     value: 0,
-                    onChanged: enabled ? (int? newValue) {
+                    onChanged: enabled ? (final int? newValue) {
                       setState(() {
                         groupValue = newValue;
                       });
@@ -273,7 +273,7 @@ void main() {
                   CupertinoRadio<int>(
                     key: radioKey1,
                     value: 1,
-                    onChanged: enabled ? (int? newValue) {
+                    onChanged: enabled ? (final int? newValue) {
                       setState(() {
                         groupValue = newValue;
                       });
@@ -283,7 +283,7 @@ void main() {
                   CupertinoRadio<int>(
                     key: radioKey2,
                     value: 2,
-                    onChanged: enabled ? (int? newValue) {
+                    onChanged: enabled ? (final int? newValue) {
                       setState(() {
                         groupValue = newValue;
                       });
@@ -315,13 +315,13 @@ void main() {
     expect(groupValue, equals(2));
   });
 
-  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
+  testWidgets('Do not crash when widget disappears while pointer is down', (final WidgetTester tester) async {
     final Key key = UniqueKey();
 
-    Widget buildRadio(bool show) {
+    Widget buildRadio(final bool show) {
       return CupertinoApp(
         home: Center(
-          child: show ? CupertinoRadio<bool>(key: key, value: true, groupValue: false, onChanged: (_) { }) : Container(),
+          child: show ? CupertinoRadio<bool>(key: key, value: true, groupValue: false, onChanged: (final _) { }) : Container(),
         ),
       );
     }

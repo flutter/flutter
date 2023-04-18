@@ -27,23 +27,23 @@ class RenderImage extends RenderBox {
   /// must not be null. The [textDirection] argument must not be null if
   /// [alignment] will need resolving or if [matchTextDirection] is true.
   RenderImage({
-    ui.Image? image,
+    final ui.Image? image,
     this.debugImageLabel,
-    double? width,
-    double? height,
-    double scale = 1.0,
-    Color? color,
-    Animation<double>? opacity,
-    BlendMode? colorBlendMode,
-    BoxFit? fit,
-    AlignmentGeometry alignment = Alignment.center,
-    ImageRepeat repeat = ImageRepeat.noRepeat,
-    Rect? centerSlice,
-    bool matchTextDirection = false,
-    TextDirection? textDirection,
-    bool invertColors = false,
-    bool isAntiAlias = false,
-    FilterQuality filterQuality = FilterQuality.low,
+    final double? width,
+    final double? height,
+    final double scale = 1.0,
+    final Color? color,
+    final Animation<double>? opacity,
+    final BlendMode? colorBlendMode,
+    final BoxFit? fit,
+    final AlignmentGeometry alignment = Alignment.center,
+    final ImageRepeat repeat = ImageRepeat.noRepeat,
+    final Rect? centerSlice,
+    final bool matchTextDirection = false,
+    final TextDirection? textDirection,
+    final bool invertColors = false,
+    final bool isAntiAlias = false,
+    final FilterQuality filterQuality = FilterQuality.low,
   }) : _image = image,
        _width = width,
        _height = height,
@@ -83,7 +83,7 @@ class RenderImage extends RenderBox {
   /// The image to display.
   ui.Image? get image => _image;
   ui.Image? _image;
-  set image(ui.Image? value) {
+  set image(final ui.Image? value) {
     if (value == _image) {
       return;
     }
@@ -110,7 +110,7 @@ class RenderImage extends RenderBox {
   /// aspect ratio.
   double? get width => _width;
   double? _width;
-  set width(double? value) {
+  set width(final double? value) {
     if (value == _width) {
       return;
     }
@@ -124,7 +124,7 @@ class RenderImage extends RenderBox {
   /// aspect ratio.
   double? get height => _height;
   double? _height;
-  set height(double? value) {
+  set height(final double? value) {
     if (value == _height) {
       return;
     }
@@ -137,7 +137,7 @@ class RenderImage extends RenderBox {
   /// Used when determining the best display size for the image.
   double get scale => _scale;
   double _scale;
-  set scale(double value) {
+  set scale(final double value) {
     if (value == _scale) {
       return;
     }
@@ -158,7 +158,7 @@ class RenderImage extends RenderBox {
   /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   Color? get color => _color;
   Color? _color;
-  set color(Color? value) {
+  set color(final Color? value) {
     if (value == _color) {
       return;
     }
@@ -171,7 +171,7 @@ class RenderImage extends RenderBox {
   /// of each image pixel before painting onto the canvas.
   Animation<double>? get opacity => _opacity;
   Animation<double>? _opacity;
-  set opacity(Animation<double>? value) {
+  set opacity(final Animation<double>? value) {
     if (value == _opacity) {
       return;
     }
@@ -192,7 +192,7 @@ class RenderImage extends RenderBox {
   /// to nearest-neighbor.
   FilterQuality get filterQuality => _filterQuality;
   FilterQuality _filterQuality;
-  set filterQuality(FilterQuality value) {
+  set filterQuality(final FilterQuality value) {
     if (value == _filterQuality) {
       return;
     }
@@ -211,7 +211,7 @@ class RenderImage extends RenderBox {
   ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
   BlendMode? get colorBlendMode => _colorBlendMode;
   BlendMode? _colorBlendMode;
-  set colorBlendMode(BlendMode? value) {
+  set colorBlendMode(final BlendMode? value) {
     if (value == _colorBlendMode) {
       return;
     }
@@ -226,7 +226,7 @@ class RenderImage extends RenderBox {
   /// [paintImage].
   BoxFit? get fit => _fit;
   BoxFit? _fit;
-  set fit(BoxFit? value) {
+  set fit(final BoxFit? value) {
     if (value == _fit) {
       return;
     }
@@ -240,7 +240,7 @@ class RenderImage extends RenderBox {
   /// not be null.
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
-  set alignment(AlignmentGeometry value) {
+  set alignment(final AlignmentGeometry value) {
     if (value == _alignment) {
       return;
     }
@@ -251,7 +251,7 @@ class RenderImage extends RenderBox {
   /// How to repeat this image if it doesn't fill its layout bounds.
   ImageRepeat get repeat => _repeat;
   ImageRepeat _repeat;
-  set repeat(ImageRepeat value) {
+  set repeat(final ImageRepeat value) {
     if (value == _repeat) {
       return;
     }
@@ -268,7 +268,7 @@ class RenderImage extends RenderBox {
   /// the center slice will be stretched only vertically.
   Rect? get centerSlice => _centerSlice;
   Rect? _centerSlice;
-  set centerSlice(Rect? value) {
+  set centerSlice(final Rect? value) {
     if (value == _centerSlice) {
       return;
     }
@@ -283,7 +283,7 @@ class RenderImage extends RenderBox {
   /// after it. This is primarily used for implementing smart invert on iOS.
   bool get invertColors => _invertColors;
   bool _invertColors;
-  set invertColors(bool value) {
+  set invertColors(final bool value) {
     if (value == _invertColors) {
       return;
     }
@@ -307,7 +307,7 @@ class RenderImage extends RenderBox {
   /// If this is set to true, [textDirection] must not be null.
   bool get matchTextDirection => _matchTextDirection;
   bool _matchTextDirection;
-  set matchTextDirection(bool value) {
+  set matchTextDirection(final bool value) {
     if (value == _matchTextDirection) {
       return;
     }
@@ -322,7 +322,7 @@ class RenderImage extends RenderBox {
   /// depend on the direction.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  set textDirection(final TextDirection? value) {
     if (_textDirection == value) {
       return;
     }
@@ -335,7 +335,7 @@ class RenderImage extends RenderBox {
   /// Anti-aliasing alleviates the sawtooth artifact when the image is rotated.
   bool get isAntiAlias => _isAntiAlias;
   bool _isAntiAlias;
-  set isAntiAlias(bool value) {
+  set isAntiAlias(final bool value) {
     if (_isAntiAlias == value) {
       return;
     }
@@ -369,7 +369,7 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     assert(height >= 0.0);
     if (_width == null && _height == null) {
       return 0.0;
@@ -378,13 +378,13 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     assert(height >= 0.0);
     return _sizeForConstraints(BoxConstraints.tightForFinite(height: height)).width;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     assert(width >= 0.0);
     if (_width == null && _height == null) {
       return 0.0;
@@ -393,16 +393,16 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     assert(width >= 0.0);
     return _sizeForConstraints(BoxConstraints.tightForFinite(width: width)).height;
   }
 
   @override
-  bool hitTestSelf(Offset position) => true;
+  bool hitTestSelf(final Offset position) => true;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _sizeForConstraints(constraints);
   }
 
@@ -412,7 +412,7 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  void attach(covariant PipelineOwner owner) {
+  void attach(covariant final PipelineOwner owner) {
     super.attach(owner);
     _opacity?.addListener(markNeedsPaint);
   }
@@ -424,7 +424,7 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (_image == null) {
       return;
     }
@@ -458,7 +458,7 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ui.Image>('image', image));
     properties.add(DoubleProperty('width', width, defaultValue: null));

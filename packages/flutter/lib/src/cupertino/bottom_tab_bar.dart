@@ -143,14 +143,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Indicates whether the tab bar is fully opaque or can have contents behind
   /// it show through it.
-  bool opaque(BuildContext context) {
+  bool opaque(final BuildContext context) {
     final Color backgroundColor =
         this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
     return CupertinoDynamicColor.resolve(backgroundColor, context).alpha == 0xFF;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final double bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
@@ -159,7 +159,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       context,
     );
 
-    BorderSide resolveBorderSide(BorderSide side) {
+    BorderSide resolveBorderSide(final BorderSide side) {
       return side == BorderSide.none
         ? side
         : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
@@ -216,7 +216,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
-  List<Widget> _buildTabItems(BuildContext context) {
+  List<Widget> _buildTabItems(final BuildContext context) {
     final List<Widget> result = <Widget>[];
     final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
@@ -260,7 +260,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return result;
   }
 
-  List<Widget> _buildSingleTabItem(BottomNavigationBarItem item, bool active) {
+  List<Widget> _buildSingleTabItem(final BottomNavigationBarItem item, final bool active) {
     return <Widget>[
       Expanded(
         child: Center(child: active ? item.activeIcon : item.icon),
@@ -270,7 +270,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Change the active tab item's icon and title colors to active.
-  Widget _wrapActiveItem(BuildContext context, Widget item, { required bool active }) {
+  Widget _wrapActiveItem(final BuildContext context, final Widget item, { required final bool active }) {
     if (!active) {
       return item;
     }
@@ -291,16 +291,16 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Create a clone of the current [CupertinoTabBar] but with provided
   /// parameters overridden.
   CupertinoTabBar copyWith({
-    Key? key,
-    List<BottomNavigationBarItem>? items,
-    Color? backgroundColor,
-    Color? activeColor,
-    Color? inactiveColor,
-    double? iconSize,
-    double? height,
-    Border? border,
-    int? currentIndex,
-    ValueChanged<int>? onTap,
+    final Key? key,
+    final List<BottomNavigationBarItem>? items,
+    final Color? backgroundColor,
+    final Color? activeColor,
+    final Color? inactiveColor,
+    final double? iconSize,
+    final double? height,
+    final Border? border,
+    final int? currentIndex,
+    final ValueChanged<int>? onTap,
   }) {
     return CupertinoTabBar(
       key: key ?? this.key,

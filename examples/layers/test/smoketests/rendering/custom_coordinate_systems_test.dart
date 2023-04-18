@@ -11,7 +11,7 @@ import '../../../rendering/custom_coordinate_systems.dart' as demo;
 
 void main() {
   test('layers smoketest for rendering/custom_coordinate_systems.dart', () {
-    FlutterError.onError = (FlutterErrorDetails details) { throw details.exception; };
+    FlutterError.onError = (final FlutterErrorDetails details) { throw details.exception; };
     demo.main();
     expect(SchedulerBinding.instance.hasScheduledFrame, true);
   });

@@ -12,7 +12,7 @@ class TextEditingControllerExampleApp extends StatelessWidget {
   const TextEditingControllerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: TextEditingControllerExample(),
     );
@@ -49,7 +49,7 @@ class _TextEditingControllerExampleState extends State<TextEditingControllerExam
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Should route pointers', () {
     bool callbackRan = false;
-    void callback(PointerEvent event) {
+    void callback(final PointerEvent event) {
       callbackRan = true;
     }
 
@@ -30,11 +30,11 @@ void main() {
 
   test('Supports re-entrant cancellation', () {
     bool callbackRan = false;
-    void callback(PointerEvent event) {
+    void callback(final PointerEvent event) {
       callbackRan = true;
     }
     final PointerRouter router = PointerRouter();
-    router.addRoute(2, (PointerEvent event) {
+    router.addRoute(2, (final PointerEvent event) {
       router.removeRoute(2, callback);
     });
     router.addRoute(2, callback);
@@ -45,13 +45,13 @@ void main() {
 
   test('Supports global callbacks', () {
     bool secondCallbackRan = false;
-    void secondCallback(PointerEvent event) {
+    void secondCallback(final PointerEvent event) {
       secondCallbackRan = true;
     }
 
     bool firstCallbackRan = false;
     final PointerRouter router = PointerRouter();
-    router.addGlobalRoute((PointerEvent event) {
+    router.addGlobalRoute((final PointerEvent event) {
       firstCallbackRan = true;
       router.addGlobalRoute(secondCallback);
     });
@@ -64,11 +64,11 @@ void main() {
 
   test('Supports re-entrant global cancellation', () {
     bool callbackRan = false;
-    void callback(PointerEvent event) {
+    void callback(final PointerEvent event) {
       callbackRan = true;
     }
     final PointerRouter router = PointerRouter();
-    router.addGlobalRoute((PointerEvent event) {
+    router.addGlobalRoute((final PointerEvent event) {
       router.removeGlobalRoute(callback);
     });
     router.addGlobalRoute(callback);
@@ -79,12 +79,12 @@ void main() {
 
   test('Per-pointer callbacks cannot re-entrantly add global routes', () {
     bool callbackRan = false;
-    void callback(PointerEvent event) {
+    void callback(final PointerEvent event) {
       callbackRan = true;
     }
     final PointerRouter router = PointerRouter();
     bool perPointerCallbackRan = false;
-    router.addRoute(2, (PointerEvent event) {
+    router.addRoute(2, (final PointerEvent event) {
       perPointerCallbackRan = true;
       router.addGlobalRoute(callback);
     });
@@ -97,16 +97,16 @@ void main() {
   test('Per-pointer callbacks happen before global callbacks', () {
     final List<String> log = <String>[];
     final PointerRouter router = PointerRouter();
-    router.addGlobalRoute((PointerEvent event) {
+    router.addGlobalRoute((final PointerEvent event) {
       log.add('global 1');
     });
-    router.addRoute(2, (PointerEvent event) {
+    router.addRoute(2, (final PointerEvent event) {
       log.add('per-pointer 1');
     });
-    router.addGlobalRoute((PointerEvent event) {
+    router.addGlobalRoute((final PointerEvent event) {
       log.add('global 2');
     });
-    router.addRoute(2, (PointerEvent event) {
+    router.addRoute(2, (final PointerEvent event) {
       log.add('per-pointer 2');
     });
     final TestPointer pointer2 = TestPointer(2);
@@ -122,19 +122,19 @@ void main() {
   test('Exceptions do not stop pointer routing', () {
     final List<String> log = <String>[];
     final PointerRouter router = PointerRouter();
-    router.addRoute(2, (PointerEvent event) {
+    router.addRoute(2, (final PointerEvent event) {
       log.add('per-pointer 1');
     });
-    router.addRoute(2, (PointerEvent event) {
+    router.addRoute(2, (final PointerEvent event) {
       log.add('per-pointer 2');
       throw 'Having a bad day!';
     });
-    router.addRoute(2, (PointerEvent event) {
+    router.addRoute(2, (final PointerEvent event) {
       log.add('per-pointer 3');
     });
 
     final FlutterExceptionHandler? previousErrorHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       log.add('error report');
     };
 
@@ -153,7 +153,7 @@ void main() {
   test('Exceptions include router, route & event', () {
     try {
       final PointerRouter router = PointerRouter();
-      router.addRoute(2, (PointerEvent event) => throw 'Pointer exception');
+      router.addRoute(2, (final PointerEvent event) => throw 'Pointer exception');
     } catch (e) {
       expect(e, contains("router: Instance of 'PointerRouter'"));
       expect(e, contains('route: Closure: (PointerEvent) => Null'));
@@ -167,11 +167,11 @@ void main() {
     final PointerRouter router = PointerRouter();
     final Matrix4 transform = (Matrix4.identity()..scale(1 / 2.0, 1 / 2.0, 1.0)).multiplied(Matrix4.translationValues(-10, -30, 0));
 
-    router.addRoute(1, (PointerEvent event) {
+    router.addRoute(1, (final PointerEvent event) {
       events.add(event);
     }, transform);
 
-    router.addGlobalRoute((PointerEvent event) {
+    router.addGlobalRoute((final PointerEvent event) {
       globalEvents.add(event);
     }, transform);
 

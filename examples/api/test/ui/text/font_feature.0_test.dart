@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/ui/text/font_feature.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows font features', (WidgetTester tester) async {
+  testWidgets('shows font features', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: example.ExampleWidget(),

@@ -29,7 +29,7 @@ class FallbackDemo extends StatefulWidget {
 class FallbackDemoState extends State<FallbackDemo> {
   String? _capture;
   late final FallbackFocusNode _node = FallbackFocusNode(
-    onKeyEvent: (KeyEvent event) {
+    onKeyEvent: (final KeyEvent event) {
       if (event is! KeyDownEvent) {
         return false;
       }
@@ -44,7 +44,7 @@ class FallbackDemoState extends State<FallbackDemo> {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FallbackFocus(
       node: _node,
       child: Container(
@@ -127,8 +127,8 @@ class FallbackKeyEventRegistrar {
   // assigned by the shortcut system, but it can be anything. The returned
   // handler calls that handler first, and if the event is not handled at all
   // by the framework, invokes the innermost `FallbackNode`'s handler.
-  KeyMessageHandler _buildHandler(KeyMessageHandler existing) {
-    return (KeyMessage message) {
+  KeyMessageHandler _buildHandler(final KeyMessageHandler existing) {
+    return (final KeyMessage message) {
       if (existing(message)) {
         return true;
       }
@@ -167,7 +167,7 @@ class FallbackFocus extends StatelessWidget {
   final Widget child;
   final FallbackFocusNode node;
 
-  void _onFocusChange(bool focused) {
+  void _onFocusChange(final bool focused) {
     if (focused) {
       FallbackKeyEventRegistrar.instance._fallbackNodes.add(node);
     } else {
@@ -177,7 +177,7 @@ class FallbackFocus extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Focus(
       onFocusChange: _onFocusChange,
       child: child,

@@ -12,7 +12,7 @@ class IconButtonExampleApp extends StatelessWidget {
   const IconButtonExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('IconButton Sample')),
@@ -27,7 +27,7 @@ class IconButtonExample extends StatelessWidget {
 
   @override
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       color: Colors.white,
       child: Center(

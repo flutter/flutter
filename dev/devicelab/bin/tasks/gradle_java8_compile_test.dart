@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     try {
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+      await runPluginProjectTest((final FlutterPluginProject pluginProject) async {
 
         section('check main plugin file exists');
         final File pluginMainKotlinFile = File(

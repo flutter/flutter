@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/button/cupertino_button.0.dart' as
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Has 4 CupertinoButton variants', (WidgetTester tester) async {
+  testWidgets('Has 4 CupertinoButton variants', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoButtonApp(),
     );

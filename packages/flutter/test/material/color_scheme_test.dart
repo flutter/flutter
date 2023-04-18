@@ -460,16 +460,16 @@ void main() {
     final ImageProvider image = MemoryImage(corruptImage);
 
     expect(() async => ColorScheme.fromImageProvider(provider: image), throwsA(
-      isA<Exception>().having((Exception e) => e.toString(),
+      isA<Exception>().having((final Exception e) => e.toString(),
         'Timeout occurred trying to load image', contains('TimeoutException')),
       ),
     );
   });
 
-  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (WidgetTester tester) async {
+  testWidgets('generated scheme "on" colors meet a11y contrast guidelines', (final WidgetTester tester) async {
     final ColorScheme colors = ColorScheme.fromSeed(seedColor: Colors.teal);
 
-    Widget label(String text, Color textColor, Color background) {
+    Widget label(final String text, final Color textColor, final Color background) {
       return Container(
         color: background,
         padding: const EdgeInsets.all(8),

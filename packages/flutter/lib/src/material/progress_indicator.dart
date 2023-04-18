@@ -108,7 +108,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// {@endtemplate}
   final String? semanticsValue;
 
-  Color _getValueColor(BuildContext context, {Color? defaultColor}) {
+  Color _getValueColor(final BuildContext context, {final Color? defaultColor}) {
     return valueColor?.value ??
       color ??
       ProgressIndicatorTheme.of(context).color ??
@@ -117,14 +117,14 @@ abstract class ProgressIndicator extends StatefulWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
   }
 
   Widget _buildSemanticsWrapper({
-    required BuildContext context,
-    required Widget child,
+    required final BuildContext context,
+    required final Widget child,
   }) {
     String? expandedSemanticsValue = semanticsValue;
     if (value != null) {
@@ -177,7 +177,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   );
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.fill;
@@ -185,7 +185,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
     paint.color = valueColor;
 
-    void drawBar(double x, double width) {
+    void drawBar(final double x, final double width) {
       if (width <= 0.0) {
         return;
       }
@@ -215,7 +215,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_LinearProgressIndicatorPainter oldPainter) {
+  bool shouldRepaint(final _LinearProgressIndicatorPainter oldPainter) {
     return oldPainter.backgroundColor != backgroundColor
         || oldPainter.valueColor != valueColor
         || oldPainter.value != value
@@ -321,7 +321,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   }
 
   @override
-  void didUpdateWidget(LinearProgressIndicator oldWidget) {
+  void didUpdateWidget(final LinearProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
@@ -336,7 +336,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     super.dispose();
   }
 
-  Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
+  Widget _buildIndicator(final BuildContext context, final double animationValue, final TextDirection textDirection) {
     final ProgressIndicatorThemeData defaults = Theme.of(context).useMaterial3
       ? _LinearProgressIndicatorDefaultsM3(context)
       : _LinearProgressIndicatorDefaultsM2(context);
@@ -370,7 +370,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
 
     if (widget.value != null) {
@@ -379,7 +379,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
     return AnimatedBuilder(
       animation: _controller.view,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return _buildIndicator(context, _controller.value, textDirection);
       },
     );
@@ -423,7 +423,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   static const double _startAngle = -math.pi / 2.0;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
@@ -449,7 +449,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CircularProgressIndicatorPainter oldPainter) {
+  bool shouldRepaint(final _CircularProgressIndicatorPainter oldPainter) {
     return oldPainter.backgroundColor != backgroundColor
         || oldPainter.valueColor != valueColor
         || oldPainter.value != value
@@ -609,7 +609,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   @override
-  void didUpdateWidget(CircularProgressIndicator oldWidget) {
+  void didUpdateWidget(final CircularProgressIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.value == null && !_controller.isAnimating) {
       _controller.repeat();
@@ -624,12 +624,12 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
     super.dispose();
   }
 
-  Widget _buildCupertinoIndicator(BuildContext context) {
+  Widget _buildCupertinoIndicator(final BuildContext context) {
     final Color? tickColor = widget.backgroundColor;
     return CupertinoActivityIndicator(key: widget.key, color: tickColor);
   }
 
-  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(final BuildContext context, final double headValue, final double tailValue, final double offsetValue, final double rotationValue) {
     final ProgressIndicatorThemeData defaults = Theme.of(context).useMaterial3
       ? _CircularProgressIndicatorDefaultsM3(context)
       : _CircularProgressIndicatorDefaultsM2(context);
@@ -662,7 +662,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   Widget _buildAnimation() {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return _buildMaterialIndicator(
           context,
           _strokeHeadTween.evaluate(_controller),
@@ -675,7 +675,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     switch (widget._indicatorType) {
       case _ActivityIndicatorType.material:
         if (widget.value != null) {
@@ -716,7 +716,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
 
   final double arrowheadScale;
 
-  void paintArrowhead(Canvas canvas, Size size) {
+  void paintArrowhead(final Canvas canvas, final Size size) {
     // ux, uy: a unit vector whose direction parallels the base of the arrowhead.
     // (So ux, -uy points in the direction the arrowhead points.)
     final double arcEnd = arcStart + arcSweep;
@@ -745,7 +745,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     super.paint(canvas, size);
     if (arrowheadScale > 0.0) {
       paintArrowhead(canvas, size);
@@ -838,7 +838,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   //
   // When value is null the arrow animation starting from wherever we left it.
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final double? value = widget.value;
     if (value != null) {
       _lastValue = value;
@@ -852,7 +852,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   Widget _buildAnimation() {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return _buildMaterialIndicator(
           context,
           // Lengthen the arc a little
@@ -866,7 +866,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   }
 
   @override
-  Widget _buildMaterialIndicator(BuildContext context, double headValue, double tailValue, double offsetValue, double rotationValue) {
+  Widget _buildMaterialIndicator(final BuildContext context, final double headValue, final double tailValue, final double offsetValue, final double rotationValue) {
     final double? value = widget.value;
     final double arrowheadScale = value == null ? 0.0 : const Interval(0.1, _strokeHeadInterval).transform(value);
     final double rotation;

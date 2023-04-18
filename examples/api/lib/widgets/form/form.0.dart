@@ -12,7 +12,7 @@ class FormExampleApp extends StatelessWidget {
   const FormExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Form Sample')),
@@ -33,7 +33,7 @@ class _FormExampleState extends State<FormExample> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Form(
       key: _formKey,
       child: Column(
@@ -43,7 +43,7 @@ class _FormExampleState extends State<FormExample> {
             decoration: const InputDecoration(
               hintText: 'Enter your email',
             ),
-            validator: (String? value) {
+            validator: (final String? value) {
               if (value == null || value.isEmpty) {
                 return 'Please enter some text';
               }

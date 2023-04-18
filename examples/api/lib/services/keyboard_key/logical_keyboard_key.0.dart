@@ -14,7 +14,7 @@ class KeyExampleApp extends StatelessWidget {
   const KeyExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Key Handling Example')),
@@ -46,7 +46,7 @@ class _MyKeyExampleState extends State<MyKeyExample> {
 
   // Handles the key events from the Focus widget and updates the
   // _message.
-  KeyEventResult _handleKeyEvent(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyEvent(final FocusNode node, final RawKeyEvent event) {
     setState(() {
       if (event.logicalKey == LogicalKeyboardKey.keyQ) {
         _message = 'Pressed the "Q" key!';
@@ -64,7 +64,7 @@ class _MyKeyExampleState extends State<MyKeyExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Container(
       color: Colors.white,
@@ -76,7 +76,7 @@ class _MyKeyExampleState extends State<MyKeyExample> {
           onKey: _handleKeyEvent,
           child: AnimatedBuilder(
             animation: _focusNode,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               if (!_focusNode.hasFocus) {
                 return GestureDetector(
                   onTap: () {

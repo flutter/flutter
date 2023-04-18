@@ -16,7 +16,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   WebCodeGenerator(
     super.keyData,
     super.logicalData,
-    String logicalLocationMap,
+    final String logicalLocationMap,
   ) : _logicalLocationMap = parseMapOfListOfNullableString(logicalLocationMap);
 
   /// This generates the map of Web KeyboardEvent codes to logical key ids.
@@ -48,11 +48,11 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   /// This generates the map of Web number pad codes to logical key ids.
   String get _webLogicalLocationMap {
     final OutputLines<String> lines = OutputLines<String>('Web logical location map');
-    _logicalLocationMap.forEach((String webKey, List<String?> locations) {
-      final String valuesString = locations.map((String? value) {
+    _logicalLocationMap.forEach((final String webKey, final List<String?> locations) {
+      final String valuesString = locations.map((final String? value) {
         return value == null ? 'null' : toHex(logicalData.entryByName(value).value, digits: 11);
       }).join(', ');
-      final String namesString = locations.map((String? value) {
+      final String namesString = locations.map((final String? value) {
         return value == null ? 'null' : logicalData.entryByName(value).constantName;
       }).join(', ');
       lines.add(webKey, "  '$webKey': <int?>[$valuesString], // $namesString");
@@ -65,7 +65,7 @@ class WebCodeGenerator extends PlatformCodeGenerator {
   String get templatePath => path.join(dataRoot, 'web_key_map_dart.tmpl');
 
   @override
-  String outputPath(String platform) => path.join(PlatformCodeGenerator.engineRoot,
+  String outputPath(final String platform) => path.join(PlatformCodeGenerator.engineRoot,
       'lib', 'web_ui', 'lib', 'src', 'engine', 'key_map.g.dart');
 
   @override

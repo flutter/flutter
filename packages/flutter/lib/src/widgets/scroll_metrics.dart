@@ -41,12 +41,12 @@ mixin ScrollMetrics {
   /// is useful to examine hypothetical situations, for example "would applying
   /// this delta unmodified take the position [outOfRange]?".
   ScrollMetrics copyWith({
-    double? minScrollExtent,
-    double? maxScrollExtent,
-    double? pixels,
-    double? viewportDimension,
-    AxisDirection? axisDirection,
-    double? devicePixelRatio,
+    final double? minScrollExtent,
+    final double? maxScrollExtent,
+    final double? pixels,
+    final double? viewportDimension,
+    final AxisDirection? axisDirection,
+    final double? devicePixelRatio,
   }) {
     return FixedScrollMetrics(
       minScrollExtent: minScrollExtent ?? (hasContentDimensions ? this.minScrollExtent : null),
@@ -138,10 +138,10 @@ mixin ScrollMetrics {
 class FixedScrollMetrics with ScrollMetrics {
   /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
-    required double? minScrollExtent,
-    required double? maxScrollExtent,
-    required double? pixels,
-    required double? viewportDimension,
+    required final double? minScrollExtent,
+    required final double? maxScrollExtent,
+    required final double? pixels,
+    required final double? viewportDimension,
     required this.axisDirection,
     required this.devicePixelRatio,
   }) : _minScrollExtent = minScrollExtent,

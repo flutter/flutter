@@ -12,9 +12,9 @@ class MultidexProject extends Project {
   MultidexProject(this.includeFlutterMultiDexApplication);
 
   @override
-  Future<void> setUpIn(Directory dir, {
-    bool useDeferredLoading = false,
-    bool useSyntheticPackage = false,
+  Future<void> setUpIn(final Directory dir, {
+    final bool useDeferredLoading = false,
+    final bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
     writeFile(fileSystem.path.join(dir.path, 'android', 'settings.gradle'), androidSettings);

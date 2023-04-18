@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/nav_bar/cupertino_navigation_bar.0
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CupertinoNavigationBar is semi transparent', (WidgetTester tester) async {
+  testWidgets('CupertinoNavigationBar is semi transparent', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.NavBarApp(),
     );

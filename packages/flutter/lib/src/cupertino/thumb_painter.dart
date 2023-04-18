@@ -51,8 +51,8 @@ class CupertinoThumbPainter {
 
   /// Creates an object that paints an iOS-style switch thumb.
   const CupertinoThumbPainter.switchThumb({
-    Color color = CupertinoColors.white,
-    List<BoxShadow> shadows = _kSwitchBoxShadows,
+    final Color color = CupertinoColors.white,
+    final List<BoxShadow> shadows = _kSwitchBoxShadows,
   }) : this(color: color, shadows: shadows);
 
   /// The color of the interior of the thumb.
@@ -73,7 +73,7 @@ class CupertinoThumbPainter {
   ///
   /// Consider using [radius] and [extension] when deciding how large a
   /// rectangle to use for the thumb.
-  void paint(Canvas canvas, Rect rect) {
+  void paint(final Canvas canvas, final Rect rect) {
     final RRect rrect = RRect.fromRectAndRadius(
       rect,
       Radius.circular(rect.shortestSide / 2.0),

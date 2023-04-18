@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 // functions as expected.
 
 void main() {
-  testWidgets('Example app has a placeholder', (WidgetTester tester) async {
+  testWidgets('Example app has a placeholder', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SampleApp(),
     );

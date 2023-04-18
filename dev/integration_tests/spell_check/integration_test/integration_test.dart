@@ -20,14 +20,14 @@ late Locale locale;
 /// words marked the same as the [TextSpan] provided and returns
 /// true if it is found before timing out at 20 seconds.
 Future<bool> findTextSpanTree(
-  WidgetTester tester,
-  TextSpan inlineSpan,
+  final WidgetTester tester,
+  final TextSpan inlineSpan,
 ) async {
   final RenderObject root = tester.renderObject(find.byType(EditableText));
   expect(root, isNotNull);
 
   RenderEditable? renderEditable;
-  void recursiveFinder(RenderObject child) {
+  void recursiveFinder(final RenderObject child) {
     if (child is RenderEditable && child.text == inlineSpan) {
       renderEditable = child;
       return;
@@ -158,7 +158,7 @@ void main() {
     );
   });
 
-  testWidgets('EditableText spell checks when text is entered and spell check enabled', (WidgetTester tester) async {
+  testWidgets('EditableText spell checks when text is entered and spell check enabled', (final WidgetTester tester) async {
     const TextStyle style = TextStyle();
     const TextStyle misspelledTextStyle = TextField.materialMisspelledTextStyle;
 

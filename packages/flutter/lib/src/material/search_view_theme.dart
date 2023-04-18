@@ -77,15 +77,15 @@ class SearchViewThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   SearchViewThemeData copyWith({
-    Color? backgroundColor,
-    double? elevation,
-    Color? surfaceTintColor,
-    BorderSide? side,
-    OutlinedBorder? shape,
-    TextStyle? headerTextStyle,
-    TextStyle? headerHintStyle,
-    BoxConstraints? constraints,
-    Color? dividerColor,
+    final Color? backgroundColor,
+    final double? elevation,
+    final Color? surfaceTintColor,
+    final BorderSide? side,
+    final OutlinedBorder? shape,
+    final TextStyle? headerTextStyle,
+    final TextStyle? headerHintStyle,
+    final BoxConstraints? constraints,
+    final Color? dividerColor,
   }) {
     return SearchViewThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -101,7 +101,7 @@ class SearchViewThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two [SearchViewThemeData]s.
-  static SearchViewThemeData? lerp(SearchViewThemeData? a, SearchViewThemeData? b, double t) {
+  static SearchViewThemeData? lerp(final SearchViewThemeData? a, final SearchViewThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -132,7 +132,7 @@ class SearchViewThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -152,7 +152,7 @@ class SearchViewThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color?>('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<double?>('elevation', elevation, defaultValue: null));
@@ -166,7 +166,7 @@ class SearchViewThemeData with Diagnosticable {
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
-  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+  static BorderSide? _lerpSides(final BorderSide? a, final BorderSide? b, final double t) {
     if (a == null || b == null) {
       return null;
     }
@@ -207,11 +207,11 @@ class SearchViewTheme extends InheritedWidget {
   /// ```dart
   /// SearchViewThemeData theme = SearchViewTheme.of(context);
   /// ```
-  static SearchViewThemeData of(BuildContext context) {
+  static SearchViewThemeData of(final BuildContext context) {
     final SearchViewTheme? searchViewTheme = context.dependOnInheritedWidgetOfExactType<SearchViewTheme>();
     return searchViewTheme?.data ?? Theme.of(context).searchViewTheme;
   }
 
   @override
-  bool updateShouldNotify(SearchViewTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final SearchViewTheme oldWidget) => data != oldWidget.data;
 }

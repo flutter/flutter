@@ -99,14 +99,14 @@ abstract class TextInputFormatter {
   /// When formatters are chained, `oldValue` reflects the initial value of
   /// [TextEditingValue] at the beginning of the chain.
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
+    final TextEditingValue oldValue,
+    final TextEditingValue newValue,
   );
 
   /// A shorthand to creating a custom [TextInputFormatter] which formats
   /// incoming text input changes with the given function.
   static TextInputFormatter withFunction(
-    TextInputFormatFunction formatFunction,
+    final TextInputFormatFunction formatFunction,
   ) {
     return _SimpleTextInputFormatter(formatFunction);
   }
@@ -127,8 +127,8 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
+    final TextEditingValue oldValue,
+    final TextEditingValue newValue,
   ) {
     return formatFunction(oldValue, newValue);
   }
@@ -138,13 +138,13 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 class _MutableTextRange {
   _MutableTextRange(this.base, this.extent);
 
-  static _MutableTextRange? fromComposingRange(TextRange range) {
+  static _MutableTextRange? fromComposingRange(final TextRange range) {
     return range.isValid && !range.isCollapsed
       ? _MutableTextRange(range.start, range.end)
       : null;
   }
 
-  static _MutableTextRange? fromTextSelection(TextSelection selection) {
+  static _MutableTextRange? fromTextSelection(final TextSelection selection) {
     return selection.isValid
       ? _MutableTextRange(selection.baseOffset, selection.extentOffset)
       : null;
@@ -277,8 +277,8 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// The [filterPattern] and [replacementString] arguments
   /// must not be null.
   FilteringTextInputFormatter.allow(
-    Pattern filterPattern, {
-    String replacementString = '',
+    final Pattern filterPattern, {
+    final String replacementString = '',
   }) : this(filterPattern, allow: true, replacementString: replacementString);
 
   /// Creates a formatter that blocks characters matching a pattern.
@@ -286,8 +286,8 @@ class FilteringTextInputFormatter extends TextInputFormatter {
   /// The [filterPattern] and [replacementString] arguments
   /// must not be null.
   FilteringTextInputFormatter.deny(
-    Pattern filterPattern, {
-    String replacementString = '',
+    final Pattern filterPattern, {
+    final String replacementString = '',
   }) : this(filterPattern, allow: false, replacementString: replacementString);
 
   /// A [Pattern] to match or replace in incoming [TextEditingValue]s.
@@ -373,8 +373,8 @@ class FilteringTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // unused.
-    TextEditingValue newValue,
+    final TextEditingValue oldValue, // unused.
+    final TextEditingValue newValue,
   ) {
     final _TextEditingValueAccumulator formatState = _TextEditingValueAccumulator(newValue);
     assert(!formatState.debugFinalized);
@@ -404,7 +404,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     return formatState.finalize();
   }
 
-  void _processRegion(bool isBannedRegion, int regionStart, int regionEnd, _TextEditingValueAccumulator state) {
+  void _processRegion(final bool isBannedRegion, final int regionStart, final int regionEnd, final _TextEditingValueAccumulator state) {
     final String replacementString = isBannedRegion
       ? (regionStart == regionEnd ? '' : this.replacementString)
       : state.inputValue.text.substring(regionStart, regionEnd);
@@ -417,7 +417,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
       return;
     }
 
-    int adjustIndex(int originalIndex) {
+    int adjustIndex(final int originalIndex) {
       // The length added by adding the replacementString.
       final int replacedLength = originalIndex <= regionStart && originalIndex < regionEnd ? 0 : replacementString.length;
       // The length removed by removing the replacementRange.
@@ -527,7 +527,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///    allow the composition to exceed by default.
   /// {@endtemplate}
   static MaxLengthEnforcement getDefaultMaxLengthEnforcement([
-    TargetPlatform? platform,
+    final TargetPlatform? platform,
   ]) {
     if (kIsWeb) {
       return MaxLengthEnforcement.truncateAfterCompositionEnds;
@@ -552,7 +552,7 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   ///  * [Dart's characters package](https://pub.dev/packages/characters).
   ///  * [Dart's documentation on runes and grapheme clusters](https://dart.dev/guides/language/language-tour#runes-and-grapheme-clusters).
   @visibleForTesting
-  static TextEditingValue truncate(TextEditingValue value, int maxLength) {
+  static TextEditingValue truncate(final TextEditingValue value, final int maxLength) {
     final CharacterRange iterator = CharacterRange(value.text);
     if (value.text.characters.length > maxLength) {
       iterator.expandNext(maxLength);
@@ -576,8 +576,8 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
+    final TextEditingValue oldValue,
+    final TextEditingValue newValue,
   ) {
     final int? maxLength = this.maxLength;
 

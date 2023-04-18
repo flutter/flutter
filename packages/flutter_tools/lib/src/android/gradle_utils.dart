@@ -76,10 +76,10 @@ const String gradleWrapperPropertiesFilename = 'gradle-wrapper.properties';
 /// or constructing a Gradle project.
 class GradleUtils {
   GradleUtils({
-    required Platform platform,
-    required Logger logger,
-    required Cache cache,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final Platform platform,
+    required final Logger logger,
+    required final Cache cache,
+    required final OperatingSystemUtils operatingSystemUtils,
   })  : _platform = platform,
        _logger = logger,
        _cache = cache,
@@ -92,7 +92,7 @@ class GradleUtils {
 
   /// Gets the Gradle executable path and prepares the Gradle project.
   /// This is the `gradlew` or `gradlew.bat` script in the `android/` directory.
-  String getExecutable(FlutterProject project) {
+  String getExecutable(final FlutterProject project) {
     final Directory androidDir = project.android.hostAppGradleRoot;
     injectGradleWrapperIfNeeded(androidDir);
 
@@ -111,15 +111,15 @@ class GradleUtils {
   }
 
   /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
-  void injectGradleWrapperIfNeeded(Directory directory) {
+  void injectGradleWrapperIfNeeded(final Directory directory) {
     copyDirectory(
       _cache.getArtifactDirectory('gradle_wrapper'),
       directory,
-      shouldCopyFile: (File sourceFile, File destinationFile) {
+      shouldCopyFile: (final File sourceFile, final File destinationFile) {
         // Don't override the existing files in the project.
         return !destinationFile.existsSync();
       },
-      onFileCopied: (File source, File dest) {
+      onFileCopied: (final File source, final File dest) {
         _operatingSystemUtils.makeExecutable(dest);
       }
     );
@@ -152,7 +152,7 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 ///
 /// The Android plugin version is specified in the [build.gradle] file within
 /// the project's Android directory.
-String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
+String getGradleVersionForAndroidPlugin(final Directory directory, final Logger logger) {
   final File buildFile = directory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
     logger.printTrace(
@@ -176,7 +176,7 @@ String getGradleVersionForAndroidPlugin(Directory directory, Logger logger) {
 /// If gradle version is not found null is returned.
 /// [directory] should be and android directory with a build.gradle file.
 Future<String?> getGradleVersion(
-    Directory directory, Logger logger, ProcessManager processManager) async {
+    final Directory directory, final Logger logger, final ProcessManager processManager) async {
   final File propertiesFile = directory
       .childDirectory(gradleDirectoryName)
       .childDirectory(gradleWrapperDirectoryName)
@@ -265,7 +265,7 @@ OS:           Mac OS X 13.2.1 aarch64
 ///
 /// The Android plugin version is specified in the [build.gradle] file within
 /// the project's Android directory ([androidDirectory]).
-String? getAgpVersion(Directory androidDirectory, Logger logger) {
+String? getAgpVersion(final Directory androidDirectory, final Logger logger) {
   final File buildFile = androidDirectory.childFile('build.gradle');
   if (!buildFile.existsSync()) {
     logger.printTrace('Can not find build.gradle in $androidDirectory');
@@ -283,7 +283,7 @@ String? getAgpVersion(Directory androidDirectory, Logger logger) {
   return androidPluginVersion;
 }
 
-String _formatParseWarning(String content) {
+String _formatParseWarning(final String content) {
   return 'Could not parse gradle version from: \n'
       '$content \n'
       'If there is a version please look for an existing bug '
@@ -303,8 +303,8 @@ String _formatParseWarning(String content) {
 // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 // AGP has a minimim version of gradle required but no max starting at
 // AGP version 2.3.0+.
-bool validateGradleAndAgp(Logger logger,
-    {required String? gradleV, required String? agpV}) {
+bool validateGradleAndAgp(final Logger logger,
+    {required final String? gradleV, required final String? agpV}) {
 
   const String oldestSupportedAgpVersion = '3.3.0';
   const String oldestSupportedGradleVersion = '4.10.1';
@@ -426,8 +426,8 @@ bool validateGradleAndAgp(Logger logger,
 //
 // Source of truth:
 // https://docs.gradle.org/current/userguide/compatibility.html#java
-bool validateJavaGradle(Logger logger,
-    {required String? javaV, required String? gradleV}) {
+bool validateJavaGradle(final Logger logger,
+    {required final String? javaV, required final String? gradleV}) {
   // Update these when new major versions of Java are supported by android.
   // Supported means Java <-> Gradle support.
   const String oneMajorVersionHigherJavaVersion = '20';
@@ -561,7 +561,7 @@ bool validateJavaGradle(Logger logger,
 /// Returns the Gradle version that is required by the given Android Gradle plugin version
 /// by picking the largest compatible version from
 /// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-String getGradleVersionFor(String androidPluginVersion) {
+String getGradleVersionFor(final String androidPluginVersion) {
   final List<GradleForAgp> compatList = <GradleForAgp> [
     GradleForAgp(agpMin: '1.0.0', agpMax: '1.1.3', minRequiredGradle: '2.3'),
     GradleForAgp(agpMin: '1.2.0', agpMax: '1.3.1', minRequiredGradle: '2.9'),
@@ -601,9 +601,9 @@ String getGradleVersionFor(String androidPluginVersion) {
 /// If [requireAndroidSdk] is true (the default) and no Android SDK is found,
 /// this will fail with a [ToolExit].
 void updateLocalProperties({
-  required FlutterProject project,
-  BuildInfo? buildInfo,
-  bool requireAndroidSdk = true,
+  required final FlutterProject project,
+  final BuildInfo? buildInfo,
+  final bool requireAndroidSdk = true,
 }) {
   if (requireAndroidSdk && globals.androidSdk == null) {
     exitWithNoSdkMessage();
@@ -619,7 +619,7 @@ void updateLocalProperties({
     changed = true;
   }
 
-  void changeIfNecessary(String key, String? value) {
+  void changeIfNecessary(final String key, final String? value) {
     if (settings.values[key] == value) {
       return;
     }
@@ -661,7 +661,7 @@ void updateLocalProperties({
 /// Writes standard Android local properties to the specified [properties] file.
 ///
 /// Writes the path to the Android SDK, if known.
-void writeLocalProperties(File properties) {
+void writeLocalProperties(final File properties) {
   final SettingsFile settings = SettingsFile();
   final AndroidSdk? androidSdk = globals.androidSdk;
   if (androidSdk != null) {
@@ -706,7 +706,7 @@ class GradleForAgp {
 }
 
 // Returns gradlew file name based on the platform.
-String getGradlewFileName(Platform platform) {
+String getGradlewFileName(final Platform platform) {
   if (platform.isWindows) {
     return 'gradlew.bat';
   } else {

@@ -103,7 +103,7 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
     _updateAnimations();
   }
 
-  void _animationListener(AnimationStatus animationStatus) {
+  void _animationListener(final AnimationStatus animationStatus) {
     final AnimationStatus oldEffective = _effectiveAnimationStatus;
     _effectiveAnimationStatus = _calculateEffectiveAnimationStatus(
       lastEffective: _effectiveAnimationStatus,
@@ -115,7 +115,7 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
   }
 
   @override
-  void didUpdateWidget(DualTransitionBuilder oldWidget) {
+  void didUpdateWidget(final DualTransitionBuilder oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.animation != widget.animation) {
       oldWidget.animation.removeStatusListener(_animationListener);
@@ -129,8 +129,8 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
   // yield a disjoint experience since the forward and reverse transitions are
   // very different.
   AnimationStatus _calculateEffectiveAnimationStatus({
-    required AnimationStatus lastEffective,
-    required AnimationStatus current,
+    required final AnimationStatus lastEffective,
+    required final AnimationStatus current,
   }) {
     switch (current) {
       case AnimationStatus.dismissed:
@@ -177,7 +177,7 @@ class _DualTransitionBuilderState extends State<DualTransitionBuilder> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.forwardBuilder(
       context,
       _forwardAnimation,

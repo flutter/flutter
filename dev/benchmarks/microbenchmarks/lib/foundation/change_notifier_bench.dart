@@ -20,12 +20,12 @@ void main() {
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
 
-  void runAddListenerBenchmark(int iteration, {bool addResult = true}) {
+  void runAddListenerBenchmark(final int iteration, {final bool addResult = true}) {
     const String name = 'add';
     for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
       final List<_Notifier> notifiers = List<_Notifier>.generate(
         iteration,
-        (_) => _Notifier(),
+        (final _) => _Notifier(),
         growable: false,
       );
 
@@ -50,7 +50,7 @@ void main() {
     }
   }
 
-  void runNotifyListenerBenchmark(int iteration, {bool addResult = true}) {
+  void runNotifyListenerBenchmark(final int iteration, {final bool addResult = true}) {
     const String name = 'notify';
 
     for (int listenerCount = 0; listenerCount <= 5; listenerCount += 1) {
@@ -77,7 +77,7 @@ void main() {
     }
   }
 
-  void runRemoveListenerBenchmark(int iteration, {bool addResult = true}) {
+  void runRemoveListenerBenchmark(final int iteration, {final bool addResult = true}) {
     const String name = 'remove';
     final List<VoidCallback> listeners = <VoidCallback>[
       () {},
@@ -89,7 +89,7 @@ void main() {
     for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
       final List<_Notifier> notifiers = List<_Notifier>.generate(
         iteration,
-        (_) {
+        (final _) {
           final _Notifier notifier = _Notifier();
           for (int l = 0; l < listenerCount; l += 1) {
             notifier.addListener(listeners[l]);
@@ -120,8 +120,8 @@ void main() {
     }
   }
 
-  void runRemoveListenerWhileNotifyingBenchmark(int iteration,
-      {bool addResult = true}) {
+  void runRemoveListenerWhileNotifyingBenchmark(final int iteration,
+      {final bool addResult = true}) {
     const String name = 'removeWhileNotify';
 
     final List<VoidCallback> listeners = <VoidCallback>[
@@ -134,7 +134,7 @@ void main() {
     for (int listenerCount = 1; listenerCount <= 5; listenerCount += 1) {
       final List<_Notifier> notifiers = List<_Notifier>.generate(
         iteration,
-        (_) {
+        (final _) {
           final _Notifier notifier = _Notifier();
           notifier.addListener(() {
             // This listener will remove all other listeners. So that only this

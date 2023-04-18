@@ -12,7 +12,7 @@ class OrderedTraversalPolicyExampleApp extends StatelessWidget {
   const OrderedTraversalPolicyExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OrderedTraversalPolicy Sample')),
@@ -42,7 +42,7 @@ class DemoButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FocusTraversalOrder(
       order: NumericFocusOrder(order),
       child: TextButton(
@@ -58,7 +58,7 @@ class OrderedTraversalPolicyExample extends StatelessWidget {
   const OrderedTraversalPolicyExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return FocusTraversalGroup(
       policy: OrderedTraversalPolicy(),
       child: const Column(

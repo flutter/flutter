@@ -11,7 +11,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   final _MockClipboard mockClipboard = _MockClipboard();
 
-  testWidgets('Copies text on Ctrl-C', (WidgetTester tester) async {
+  testWidgets('Copies text on Ctrl-C', (final WidgetTester tester) async {
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, mockClipboard.handleMethodCall);
     await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
@@ -37,7 +37,7 @@ class _MockClipboard {
 
   Map<String, dynamic>? clipboardData;
 
-  Future<Object?> handleMethodCall(MethodCall methodCall) async {
+  Future<Object?> handleMethodCall(final MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'Clipboard.setData':
         clipboardData = methodCall.arguments as Map<String, dynamic>;

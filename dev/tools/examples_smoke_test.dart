@@ -45,7 +45,7 @@ FutureOr<dynamic> main() async {
   }
 }
 
-Future<void> cleanUp(File integrationTest) async {
+Future<void> cleanUp(final File integrationTest) async {
   try {
     await integrationTest.delete();
     // Delete the integration_test directory if it is empty.
@@ -58,9 +58,9 @@ Future<void> cleanUp(File integrationTest) async {
 
 // Executes the generated smoke test.
 Future<void> runSmokeTests({
-  required Directory flutterDir,
-  required File integrationTest,
-  required Directory apiDir,
+  required final Directory flutterDir,
+  required final File integrationTest,
+  required final Directory apiDir,
 }) async {
   final File flutterExe =
       flutterDir.childDirectory('bin').childFile(platform.isWindows ? 'flutter.bat' : 'flutter');
@@ -81,7 +81,7 @@ Future<void> runSmokeTests({
 // A class to hold information related to an example, used to generate names
 // from for the tests.
 class ExampleInfo {
-  ExampleInfo(this.file, Directory examplesLibDir)
+  ExampleInfo(this.file, final Directory examplesLibDir)
       : importPath = _getImportPath(file, examplesLibDir),
         importName = '' {
     importName = importPath.replaceAll(RegExp(r'\.dart$'), '').replaceAll(RegExp(r'\W'), '_');
@@ -91,7 +91,7 @@ class ExampleInfo {
   final String importPath;
   String importName;
 
-  static String _getImportPath(File example, Directory examplesLibDir) {
+  static String _getImportPath(final File example, final Directory examplesLibDir) {
     final String relativePath =
         path.relative(example.absolute.path, from: examplesLibDir.absolute.path);
     // So that Windows paths are proper URIs in the import statements.
@@ -100,7 +100,7 @@ class ExampleInfo {
 }
 
 // Generates the combined smoke test.
-Future<File> generateTest(Directory apiDir) async {
+Future<File> generateTest(final Directory apiDir) async {
   final Directory examplesLibDir = apiDir.childDirectory('lib');
 
   // Get files from git, to avoid any non-repo files that might be in someone's
@@ -112,7 +112,7 @@ Future<File> generateTest(Directory apiDir) async {
   )).replaceAll(r'\', '/')
     .trim()
     .split('\n');
-  final Iterable<File> examples = gitFiles.map<File>((String examplePath) {
+  final Iterable<File> examples = gitFiles.map<File>((final String examplePath) {
     return filesystem.file(path.join(examplesLibDir.absolute.path, examplePath));
   });
 
@@ -129,7 +129,7 @@ Future<File> generateTest(Directory apiDir) async {
     imports.add('''import 'package:flutter_api_samples/${info.importPath}' as ${info.importName};''');
   }
   imports.sort();
-  infoList.sort((ExampleInfo a, ExampleInfo b) => a.importPath.compareTo(b.importPath));
+  infoList.sort((final ExampleInfo a, final ExampleInfo b) => a.importPath.compareTo(b.importPath));
 
   final StringBuffer buffer = StringBuffer();
   buffer.writeln('// Temporary generated file. Do not commit.');
@@ -184,11 +184,11 @@ void main() {
 // Run a command, and optionally stream the output as it runs, returning the
 // stdout.
 Future<String> runCommand(
-  List<String> cmd, {
-  required Directory workingDirectory,
-  bool quiet = false,
-  List<String>? output,
-  Map<String, String>? environment,
+  final List<String> cmd, {
+  required final Directory workingDirectory,
+  final bool quiet = false,
+  final List<String>? output,
+  final Map<String, String>? environment,
 }) async {
   final List<int> stdoutOutput = <int>[];
   final List<int> combinedOutput = <int>[];
@@ -209,7 +209,7 @@ Future<String> runCommand(
       environment: environment,
     );
     process.stdout.listen(
-      (List<int> event) {
+      (final List<int> event) {
         stdoutOutput.addAll(event);
         combinedOutput.addAll(event);
         if (!quiet) {
@@ -219,7 +219,7 @@ Future<String> runCommand(
       onDone: () async => stdoutComplete.complete(),
     );
     process.stderr.listen(
-      (List<int> event) {
+      (final List<int> event) {
         combinedOutput.addAll(event);
         if (!quiet) {
           stderr.add(event);

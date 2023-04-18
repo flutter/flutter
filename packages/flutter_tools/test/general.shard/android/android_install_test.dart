@@ -49,7 +49,7 @@ void main() {
 
   AndroidDevice setUpAndroidDevice({
     AndroidSdk? androidSdk,
-    ProcessManager? processManager,
+    final ProcessManager? processManager,
   }) {
     androidSdk ??= FakeAndroidSdk();
     return AndroidDevice('1234',

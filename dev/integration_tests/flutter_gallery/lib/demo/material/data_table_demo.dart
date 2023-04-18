@@ -78,7 +78,7 @@ class DessertDataSource extends DataTableSource {
     Dessert('Coconut slice and KitKat',             677, 41.0,  72,  8.5,  63, 12, 12),
   ];
 
-  void _sort<T>(Comparable<T> Function(Dessert d) getField, bool ascending) {
+  void _sort<T>(final Comparable<T> Function(Dessert d) getField, final bool ascending) {
     _desserts.sort((Dessert a, Dessert b) {
       if (!ascending) {
         final Dessert c = a;
@@ -95,7 +95,7 @@ class DessertDataSource extends DataTableSource {
   int _selectedCount = 0;
 
   @override
-  DataRow? getRow(int index) {
+  DataRow? getRow(final int index) {
     assert(index >= 0);
     if (index >= _desserts.length) {
       return null;
@@ -104,7 +104,7 @@ class DessertDataSource extends DataTableSource {
     return DataRow.byIndex(
       index: index,
       selected: dessert.selected!,
-      onSelectChanged: (bool? value) {
+      onSelectChanged: (final bool? value) {
         if (dessert.selected != value) {
           _selectedCount += value! ? 1 : -1;
           assert(_selectedCount >= 0);
@@ -134,7 +134,7 @@ class DessertDataSource extends DataTableSource {
   @override
   int get selectedRowCount => _selectedCount;
 
-  void _selectAll(bool? checked) {
+  void _selectAll(final bool? checked) {
     for (final Dessert dessert in _desserts) {
       dessert.selected = checked;
     }
@@ -158,7 +158,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
   bool _sortAscending = true;
   final DessertDataSource _dessertsDataSource = DessertDataSource();
 
-  void _sort<T>(Comparable<T> Function(Dessert d) getField, int columnIndex, bool ascending) {
+  void _sort<T>(final Comparable<T> Function(Dessert d) getField, final int columnIndex, final bool ascending) {
     _dessertsDataSource._sort<T>(getField, ascending);
     setState(() {
       _sortColumnIndex = columnIndex;
@@ -167,7 +167,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Data tables'),
@@ -183,51 +183,51 @@ class _DataTableDemoState extends State<DataTableDemo> {
             PaginatedDataTable(
               header: const Text('Nutrition'),
               rowsPerPage: _rowsPerPage!,
-              onRowsPerPageChanged: (int? value) { setState(() { _rowsPerPage = value; }); },
+              onRowsPerPageChanged: (final int? value) { setState(() { _rowsPerPage = value; }); },
               sortColumnIndex: _sortColumnIndex,
               sortAscending: _sortAscending,
               onSelectAll: _dessertsDataSource._selectAll,
               columns: <DataColumn>[
                 DataColumn(
                   label: const Text('Dessert (100g serving)'),
-                  onSort: (int columnIndex, bool ascending) => _sort<String>((Dessert d) => d.name, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<String>((final Dessert d) => d.name, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: const Text('Calories'),
                   tooltip: 'The total amount of food energy in the given serving size.',
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) => _sort<num>((Dessert d) => d.calories, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<num>((final Dessert d) => d.calories, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: const Text('Fat (g)'),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) => _sort<num>((Dessert d) => d.fat, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<num>((final Dessert d) => d.fat, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: const Text('Carbs (g)'),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) => _sort<num>((Dessert d) => d.carbs, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<num>((final Dessert d) => d.carbs, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: const Text('Protein (g)'),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) => _sort<num>((Dessert d) => d.protein, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<num>((final Dessert d) => d.protein, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: const Text('Sodium (mg)'),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) => _sort<num>((Dessert d) => d.sodium, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<num>((final Dessert d) => d.sodium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: const Text('Calcium (%)'),
                   tooltip: 'The amount of calcium as a percentage of the recommended daily amount.',
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) => _sort<num>((Dessert d) => d.calcium, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<num>((final Dessert d) => d.calcium, columnIndex, ascending),
                 ),
                 DataColumn(
                   label: const Text('Iron (%)'),
                   numeric: true,
-                  onSort: (int columnIndex, bool ascending) => _sort<num>((Dessert d) => d.iron, columnIndex, ascending),
+                  onSort: (final int columnIndex, final bool ascending) => _sort<num>((final Dessert d) => d.iron, columnIndex, ascending),
                 ),
               ],
               source: _dessertsDataSource,

@@ -22,7 +22,7 @@ void main() {
 }
 
 void _defineTests() {
-  testWidgets('builds no semantics by default', (WidgetTester tester) async {
+  testWidgets('builds no semantics by default', (final WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -36,7 +36,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('provides foreground semantics', (WidgetTester tester) async {
+  testWidgets('provides foreground semantics', (final WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -72,7 +72,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('provides background semantics', (WidgetTester tester) async {
+  testWidgets('provides background semantics', (final WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -108,7 +108,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('combines background, child and foreground semantics', (WidgetTester tester) async {
+  testWidgets('combines background, child and foreground semantics', (final WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -167,7 +167,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('applies $SemanticsProperties', (WidgetTester tester) async {
+  testWidgets('applies $SemanticsProperties', (final WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     await tester.pumpWidget(CustomPaint(
@@ -270,7 +270,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
+  testWidgets('Can toggle semantics on, off, on without crash', (final WidgetTester tester) async {
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
         semantics: const CustomPainterSemantics(
@@ -312,7 +312,7 @@ void _defineTests() {
     semantics.dispose();
   }, semanticsEnabled: false);
 
-  testWidgets('Supports all actions', (WidgetTester tester) async {
+  testWidgets('Supports all actions', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final List<SemanticsAction> performedActions = <SemanticsAction>[];
 
@@ -334,12 +334,12 @@ void _defineTests() {
             onCopy: () => performedActions.add(SemanticsAction.copy),
             onCut: () => performedActions.add(SemanticsAction.cut),
             onPaste: () => performedActions.add(SemanticsAction.paste),
-            onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-            onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
-            onMoveCursorForwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
-            onMoveCursorBackwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
-            onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
-            onSetText: (String text) => performedActions.add(SemanticsAction.setText),
+            onMoveCursorForwardByCharacter: (final bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+            onMoveCursorBackwardByCharacter: (final bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+            onMoveCursorForwardByWord: (final bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
+            onMoveCursorBackwardByWord: (final bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
+            onSetSelection: (final TextSelection _) => performedActions.add(SemanticsAction.setSelection),
+            onSetText: (final String text) => performedActions.add(SemanticsAction.setText),
             onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
             onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
           ),
@@ -359,7 +359,7 @@ void _defineTests() {
             TestSemantics.rootChild(
               id: expectedId,
               rect: TestSemantics.fullScreen,
-              actions: allActions.fold<int>(0, (int previous, SemanticsAction action) => previous | action.index),
+              actions: allActions.fold<int>(0, (final int previous, final SemanticsAction action) => previous | action.index),
             ),
           ],
         ),
@@ -410,7 +410,7 @@ void _defineTests() {
     semantics.dispose();
   });
 
-  testWidgets('Supports all flags', (WidgetTester tester) async {
+  testWidgets('Supports all flags', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     // checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(CustomPaint(
@@ -523,7 +523,7 @@ void _defineTests() {
   });
 
   group('diffing', () {
-    testWidgets('complains about duplicate keys', (WidgetTester tester) async {
+    testWidgets('complains about duplicate keys', (final WidgetTester tester) async {
       final SemanticsTester semanticsTester = SemanticsTester(tester);
       await tester.pumpWidget(CustomPaint(
         painter: _SemanticsDiffTest(<String>[
@@ -535,35 +535,35 @@ void _defineTests() {
       semanticsTester.dispose();
     });
 
-    _testDiff('adds one item to an empty list', (_DiffTester tester) async {
+    _testDiff('adds one item to an empty list', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>[],
         to: <String>['a'],
       );
     });
 
-    _testDiff('removes the last item from the list', (_DiffTester tester) async {
+    _testDiff('removes the last item from the list', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>['a'],
         to: <String>[],
       );
     });
 
-    _testDiff('appends one item at the end of a non-empty list', (_DiffTester tester) async {
+    _testDiff('appends one item at the end of a non-empty list', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>['a'],
         to: <String>['a', 'b'],
       );
     });
 
-    _testDiff('prepends one item at the beginning of a non-empty list', (_DiffTester tester) async {
+    _testDiff('prepends one item at the beginning of a non-empty list', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>['b'],
         to: <String>['a', 'b'],
       );
     });
 
-    _testDiff('inserts one item in the middle of a list', (_DiffTester tester) async {
+    _testDiff('inserts one item in the middle of a list', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -577,7 +577,7 @@ void _defineTests() {
       );
     });
 
-    _testDiff('removes one item from the middle of a list', (_DiffTester tester) async {
+    _testDiff('removes one item from the middle of a list', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -591,7 +591,7 @@ void _defineTests() {
       );
     });
 
-    _testDiff('swaps two items', (_DiffTester tester) async {
+    _testDiff('swaps two items', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -604,7 +604,7 @@ void _defineTests() {
       );
     });
 
-    _testDiff('finds and moved one keyed item', (_DiffTester tester) async {
+    _testDiff('finds and moved one keyed item', (final _DiffTester tester) async {
       await tester.diff(
         from: <String>[
           'a-k',
@@ -620,7 +620,7 @@ void _defineTests() {
     });
   });
 
-  testWidgets('rebuilds semantics upon resize', (WidgetTester tester) async {
+  testWidgets('rebuilds semantics upon resize', (final WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     final _PainterWithSemantics painter = _PainterWithSemantics(
@@ -665,7 +665,7 @@ void _defineTests() {
     semanticsTester.dispose();
   });
 
-  testWidgets('does not rebuild when shouldRebuildSemantics is false', (WidgetTester tester) async {
+  testWidgets('does not rebuild when shouldRebuildSemantics is false', (final WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     const CustomPainterSemantics testSemantics = CustomPainterSemantics(
@@ -709,8 +709,8 @@ void _defineTests() {
   });
 }
 
-void _testDiff(String description, Future<void> Function(_DiffTester tester) testFunction) {
-  testWidgets(description, (WidgetTester tester) async {
+void _testDiff(final String description, final Future<void> Function(_DiffTester tester) testFunction) {
+  testWidgets(description, (final WidgetTester tester) async {
     await testFunction(_DiffTester(tester));
   });
 }
@@ -727,10 +727,10 @@ class _DiffTester {
   ///
   /// - checks that initial and final configurations are in the desired states.
   /// - checks that keyed nodes have stable IDs.
-  Future<void> diff({ required List<String> from, required List<String> to }) async {
+  Future<void> diff({ required final List<String> from, required final List<String> to }) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
-    TestSemantics createExpectations(List<String> labels) {
+    TestSemantics createExpectations(final List<String> labels) {
       return TestSemantics.root(
         children: <TestSemantics>[
           TestSemantics.rootChild(
@@ -754,8 +754,8 @@ class _DiffTester {
 
     SemanticsNode root = RendererBinding.instance.renderView.debugSemantics!;
     final Map<Key, int> idAssignments = <Key, int>{};
-    root.visitChildren((SemanticsNode firstChild) {
-      firstChild.visitChildren((SemanticsNode node) {
+    root.visitChildren((final SemanticsNode firstChild) {
+      firstChild.visitChildren((final SemanticsNode node) {
         if (node.key != null) {
           idAssignments[node.key!] = node.id;
         }
@@ -771,8 +771,8 @@ class _DiffTester {
     expect(semanticsTester, hasSemantics(createExpectations(to), ignoreId: true));
 
     root = RendererBinding.instance.renderView.debugSemantics!;
-    root.visitChildren((SemanticsNode firstChild) {
-      firstChild.visitChildren((SemanticsNode node) {
+    root.visitChildren((final SemanticsNode firstChild) {
+      firstChild.visitChildren((final SemanticsNode node) {
         if (node.key != null && idAssignments[node.key] != null) {
           expect(idAssignments[node.key], node.id, reason:
             'Node with key ${node.key} was previously assigned ID ${idAssignments[node.key]}. '
@@ -794,14 +794,14 @@ class _SemanticsDiffTest extends CustomPainter {
   final List<String> data;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     // We don't test painting.
   }
 
   @override
   SemanticsBuilderCallback get semanticsBuilder => buildSemantics;
 
-  List<CustomPainterSemantics> buildSemantics(Size size) {
+  List<CustomPainterSemantics> buildSemantics(final Size size) {
     final List<CustomPainterSemantics> semantics = <CustomPainterSemantics>[];
     for (final String label in data) {
       Key? key;
@@ -823,7 +823,7 @@ class _SemanticsDiffTest extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SemanticsDiffTest oldPainter) => true;
+  bool shouldRepaint(final _SemanticsDiffTest oldPainter) => true;
 }
 
 class _PainterWithSemantics extends CustomPainter {
@@ -836,7 +836,7 @@ class _PainterWithSemantics extends CustomPainter {
   static int shouldRebuildSemanticsCallCount = 0;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     // We don't test painting.
   }
 
@@ -846,18 +846,18 @@ class _PainterWithSemantics extends CustomPainter {
     return buildSemantics;
   }
 
-  List<CustomPainterSemantics> buildSemantics(Size size) {
+  List<CustomPainterSemantics> buildSemantics(final Size size) {
     buildSemanticsCallCount += 1;
     return <CustomPainterSemantics>[semantics];
   }
 
   @override
-  bool shouldRepaint(_PainterWithSemantics oldPainter) {
+  bool shouldRepaint(final _PainterWithSemantics oldPainter) {
     return true;
   }
 
   @override
-  bool shouldRebuildSemantics(_PainterWithSemantics oldPainter) {
+  bool shouldRebuildSemantics(final _PainterWithSemantics oldPainter) {
     shouldRebuildSemanticsCallCount += 1;
     return !identical(oldPainter.semantics, semantics);
   }
@@ -867,10 +867,10 @@ class _PainterWithoutSemantics extends CustomPainter {
   _PainterWithoutSemantics();
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     // We don't test painting.
   }
 
   @override
-  bool shouldRepaint(_PainterWithSemantics oldPainter) => true;
+  bool shouldRepaint(final _PainterWithSemantics oldPainter) => true;
 }

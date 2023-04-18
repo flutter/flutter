@@ -36,7 +36,7 @@ class TestStepResult {
     this.error = nothing,
   });
 
-  factory TestStepResult.fromSnapshot(AsyncSnapshot<TestStepResult> snapshot) {
+  factory TestStepResult.fromSnapshot(final AsyncSnapshot<TestStepResult> snapshot) {
     switch (snapshot.connectionState) {
       case ConnectionState.none:
         return const TestStepResult('Not started', nothing, TestStatus.ok);
@@ -68,7 +68,7 @@ class TestStepResult {
     TestStatus.complete,
   );
 
-  Widget asWidget(BuildContext context) {
+  Widget asWidget(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -91,7 +91,7 @@ class TestStepResult {
     );
   }
 
-  static bool deepEquals(dynamic a, dynamic b) => _deepEquals(a, b);
+  static bool deepEquals(final dynamic a, final dynamic b) => _deepEquals(a, b);
 
   @override
   String toString() {
@@ -100,12 +100,12 @@ class TestStepResult {
 }
 
 Future<TestStepResult> resultOfHandshake(
-  String name,
-  String description,
-  dynamic message,
-  List<dynamic> received,
-  dynamic messageEcho,
-  dynamic error,
+  final String name,
+  final String description,
+  final dynamic message,
+  final List<dynamic> received,
+  final dynamic messageEcho,
+  final dynamic error,
 ) async {
   assert(message != nothing);
   while (received.length < 2) {
@@ -134,7 +134,7 @@ Future<TestStepResult> resultOfHandshake(
   );
 }
 
-String _toString(dynamic message) {
+String _toString(final dynamic message) {
   if (message is ByteData) {
     return message.buffer
         .asUint8List(message.offsetInBytes, message.lengthInBytes)
@@ -144,7 +144,7 @@ String _toString(dynamic message) {
   }
 }
 
-bool _deepEquals(dynamic a, dynamic b) {
+bool _deepEquals(final dynamic a, final dynamic b) {
   if (a == b) {
     return true;
   }
@@ -166,14 +166,14 @@ bool _deepEquals(dynamic a, dynamic b) {
   return false;
 }
 
-bool _deepEqualsByteData(ByteData a, ByteData b) {
+bool _deepEqualsByteData(final ByteData a, final ByteData b) {
   return _deepEqualsList(
     a.buffer.asUint8List(a.offsetInBytes, a.lengthInBytes),
     b.buffer.asUint8List(b.offsetInBytes, b.lengthInBytes),
   );
 }
 
-bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
+bool _deepEqualsList(final List<dynamic> a, final List<dynamic> b) {
   if (a.length != b.length) {
     return false;
   }
@@ -185,7 +185,7 @@ bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
   return true;
 }
 
-bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
+bool _deepEqualsMap(final Map<dynamic, dynamic> a, final Map<dynamic, dynamic> b) {
   if (a.length != b.length) {
     return false;
   }
@@ -197,6 +197,6 @@ bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
   return true;
 }
 
-bool _deepEqualsPair(Pair a, Pair b) {
+bool _deepEqualsPair(final Pair a, final Pair b) {
   return _deepEquals(a.left, b.left) && _deepEquals(a.right, b.right);
 }

@@ -50,7 +50,7 @@ Future<void> main() async {
   try {
     // Verify that _kUnsynchronizedDemos and _kSkippedDemos identify
     // demos that actually exist.
-    final List<String> allDemoTitles = kAllGalleryDemos.map((GalleryDemo demo) => demo.title).toList();
+    final List<String> allDemoTitles = kAllGalleryDemos.map((final GalleryDemo demo) => demo.title).toList();
     if (!Set<String>.from(allDemoTitles).containsAll(_kUnsynchronizedDemoTitles)) {
       fail('Unrecognized demo titles in _kUnsynchronizedDemosTitles: $_kUnsynchronizedDemoTitles');
     }
@@ -92,7 +92,7 @@ Future<void> main() async {
 }
 
 final Finder backFinder = find.byElementPredicate(
-  (Element element) {
+  (final Element element) {
     final Widget widget = element.widget;
     if (widget is Tooltip) {
       return widget.message == 'Back';
@@ -113,10 +113,10 @@ class _LiveWidgetController extends LiveWidgetController {
   bool frameSync = true;
 
   /// Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool Function() condition, [Completer<void>? completer]) {
+  Future<void> _waitUntilFrame(final bool Function() condition, [Completer<void>? completer]) {
     completer ??= Completer<void>();
     if (!condition()) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      SchedulerBinding.instance.addPostFrameCallback((final Duration timestamp) {
         _waitUntilFrame(condition, completer);
       });
     } else {
@@ -126,7 +126,7 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
-  Future<Finder> _waitForElement(Finder finder) async {
+  Future<Finder> _waitForElement(final Finder finder) async {
     if (frameSync) {
       await _waitUntilFrame(() => binding.transientCallbackCount == 0);
     }
@@ -138,11 +138,11 @@ class _LiveWidgetController extends LiveWidgetController {
   }
 
   @override
-  Future<void> tap(Finder finder, { int? pointer, int buttons = kPrimaryButton, bool warnIfMissed = true }) async {
+  Future<void> tap(final Finder finder, { final int? pointer, final int buttons = kPrimaryButton, final bool warnIfMissed = true }) async {
     await super.tap(await _waitForElement(finder), pointer: pointer, buttons: buttons, warnIfMissed: warnIfMissed);
   }
 
-  Future<void> scrollIntoView(Finder finder, {required double alignment}) async {
+  Future<void> scrollIntoView(final Finder finder, {required final double alignment}) async {
     final Finder target = await _waitForElement(finder);
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: alignment);
   }

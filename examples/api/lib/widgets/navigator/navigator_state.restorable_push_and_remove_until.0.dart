@@ -12,7 +12,7 @@ class RestorablePushAndRemoveUntilExampleApp extends StatelessWidget {
   const RestorablePushAndRemoveUntilExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: RestorablePushAndRemoveUntilExample(),
     );
@@ -28,14 +28,14 @@ class RestorablePushAndRemoveUntilExample extends StatefulWidget {
 
 class _RestorablePushAndRemoveUntilExampleState extends State<RestorablePushAndRemoveUntilExample> {
   @pragma('vm:entry-point')
-  static Route<void> _myRouteBuilder(BuildContext context, Object? arguments) {
+  static Route<void> _myRouteBuilder(final BuildContext context, final Object? arguments) {
     return MaterialPageRoute<void>(
-      builder: (BuildContext context) => const RestorablePushAndRemoveUntilExample(),
+      builder: (final BuildContext context) => const RestorablePushAndRemoveUntilExample(),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sample Code'),

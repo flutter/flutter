@@ -127,7 +127,7 @@ void main() {
     final PubspecYaml flutterPubspec = PubspecYaml(flutter);
 
     final PubspecDependency gitDependency = flutterPubspec.dependencies
-        .firstWhere((PubspecDependency dep) => dep.kind == DependencyKind.git);
+        .firstWhere((final PubspecDependency dep) => dep.kind == DependencyKind.git);
     expect(
       gitDependency.lockLine,
       '''
@@ -185,7 +185,7 @@ void main() {
     final PubspecYaml pubspecYaml = PubspecYaml(flutter);
     expect(
         pubspecYaml.allDependencies
-            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
+            .map<String>((final PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',
@@ -200,7 +200,7 @@ void main() {
         }));
     expect(
         pubspecYaml.allExplicitDependencies
-            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
+            .map<String>((final PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',
@@ -214,7 +214,7 @@ void main() {
         }));
     expect(
         pubspecYaml.dependencies
-            .map<String>((PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
+            .map<String>((final PubspecDependency dependency) => '${dependency.name}: ${dependency.version}')
             .toSet(),
         equals(<String>{
           'collection: 1.14.11',

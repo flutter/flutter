@@ -12,7 +12,7 @@ class LayoutBuilderExampleApp extends StatelessWidget {
   const LayoutBuilderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: LayoutBuilderExample(),
     );
@@ -23,11 +23,11 @@ class LayoutBuilderExample extends StatelessWidget {
   const LayoutBuilderExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('LayoutBuilder Example')),
       body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (final BuildContext context, final BoxConstraints constraints) {
           if (constraints.maxWidth > 600) {
             return _buildWideContainers();
           } else {

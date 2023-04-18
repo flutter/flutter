@@ -12,7 +12,7 @@ class DividerExampleApp extends StatelessWidget {
   const DividerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(colorSchemeSeed: const Color(0xff6750a4), useMaterial3: true),
       home: Scaffold(
@@ -27,7 +27,7 @@ class DividerExample extends StatelessWidget {
   const DividerExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(16.0),

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
+  testWidgets('AbsorbPointers do not block siblings', (final WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(
       Column(
@@ -29,7 +29,7 @@ void main() {
   });
 
   group('AbsorbPointer semantics', () {
-    testWidgets('does not change semantics when not absorbing', (WidgetTester tester) async {
+    testWidgets('does not change semantics when not absorbing', (final WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(
@@ -56,7 +56,7 @@ void main() {
       );
     });
 
-    testWidgets('drops semantics when its ignoreSemantics is true', (WidgetTester tester) async {
+    testWidgets('drops semantics when its ignoreSemantics is true', (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
@@ -75,7 +75,7 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('ignores user interactions', (WidgetTester tester) async {
+    testWidgets('ignores user interactions', (final WidgetTester tester) async {
       final UniqueKey key = UniqueKey();
       await tester.pumpWidget(
         MaterialApp(

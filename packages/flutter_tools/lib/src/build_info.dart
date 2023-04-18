@@ -23,18 +23,18 @@ class BuildInfo {
     this.mode,
     this.flavor, {
     this.trackWidgetCreation = false,
-    List<String>? extraFrontEndOptions,
-    List<String>? extraGenSnapshotOptions,
-    List<String>? fileSystemRoots,
+    final List<String>? extraFrontEndOptions,
+    final List<String>? extraGenSnapshotOptions,
+    final List<String>? fileSystemRoots,
     this.androidProjectArgs = const <String>[],
     this.fileSystemScheme,
     this.buildNumber,
     this.buildName,
     this.splitDebugInfoPath,
     this.dartObfuscation = false,
-    List<String>? dartDefines,
+    final List<String>? dartDefines,
     this.bundleSkSLPath,
-    List<String>? dartExperiments,
+    final List<String>? dartExperiments,
     this.webRenderer = WebRendererMode.auto,
     required this.treeShakeIcons,
     this.performanceMeasurementFile,
@@ -267,7 +267,7 @@ class BuildInfo {
   /// Fields that are `null` are excluded from this configuration.
   Map<String, String> toEnvironmentConfig() {
     final Map<String, String> map = <String, String>{};
-    dartDefineConfigJsonMap?.forEach((String key, Object value) {
+    dartDefineConfigJsonMap?.forEach((final String key, final Object value) {
       map[key] = '$value';
     });
     final Map<String, String> environmentMap = <String, String>{
@@ -290,7 +290,7 @@ class BuildInfo {
       if (codeSizeDirectory != null)
         'CODE_SIZE_DIRECTORY': codeSizeDirectory!,
     };
-    map.forEach((String key, String value) {
+    map.forEach((final String key, final String value) {
       if (environmentMap.containsKey(key)) {
         globals.printWarning(
             'The key: [$key] already exists, you cannot use environment variables that have been used by the system!');
@@ -329,7 +329,7 @@ class BuildInfo {
     ];
     if (dartDefineConfigJsonMap != null) {
       final Iterable<String> gradleConfKeys = result.map((final String gradleConf) => gradleConf.split('=')[0].substring(2));
-      dartDefineConfigJsonMap!.forEach((String key, Object value) {
+      dartDefineConfigJsonMap!.forEach((final String key, final Object value) {
         if (gradleConfKeys.contains(key)) {
           globals.printWarning(
               'The key: [$key] already exists, you cannot use gradle variables that have been used by the system!');
@@ -390,8 +390,8 @@ enum BuildMode {
   /// Built in JIT mode with all optimizations and no VM service.
   jitRelease;
 
-  factory BuildMode.fromCliName(String value) => values.singleWhere(
-        (BuildMode element) => element.cliName == value,
+  factory BuildMode.fromCliName(final String value) => values.singleWhere(
+        (final BuildMode element) => element.cliName == value,
         orElse: () =>
             throw ArgumentError('$value is not a supported build mode'),
       );
@@ -429,7 +429,7 @@ enum EnvironmentType {
   simulator,
 }
 
-String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? buildNumber, Logger logger) {
+String? validatedBuildNumberForPlatform(final TargetPlatform targetPlatform, final String? buildNumber, final Logger logger) {
   if (buildNumber == null) {
     return null;
   }
@@ -443,7 +443,7 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? b
     }
     final List<String> segments = tmpBuildNumber
         .split('.')
-        .where((String segment) => segment.isNotEmpty)
+        .where((final String segment) => segment.isNotEmpty)
         .toList();
     if (segments.isEmpty) {
       segments.add('0');
@@ -476,7 +476,7 @@ String? validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String? b
   return buildNumber;
 }
 
-String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? buildName, Logger logger) {
+String? validatedBuildNameForPlatform(final TargetPlatform targetPlatform, final String? buildName, final Logger logger) {
   if (buildName == null) {
     return null;
   }
@@ -490,7 +490,7 @@ String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? bui
     }
     final List<String> segments = tmpBuildName
         .split('.')
-        .where((String segment) => segment.isNotEmpty)
+        .where((final String segment) => segment.isNotEmpty)
         .toList();
     while (segments.length < 3) {
       segments.add('0');
@@ -513,17 +513,17 @@ String? validatedBuildNameForPlatform(TargetPlatform targetPlatform, String? bui
   return buildName;
 }
 
-String getFriendlyModeName(BuildMode mode) {
+String getFriendlyModeName(final BuildMode mode) {
   return snakeCase(mode.cliName).replaceAll('_', ' ');
 }
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
-bool isAotBuildMode(BuildMode mode) {
+bool isAotBuildMode(final BuildMode mode) {
   return mode == BuildMode.profile || mode == BuildMode.release;
 }
 
 // Returns true if the given build mode can be used on emulators / simulators.
-bool isEmulatorBuildMode(BuildMode mode) {
+bool isEmulatorBuildMode(final BuildMode mode) {
   return mode == BuildMode.debug;
 }
 
@@ -567,8 +567,8 @@ enum AndroidArch {
 
 /// The default set of iOS device architectures to build for.
 List<DarwinArch> defaultIOSArchsForEnvironment(
-  EnvironmentType environmentType,
-  Artifacts artifacts,
+  final EnvironmentType environmentType,
+  final Artifacts artifacts,
 ) {
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
@@ -592,7 +592,7 @@ List<DarwinArch> defaultIOSArchsForEnvironment(
 }
 
 /// The default set of macOS device architectures to build for.
-List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
+List<DarwinArch> defaultMacOSArchsForEnvironment(final Artifacts artifacts) {
   // Handle single-arch local engines.
   final LocalEngineInfo? localEngineInfo = artifacts.localEngineInfo;
   if (localEngineInfo != null) {
@@ -613,7 +613,7 @@ List<DarwinArch> defaultMacOSArchsForEnvironment(Artifacts artifacts) {
 // variants of `gen_snapshot`, one for each target architecture. The output
 // instructions are then built into architecture-specific binaries, which are
 // merged into a universal binary using the `lipo` tool.
-String getDartNameForDarwinArch(DarwinArch arch) {
+String getDartNameForDarwinArch(final DarwinArch arch) {
   switch (arch) {
     case DarwinArch.armv7:
       return 'armv7';
@@ -632,7 +632,7 @@ String getDartNameForDarwinArch(DarwinArch arch) {
 //
 // For consistency with developer expectations, Flutter outputs also use these
 // architecture names in its build products for Darwin target platforms.
-String getNameForDarwinArch(DarwinArch arch) {
+String getNameForDarwinArch(final DarwinArch arch) {
   switch (arch) {
     case DarwinArch.armv7:
       return 'armv7';
@@ -643,7 +643,7 @@ String getNameForDarwinArch(DarwinArch arch) {
   }
 }
 
-DarwinArch getIOSArchForName(String arch) {
+DarwinArch getIOSArchForName(final String arch) {
   switch (arch) {
     case 'armv7':
     case 'armv7f': // iPhone 4S.
@@ -658,7 +658,7 @@ DarwinArch getIOSArchForName(String arch) {
   throw Exception('Unsupported iOS arch name "$arch"');
 }
 
-DarwinArch getDarwinArchForName(String arch) {
+DarwinArch getDarwinArchForName(final String arch) {
   switch (arch) {
     case 'arm64':
       return DarwinArch.arm64;
@@ -668,7 +668,7 @@ DarwinArch getDarwinArchForName(String arch) {
   throw Exception('Unsupported MacOS arch name "$arch"');
 }
 
-String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch}) {
+String getNameForTargetPlatform(final TargetPlatform platform, {final DarwinArch? darwinArch}) {
   switch (platform) {
     case TargetPlatform.android_arm:
       return 'android-arm';
@@ -707,7 +707,7 @@ String getNameForTargetPlatform(TargetPlatform platform, {DarwinArch? darwinArch
   }
 }
 
-TargetPlatform getTargetPlatformForName(String platform) {
+TargetPlatform getTargetPlatformForName(final String platform) {
   switch (platform) {
     case 'android':
       return TargetPlatform.android;
@@ -743,7 +743,7 @@ TargetPlatform getTargetPlatformForName(String platform) {
   throw Exception('Unsupported platform name "$platform"');
 }
 
-AndroidArch getAndroidArchForName(String platform) {
+AndroidArch getAndroidArchForName(final String platform) {
   switch (platform) {
     case 'android-arm':
       return AndroidArch.armeabi_v7a;
@@ -757,7 +757,7 @@ AndroidArch getAndroidArchForName(String platform) {
   throw Exception('Unsupported Android arch name "$platform"');
 }
 
-String getNameForAndroidArch(AndroidArch arch) {
+String getNameForAndroidArch(final AndroidArch arch) {
   switch (arch) {
     case AndroidArch.armeabi_v7a:
       return 'armeabi-v7a';
@@ -770,7 +770,7 @@ String getNameForAndroidArch(AndroidArch arch) {
   }
 }
 
-String getPlatformNameForAndroidArch(AndroidArch arch) {
+String getPlatformNameForAndroidArch(final AndroidArch arch) {
   switch (arch) {
     case AndroidArch.armeabi_v7a:
       return 'android-arm';
@@ -783,7 +783,7 @@ String getPlatformNameForAndroidArch(AndroidArch arch) {
   }
 }
 
-String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
+String fuchsiaArchForTargetPlatform(final TargetPlatform targetPlatform) {
   switch (targetPlatform) {
     case TargetPlatform.fuchsia_arm64:
       return 'arm64';
@@ -822,12 +822,12 @@ HostPlatform getCurrentHostPlatform() {
   return HostPlatform.linux_x64;
 }
 
-FileSystemEntity getWebPlatformBinariesDirectory(Artifacts artifacts, WebRendererMode webRenderer) {
+FileSystemEntity getWebPlatformBinariesDirectory(final Artifacts artifacts, final WebRendererMode webRenderer) {
   return artifacts.getHostArtifact(HostArtifact.webPlatformKernelFolder);
 }
 
 /// Returns the top-level build output directory.
-String getBuildDirectory([Config? config, FileSystem? fileSystem]) {
+String getBuildDirectory([final Config? config, final FileSystem? fileSystem]) {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
   final Config localConfig = config ?? globals.config;
@@ -868,12 +868,12 @@ String getMacOSBuildDirectory() {
 }
 
 /// Returns the web build output directory.
-String getWebBuildDirectory([bool isWasm = false]) {
+String getWebBuildDirectory([final bool isWasm = false]) {
   return globals.fs.path.join(getBuildDirectory(), isWasm ? 'web_wasm' : 'web');
 }
 
 /// Returns the Linux build output directory.
-String getLinuxBuildDirectory([TargetPlatform? targetPlatform]) {
+String getLinuxBuildDirectory([final TargetPlatform? targetPlatform]) {
   final String arch = (targetPlatform == null) ?
       _getCurrentHostPlatformArchName() :
       getNameForTargetPlatformArch(targetPlatform);
@@ -997,11 +997,11 @@ final Converter<String, String> _defineDecoder = base64.decoder.fuse(utf8.decode
 ///
 /// If the presence of the `/` character ends up being an issue, this can
 /// be changed to use base32 instead.
-String encodeDartDefines(List<String> defines) {
+String encodeDartDefines(final List<String> defines) {
   return defines.map(_defineEncoder.convert).join(',');
 }
 
-List<String> decodeCommaSeparated(Map<String, String> environmentDefines, String key) {
+List<String> decodeCommaSeparated(final Map<String, String> environmentDefines, final String key) {
   if (!environmentDefines.containsKey(key) || environmentDefines[key]!.isEmpty) {
     return <String>[];
   }
@@ -1012,7 +1012,7 @@ List<String> decodeCommaSeparated(Map<String, String> environmentDefines, String
 }
 
 /// Dart defines are encoded inside [environmentDefines] as a comma-separated list.
-List<String> decodeDartDefines(Map<String, String> environmentDefines, String key) {
+List<String> decodeDartDefines(final Map<String, String> environmentDefines, final String key) {
   if (!environmentDefines.containsKey(key) || environmentDefines[key]!.isEmpty) {
     return <String>[];
   }
@@ -1036,7 +1036,7 @@ String _getCurrentHostPlatformArchName() {
   return getNameForHostPlatformArch(hostPlatform);
 }
 
-String getNameForTargetPlatformArch(TargetPlatform platform) {
+String getNameForTargetPlatformArch(final TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.linux_x64:
     case TargetPlatform.darwin:
@@ -1058,7 +1058,7 @@ String getNameForTargetPlatformArch(TargetPlatform platform) {
   }
 }
 
-String getNameForHostPlatformArch(HostPlatform platform) {
+String getNameForHostPlatformArch(final HostPlatform platform) {
   switch (platform) {
     case HostPlatform.darwin_x64:
       return 'x64';
@@ -1073,7 +1073,7 @@ String getNameForHostPlatformArch(HostPlatform platform) {
   }
 }
 
-String? _uncapitalize(String? s) {
+String? _uncapitalize(final String? s) {
   if (s == null || s.isEmpty) {
     return s;
   }

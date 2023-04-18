@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InvertColors',  (WidgetTester tester) async {
+  testWidgets('InvertColors',  (final WidgetTester tester) async {
     await tester.pumpWidget(const RepaintBoundary(
       child: SizedBox(
         width: 200.0,
@@ -29,7 +29,7 @@ void main() {
     );
   });
 
-  testWidgets('InvertColors and ColorFilter',  (WidgetTester tester) async {
+  testWidgets('InvertColors and ColorFilter',  (final WidgetTester tester) async {
     await tester.pumpWidget(const RepaintBoundary(
       child: SizedBox(
         width: 200.0,
@@ -61,11 +61,11 @@ class InvertColorTestWidget extends LeafRenderObjectWidget {
   final ColorFilter? filter;
 
   @override
-  RenderInvertColorTest createRenderObject(BuildContext context) {
+  RenderInvertColorTest createRenderObject(final BuildContext context) {
     return RenderInvertColorTest(color, filter);
   }
   @override
-  void updateRenderObject(BuildContext context, covariant RenderInvertColorTest renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final RenderInvertColorTest renderObject) {
     renderObject
       ..color = color
       ..filter = filter;
@@ -78,7 +78,7 @@ class RenderInvertColorTest extends RenderProxyBox {
 
   Color get color => _color;
   Color _color;
-  set color(Color value) {
+  set color(final Color value) {
     if (color == value) {
       return;
     }
@@ -89,7 +89,7 @@ class RenderInvertColorTest extends RenderProxyBox {
 
   ColorFilter? get filter => _filter;
   ColorFilter? _filter;
-  set filter(ColorFilter? value) {
+  set filter(final ColorFilter? value) {
     if (filter == value) {
       return;
     }
@@ -98,7 +98,7 @@ class RenderInvertColorTest extends RenderProxyBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final Paint paint = Paint()
       ..style = PaintingStyle.fill
       ..color = color

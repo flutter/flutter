@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/list_section/list_section_inset.0.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Has exactly 1 CupertinoListSection inset grouped widget', (WidgetTester tester) async {
+  testWidgets('Has exactly 1 CupertinoListSection inset grouped widget', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoListSectionInsetApp(),
     );
@@ -19,7 +19,7 @@ void main() {
     expect(listSectionWidget.type, equals(CupertinoListSectionType.insetGrouped));
   });
 
-  testWidgets('CupertinoListSection has 3 CupertinoListTile children', (WidgetTester tester) async {
+  testWidgets('CupertinoListSection has 3 CupertinoListTile children', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoListSectionInsetApp(),
     );

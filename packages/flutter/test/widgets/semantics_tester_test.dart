@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics tester visits last child', (WidgetTester tester) async {
+  testWidgets('Semantics tester visits last child', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle();
     await tester.pumpWidget(

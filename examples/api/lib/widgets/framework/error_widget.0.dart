@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   // Set the ErrorWidget's builder before the app is started.
-  ErrorWidget.builder = (FlutterErrorDetails details) {
+  ErrorWidget.builder = (final FlutterErrorDetails details) {
     // If we're in debug mode, use the normal error widget which shows the error
     // message:
     if (kDebugMode) {
@@ -42,12 +42,12 @@ class _ErrorWidgetExampleAppState extends State<ErrorWidgetExampleApp> {
   bool throwError = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (throwError) {
       // Since the error widget is only used during a build, in this contrived example,
       // we purposely throw an exception in a build function.
       return Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           throw Exception('oh no, an error');
         },
       );

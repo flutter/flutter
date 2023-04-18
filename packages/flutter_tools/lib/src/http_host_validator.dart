@@ -23,9 +23,9 @@ const String kPubDevOverride = 'PUB_HOSTED_URL'; // https://dart.dev/tools/pub/e
 // Validator that checks all provided hosts are reachable and responsive
 class HttpHostValidator extends DoctorValidator {
   HttpHostValidator({
-    required Platform platform,
-    required FeatureFlags featureFlags,
-    required HttpClient httpClient,
+    required final Platform platform,
+    required final FeatureFlags featureFlags,
+    required final HttpClient httpClient,
   }) : _platform = platform,
       _featureFlags = featureFlags,
       _httpClient = httpClient,
@@ -42,11 +42,11 @@ class HttpHostValidator extends DoctorValidator {
     if (_activeHosts.isEmpty) {
       return 'Network resources check is taking a long time...';
     }
-    return 'Attempting to reach ${_activeHosts.map((Uri url) => url.host).join(", ")}...';
+    return 'Attempting to reach ${_activeHosts.map((final Uri url) => url.host).join(", ")}...';
   }
 
   /// Make a head request to the HTTP host for checking availability
-  Future<String?> _checkHostAvailability(Uri host) async {
+  Future<String?> _checkHostAvailability(final Uri host) async {
     try {
       assert(!_activeHosts.contains(host));
       _activeHosts.add(host);
@@ -69,7 +69,7 @@ class HttpHostValidator extends DoctorValidator {
     }
   }
 
-  static Uri? _parseUrl(String value) {
+  static Uri? _parseUrl(final String value) {
     final Uri? url = Uri.tryParse(value);
     if (url == null || !url.hasScheme || !url.hasAuthority || (!url.hasEmptyPath && !url.hasAbsolutePath) || url.hasFragment) {
       return null;

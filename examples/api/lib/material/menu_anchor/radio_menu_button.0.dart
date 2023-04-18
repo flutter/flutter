@@ -42,14 +42,14 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
     super.dispose();
   }
 
-  void _setBackgroundColor(Color? color) {
+  void _setBackgroundColor(final Color? color) {
     setState(() {
       _backgroundColor = color!;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -78,7 +78,7 @@ class _MyRadioMenuState extends State<MyRadioMenu> {
               child: const Text('Blue Background'),
             ),
           ],
-          builder: (BuildContext context, MenuController controller, Widget? child) {
+          builder: (final BuildContext context, final MenuController controller, final Widget? child) {
             return TextButton(
               focusNode: _buttonFocusNode,
               onPressed: () {
@@ -106,7 +106,7 @@ class MenuApp extends StatelessWidget {
   const MenuApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: MyRadioMenu()),
     );

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
 
-  testWidgets('SelectableButton', (WidgetTester tester) async {
+  testWidgets('SelectableButton', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(

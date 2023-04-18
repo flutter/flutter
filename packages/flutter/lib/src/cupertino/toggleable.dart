@@ -61,7 +61,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   Offset? get downPosition => _downPosition;
   Offset? _downPosition;
 
-  void _handleTapDown(TapDownDetails details) {
+  void _handleTapDown(final TapDownDetails details) {
     if (isInteractive) {
       setState(() {
         _downPosition = details.localPosition;
@@ -69,7 +69,7 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     }
   }
 
-  void _handleTap([Intent? _]) {
+  void _handleTap([final Intent? _]) {
     if (!isInteractive) {
       return;
     }
@@ -84,14 +84,14 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
     context.findRenderObject()!.sendSemanticsEvent(const TapSemanticEvent());
   }
 
-  void _handleTapEnd([TapUpDetails? _]) {
+  void _handleTapEnd([final TapUpDetails? _]) {
     if (_downPosition != null) {
       setState(() { _downPosition = null; });
     }
   }
 
   bool _focused = false;
-  void _handleFocusHighlightChanged(bool focused) {
+  void _handleFocusHighlightChanged(final bool focused) {
     if (focused != _focused) {
       setState(() { _focused = focused; });
     }
@@ -110,11 +110,11 @@ mixin ToggleableStateMixin<S extends StatefulWidget> on TickerProviderStateMixin
   /// that uses this mixin. The returned [Widget] must be returned from the
   /// build method - potentially after wrapping it in other widgets.
   Widget buildToggleable({
-    FocusNode? focusNode,
-    Function(bool)? onFocusChange,
-    bool autofocus = false,
-    required Size size,
-    required CustomPainter painter,
+    final FocusNode? focusNode,
+    final Function(bool)? onFocusChange,
+    final bool autofocus = false,
+    required final Size size,
+    required final CustomPainter painter,
   }) {
     return FocusableActionDetector(
       focusNode: focusNode,
@@ -154,7 +154,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// For example, a checkbox should use this color when checked.
   Color get activeColor => _activeColor!;
   Color? _activeColor;
-  set activeColor(Color value) {
+  set activeColor(final Color value) {
     if (_activeColor == value) {
       return;
     }
@@ -168,7 +168,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// For example, a checkbox should use this color when unchecked.
   Color get inactiveColor => _inactiveColor!;
   Color? _inactiveColor;
-  set inactiveColor(Color value) {
+  set inactiveColor(final Color value) {
     if (_inactiveColor == value) {
       return;
     }
@@ -182,7 +182,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// when it has focus.
   Color get focusColor => _focusColor!;
   Color? _focusColor;
-  set focusColor(Color value) {
+  set focusColor(final Color value) {
     if (value == _focusColor) {
       return;
     }
@@ -197,7 +197,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// Usually set to [ToggleableStateMixin.downPosition].
   Offset? get downPosition => _downPosition;
   Offset? _downPosition;
-  set downPosition(Offset? value) {
+  set downPosition(final Offset? value) {
     if (value == _downPosition) {
       return;
     }
@@ -208,7 +208,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// True if this toggleable has the input focus.
   bool get isFocused => _isFocused!;
   bool? _isFocused;
-  set isFocused(bool? value) {
+  set isFocused(final bool? value) {
     if (value == _isFocused) {
       return;
     }
@@ -219,7 +219,7 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   /// Determines whether the toggleable shows as active.
   bool get isActive => _isActive!;
   bool? _isActive;
-  set isActive(bool? value) {
+  set isActive(final bool? value) {
     if (value == _isActive) {
       return;
     }
@@ -228,16 +228,16 @@ abstract class ToggleablePainter extends ChangeNotifier implements CustomPainter
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant final CustomPainter oldDelegate) => true;
 
   @override
-  bool? hitTest(Offset position) => null;
+  bool? hitTest(final Offset position) => null;
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
 
   @override
-  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(covariant final CustomPainter oldDelegate) => false;
 
   @override
   String toString() => describeIdentity(this);

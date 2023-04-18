@@ -16,8 +16,8 @@ WindowsWorkflow? get windowsWorkflow => context.get<WindowsWorkflow>();
 /// desktop configuration setting to be enabled.
 class WindowsWorkflow implements Workflow {
   const WindowsWorkflow({
-    required Platform platform,
-    required FeatureFlags featureFlags,
+    required final Platform platform,
+    required final FeatureFlags featureFlags,
   }) : _platform = platform,
        _featureFlags = featureFlags;
 

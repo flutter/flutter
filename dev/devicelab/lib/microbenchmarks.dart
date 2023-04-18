@@ -9,7 +9,7 @@ import 'dart:io';
 /// Reads through the print commands from [process] waiting for the magic phase
 /// that contains microbenchmarks results as defined in
 /// `dev/benchmarks/microbenchmarks/lib/common.dart`.
-Future<Map<String, double>> readJsonResults(Process process) {
+Future<Map<String, double>> readJsonResults(final Process process) {
   // IMPORTANT: keep these values in sync with dev/benchmarks/microbenchmarks/lib/common.dart
   const String jsonStart = '================ RESULTS ================';
   const String jsonEnd = '================ FORMATTED ==============';
@@ -21,7 +21,7 @@ Future<Map<String, double>> readJsonResults(Process process) {
   final StreamSubscription<String> stderrSub = process.stderr
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
-      .listen((String line) {
+      .listen((final String line) {
         stderr.writeln('[STDERR] $line');
       });
 
@@ -30,7 +30,7 @@ Future<Map<String, double>> readJsonResults(Process process) {
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
-      .listen((String line) async {
+      .listen((final String line) async {
     print('[STDOUT] $line');
 
     if (line.contains(jsonStart)) {
@@ -79,7 +79,7 @@ Future<Map<String, double>> readJsonResults(Process process) {
     }
   });
 
-  process.exitCode.then<void>((int code) async {
+  process.exitCode.then<void>((final int code) async {
     await Future.wait<void>(<Future<void>>[
       stdoutSub.cancel(),
       stderrSub.cancel(),

@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Color kTitleColor = Color(0xFF333333);
 const String kTitleString = 'Hello World';
 
-Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle? onGenerateTitle, Color? color }) async {
+Future<void> pumpApp(final WidgetTester tester, { final GenerateAppTitle? onGenerateTitle, final Color? color }) async {
   await tester.pumpWidget(
     WidgetsApp(
       supportedLocales: const <Locale>[
@@ -18,9 +18,9 @@ Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle? onGenerateTitle, C
       title: kTitleString,
       color: color ?? kTitleColor,
       onGenerateTitle: onGenerateTitle,
-      onGenerateRoute: (RouteSettings settings) {
+      onGenerateRoute: (final RouteSettings settings) {
         return PageRouteBuilder<void>(
-          pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+          pageBuilder: (final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
             return Container();
           },
         );
@@ -30,13 +30,13 @@ Future<void> pumpApp(WidgetTester tester, { GenerateAppTitle? onGenerateTitle, C
 }
 
 void main() {
-  testWidgets('Specified title and color are used to build a Title', (WidgetTester tester) async {
+  testWidgets('Specified title and color are used to build a Title', (final WidgetTester tester) async {
     await pumpApp(tester);
     expect(tester.widget<Title>(find.byType(Title)).title, kTitleString);
     expect(tester.widget<Title>(find.byType(Title)).color, kTitleColor);
   });
 
-  testWidgets('Specified color is made opaque for Title', (WidgetTester tester) async {
+  testWidgets('Specified color is made opaque for Title', (final WidgetTester tester) async {
     // The Title widget can only handle fully opaque colors, the WidgetApp should
     // ensure it only uses a fully opaque version of its color for the title.
     const Color transparentBlue = Color(0xDD0000ff);
@@ -45,8 +45,8 @@ void main() {
     expect(tester.widget<Title>(find.byType(Title)).color, opaqueBlue);
   });
 
-  testWidgets('onGenerateTitle handles changing locales', (WidgetTester tester) async {
-    String generateTitle(BuildContext context) {
+  testWidgets('onGenerateTitle handles changing locales', (final WidgetTester tester) async {
+    String generateTitle(final BuildContext context) {
       return Localizations.localeOf(context).toString();
     }
 

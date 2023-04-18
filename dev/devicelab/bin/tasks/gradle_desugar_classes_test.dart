@@ -13,7 +13,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 Future<void> main() async {
   await task(() async {
     try {
-      await runProjectTest((FlutterProject flutterProject) async {
+      await runProjectTest((final FlutterProject flutterProject) async {
         section('APK contains plugin classes');
         await flutterProject.setMinSdkVersion(20);
         flutterProject.addPlugin('google_maps_flutter', value: '^2.2.1');

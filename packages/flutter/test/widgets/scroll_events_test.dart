@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget _buildScroller({ required List<String> log }) {
+Widget _buildScroller({ required final List<String> log }) {
   return NotificationListener<ScrollNotification>(
-    onNotification: (ScrollNotification notification) {
+    onNotification: (final ScrollNotification notification) {
       if (notification is ScrollStartNotification) {
         log.add('scroll-start');
       } else if (notification is ScrollUpdateNotification) {
@@ -26,19 +26,19 @@ Widget _buildScroller({ required List<String> log }) {
 }
 
 void main() {
-  Completer<void> animateTo(WidgetTester tester, double newScrollOffset, { required Duration duration }) {
+  Completer<void> animateTo(final WidgetTester tester, final double newScrollOffset, { required final Duration duration }) {
     final Completer<void> completer = Completer<void>();
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);
     return completer;
   }
 
-  void jumpTo(WidgetTester tester, double newScrollOffset) {
+  void jumpTo(final WidgetTester tester, final double newScrollOffset) {
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(newScrollOffset);
   }
 
-  testWidgets('Scroll event drag', (WidgetTester tester) async {
+  testWidgets('Scroll event drag', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -57,7 +57,7 @@ void main() {
     expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end']));
   });
 
-  testWidgets('Scroll animateTo', (WidgetTester tester) async {
+  testWidgets('Scroll animateTo', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -74,7 +74,7 @@ void main() {
     expect(completer.isCompleted, isTrue);
   });
 
-  testWidgets('Scroll jumpTo', (WidgetTester tester) async {
+  testWidgets('Scroll jumpTo', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -85,7 +85,7 @@ void main() {
     expect(log, equals(<String>['scroll-start', 'scroll-update', 'scroll-end']));
   });
 
-  testWidgets('Scroll jumpTo during animation', (WidgetTester tester) async {
+  testWidgets('Scroll jumpTo during animation', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -110,7 +110,7 @@ void main() {
     expect(completer.isCompleted, isTrue);
   });
 
-  testWidgets('Scroll scrollTo during animation', (WidgetTester tester) async {
+  testWidgets('Scroll scrollTo during animation', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -134,7 +134,7 @@ void main() {
     expect(completer.isCompleted, isTrue);
   });
 
-  testWidgets('fling, fling generates two start/end pairs', (WidgetTester tester) async {
+  testWidgets('fling, fling generates two start/end pairs', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -146,37 +146,37 @@ void main() {
     expect(log, equals(<String>[]));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     await tester.pump(const Duration(seconds: 1));
-    log.removeWhere((String value) => value == 'scroll-update');
+    log.removeWhere((final String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start']));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
-    log.removeWhere((String value) => value == 'scroll-update');
+    log.removeWhere((final String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start']));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    log.removeWhere((String value) => value == 'scroll-update');
+    log.removeWhere((final String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start', 'scroll-end']));
   });
 
-  testWidgets('fling, pause, fling generates two start/end pairs', (WidgetTester tester) async {
+  testWidgets('fling, pause, fling generates two start/end pairs', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
     expect(log, equals(<String>[]));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     await tester.pump(const Duration(seconds: 1));
-    log.removeWhere((String value) => value == 'scroll-update');
+    log.removeWhere((final String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start']));
     await tester.pump(const Duration(minutes: 1));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
-    log.removeWhere((String value) => value == 'scroll-update');
+    log.removeWhere((final String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start']));
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    log.removeWhere((String value) => value == 'scroll-update');
+    log.removeWhere((final String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start', 'scroll-end']));
   });
 
-  testWidgets('fling up ends', (WidgetTester tester) async {
+  testWidgets('fling up ends', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
@@ -187,7 +187,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(log.first, equals('scroll-start'));
     expect(log.last, equals('scroll-end'));
-    log.removeWhere((String value) => value == 'scroll-update');
+    log.removeWhere((final String value) => value == 'scroll-update');
     expect(log.length, equals(2));
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, equals(0.0));
   });

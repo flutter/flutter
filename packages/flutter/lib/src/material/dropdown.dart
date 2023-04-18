@@ -64,7 +64,7 @@ class _DropdownMenuPainter extends CustomPainter {
   final BoxPainter _painter;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final double selectedItemOffset = getSelectedItemOffset();
     final Tween<double> top = Tween<double>(
       begin: clampDouble(selectedItemOffset, 0.0, math.max(size.height - _kMenuItemHeight, 0.0)),
@@ -82,7 +82,7 @@ class _DropdownMenuPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DropdownMenuPainter oldPainter) {
+  bool shouldRepaint(final _DropdownMenuPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.elevation != elevation
         || oldPainter.selectedIndex != selectedIndex
@@ -115,7 +115,7 @@ class _DropdownMenuItemButton<T> extends StatefulWidget {
 }
 
 class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> {
-  void _handleFocusChange(bool focused) {
+  void _handleFocusChange(final bool focused) {
     final bool inTraditionalMode;
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
@@ -157,7 +157,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final DropdownMenuItem<T> dropdownMenuItem = widget.route.items[widget.itemIndex].item!;
     final CurvedAnimation opacity;
     final double unit = 0.5 / (widget.route.items.length + 1.5);
@@ -242,7 +242,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // The menu is shown in three stages (unit timing in brackets):
     // [0s - 0.25s] - Fade in a rect-sized menu container with the selected item.
     // [0.25s - 0.5s] - Grow the otherwise empty menu container from the center
@@ -336,7 +336,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   final TextDirection? textDirection;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     // The maximum height of a simple menu should be one or more rows less than
     // the view height. This ensures a tappable area outside of the simple menu
     // with which to dismiss the menu.
@@ -356,7 +356,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     final _MenuLimits menuLimits = route.getMenuLimits(buttonRect, size.height, route.selectedIndex);
 
     assert(() {
@@ -383,7 +383,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   }
 
   @override
-  bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) {
+  bool shouldRelayout(final _DropdownMenuRouteLayout<T> oldDelegate) {
     return buttonRect != oldDelegate.buttonRect || textDirection != oldDelegate.textDirection;
   }
 }
@@ -398,7 +398,7 @@ class _DropdownRouteResult<T> {
   final T? result;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is _DropdownRouteResult<T>
         && other.result == result;
   }
@@ -461,9 +461,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final String? barrierLabel;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         return _DropdownRoutePage<T>(
           route: this,
           constraints: constraints,
@@ -488,13 +488,13 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     }
   }
 
-  double getItemOffset(int index) {
+  double getItemOffset(final int index) {
     double offset = kMaterialListPadding.top;
     if (items.isNotEmpty && index > 0) {
       assert(items.length == itemHeights.length);
       offset += itemHeights
         .sublist(0, index)
-        .reduce((double total, double height) => total + height);
+        .reduce((final double total, final double height) => total + height);
     }
     return offset;
   }
@@ -503,7 +503,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   // for the ListView that contains the menu items. The vertical center of the
   // selected item is aligned with the button's vertical center, as far as
   // that's possible given availableHeight.
-  _MenuLimits getMenuLimits(Rect buttonRect, double availableHeight, int index) {
+  _MenuLimits getMenuLimits(final Rect buttonRect, final double availableHeight, final int index) {
     double computedMaxHeight = availableHeight - 2.0 * _kMenuItemHeight;
     if (menuMaxHeight != null) {
       computedMaxHeight = math.min(computedMaxHeight, menuMaxHeight!);
@@ -522,7 +522,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     double menuTop = (buttonTop - selectedItemOffset) - (itemHeights[selectedIndex] - buttonRect.height) / 2.0;
     double preferredMenuHeight = kMaterialListPadding.vertical;
     if (items.isNotEmpty) {
-      preferredMenuHeight += itemHeights.reduce((double total, double height) => total + height);
+      preferredMenuHeight += itemHeights.reduce((final double total, final double height) => total + height);
     }
 
     // If there are too many elements in the menu, we need to shrink it down
@@ -602,7 +602,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
 
     // Computing the initialScrollOffset now, before the items have been laid
@@ -634,7 +634,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       removeLeft: true,
       removeRight: true,
       child: Builder(
-        builder: (BuildContext context) {
+        builder: (final BuildContext context) {
           return CustomSingleChildLayout(
             delegate: _DropdownMenuRouteLayout<T>(
               buttonRect: buttonRect,
@@ -665,18 +665,18 @@ class _MenuItem<T> extends SingleChildRenderObjectWidget {
   final DropdownMenuItem<T>? item;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderMenuItem(onLayout);
   }
 
   @override
-  void updateRenderObject(BuildContext context, covariant _RenderMenuItem renderObject) {
+  void updateRenderObject(final BuildContext context, covariant final _RenderMenuItem renderObject) {
     renderObject.onLayout = onLayout;
   }
 }
 
 class _RenderMenuItem extends RenderProxyBox {
-  _RenderMenuItem(this.onLayout, [RenderBox? child]) : super(child);
+  _RenderMenuItem(this.onLayout, [final RenderBox? child]) : super(child);
 
   ValueChanged<Size> onLayout;
 
@@ -718,7 +718,7 @@ class _DropdownMenuItemContainer extends StatelessWidget {
   final AlignmentGeometry alignment;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       constraints: const BoxConstraints(minHeight: _kMenuItemHeight),
       alignment: alignment,
@@ -774,12 +774,12 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 
   /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.
-  static bool at(BuildContext context) {
+  static bool at(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<DropdownButtonHideUnderline>() != null;
   }
 
   @override
-  bool updateShouldNotify(DropdownButtonHideUnderline oldWidget) => false;
+  bool updateShouldNotify(final DropdownButtonHideUnderline oldWidget) => false;
 }
 
 /// A Material Design button for selecting from a list of items.
@@ -886,7 +886,7 @@ class DropdownButton<T> extends StatefulWidget {
     // When adding new arguments, consider adding similar arguments to
     // DropdownButtonFormField.
   }) : assert(items == null || items.isEmpty || value == null ||
-              items.where((DropdownMenuItem<T> item) {
+              items.where((final DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
                 "There should be exactly one item with [DropdownButton]'s value: "
@@ -927,11 +927,11 @@ class DropdownButton<T> extends StatefulWidget {
     this.alignment = AlignmentDirectional.centerStart,
     this.borderRadius,
     this.padding,
-    required InputDecoration inputDecoration,
-    required bool isEmpty,
-    required bool isFocused,
+    required final InputDecoration inputDecoration,
+    required final bool isEmpty,
+    required final bool isFocused,
   }) : assert(items == null || items.isEmpty || value == null ||
-              items.where((DropdownMenuItem<T> item) {
+              items.where((final DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
                 "There should be exactly one item with [DropdownButtonFormField]'s value: "
@@ -1195,10 +1195,10 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     }
     _actionMap = <Type, Action<Intent>>{
       ActivateIntent: CallbackAction<ActivateIntent>(
-        onInvoke: (ActivateIntent intent) => _handleTap(),
+        onInvoke: (final ActivateIntent intent) => _handleTap(),
       ),
       ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(
-        onInvoke: (ButtonActivateIntent intent) => _handleTap(),
+        onInvoke: (final ButtonActivateIntent intent) => _handleTap(),
       ),
     };
     focusNode!.addListener(_handleFocusChanged);
@@ -1229,7 +1229,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
 
   @override
-  void didUpdateWidget(DropdownButton<T> oldWidget) {
+  void didUpdateWidget(final DropdownButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode?.removeListener(_handleFocusChanged);
@@ -1247,13 +1247,13 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
         || widget.items!.isEmpty
         || (widget.value == null &&
             widget.items!
-                .where((DropdownMenuItem<T> item) => item.enabled && item.value == widget.value)
+                .where((final DropdownMenuItem<T> item) => item.enabled && item.value == widget.value)
                 .isEmpty)) {
       _selectedIndex = null;
       return;
     }
 
-    assert(widget.items!.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
+    assert(widget.items!.where((final DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
     for (int itemIndex = 0; itemIndex < widget.items!.length; itemIndex++) {
       if (widget.items![itemIndex].value == widget.value) {
         _selectedIndex = itemIndex;
@@ -1274,7 +1274,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     for (int index = 0; index < widget.items!.length; index += 1)
       _MenuItem<T>(
         item: widget.items![index],
-        onLayout: (Size size) {
+        onLayout: (final Size size) {
           // If [_dropdownRoute] is null and onLayout is called, this means
           // that performLayout was called on a _DropdownRoute that has not
           // left the widget tree but is already on its way out.
@@ -1313,7 +1313,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     );
 
     focusNode?.requestFocus();
-    navigator.push(_dropdownRoute!).then<void>((_DropdownRouteResult<T>? newValue) {
+    navigator.push(_dropdownRoute!).then<void>((final _DropdownRouteResult<T>? newValue) {
       _removeDropdownRoute();
       if (!mounted || newValue == null) {
         return;
@@ -1364,7 +1364,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
   bool get _enabled => widget.items != null && widget.items!.isNotEmpty && widget.onChanged != null;
 
-  Orientation _getOrientation(BuildContext context) {
+  Orientation _getOrientation(final BuildContext context) {
     Orientation? result = MediaQuery.maybeOrientationOf(context);
     if (result == null) {
       // If there's no MediaQuery, then use the view aspect to determine
@@ -1376,7 +1376,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final Orientation newOrientation = _getOrientation(context);
@@ -1424,7 +1424,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       innerItemsWidget = IndexedStack(
         index: _selectedIndex ?? hintIndex,
         alignment: widget.alignment,
-        children: widget.isDense ? items : items.map((Widget item) {
+        children: widget.isDense ? items : items.map((final Widget item) {
           return widget.itemHeight != null
             ? SizedBox(height: widget.itemHeight, child: item)
             : Column(mainAxisSize: MainAxisSize.min, children: <Widget>[item]);
@@ -1546,39 +1546,39 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// `autofocus`, and `decoration`  parameters must not be null.
   DropdownButtonFormField({
     super.key,
-    required List<DropdownMenuItem<T>>? items,
-    DropdownButtonBuilder? selectedItemBuilder,
-    T? value,
-    Widget? hint,
-    Widget? disabledHint,
+    required final List<DropdownMenuItem<T>>? items,
+    final DropdownButtonBuilder? selectedItemBuilder,
+    final T? value,
+    final Widget? hint,
+    final Widget? disabledHint,
     required this.onChanged,
-    VoidCallback? onTap,
-    int elevation = 8,
-    TextStyle? style,
-    Widget? icon,
-    Color? iconDisabledColor,
-    Color? iconEnabledColor,
-    double iconSize = 24.0,
-    bool isDense = true,
-    bool isExpanded = false,
-    double? itemHeight,
-    Color? focusColor,
-    FocusNode? focusNode,
-    bool autofocus = false,
-    Color? dropdownColor,
-    InputDecoration? decoration,
+    final VoidCallback? onTap,
+    final int elevation = 8,
+    final TextStyle? style,
+    final Widget? icon,
+    final Color? iconDisabledColor,
+    final Color? iconEnabledColor,
+    final double iconSize = 24.0,
+    final bool isDense = true,
+    final bool isExpanded = false,
+    final double? itemHeight,
+    final Color? focusColor,
+    final FocusNode? focusNode,
+    final bool autofocus = false,
+    final Color? dropdownColor,
+    final InputDecoration? decoration,
     super.onSaved,
     super.validator,
-    AutovalidateMode? autovalidateMode,
-    double? menuMaxHeight,
-    bool? enableFeedback,
-    AlignmentGeometry alignment = AlignmentDirectional.centerStart,
-    BorderRadius? borderRadius,
-    EdgeInsetsGeometry? padding,
+    final AutovalidateMode? autovalidateMode,
+    final double? menuMaxHeight,
+    final bool? enableFeedback,
+    final AlignmentGeometry alignment = AlignmentDirectional.centerStart,
+    final BorderRadius? borderRadius,
+    final EdgeInsetsGeometry? padding,
     // When adding new arguments, consider adding similar arguments to
     // DropdownButton.
   }) : assert(items == null || items.isEmpty || value == null ||
-              items.where((DropdownMenuItem<T> item) {
+              items.where((final DropdownMenuItem<T> item) {
                 return item.value == value;
               }).length == 1,
                 "There should be exactly one item with [DropdownButton]'s value: "
@@ -1591,14 +1591,14 @@ class DropdownButtonFormField<T> extends FormField<T> {
        super(
          initialValue: value,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
-         builder: (FormFieldState<T> field) {
+         builder: (final FormFieldState<T> field) {
            final _DropdownButtonFormFieldState<T> state = field as _DropdownButtonFormFieldState<T>;
            final InputDecoration decorationArg =  decoration ?? InputDecoration(focusColor: focusColor);
            final InputDecoration effectiveDecoration = decorationArg.applyDefaults(
              Theme.of(field.context).inputDecorationTheme,
            );
 
-           final bool showSelectedItem = items != null && items.where((DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
+           final bool showSelectedItem = items != null && items.where((final DropdownMenuItem<T> item) => item.value == state.value).isNotEmpty;
            bool isHintOrDisabledHintAvailable() {
              final bool isDropdownDisabled = onChanged == null || (items == null || items.isEmpty);
              if (isDropdownDisabled) {
@@ -1614,7 +1614,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
            return Focus(
              canRequestFocus: false,
              skipTraversal: true,
-             child: Builder(builder: (BuildContext context) {
+             child: Builder(builder: (final BuildContext context) {
                return DropdownButtonHideUnderline(
                  child: DropdownButton<T>._formField(
                    items: items,
@@ -1671,7 +1671,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
 
   @override
-  void didChange(T? value) {
+  void didChange(final T? value) {
     super.didChange(value);
     final DropdownButtonFormField<T> dropdownButtonFormField = widget as DropdownButtonFormField<T>;
     assert(dropdownButtonFormField.onChanged != null);
@@ -1679,7 +1679,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   }
 
   @override
-  void didUpdateWidget(DropdownButtonFormField<T> oldWidget) {
+  void didUpdateWidget(final DropdownButtonFormField<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.initialValue != widget.initialValue) {
       setValue(widget.initialValue);

@@ -20,12 +20,12 @@ class FakeImageProvider extends ImageProvider<FakeImageProvider> {
   final double scale;
 
   @override
-  Future<FakeImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<FakeImageProvider> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<FakeImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter load(FakeImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(final FakeImageProvider key, final DecoderCallback decode) {
     assert(key == this);
     return MultiFrameImageStreamCompleter(
       codec: SynchronousFuture<ui.Codec>(_codec),

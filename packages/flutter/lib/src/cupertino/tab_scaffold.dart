@@ -34,7 +34,7 @@ class CupertinoTabController extends ChangeNotifier {
   ///
   /// The [initialIndex] must not be null and defaults to 0. The value must be
   /// greater than or equal to 0, and less than the total number of tabs.
-  CupertinoTabController({ int initialIndex = 0 })
+  CupertinoTabController({ final int initialIndex = 0 })
     : _index = initialIndex,
       assert(initialIndex >= 0);
 
@@ -50,7 +50,7 @@ class CupertinoTabController extends ChangeNotifier {
   /// number of tabs.
   int get index => _index;
   int _index;
-  set index(int value) {
+  set index(final int value) {
     assert(value >= 0);
     if (_index == value) {
       return;
@@ -238,7 +238,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
   String? get restorationId => widget.restorationId;
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     _restoreInternalController();
   }
 
@@ -255,7 +255,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
     _updateTabController();
   }
 
-  void _updateTabController([CupertinoTabController? oldWidgetController]) {
+  void _updateTabController([final CupertinoTabController? oldWidgetController]) {
     if (widget.controller == null && _internalController == null) {
       // No widget-provided controller: create an internal controller.
       _internalController = RestorableCupertinoTabController(initialIndex: widget.tabBar.currentIndex);
@@ -291,7 +291,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
   }
 
   @override
-  void didUpdateWidget(CupertinoTabScaffold oldWidget) {
+  void didUpdateWidget(final CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       _updateTabController(oldWidget.controller);
@@ -303,7 +303,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     MediaQueryData newMediaQuery = MediaQuery.of(context);
 
@@ -370,7 +370,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> with Restor
               // provided callback.
               child: widget.tabBar.copyWith(
                 currentIndex: _controller.index,
-                onTap: (int newIndex) {
+                onTap: (final int newIndex) {
                   _controller.index = newIndex;
                   // Chain the user's original callback.
                   widget.tabBar.onTap?.call(newIndex);
@@ -433,7 +433,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   }
 
   @override
-  void didUpdateWidget(_TabSwitchingView oldWidget) {
+  void didUpdateWidget(final _TabSwitchingView oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // Only partially invalidate the tabs cache to avoid breaking the current
@@ -461,7 +461,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         tabFocusNodes.addAll(
           List<FocusScopeNode>.generate(
             widget.tabCount - tabFocusNodes.length,
-              (int index) => FocusScopeNode(debugLabel: '$CupertinoTabScaffold Tab ${index + tabFocusNodes.length}'),
+              (final int index) => FocusScopeNode(debugLabel: '$CupertinoTabScaffold Tab ${index + tabFocusNodes.length}'),
           ),
         );
       }
@@ -481,10 +481,10 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       fit: StackFit.expand,
-      children: List<Widget>.generate(widget.tabCount, (int index) {
+      children: List<Widget>.generate(widget.tabCount, (final int index) {
         final bool active = index == widget.currentTabIndex;
         shouldBuildTab[index] = active || shouldBuildTab[index];
 
@@ -496,7 +496,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
               enabled: active,
               child: FocusScope(
                 node: tabFocusNodes[index],
-                child: Builder(builder: (BuildContext context) {
+                child: Builder(builder: (final BuildContext context) {
                   return shouldBuildTab[index] ? widget.tabBuilder(context, index) : const SizedBox.shrink();
                 }),
               ),
@@ -521,7 +521,7 @@ class RestorableCupertinoTabController extends RestorableChangeNotifier<Cupertin
   ///
   /// The `initialIndex` must not be null and defaults to 0. The value must be
   /// greater than or equal to 0, and less than the total number of tabs.
-  RestorableCupertinoTabController({ int initialIndex = 0 })
+  RestorableCupertinoTabController({ final int initialIndex = 0 })
     : assert(initialIndex >= 0),
       _initialIndex = initialIndex;
 
@@ -533,7 +533,7 @@ class RestorableCupertinoTabController extends RestorableChangeNotifier<Cupertin
   }
 
   @override
-  CupertinoTabController fromPrimitives(Object? data) {
+  CupertinoTabController fromPrimitives(final Object? data) {
     assert(data != null);
     return CupertinoTabController(initialIndex: data! as int);
   }

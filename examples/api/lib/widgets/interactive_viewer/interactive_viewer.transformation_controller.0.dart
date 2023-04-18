@@ -12,7 +12,7 @@ class TransformationControllerExampleApp extends StatelessWidget {
   const TransformationControllerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: TransformationControllerExample(),
     );
@@ -61,7 +61,7 @@ class _TransformationControllerExampleState extends State<TransformationControll
     _controllerReset.reset();
   }
 
-  void _onInteractionStart(ScaleStartDetails details) {
+  void _onInteractionStart(final ScaleStartDetails details) {
     // If the user tries to cause a transformation while the reset animation is
     // running, cancel the reset animation.
     if (_controllerReset.status == AnimationStatus.forward) {
@@ -85,7 +85,7 @@ class _TransformationControllerExampleState extends State<TransformationControll
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
       appBar: AppBar(

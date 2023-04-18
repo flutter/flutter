@@ -31,12 +31,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   final Map<String, String>? headers;
 
   @override
-  Future<NetworkImage> obtainKey(image_provider.ImageConfiguration configuration) {
+  Future<NetworkImage> obtainKey(final image_provider.ImageConfiguration configuration) {
     return SynchronousFuture<NetworkImage>(this);
   }
 
   @override
-  ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
+  ImageStreamCompleter load(final image_provider.NetworkImage key, final image_provider.DecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -55,7 +55,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter loadBuffer(image_provider.NetworkImage key, image_provider.DecoderBufferCallback decode) {
+  ImageStreamCompleter loadBuffer(final image_provider.NetworkImage key, final image_provider.DecoderBufferCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -74,7 +74,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  ImageStreamCompleter loadImage(image_provider.NetworkImage key, image_provider.ImageDecoderCallback decode) {
+  ImageStreamCompleter loadImage(final image_provider.NetworkImage key, final image_provider.ImageDecoderCallback decode) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -110,11 +110,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   Future<ui.Codec> _loadAsync(
-    NetworkImage key,
-    StreamController<ImageChunkEvent> chunkEvents, {
-    image_provider.ImageDecoderCallback? decode,
-    image_provider.DecoderBufferCallback? decodeBufferDeprecated,
-    image_provider.DecoderCallback? decodeDeprecated,
+    final NetworkImage key,
+    final StreamController<ImageChunkEvent> chunkEvents, {
+    final image_provider.ImageDecoderCallback? decode,
+    final image_provider.DecoderBufferCallback? decodeBufferDeprecated,
+    final image_provider.DecoderCallback? decodeDeprecated,
   }) async {
     try {
       assert(key == this);
@@ -123,7 +123,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
       final HttpClientRequest request = await _httpClient.getUrl(resolved);
 
-      headers?.forEach((String name, String value) {
+      headers?.forEach((final String name, final String value) {
         request.headers.add(name, value);
       });
       final HttpClientResponse response = await request.close();
@@ -137,7 +137,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,
-        onBytesReceived: (int cumulative, int? total) {
+        onBytesReceived: (final int cumulative, final int? total) {
           chunkEvents.add(ImageChunkEvent(
             cumulativeBytesLoaded: cumulative,
             expectedTotalBytes: total,
@@ -172,7 +172,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

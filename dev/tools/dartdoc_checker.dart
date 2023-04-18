@@ -22,7 +22,7 @@ import 'package:path/path.dart' as path;
 /// ```
 /// void foo({@required int bar});
 /// ```
-void checkForUnresolvedDirectives(String htmlOutputPath) {
+void checkForUnresolvedDirectives(final String htmlOutputPath) {
   final Directory dartDocDir = Directory(htmlOutputPath);
   if (!dartDocDir.existsSync()) {
     throw Exception('Directory with dartdoc output (${dartDocDir.path}) does not exist.');
@@ -77,10 +77,10 @@ void checkForUnresolvedDirectives(String htmlOutputPath) {
   print('No unresolved dartdoc directives detected.');
 }
 
-int _scanFile(File file) {
+int _scanFile(final File file) {
   assert(path.extension(file.path) == '.html');
   final Iterable<String> matches = _pattern.allMatches(file.readAsStringSync())
-      .map((RegExpMatch m ) => m.group(0)!);
+      .map((final RegExpMatch m ) => m.group(0)!);
 
   if (matches.isNotEmpty) {
     stderr.writeln('Found unresolved dartdoc directives in ${file.path}:');
@@ -105,7 +105,7 @@ final RegExp _pattern = RegExp(r'({@[^}\n]*}?)(?![^<>]*</code)');
 //
 // Provide the path to the dartdoc HTML output as an argument when running the
 // program.
-void main(List<String> args) {
+void main(final List<String> args) {
   if (args.length != 1) {
     throw Exception('Must provide the path to the dartdoc HTML output as argument.');
   }

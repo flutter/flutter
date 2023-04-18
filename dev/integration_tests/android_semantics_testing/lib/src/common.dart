@@ -54,7 +54,7 @@ class AndroidSemanticsNode {
   ///         int,
   ///       ]
   ///     }
-  factory AndroidSemanticsNode.deserialize(String value) {
+  factory AndroidSemanticsNode.deserialize(final String value) {
     return AndroidSemanticsNode._(json.decode(value));
   }
 
@@ -201,7 +201,7 @@ class Rect {
   int get hashCode => Object.hash(top, left, right, bottom);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -234,7 +234,7 @@ class Size {
   int get hashCode => Object.hash(width, height);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

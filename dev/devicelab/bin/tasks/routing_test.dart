@@ -46,7 +46,7 @@ void main() {
       run.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           print('run:stdout: $line');
           if (vmServicePort == null) {
             vmServicePort = parseServicePort(line);
@@ -61,10 +61,10 @@ void main() {
       run.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           stderr.writeln('run:stderr: $line');
         });
-      unawaited(run.exitCode.then<void>((int exitCode) { ok = false; }));
+      unawaited(run.exitCode.then<void>((final int exitCode) { ok = false; }));
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
       if (!ok) {
         throw 'Failed to run test app.';
@@ -77,13 +77,13 @@ void main() {
       drive.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           print('drive:stdout: $line');
         });
       drive.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           stderr.writeln('drive:stderr: $line');
         });
       int result;

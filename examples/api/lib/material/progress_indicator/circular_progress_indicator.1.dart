@@ -12,7 +12,7 @@ class ProgressIndicatorApp extends StatelessWidget {
   const ProgressIndicatorApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
       home: const ProgressIndicatorExample(),
@@ -52,7 +52,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -79,7 +79,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
                 ),
                 Switch(
                   value: determinate,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       determinate = value;
                       if (determinate) {

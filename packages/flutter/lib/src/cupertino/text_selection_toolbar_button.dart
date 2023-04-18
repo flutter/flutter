@@ -89,7 +89,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
 
   /// Returns the default button label String for the button of the given
   /// [ContextMenuButtonItem]'s [ContextMenuButtonType].
-  static String getButtonLabel(BuildContext context, ContextMenuButtonItem buttonItem) {
+  static String getButtonLabel(final BuildContext context, final ContextMenuButtonItem buttonItem) {
     if (buttonItem.label != null) {
       return buttonItem.label!;
     }
@@ -112,7 +112,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget child = this.child ?? Text(
        text ?? getButtonLabel(context, buttonItem!),
        overflow: TextOverflow.ellipsis,

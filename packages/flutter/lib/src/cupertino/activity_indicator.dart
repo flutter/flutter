@@ -100,7 +100,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   }
 
   @override
-  void didUpdateWidget(CupertinoActivityIndicator oldWidget) {
+  void didUpdateWidget(final CupertinoActivityIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animating != oldWidget.animating) {
       if (widget.animating) {
@@ -118,7 +118,7 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       height: widget.radius * 2,
       width: widget.radius * 2,
@@ -176,7 +176,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   final RRect tickFundamentalRRect;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint();
     final int tickCount = _kAlphaValues.length;
 
@@ -197,7 +197,7 @@ class _CupertinoActivityIndicatorPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_CupertinoActivityIndicatorPainter oldPainter) {
+  bool shouldRepaint(final _CupertinoActivityIndicatorPainter oldPainter) {
     return oldPainter.position != position ||
         oldPainter.activeColor != activeColor ||
         oldPainter.progress != progress;

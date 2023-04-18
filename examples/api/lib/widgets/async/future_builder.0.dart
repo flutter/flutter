@@ -12,7 +12,7 @@ class FutureBuilderExampleApp extends StatelessWidget {
   const FutureBuilderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FutureBuilderExample(),
     );
@@ -33,13 +33,13 @@ class _FutureBuilderExampleState extends State<FutureBuilderExample> {
   );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.displayMedium!,
       textAlign: TextAlign.center,
       child: FutureBuilder<String>(
         future: _calculation, // a previously-obtained Future<String> or null
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        builder: (final BuildContext context, final AsyncSnapshot<String> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) {
             children = <Widget>[

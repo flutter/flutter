@@ -15,7 +15,7 @@ import 'package:path/path.dart' as path;
 /// Runs tasks.
 ///
 /// The tasks are chosen depending on the command-line options.
-Future<void> main(List<String> rawArgs) async {
+Future<void> main(final List<String> rawArgs) async {
   // This is populated by a callback in the ArgParser.
   final List<String> taskNames = <String>[];
   final ArgParser argParser = createArgParser(taskNames);
@@ -122,14 +122,14 @@ Future<void> main(List<String> rawArgs) async {
 }
 
 Future<void> _runABTest({
-  required int runsPerTest,
-  required bool silent,
-  required String? localEngine,
-  required String? localWebSdk,
-  required String? localEngineSrcPath,
-  required String? deviceId,
-  required String resultsFile,
-  required String taskName,
+  required final int runsPerTest,
+  required final bool silent,
+  required final String? localEngine,
+  required final String? localWebSdk,
+  required final String? localEngineSrcPath,
+  required final String? deviceId,
+  required final String resultsFile,
+  required final String taskName,
 }) async {
   print('$taskName A/B test. Will run $runsPerTest times.');
 
@@ -198,7 +198,7 @@ Future<void> _runABTest({
   print('Results saved to ${jsonFile.path}');
 }
 
-File _uniqueFile(String filenameTemplate) {
+File _uniqueFile(final String filenameTemplate) {
   final List<String> parts = filenameTemplate.split('#');
   if (parts.length != 2) {
     return File(filenameTemplate);
@@ -212,7 +212,7 @@ File _uniqueFile(String filenameTemplate) {
   return file;
 }
 
-ArgParser createArgParser(List<String> taskNames) {
+ArgParser createArgParser(final List<String> taskNames) {
   return ArgParser()
     ..addMultiOption(
       'task',
@@ -225,7 +225,7 @@ ArgParser createArgParser(List<String> taskNames) {
           '   Example: bin/tasks/complex_layout__start_up.dart.\n'
           '\n'
           'This option may be repeated to specify multiple tasks.',
-      callback: (List<String> value) {
+      callback: (final List<String> value) {
         for (final String nameOrPath in value) {
           final List<String> fragments = path.split(nameOrPath);
           final bool isDartFile = fragments.last.endsWith('.dart');
@@ -261,7 +261,7 @@ ArgParser createArgParser(List<String> taskNames) {
             'produces a report containing averages, noise, and the speed-up\n'
             'between the two engines. --local-engine is required when running\n'
             'an A/B test.',
-      callback: (String? value) {
+      callback: (final String? value) {
         if (value != null && int.tryParse(value) == null) {
           throw ArgParserException('Option --ab must be a number, but was "$value".');
         }
@@ -349,7 +349,7 @@ ArgParser createArgParser(List<String> taskNames) {
     ..addMultiOption(
       'test',
       hide: true,
-      callback: (List<String> value) {
+      callback: (final List<String> value) {
         if (value.isNotEmpty) {
           throw const FormatException(
             'Invalid option --test. Did you mean --task (-t)?',

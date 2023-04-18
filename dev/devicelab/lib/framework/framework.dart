@@ -45,7 +45,7 @@ bool _isTaskRegistered = false;
 ///
 /// If no `processManager` is provided, a default [LocalProcessManager] is created
 /// for the task.
-Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) async {
+Future<TaskResult> task(final TaskFunction task, { ProcessManager? processManager }) async {
   if (_isTaskRegistered) {
     throw StateError('A task is already registered');
   }
@@ -55,7 +55,7 @@ Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) a
 
   // TODO(ianh): allow overriding logging.
   Logger.root.level = Level.ALL;
-  Logger.root.onRecord.listen((LogRecord rec) {
+  Logger.root.onRecord.listen((final LogRecord rec) {
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
   });
 
@@ -67,7 +67,7 @@ Future<TaskResult> task(TaskFunction task, { ProcessManager? processManager }) a
 class _TaskRunner {
   _TaskRunner(this.task, this.processManager) {
     registerExtension('ext.cocoonRunTask',
-        (String method, Map<String, String> parameters) async {
+        (final String method, final Map<String, String> parameters) async {
       final Duration? taskTimeout = parameters.containsKey('timeoutInMinutes')
         ? Duration(minutes: int.parse(parameters['timeoutInMinutes']!))
         : null;
@@ -83,7 +83,7 @@ class _TaskRunner {
       return ServiceExtensionResponse.result(json.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
-        (String method, Map<String, String> parameters) async {
+        (final String method, final Map<String, String> parameters) async {
       return ServiceExtensionResponse.result('"ready"');
     });
   }
@@ -111,10 +111,10 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run(Duration? taskTimeout, {
-    bool runFlutterConfig = true,
-    bool runProcessCleanup = true,
-    required String? localEngine,
+  Future<TaskResult> run(final Duration? taskTimeout, {
+    final bool runFlutterConfig = true,
+    final bool runProcessCleanup = true,
+    required final String? localEngine,
   }) async {
     try {
       _taskStarted = true;
@@ -272,7 +272,7 @@ class _TaskRunner {
     final Completer<TaskResult> completer = Completer<TaskResult>();
     Chain.capture(() async {
       completer.complete(await task());
-    }, onError: (dynamic taskError, Chain taskErrorStack) {
+    }, onError: (final dynamic taskError, final Chain taskErrorStack) {
       final String message = 'Task failed: $taskError';
       stderr
         ..writeln(message)

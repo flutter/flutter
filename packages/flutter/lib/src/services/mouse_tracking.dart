@@ -109,7 +109,7 @@ class MouseTrackerAnnotation with Diagnosticable {
   final bool validForMouseTracker;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagsSummary<Function?>(
       'callbacks',

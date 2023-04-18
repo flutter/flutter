@@ -15,9 +15,9 @@ void main() {
 
   testWidgets(
     '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       ObjectEvent? receivedEvent;
-      ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
+      ObjectEvent listener(final ObjectEvent event) => receivedEvent = event;
 
       ma.addListener(listener);
       expect(ma.hasListeners, isFalse);
@@ -33,7 +33,7 @@ void main() {
 
 class _TestLeafRenderObjectWidget extends LeafRenderObjectWidget {
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _TestRenderObject();
   }
 }
@@ -65,13 +65,13 @@ class _TestElement extends RenderObjectElement with RootElementMixin {
   }
 
   @override
-  void insertRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void insertRenderObjectChild(covariant final RenderObject child, covariant final Object? slot) { }
 
   @override
-  void moveRenderObjectChild(covariant RenderObject child, covariant Object? oldSlot, covariant Object? newSlot) { }
+  void moveRenderObjectChild(covariant final RenderObject child, covariant final Object? oldSlot, covariant final Object? newSlot) { }
 
   @override
-  void removeRenderObjectChild(covariant RenderObject child, covariant Object? slot) { }
+  void removeRenderObjectChild(covariant final RenderObject child, covariant final Object? slot) { }
 }
 
 class _MyStatefulWidget extends StatefulWidget {
@@ -83,13 +83,13 @@ class _MyStatefulWidget extends StatefulWidget {
 
 class _MyStatefulWidgetState extends State<_MyStatefulWidget> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<void> _activateFlutterObjects(WidgetTester tester) async {
+Future<void> _activateFlutterObjects(final WidgetTester tester) async {
   final _TestElement element = _TestElement();
   element.makeInactive(); element.unmount();
 

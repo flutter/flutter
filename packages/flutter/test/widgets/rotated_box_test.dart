@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Rotated box control test', (WidgetTester tester) async {
+  testWidgets('Rotated box control test', (final WidgetTester tester) async {
     final List<String> log = <String>[];
     final Key rotatedBoxKey = UniqueKey();
 

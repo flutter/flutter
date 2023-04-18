@@ -130,7 +130,7 @@ abstract class CustomPainter extends Listenable {
   /// Creates a custom painter.
   ///
   /// The painter will repaint whenever `repaint` notifies its listeners.
-  const CustomPainter({ Listenable? repaint }) : _repaint = repaint;
+  const CustomPainter({ final Listenable? repaint }) : _repaint = repaint;
 
   final Listenable? _repaint;
 
@@ -140,7 +140,7 @@ abstract class CustomPainter extends Listenable {
   /// the [Listenable] provided to the constructor in the `repaint` argument, if
   /// it was not null.
   @override
-  void addListener(VoidCallback listener) => _repaint?.addListener(listener);
+  void addListener(final VoidCallback listener) => _repaint?.addListener(listener);
 
   /// Remove a previously registered closure from the list of closures that the
   /// object notifies when it is time to repaint.
@@ -149,7 +149,7 @@ abstract class CustomPainter extends Listenable {
   /// the [Listenable] provided to the constructor in the `repaint` argument, if
   /// it was not null.
   @override
-  void removeListener(VoidCallback listener) => _repaint?.removeListener(listener);
+  void removeListener(final VoidCallback listener) => _repaint?.removeListener(listener);
 
   /// Called whenever the object needs to paint. The given [Canvas] has its
   /// coordinate space configured such that the origin is at the top left of the
@@ -183,7 +183,7 @@ abstract class CustomPainter extends Listenable {
   ///    [Canvas.drawImageRect], or [Canvas.drawImageNine] methods to paint the
   ///    [ImageInfo.image] object, applying the [ImageInfo.scale] value to
   ///    obtain the correct rendering size.
-  void paint(Canvas canvas, Size size);
+  void paint(final Canvas canvas, final Size size);
 
   /// Returns a function that builds semantic information for the picture drawn
   /// by this painter.
@@ -221,7 +221,7 @@ abstract class CustomPainter extends Listenable {
   ///
   /// By default this method delegates to [shouldRepaint] under the assumption
   /// that in most cases semantics change when something new is drawn.
-  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => shouldRepaint(oldDelegate);
+  bool shouldRebuildSemantics(covariant final CustomPainter oldDelegate) => shouldRepaint(oldDelegate);
 
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderCustomPaint] object, or any time that a new
@@ -248,7 +248,7 @@ abstract class CustomPainter extends Listenable {
   /// [RenderObject.isRepaintBoundary] set to true) might be helpful.
   ///
   /// The `oldDelegate` argument will never be null.
-  bool shouldRepaint(covariant CustomPainter oldDelegate);
+  bool shouldRepaint(covariant final CustomPainter oldDelegate);
 
   /// Called whenever a hit test is being performed on an object that is using
   /// this custom paint delegate.
@@ -263,7 +263,7 @@ abstract class CustomPainter extends Listenable {
   /// image that should be considered a "hit", false if it corresponds to a
   /// point that should be considered outside the painted image, and null to use
   /// the default behavior.
-  bool? hitTest(Offset position) => null;
+  bool? hitTest(final Offset position) => null;
 
   @override
   String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
@@ -364,12 +364,12 @@ class CustomPainterSemantics {
 class RenderCustomPaint extends RenderProxyBox {
   /// Creates a render object that delegates its painting.
   RenderCustomPaint({
-    CustomPainter? painter,
-    CustomPainter? foregroundPainter,
-    Size preferredSize = Size.zero,
+    final CustomPainter? painter,
+    final CustomPainter? foregroundPainter,
+    final Size preferredSize = Size.zero,
     this.isComplex = false,
     this.willChange = false,
-    RenderBox? child,
+    final RenderBox? child,
   }) : _painter = painter,
        _foregroundPainter = foregroundPainter,
        _preferredSize = preferredSize,
@@ -392,7 +392,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
-  set painter(CustomPainter? value) {
+  set painter(final CustomPainter? value) {
     if (_painter == value) {
       return;
     }
@@ -418,7 +418,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter(CustomPainter? value) {
+  set foregroundPainter(final CustomPainter? value) {
     if (_foregroundPainter == value) {
       return;
     }
@@ -427,7 +427,7 @@ class RenderCustomPaint extends RenderProxyBox {
     _didUpdatePainter(_foregroundPainter, oldPainter);
   }
 
-  void _didUpdatePainter(CustomPainter? newPainter, CustomPainter? oldPainter) {
+  void _didUpdatePainter(final CustomPainter? newPainter, final CustomPainter? oldPainter) {
     // Check if we need to repaint.
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
@@ -464,7 +464,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// instead.
   Size get preferredSize => _preferredSize;
   Size _preferredSize;
-  set preferredSize(Size value) {
+  set preferredSize(final Size value) {
     if (preferredSize == value) {
       return;
     }
@@ -491,7 +491,7 @@ class RenderCustomPaint extends RenderProxyBox {
   bool willChange;
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     if (child == null) {
       return preferredSize.width.isFinite ? preferredSize.width : 0;
     }
@@ -499,7 +499,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     if (child == null) {
       return preferredSize.width.isFinite ? preferredSize.width : 0;
     }
@@ -507,7 +507,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     if (child == null) {
       return preferredSize.height.isFinite ? preferredSize.height : 0;
     }
@@ -515,7 +515,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     if (child == null) {
       return preferredSize.height.isFinite ? preferredSize.height : 0;
     }
@@ -523,7 +523,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     super.attach(owner);
     _painter?.addListener(markNeedsPaint);
     _foregroundPainter?.addListener(markNeedsPaint);
@@ -537,7 +537,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     if (_foregroundPainter != null && (_foregroundPainter!.hitTest(position) ?? false)) {
       return true;
     }
@@ -545,7 +545,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestSelf(Offset position) {
+  bool hitTestSelf(final Offset position) {
     return _painter != null && (_painter!.hitTest(position) ?? true);
   }
 
@@ -556,11 +556,11 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  Size computeSizeForNoChild(BoxConstraints constraints) {
+  Size computeSizeForNoChild(final BoxConstraints constraints) {
     return constraints.constrain(preferredSize);
   }
 
-  void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
+  void _paintWithPainter(final Canvas canvas, final Offset offset, final CustomPainter painter) {
     late int debugPreviousCanvasSaveCount;
     canvas.save();
     assert(() {
@@ -610,7 +610,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (_painter != null) {
       _paintWithPainter(context.canvas, offset, _painter!);
       _setRasterCacheHints(context);
@@ -622,7 +622,7 @@ class RenderCustomPaint extends RenderProxyBox {
     }
   }
 
-  void _setRasterCacheHints(PaintingContext context) {
+  void _setRasterCacheHints(final PaintingContext context) {
     if (isComplex) {
       context.setIsComplexHint();
     }
@@ -638,7 +638,7 @@ class RenderCustomPaint extends RenderProxyBox {
   SemanticsBuilderCallback? _foregroundSemanticsBuilder;
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     _backgroundSemanticsBuilder = painter?.semanticsBuilder;
     _foregroundSemanticsBuilder = foregroundPainter?.semanticsBuilder;
@@ -653,9 +653,9 @@ class RenderCustomPaint extends RenderProxyBox {
 
   @override
   void assembleSemanticsNode(
-    SemanticsNode node,
-    SemanticsConfiguration config,
-    Iterable<SemanticsNode> children,
+    final SemanticsNode node,
+    final SemanticsConfiguration config,
+    final Iterable<SemanticsNode> children,
   ) {
     assert(() {
       if (child == null && children.isNotEmpty) {
@@ -851,7 +851,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// If `oldChild` can be updated, it is updated using [_updateSemanticsChild].
   /// Otherwise, the node is replaced by a new instance of [SemanticsNode].
-  static bool _canUpdateSemanticsChild(SemanticsNode oldChild, CustomPainterSemantics newSemantics) {
+  static bool _canUpdateSemanticsChild(final SemanticsNode oldChild, final CustomPainterSemantics newSemantics) {
     return oldChild.key == newSemantics.key;
   }
 
@@ -859,7 +859,7 @@ class RenderCustomPaint extends RenderProxyBox {
   ///
   /// This method requires that `_canUpdateSemanticsChild(oldChild, newSemantics)`
   /// is true prior to calling it.
-  static SemanticsNode _updateSemanticsChild(SemanticsNode? oldChild, CustomPainterSemantics newSemantics) {
+  static SemanticsNode _updateSemanticsChild(final SemanticsNode? oldChild, final CustomPainterSemantics newSemantics) {
     assert(oldChild == null || _canUpdateSemanticsChild(oldChild, newSemantics));
 
     final SemanticsNode newChild = oldChild ?? SemanticsNode(
@@ -1037,7 +1037,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(MessageProperty('painter', '$painter'));
     properties.add(MessageProperty('foregroundPainter', '$foregroundPainter', level: foregroundPainter != null ? DiagnosticLevel.info : DiagnosticLevel.fine));

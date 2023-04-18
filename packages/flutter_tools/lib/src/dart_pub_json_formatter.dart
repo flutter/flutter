@@ -15,7 +15,7 @@ class DartDependencyPackage {
     required this.dependencies,
   });
 
-  factory DartDependencyPackage.fromHashMap(dynamic packageInfo) {
+  factory DartDependencyPackage.fromHashMap(final dynamic packageInfo) {
     String name = '';
     String version = '';
     String source = '';
@@ -40,7 +40,7 @@ class DartDependencyPackage {
       name: name,
       version: version,
       source: source,
-      dependencies: dependencies.map((dynamic e) => e.toString()).toList(),
+      dependencies: dependencies.map((final dynamic e) => e.toString()).toList(),
     );
   }
 

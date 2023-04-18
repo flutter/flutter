@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('HardwareKeyboard records pressed keys and enabled locks', (WidgetTester tester) async {
+  testWidgets('HardwareKeyboard records pressed keys and enabled locks', (final WidgetTester tester) async {
     await simulateKeyDownEvent(LogicalKeyboardKey.numLock, platform: 'windows');
     expect(HardwareKeyboard.instance.physicalKeysPressed,
       equals(<PhysicalKeyboardKey>{PhysicalKeyboardKey.numLock}));
@@ -68,9 +68,9 @@ void main() {
       equals(<KeyboardLockMode>{}));
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (WidgetTester tester) async {
+  testWidgets('KeyboardManager synthesizes modifier keys in rawKeyData mode', (final WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
-    HardwareKeyboard.instance.addHandler((KeyEvent event) {
+    HardwareKeyboard.instance.addHandler((final KeyEvent event) {
       events.add(event);
       return false;
     });
@@ -96,7 +96,7 @@ void main() {
     expect(events[1].synthesized, false);
   });
 
-  testWidgets('Dispatch events to all handlers', (WidgetTester tester) async {
+  testWidgets('Dispatch events to all handlers', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<int> logs = <int>[];
 
@@ -105,7 +105,7 @@ void main() {
         autofocus: true,
         focusNode: focusNode,
         child: Container(),
-        onKeyEvent: (KeyEvent event) {
+        onKeyEvent: (final KeyEvent event) {
           logs.add(1);
         },
       ),
@@ -121,7 +121,7 @@ void main() {
     // Add a handler.
 
     bool handler2Result = false;
-    bool handler2(KeyEvent event) {
+    bool handler2(final KeyEvent event) {
       logs.add(2);
       return handler2Result;
     }
@@ -143,7 +143,7 @@ void main() {
 
     handler2Result = false;
     bool handler3Result = false;
-    bool handler3(KeyEvent event) {
+    bool handler3(final KeyEvent event) {
       logs.add(3);
       return handler3Result;
     }
@@ -201,7 +201,7 @@ void main() {
   // _CastError on _hardwareKeyboard.lookUpLayout(key). The original scenario
   // that this is triggered on Android is unknown. Here we make up a scenario
   // where a ShiftLeft key down is dispatched but the modifier bit is not set.
-  testWidgets('Correctly convert down events that are synthesized released', (WidgetTester tester) async {
+  testWidgets('Correctly convert down events that are synthesized released', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<KeyEvent> events = <KeyEvent>[];
 
@@ -210,7 +210,7 @@ void main() {
         autofocus: true,
         focusNode: focusNode,
         child: Container(),
-        onKeyEvent: (KeyEvent event) {
+        onKeyEvent: (final KeyEvent event) {
           events.add(event);
         },
       ),
@@ -227,7 +227,7 @@ void main() {
     await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
       SystemChannels.keyEvent.codec.encodeMessage(data2),
-      (ByteData? data) {},
+      (final ByteData? data) {},
     );
 
     expect(events, hasLength(3));
@@ -244,7 +244,7 @@ void main() {
     KeyDataTransitMode.rawKeyData,
   }));
 
-  testWidgets('Instantly dispatch synthesized key events when the queue is empty', (WidgetTester tester) async {
+  testWidgets('Instantly dispatch synthesized key events when the queue is empty', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<int> logs = <int>[];
 
@@ -253,12 +253,12 @@ void main() {
         autofocus: true,
         focusNode: focusNode,
         child: Container(),
-        onKeyEvent: (KeyEvent event) {
+        onKeyEvent: (final KeyEvent event) {
           logs.add(1);
         },
       ),
     );
-    ServicesBinding.instance.keyboard.addHandler((KeyEvent event) {
+    ServicesBinding.instance.keyboard.addHandler((final KeyEvent event) {
       logs.add(2);
       return false;
     });
@@ -276,21 +276,21 @@ void main() {
     logs.clear();
   }, variant: KeySimulatorTransitModeVariant.keyDataThenRawKeyData());
 
-  testWidgets('Postpone synthesized key events when the queue is not empty', (WidgetTester tester) async {
+  testWidgets('Postpone synthesized key events when the queue is not empty', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
     final List<String> logs = <String>[];
 
     await tester.pumpWidget(
       RawKeyboardListener(
         focusNode: FocusNode(),
-        onKey: (RawKeyEvent event) {
+        onKey: (final RawKeyEvent event) {
           logs.add('${event.runtimeType}');
         },
         child: KeyboardListener(
           autofocus: true,
           focusNode: focusNode,
           child: Container(),
-          onKeyEvent: (KeyEvent event) {
+          onKeyEvent: (final KeyEvent event) {
             logs.add('${event.runtimeType}');
           },
         ),
@@ -331,14 +331,14 @@ void main() {
   // In that case, the key data should not be converted to any [KeyEvent]s,
   // but is only used so that *a* key data comes before the raw key message
   // and makes [KeyEventManager] infer [KeyDataTransitMode.keyDataThenRawKeyData].
-  testWidgets('Empty keyData yields no event but triggers inference', (WidgetTester tester) async {
+  testWidgets('Empty keyData yields no event but triggers inference', (final WidgetTester tester) async {
     final List<KeyEvent> events = <KeyEvent>[];
     final List<RawKeyEvent> rawEvents = <RawKeyEvent>[];
-    tester.binding.keyboard.addHandler((KeyEvent event) {
+    tester.binding.keyboard.addHandler((final KeyEvent event) {
       events.add(event);
       return true;
     });
-    RawKeyboard.instance.addListener((RawKeyEvent event) {
+    RawKeyboard.instance.addListener((final RawKeyEvent event) {
       rawEvents.add(event);
     });
     tester.binding.keyEventManager.handleKeyData(const ui.KeyData(
@@ -383,14 +383,14 @@ void main() {
     expect(rawEvents.length, 2);
   });
 
-  testWidgets('Exceptions from keyMessageHandler are caught and reported', (WidgetTester tester) async {
+  testWidgets('Exceptions from keyMessageHandler are caught and reported', (final WidgetTester tester) async {
     final KeyMessageHandler? oldKeyMessageHandler = tester.binding.keyEventManager.keyMessageHandler;
     addTearDown(() {
       tester.binding.keyEventManager.keyMessageHandler = oldKeyMessageHandler;
     });
 
     // When keyMessageHandler throws an error...
-    tester.binding.keyEventManager.keyMessageHandler = (KeyMessage message) {
+    tester.binding.keyEventManager.keyMessageHandler = (final KeyMessage message) {
       throw 1;
     };
 
@@ -398,7 +398,7 @@ void main() {
     FlutterErrorDetails? record;
     await _runWhileOverridingOnError(
       () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
+      onError: (final FlutterErrorDetails details) {
         record = details;
       }
     );
@@ -417,7 +417,7 @@ void main() {
     // Simulate a key up event.
     await _runWhileOverridingOnError(
       () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
+      onError: (final FlutterErrorDetails details) {
         record = details;
       }
     );
@@ -426,8 +426,8 @@ void main() {
     expect(record, isNull);
   });
 
-  testWidgets('Exceptions from HardwareKeyboard handlers are caught and reported', (WidgetTester tester) async {
-    bool throwingCallback(KeyEvent event) {
+  testWidgets('Exceptions from HardwareKeyboard handlers are caught and reported', (final WidgetTester tester) async {
+    bool throwingCallback(final KeyEvent event) {
       throw 1;
     }
 
@@ -438,7 +438,7 @@ void main() {
     FlutterErrorDetails? record;
     await _runWhileOverridingOnError(
       () => simulateKeyDownEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
+      onError: (final FlutterErrorDetails details) {
         record = details;
       }
     );
@@ -457,7 +457,7 @@ void main() {
     // Simulate a key up event.
     await _runWhileOverridingOnError(
       () => simulateKeyUpEvent(LogicalKeyboardKey.keyA),
-      onError: (FlutterErrorDetails details) {
+      onError: (final FlutterErrorDetails details) {
         record = details;
       }
     );
@@ -469,7 +469,7 @@ void main() {
 
 
 
-Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExceptionHandler onError}) async {
+Future<void> _runWhileOverridingOnError(final AsyncCallback body, {required final FlutterExceptionHandler onError}) async {
   final FlutterExceptionHandler? oldFlutterErrorOnError = FlutterError.onError;
   FlutterError.onError = onError;
 
@@ -480,9 +480,9 @@ Future<void> _runWhileOverridingOnError(AsyncCallback body, {required FlutterExc
   }
 }
 
-Map<String, DiagnosticsNode> _groupDiagnosticsByName(Iterable<DiagnosticsNode> infos) {
+Map<String, DiagnosticsNode> _groupDiagnosticsByName(final Iterable<DiagnosticsNode> infos) {
   return Map<String, DiagnosticsNode>.fromIterable(
     infos,
-    key: (dynamic node) => (node as DiagnosticsNode).name ?? '',
+    key: (final dynamic node) => (node as DiagnosticsNode).name ?? '',
   );
 }

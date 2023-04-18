@@ -6,7 +6,7 @@ import 'package:flutter_api_samples/widgets/will_pop_scope/will_pop_scope.0.dart
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('pressing shouldPop button changes shouldPop', (WidgetTester tester) async {
+  testWidgets('pressing shouldPop button changes shouldPop', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.WillPopScopeExampleApp(),
     );
@@ -17,7 +17,7 @@ void main() {
     await tester.pump();
     expect(find.text('shouldPop: false'), findsOneWidget);
   });
-  testWidgets('pressing Push button pushes route', (WidgetTester tester) async {
+  testWidgets('pressing Push button pushes route', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.WillPopScopeExampleApp(),
     );

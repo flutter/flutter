@@ -66,7 +66,7 @@ class TestRender extends RenderSemanticsAnnotations {
   int describeSemanticsConfigurationCallCount = 0;
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     describeSemanticsConfigurationCallCount += 1;
   }

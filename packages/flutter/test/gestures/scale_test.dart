@@ -12,13 +12,13 @@ import 'gesture_tester.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testGesture('Should recognize scale gestures', (GestureTester tester) {
+  testGesture('Should recognize scale gestures', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
@@ -27,7 +27,7 @@ void main() {
     double? updatedHorizontalScale;
     double? updatedVerticalScale;
     Offset? updatedDelta;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedHorizontalScale = details.horizontalScale;
       updatedVerticalScale = details.verticalScale;
@@ -36,7 +36,7 @@ void main() {
     };
 
     bool didEndScale = false;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
     };
 
@@ -249,18 +249,18 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('Rejects scale gestures from unallowed device kinds', (GestureTester tester) {
+  testGesture('Rejects scale gestures from unallowed device kinds', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
     );
 
     bool didStartScale = false;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
     };
 
     double? updatedScale;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedScale = details.scale;
     };
 
@@ -283,26 +283,26 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices', (GestureTester tester) {
+  testGesture('Scale gestures starting from allowed device kinds cannot be ended from unallowed devices', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       supportedDevices: <PointerDeviceKind>{ PointerDeviceKind.touch },
     );
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
     double? updatedScale;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedFocalPoint = details.focalPoint;
     };
 
     bool didEndScale = false;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
     };
 
@@ -348,18 +348,18 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('Scale gesture competes with drag', (GestureTester tester) {
+  testGesture('Scale gesture competes with drag', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     final List<String> log = <String>[];
 
-    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
-    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
-    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
+    scale.onStart = (final ScaleStartDetails details) { log.add('scale-start'); };
+    scale.onUpdate = (final ScaleUpdateDetails details) { log.add('scale-update'); };
+    scale.onEnd = (final ScaleEndDetails details) { log.add('scale-end'); };
 
-    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
-    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
+    drag.onStart = (final DragStartDetails details) { log.add('drag-start'); };
+    drag.onEnd = (final DragEndDetails details) { log.add('drag-end'); };
 
     final TestPointer pointer1 = TestPointer();
 
@@ -430,27 +430,27 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('Should recognize rotation gestures', (GestureTester tester) {
+  testGesture('Should recognize rotation gestures', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
     double? updatedRotation;
     Offset? updatedDelta;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedRotation = details.rotation;
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
     };
 
     bool didEndScale = false;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
     };
 
@@ -629,11 +629,11 @@ void main() {
   });
 
   // Regressing test for https://github.com/flutter/flutter/issues/78941
-  testGesture('First rotation test', (GestureTester tester) {
+  testGesture('First rotation test', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
 
     double? updatedRotation;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedRotation = details.rotation;
     };
 
@@ -656,17 +656,17 @@ void main() {
     expect(updatedRotation, math.pi / 4.0);
   });
 
-  testGesture('Scale gestures pointer count test', (GestureTester tester) {
+  testGesture('Scale gestures pointer count test', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
 
     int pointerCountOfStart = 0;
-    scale.onStart = (ScaleStartDetails details) => pointerCountOfStart = details.pointerCount;
+    scale.onStart = (final ScaleStartDetails details) => pointerCountOfStart = details.pointerCount;
 
     int pointerCountOfUpdate = 0;
-    scale.onUpdate = (ScaleUpdateDetails details) => pointerCountOfUpdate = details.pointerCount;
+    scale.onUpdate = (final ScaleUpdateDetails details) => pointerCountOfUpdate = details.pointerCount;
 
     int pointerCountOfEnd = 0;
-    scale.onEnd = (ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
+    scale.onEnd = (final ScaleEndDetails details) => pointerCountOfEnd = details.pointerCount;
 
     final TestPointer pointer1 = TestPointer();
     final PointerDownEvent down = pointer1.down(Offset.zero);
@@ -708,13 +708,13 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('Should recognize scale gestures from pointer pan/zoom events', (GestureTester tester) {
+  testGesture('Should recognize scale gestures from pointer pan/zoom events', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
@@ -723,7 +723,7 @@ void main() {
     double? updatedHorizontalScale;
     double? updatedVerticalScale;
     Offset? updatedDelta;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedHorizontalScale = details.horizontalScale;
       updatedVerticalScale = details.verticalScale;
@@ -732,7 +732,7 @@ void main() {
     };
 
     bool didEndScale = false;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
     };
 
@@ -808,13 +808,13 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('Pointer pan/zooms should work alongside touches', (GestureTester tester) {
+  testGesture('Pointer pan/zooms should work alongside touches', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
@@ -824,7 +824,7 @@ void main() {
     double? updatedVerticalScale;
     Offset? updatedDelta;
     double? updatedRotation;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedHorizontalScale = details.horizontalScale;
       updatedVerticalScale = details.verticalScale;
@@ -834,7 +834,7 @@ void main() {
     };
 
     bool didEndScale = false;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
     };
 
@@ -976,18 +976,18 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('Scale gesture competes with drag for trackpad gesture', (GestureTester tester) {
+  testGesture('Scale gesture competes with drag for trackpad gesture', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer();
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     final List<String> log = <String>[];
 
-    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
-    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
-    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
+    scale.onStart = (final ScaleStartDetails details) { log.add('scale-start'); };
+    scale.onUpdate = (final ScaleUpdateDetails details) { log.add('scale-update'); };
+    scale.onEnd = (final ScaleEndDetails details) { log.add('scale-end'); };
 
-    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
-    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
+    drag.onStart = (final DragStartDetails details) { log.add('drag-start'); };
+    drag.onEnd = (final DragEndDetails details) { log.add('drag-end'); };
 
     final TestPointer pointer1 = TestPointer(2, PointerDeviceKind.trackpad);
 
@@ -1058,13 +1058,13 @@ void main() {
     drag.dispose();
   });
 
-  testGesture('Scale gesture from pan/zoom events properly handles DragStartBehavior.start', (GestureTester tester) {
+  testGesture('Scale gesture from pan/zoom events properly handles DragStartBehavior.start', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(dragStartBehavior: DragStartBehavior.start);
     final HorizontalDragGestureRecognizer drag = HorizontalDragGestureRecognizer();
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
@@ -1074,7 +1074,7 @@ void main() {
     double? updatedVerticalScale;
     double? updatedRotation;
     Offset? updatedDelta;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedHorizontalScale = details.horizontalScale;
       updatedVerticalScale = details.verticalScale;
@@ -1084,7 +1084,7 @@ void main() {
     };
 
     bool didEndScale = false;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
     };
 
@@ -1163,7 +1163,7 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('scale trackpadScrollCausesScale', (GestureTester tester) {
+  testGesture('scale trackpadScrollCausesScale', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       dragStartBehavior: DragStartBehavior.start,
       trackpadScrollCausesScale: true
@@ -1171,21 +1171,21 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
     double? updatedScale;
     Offset? updatedDelta;
-    scale.onUpdate = (ScaleUpdateDetails details) {
+    scale.onUpdate = (final ScaleUpdateDetails details) {
       updatedScale = details.scale;
       updatedFocalPoint = details.focalPoint;
       updatedDelta = details.focalPointDelta;
     };
 
     bool didEndScale = false;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
     };
 
@@ -1298,7 +1298,7 @@ void main() {
     scale.dispose();
   });
 
-  testGesture('scale ending velocity', (GestureTester tester) {
+  testGesture('scale ending velocity', (final GestureTester tester) {
     final ScaleGestureRecognizer scale = ScaleGestureRecognizer(
       dragStartBehavior: DragStartBehavior.start,
       trackpadScrollCausesScale: true
@@ -1306,14 +1306,14 @@ void main() {
 
     bool didStartScale = false;
     Offset? updatedFocalPoint;
-    scale.onStart = (ScaleStartDetails details) {
+    scale.onStart = (final ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
     };
 
     bool didEndScale = false;
     double? scaleEndVelocity;
-    scale.onEnd = (ScaleEndDetails details) {
+    scale.onEnd = (final ScaleEndDetails details) {
       didEndScale = true;
       scaleEndVelocity = details.scaleVelocity;
     };

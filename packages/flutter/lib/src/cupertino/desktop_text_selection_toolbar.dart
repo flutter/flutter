@@ -65,7 +65,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
 
   // Builds a toolbar just like the default Mac toolbar, with the right color
   // background, padding, and rounded corners.
-  static Widget _defaultToolbarBuilder(BuildContext context, Widget child) {
+  static Widget _defaultToolbarBuilder(final BuildContext context, final Widget child) {
     return Container(
       width: _kToolbarWidth,
       decoration: BoxDecoration(
@@ -83,7 +83,7 @@ class CupertinoDesktopTextSelectionToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
 
     final double paddingAbove = MediaQuery.paddingOf(context).top + _kToolbarScreenPadding;

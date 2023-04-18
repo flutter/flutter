@@ -9,14 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 // Only check the initial lines of the message, since the message walks the
 // entire widget tree back, and any changes to the widget tree break these
 // tests if we check the entire message.
-void _expectStartsWith(List<String?> actual, List<String?> matcher) {
+void _expectStartsWith(final List<String?> actual, final List<String?> matcher) {
   expect(actual.sublist(0, matcher.length), equals(matcher));
 }
 
 void main() {
   final _MockLiveTestWidgetsFlutterBinding binding = _MockLiveTestWidgetsFlutterBinding();
 
-  testWidgets('Should print message on pointer events', (WidgetTester tester) async {
+  testWidgets('Should print message on pointer events', (final WidgetTester tester) async {
     final List<String?> printedMessages = <String?>[];
 
     int invocations = 0;
@@ -64,7 +64,7 @@ No widgets found at Offset(1.0, 1.0).
 '''.trim().split('\n')));
   });
 
-  testWidgets('Should print message on pointer events with setSurfaceSize', (WidgetTester tester) async {
+  testWidgets('Should print message on pointer events with setSurfaceSize', (final WidgetTester tester) async {
     final List<String?> printedMessages = <String?>[];
 
     int invocations = 0;
@@ -118,8 +118,8 @@ No widgets found at Offset(1.0, 1.0).
 class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
   @override
   void handlePointerEventForSource(
-    PointerEvent event, {
-    TestBindingEventSource source = TestBindingEventSource.device,
+    final PointerEvent event, {
+    final TestBindingEventSource source = TestBindingEventSource.device,
   }) {
     // In this test we use `WidgetTester.tap` to simulate real device touches.
     // `WidgetTester.tap` sends events in the local coordinate system, while
@@ -138,11 +138,11 @@ class _MockLiveTestWidgetsFlutterBinding extends LiveTestWidgetsFlutterBinding {
   DebugPrintCallback get debugPrintOverride {
     return _storeDebugPrints == null
         ? super.debugPrintOverride
-        : ((String? message, { int? wrapWidth }) => _storeDebugPrints!.add(message));
+        : ((final String? message, { final int? wrapWidth }) => _storeDebugPrints!.add(message));
   }
 
   // Execute `task` while redirecting [debugPrint] to appending to `store`.
-  Future<void> collectDebugPrints(List<String?>? store, AsyncValueGetter<void> task) async {
+  Future<void> collectDebugPrints(final List<String?>? store, final AsyncValueGetter<void> task) async {
     _storeDebugPrints = store;
     try {
       await task();

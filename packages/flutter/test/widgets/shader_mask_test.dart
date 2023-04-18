@@ -10,7 +10,7 @@ library;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Shader createShader(Rect bounds) {
+Shader createShader(final Rect bounds) {
   return const LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -21,14 +21,14 @@ Shader createShader(Rect bounds) {
 
 
 void main() {
-  testWidgets('Can be constructed', (WidgetTester tester) async {
+  testWidgets('Can be constructed', (final WidgetTester tester) async {
     const Widget child = SizedBox(width: 100.0, height: 100.0);
     await tester.pumpWidget(const ShaderMask(shaderCallback: createShader, child: child));
   });
 
-  testWidgets('Bounds rect includes offset', (WidgetTester tester) async {
+  testWidgets('Bounds rect includes offset', (final WidgetTester tester) async {
     late Rect shaderBounds;
-    Shader recordShaderBounds(Rect bounds) {
+    Shader recordShaderBounds(final Rect bounds) {
       shaderBounds = bounds;
       return createShader(bounds);
     }
@@ -50,7 +50,7 @@ void main() {
   });
 
 
-  testWidgets('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
+  testWidgets('Bounds rect includes offset visual inspection', (final WidgetTester tester) async {
     final Widget widgetBottomRight = Container(
       width: 400,
       height: 400,
@@ -59,7 +59,7 @@ void main() {
         child: Align(
           alignment: Alignment.bottomRight,
           child: ShaderMask(
-            shaderCallback: (Rect bounds) => const RadialGradient(
+            shaderCallback: (final Rect bounds) => const RadialGradient(
               radius: 0.05,
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,
@@ -88,7 +88,7 @@ void main() {
         child: Align(
           alignment: Alignment.topLeft,
           child: ShaderMask(
-            shaderCallback: (Rect bounds) => const RadialGradient(
+            shaderCallback: (final Rect bounds) => const RadialGradient(
               radius: 0.05,
               colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
               tileMode: TileMode.mirror,

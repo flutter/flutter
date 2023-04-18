@@ -7,10 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Adds the basic requirements for a Chip.
 Widget wrapForChip({
-  required Widget child,
-  TextDirection textDirection = TextDirection.ltr,
-  double textScaleFactor = 1.0,
-  Brightness brightness = Brightness.light,
+  required final Widget child,
+  final TextDirection textDirection = TextDirection.ltr,
+  final double textScaleFactor = 1.0,
+  final Brightness brightness = Brightness.light,
 }) {
   return MaterialApp(
     theme: ThemeData(brightness: brightness),
@@ -24,7 +24,7 @@ Widget wrapForChip({
   );
 }
 
-void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
+void checkChipMaterialClipBehavior(final WidgetTester tester, final Clip clipBehavior) {
   final Iterable<Material> materials = tester.widgetList<Material>(find.byType(Material));
   // There should be two Material widgets, first Material is from the "_wrapForChip" and
   // last Material is from the "RawChip".
@@ -34,7 +34,7 @@ void checkChipMaterialClipBehavior(WidgetTester tester, Clip clipBehavior) {
 }
 
 void main() {
-  testWidgets('ActionChip can be tapped', (WidgetTester tester) async {
+  testWidgets('ActionChip can be tapped', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -50,7 +50,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('ActionChip clipBehavior properly passes through to the Material', (WidgetTester tester) async {
+  testWidgets('ActionChip clipBehavior properly passes through to the Material', (final WidgetTester tester) async {
     const Text label = Text('label');
     await tester.pumpWidget(wrapForChip(child: ActionChip(label: label, onPressed: () { })));
     checkChipMaterialClipBehavior(tester, Clip.none);

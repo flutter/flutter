@@ -39,7 +39,7 @@ class FlutterAttachRequestArguments
         program = obj['program'] as String?,
         super.fromMap();
 
-  static FlutterAttachRequestArguments fromJson(Map<String, Object?> obj) =>
+  static FlutterAttachRequestArguments fromJson(final Map<String, Object?> obj) =>
       FlutterAttachRequestArguments.fromMap(obj);
 
   /// Arguments to be passed to the tool that will run [program] (for example, the VM or Flutter tool).
@@ -160,6 +160,6 @@ class FlutterLaunchRequestArguments
           'customToolReplacesArgs': customToolReplacesArgs,
       };
 
-  static FlutterLaunchRequestArguments fromJson(Map<String, Object?> obj) =>
+  static FlutterLaunchRequestArguments fromJson(final Map<String, Object?> obj) =>
       FlutterLaunchRequestArguments.fromMap(obj);
 }

@@ -13,7 +13,7 @@ void main() {
 
   tearDown(() {
     final List<PipelineOwner> children = <PipelineOwner>[];
-    RendererBinding.instance.pipelineOwner.visitChildren((PipelineOwner child) {
+    RendererBinding.instance.pipelineOwner.visitChildren((final PipelineOwner child) {
       children.add(child);
     });
     children.forEach(RendererBinding.instance.pipelineOwner.dropChild);
@@ -35,7 +35,7 @@ void main() {
 
   test('Turning global semantics on/off creates semantics owners in PipelineOwner tree', () {
     final PipelineOwner child = PipelineOwner(
-      onSemanticsUpdate: (_) { },
+      onSemanticsUpdate: (final _) { },
     );
     RendererBinding.instance.pipelineOwner.adoptChild(child);
 

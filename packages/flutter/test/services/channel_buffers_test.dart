@@ -13,13 +13,13 @@ import 'package:flutter_test/flutter_test.dart';
 class TestChannelBuffersFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding { }
 
 void main() {
-  ByteData makeByteData(String str) {
+  ByteData makeByteData(final String str) {
     final List<int> list = utf8.encode(str);
     final ByteBuffer buffer = list is Uint8List ? list.buffer : Uint8List.fromList(list).buffer;
     return ByteData.view(buffer);
   }
 
-  String getString(ByteData data) {
+  String getString(final ByteData data) {
     final ByteBuffer buffer = data.buffer;
     final List<int> list = buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
     return utf8.decode(list);
@@ -30,14 +30,14 @@ void main() {
     final TestChannelBuffersFlutterBinding binding = TestChannelBuffersFlutterBinding();
     expect(binding.defaultBinaryMessenger, isNotNull);
     bool didCallCallback = false;
-    void callback(ByteData? responseData) {
+    void callback(final ByteData? responseData) {
       didCallCallback = true;
     }
     const String payload = 'bar';
     final ByteData data = makeByteData(payload);
     ui.channelBuffers.push(channel, data, callback);
     bool didDrainData = false;
-    binding.defaultBinaryMessenger.setMessageHandler(channel, (ByteData? message) async {
+    binding.defaultBinaryMessenger.setMessageHandler(channel, (final ByteData? message) async {
       expect(getString(message!), payload);
       didDrainData = true;
       return null;

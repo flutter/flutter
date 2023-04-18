@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/heroes/hero.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Has Hero animation', (WidgetTester tester) async {
+  testWidgets('Has Hero animation', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.HeroApp(),
     );

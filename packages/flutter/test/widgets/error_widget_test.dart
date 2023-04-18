@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ErrorWidget displays actual error when throwing during build', (WidgetTester tester) async {
+  testWidgets('ErrorWidget displays actual error when throwing during build', (final WidgetTester tester) async {
     final Key container = UniqueKey();
     const String errorText = 'Oh no, there was a crash!!1';
 
@@ -17,7 +17,7 @@ void main() {
         color: Colors.red,
         padding: const EdgeInsets.all(10),
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             throw UnsupportedError(errorText);
           },
         ),
@@ -26,7 +26,7 @@ void main() {
 
     expect(
       tester.takeException(),
-      isA<UnsupportedError>().having((UnsupportedError error) => error.message, 'message', contains(errorText)),
+      isA<UnsupportedError>().having((final UnsupportedError error) => error.message, 'message', contains(errorText)),
     );
 
     final ErrorWidget errorWidget = tester.widget(find.byType(ErrorWidget));
@@ -37,7 +37,7 @@ void main() {
     expect(find.byKey(container), findsOneWidget);
   });
 
-  testWidgets('when constructing an ErrorWidget due to a build failure throws an error, fail gracefully', (WidgetTester tester) async {
+  testWidgets('when constructing an ErrorWidget due to a build failure throws an error, fail gracefully', (final WidgetTester tester) async {
     final Key container = UniqueKey();
     await tester.pumpWidget(
       Container(
@@ -53,7 +53,7 @@ void main() {
 
     expect(
       tester.takeException(),
-      isA<UnsupportedError>().having((UnsupportedError error) => error.message, 'message', contains(MyThrowingElement.debugFillPropertiesErrorMessage)),
+      isA<UnsupportedError>().having((final UnsupportedError error) => error.message, 'message', contains(MyThrowingElement.debugFillPropertiesErrorMessage)),
     );
 
     final ErrorWidget errorWidget = tester.widget(find.byType(ErrorWidget));
@@ -74,7 +74,7 @@ class MyDoubleThrowingWidget extends StatelessWidget {
   StatelessElement createElement() => MyThrowingElement(this);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     throw UnsupportedError('You cannot build me!');
   }
 }
@@ -85,7 +85,7 @@ class MyThrowingElement extends StatelessElement {
   static const String debugFillPropertiesErrorMessage = 'Crash during debugFillProperties';
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     throw UnsupportedError(debugFillPropertiesErrorMessage);
   }

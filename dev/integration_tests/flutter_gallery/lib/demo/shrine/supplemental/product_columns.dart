@@ -17,8 +17,8 @@ class TwoProductCardColumn extends StatelessWidget {
   final Product? bottom, top;
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+  Widget build(final BuildContext context) {
+    return LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
       const double spacerHeight = 44.0;
 
       final double heightOfCards = (constraints.biggest.height - spacerHeight) / 2.0;
@@ -63,7 +63,7 @@ class OneProductCardColumn extends StatelessWidget {
   final Product? product;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView(
       physics: const ClampingScrollPhysics(),
       reverse: true,

@@ -26,11 +26,11 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
     text: text,
   );
 
-  void _showDialog(BuildContext context) {
+  void _showDialog(final BuildContext context) {
     Navigator.of(context).push(
       DialogRoute<void>(
         context: context,
-        builder: (BuildContext context) => const AlertDialog(title: Text('You clicked send email!')),
+        builder: (final BuildContext context) => const AlertDialog(title: Text('You clicked send email!')),
       ),
     );
   }
@@ -54,7 +54,7 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -66,7 +66,7 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
               Container(height: 20.0),
               TextField(
                 controller: _controller,
-                contextMenuBuilder: (BuildContext context, EditableTextState editableTextState) {
+                contextMenuBuilder: (final BuildContext context, final EditableTextState editableTextState) {
                   final List<ContextMenuButtonItem> buttonItems = editableTextState.contextMenuButtonItems;
                   // Here we add an "Email" button to the default TextField
                   // context menu for the current platform, but only if an email
@@ -98,7 +98,7 @@ class _EditableTextToolbarBuilderExampleAppState extends State<EditableTextToolb
   }
 }
 
-bool _isValidEmail(String text) {
+bool _isValidEmail(final String text) {
   return RegExp(
     r'(?<name>[a-zA-Z0-9]+)'
     r'@'

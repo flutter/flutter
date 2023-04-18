@@ -37,7 +37,7 @@ void main() {
 
   testUsingContext('WebBuilder sets environment on success', () async {
     final TestBuildSystem buildSystem =
-        TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+        TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
       expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
       expect(webServiceWorker.webRenderer, WebRendererMode.auto);

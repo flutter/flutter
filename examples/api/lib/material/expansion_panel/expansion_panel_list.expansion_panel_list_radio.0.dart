@@ -12,7 +12,7 @@ class ExpansionPanelListRadioExampleApp extends StatelessWidget {
   const ExpansionPanelListRadioExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ExpansionPanelList.radio Sample')),
@@ -35,8 +35,8 @@ class Item {
   String headerValue;
 }
 
-List<Item> generateItems(int numberOfItems) {
-  return List<Item>.generate(numberOfItems, (int index) {
+List<Item> generateItems(final int numberOfItems) {
+  return List<Item>.generate(numberOfItems, (final int index) {
     return Item(
       id: index,
       headerValue: 'Panel $index',
@@ -56,7 +56,7 @@ class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadio
   final List<Item> _data = generateItems(8);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SingleChildScrollView(
       child: Container(
         child: _buildPanel(),
@@ -67,10 +67,10 @@ class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadio
   Widget _buildPanel() {
     return ExpansionPanelList.radio(
       initialOpenPanelValue: 2,
-      children: _data.map<ExpansionPanelRadio>((Item item) {
+      children: _data.map<ExpansionPanelRadio>((final Item item) {
         return ExpansionPanelRadio(
             value: item.id,
-            headerBuilder: (BuildContext context, bool isExpanded) {
+            headerBuilder: (final BuildContext context, final bool isExpanded) {
               return ListTile(
                 title: Text(item.headerValue),
               );
@@ -81,7 +81,7 @@ class _ExpansionPanelListRadioExampleState extends State<ExpansionPanelListRadio
                 trailing: const Icon(Icons.delete),
                 onTap: () {
                   setState(() {
-                    _data.removeWhere((Item currentItem) => item == currentItem);
+                    _data.removeWhere((final Item currentItem) => item == currentItem);
                   });
                 }));
       }).toList(),

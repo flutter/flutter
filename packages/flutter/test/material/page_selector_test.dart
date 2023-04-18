@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController, { Color? color, Color? selectedColor, double indicatorSize = 12.0, BorderStyle? borderStyle }) {
+Widget buildFrame(final TabController tabController, { final Color? color, final Color? selectedColor, final double indicatorSize = 12.0, final BorderStyle? borderStyle }) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -53,18 +53,18 @@ Widget buildFrame(TabController tabController, { Color? color, Color? selectedCo
   );
 }
 
-List<Color> indicatorColors(WidgetTester tester) {
+List<Color> indicatorColors(final WidgetTester tester) {
   final Iterable<TabPageSelectorIndicator> indicators = tester.widgetList(
     find.descendant(
       of: find.byType(TabPageSelector),
       matching: find.byType(TabPageSelectorIndicator),
     ),
   );
-  return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
+  return indicators.map<Color>((final TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
 }
 
 void main() {
-  testWidgets('PageSelector responds correctly to setting the TabController index', (WidgetTester tester) async {
+  testWidgets('PageSelector responds correctly to setting the TabController index', (final WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
@@ -85,7 +85,7 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
   });
 
-  testWidgets('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
+  testWidgets('PageSelector responds correctly to TabController.animateTo()', (final WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
@@ -128,7 +128,7 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
   });
 
-  testWidgets('PageSelector responds correctly to TabBarView drags', (WidgetTester tester) async {
+  testWidgets('PageSelector responds correctly to TabBarView drags', (final WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -187,7 +187,7 @@ void main() {
 
   });
 
-  testWidgets('PageSelector indicatorColors', (WidgetTester tester) async {
+  testWidgets('PageSelector indicatorColors', (final WidgetTester tester) async {
     const Color kRed = Color(0xFFFF0000);
     const Color kBlue = Color(0xFF0000FF);
 
@@ -206,7 +206,7 @@ void main() {
     expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
   });
 
-  testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
+  testWidgets('PageSelector indicatorSize', (final WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
@@ -227,7 +227,7 @@ void main() {
     expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
 
-    testWidgets('PageSelector circle border', (WidgetTester tester) async {
+    testWidgets('PageSelector circle border', (final WidgetTester tester) async {
     final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,

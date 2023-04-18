@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AnimatedPadding.debugFillProperties', (WidgetTester tester) async {
+  testWidgets('AnimatedPadding.debugFillProperties', (final WidgetTester tester) async {
     final AnimatedPadding padding = AnimatedPadding(
       padding: const EdgeInsets.all(7.0),
       curve: Curves.ease,
@@ -16,7 +16,7 @@ void main() {
     expect(padding, hasOneLineDescription);
   });
 
-  testWidgets('AnimatedPadding padding visual-to-directional animation', (WidgetTester tester) async {
+  testWidgets('AnimatedPadding padding visual-to-directional animation', (final WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(
@@ -58,7 +58,7 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(700.0, 0.0));
   });
 
-  testWidgets('AnimatedPadding animated padding clamped to positive values', (WidgetTester tester) async {
+  testWidgets('AnimatedPadding animated padding clamped to positive values', (final WidgetTester tester) async {
     final Key target = UniqueKey();
 
     await tester.pumpWidget(

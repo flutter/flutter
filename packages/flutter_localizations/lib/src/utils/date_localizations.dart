@@ -17,7 +17,7 @@ bool _dateIntlDataInitialized = false;
 void loadDateIntlDataIfNotLoaded() {
   if (!_dateIntlDataInitialized) {
     date_localizations.dateSymbols
-      .forEach((String locale, intl.DateSymbols symbols) {
+      .forEach((final String locale, final intl.DateSymbols symbols) {
         // Perform initialization.
         assert(date_localizations.datePatterns.containsKey(locale));
         date_symbol_data_custom.initializeDateFormattingCustom(

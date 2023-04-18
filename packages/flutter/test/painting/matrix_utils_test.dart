@@ -172,7 +172,7 @@ void main() {
 // the built-in perspective transform methods in the Matrix4 class as a
 // golden implementation of the optimized `MatrixUtils.transformPoint`
 // to make sure optimizations do not contain bugs.
-Offset _transformPoint(Matrix4 transform, Offset point) {
+Offset _transformPoint(final Matrix4 transform, final Offset point) {
   final Vector3 position3 = Vector3(point.dx, point.dy, 0.0);
   final Vector3 transformed3 = transform.perspectiveTransform(position3);
   return Offset(transformed3.x, transformed3.y);
@@ -182,7 +182,7 @@ Offset _transformPoint(Matrix4 transform, Offset point) {
 // one point at a time. This function is used as the golden implementation of the
 // optimized `MatrixUtils.transformRect` to make sure optimizations do not contain
 // bugs.
-Rect _vectorWiseTransformRect(Matrix4 transform, Rect rect) {
+Rect _vectorWiseTransformRect(final Matrix4 transform, final Rect rect) {
   final Offset point1 = _transformPoint(transform, rect.topLeft);
   final Offset point2 = _transformPoint(transform, rect.topRight);
   final Offset point3 = _transformPoint(transform, rect.bottomLeft);
@@ -195,10 +195,10 @@ Rect _vectorWiseTransformRect(Matrix4 transform, Rect rect) {
   );
 }
 
-double _min4(double a, double b, double c, double d) {
+double _min4(final double a, final double b, final double c, final double d) {
   return min(a, min(b, min(c, d)));
 }
 
-double _max4(double a, double b, double c, double d) {
+double _max4(final double a, final double b, final double c, final double d) {
   return max(a, max(b, max(c, d)));
 }

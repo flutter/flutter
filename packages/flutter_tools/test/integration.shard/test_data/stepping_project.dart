@@ -55,7 +55,7 @@ class SteppingProject extends Project {
 
   Uri get breakpointUri => mainDart;
   int get breakpointLine => lineContaining(main, '// BREAKPOINT');
-  int lineForStep(int i) => lineContaining(main, '// STEP $i');
+  int lineForStep(final int i) => lineContaining(main, '// STEP $i');
 
   final int numberOfSteps = 8;
 }
@@ -111,7 +111,7 @@ class WebSteppingProject extends Project {
 
   Uri get breakpointUri => mainDart;
   int get breakpointLine => lineContaining(main, '// BREAKPOINT');
-  int lineForStep(int i) => lineContaining(main, '// STEP $i');
+  int lineForStep(final int i) => lineContaining(main, '// STEP $i');
 
   final int numberOfSteps = 5;
 }

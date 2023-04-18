@@ -9,7 +9,7 @@ const String text = 'Hello World! How are you? Life is good!';
 const String alternativeText = 'Everything is awesome!!';
 
 void main() {
-  testWidgets('TextField restoration', (WidgetTester tester) async {
+  testWidgets('TextField restoration', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'app',
@@ -20,7 +20,7 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgets('TextField restoration with external controller', (WidgetTester tester) async {
+  testWidgets('TextField restoration with external controller', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         restorationScopeId: 'root',
@@ -33,8 +33,8 @@ void main() {
     await restoreAndVerify(tester);
   });
 
-  testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation', (WidgetTester tester) async {
-    String? errorText(String? value) => '$value/error';
+  testWidgets('State restoration (No Form ancestor) - onUserInteraction error text validation', (final WidgetTester tester) async {
+    String? errorText(final String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
     Widget builder() {
@@ -46,7 +46,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Center(
               child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter state) {
+                builder: (final BuildContext context, final StateSetter state) {
                   formState = GlobalKey<FormFieldState<String>>();
                   return Material(
                     child: TextFormField(
@@ -91,11 +91,11 @@ void main() {
     expect(find.text(errorText('bar')!), findsOneWidget);
   });
 
-  testWidgets('State Restoration (No Form ancestor) - validator sets the error text only when validate is called', (WidgetTester tester) async {
-    String? errorText(String? value) => '$value/error';
+  testWidgets('State Restoration (No Form ancestor) - validator sets the error text only when validate is called', (final WidgetTester tester) async {
+    String? errorText(final String? value) => '$value/error';
     late GlobalKey<FormFieldState<String>> formState;
 
-    Widget builder(AutovalidateMode mode) {
+    Widget builder(final AutovalidateMode mode) {
       return MaterialApp(
         restorationScopeId: 'app',
         home: MediaQuery(
@@ -104,7 +104,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: Center(
               child: StatefulBuilder(
-                builder: (BuildContext context, StateSetter state) {
+                builder: (final BuildContext context, final StateSetter state) {
                   formState = GlobalKey<FormFieldState<String>>();
                   return Material(
                     child: TextFormField(
@@ -126,7 +126,7 @@ void main() {
     // Start off not autovalidating.
     await tester.pumpWidget(builder(AutovalidateMode.disabled));
 
-    Future<void> checkErrorText(String testValue) async {
+    Future<void> checkErrorText(final String testValue) async {
       formState.currentState!.reset();
       await tester.pumpWidget(builder(AutovalidateMode.disabled));
       await tester.enterText(find.byType(TextFormField), testValue);
@@ -166,7 +166,7 @@ void main() {
   });
 }
 
-Future<void> restoreAndVerify(WidgetTester tester) async {
+Future<void> restoreAndVerify(final WidgetTester tester) async {
   expect(find.text(text), findsNothing);
   expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0);
 
@@ -217,7 +217,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   String get restorationId => 'widget';
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(controller, 'controller');
   }
 
@@ -228,7 +228,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Align(
         child: SizedBox(
@@ -244,7 +244,7 @@ class TestWidgetState extends State<TestWidget> with RestorationMixin {
   }
 }
 
-Future<void> skipPastScrollingAnimation(WidgetTester tester) async {
+Future<void> skipPastScrollingAnimation(final WidgetTester tester) async {
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
 }

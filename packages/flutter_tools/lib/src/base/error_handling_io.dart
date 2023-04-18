@@ -37,8 +37,8 @@ const int kSystemCannotFindFile = 2;
 /// fails to delete a file.
 class ErrorHandlingFileSystem extends ForwardingFileSystem {
   ErrorHandlingFileSystem({
-    required FileSystem delegate,
-    required Platform platform,
+    required final FileSystem delegate,
+    required final Platform platform,
   }) :
       _platform = platform,
       super(delegate);
@@ -56,7 +56,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This can be used to bypass the [ErrorHandlingFileSystem] permission exit
   /// checks for situations where failure is acceptable, such as the flutter
   /// persistent settings cache.
-  static void noExitOnFailure(void Function() operation) {
+  static void noExitOnFailure(final void Function() operation) {
     final bool previousValue = ErrorHandlingFileSystem._noExitOnFailure;
     try {
       ErrorHandlingFileSystem._noExitOnFailure = true;
@@ -72,7 +72,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   /// This method should be preferred to checking if it exists and
   /// then deleting, because it handles the edge case where the file or directory
   /// is deleted by a different program between the two calls.
-  static bool deleteIfExists(FileSystemEntity file, {bool recursive = false}) {
+  static bool deleteIfExists(final FileSystemEntity file, {final bool recursive = false}) {
     if (!file.existsSync()) {
       return false;
     }
@@ -115,21 +115,21 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   }
 
   @override
-  File file(dynamic path) => ErrorHandlingFile(
+  File file(final dynamic path) => ErrorHandlingFile(
     platform: _platform,
     fileSystem: this,
     delegate: delegate.file(path),
   );
 
   @override
-  Directory directory(dynamic path) => ErrorHandlingDirectory(
+  Directory directory(final dynamic path) => ErrorHandlingDirectory(
     platform: _platform,
     fileSystem: this,
     delegate: delegate.directory(path),
   );
 
   @override
-  Link link(dynamic path) => ErrorHandlingLink(
+  Link link(final dynamic path) => ErrorHandlingLink(
     platform: _platform,
     fileSystem: this,
     delegate: delegate.link(path),
@@ -145,7 +145,7 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   p.Context? _cachedPath;
 
   @override
-  set currentDirectory(dynamic path) {
+  set currentDirectory(final dynamic path) {
     _cachedPath = null;
     delegate.currentDirectory = path;
   }
@@ -159,7 +159,7 @@ class ErrorHandlingFile
     // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
     with ForwardingFile { // ignore: prefer_mixin
   ErrorHandlingFile({
-    required Platform platform,
+    required final Platform platform,
     required this.fileSystem,
     required this.delegate,
   }) :
@@ -174,21 +174,21 @@ class ErrorHandlingFile
   final Platform _platform;
 
   @override
-  File wrapFile(io.File delegate) => ErrorHandlingFile(
+  File wrapFile(final io.File delegate) => ErrorHandlingFile(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
   );
 
   @override
-  Directory wrapDirectory(io.Directory delegate) => ErrorHandlingDirectory(
+  Directory wrapDirectory(final io.Directory delegate) => ErrorHandlingDirectory(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
   );
 
   @override
-  Link wrapLink(io.Link delegate) => ErrorHandlingLink(
+  Link wrapLink(final io.Link delegate) => ErrorHandlingLink(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
@@ -196,9 +196,9 @@ class ErrorHandlingFile
 
   @override
   Future<File> writeAsBytes(
-    List<int> bytes, {
-    FileMode mode = FileMode.write,
-    bool flush = false,
+    final List<int> bytes, {
+    final FileMode mode = FileMode.write,
+    final bool flush = false,
   }) async {
     return _run<File>(
       () async => wrap(await delegate.writeAsBytes(
@@ -213,7 +213,7 @@ class ErrorHandlingFile
   }
 
   @override
-  String readAsStringSync({Encoding encoding = utf8}) {
+  String readAsStringSync({final Encoding encoding = utf8}) {
     return _runSync<String>(
       () => delegate.readAsStringSync(),
       platform: _platform,
@@ -224,9 +224,9 @@ class ErrorHandlingFile
 
   @override
   void writeAsBytesSync(
-    List<int> bytes, {
-    FileMode mode = FileMode.write,
-    bool flush = false,
+    final List<int> bytes, {
+    final FileMode mode = FileMode.write,
+    final bool flush = false,
   }) {
     _runSync<void>(
       () => delegate.writeAsBytesSync(bytes, mode: mode, flush: flush),
@@ -238,10 +238,10 @@ class ErrorHandlingFile
 
   @override
   Future<File> writeAsString(
-    String contents, {
-    FileMode mode = FileMode.write,
-    Encoding encoding = utf8,
-    bool flush = false,
+    final String contents, {
+    final FileMode mode = FileMode.write,
+    final Encoding encoding = utf8,
+    final bool flush = false,
   }) async {
     return _run<File>(
       () async => wrap(await delegate.writeAsString(
@@ -258,10 +258,10 @@ class ErrorHandlingFile
 
   @override
   void writeAsStringSync(
-    String contents, {
-    FileMode mode = FileMode.write,
-    Encoding encoding = utf8,
-    bool flush = false,
+    final String contents, {
+    final FileMode mode = FileMode.write,
+    final Encoding encoding = utf8,
+    final bool flush = false,
   }) {
     _runSync<void>(
       () => delegate.writeAsStringSync(
@@ -278,7 +278,7 @@ class ErrorHandlingFile
 
   // TODO(aam): Pass `exclusive` through after dartbug.com/49647 lands.
   @override
-  void createSync({bool recursive = false, bool exclusive = false}) {
+  void createSync({final bool recursive = false, final bool exclusive = false}) {
     _runSync<void>(
       () => delegate.createSync(
         recursive: recursive,
@@ -290,7 +290,7 @@ class ErrorHandlingFile
   }
 
   @override
-  RandomAccessFile openSync({FileMode mode = FileMode.read}) {
+  RandomAccessFile openSync({final FileMode mode = FileMode.read}) {
     return _runSync<RandomAccessFile>(
       () => delegate.openSync(
         mode: mode,
@@ -304,7 +304,7 @@ class ErrorHandlingFile
   /// This copy method attempts to handle file system errors from both reading
   /// and writing the copied file.
   @override
-  File copySync(String newPath) {
+  File copySync(final String newPath) {
     final File resultFile = fileSystem.file(newPath);
     // First check if the source file can be read. If not, bail through error
     // handling.
@@ -360,7 +360,7 @@ class ErrorHandlingFile
     return wrapFile(resultFile);
   }
 
-  String _posixPermissionSuggestion(List<String> paths) => 'Try running:\n'
+  String _posixPermissionSuggestion(final List<String> paths) => 'Try running:\n'
       '  sudo chown -R \$(whoami) ${paths.map(fileSystem.path.absolute).join(' ')}';
 
   @override
@@ -372,7 +372,7 @@ class ErrorHandlingDirectory
     // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
     with ForwardingDirectory<Directory> { // ignore: prefer_mixin
   ErrorHandlingDirectory({
-    required Platform platform,
+    required final Platform platform,
     required this.fileSystem,
     required this.delegate,
   }) :
@@ -387,43 +387,43 @@ class ErrorHandlingDirectory
   final Platform _platform;
 
   @override
-  File wrapFile(io.File delegate) => ErrorHandlingFile(
+  File wrapFile(final io.File delegate) => ErrorHandlingFile(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
   );
 
   @override
-  Directory wrapDirectory(io.Directory delegate) => ErrorHandlingDirectory(
+  Directory wrapDirectory(final io.Directory delegate) => ErrorHandlingDirectory(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
   );
 
   @override
-  Link wrapLink(io.Link delegate) => ErrorHandlingLink(
+  Link wrapLink(final io.Link delegate) => ErrorHandlingLink(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
   );
 
   @override
-  Directory childDirectory(String basename) {
+  Directory childDirectory(final String basename) {
     return fileSystem.directory(fileSystem.path.join(path, basename));
   }
 
   @override
-  File childFile(String basename) {
+  File childFile(final String basename) {
     return fileSystem.file(fileSystem.path.join(path, basename));
   }
 
   @override
-  Link childLink(String basename) {
+  Link childLink(final String basename) {
     return fileSystem.link(fileSystem.path.join(path, basename));
   }
 
   @override
-  void createSync({bool recursive = false}) {
+  void createSync({final bool recursive = false}) {
     return _runSync<void>(
       () => delegate.createSync(recursive: recursive),
       platform: _platform,
@@ -434,7 +434,7 @@ class ErrorHandlingDirectory
   }
 
   @override
-  Future<Directory> createTemp([String? prefix]) {
+  Future<Directory> createTemp([final String? prefix]) {
     return _run<Directory>(
       () async => wrap(await delegate.createTemp(prefix)),
       platform: _platform,
@@ -444,7 +444,7 @@ class ErrorHandlingDirectory
   }
 
   @override
-  Directory createTempSync([String? prefix]) {
+  Directory createTempSync([final String? prefix]) {
     return _runSync<Directory>(
       () => wrap(delegate.createTempSync(prefix)),
       platform: _platform,
@@ -454,7 +454,7 @@ class ErrorHandlingDirectory
   }
 
   @override
-  Future<Directory> create({bool recursive = false}) {
+  Future<Directory> create({final bool recursive = false}) {
     return _run<Directory>(
       () async => wrap(await delegate.create(recursive: recursive)),
       platform: _platform,
@@ -465,7 +465,7 @@ class ErrorHandlingDirectory
   }
 
   @override
-  Future<Directory> delete({bool recursive = false}) {
+  Future<Directory> delete({final bool recursive = false}) {
     return _run<Directory>(
       () async => wrap(fileSystem.directory((await delegate.delete(recursive: recursive)).path)),
       platform: _platform,
@@ -476,7 +476,7 @@ class ErrorHandlingDirectory
   }
 
   @override
-  void deleteSync({bool recursive = false}) {
+  void deleteSync({final bool recursive = false}) {
     return _runSync<void>(
       () => delegate.deleteSync(recursive: recursive),
       platform: _platform,
@@ -497,7 +497,7 @@ class ErrorHandlingDirectory
     );
   }
 
-  String _posixPermissionSuggestion(String path) => 'Try running:\n'
+  String _posixPermissionSuggestion(final String path) => 'Try running:\n'
       '  sudo chown -R \$(whoami) ${fileSystem.path.absolute(path)}';
 
   @override
@@ -509,7 +509,7 @@ class ErrorHandlingLink
     // TODO(goderbauer): Fix this ignore when https://github.com/google/file.dart/issues/209 is resolved.
     with ForwardingLink { // ignore: prefer_mixin
   ErrorHandlingLink({
-    required Platform platform,
+    required final Platform platform,
     required this.fileSystem,
     required this.delegate,
   }) :
@@ -524,21 +524,21 @@ class ErrorHandlingLink
   final Platform _platform;
 
   @override
-  File wrapFile(io.File delegate) => ErrorHandlingFile(
+  File wrapFile(final io.File delegate) => ErrorHandlingFile(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
   );
 
   @override
-  Directory wrapDirectory(io.Directory delegate) => ErrorHandlingDirectory(
+  Directory wrapDirectory(final io.Directory delegate) => ErrorHandlingDirectory(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
   );
 
   @override
-  Link wrapLink(io.Link delegate) => ErrorHandlingLink(
+  Link wrapLink(final io.Link delegate) => ErrorHandlingLink(
     platform: _platform,
     fileSystem: fileSystem,
     delegate: delegate,
@@ -550,10 +550,10 @@ class ErrorHandlingLink
 
 const String _kNoExecutableFound = 'The Flutter tool could not locate an executable with suitable permissions';
 
-Future<T> _run<T>(Future<T> Function() op, {
-  required Platform platform,
-  String? failureMessage,
-  String? posixPermissionSuggestion,
+Future<T> _run<T>(final Future<T> Function() op, {
+  required final Platform platform,
+  final String? failureMessage,
+  final String? posixPermissionSuggestion,
 }) async {
   try {
     return await op();
@@ -581,10 +581,10 @@ Future<T> _run<T>(Future<T> Function() op, {
   }
 }
 
-T _runSync<T>(T Function() op, {
-  required Platform platform,
-  String? failureMessage,
-  String? posixPermissionSuggestion,
+T _runSync<T>(final T Function() op, {
+  required final Platform platform,
+  final String? failureMessage,
+  final String? posixPermissionSuggestion,
 }) {
   try {
     return op();
@@ -623,8 +623,8 @@ T _runSync<T>(T Function() op, {
 ///   * [ErrorHandlingFileSystem], for a similar file system strategy.
 class ErrorHandlingProcessManager extends ProcessManager {
   ErrorHandlingProcessManager({
-    required ProcessManager delegate,
-    required Platform platform,
+    required final ProcessManager delegate,
+    required final Platform platform,
   }) : _delegate = delegate,
        _platform = platform;
 
@@ -632,7 +632,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   final Platform _platform;
 
   @override
-  bool canRun(dynamic executable, {String? workingDirectory}) {
+  bool canRun(final dynamic executable, {final String? workingDirectory}) {
     return _runSync(
       () => _delegate.canRun(executable, workingDirectory: workingDirectory),
       platform: _platform,
@@ -643,7 +643,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 
   @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool killPid(final int pid, [final io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     return _runSync(
       () => _delegate.killPid(pid, signal),
       platform: _platform,
@@ -652,13 +652,13 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   Future<io.ProcessResult> run(
-    List<Object> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding? stdoutEncoding = io.systemEncoding,
-    Encoding? stderrEncoding = io.systemEncoding,
+    final List<Object> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true,
+    final bool runInShell = false,
+    final Encoding? stdoutEncoding = io.systemEncoding,
+    final Encoding? stderrEncoding = io.systemEncoding,
   }) {
     return _run(() {
       return _delegate.run(
@@ -678,12 +678,12 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   Future<io.Process> start(
-    List<Object> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    io.ProcessStartMode mode = io.ProcessStartMode.normal,
+    final List<Object> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true,
+    final bool runInShell = false,
+    final io.ProcessStartMode mode = io.ProcessStartMode.normal,
   }) {
     return _run(() {
       return _delegate.start(
@@ -702,13 +702,13 @@ class ErrorHandlingProcessManager extends ProcessManager {
 
   @override
   io.ProcessResult runSync(
-    List<Object> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding? stdoutEncoding = io.systemEncoding,
-    Encoding? stderrEncoding = io.systemEncoding,
+    final List<Object> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true,
+    final bool runInShell = false,
+    final Encoding? stdoutEncoding = io.systemEncoding,
+    final Encoding? stderrEncoding = io.systemEncoding,
   }) {
     return _runSync(() {
       return _delegate.runSync(
@@ -727,7 +727,7 @@ class ErrorHandlingProcessManager extends ProcessManager {
   }
 }
 
-void _handlePosixException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
+void _handlePosixException(final Exception e, final String? message, final int errorCode, final String? posixPermissionSuggestion) {
   // From:
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno.h
   // https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/errno-base.h
@@ -764,7 +764,7 @@ void _handlePosixException(Exception e, String? message, int errorCode, String? 
   _throwFileSystemException(errorMessage);
 }
 
-void _handleMacOSException(Exception e, String? message, int errorCode, String? posixPermissionSuggestion) {
+void _handleMacOSException(final Exception e, final String? message, final int errorCode, final String? posixPermissionSuggestion) {
   // https://github.com/apple/darwin-xnu/blob/master/bsd/dev/dtrace/scripts/errno.d
   const int ebadarch = 86;
   if (errorCode == ebadarch) {
@@ -780,7 +780,7 @@ void _handleMacOSException(Exception e, String? message, int errorCode, String? 
   _handlePosixException(e, message, errorCode, posixPermissionSuggestion);
 }
 
-void _handleWindowsException(Exception e, String? message, int errorCode) {
+void _handleWindowsException(final Exception e, final String? message, final int errorCode) {
   // From:
   // https://docs.microsoft.com/en-us/windows/win32/debug/system-error-codes
   const int kDeviceFull = 112;
@@ -824,7 +824,7 @@ void _handleWindowsException(Exception e, String? message, int errorCode) {
   _throwFileSystemException(errorMessage);
 }
 
-void _throwFileSystemException(String? errorMessage) {
+void _throwFileSystemException(final String? errorMessage) {
   if (errorMessage == null) {
     return;
   }

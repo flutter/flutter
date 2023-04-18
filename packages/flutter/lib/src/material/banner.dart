@@ -224,7 +224,7 @@ class MaterialBanner extends StatefulWidget {
   // API for ScaffoldMessengerState.showMaterialBanner():
 
   /// Creates an animation controller useful for driving a [MaterialBanner]'s entrance and exit animation.
-  static AnimationController createAnimationController({ required TickerProvider vsync }) {
+  static AnimationController createAnimationController({ required final TickerProvider vsync }) {
     return AnimationController(
       duration: _materialBannerTransitionDuration,
       debugLabel: 'MaterialBanner',
@@ -236,7 +236,7 @@ class MaterialBanner extends StatefulWidget {
   ///
   /// If the original material banner lacks a key, the newly created material banner will
   /// use the given fallback key.
-  MaterialBanner withAnimation(Animation<double> newAnimation, { Key? fallbackKey }) {
+  MaterialBanner withAnimation(final Animation<double> newAnimation, { final Key? fallbackKey }) {
     return MaterialBanner(
       key: key ?? fallbackKey,
       content: content,
@@ -272,7 +272,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
   }
 
   @override
-  void didUpdateWidget(MaterialBanner oldWidget) {
+  void didUpdateWidget(final MaterialBanner oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation?.removeStatusListener(_onAnimationStatusChanged);
@@ -286,7 +286,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     super.dispose();
   }
 
-  void _onAnimationStatusChanged(AnimationStatus animationStatus) {
+  void _onAnimationStatusChanged(final AnimationStatus animationStatus) {
     switch (animationStatus) {
       case AnimationStatus.dismissed:
       case AnimationStatus.forward:
@@ -301,7 +301,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final bool accessibleNavigation = MediaQuery.accessibleNavigationOf(context);
 
@@ -424,7 +424,7 @@ class _MaterialBannerState extends State<MaterialBanner> {
     } else {
       materialBannerTransition = AnimatedBuilder(
         animation: heightAnimation,
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return Align(
             alignment: AlignmentDirectional.bottomStart,
             heightFactor: heightAnimation.value,

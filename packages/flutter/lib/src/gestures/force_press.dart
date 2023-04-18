@@ -50,7 +50,7 @@ class ForcePressDetails {
   /// The [globalPosition] argument must not be null.
   ForcePressDetails({
     required this.globalPosition,
-    Offset? localPosition,
+    final Offset? localPosition,
     required this.pressure,
   }) : localPosition = localPosition ?? globalPosition;
 
@@ -207,7 +207,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   _ForceState _state = _ForceState.ready;
 
   @override
-  void addAllowedPointer(PointerDownEvent event) {
+  void addAllowedPointer(final PointerDownEvent event) {
     // If the device has a maximum pressure of less than or equal to 1, it
     // doesn't have touch pressure sensing capabilities. Do not participate
     // in the gesture arena.
@@ -223,7 +223,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void handleEvent(PointerEvent event) {
+  void handleEvent(final PointerEvent event) {
     assert(_state != _ForceState.ready);
     // A static pointer with changes in pressure creates PointerMoveEvent events.
     if (event is PointerMoveEvent || event is PointerDownEvent) {
@@ -282,7 +282,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
+  void acceptGesture(final int pointer) {
     if (_state == _ForceState.possible) {
       _state = _ForceState.accepted;
     }
@@ -297,7 +297,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void didStopTrackingLastPointer(int pointer) {
+  void didStopTrackingLastPointer(final int pointer) {
     final bool wasAccepted = _state == _ForceState.started || _state == _ForceState.peaked;
     if (_state == _ForceState.possible) {
       resolve(GestureDisposition.rejected);
@@ -316,12 +316,12 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(final int pointer) {
     stopTrackingPointer(pointer);
     didStopTrackingLastPointer(pointer);
   }
 
-  static double _inverseLerp(double min, double max, double t) {
+  static double _inverseLerp(final double min, final double max, final double t) {
     assert(min <= max);
     double value = (t - min) / (max - min);
 

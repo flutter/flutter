@@ -12,7 +12,7 @@ class SwitchListTileApp extends StatelessWidget {
   const SwitchListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -36,11 +36,11 @@ class _SwitchListTileExampleState extends State<SwitchListTileExample> {
   bool _lights = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SwitchListTile(
       title: const Text('Lights'),
       value: _lights,
-      onChanged: (bool value) {
+      onChanged: (final bool value) {
         setState(() {
           _lights = value;
         });

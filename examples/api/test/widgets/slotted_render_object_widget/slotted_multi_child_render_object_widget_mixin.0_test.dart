@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/slotted_render_object_widget/slotted
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('shows two widgets arranged diagonally', (WidgetTester tester) async {
+  testWidgets('shows two widgets arranged diagonally', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.ExampleWidget(),
     );
@@ -36,6 +36,6 @@ void main() {
   });
 }
 
-Finder findContainerWithText(String text) {
+Finder findContainerWithText(final String text) {
   return find.ancestor(of: find.text(text), matching: find.byType(Container));
 }

@@ -13,12 +13,12 @@ class TestCustomPainter extends CustomPainter {
   final String? name;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     log.add(name);
   }
 
   @override
-  bool shouldRepaint(TestCustomPainter oldPainter) => true;
+  bool shouldRepaint(final TestCustomPainter oldPainter) => true;
 }
 
 class MockCanvas extends Fake implements Canvas {
@@ -40,7 +40,7 @@ class MockPaintingContext extends Fake implements PaintingContext {
 }
 
 void main() {
-  testWidgets('Control test for custom painting', (WidgetTester tester) async {
+  testWidgets('Control test for custom painting', (final WidgetTester tester) async {
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
@@ -62,7 +62,7 @@ void main() {
     expect(log, equals(<String>['background', 'child', 'foreground']));
   });
 
-  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (WidgetTester tester) async {
+  testWidgets('Throws FlutterError on custom painter incorrect restore/save calls', (final WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
     final List<String?> log = <String?>[];
     await tester.pumpWidget(CustomPaint(
@@ -118,7 +118,7 @@ void main() {
     expect(error.toStringDeep(), contains('2 more times'));
   });
 
-  testWidgets('CustomPaint sizing', (WidgetTester tester) async {
+  testWidgets('CustomPaint sizing', (final WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
     await tester.pumpWidget(Center(
@@ -153,7 +153,7 @@ void main() {
 
   });
 
-  testWidgets('Raster cache hints', (WidgetTester tester) async {
+  testWidgets('Raster cache hints', (final WidgetTester tester) async {
     final GlobalKey target = GlobalKey();
 
     final List<String?> log = <String?>[];

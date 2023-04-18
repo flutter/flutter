@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ListView can handle shrinking top elements', (WidgetTester tester) async {
+  testWidgets('ListView can handle shrinking top elements', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -65,7 +65,7 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dy, equals(200.0));
   });
 
-  testWidgets('ListView can handle shrinking top elements with cache extent', (WidgetTester tester) async {
+  testWidgets('ListView can handle shrinking top elements with cache extent', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -122,7 +122,7 @@ void main() {
     expect(tester.getTopLeft(find.text('2')).dy, equals(150.0));
   });
 
-  testWidgets('ListView can handle inserts at 0', (WidgetTester tester) async {
+  testWidgets('ListView can handle inserts at 0', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(

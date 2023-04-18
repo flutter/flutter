@@ -17,7 +17,7 @@ void main() {
     expect(
       () => objectTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (final FlutterError error) => error.diagnostics.map((final DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "Instance of \'Object\'" and "Instance of \'Object\'".',
@@ -37,7 +37,7 @@ void main() {
     expect(
       () => colorTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (final FlutterError error) => error.diagnostics.map((final DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "Color(0xff000000)" and "Color(0xffffffff)".',
@@ -57,7 +57,7 @@ void main() {
     expect(
       () => rectTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (final FlutterError error) => error.diagnostics.map((final DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)" and "Rect.fromLTRB(2.0, 2.0, 4.0, 4.0)".',
@@ -77,7 +77,7 @@ void main() {
     expect(
       () => colorTween.transform(0.1),
       throwsA(isA<FlutterError>().having(
-        (FlutterError error) => error.diagnostics.map((DiagnosticsNode node) => node.toString()),
+        (final FlutterError error) => error.diagnostics.map((final DiagnosticsNode node) => node.toString()),
         'diagnostics',
         <String>[
           'Cannot lerp between "0" and "1".',

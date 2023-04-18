@@ -43,7 +43,7 @@ const String _kFlutterFirstRunMessage = '''
 /// need to be displayed.
 class FirstRunMessenger {
   FirstRunMessenger({
-    required PersistentToolState persistentToolState
+    required final PersistentToolState persistentToolState
   }) : _persistentToolState = persistentToolState;
 
   final PersistentToolState _persistentToolState;

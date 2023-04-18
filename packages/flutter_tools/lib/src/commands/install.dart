@@ -13,7 +13,7 @@ import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   InstallCommand({
-    required bool verboseHelp,
+    required final bool verboseHelp,
   }) {
     addBuildModeFlags(verboseHelp: verboseHelp);
     requiresPubspecYaml();
@@ -82,7 +82,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     return FlutterCommandResult.success();
   }
 
-  Future<void> _uninstallApp(ApplicationPackage package, Device device) async {
+  Future<void> _uninstallApp(final ApplicationPackage package, final Device device) async {
     if (await device.isAppInstalled(package, userIdentifier: userIdentifier)) {
       globals.printStatus('Uninstalling $package from $device...');
       if (!await device.uninstallApp(package, userIdentifier: userIdentifier)) {
@@ -93,7 +93,7 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
     }
   }
 
-  Future<void> _installApp(ApplicationPackage package, Device device) async {
+  Future<void> _installApp(final ApplicationPackage package, final Device device) async {
     globals.printStatus('Installing $package to $device...');
 
     if (!await installApp(device, package, userIdentifier: userIdentifier)) {
@@ -103,10 +103,10 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 }
 
 Future<bool> installApp(
-  Device device,
-  ApplicationPackage package, {
-  String? userIdentifier,
-  bool uninstall = true
+  final Device device,
+  final ApplicationPackage package, {
+  final String? userIdentifier,
+  final bool uninstall = true
 }) async {
   try {
     if (uninstall && await device.isAppInstalled(package, userIdentifier: userIdentifier)) {

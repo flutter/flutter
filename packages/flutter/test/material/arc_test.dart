@@ -86,7 +86,7 @@ void main() {
     const Rect begin = Rect.fromLTRB(180.0, 100.0, 330.0, 200.0);
     const Rect end = Rect.fromLTRB(32.0, 275.0, 132.0, 425.0);
 
-    bool sameRect(Rect a, Rect b) {
+    bool sameRect(final Rect a, final Rect b) {
       return (a.left - b.left).abs() < 2.0
         && (a.top - b.top).abs() < 2.0
         && (a.right - b.right).abs() < 2.0

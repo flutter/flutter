@@ -14,7 +14,7 @@ class PointerSignalResolverExampleApp extends StatelessWidget {
   const PointerSignalResolverExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: PointerSignalResolverExample(),
     );
@@ -53,16 +53,16 @@ class _ColorChangerState extends State<ColorChanger> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         border: const Border.fromBorderSide(BorderSide()),
         color: color.toColor(),
       ),
       child: Listener(
-        onPointerSignal: (PointerSignalEvent event) {
+        onPointerSignal: (final PointerSignalEvent event) {
           if (widget.useResolver) {
-            GestureBinding.instance.pointerSignalResolver.register(event, (PointerSignalEvent event) {
+            GestureBinding.instance.pointerSignalResolver.register(event, (final PointerSignalEvent event) {
               rotateColor();
             });
           } else {
@@ -92,7 +92,7 @@ class _PointerSignalResolverExampleState extends State<PointerSignalResolverExam
   bool useResolver = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Stack(
         fit: StackFit.expand,
@@ -115,7 +115,7 @@ class _PointerSignalResolverExampleState extends State<PointerSignalResolverExam
               children: <Widget>[
                 Switch(
                   value: useResolver,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       useResolver = value;
                     });

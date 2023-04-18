@@ -58,7 +58,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
   OutlinedBorder? _buttonShape;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
         tabName: 'ELEVATED',
@@ -120,7 +120,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildElevatedButton(OutlinedBorder? shape) {
+  Widget buildElevatedButton(final OutlinedBorder? shape) {
     final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
@@ -169,7 +169,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildTextButton(OutlinedBorder? shape) {
+  Widget buildTextButton(final OutlinedBorder? shape) {
     final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
@@ -217,7 +217,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildOutlinedButton(OutlinedBorder? shape) {
+  Widget buildOutlinedButton(final OutlinedBorder? shape) {
     final ButtonStyle style = ElevatedButton.styleFrom(shape: shape);
     return Align(
       alignment: const Alignment(0.0, -0.2),
@@ -280,12 +280,12 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             title: const Text('Simple dropdown:'),
             trailing: DropdownButton<String>(
               value: dropdown1Value,
-              onChanged: (String? newValue) {
+              onChanged: (final String? newValue) {
                 setState(() {
                   dropdown1Value = newValue;
                 });
               },
-              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((final String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -301,12 +301,12 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             trailing: DropdownButton<String>(
               value: dropdown2Value,
               hint: const Text('Choose'),
-              onChanged: (String? newValue) {
+              onChanged: (final String? newValue) {
                 setState(() {
                   dropdown2Value = newValue;
                 });
               },
-              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((String value) {
+              items: <String>['One', 'Two', 'Free', 'Four'].map<DropdownMenuItem<String>>((final String value) {
                 return DropdownMenuItem<String>(
                   value: value,
                   child: Text(value),
@@ -321,7 +321,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             title: const Text('Scrollable dropdown:'),
             trailing: DropdownButton<String>(
               value: dropdown3Value,
-              onChanged: (String? newValue) {
+              onChanged: (final String? newValue) {
                 setState(() {
                   dropdown3Value = newValue;
                 });
@@ -330,7 +330,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
                   'One', 'Two', 'Free', 'Four', 'Can', 'I', 'Have', 'A', 'Little',
                   'Bit', 'More', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
                  ]
-                .map<DropdownMenuItem<String>>((String value) {
+                .map<DropdownMenuItem<String>>((final String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -370,7 +370,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             onPressed: null,
           ),
         ]
-        .map<Widget>((Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
+        .map<Widget>((final Widget button) => SizedBox(width: 64.0, height: 64.0, child: button))
         .toList(),
       ),
     );

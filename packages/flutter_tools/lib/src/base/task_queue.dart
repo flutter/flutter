@@ -18,7 +18,7 @@ class TaskQueue<T> {
   /// Creates a task queue with a maximum number of simultaneous jobs.
   /// The [maxJobs] parameter defaults to the number of CPU cores on the
   /// system.
-  TaskQueue({int? maxJobs})
+  TaskQueue({final int? maxJobs})
       : maxJobs = maxJobs ?? globals.platform.numberOfProcessors;
 
   /// The maximum number of jobs that this queue will run simultaneously.
@@ -43,7 +43,7 @@ class TaskQueue<T> {
 
   /// Adds a single closure to the task queue, returning a future that
   /// completes when the task completes.
-  Future<T> add(TaskQueueClosure<T> task) {
+  Future<T> add(final TaskQueueClosure<T> task) {
     final Completer<T> completer = Completer<T>();
     _pendingTasks.add(_TaskQueueItem<T>(task, completer));
     if (_activeTasks.length < maxJobs) {

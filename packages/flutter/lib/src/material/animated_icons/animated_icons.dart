@@ -97,7 +97,7 @@ class AnimatedIcon extends StatelessWidget {
   static ui.Path _pathFactory() => ui.Path();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasDirectionality(context));
     final _AnimatedIconData iconData = icon as _AnimatedIconData;
     final IconThemeData iconTheme = IconTheme.of(context);
@@ -149,7 +149,7 @@ class _AnimatedIconPainter extends CustomPainter {
   final _UiPathFactory uiPathFactory;
 
   @override
-  void paint(ui.Canvas canvas, Size size) {
+  void paint(final ui.Canvas canvas, final Size size) {
     // The RenderCustomPaint render object performs canvas.save before invoking
     // this and canvas.restore after, so we don't need to do it here.
     if (shouldMirror) {
@@ -166,7 +166,7 @@ class _AnimatedIconPainter extends CustomPainter {
 
 
   @override
-  bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
+  bool shouldRepaint(final _AnimatedIconPainter oldDelegate) {
     return oldDelegate.progress.value != progress.value
         || oldDelegate.color != color
         // We are comparing the paths list by reference, assuming the list is
@@ -177,10 +177,10 @@ class _AnimatedIconPainter extends CustomPainter {
   }
 
   @override
-  bool? hitTest(Offset position) => null;
+  bool? hitTest(final Offset position) => null;
 
   @override
-  bool shouldRebuildSemantics(CustomPainter oldDelegate) => false;
+  bool shouldRebuildSemantics(final CustomPainter oldDelegate) => false;
 
   @override
   SemanticsBuilderCallback? get semanticsBuilder => null;
@@ -195,7 +195,7 @@ class _PathFrames {
   final List<_PathCommand> commands;
   final List<double> opacities;
 
-  void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
+  void paint(final ui.Canvas canvas, final Color color, final _UiPathFactory uiPathFactory, final double progress) {
     final double opacity = _interpolate<double?>(opacities, progress, lerpDouble)!;
     final ui.Paint paint = ui.Paint()
       ..style = PaintingStyle.fill
@@ -219,7 +219,7 @@ abstract class _PathCommand {
   ///
   /// For example if the object is a [_PathMoveTo] command it will invoke
   /// [Path.moveTo] on [path].
-  void apply(ui.Path path, double progress);
+  void apply(final ui.Path path, final double progress);
 }
 
 class _PathMoveTo extends _PathCommand {
@@ -228,7 +228,7 @@ class _PathMoveTo extends _PathCommand {
   final List<Offset> points;
 
   @override
-  void apply(Path path, double progress) {
+  void apply(final Path path, final double progress) {
     final Offset offset = _interpolate<Offset?>(points, progress, Offset.lerp)!;
     path.moveTo(offset.dx, offset.dy);
   }
@@ -242,7 +242,7 @@ class _PathCubicTo extends _PathCommand {
   final List<Offset> targetPoints;
 
   @override
-  void apply(Path path, double progress) {
+  void apply(final Path path, final double progress) {
     final Offset controlPoint1 = _interpolate<Offset?>(controlPoints1, progress, Offset.lerp)!;
     final Offset controlPoint2 = _interpolate<Offset?>(controlPoints2, progress, Offset.lerp)!;
     final Offset targetPoint = _interpolate<Offset?>(targetPoints, progress, Offset.lerp)!;
@@ -261,7 +261,7 @@ class _PathLineTo extends _PathCommand {
   final List<Offset> points;
 
   @override
-  void apply(Path path, double progress) {
+  void apply(final Path path, final double progress) {
     final Offset point = _interpolate<Offset?>(points, progress, Offset.lerp)!;
     path.lineTo(point.dx, point.dy);
   }
@@ -271,7 +271,7 @@ class _PathClose extends _PathCommand {
   const _PathClose();
 
   @override
-  void apply(Path path, double progress) {
+  void apply(final Path path, final double progress) {
     path.close();
   }
 }
@@ -287,7 +287,7 @@ class _PathClose extends _PathCommand {
 /// not be smooth enough we can try applying spline instead.
 ///
 /// [progress] is expected to be between 0.0 and 1.0.
-T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
+T _interpolate<T>(final List<T> values, final double progress, final _Interpolator<T> interpolator) {
   assert(progress <= 1.0);
   assert(progress >= 0.0);
   if (values.length == 1) {

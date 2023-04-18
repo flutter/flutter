@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Comparing coordinates', (WidgetTester tester) async {
+  testWidgets('Comparing coordinates', (final WidgetTester tester) async {
     final Key keyA = GlobalKey();
     final Key keyB = GlobalKey();
 

@@ -12,7 +12,7 @@ class ActionSheetApp extends StatelessWidget {
   const ActionSheetApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: ActionSheetExample(),
@@ -24,10 +24,10 @@ class ActionSheetExample extends StatelessWidget {
   const ActionSheetExample({super.key});
 
   // This shows a CupertinoModalPopup which hosts a CupertinoActionSheet.
-  void _showActionSheet(BuildContext context) {
+  void _showActionSheet(final BuildContext context) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (BuildContext context) => CupertinoActionSheet(
+      builder: (final BuildContext context) => CupertinoActionSheet(
         title: const Text('Title'),
         message: const Text('Message'),
         actions: <CupertinoActionSheetAction>[
@@ -62,7 +62,7 @@ class ActionSheetExample extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoActionSheet Sample'),

@@ -46,7 +46,7 @@ class TestCompiler {
   TestCompiler(
     this.buildInfo,
     this.flutterProject,
-    { String? precompiledDillPath, this.testTimeRecorder }
+    { final String? precompiledDillPath, this.testTimeRecorder }
   ) : testFilePath = precompiledDillPath ?? globals.fs.path.join(
         flutterProject!.directory.path,
         getBuildDirectory(),
@@ -82,7 +82,7 @@ class TestCompiler {
   ResidentCompiler? compiler;
   late File outputDill;
 
-  Future<String?> compile(Uri mainDart) {
+  Future<String?> compile(final Uri mainDart) {
     final Completer<String?> completer = Completer<String?>();
     if (compilerController.isClosed) {
       return Future<String?>.value();
@@ -129,7 +129,7 @@ class TestCompiler {
   }
 
   // Handle a compilation request.
-  Future<void> _onCompilationRequest(CompilationRequest request) async {
+  Future<void> _onCompilationRequest(final CompilationRequest request) async {
     final bool isEmpty = compilationQueue.isEmpty;
     compilationQueue.add(request);
     // Only trigger processing if queue was empty - i.e. no other requests

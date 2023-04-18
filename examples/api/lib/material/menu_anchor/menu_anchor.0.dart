@@ -43,7 +43,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
 
   Color get backgroundColor => _backgroundColor;
   Color _backgroundColor = Colors.red;
-  set backgroundColor(Color value) {
+  set backgroundColor(final Color value) {
     if (_backgroundColor != value) {
       setState(() {
         _backgroundColor = value;
@@ -53,7 +53,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
 
   bool get showingMessage => _showingMessage;
   bool _showingMessage = false;
-  set showingMessage(bool value) {
+  set showingMessage(final bool value) {
     if (_showingMessage != value) {
       setState(() {
         _showingMessage = value;
@@ -87,7 +87,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -131,7 +131,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
               child: const Text('Background Color'),
             ),
           ],
-          builder: (BuildContext context, MenuController controller, Widget? child) {
+          builder: (final BuildContext context, final MenuController controller, final Widget? child) {
             return TextButton(
               focusNode: _buttonFocusNode,
               onPressed: () {
@@ -168,7 +168,7 @@ class _MyCascadingMenuState extends State<MyCascadingMenu> {
     );
   }
 
-  void _activate(MenuEntry selection) {
+  void _activate(final MenuEntry selection) {
     setState(() {
       _lastSelection = selection;
     });
@@ -201,7 +201,7 @@ class MenuApp extends StatelessWidget {
   static const String kMessage = '"Talk less. Smile more." - A. Burr';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Scaffold(body: MyCascadingMenu(message: kMessage)),
     );

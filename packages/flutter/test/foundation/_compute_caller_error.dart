@@ -6,7 +6,7 @@
 
 import 'package:flutter/src/foundation/_isolates_io.dart';
 
-int getLength(String s) {
+int getLength(final String s) {
   throw 10;
 }
 

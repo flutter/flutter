@@ -57,7 +57,7 @@ class IconData {
   final bool matchTextDirection;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -90,7 +90,7 @@ class IconDataProperty extends DiagnosticsProperty<IconData> {
   });
 
   @override
-  Map<String, Object?> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+  Map<String, Object?> toJsonMap(final DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object?> json = super.toJsonMap(delegate);
     if (value != null) {
       json['valueProperties'] = <String, Object>{

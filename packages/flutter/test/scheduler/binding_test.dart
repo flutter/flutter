@@ -24,7 +24,7 @@ void main() {
     timeDilation = 3.0;
     expect(
       () => SchedulerBinding.instance.debugAssertNoTimeDilation('reason'),
-      throwsA(isA<FlutterError>().having((FlutterError e) => e.message, 'message', 'reason')),
+      throwsA(isA<FlutterError>().having((final FlutterError e) => e.message, 'message', 'reason')),
     );
     timeDilation = 1.0;
   });

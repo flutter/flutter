@@ -14,7 +14,7 @@ const Color green = Color(0xFF00FF00);
 const Color yellow = Color(0xFFFFFF00);
 
 void main() {
-  testWidgets('SlottedRenderObjectWidget test', (WidgetTester tester) async {
+  testWidgets('SlottedRenderObjectWidget test', (final WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
       topLeft: Container(
         height: 100,
@@ -139,7 +139,7 @@ void main() {
     expect(_RenderTest().publicNameForSlot(slot), slot.toString());
   });
 
-  testWidgets('key reparenting', (WidgetTester tester) async {
+  testWidgets('key reparenting', (final WidgetTester tester) async {
     const Widget widget1 = SizedBox(key: ValueKey<String>('smol'), height: 10, width: 10);
     const Widget widget2 = SizedBox(key: ValueKey<String>('big'), height: 100, width: 100);
     const Widget nullWidget = SizedBox(key: ValueKey<String>('null'), height: 50, width: 50);
@@ -188,7 +188,7 @@ void main() {
     expect(widget2Element, same(tester.element(find.byWidget(widget2))));
   });
 
-  testWidgets('duplicated key error message', (WidgetTester tester) async {
+  testWidgets('duplicated key error message', (final WidgetTester tester) async {
     const Widget widget1 = SizedBox(key: ValueKey<String>('widget 1'), height: 10, width: 10);
     const Widget widget2 = SizedBox(key: ValueKey<String>('widget 1'), height: 100, width: 100);
     const Widget widget3 = SizedBox(key: ValueKey<String>('widget 1'), height: 50, width: 50);
@@ -205,7 +205,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugDescribeChildren', (WidgetTester tester) async {
+  testWidgets('debugDescribeChildren', (final WidgetTester tester) async {
     await tester.pumpWidget(buildWidget(
       topLeft: const SizedBox(
         height: 100,
@@ -250,7 +250,7 @@ void main() {
   });
 }
 
-Widget buildWidget({Widget? topLeft, Widget? bottomRight, Widget? nullSlot}) {
+Widget buildWidget({final Widget? topLeft, final Widget? bottomRight, final Widget? nullSlot}) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Align(
@@ -284,7 +284,7 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
   Iterable<_DiagonalSlot?> get slots => <_DiagonalSlot?>[null, ..._DiagonalSlot.values];
 
   @override
-  Widget? childForSlot(_DiagonalSlot? slot) {
+  Widget? childForSlot(final _DiagonalSlot? slot) {
     switch (slot) {
       case null:
         return nullSlot;
@@ -297,7 +297,7 @@ class _Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWid
 
   @override
   SlottedContainerRenderObjectMixin<_DiagonalSlot?> createRenderObject(
-    BuildContext context,
+    final BuildContext context,
   ) {
     return _RenderDiagonal();
   }
@@ -343,12 +343,12 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
     ));
   }
 
-  void _positionChild(RenderBox child, Offset offset) {
+  void _positionChild(final RenderBox child, final Offset offset) {
     (child.parentData! as BoxParentData).offset = offset;
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (_topLeft != null) {
       _paintChild(_topLeft!, context, offset);
     }
@@ -357,12 +357,12 @@ class _RenderDiagonal extends RenderBox with SlottedContainerRenderObjectMixin<_
     }
   }
 
-  void _paintChild(RenderBox child, PaintingContext context, Offset offset) {
+  void _paintChild(final RenderBox child, final PaintingContext context, final Offset offset) {
     final BoxParentData childParentData = child.parentData! as BoxParentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
-  String publicNameForSlot(_DiagonalSlot slot) => debugNameForSlot(slot);
+  String publicNameForSlot(final _DiagonalSlot slot) => debugNameForSlot(slot);
 }
 
 class _Slot {
@@ -371,5 +371,5 @@ class _Slot {
 }
 
 class _RenderTest extends RenderBox with SlottedContainerRenderObjectMixin<_Slot> {
-  String publicNameForSlot(_Slot slot) => debugNameForSlot(slot);
+  String publicNameForSlot(final _Slot slot) => debugNameForSlot(slot);
 }

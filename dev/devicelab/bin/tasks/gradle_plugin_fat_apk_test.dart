@@ -13,7 +13,7 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   await task(() async {
     try {
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+      await runPluginProjectTest((final FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug without explicit target platform');
         await inDirectory(pluginProject.exampleAndroidPath, () {
           return flutter(
@@ -140,7 +140,7 @@ Future<void> main() async {
         checkCollectionDoesNotContain<String>(debugAssets, arm64ApkFiles);
       });
 
-      await runProjectTest((FlutterProject project) async {
+      await runProjectTest((final FlutterProject project) async {
         section('gradlew assembleRelease');
 
         await inDirectory(project.rootPath, () {

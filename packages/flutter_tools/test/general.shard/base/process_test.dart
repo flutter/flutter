@@ -89,7 +89,7 @@ void main() {
         stderr: 'match\nno match',
       ));
 
-      await processUtils.stream(<String>['command'], mapFunction: (String line) {
+      await processUtils.stream(<String>['command'], mapFunction: (final String line) {
         if (line == 'match') {
           return line;
         }
@@ -153,7 +153,7 @@ void main() {
         (await processUtils.run(
           <String>['kaboom'],
           throwOnError: true,
-          allowedFailures: (int c) => c == 1,
+          allowedFailures: (final int c) => c == 1,
         )).exitCode,
         1,
       );
@@ -170,7 +170,7 @@ void main() {
         () => processUtils.run(
           <String>['kaboom'],
           throwOnError: true,
-          allowedFailures: (int c) => c == 1,
+          allowedFailures: (final int c) => c == 1,
         ),
         throwsProcessException(),
       );
@@ -228,7 +228,7 @@ void main() {
       expect(
         () => processUtils.runSync(<String>['kaboom'], throwOnError: true),
         throwsA(isA<ProcessException>().having(
-          (ProcessException error) => error.message,
+          (final ProcessException error) => error.message,
           'message',
           isNot(contains(stderr)),
         )),
@@ -265,7 +265,7 @@ void main() {
         processUtils.runSync(
           <String>['kaboom'],
           throwOnError: true,
-          allowedFailures: (int c) => c == 1,
+          allowedFailures: (final int c) => c == 1,
         ).exitCode,
         1);
     });
@@ -281,7 +281,7 @@ void main() {
         () => processUtils.runSync(
           <String>['kaboom'],
           throwOnError: true,
-          allowedFailures: (int c) => c == 1,
+          allowedFailures: (final int c) => c == 1,
         ),
         throwsProcessException(),
       );

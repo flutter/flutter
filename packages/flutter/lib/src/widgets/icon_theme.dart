@@ -30,12 +30,12 @@ class IconTheme extends InheritedTheme {
   ///
   /// The [data] and [child] arguments must not be null.
   static Widget merge({
-    Key? key,
-    required IconThemeData data,
-    required Widget child,
+    final Key? key,
+    required final IconThemeData data,
+    required final Widget child,
   }) {
     return Builder(
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return IconTheme(
           key: key,
           data: _getInheritedIconThemeData(context).merge(data),
@@ -67,7 +67,7 @@ class IconTheme extends InheritedTheme {
   /// ```dart
   /// IconThemeData theme = IconTheme.of(context);
   /// ```
-  static IconThemeData of(BuildContext context) {
+  static IconThemeData of(final BuildContext context) {
     final IconThemeData iconThemeData = _getInheritedIconThemeData(context).resolve(context);
     return iconThemeData.isConcrete
       ? iconThemeData
@@ -83,21 +83,21 @@ class IconTheme extends InheritedTheme {
       );
   }
 
-  static IconThemeData _getInheritedIconThemeData(BuildContext context) {
+  static IconThemeData _getInheritedIconThemeData(final BuildContext context) {
     final IconTheme? iconTheme = context.dependOnInheritedWidgetOfExactType<IconTheme>();
     return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
   @override
-  bool updateShouldNotify(IconTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final IconTheme oldWidget) => data != oldWidget.data;
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return IconTheme(data: data, child: child);
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     data.debugFillProperties(properties);
   }

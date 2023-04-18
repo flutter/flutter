@@ -87,18 +87,18 @@ class FilledButton extends ButtonStyleButton {
   ///
   /// The [icon] and [label] arguments must not be null.
   factory FilledButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
-    required Widget icon,
-    required Widget label,
+    final Key? key,
+    required final VoidCallback? onPressed,
+    final VoidCallback? onLongPress,
+    final ValueChanged<bool>? onHover,
+    final ValueChanged<bool>? onFocusChange,
+    final ButtonStyle? style,
+    final FocusNode? focusNode,
+    final bool? autofocus,
+    final Clip? clipBehavior,
+    final MaterialStatesController? statesController,
+    required final Widget icon,
+    required final Widget label,
   }) = _FilledButtonWithIcon;
 
   /// Create a tonal variant of FilledButton.
@@ -130,18 +130,18 @@ class FilledButton extends ButtonStyleButton {
   ///
   /// The [icon] and [label] arguments must not be null.
   factory FilledButton.tonalIcon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
-    required Widget icon,
-    required Widget label,
+    final Key? key,
+    required final VoidCallback? onPressed,
+    final VoidCallback? onLongPress,
+    final ValueChanged<bool>? onHover,
+    final ValueChanged<bool>? onFocusChange,
+    final ButtonStyle? style,
+    final FocusNode? focusNode,
+    final bool? autofocus,
+    final Clip? clipBehavior,
+    final MaterialStatesController? statesController,
+    required final Widget icon,
+    required final Widget label,
   }) {
     return _FilledButtonWithIcon.tonal(
       key: key,
@@ -204,28 +204,28 @@ class FilledButton extends ButtonStyleButton {
   /// );
   /// ```
   static ButtonStyle styleFrom({
-    Color? foregroundColor,
-    Color? backgroundColor,
-    Color? disabledForegroundColor,
-    Color? disabledBackgroundColor,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    double? elevation,
-    TextStyle? textStyle,
-    EdgeInsetsGeometry? padding,
-    Size? minimumSize,
-    Size? fixedSize,
-    Size? maximumSize,
-    BorderSide? side,
-    OutlinedBorder? shape,
-    MouseCursor? enabledMouseCursor,
-    MouseCursor? disabledMouseCursor,
-    VisualDensity? visualDensity,
-    MaterialTapTargetSize? tapTargetSize,
-    Duration? animationDuration,
-    bool? enableFeedback,
-    AlignmentGeometry? alignment,
-    InteractiveInkFeatureFactory? splashFactory,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
+    final Color? disabledForegroundColor,
+    final Color? disabledBackgroundColor,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final double? elevation,
+    final TextStyle? textStyle,
+    final EdgeInsetsGeometry? padding,
+    final Size? minimumSize,
+    final Size? fixedSize,
+    final Size? maximumSize,
+    final BorderSide? side,
+    final OutlinedBorder? shape,
+    final MouseCursor? enabledMouseCursor,
+    final MouseCursor? disabledMouseCursor,
+    final VisualDensity? visualDensity,
+    final MaterialTapTargetSize? tapTargetSize,
+    final Duration? animationDuration,
+    final bool? enableFeedback,
+    final AlignmentGeometry? alignment,
+    final InteractiveInkFeatureFactory? splashFactory,
   }) {
     final MaterialStateProperty<Color?>? backgroundColorProp =
       (backgroundColor == null && disabledBackgroundColor == null)
@@ -390,7 +390,7 @@ class FilledButton extends ButtonStyleButton {
   /// For the [FilledButton.icon] factory, the start (generally the left) value of
   /// [padding] is reduced from 24 to 16.
   @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
+  ButtonStyle defaultStyleOf(final BuildContext context) {
     switch (_variant) {
       case _FilledButtonVariant.filled:
         return _FilledButtonDefaultsM3(context);
@@ -402,12 +402,12 @@ class FilledButton extends ButtonStyleButton {
   /// Returns the [FilledButtonThemeData.style] of the closest
   /// [FilledButtonTheme] ancestor.
   @override
-  ButtonStyle? themeStyleOf(BuildContext context) {
+  ButtonStyle? themeStyleOf(final BuildContext context) {
     return FilledButtonTheme.of(context).style;
   }
 }
 
-EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+EdgeInsetsGeometry _scaledPadding(final BuildContext context) {
   final bool useMaterial3 = Theme.of(context).useMaterial3;
   final double padding1x = useMaterial3 ? 24.0 : 16.0;
   return ButtonStyleButton.scaledPadding(
@@ -426,7 +426,7 @@ class _FilledButtonDefaultColor extends MaterialStateProperty<Color?> with Diagn
   final Color? disabled;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabled;
     }
@@ -441,7 +441,7 @@ class _FilledButtonDefaultOverlay extends MaterialStateProperty<Color?> with Dia
   final Color overlay;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered)) {
       return overlay.withOpacity(0.08);
     }
@@ -460,7 +460,7 @@ class _FilledButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor?
   final MouseCursor? disabledCursor;
 
   @override
-  MouseCursor? resolve(Set<MaterialState> states) {
+  MouseCursor? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
@@ -477,11 +477,11 @@ class _FilledButtonWithIcon extends FilledButton {
     super.onFocusChange,
     super.style,
     super.focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
+    final bool? autofocus,
+    final Clip? clipBehavior,
     super.statesController,
-    required Widget icon,
-    required Widget label,
+    required final Widget icon,
+    required final Widget label,
   }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
@@ -496,11 +496,11 @@ class _FilledButtonWithIcon extends FilledButton {
     super.onFocusChange,
     super.style,
     super.focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
+    final bool? autofocus,
+    final Clip? clipBehavior,
     super.statesController,
-    required Widget icon,
-    required Widget label,
+    required final Widget icon,
+    required final Widget label,
   }) : super.tonal(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
@@ -508,7 +508,7 @@ class _FilledButtonWithIcon extends FilledButton {
        );
 
   @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
+  ButtonStyle defaultStyleOf(final BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final EdgeInsetsGeometry scaledPadding = useMaterial3 ?  ButtonStyleButton.scaledPadding(
       const EdgeInsetsDirectional.fromSTEB(16, 0, 24, 0),
@@ -534,7 +534,7 @@ class _FilledButtonWithIconChild extends StatelessWidget {
   final Widget icon;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final double scale = MediaQuery.textScaleFactorOf(context);
     // Adjust the gap based on the text scale factor. Start at 8, and lerp
     // to 4 based on how large the text is.
@@ -572,7 +572,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
@@ -581,7 +581,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -590,7 +590,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return _colors.onPrimary.withOpacity(0.08);
       }
@@ -613,7 +613,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<double>? get elevation =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return 0.0;
       }
@@ -651,7 +651,7 @@ class _FilledButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }
@@ -696,7 +696,7 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get backgroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.12);
       }
@@ -705,7 +705,7 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -714,7 +714,7 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return _colors.onSecondaryContainer.withOpacity(0.08);
       }
@@ -737,7 +737,7 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<double>? get elevation =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return 0.0;
       }
@@ -775,7 +775,7 @@ class _FilledTonalButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }

@@ -12,7 +12,7 @@ class ShowMaterialBannerExampleApp extends StatelessWidget {
   const ShowMaterialBannerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ScaffoldMessengerState Sample')),
@@ -28,7 +28,7 @@ class ShowMaterialBannerExample extends StatelessWidget {
   const ShowMaterialBannerExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return OutlinedButton(
       onPressed: () {
         ScaffoldMessenger.of(context).showMaterialBanner(

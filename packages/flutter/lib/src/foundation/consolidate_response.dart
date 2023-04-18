@@ -47,9 +47,9 @@ typedef BytesReceivedCallback = void Function(int cumulative, int? total);
 /// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
 /// parameter to false.
 Future<Uint8List> consolidateHttpClientResponseBytes(
-  HttpClientResponse response, {
-  bool autoUncompress = true,
-  BytesReceivedCallback? onBytesReceived,
+  final HttpClientResponse response, {
+  final bool autoUncompress = true,
+  final BytesReceivedCallback? onBytesReceived,
 }) {
   final Completer<Uint8List> completer = Completer<Uint8List>.sync();
 
@@ -76,7 +76,7 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
 
   int bytesReceived = 0;
   late final StreamSubscription<List<int>> subscription;
-  subscription = response.listen((List<int> chunk) {
+  subscription = response.listen((final List<int> chunk) {
     sink.add(chunk);
     if (onBytesReceived != null) {
       bytesReceived += chunk.length;
@@ -102,7 +102,7 @@ class _OutputBuffer extends ByteConversionSinkBase {
   Uint8List? _bytes;
 
   @override
-  void add(List<int> chunk) {
+  void add(final List<int> chunk) {
     assert(_bytes == null);
     _chunks!.add(chunk);
     _contentLength += chunk.length;

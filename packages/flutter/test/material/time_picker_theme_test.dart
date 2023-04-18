@@ -40,19 +40,19 @@ void main() {
     expect(timePickerTheme.inputDecorationTheme, null);
   });
 
-  testWidgets('Default TimePickerThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default TimePickerThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('TimePickerThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('TimePickerThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TimePickerThemeData(
       backgroundColor: Color(0xFFFFFFFF),
@@ -74,8 +74,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -98,7 +98,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no TimePickerThemeData uses defaults', (WidgetTester tester) async {
+  testWidgets('Passing no TimePickerThemeData uses defaults', (final WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData.fallback();
     await tester.pumpWidget(const _TimePickerLauncher());
     await tester.tap(find.text('X'));
@@ -217,7 +217,7 @@ void main() {
   });
 
 
-  testWidgets('Passing no TimePickerThemeData uses defaults - input mode', (WidgetTester tester) async {
+  testWidgets('Passing no TimePickerThemeData uses defaults - input mode', (final WidgetTester tester) async {
     final ThemeData defaultTheme = ThemeData.fallback();
     await tester.pumpWidget(const _TimePickerLauncher(entryMode: TimePickerEntryMode.input));
     await tester.tap(find.text('X'));
@@ -225,7 +225,7 @@ void main() {
 
     final InputDecoration hourDecoration = _textField(tester, '7').decoration!;
     expect(hourDecoration.filled, true);
-    expect(hourDecoration.fillColor, MaterialStateColor.resolveWith((Set<MaterialState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12)));
+    expect(hourDecoration.fillColor, MaterialStateColor.resolveWith((final Set<MaterialState> states) => defaultTheme.colorScheme.onSurface.withOpacity(0.12)));
     expect(hourDecoration.enabledBorder, const OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)));
     expect(hourDecoration.errorBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.error, width: 2)));
     expect(hourDecoration.focusedBorder, OutlineInputBorder(borderSide: BorderSide(color: defaultTheme.colorScheme.primary, width: 2)));
@@ -237,7 +237,7 @@ void main() {
     );
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData', (WidgetTester tester) async {
+  testWidgets('Time picker uses values from TimePickerThemeData', (final WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme));
@@ -354,7 +354,7 @@ void main() {
     );
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (WidgetTester tester) async {
+  testWidgets('Time picker uses values from TimePickerThemeData with InputDecorationTheme - input mode', (final WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme(includeInputDecoration: true);
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
@@ -371,7 +371,7 @@ void main() {
     expect(hourDecoration.hintStyle, timePickerTheme.inputDecorationTheme!.hintStyle);
   });
 
-  testWidgets('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (WidgetTester tester) async {
+  testWidgets('Time picker uses values from TimePickerThemeData without InputDecorationTheme - input mode', (final WidgetTester tester) async {
     final TimePickerThemeData timePickerTheme = _timePickerTheme();
     final ThemeData theme = ThemeData(timePickerTheme: timePickerTheme);
     await tester.pumpWidget(_TimePickerLauncher(themeData: theme, entryMode: TimePickerEntryMode.input));
@@ -386,8 +386,8 @@ void main() {
 final Color _selectedColor = Colors.green[100]!;
 final Color _unselectedColor = Colors.green[200]!;
 
-TimePickerThemeData _timePickerTheme({bool includeInputDecoration = false}) {
-  Color getColor(Set<MaterialState> states) {
+TimePickerThemeData _timePickerTheme({final bool includeInputDecoration = false}) {
+  Color getColor(final Set<MaterialState> states) {
     return states.contains(MaterialState.selected) ? _selectedColor : _unselectedColor;
   }
   final MaterialStateColor materialStateColor = MaterialStateColor.resolveWith(getColor);
@@ -430,13 +430,13 @@ class _TimePickerLauncher extends StatelessWidget {
   final TimePickerEntryMode entryMode;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: themeData,
       home: Material(
         child: Center(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return ElevatedButton(
                 child: const Text('X'),
                 onPressed: () async {
@@ -455,35 +455,35 @@ class _TimePickerLauncher extends StatelessWidget {
   }
 }
 
-Material _dialogMaterial(WidgetTester tester) {
+Material _dialogMaterial(final WidgetTester tester) {
   return tester.widget<Material>(find.descendant(of: find.byType(Dialog), matching: find.byType(Material)).first);
 }
 
-Material _textMaterial(WidgetTester tester, String text) {
+Material _textMaterial(final WidgetTester tester, final String text) {
   return tester.widget<Material>(find.ancestor(of: find.text(text), matching: find.byType(Material)).first);
 }
 
-TextField _textField(WidgetTester tester, String text) {
+TextField _textField(final WidgetTester tester, final String text) {
   return tester.widget<TextField>(find.ancestor(of: find.text(text), matching: find.byType(TextField)).first);
 }
 
-Material _dayPeriodMaterial(WidgetTester tester) {
-  return tester.widget<Material>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Material)).first);
+Material _dayPeriodMaterial(final WidgetTester tester) {
+  return tester.widget<Material>(find.descendant(of: find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Material)).first);
 }
 
-Container _dayPeriodDivider(WidgetTester tester) {
-  return tester.widget<Container>(find.descendant(of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Container)).at(0));
+Container _dayPeriodDivider(final WidgetTester tester) {
+  return tester.widget<Container>(find.descendant(of: find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == '_DayPeriodControl'), matching: find.byType(Container)).at(0));
 }
 
-IconButton _entryModeIconButton(WidgetTester tester) {
+IconButton _entryModeIconButton(final WidgetTester tester) {
   return tester.widget<IconButton>(find.descendant(of: find.byType(Dialog), matching: find.byType(IconButton)).first);
 }
 
-RenderParagraph _textRenderParagraph(WidgetTester tester, String text) {
+RenderParagraph _textRenderParagraph(final WidgetTester tester, final String text) {
   return tester.element<StatelessElement>(find.text(text).first).renderObject! as RenderParagraph;
 }
 
 final Finder findDialPaint = find.descendant(
-  of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-  matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+  of: find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == '_Dial'),
+  matching: find.byWidgetPredicate((final Widget w) => w is CustomPaint),
 );

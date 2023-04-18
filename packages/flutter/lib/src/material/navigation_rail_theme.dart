@@ -106,19 +106,19 @@ class NavigationRailThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   NavigationRailThemeData copyWith({
-    Color? backgroundColor,
-    double? elevation,
-    TextStyle? unselectedLabelTextStyle,
-    TextStyle? selectedLabelTextStyle,
-    IconThemeData? unselectedIconTheme,
-    IconThemeData? selectedIconTheme,
-    double? groupAlignment,
-    NavigationRailLabelType? labelType,
-    bool? useIndicator,
-    Color? indicatorColor,
-    ShapeBorder? indicatorShape,
-    double? minWidth,
-    double? minExtendedWidth,
+    final Color? backgroundColor,
+    final double? elevation,
+    final TextStyle? unselectedLabelTextStyle,
+    final TextStyle? selectedLabelTextStyle,
+    final IconThemeData? unselectedIconTheme,
+    final IconThemeData? selectedIconTheme,
+    final double? groupAlignment,
+    final NavigationRailLabelType? labelType,
+    final bool? useIndicator,
+    final Color? indicatorColor,
+    final ShapeBorder? indicatorShape,
+    final double? minWidth,
+    final double? minExtendedWidth,
   }) {
     return NavigationRailThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -142,7 +142,7 @@ class NavigationRailThemeData with Diagnosticable {
   /// If both arguments are null then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static NavigationRailThemeData? lerp(NavigationRailThemeData? a, NavigationRailThemeData? b, double t) {
+  static NavigationRailThemeData? lerp(final NavigationRailThemeData? a, final NavigationRailThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -184,7 +184,7 @@ class NavigationRailThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -208,7 +208,7 @@ class NavigationRailThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const NavigationRailThemeData defaultData = NavigationRailThemeData();
 
@@ -259,16 +259,16 @@ class NavigationRailTheme extends InheritedTheme {
   /// ```dart
   /// NavigationRailThemeData theme = NavigationRailTheme.of(context);
   /// ```
-  static NavigationRailThemeData of(BuildContext context) {
+  static NavigationRailThemeData of(final BuildContext context) {
     final NavigationRailTheme? navigationRailTheme = context.dependOnInheritedWidgetOfExactType<NavigationRailTheme>();
     return navigationRailTheme?.data ?? Theme.of(context).navigationRailTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return NavigationRailTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(NavigationRailTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final NavigationRailTheme oldWidget) => data != oldWidget.data;
 }

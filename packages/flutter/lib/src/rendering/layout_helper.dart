@@ -31,7 +31,7 @@ abstract final class ChildLayoutHelper {
   ///
   ///  * [layoutChild], which actually lays out the child with the given
   ///    constraints.
-  static Size dryLayoutChild(RenderBox child, BoxConstraints constraints) {
+  static Size dryLayoutChild(final RenderBox child, final BoxConstraints constraints) {
     return child.getDryLayout(constraints);
   }
 
@@ -48,7 +48,7 @@ abstract final class ChildLayoutHelper {
   /// See also:
   ///
   ///  * [dryLayoutChild], which does not perform a real layout of the child.
-  static Size layoutChild(RenderBox child, BoxConstraints constraints) {
+  static Size layoutChild(final RenderBox child, final BoxConstraints constraints) {
     child.layout(constraints, parentUsesSize: true);
     return child.size;
   }

@@ -98,64 +98,64 @@ class TextFormField extends FormField<String> {
   TextFormField({
     super.key,
     this.controller,
-    String? initialValue,
-    FocusNode? focusNode,
-    InputDecoration? decoration = const InputDecoration(),
-    TextInputType? keyboardType,
-    TextCapitalization textCapitalization = TextCapitalization.none,
-    TextInputAction? textInputAction,
-    TextStyle? style,
-    StrutStyle? strutStyle,
-    TextDirection? textDirection,
-    TextAlign textAlign = TextAlign.start,
-    TextAlignVertical? textAlignVertical,
-    bool autofocus = false,
-    bool readOnly = false,
+    final String? initialValue,
+    final FocusNode? focusNode,
+    final InputDecoration? decoration = const InputDecoration(),
+    final TextInputType? keyboardType,
+    final TextCapitalization textCapitalization = TextCapitalization.none,
+    final TextInputAction? textInputAction,
+    final TextStyle? style,
+    final StrutStyle? strutStyle,
+    final TextDirection? textDirection,
+    final TextAlign textAlign = TextAlign.start,
+    final TextAlignVertical? textAlignVertical,
+    final bool autofocus = false,
+    final bool readOnly = false,
     @Deprecated(
       'Use `contextMenuBuilder` instead. '
       'This feature was deprecated after v3.3.0-0.5.pre.',
     )
-    ToolbarOptions? toolbarOptions,
-    bool? showCursor,
-    String obscuringCharacter = '•',
-    bool obscureText = false,
-    bool autocorrect = true,
-    SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType,
-    bool enableSuggestions = true,
-    MaxLengthEnforcement? maxLengthEnforcement,
-    int? maxLines = 1,
-    int? minLines,
-    bool expands = false,
-    int? maxLength,
-    ValueChanged<String>? onChanged,
-    GestureTapCallback? onTap,
-    TapRegionCallback? onTapOutside,
-    VoidCallback? onEditingComplete,
-    ValueChanged<String>? onFieldSubmitted,
+    final ToolbarOptions? toolbarOptions,
+    final bool? showCursor,
+    final String obscuringCharacter = '•',
+    final bool obscureText = false,
+    final bool autocorrect = true,
+    final SmartDashesType? smartDashesType,
+    final SmartQuotesType? smartQuotesType,
+    final bool enableSuggestions = true,
+    final MaxLengthEnforcement? maxLengthEnforcement,
+    final int? maxLines = 1,
+    final int? minLines,
+    final bool expands = false,
+    final int? maxLength,
+    final ValueChanged<String>? onChanged,
+    final GestureTapCallback? onTap,
+    final TapRegionCallback? onTapOutside,
+    final VoidCallback? onEditingComplete,
+    final ValueChanged<String>? onFieldSubmitted,
     super.onSaved,
     super.validator,
-    List<TextInputFormatter>? inputFormatters,
-    bool? enabled,
-    double cursorWidth = 2.0,
-    double? cursorHeight,
-    Radius? cursorRadius,
-    Color? cursorColor,
-    Brightness? keyboardAppearance,
-    EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
-    bool? enableInteractiveSelection,
-    TextSelectionControls? selectionControls,
-    InputCounterWidgetBuilder? buildCounter,
-    ScrollPhysics? scrollPhysics,
-    Iterable<String>? autofillHints,
-    AutovalidateMode? autovalidateMode,
-    ScrollController? scrollController,
+    final List<TextInputFormatter>? inputFormatters,
+    final bool? enabled,
+    final double cursorWidth = 2.0,
+    final double? cursorHeight,
+    final Radius? cursorRadius,
+    final Color? cursorColor,
+    final Brightness? keyboardAppearance,
+    final EdgeInsets scrollPadding = const EdgeInsets.all(20.0),
+    final bool? enableInteractiveSelection,
+    final TextSelectionControls? selectionControls,
+    final InputCounterWidgetBuilder? buildCounter,
+    final ScrollPhysics? scrollPhysics,
+    final Iterable<String>? autofillHints,
+    final AutovalidateMode? autovalidateMode,
+    final ScrollController? scrollController,
     super.restorationId,
-    bool enableIMEPersonalizedLearning = true,
-    MouseCursor? mouseCursor,
-    EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
-    SpellCheckConfiguration? spellCheckConfiguration,
-    TextMagnifierConfiguration? magnifierConfiguration,
+    final bool enableIMEPersonalizedLearning = true,
+    final MouseCursor? mouseCursor,
+    final EditableTextContextMenuBuilder? contextMenuBuilder = _defaultContextMenuBuilder,
+    final SpellCheckConfiguration? spellCheckConfiguration,
+    final TextMagnifierConfiguration? magnifierConfiguration,
   }) : assert(initialValue == null || controller == null),
        assert(obscuringCharacter.length == 1),
        assert(maxLines == null || maxLines > 0),
@@ -174,11 +174,11 @@ class TextFormField extends FormField<String> {
          initialValue: controller != null ? controller.text : (initialValue ?? ''),
          enabled: enabled ?? decoration?.enabled ?? true,
          autovalidateMode: autovalidateMode ?? AutovalidateMode.disabled,
-         builder: (FormFieldState<String> field) {
+         builder: (final FormFieldState<String> field) {
            final _TextFormFieldState state = field as _TextFormFieldState;
            final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
                .applyDefaults(Theme.of(field.context).inputDecorationTheme);
-           void onChangedHandler(String value) {
+           void onChangedHandler(final String value) {
              field.didChange(value);
              if (onChanged != null) {
                onChanged(value);
@@ -249,7 +249,7 @@ class TextFormField extends FormField<String> {
   /// initialize its [TextEditingController.text] with [initialValue].
   final TextEditingController? controller;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+  static Widget _defaultContextMenuBuilder(final BuildContext context, final EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -267,7 +267,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   TextFormField get _textFormField => super.widget as TextFormField;
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     super.restoreState(oldBucket, initialRestore);
     if (_controller != null) {
       _registerController();
@@ -282,7 +282,7 @@ class _TextFormFieldState extends FormFieldState<String> {
     registerForRestoration(_controller!, 'controller');
   }
 
-  void _createLocalController([TextEditingValue? value]) {
+  void _createLocalController([final TextEditingValue? value]) {
     assert(_controller == null);
     _controller = value == null
         ? RestorableTextEditingController()
@@ -303,7 +303,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   }
 
   @override
-  void didUpdateWidget(TextFormField oldWidget) {
+  void didUpdateWidget(final TextFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_textFormField.controller != oldWidget.controller) {
       oldWidget.controller?.removeListener(_handleControllerChanged);
@@ -332,7 +332,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   }
 
   @override
-  void didChange(String? value) {
+  void didChange(final String? value) {
     super.didChange(value);
 
     if (_effectiveController.text != value) {

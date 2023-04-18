@@ -18,10 +18,10 @@ import 'utils.dart';
 /// If `expectNonZeroExit` is false and the process exits with a non-zero exit
 /// code fails the test immediately by exiting the test process with exit code
 /// 1.
-Stream<String> runAndGetStdout(String executable, List<String> arguments, {
-  String? workingDirectory,
-  Map<String, String>? environment,
-  bool expectNonZeroExit = false,
+Stream<String> runAndGetStdout(final String executable, final List<String> arguments, {
+  final String? workingDirectory,
+  final Map<String, String>? environment,
+  final bool expectNonZeroExit = false,
 }) async* {
   final StreamController<String> output = StreamController<String>();
   final Future<CommandResult?> command = runCommand(
@@ -32,7 +32,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
     expectNonZeroExit: expectNonZeroExit,
     // Capture the output so it's not printed to the console by default.
     outputMode: OutputMode.capture,
-    outputListener: (String line, io.Process process) {
+    outputListener: (final String line, final io.Process process) {
       output.add(line);
     },
   );
@@ -82,12 +82,12 @@ class CommandResult {
 ///
 /// `outputMode` controls where the standard output from the command process
 /// goes. See [OutputMode].
-Future<Command> startCommand(String executable, List<String> arguments, {
-  String? workingDirectory,
-  Map<String, String>? environment,
-  OutputMode outputMode = OutputMode.print,
-  bool Function(String)? removeLine,
-  void Function(String, io.Process)? outputListener,
+Future<Command> startCommand(final String executable, final List<String> arguments, {
+  final String? workingDirectory,
+  final Map<String, String>? environment,
+  final OutputMode outputMode = OutputMode.print,
+  final bool Function(String)? removeLine,
+  final void Function(String, io.Process)? outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);
@@ -104,8 +104,8 @@ Future<Command> startCommand(String executable, List<String> arguments, {
     process.stdout
       .transform<String>(const Utf8Decoder())
       .transform(const LineSplitter())
-      .where((String line) => removeLine == null || !removeLine(line))
-      .map<String>((String line) {
+      .where((final String line) => removeLine == null || !removeLine(line))
+      .map<String>((final String line) {
         final String formattedLine = '$line\n';
         if (outputListener != null) {
           outputListener(formattedLine, process);
@@ -122,7 +122,7 @@ Future<Command> startCommand(String executable, List<String> arguments, {
     process.stderr
       .transform<String>(const Utf8Decoder())
       .transform(const LineSplitter())
-      .map<String>((String line) {
+      .map<String>((final String line) {
         switch (outputMode) {
           case OutputMode.print:
             print(line);
@@ -149,15 +149,15 @@ Future<Command> startCommand(String executable, List<String> arguments, {
 ///
 /// `outputMode` controls where the standard output from the command process
 /// goes. See [OutputMode].
-Future<CommandResult> runCommand(String executable, List<String> arguments, {
-  String? workingDirectory,
-  Map<String, String>? environment,
-  bool expectNonZeroExit = false,
-  int? expectedExitCode,
-  String? failureMessage,
-  OutputMode outputMode = OutputMode.print,
-  bool Function(String)? removeLine,
-  void Function(String, io.Process)? outputListener,
+Future<CommandResult> runCommand(final String executable, final List<String> arguments, {
+  final String? workingDirectory,
+  final Map<String, String>? environment,
+  final bool expectNonZeroExit = false,
+  final int? expectedExitCode,
+  final String? failureMessage,
+  final OutputMode outputMode = OutputMode.print,
+  final bool Function(String)? removeLine,
+  final void Function(String, io.Process)? outputListener,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory ?? io.Directory.current.path);

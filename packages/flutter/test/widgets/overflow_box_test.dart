@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('OverflowBox control test', (WidgetTester tester) async {
+  testWidgets('OverflowBox control test', (final WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Align(
       alignment: Alignment.bottomRight,
@@ -30,7 +30,7 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
-  testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('OverflowBox implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
@@ -39,8 +39,8 @@ void main() {
       maxHeight: 4.0,
     ).debugFillProperties(builder);
     final List<String> description = builder.properties
-        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode n) => n.toString()).toList();
+        .where((final DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'alignment: Alignment.center',
       'minWidth: 1.0',
@@ -50,7 +50,7 @@ void main() {
     ]);
   });
 
-  testWidgets('SizedOverflowBox alignment', (WidgetTester tester) async {
+  testWidgets('SizedOverflowBox alignment', (final WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,
@@ -73,7 +73,7 @@ void main() {
     );
   });
 
-  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (WidgetTester tester) async {
+  testWidgets('SizedOverflowBox alignment (direction-sensitive)', (final WidgetTester tester) async {
     final GlobalKey inner = GlobalKey();
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.rtl,

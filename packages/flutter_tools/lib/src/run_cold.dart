@@ -47,10 +47,10 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
-    String? route,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool enableDevTools = false,
+    final String? route,
   }) async {
     try {
       for (final FlutterDevice? device in flutterDevices) {
@@ -140,11 +140,11 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<int> attach({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
-    bool needsFullRestart = true,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool allowExistingDdsInstance = false,
+    final bool enableDevTools = false,
+    final bool needsFullRestart = true,
   }) async {
     _didAttach = true;
     try {
@@ -208,7 +208,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp({ required bool details }) {
+  void printHelp({ required final bool details }) {
     globals.printStatus('Flutter run key commands.');
     if (details) {
       printHelpDetails();

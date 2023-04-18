@@ -98,18 +98,18 @@ class TextButton extends ButtonStyleButton {
   ///
   /// The [icon] and [label] arguments must not be null.
   factory TextButton.icon({
-    Key? key,
-    required VoidCallback? onPressed,
-    VoidCallback? onLongPress,
-    ValueChanged<bool>? onHover,
-    ValueChanged<bool>? onFocusChange,
-    ButtonStyle? style,
-    FocusNode? focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
-    MaterialStatesController? statesController,
-    required Widget icon,
-    required Widget label,
+    final Key? key,
+    required final VoidCallback? onPressed,
+    final VoidCallback? onLongPress,
+    final ValueChanged<bool>? onHover,
+    final ValueChanged<bool>? onFocusChange,
+    final ButtonStyle? style,
+    final FocusNode? focusNode,
+    final bool? autofocus,
+    final Clip? clipBehavior,
+    final MaterialStatesController? statesController,
+    required final Widget icon,
+    required final Widget label,
   }) = _TextButtonWithIcon;
 
   /// A static convenience method that constructs a text button
@@ -147,40 +147,40 @@ class TextButton extends ButtonStyleButton {
   /// ),
   /// ```
   static ButtonStyle styleFrom({
-    Color? foregroundColor,
-    Color? backgroundColor,
-    Color? disabledForegroundColor,
-    Color? disabledBackgroundColor,
-    Color? shadowColor,
-    Color? surfaceTintColor,
-    Color? iconColor,
-    Color? disabledIconColor,
-    double? elevation,
-    TextStyle? textStyle,
-    EdgeInsetsGeometry? padding,
-    Size? minimumSize,
-    Size? fixedSize,
-    Size? maximumSize,
-    BorderSide? side,
-    OutlinedBorder? shape,
-    MouseCursor? enabledMouseCursor,
-    MouseCursor? disabledMouseCursor,
-    VisualDensity? visualDensity,
-    MaterialTapTargetSize? tapTargetSize,
-    Duration? animationDuration,
-    bool? enableFeedback,
-    AlignmentGeometry? alignment,
-    InteractiveInkFeatureFactory? splashFactory,
+    final Color? foregroundColor,
+    final Color? backgroundColor,
+    final Color? disabledForegroundColor,
+    final Color? disabledBackgroundColor,
+    final Color? shadowColor,
+    final Color? surfaceTintColor,
+    final Color? iconColor,
+    final Color? disabledIconColor,
+    final double? elevation,
+    final TextStyle? textStyle,
+    final EdgeInsetsGeometry? padding,
+    final Size? minimumSize,
+    final Size? fixedSize,
+    final Size? maximumSize,
+    final BorderSide? side,
+    final OutlinedBorder? shape,
+    final MouseCursor? enabledMouseCursor,
+    final MouseCursor? disabledMouseCursor,
+    final VisualDensity? visualDensity,
+    final MaterialTapTargetSize? tapTargetSize,
+    final Duration? animationDuration,
+    final bool? enableFeedback,
+    final AlignmentGeometry? alignment,
+    final InteractiveInkFeatureFactory? splashFactory,
     @Deprecated(
       'Use foregroundColor instead. '
       'This feature was deprecated after v3.1.0.'
     )
-    Color? primary,
+    final Color? primary,
     @Deprecated(
       'Use disabledForegroundColor instead. '
       'This feature was deprecated after v3.1.0.'
     )
-    Color? onSurface,
+    final Color? onSurface,
   }) {
     final Color? foreground = foregroundColor ?? primary;
     final Color? disabledForeground = disabledForegroundColor ?? onSurface?.withOpacity(0.38);
@@ -343,7 +343,7 @@ class TextButton extends ButtonStyleButton {
   /// [padding] is increased from 12 to 16.
   /// {@endtemplate}
   @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
+  ButtonStyle defaultStyleOf(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
 
@@ -375,12 +375,12 @@ class TextButton extends ButtonStyleButton {
   /// Returns the [TextButtonThemeData.style] of the closest
   /// [TextButtonTheme] ancestor.
   @override
-  ButtonStyle? themeStyleOf(BuildContext context) {
+  ButtonStyle? themeStyleOf(final BuildContext context) {
     return TextButtonTheme.of(context).style;
   }
 }
 
-EdgeInsetsGeometry _scaledPadding(BuildContext context) {
+EdgeInsetsGeometry _scaledPadding(final BuildContext context) {
   final bool useMaterial3 = Theme.of(context).useMaterial3;
   return ButtonStyleButton.scaledPadding(
     useMaterial3 ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) :  const EdgeInsets.all(8),
@@ -398,7 +398,7 @@ class _TextButtonDefaultColor extends MaterialStateProperty<Color?> {
   final Color? disabled;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabled;
     }
@@ -418,7 +418,7 @@ class _TextButtonDefaultOverlay extends MaterialStateProperty<Color?> {
   final Color primary;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.hovered)) {
       return primary.withOpacity(0.04);
     }
@@ -442,7 +442,7 @@ class _TextButtonDefaultIconColor extends MaterialStateProperty<Color?> {
   final Color? disabledIconColor;
 
   @override
-  Color? resolve(Set<MaterialState> states) {
+  Color? resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledIconColor;
     }
@@ -463,7 +463,7 @@ class _TextButtonDefaultMouseCursor extends MaterialStateProperty<MouseCursor> w
   final MouseCursor disabledCursor;
 
   @override
-  MouseCursor resolve(Set<MaterialState> states) {
+  MouseCursor resolve(final Set<MaterialState> states) {
     if (states.contains(MaterialState.disabled)) {
       return disabledCursor;
     }
@@ -480,11 +480,11 @@ class _TextButtonWithIcon extends TextButton {
     super.onFocusChange,
     super.style,
     super.focusNode,
-    bool? autofocus,
-    Clip? clipBehavior,
+    final bool? autofocus,
+    final Clip? clipBehavior,
     super.statesController,
-    required Widget icon,
-    required Widget label,
+    required final Widget icon,
+    required final Widget label,
   }) : super(
          autofocus: autofocus ?? false,
          clipBehavior: clipBehavior ?? Clip.none,
@@ -492,7 +492,7 @@ class _TextButtonWithIcon extends TextButton {
       );
 
   @override
-  ButtonStyle defaultStyleOf(BuildContext context) {
+  ButtonStyle defaultStyleOf(final BuildContext context) {
     final bool useMaterial3 = Theme.of(context).useMaterial3;
     final EdgeInsetsGeometry scaledPadding = ButtonStyleButton.scaledPadding(
       useMaterial3 ? const EdgeInsetsDirectional.fromSTEB(12, 8, 16, 8) : const EdgeInsets.all(8),
@@ -516,7 +516,7 @@ class _TextButtonWithIconChild extends StatelessWidget {
   final Widget icon;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final double scale = MediaQuery.textScaleFactorOf(context);
     final double gap = scale <= 1 ? 8 : lerpDouble(8, 4, math.min(scale - 1, 1))!;
     return Row(
@@ -556,7 +556,7 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get foregroundColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _colors.onSurface.withOpacity(0.38);
       }
@@ -565,7 +565,7 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return _colors.primary.withOpacity(0.08);
       }
@@ -612,7 +612,7 @@ class _TextButtonDefaultsM3 extends ButtonStyle {
 
   @override
   MaterialStateProperty<MouseCursor?>? get mouseCursor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return SystemMouseCursors.basic;
       }

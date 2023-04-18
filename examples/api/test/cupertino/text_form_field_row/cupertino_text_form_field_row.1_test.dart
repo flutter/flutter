@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/cupertino/text_form_field_row/cupertino_text
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Can enter text in CupertinoTextFormFieldRow', (WidgetTester tester) async {
+  testWidgets('Can enter text in CupertinoTextFormFieldRow', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.FormSectionApp(),
     );

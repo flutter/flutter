@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/painting/borders/border_side.stroke_align.0.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Finds the expected BorderedBox', (WidgetTester tester) async {
+  testWidgets('Finds the expected BorderedBox', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: example.StrokeAlignExample(),

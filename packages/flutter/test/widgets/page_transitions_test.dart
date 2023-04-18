@@ -11,7 +11,7 @@ class TestOverlayRoute extends OverlayRoute<void> {
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield OverlayEntry(builder: _build);
   }
-  Widget _build(BuildContext context) => const Text('Overlay');
+  Widget _build(final BuildContext context) => const Text('Overlay');
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
@@ -27,7 +27,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   bool setStateCalled = false;
 
   void showBottomSheet() {
-    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet<void>((final BuildContext context) {
       return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
@@ -38,7 +38,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       body: const Text('Sheet'),
@@ -47,12 +47,12 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 }
 
 void main() {
-  testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
+  testWidgets('Check onstage/offstage handling around transitions', (final WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => Container(key: containerKey1, child: const Text('Home')),
-      '/settings': (_) => Container(key: containerKey2, child: const Text('Settings')),
+      '/': (final _) => Container(key: containerKey1, child: const Text('Home')),
+      '/settings': (final _) => Container(key: containerKey2, child: const Text('Settings')),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -129,12 +129,12 @@ void main() {
     expect(Navigator.canPop(containerKey1.currentContext!), isFalse);
   });
 
-  testWidgets('Check back gesture disables Heroes', (WidgetTester tester) async {
+  testWidgets('Check back gesture disables Heroes', (final WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     const String kHeroTag = 'hero';
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => Scaffold(
+      '/': (final _) => Scaffold(
         key: containerKey1,
         body: const ColoredBox(
           color: Color(0xff00ffff),
@@ -144,7 +144,7 @@ void main() {
           ),
         ),
       ),
-      '/settings': (_) => Scaffold(
+      '/settings': (final _) => Scaffold(
         key: containerKey2,
         body: Container(
           padding: const EdgeInsets.all(100.0),
@@ -198,12 +198,12 @@ void main() {
     expect(settingsOffset.dy, 100.0);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets("Check back gesture doesn't start during transitions", (WidgetTester tester) async {
+  testWidgets("Check back gesture doesn't start during transitions", (final WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
-      '/settings': (_) => Scaffold(key: containerKey2, body: const Text('Settings')),
+      '/': (final _) => Scaffold(key: containerKey1, body: const Text('Home')),
+      '/settings': (final _) => Scaffold(key: containerKey2, body: const Text('Settings')),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -242,12 +242,12 @@ void main() {
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
-  testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
+  testWidgets('Check back gesture with a persistent bottom sheet showing', (final WidgetTester tester) async {
     final GlobalKey containerKey1 = GlobalKey();
     final GlobalKey containerKey2 = GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => Scaffold(key: containerKey1, body: const Text('Home')),
-      '/sheet': (_) => PersistentBottomSheetTest(key: containerKey2),
+      '/': (final _) => Scaffold(key: containerKey1, body: const Text('Home')),
+      '/sheet': (final _) => PersistentBottomSheetTest(key: containerKey2),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
@@ -295,17 +295,17 @@ void main() {
     expect(sheet.setStateCalled, isFalse);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
-  testWidgets('Test completed future', (WidgetTester tester) async {
+  testWidgets('Test completed future', (final WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => const Center(child: Text('home')),
-      '/next': (_) => const Center(child: Text('next')),
+      '/': (final _) => const Center(child: Text('home')),
+      '/next': (final _) => const Center(child: Text('next')),
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));
 
     final PageRoute<void> route = MaterialPageRoute<void>(
       settings: const RouteSettings(name: '/page'),
-      builder: (BuildContext context) => const Center(child: Text('page')),
+      builder: (final BuildContext context) => const Center(child: Text('page')),
     );
 
     int popCount = 0;

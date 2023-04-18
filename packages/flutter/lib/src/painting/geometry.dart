@@ -38,12 +38,12 @@ import 'basic_types.dart';
 ///
 /// The arguments must not be null.
 Offset positionDependentBox({
-  required Size size,
-  required Size childSize,
-  required Offset target,
-  required bool preferBelow,
-  double verticalOffset = 0.0,
-  double margin = 10.0,
+  required final Size size,
+  required final Size childSize,
+  required final Offset target,
+  required final bool preferBelow,
+  final double verticalOffset = 0.0,
+  final double margin = 10.0,
 }) {
   // VERTICAL DIRECTION
   final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - margin;

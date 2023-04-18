@@ -25,10 +25,10 @@ class TextSelectionToolbarAnchors {
 
   /// Creates an instance of [TextSelectionToolbarAnchors] for some selection.
   factory TextSelectionToolbarAnchors.fromSelection({
-    required RenderBox renderBox,
-    required double startGlyphHeight,
-    required double endGlyphHeight,
-    required List<TextSelectionPoint> selectionEndpoints,
+    required final RenderBox renderBox,
+    required final double startGlyphHeight,
+    required final double endGlyphHeight,
+    required final List<TextSelectionPoint> selectionEndpoints,
   }) {
     final Rect editingRegion = Rect.fromPoints(
       renderBox.localToGlobal(Offset.zero),

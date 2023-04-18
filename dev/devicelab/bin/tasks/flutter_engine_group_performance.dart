@@ -16,7 +16,7 @@ const String _activityName = 'MainActivity';
 const int _numberOfIterations = 10;
 
 Future<void> _withApkInstall(
-    String apkPath, String bundleName, Function(AndroidDevice) body) async {
+    final String apkPath, final String bundleName, final Function(AndroidDevice) body) async {
   final DeviceDiscovery devices = DeviceDiscovery();
   final AndroidDevice device = await devices.workingDevice as AndroidDevice;
   await device.unlock();
@@ -30,7 +30,7 @@ Future<void> _withApkInstall(
 
 /// Since we don't check the gradle wrapper in with the android host project we
 /// yank the gradle wrapper from the module (which is added by the Flutter tool).
-void _copyGradleFromModule(String source, String destination) {
+void _copyGradleFromModule(final String source, final String destination) {
   print('copying gradle from module $source to $destination');
   final String wrapperPath = path.join(source, '.android', 'gradlew');
   final String windowsWrapperPath = path.join(source, '.android', 'gradlew.bat');
@@ -71,7 +71,7 @@ Future<TaskResult> _doTest() async {
         'build', 'outputs', 'apk', 'release', 'app-release.apk');
 
     TaskResult? result;
-    await _withApkInstall(apkPath, _bundleName, (AndroidDevice device) async {
+    await _withApkInstall(apkPath, _bundleName, (final AndroidDevice device) async {
       final List<int> totalMemorySamples = <int>[];
       for (int i = 0; i < _numberOfIterations; ++i) {
         await device.adb(<String>[

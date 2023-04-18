@@ -110,12 +110,12 @@ void main() {
     testTimeRecorder.print();
 
     // Expect one message for each phase.
-    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    final List<String> logPhaseMessages = logger.messages.where((final String m) => m.startsWith('Runtime for phase ')).toList();
     expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
 
     // As the compile method adds a job to a queue etc we expect at
     // least one phase to take a non-zero amount of time.
-    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((final String m) => !m.contains(Duration.zero.toString())).toList();
     expect(logPhaseMessagesNonZero, isNotEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fileSystem,
@@ -225,15 +225,15 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
   @override
   Future<CompilerOutput?> recompile(
-    Uri mainUri,
-    List<Uri>? invalidatedFiles, {
-    String? outputPath,
-    PackageConfig? packageConfig,
-    String? projectRootPath,
-    FileSystem? fs,
-    bool suppressErrors = false,
-    bool checkDartPluginRegistry = false,
-    File? dartPluginRegistrant,
+    final Uri mainUri,
+    final List<Uri>? invalidatedFiles, {
+    final String? outputPath,
+    final PackageConfig? packageConfig,
+    final String? projectRootPath,
+    final FileSystem? fs,
+    final bool suppressErrors = false,
+    final bool checkDartPluginRegistry = false,
+    final File? dartPluginRegistrant,
   }) async {
     if (compilerOutput != null) {
       fileSystem!.file(compilerOutput!.outputFilename).createSync(recursive: true);

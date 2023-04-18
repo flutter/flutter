@@ -12,7 +12,7 @@ class ListViewExampleApp extends StatelessWidget {
   const ListViewExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: ListTileSelectExample(),
     );
@@ -40,7 +40,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
   }
 
   void initializeSelection() {
-    _selected = List<bool>.generate(listLength, (_) => false);
+    _selected = List<bool>.generate(listLength, (final _) => false);
   }
 
   @override
@@ -50,7 +50,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           title: const Text(
@@ -100,7 +100,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
                   onPressed: () {
                     _selectAll = !_selectAll;
                     setState(() {
-                      _selected = List<bool>.generate(listLength, (_) => _selectAll);
+                      _selected = List<bool>.generate(listLength, (final _) => _selectAll);
                     });
                   }),
           ],
@@ -109,7 +109,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
             ? GridBuilder(
                 isSelectionMode: isSelectionMode,
                 selectedList: _selected,
-                onSelectionChange: (bool x) {
+                onSelectionChange: (final bool x) {
                   setState(() {
                     isSelectionMode = x;
                   });
@@ -118,7 +118,7 @@ class ListTileSelectExampleState extends State<ListTileSelectExample> {
             : ListBuilder(
                 isSelectionMode: isSelectionMode,
                 selectedList: _selected,
-                onSelectionChange: (bool x) {
+                onSelectionChange: (final bool x) {
                   setState(() {
                     isSelectionMode = x;
                   });
@@ -144,7 +144,7 @@ class GridBuilder extends StatefulWidget {
 }
 
 class GridBuilderState extends State<GridBuilder> {
-  void _toggle(int index) {
+  void _toggle(final int index) {
     if (widget.isSelectionMode) {
       setState(() {
         widget.selectedList[index] = !widget.selectedList[index];
@@ -153,11 +153,11 @@ class GridBuilderState extends State<GridBuilder> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return GridView.builder(
         itemCount: widget.selectedList.length,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-        itemBuilder: (_, int index) {
+        itemBuilder: (final _, final int index) {
           return InkWell(
             onTap: () => _toggle(index),
             onLongPress: () {
@@ -171,7 +171,7 @@ class GridBuilderState extends State<GridBuilder> {
             child: GridTile(
                 child: Container(
               child: widget.isSelectionMode
-                  ? Checkbox(onChanged: (bool? x) => _toggle(index), value: widget.selectedList[index])
+                  ? Checkbox(onChanged: (final bool? x) => _toggle(index), value: widget.selectedList[index])
                   : const Icon(Icons.image),
             )),
           );
@@ -196,7 +196,7 @@ class ListBuilder extends StatefulWidget {
 }
 
 class _ListBuilderState extends State<ListBuilder> {
-  void _toggle(int index) {
+  void _toggle(final int index) {
     if (widget.isSelectionMode) {
       setState(() {
         widget.selectedList[index] = !widget.selectedList[index];
@@ -205,10 +205,10 @@ class _ListBuilderState extends State<ListBuilder> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
         itemCount: widget.selectedList.length,
-        itemBuilder: (_, int index) {
+        itemBuilder: (final _, final int index) {
           return ListTile(
               onTap: () => _toggle(index),
               onLongPress: () {
@@ -222,7 +222,7 @@ class _ListBuilderState extends State<ListBuilder> {
               trailing: widget.isSelectionMode
                   ? Checkbox(
                       value: widget.selectedList[index],
-                      onChanged: (bool? x) => _toggle(index),
+                      onChanged: (final bool? x) => _toggle(index),
                     )
                   : const SizedBox.shrink(),
               title: Text('item $index'));

@@ -14,7 +14,7 @@ class TextInputControlExampleApp extends StatelessWidget {
   const TextInputControlExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: TextInputControlExample(),
     );
@@ -40,7 +40,7 @@ class MyStatefulWidgetState extends State<TextInputControlExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: TextField(
@@ -86,15 +86,15 @@ class MyVirtualKeyboardState extends State<MyVirtualKeyboard> {
     _inputControl.unregister();
   }
 
-  void _handleKeyPress(String key) {
+  void _handleKeyPress(final String key) {
     _inputControl.processUserInput(key);
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: _inputControl.visible,
-      builder: (_, bool visible, __) {
+      builder: (final _, final bool visible, final __) {
         return Visibility(
           visible: visible,
           child: FocusScope(
@@ -138,13 +138,13 @@ class MyTextInputControl with TextInputControl {
   void hide() => _visible.value = false;
 
   @override
-  void setEditingState(TextEditingValue value) => _editingState = value;
+  void setEditingState(final TextEditingValue value) => _editingState = value;
 
   /// Process user input.
   ///
   /// Updates the internal editing state by inserting the input text,
   /// and by replacing the current selection if any.
-  void processUserInput(String input) {
+  void processUserInput(final String input) {
     _editingState = _editingState.copyWith(
       text: _insertText(input),
       selection: _replaceSelection(input),
@@ -154,13 +154,13 @@ class MyTextInputControl with TextInputControl {
     TextInput.updateEditingValue(_editingState);
   }
 
-  String _insertText(String input) {
+  String _insertText(final String input) {
     final String text = _editingState.text;
     final TextSelection selection = _editingState.selection;
     return text.replaceRange(selection.start, selection.end, input);
   }
 
-  TextSelection _replaceSelection(String input) {
+  TextSelection _replaceSelection(final String input) {
     final TextSelection selection = _editingState.selection;
     return TextSelection.collapsed(offset: selection.start + input.length);
   }

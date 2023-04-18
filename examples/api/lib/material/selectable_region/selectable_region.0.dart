@@ -13,7 +13,7 @@ class SelectableRegionExampleApp extends StatelessWidget {
   const SelectableRegionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: SelectionArea(
         child: Scaffold(
@@ -40,7 +40,7 @@ class MySelectableAdapter extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
     if (registrar == null) {
       return child;
@@ -58,13 +58,13 @@ class MySelectableAdapter extends StatelessWidget {
 class _SelectableAdapter extends SingleChildRenderObjectWidget {
   const _SelectableAdapter({
     required this.registrar,
-    required Widget child,
+    required final Widget child,
   }) : super(child: child);
 
   final SelectionRegistrar registrar;
 
   @override
-  _RenderSelectableAdapter createRenderObject(BuildContext context) {
+  _RenderSelectableAdapter createRenderObject(final BuildContext context) {
     return _RenderSelectableAdapter(
       DefaultSelectionStyle.of(context).selectionColor!,
       registrar,
@@ -72,7 +72,7 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderSelectableAdapter renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderSelectableAdapter renderObject) {
     renderObject
       ..selectionColor = DefaultSelectionStyle.of(context).selectionColor!
       ..registrar = registrar;
@@ -81,8 +81,8 @@ class _SelectableAdapter extends SingleChildRenderObjectWidget {
 
 class _RenderSelectableAdapter extends RenderProxyBox with Selectable, SelectionRegistrant {
   _RenderSelectableAdapter(
-    Color selectionColor,
-    SelectionRegistrar registrar,
+    final Color selectionColor,
+    final SelectionRegistrar registrar,
   )   : _selectionColor = selectionColor,
         _geometry = ValueNotifier<SelectionGeometry>(_noSelection) {
     this.registrar = registrar;
@@ -94,7 +94,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
 
   Color get selectionColor => _selectionColor;
   late Color _selectionColor;
-  set selectionColor(Color value) {
+  set selectionColor(final Color value) {
     if (_selectionColor == value) {
       return;
     }
@@ -105,10 +105,10 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   // ValueListenable APIs
 
   @override
-  void addListener(VoidCallback listener) => _geometry.addListener(listener);
+  void addListener(final VoidCallback listener) => _geometry.addListener(listener);
 
   @override
-  void removeListener(VoidCallback listener) => _geometry.removeListener(listener);
+  void removeListener(final VoidCallback listener) => _geometry.removeListener(listener);
 
   @override
   SelectionGeometry get value => _geometry.value;
@@ -162,7 +162,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   }
 
   @override
-  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+  SelectionResult dispatchSelectionEvent(final SelectionEvent event) {
     SelectionResult result = SelectionResult.none;
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
@@ -270,7 +270,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   LayerLink? _endHandle;
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
+  void pushHandleLayers(final LayerLink? startHandle, final LayerLink? endHandle) {
     if (_startHandle == startHandle && _endHandle == endHandle) {
       return;
     }
@@ -280,7 +280,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     super.paint(context, offset);
     if (!_geometry.value.hasSelection) {
       return;
@@ -298,7 +298,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           link: _startHandle!,
           offset: offset + value.startSelectionPoint!.localPosition,
         ),
-        (PaintingContext context, Offset offset) {},
+        (final PaintingContext context, final Offset offset) {},
         Offset.zero,
       );
     }
@@ -308,7 +308,7 @@ class _RenderSelectableAdapter extends RenderProxyBox with Selectable, Selection
           link: _endHandle!,
           offset: offset + value.endSelectionPoint!.localPosition,
         ),
-        (PaintingContext context, Offset offset) {},
+        (final PaintingContext context, final Offset offset) {},
         Offset.zero,
       );
     }

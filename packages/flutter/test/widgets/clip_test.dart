@@ -19,13 +19,13 @@ final List<String> log = <String>[];
 
 class PathClipper extends CustomClipper<Path> {
   @override
-  Path getClip(Size size) {
+  Path getClip(final Size size) {
     log.add('getClip');
     return Path()
       ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
   @override
-  bool shouldReclip(PathClipper oldClipper) => false;
+  bool shouldReclip(final PathClipper oldClipper) => false;
 }
 
 class ValueClipper<T> extends CustomClipper<T> {
@@ -35,13 +35,13 @@ class ValueClipper<T> extends CustomClipper<T> {
   final T value;
 
   @override
-  T getClip(Size size) {
+  T getClip(final Size size) {
     log.add(message);
     return value;
   }
 
   @override
-  bool shouldReclip(ValueClipper<T> oldClipper) {
+  bool shouldReclip(final ValueClipper<T> oldClipper) {
     return oldClipper.message != message || oldClipper.value != value;
   }
 }
@@ -52,14 +52,14 @@ class NotifyClipper<T> extends CustomClipper<T> {
   final ValueNotifier<T> clip;
 
   @override
-  T getClip(Size size) => clip.value;
+  T getClip(final Size size) => clip.value;
 
   @override
-  bool shouldReclip(NotifyClipper<T> oldClipper) => clip != oldClipper.clip;
+  bool shouldReclip(final NotifyClipper<T> oldClipper) => clip != oldClipper.clip;
 }
 
 void main() {
-  testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
+  testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (final WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
         child: ClipRect(
@@ -78,7 +78,7 @@ void main() {
     expect(find.byType(FittedBox), findsOneWidget);
   });
 
-  testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipRect updates clipBehavior in updateRenderObject', (final WidgetTester tester) async {
     await tester.pumpWidget(const ClipRect());
 
     final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
@@ -100,7 +100,7 @@ void main() {
     expect(clipRRect.borderRadius, equals(BorderRadius.zero));
   });
 
-  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (final WidgetTester tester) async {
     await tester.pumpWidget(const ClipRRect());
 
     final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
@@ -116,7 +116,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (final WidgetTester tester) async {
     await tester.pumpWidget(const ClipOval());
 
     final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
@@ -132,7 +132,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (final WidgetTester tester) async {
     await tester.pumpWidget(const ClipPath());
 
     final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
@@ -148,7 +148,7 @@ void main() {
     expect(renderClip.clipBehavior, equals(Clip.none));
   });
 
-  testWidgets('ClipPath', (WidgetTester tester) async {
+  testWidgets('ClipPath', (final WidgetTester tester) async {
     await tester.pumpWidget(
       ClipPath(
         clipper: PathClipper(),
@@ -169,7 +169,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ClipOval', (WidgetTester tester) async {
+  testWidgets('ClipOval', (final WidgetTester tester) async {
     await tester.pumpWidget(
       ClipOval(
         child: GestureDetector(
@@ -189,7 +189,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('Transparent ClipOval hit test', (WidgetTester tester) async {
+  testWidgets('Transparent ClipOval hit test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Opacity(
         opacity: 0.0,
@@ -212,7 +212,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('ClipRect', (WidgetTester tester) async {
+  testWidgets('ClipRect', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Align(
         alignment: Alignment.topLeft,
@@ -335,7 +335,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('debugPaintSizeEnabled', (WidgetTester tester) async {
+  testWidgets('debugPaintSizeEnabled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const ClipRect(
         child: Placeholder(),
@@ -357,7 +357,7 @@ void main() {
     debugPaintSizeEnabled = false;
   });
 
-  testWidgets('ClipRect painting', (WidgetTester tester) async {
+  testWidgets('ClipRect painting', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -400,7 +400,7 @@ void main() {
     );
   });
 
-  testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
+  testWidgets('ClipRect save, overlay, and antialiasing', (final WidgetTester tester) async {
     await tester.pumpWidget(
       RepaintBoundary(
         child: Stack(
@@ -439,7 +439,7 @@ void main() {
     );
   });
 
-  testWidgets('ClipRRect painting', (WidgetTester tester) async {
+  testWidgets('ClipRRect painting', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -488,7 +488,7 @@ void main() {
     );
   });
 
-  testWidgets('ClipOval painting', (WidgetTester tester) async {
+  testWidgets('ClipOval painting', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -531,7 +531,7 @@ void main() {
     );
   });
 
-  testWidgets('ClipPath painting', (WidgetTester tester) async {
+  testWidgets('ClipPath painting', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -579,7 +579,7 @@ void main() {
     );
   });
 
-  Center genPhysicalModel(Clip clipBehavior) {
+  Center genPhysicalModel(final Clip clipBehavior) {
     return Center(
       child: RepaintBoundary(
         child: ColoredBox(
@@ -616,7 +616,7 @@ void main() {
     );
   }
 
-  testWidgets('PhysicalModel painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.antiAlias', (final WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -624,7 +624,7 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.hardEdge', (final WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -634,7 +634,7 @@ void main() {
 
   // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
   // round corners.
-  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgets('PhysicalModel painting with Clip.antiAliasWithSaveLayer', (final WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -642,7 +642,7 @@ void main() {
     );
   });
 
-  testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
+  testWidgets('Default PhysicalModel painting', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -684,7 +684,7 @@ void main() {
     );
   });
 
-  Center genPhysicalShape(Clip clipBehavior) {
+  Center genPhysicalShape(final Clip clipBehavior) {
     return Center(
       child: RepaintBoundary(
         child: ColoredBox(
@@ -725,7 +725,7 @@ void main() {
     );
   }
 
-  testWidgets('PhysicalShape painting with Clip.antiAlias', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.antiAlias', (final WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -733,7 +733,7 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.hardEdge', (final WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -741,7 +741,7 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (final WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
@@ -749,7 +749,7 @@ void main() {
     );
   });
 
-  testWidgets('PhysicalShape painting', (WidgetTester tester) async {
+  testWidgets('PhysicalShape painting', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -795,9 +795,9 @@ void main() {
     );
   });
 
-  testWidgets('ClipPath.shape', (WidgetTester tester) async {
+  testWidgets('ClipPath.shape', (final WidgetTester tester) async {
     final List<String> logs = <String>[];
-    final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+    final ShapeBorder shape = TestBorder((final String message) { logs.add(message); });
     Widget buildClipPath() {
       return ClipPath.shape(
         shape: shape,
@@ -852,7 +852,7 @@ void main() {
     ]);
   });
 
-  testWidgets('CustomClipper reclips when notified', (WidgetTester tester) async {
+  testWidgets('CustomClipper reclips when notified', (final WidgetTester tester) async {
     final ValueNotifier<Rect> clip = ValueNotifier<Rect>(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
 
     await tester.pumpWidget(
@@ -885,11 +885,11 @@ void main() {
     );
   });
 
-  testWidgets('ClipRRect supports BorderRadiusDirectional', (WidgetTester tester) async {
+  testWidgets('ClipRRect supports BorderRadiusDirectional', (final WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
 
-    Widget buildClipRRect(TextDirection textDirection) {
+    Widget buildClipRRect(final TextDirection textDirection) {
       return Directionality(
         textDirection: textDirection,
         child: const ClipRRect(
@@ -912,12 +912,12 @@ void main() {
     }
   });
 
-  testWidgets('ClipRRect is direction-aware', (WidgetTester tester) async {
+  testWidgets('ClipRRect is direction-aware', (final WidgetTester tester) async {
     const Radius startRadius = Radius.circular(15.0);
     const Radius endRadius = Radius.circular(30.0);
     TextDirection textDirection = TextDirection.ltr;
 
-    Widget buildClipRRect(TextDirection textDirection) {
+    Widget buildClipRRect(final TextDirection textDirection) {
       return Directionality(
         textDirection: textDirection,
         child: const ClipRRect(
@@ -931,7 +931,7 @@ void main() {
 
     Widget buildStatefulClipRRect() {
       return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
+        builder: (final BuildContext context, final StateSetter setState) {
           return Directionality(
             textDirection: textDirection,
             child: SizedBox(

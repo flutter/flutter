@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/activity_indicator/cupertino_activ
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Default and customized cupertino activity indicators', (WidgetTester tester) async {
+  testWidgets('Default and customized cupertino activity indicators', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoIndicatorApp(),
     );

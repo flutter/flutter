@@ -23,15 +23,15 @@ class Home extends StatelessWidget {
   const Home({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: ListView(
-         children: _allPages.map((PageWidget p) => _buildPageListTile(context, p)).toList(),
+         children: _allPages.map((final PageWidget p) => _buildPageListTile(context, p)).toList(),
       ),
     );
   }
 
-  Widget _buildPageListTile(BuildContext context, PageWidget page) {
+  Widget _buildPageListTile(final BuildContext context, final PageWidget page) {
     return ListTile(
       title: Text(page.title),
       key: page.tileKey,
@@ -39,9 +39,9 @@ class Home extends StatelessWidget {
     );
   }
 
-  void _pushPage(BuildContext context, PageWidget page) {
+  void _pushPage(final BuildContext context, final PageWidget page) {
     Navigator.of(context).push(MaterialPageRoute<void>(
-        builder: (_) => Scaffold(
+        builder: (final _) => Scaffold(
               body: page,
             )));
   }

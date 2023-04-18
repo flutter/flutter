@@ -18,11 +18,11 @@ import 'viewport_offset.dart';
 // Trims the specified edges of the given `Rect` [original], so that they do not
 // exceed the given values.
 Rect? _trim(
-  Rect? original, {
-  double top = -double.infinity,
-  double right = double.infinity,
-  double bottom = double.infinity,
-  double left = -double.infinity,
+  final Rect? original, {
+  final double top = -double.infinity,
+  final double right = double.infinity,
+  final double bottom = double.infinity,
+  final double left = -double.infinity,
 }) => original?.intersect(Rect.fromLTRB(left, top, right, bottom));
 
 /// Specifies how a stretched header is to trigger an [AsyncCallback].
@@ -123,7 +123,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   /// This is an abstract class; this constructor only initializes the [child].
   RenderSliverPersistentHeader({
-    RenderBox? child,
+    final RenderBox? child,
     this.stretchConfiguration,
   }) {
     this.child = child;
@@ -196,7 +196,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   /// Any time this method would mutate the child, call [markNeedsLayout].
   @protected
-  void updateChild(double shrinkOffset, bool overlapsContent) { }
+  void updateChild(final double shrinkOffset, final bool overlapsContent) { }
 
   @override
   void markNeedsLayout() {
@@ -215,10 +215,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   /// The `overlapsContent` argument is passed to [updateChild].
   @protected
-  void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent = false }) {
+  void layoutChild(final double scrollOffset, final double maxExtent, { final bool overlapsContent = false }) {
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
     if (_needsUpdateChild || _lastShrinkOffset != shrinkOffset || _lastOverlapsContent != overlapsContent) {
-      invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
+      invokeLayoutCallback<SliverConstraints>((final SliverConstraints constraints) {
         assert(constraints == this.constraints);
         updateChild(shrinkOffset, overlapsContent);
       });
@@ -278,10 +278,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   /// If there is no child, this should return 0.0.
   @override
-  double childMainAxisPosition(covariant RenderObject child) => super.childMainAxisPosition(child);
+  double childMainAxisPosition(covariant final RenderObject child) => super.childMainAxisPosition(child);
 
   @override
-  bool hitTestChildren(SliverHitTestResult result, { required double mainAxisPosition, required double crossAxisPosition }) {
+  bool hitTestChildren(final SliverHitTestResult result, { required final double mainAxisPosition, required final double crossAxisPosition }) {
     assert(geometry!.hitTestExtent > 0.0);
     if (child != null) {
       return hitTestBoxChild(BoxHitTestResult.wrap(result), child!, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
@@ -290,13 +290,13 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   }
 
   @override
-  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+  void applyPaintTransform(final RenderObject child, final Matrix4 transform) {
     assert(child == this.child);
     applyPaintTransformForBoxChild(child as RenderBox, transform);
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, Offset offset) {
     if (child != null && geometry!.visible) {
       switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
         case AxisDirection.up:
@@ -313,13 +313,13 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   }
 
   @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  void describeSemanticsConfiguration(final SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     config.addTagForChildren(RenderViewport.excludeFromScrolling);
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty.lazy('maxExtent', () => maxExtent));
     properties.add(DoubleProperty.lazy('child position', () => childMainAxisPosition(child!)));
@@ -382,7 +382,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) {
+  double childMainAxisPosition(final RenderBox child) {
     assert(child == this.child);
     assert(_childPosition != null);
     return _childPosition!;
@@ -433,14 +433,14 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) => 0.0;
+  double childMainAxisPosition(final RenderBox child) => 0.0;
 
   @override
   void showOnScreen({
-    RenderObject? descendant,
-    Rect? rect,
-    Duration duration = Duration.zero,
-    Curve curve = Curves.ease,
+    final RenderObject? descendant,
+    final Rect? rect,
+    final Duration duration = Duration.zero,
+    final Curve curve = Curves.ease,
   }) {
     final Rect? localBounds = descendant != null
       ? MatrixUtils.transformRect(descendant.getTransformTo(this), rect ?? descendant.paintBounds)
@@ -506,7 +506,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// direction.
   RenderSliverFloatingPersistentHeader({
     super.child,
-    TickerProvider? vsync,
+    final TickerProvider? vsync,
     this.snapConfiguration,
     super.stretchConfiguration,
     required this.showOnScreenConfiguration,
@@ -536,7 +536,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   /// A [TickerProvider] to use when animating the scroll position.
   TickerProvider? get vsync => _vsync;
   TickerProvider? _vsync;
-  set vsync(TickerProvider? value) {
+  set vsync(final TickerProvider? value) {
     if (value == _vsync) {
       return;
     }
@@ -592,7 +592,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     return stretchOffset > 0 ? 0.0 : math.min(0.0, paintExtent - childExtent);
   }
 
-  void _updateAnimation(Duration duration, double endValue, Curve curve) {
+  void _updateAnimation(final Duration duration, final double endValue, final Curve curve) {
     assert(
       vsync != null,
       'vsync must not be null if the floating header changes size animatedly.',
@@ -618,12 +618,12 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   /// Update the last known ScrollDirection when scrolling began.
   // ignore: use_setters_to_change_properties, (API predates enforcing the lint)
-  void updateScrollStartDirection(ScrollDirection direction) {
+  void updateScrollStartDirection(final ScrollDirection direction) {
     _lastStartedScrollDirection = direction;
   }
 
   /// If the header isn't already fully exposed, then scroll it into view.
-  void maybeStartSnapAnimation(ScrollDirection direction) {
+  void maybeStartSnapAnimation(final ScrollDirection direction) {
     final FloatingHeaderSnapConfiguration? snap = snapConfiguration;
     if (snap == null) {
       return;
@@ -645,7 +645,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   /// If a header snap animation or a [showOnScreen] expand animation is underway
   /// then stop it.
-  void maybeStopSnapAnimation(ScrollDirection direction) {
+  void maybeStopSnapAnimation(final ScrollDirection direction) {
     _controller?.stop();
   }
 
@@ -688,10 +688,10 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 
   @override
   void showOnScreen({
-    RenderObject? descendant,
-    Rect? rect,
-    Duration duration = Duration.zero,
-    Curve curve = Curves.ease,
+    final RenderObject? descendant,
+    final Rect? rect,
+    final Duration duration = Duration.zero,
+    final Curve curve = Curves.ease,
   }) {
     final PersistentHeaderShowOnScreenConfiguration? showOnScreen = showOnScreenConfiguration;
     if (showOnScreen == null) {
@@ -760,13 +760,13 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) {
+  double childMainAxisPosition(final RenderBox child) {
     assert(child == this.child);
     return _childPosition ?? 0.0;
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('effective scroll offset', _effectiveScrollOffset));
   }

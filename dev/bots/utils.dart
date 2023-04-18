@@ -53,7 +53,7 @@ String get clock {
          '▐$reset';
 }
 
-String prettyPrintDuration(Duration duration) {
+String prettyPrintDuration(final Duration duration) {
   String result = '';
   final int minutes = duration.inMinutes;
   if (minutes > 0) {
@@ -90,13 +90,13 @@ List<List<String>> _errorMessages = <List<String>>[];
 final List<String> _pendingLogs = <String>[];
 Timer? _hideTimer; // When this is null, the output is verbose.
 
-void foundError(List<String> messages) {
+void foundError(final List<String> messages) {
   assert(messages.isNotEmpty);
   // Make the error message easy to notice in the logs by
   // wrapping it in a red box.
   final int width = math.max(15, (hasColor ? stdout.terminalColumns : 80) - 1);
   print('$red╔═╡${bold}ERROR$reset$red╞═${"═" * (width - 9)}');
-  for (final String message in messages.expand((String line) => line.split('\n'))) {
+  for (final String message in messages.expand((final String line) => line.split('\n'))) {
     print('$red║$reset $message');
   }
   print('$red╚${"═" * width}');
@@ -122,20 +122,20 @@ void resetErrorStatus() {
   _hideTimer = null;
 }
 
-Never reportSuccessAndExit(String message) {
+Never reportSuccessAndExit(final String message) {
   _hideTimer?.cancel();
   _hideTimer = null;
   print('$clock $message$reset');
   system.exit(0);
 }
 
-Never reportErrorsAndExit(String message) {
+Never reportErrorsAndExit(final String message) {
   _hideTimer?.cancel();
   _hideTimer = null;
   print('$clock $message$reset');
   print(redLine);
   print('${red}For your convenience, the error messages reported above are repeated here:$reset');
-  final bool printSeparators = _errorMessages.any((List<String> messages) => messages.length > 1);
+  final bool printSeparators = _errorMessages.any((final List<String> messages) => messages.length > 1);
   if (printSeparators) {
     print('  🙙  🙛  ');
   }
@@ -150,7 +150,7 @@ Never reportErrorsAndExit(String message) {
   system.exit(1);
 }
 
-void printProgress(String message) {
+void printProgress(final String message) {
   _pendingLogs.clear();
   _hideTimer?.cancel();
   _hideTimer = null;
@@ -171,7 +171,7 @@ void printProgress(String message) {
 
 final Pattern _lineBreak = RegExp(r'[\r\n]');
 
-void _printQuietly(Object? message) {
+void _printQuietly(final Object? message) {
   // The point of this function is to avoid printing its output unless the timer
   // has gone off in which case the function assumes verbose mode is active and
   // prints everything. To show that progress is still happening though, rather
@@ -217,7 +217,7 @@ void _printQuietly(Object? message) {
   }
 }
 
-void _printLoudly(String message) {
+void _printLoudly(final String message) {
   if (hasColor) {
     // Overwrite the last line written by _printQuietly.
     stdout.writeln('\r\x1B[2K$reset${message.trimRight()}');
@@ -243,7 +243,7 @@ Future<int> findAvailablePortAndPossiblyCauseFlakyTests() async {
   return _portCounter++;
 }
 
-Future<bool> _isPortAvailable(int port) async {
+Future<bool> _isPortAvailable(final int port) async {
   try {
     final RawSocket socket = await RawSocket.connect('localhost', port);
     socket.shutdown(SocketDirection.both);

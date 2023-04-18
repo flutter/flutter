@@ -43,7 +43,7 @@ class UnderlineTabIndicator extends Decoration {
   final EdgeInsetsGeometry insets;
 
   @override
-  Decoration? lerpFrom(Decoration? a, double t) {
+  Decoration? lerpFrom(final Decoration? a, final double t) {
     if (a is UnderlineTabIndicator) {
       return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
@@ -54,7 +54,7 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  Decoration? lerpTo(Decoration? b, double t) {
+  Decoration? lerpTo(final Decoration? b, final double t) {
     if (b is UnderlineTabIndicator) {
       return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
@@ -65,11 +65,11 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([ final VoidCallback? onChanged ]) {
     return _UnderlinePainter(this, borderRadius, onChanged);
   }
 
-  Rect _indicatorRectFor(Rect rect, TextDirection textDirection) {
+  Rect _indicatorRectFor(final Rect rect, final TextDirection textDirection) {
     final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
     return Rect.fromLTWH(
       indicator.left,
@@ -80,7 +80,7 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  Path getClipPath(Rect rect, TextDirection textDirection) {
+  Path getClipPath(final Rect rect, final TextDirection textDirection) {
     if (borderRadius != null) {
       return Path()..addRRect(
         borderRadius!.toRRect(_indicatorRectFor(rect, textDirection))
@@ -101,7 +101,7 @@ class _UnderlinePainter extends BoxPainter {
   final BorderRadius? borderRadius;
 
   @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+  void paint(final Canvas canvas, final Offset offset, final ImageConfiguration configuration) {
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection textDirection = configuration.textDirection!;

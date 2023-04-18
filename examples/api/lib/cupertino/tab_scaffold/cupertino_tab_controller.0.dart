@@ -12,7 +12,7 @@ class TabControllerApp extends StatelessWidget {
   const TabControllerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: TabControllerExample(),
@@ -37,7 +37,7 @@ class _TabControllerExampleState extends State<TabControllerExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoTabScaffold(
       controller: controller,
       tabBar: CupertinoTabBar(
@@ -52,7 +52,7 @@ class _TabControllerExampleState extends State<TabControllerExample> {
           ),
         ],
       ),
-      tabBuilder: (BuildContext context, int index) {
+      tabBuilder: (final BuildContext context, final int index) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

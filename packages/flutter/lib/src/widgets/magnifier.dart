@@ -69,7 +69,7 @@ class MagnifierInfo {
   final Rect fieldBounds;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -106,7 +106,7 @@ class TextMagnifierConfiguration {
   /// If [magnifierBuilder] is null, a default [MagnifierBuilder] will be used
   /// that never builds a magnifier.
   const TextMagnifierConfiguration({
-    MagnifierBuilder? magnifierBuilder,
+    final MagnifierBuilder? magnifierBuilder,
     this.shouldDisplayHandlesInMagnifier = true
   }) : _magnifierBuilder = magnifierBuilder;
 
@@ -119,7 +119,7 @@ class TextMagnifierConfiguration {
   final MagnifierBuilder? _magnifierBuilder;
 
   /// {@macro flutter.widgets.magnifier.MagnifierBuilder}
-  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (_, __, ___) => null;
+  MagnifierBuilder get magnifierBuilder => _magnifierBuilder ?? (final _, final __, final ___) => null;
 
   /// Determines whether a magnifier should show the text editing handles or not.
   final bool shouldDisplayHandlesInMagnifier;
@@ -237,10 +237,10 @@ class MagnifierController {
   /// override the old overlay and not play an exit animation. Consider awaiting [hide]
   /// first, to guarantee
   Future<void> show({
-    required BuildContext context,
-    required WidgetBuilder builder,
-    Widget? debugRequiredFor,
-    OverlayEntry? below,
+    required final BuildContext context,
+    required final WidgetBuilder builder,
+    final Widget? debugRequiredFor,
+    final OverlayEntry? below,
   }) async {
     if (overlayEntry != null) {
         overlayEntry!.remove();
@@ -258,7 +258,7 @@ class MagnifierController {
     );
 
    _overlayEntry = OverlayEntry(
-      builder: (BuildContext context) => capturedThemes.wrap(builder(context)),
+      builder: (final BuildContext context) => capturedThemes.wrap(builder(context)),
     );
     overlayState.insert(overlayEntry!, below: below);
 
@@ -281,7 +281,7 @@ class MagnifierController {
   ///
   ///  * [removeFromOverlay] which removes the [OverlayEntry] from the [Overlay]
   ///    synchronously.
-  Future<void> hide({bool removeFromOverlay = true}) async {
+  Future<void> hide({final bool removeFromOverlay = true}) async {
     if (overlayEntry == null) {
       return;
     }
@@ -328,8 +328,8 @@ class MagnifierController {
   /// [bounds]. If the desired output rect requires that no edges are parallel to edges
   /// of [bounds], see [Rect.deflate] by 1 on [bounds] to achieve this effect.
   static Rect shiftWithinBounds({
-    required Rect rect,
-    required Rect bounds,
+    required final Rect rect,
+    required final Rect bounds,
   }) {
     assert(rect.width <= bounds.width,
         'attempted to shift $rect within $bounds, but the rect has a greater width.');
@@ -374,7 +374,7 @@ class MagnifierDecoration extends ShapeDecoration {
   final double opacity;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -460,7 +460,7 @@ class RawMagnifier extends StatelessWidget {
   final Size size;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.center,
@@ -502,7 +502,7 @@ class _MagnifierStyle extends StatelessWidget {
   final Size size;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     double largestShadow = 0;
     for (final BoxShadow shadow in decoration.shadows ?? <BoxShadow>[]) {
       largestShadow = math.max(
@@ -542,7 +542,7 @@ class _DonutClip extends CustomClipper<Path> {
   final ShapeBorder shape;
 
   @override
-  Path getClip(Size size) {
+  Path getClip(final Size size) {
     final Path path = Path();
     final Rect rect = Offset.zero & size;
 
@@ -553,7 +553,7 @@ class _DonutClip extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(_DonutClip oldClipper) => oldClipper.shape != shape;
+  bool shouldReclip(final _DonutClip oldClipper) => oldClipper.shape != shape;
 }
 
 class _Magnifier extends SingleChildRenderObjectWidget {
@@ -578,13 +578,13 @@ class _Magnifier extends SingleChildRenderObjectWidget {
   final ShapeBorder shape;
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return _RenderMagnification(focalPointOffset, magnificationScale, shape);
   }
 
   @override
   void updateRenderObject(
-      BuildContext context, _RenderMagnification renderObject) {
+      final BuildContext context, final _RenderMagnification renderObject) {
     renderObject
       ..focalPointOffset = focalPointOffset
       ..shape = shape
@@ -597,12 +597,12 @@ class _RenderMagnification extends RenderProxyBox {
     this._focalPointOffset,
     this._magnificationScale,
     this._shape, {
-    RenderBox? child,
+    final RenderBox? child,
   }) : super(child);
 
   Offset get focalPointOffset => _focalPointOffset;
   Offset _focalPointOffset;
-  set focalPointOffset(Offset value) {
+  set focalPointOffset(final Offset value) {
     if (_focalPointOffset == value) {
       return;
     }
@@ -612,7 +612,7 @@ class _RenderMagnification extends RenderProxyBox {
 
   double get magnificationScale => _magnificationScale;
   double _magnificationScale;
-  set magnificationScale(double value) {
+  set magnificationScale(final double value) {
     if (_magnificationScale == value) {
       return;
     }
@@ -622,7 +622,7 @@ class _RenderMagnification extends RenderProxyBox {
 
   ShapeBorder get shape => _shape;
   ShapeBorder _shape;
-  set shape(ShapeBorder value) {
+  set shape(final ShapeBorder value) {
     if (_shape == value) {
       return;
     }
@@ -637,7 +637,7 @@ class _RenderMagnification extends RenderProxyBox {
   BackdropFilterLayer? get layer => super.layer as BackdropFilterLayer?;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final Offset thisCenter = Alignment.center.alongSize(size) + offset;
     final Matrix4 matrix = Matrix4.identity()
       ..translate(

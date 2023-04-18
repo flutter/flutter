@@ -43,13 +43,13 @@ class ScrollableDetails {
       'applies to decorators, and does not directly clip a scroll view. '
       'This feature was deprecated after v3.9.0-1.0.pre.'
     )
-    Clip? clipBehavior,
-    Clip? decorationClipBehavior,
+    final Clip? clipBehavior,
+    final Clip? decorationClipBehavior,
   }) : decorationClipBehavior = clipBehavior ?? decorationClipBehavior;
 
   /// A constructor specific to a [Scrollable] with an [Axis.vertical].
   const ScrollableDetails.vertical({
-    bool reverse = false,
+    final bool reverse = false,
     this.controller,
     this.physics,
     this.decorationClipBehavior,
@@ -57,7 +57,7 @@ class ScrollableDetails {
 
   /// A constructor specific to a [Scrollable] with an [Axis.horizontal].
   const ScrollableDetails.horizontal({
-    bool reverse = false,
+    final bool reverse = false,
     this.controller,
     this.physics,
     this.decorationClipBehavior,
@@ -96,10 +96,10 @@ class ScrollableDetails {
   /// Copy the current [ScrollableDetails] with the given values replacing the
   /// current values.
   ScrollableDetails copyWith({
-    AxisDirection? direction,
-    ScrollController? controller,
-    ScrollPhysics? physics,
-    Clip? decorationClipBehavior,
+    final AxisDirection? direction,
+    final ScrollController? controller,
+    final ScrollPhysics? physics,
+    final Clip? decorationClipBehavior,
   }) {
     return ScrollableDetails(
       direction: direction ?? this.direction,
@@ -114,7 +114,7 @@ class ScrollableDetails {
     final List<String> description = <String>[];
     description.add('axisDirection: $direction');
 
-    void addIfNonNull(String prefix, Object? value) {
+    void addIfNonNull(final String prefix, final Object? value) {
       if (value != null) {
         description.add(prefix + value.toString());
       }
@@ -134,7 +134,7 @@ class ScrollableDetails {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -160,7 +160,7 @@ class EdgeDraggingAutoScroller {
   EdgeDraggingAutoScroller(
     this.scrollable, {
     this.onScrollViewScrolled,
-    double? velocityScalar,
+    final double? velocityScalar,
   }): velocityScalar = velocityScalar ?? _kDefaultAutoScrollVelocityScalar;
 
   // An eyeballed value for a smooth scrolling experience.
@@ -192,7 +192,7 @@ class EdgeDraggingAutoScroller {
   bool get scrolling => _scrolling;
   bool _scrolling = false;
 
-  double _offsetExtent(Offset offset, Axis scrollDirection) {
+  double _offsetExtent(final Offset offset, final Axis scrollDirection) {
     switch (scrollDirection) {
       case Axis.horizontal:
         return offset.dx;
@@ -201,7 +201,7 @@ class EdgeDraggingAutoScroller {
     }
   }
 
-  double _sizeExtent(Size size, Axis scrollDirection) {
+  double _sizeExtent(final Size size, final Axis scrollDirection) {
     switch (scrollDirection) {
       case Axis.horizontal:
         return size.width;
@@ -220,7 +220,7 @@ class EdgeDraggingAutoScroller {
   ///
   /// If the scrollable is already scrolling, calling this method updates the
   /// previous dragTarget to the new value and continues scrolling if necessary.
-  void startAutoScrollIfNecessary(Rect dragTarget) {
+  void startAutoScrollIfNecessary(final Rect dragTarget) {
     final Offset deltaToOrigin = scrollable.deltaToScrollOrigin;
     _dragTargetRelatedToScrollOrigin = dragTarget.translate(deltaToOrigin.dx, deltaToOrigin.dy);
     if (_scrolling) {
@@ -397,7 +397,7 @@ class ScrollIntent extends Intent {
 /// pixels.
 class ScrollAction extends Action<ScrollIntent> {
   @override
-  bool isEnabled(ScrollIntent intent) {
+  bool isEnabled(final ScrollIntent intent) {
     final FocusNode? focus = primaryFocus;
     final bool contextIsValid = focus != null && focus.context != null;
     if (contextIsValid) {
@@ -419,7 +419,7 @@ class ScrollAction extends Action<ScrollIntent> {
   /// metrics (pixels, viewportDimension, maxScrollExtent, minScrollExtent) are
   /// null. The type and state arguments must not be null, and the widget must
   /// have already been laid out so that the position fields are valid.
-  static double _calculateScrollIncrement(ScrollableState state, { ScrollIncrementType type = ScrollIncrementType.line }) {
+  static double _calculateScrollIncrement(final ScrollableState state, { final ScrollIncrementType type = ScrollIncrementType.line }) {
     assert(state.position.hasPixels);
     assert(state.resolvedPhysics == null || state.resolvedPhysics!.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
@@ -440,7 +440,7 @@ class ScrollAction extends Action<ScrollIntent> {
 
   /// Find out how much of an increment to move by, taking the different
   /// directions into account.
-  static double getDirectionalIncrement(ScrollableState state, ScrollIntent intent) {
+  static double getDirectionalIncrement(final ScrollableState state, final ScrollIntent intent) {
     final double increment = _calculateScrollIncrement(state, type: intent.type);
     switch (intent.direction) {
       case AxisDirection.down:
@@ -487,7 +487,7 @@ class ScrollAction extends Action<ScrollIntent> {
   }
 
   @override
-  void invoke(ScrollIntent intent) {
+  void invoke(final ScrollIntent intent) {
     ScrollableState? state = Scrollable.maybeOf(primaryFocus!.context!);
     if (state == null) {
       final ScrollController primaryScrollController = PrimaryScrollController.of(primaryFocus!.context!);

@@ -21,7 +21,7 @@ class FuchsiaPM {
   ///
   /// NB: The [buildPath] should probably be e.g. `build/fuchsia/pkg`, and the
   /// [appName] should probably be the name of the app from the pubspec file.
-  Future<bool> init(String buildPath, String appName) {
+  Future<bool> init(final String buildPath, final String appName) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
@@ -46,7 +46,7 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(String buildPath, String manifestPath) {
+  Future<bool> build(final String buildPath, final String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
@@ -63,7 +63,7 @@ class FuchsiaPM {
   ///
   /// [buildPath] should be the same path passed to [init], and [manifestPath]
   /// should be the same manifest passed to [build].
-  Future<bool> archive(String buildPath, String manifestPath) {
+  Future<bool> archive(final String buildPath, final String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
@@ -75,7 +75,7 @@ class FuchsiaPM {
 
   /// Initializes a new package repository at [repoPath] to be later served by
   /// the 'serve' command.
-  Future<bool> newrepo(String repoPath) {
+  Future<bool> newrepo(final String repoPath) {
     return _runPMCommand(<String>[
       'newrepo',
       '-repo',
@@ -89,7 +89,7 @@ class FuchsiaPM {
   /// [newrepo]. The [host] should be the host reported by
   /// [FuchsiaFfx.resolve], and [port] should be an unused port for the
   /// http server to bind.
-  Future<Process> serve(String repoPath, String host, int port) async {
+  Future<Process> serve(final String repoPath, String host, final int port) async {
     final File? pm = globals.fuchsiaArtifacts?.pm;
     if (pm == null) {
       throwToolExit('Fuchsia pm tool not found');
@@ -125,7 +125,7 @@ class FuchsiaPM {
   /// by [serve], this call publishes the `far` package at [packagePath] to
   /// the repo such that it will be visible to devices connecting to the
   /// package server.
-  Future<bool> publish(String repoPath, String packagePath) {
+  Future<bool> publish(final String repoPath, final String packagePath) {
     return _runPMCommand(<String>[
       'publish',
       '-a',
@@ -136,7 +136,7 @@ class FuchsiaPM {
     ]);
   }
 
-  Future<bool> _runPMCommand(List<String> args) async {
+  Future<bool> _runPMCommand(final List<String> args) async {
     final File? pm = globals.fuchsiaArtifacts?.pm;
     if (pm == null) {
       throwToolExit('Fuchsia pm tool not found');
@@ -168,7 +168,7 @@ class FuchsiaPM {
 /// }
 class FuchsiaPackageServer {
   factory FuchsiaPackageServer(
-      String repo, String name, String host, int port) {
+      final String repo, final String name, final String host, final int port) {
     return FuchsiaPackageServer._(repo, name, host, port);
   }
 
@@ -228,7 +228,7 @@ class FuchsiaPackageServer {
   ///
   /// Returns true on success and false if the server wasn't started or the
   /// publish command failed.
-  Future<bool> addPackage(File package) async {
+  Future<bool> addPackage(final File package) async {
     if (_process == null) {
       return false;
     }

@@ -65,7 +65,7 @@ abstract class GoldenFileComparator {
   /// is left up to the implementation class. For instance, some implementations
   /// may load files from the local file system, whereas others may load files
   /// over the network or from a remote repository.
-  Future<bool> compare(Uint8List imageBytes, Uri golden);
+  Future<bool> compare(final Uint8List imageBytes, final Uri golden);
 
   /// Updates the golden file identified by [golden] with [imageBytes].
   ///
@@ -75,7 +75,7 @@ abstract class GoldenFileComparator {
   ///
   /// The method by which [golden] is located and by which its bytes are written
   /// is left up to the implementation class.
-  Future<void> update(Uri golden, Uint8List imageBytes);
+  Future<void> update(final Uri golden, final Uint8List imageBytes);
 
   /// Returns a new golden file [Uri] to incorporate any [version] number with
   /// the [key].
@@ -85,7 +85,7 @@ abstract class GoldenFileComparator {
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
-  Uri getTestUri(Uri key, int? version) {
+  Uri getTestUri(final Uri key, final int? version) {
     if (version == null) {
       return key;
     }
@@ -96,7 +96,7 @@ abstract class GoldenFileComparator {
 
   /// Returns a [ComparisonResult] to describe the pixel differential of the
   /// [test] and [master] image bytes provided.
-  static Future<ComparisonResult> compareLists(List<int> test, List<int> master) {
+  static Future<ComparisonResult> compareLists(final List<int> test, final List<int> master) {
     return goldens.compareLists(test, master);
   }
 }
@@ -129,7 +129,7 @@ abstract class GoldenFileComparator {
 ///    directory-level.
 GoldenFileComparator get goldenFileComparator => _goldenFileComparator;
 GoldenFileComparator _goldenFileComparator = const TrivialComparator._();
-set goldenFileComparator(GoldenFileComparator value) {
+set goldenFileComparator(final GoldenFileComparator value) {
   _goldenFileComparator = value;
 }
 
@@ -172,7 +172,7 @@ abstract class WebGoldenComparator {
   /// is left up to the implementation class. For instance, some implementations
   /// may load files from the local file system, whereas others may load files
   /// over the network or from a remote repository.
-  Future<bool> compare(double width, double height, Uri golden);
+  Future<bool> compare(final double width, final double height, final Uri golden);
 
   /// Updates the golden file identified by [golden] with rendered pixels of
   /// [width]x[height].
@@ -183,7 +183,7 @@ abstract class WebGoldenComparator {
   ///
   /// The method by which [golden] is located and by which its bytes are written
   /// is left up to the implementation class.
-  Future<void> update(double width, double height, Uri golden);
+  Future<void> update(final double width, final double height, final Uri golden);
 
   /// Returns a new golden file [Uri] to incorporate any [version] number with
   /// the [key].
@@ -193,7 +193,7 @@ abstract class WebGoldenComparator {
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
-  Uri getTestUri(Uri key, int? version) {
+  Uri getTestUri(final Uri key, final int? version) {
     if (version == null) {
       return key;
     }
@@ -234,7 +234,7 @@ abstract class WebGoldenComparator {
 ///    a web browser.
 WebGoldenComparator get webGoldenComparator => _webGoldenComparator;
 WebGoldenComparator _webGoldenComparator = const _TrivialWebGoldenComparator._();
-set webGoldenComparator(WebGoldenComparator value) {
+set webGoldenComparator(final WebGoldenComparator value) {
   _webGoldenComparator = value;
 }
 
@@ -273,7 +273,7 @@ class TrivialComparator implements GoldenFileComparator {
   const TrivialComparator._();
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+  Future<bool> compare(final Uint8List imageBytes, final Uri golden) {
     // Ideally we would use markTestSkipped here but in some situations,
     // comparators are called outside of tests.
     // See also: https://github.com/flutter/flutter/issues/91285
@@ -283,12 +283,12 @@ class TrivialComparator implements GoldenFileComparator {
   }
 
   @override
-  Future<void> update(Uri golden, Uint8List imageBytes) {
+  Future<void> update(final Uri golden, final Uint8List imageBytes) {
     throw StateError('goldenFileComparator has not been initialized');
   }
 
   @override
-  Uri getTestUri(Uri key, int? version) {
+  Uri getTestUri(final Uri key, final int? version) {
     return key;
   }
 }
@@ -297,7 +297,7 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
   const _TrivialWebGoldenComparator._();
 
   @override
-  Future<bool> compare(double width, double height, Uri golden) {
+  Future<bool> compare(final double width, final double height, final Uri golden) {
     // Ideally we would use markTestSkipped here but in some situations,
     // comparators are called outside of tests.
     // See also: https://github.com/flutter/flutter/issues/91285
@@ -307,12 +307,12 @@ class _TrivialWebGoldenComparator implements WebGoldenComparator {
   }
 
   @override
-  Future<void> update(double width, double height, Uri golden) {
+  Future<void> update(final double width, final double height, final Uri golden) {
     throw StateError('webGoldenComparator has not been initialized');
   }
 
   @override
-  Uri getTestUri(Uri key, int? version) {
+  Uri getTestUri(final Uri key, final int? version) {
     return key;
   }
 }

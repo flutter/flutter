@@ -14,7 +14,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
   HandleEventCallback? callback;
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     if (callback != null) {
       callback?.call(event);
     }
@@ -28,7 +28,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
     ],
   );
 
-  Future<void> test(VoidCallback callback) {
+  Future<void> test(final VoidCallback callback) {
     return _binding.lockEvents(() async {
       GestureBinding.instance.platformDispatcher.onPointerDataPacket?.call(packet);
       callback();

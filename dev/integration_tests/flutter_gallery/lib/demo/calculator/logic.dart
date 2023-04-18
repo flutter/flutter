@@ -19,21 +19,21 @@ class ExpressionToken {
 class NumberToken extends ExpressionToken {
   NumberToken(String super.stringRep, this.number);
 
-  NumberToken.fromNumber(num number) : this('$number', number);
+  NumberToken.fromNumber(final num number) : this('$number', number);
 
   final num number;
 }
 
 /// A token that represents an integer.
 class IntToken extends NumberToken {
-  IntToken(String stringRep) : super(stringRep, int.parse(stringRep));
+  IntToken(final String stringRep) : super(stringRep, int.parse(stringRep));
 }
 
 /// A token that represents a floating point number.
 class FloatToken extends NumberToken {
-  FloatToken(String stringRep) : super(stringRep, _parse(stringRep));
+  FloatToken(final String stringRep) : super(stringRep, _parse(stringRep));
 
-  static double _parse(String stringRep) {
+  static double _parse(final String stringRep) {
     String toParse = stringRep;
     if (toParse.startsWith('.')) {
       toParse = '0$toParse';
@@ -47,12 +47,12 @@ class FloatToken extends NumberToken {
 
 /// A token that represents a number that is the result of a computation.
 class ResultToken extends NumberToken {
-  ResultToken(num number) : super.fromNumber(round(number));
+  ResultToken(final num number) : super.fromNumber(round(number));
 
   /// rounds `number` to 14 digits of precision. A double precision
   /// floating point number is guaranteed to have at least this many
   /// decimal digits of precision.
-  static num round(num number) {
+  static num round(final num number) {
     if (number is int) {
       return number;
     }
@@ -74,7 +74,7 @@ class OperationToken extends ExpressionToken {
 
   Operation operation;
 
-  static String? opString(Operation operation) {
+  static String? opString(final Operation operation) {
     switch (operation) {
       case Operation.Addition:
         return ' + ';
@@ -124,7 +124,7 @@ class CalcExpression {
   CalcExpression.empty()
     : this(<ExpressionToken>[], ExpressionState.Start);
 
-  CalcExpression.result(FloatToken result)
+  CalcExpression.result(final FloatToken result)
     : _list = <ExpressionToken?>[],
       state = ExpressionState.Result {
     _list.add(result);
@@ -147,7 +147,7 @@ class CalcExpression {
   /// Append a digit to the current expression and return a new expression
   /// representing the result. Returns null to indicate that it is not legal
   /// to append a digit in the current state.
-  CalcExpression? appendDigit(int digit) {
+  CalcExpression? appendDigit(final int digit) {
     ExpressionState newState = ExpressionState.Number;
     ExpressionToken? newToken;
     final List<ExpressionToken?> outList = _list.toList();
@@ -202,7 +202,7 @@ class CalcExpression {
   /// Append an operation symbol to the current expression and return a new
   /// expression representing the result. Returns null to indicate that it is not
   /// legal to append an operation symbol in the current state.
-  CalcExpression? appendOperation(Operation op) {
+  CalcExpression? appendOperation(final Operation op) {
     switch (state) {
       case ExpressionState.Start:
       case ExpressionState.LeadingNeg:
@@ -303,7 +303,7 @@ class CalcExpression {
   /// Removes the next "term" from `list` and returns its numeric value.
   /// A "term" is a sequence of number tokens separated by multiplication
   /// and division symbols.
-  static num removeNextTerm(List<ExpressionToken?> list) {
+  static num removeNextTerm(final List<ExpressionToken?> list) {
     assert(list.isNotEmpty);
     final NumberToken firstNumToken = list.removeAt(0)! as NumberToken;
     num currentValue = firstNumToken.number;

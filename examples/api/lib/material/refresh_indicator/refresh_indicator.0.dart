@@ -12,7 +12,7 @@ class RefreshIndicatorExampleApp extends StatelessWidget {
   const RefreshIndicatorExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: RefreshIndicatorExample(),
     );
@@ -30,7 +30,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('RefreshIndicator Sample'),
@@ -48,7 +48,7 @@ class _RefreshIndicatorExampleState extends State<RefreshIndicatorExample> {
         // Pull from top to show refresh indicator.
         child: ListView.builder(
           itemCount: 25,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return ListTile(
               title: Text('Item $index'),
             );

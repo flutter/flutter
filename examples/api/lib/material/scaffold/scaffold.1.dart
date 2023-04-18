@@ -12,7 +12,7 @@ class ScaffoldExampleApp extends StatelessWidget {
   const ScaffoldExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: ScaffoldExample(),
     );
@@ -30,7 +30,7 @@ class _ScaffoldExampleState extends State<ScaffoldExample> {
   int _count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sample Code'),

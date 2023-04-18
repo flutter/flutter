@@ -47,14 +47,14 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
 
   int? currentSegment = 0;
 
-  void onValueChanged(int? newValue) {
+  void onValueChanged(final int? newValue) {
     setState(() {
       currentSegment = newValue;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Segmented Control'),
@@ -98,7 +98,7 @@ class _CupertinoSegmentedControlDemoState extends State<CupertinoSegmentedContro
                   child: CupertinoUserInterfaceLevel(
                     data: CupertinoUserInterfaceLevelData.elevated,
                     child: Builder(
-                      builder: (BuildContext context) {
+                      builder: (final BuildContext context) {
                         return Container(
                           padding: const EdgeInsets.symmetric(
                             vertical: 64.0,

@@ -14,7 +14,7 @@ class InheritedNotifierExampleApp extends StatelessWidget {
   const InheritedNotifierExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: InheritedNotifierExample(),
     );
@@ -28,7 +28,7 @@ class SpinModel extends InheritedNotifier<AnimationController> {
     required super.child,
   });
 
-  static double of(BuildContext context) {
+  static double of(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<SpinModel>()!.notifier!.value;
   }
 }
@@ -37,7 +37,7 @@ class Spinner extends StatelessWidget {
   const Spinner({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Transform.rotate(
       angle: SpinModel.of(context) * 2.0 * math.pi,
       child: Container(
@@ -80,7 +80,7 @@ class _InheritedNotifierExampleState extends State<InheritedNotifierExample> wit
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SpinModel(
       notifier: _controller,
       child: const Row(

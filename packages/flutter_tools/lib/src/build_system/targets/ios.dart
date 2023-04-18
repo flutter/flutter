@@ -35,7 +35,7 @@ abstract class AotAssemblyBase extends Target {
   String get analyticsName => 'ios_aot';
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
@@ -109,7 +109,7 @@ abstract class AotAssemblyBase extends Target {
       ));
     }
     final List<int> results = await Future.wait(pending);
-    if (results.any((int result) => result != 0)) {
+    if (results.any((final int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
 
@@ -226,7 +226,7 @@ class DebugUniversalFramework extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
@@ -278,7 +278,7 @@ abstract class UnpackIOS extends Target {
   BuildMode get buildMode;
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? sdkRoot = environment.defines[kSdkRoot];
     if (sdkRoot == null) {
       throw MissingDefineException(kSdkRoot, name);
@@ -301,7 +301,7 @@ abstract class UnpackIOS extends Target {
     await _signFramework(environment, frameworkBinary, buildMode);
   }
 
-  void _copyFramework(Environment environment, String sdkRoot) {
+  void _copyFramework(final Environment environment, final String sdkRoot) {
     final EnvironmentType? environmentType = environmentTypeFromSdkroot(sdkRoot, environment.fileSystem);
     final String basePath = environment.artifacts.getArtifactPath(
       Artifact.flutterFramework,
@@ -328,7 +328,7 @@ abstract class UnpackIOS extends Target {
   }
 
   /// Destructively thin Flutter.framework to include only the specified architectures.
-  void _thinFramework(Environment environment, String frameworkBinaryPath, String archs) {
+  void _thinFramework(final Environment environment, final String frameworkBinaryPath, final String archs) {
     final List<String> archList = archs.split(' ').toList();
     final ProcessResult infoResult = environment.processManager.runSync(<String>[
       'lipo',
@@ -374,7 +374,7 @@ abstract class UnpackIOS extends Target {
 
   /// Destructively strip bitcode from the framework. This can be removed
   /// when the framework is no longer built with bitcode.
-  void _bitcodeStripFramework(Environment environment, String frameworkBinaryPath) {
+  void _bitcodeStripFramework(final Environment environment, final String frameworkBinaryPath) {
     final ProcessResult stripResult = environment.processManager.runSync(<String>[
       'xcrun',
       'bitcode_strip',
@@ -458,7 +458,7 @@ abstract class IosAssetBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? environmentBuildMode = environment.defines[kBuildMode];
     if (environmentBuildMode == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -618,7 +618,7 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     bool buildSuccess = true;
     try {
       await super.build(environment);
@@ -647,8 +647,8 @@ class ReleaseIosApplicationBundle extends _IosAssetBundleWithDSYM {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<void> _createStubAppFramework(File outputFile, Environment environment,
-    Set<String>? iosArchNames, String sdkRoot) async {
+Future<void> _createStubAppFramework(final File outputFile, final Environment environment,
+    final Set<String>? iosArchNames, final String sdkRoot) async {
   try {
     outputFile.createSync(recursive: true);
   } on Exception catch (e) {
@@ -697,7 +697,7 @@ Future<void> _createStubAppFramework(File outputFile, Environment environment,
   await _signFramework(environment, outputFile, BuildMode.debug);
 }
 
-Future<void> _signFramework(Environment environment, File binary, BuildMode buildMode) async {
+Future<void> _signFramework(final Environment environment, final File binary, final BuildMode buildMode) async {
   await removeFinderExtendedAttributes(
     binary,
     ProcessUtils(processManager: environment.processManager, logger: environment.logger),

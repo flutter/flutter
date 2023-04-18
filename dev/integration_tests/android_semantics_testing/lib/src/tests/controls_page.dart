@@ -28,32 +28,32 @@ class _SelectionControlsPageState extends State<SelectionControlsPage> {
   bool _isLabeledOn = false;
   int _radio = 0;
 
-  void _updateCheckbox(bool? newValue) {
+  void _updateCheckbox(final bool? newValue) {
     setState(() {
       _isChecked = newValue!;
     });
   }
 
-  void _updateRadio(int? newValue) {
+  void _updateRadio(final int? newValue) {
     setState(() {
       _radio = newValue!;
     });
   }
 
-  void _updateSwitch(bool newValue) {
+  void _updateSwitch(final bool newValue) {
     setState(() {
       _isOn = newValue;
     });
   }
 
-  void _updateLabeledSwitch(bool newValue) {
+  void _updateLabeledSwitch(final bool newValue) {
     setState(() {
       _isLabeledOn = newValue;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(leading: const BackButton(key: ValueKey<String>('back'))),
       body: Material(

@@ -12,7 +12,7 @@ import 'src/solid_color_box.dart';
 void main() {
   final RenderFlex table = RenderFlex(direction: Axis.vertical, textDirection: TextDirection.ltr);
 
-  void addAlignmentRow(CrossAxisAlignment crossAxisAlignment) {
+  void addAlignmentRow(final CrossAxisAlignment crossAxisAlignment) {
     TextStyle style = const TextStyle(color: Color(0xFF000000));
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(style: style, text: '$crossAxisAlignment'),
@@ -58,7 +58,7 @@ void main() {
   addAlignmentRow(CrossAxisAlignment.stretch);
   addAlignmentRow(CrossAxisAlignment.baseline);
 
-  void addJustificationRow(MainAxisAlignment justify) {
+  void addJustificationRow(final MainAxisAlignment justify) {
     const TextStyle style = TextStyle(color: Color(0xFF000000));
     final RenderParagraph paragraph = RenderParagraph(
       TextSpan(style: style, text: '$justify'),

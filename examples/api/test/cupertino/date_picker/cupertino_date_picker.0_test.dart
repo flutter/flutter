@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
-  testWidgets('Can change date, time and dateTime using CupertinoDatePicker', (WidgetTester tester) async {
+  testWidgets('Can change date, time and dateTime using CupertinoDatePicker', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.DatePickerApp(),
     );

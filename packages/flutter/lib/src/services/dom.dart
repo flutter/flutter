@@ -17,10 +17,10 @@ class DomWindow {}
 /// [DomWindow] required extension.
 extension DomWindowExtension on DomWindow {
   @JS('matchMedia')
-  external DomMediaQueryList _matchMedia(JSString? query);
+  external DomMediaQueryList _matchMedia(final JSString? query);
 
   /// Returns a [DomMediaQueryList] of the media that matches [query].
-  DomMediaQueryList matchMedia(String? query) => _matchMedia(query?.toJS);
+  DomMediaQueryList matchMedia(final String? query) => _matchMedia(query?.toJS);
 
   /// Returns the [DomNavigator] associated with this window.
   external DomNavigator get navigator;
@@ -69,16 +69,16 @@ class DomEventTarget {}
 /// [DomEventTarget]'s required extension.
 extension DomEventTargetExtension on DomEventTarget {
   @JS('addEventListener')
-  external JSVoid _addEventListener1(JSString type, DomEventListener? listener);
+  external JSVoid _addEventListener1(final JSString type, final DomEventListener? listener);
 
   @JS('addEventListener')
   external JSVoid _addEventListener2(
-      JSString type, DomEventListener? listener, JSBoolean useCapture);
+      final JSString type, final DomEventListener? listener, final JSBoolean useCapture);
 
   /// Adds an event listener to this event target.
   @JS('addEventListener')
-  void addEventListener(String type, DomEventListener? listener,
-      [bool? useCapture]) {
+  void addEventListener(final String type, final DomEventListener? listener,
+      [final bool? useCapture]) {
     if (listener != null) {
       if (useCapture == null) {
         _addEventListener1(type.toJS, listener);
@@ -121,23 +121,23 @@ extension DomXMLHttpRequestExtension on DomXMLHttpRequest {
   int? get status => _status?.toDart.toInt();
 
   @JS('responseType')
-  external set _responseType(JSString value);
+  external set _responseType(final JSString value);
 
   /// Set the response type.
-  set responseType(String value) => _responseType = value.toJS;
+  set responseType(final String value) => _responseType = value.toJS;
 
   @JS('setRequestHeader')
-  external void _setRequestHeader(JSString header, JSString value);
+  external void _setRequestHeader(final JSString header, final JSString value);
 
   /// Set the request header.
-  void setRequestHeader(String header, String value) =>
+  void setRequestHeader(final String header, final String value) =>
       _setRequestHeader(header.toJS, value.toJS);
 
   @JS('open')
-  external JSVoid _open(JSString method, JSString url, JSBoolean isAsync);
+  external JSVoid _open(final JSString method, final JSString url, final JSBoolean isAsync);
 
   /// Open the request.
-  void open(String method, String url, bool isAsync) =>
+  void open(final String method, final String url, final bool isAsync) =>
       _open(method.toJS, url.toJS, isAsync.toJS);
 
   /// Send the request.
@@ -153,7 +153,7 @@ typedef DartDomEventListener = JSVoid Function(DomEvent event);
 class DomEventListener {}
 
 /// Creates a [DomEventListener] from a [DartDomEventListener].
-DomEventListener createDomEventListener(DartDomEventListener listener) =>
+DomEventListener createDomEventListener(final DartDomEventListener listener) =>
     listener.toJS as DomEventListener;
 
 /// [DomEvent] interop object.
@@ -171,7 +171,7 @@ extension DomEventExtension on DomEvent {
 
   /// Initialize an event.
   external JSVoid initEvent(
-      JSString type, JSBoolean bubbles, JSBoolean cancelable);
+      final JSString type, final JSBoolean bubbles, final JSBoolean cancelable);
 }
 
 /// [DomProgressEvent] interop object.
@@ -202,10 +202,10 @@ class DomDocument {}
 /// [DomDocument]'s required extension.
 extension DomDocumentExtension on DomDocument {
   @JS('createEvent')
-  external DomEvent _createEvent(JSString eventType);
+  external DomEvent _createEvent(final JSString eventType);
 
   /// Creates an event.
-  DomEvent createEvent(String eventType) => _createEvent(eventType.toJS);
+  DomEvent createEvent(final String eventType) => _createEvent(eventType.toJS);
 
   /// Creates a range.
   external DomRange createRange();
@@ -215,7 +215,7 @@ extension DomDocumentExtension on DomDocument {
 
   /// Creates a [DomElement].
   @JS('createElement')
-  external DomElement createElement(JSString name);
+  external DomElement createElement(final JSString name);
 }
 
 /// Returns the top level document.
@@ -223,7 +223,7 @@ extension DomDocumentExtension on DomDocument {
 external DomDocument get domDocument;
 
 /// Creates a new DOM event.
-DomEvent createDomEvent(String type, String name) {
+DomEvent createDomEvent(final String type, final String name) {
   final DomEvent event = domDocument.createEvent(type);
   event.initEvent(name.toJS, true.toJS, true.toJS);
   return event;
@@ -237,7 +237,7 @@ class DomRange {}
 /// [DomRange]'s required extension.
 extension DomRangeExtension on DomRange {
   /// Selects the provided node.
-  external JSVoid selectNode(DomNode node);
+  external JSVoid selectNode(final DomNode node);
 }
 
 /// A node in the DOM.
@@ -248,13 +248,13 @@ class DomNode extends DomEventTarget {}
 /// [DomNode]'s required extension.
 extension DomNodeExtension on DomNode {
   @JS('innerText')
-  external set _innerText(JSString text);
+  external set _innerText(final JSString text);
 
   /// Sets the innerText of this node.
-  set innerText(String text) => _innerText = text.toJS;
+  set innerText(final String text) => _innerText = text.toJS;
 
   /// Appends a node this node.
-  external JSVoid append(DomNode node);
+  external JSVoid append(final DomNode node);
 }
 
 /// An element in the DOM.
@@ -318,7 +318,7 @@ extension DomSelectionExtension on DomSelection {
   external JSVoid removeAllRanges();
 
   /// Adds a range to this selection.
-  external JSVoid addRange(DomRange range);
+  external JSVoid addRange(final DomRange range);
 }
 
 /// A DOM html div element.
@@ -353,17 +353,17 @@ class DomCSSStyleDeclaration {}
 /// [DomCSSStyleDeclaration]'s required extension.
 extension DomCSSStyleDeclarationExtension on DomCSSStyleDeclaration {
   /// Sets the width.
-  set width(String value) => setProperty('width', value);
+  set width(final String value) => setProperty('width', value);
 
   /// Sets the height.
-  set height(String value) => setProperty('height', value);
+  set height(final String value) => setProperty('height', value);
 
   @JS('setProperty')
   external JSVoid _setProperty(
-      JSString propertyName, JSString value, JSString priority);
+      final JSString propertyName, final JSString value, final JSString priority);
 
   /// Sets a CSS property by name.
-  void setProperty(String propertyName, String value, [String? priority]) {
+  void setProperty(final String propertyName, final String value, [String? priority]) {
     priority ??= '';
     _setProperty(propertyName.toJS, value.toJS, priority.toJS);
   }
@@ -387,13 +387,13 @@ class DomCSSStyleSheet extends DomStyleSheet {}
 /// [DomCSSStyleSheet]'s required extension.
 extension DomCSSStyleSheetExtension on DomCSSStyleSheet {
   @JS('insertRule')
-  external JSNumber _insertRule1(JSString rule);
+  external JSNumber _insertRule1(final JSString rule);
 
   @JS('insertRule')
-  external JSNumber _insertRule2(JSString rule, JSNumber index);
+  external JSNumber _insertRule2(final JSString rule, final JSNumber index);
 
   /// Inserts a rule into this style sheet.
-  int insertRule(String rule, [int? index]) {
+  int insertRule(final String rule, [final int? index]) {
     if (index == null) {
       return _insertRule1(rule.toJS).toDart.toInt();
     } else {
@@ -410,8 +410,8 @@ class DomTokenList {}
 /// [DomTokenList]'s required extension.
 extension DomTokenListExtension on DomTokenList {
   @JS('add')
-  external JSVoid _add(JSString value);
+  external JSVoid _add(final JSString value);
 
   /// Adds a token to this token list.
-  void add(String value) => _add(value.toJS);
+  void add(final String value) => _add(value.toJS);
 }

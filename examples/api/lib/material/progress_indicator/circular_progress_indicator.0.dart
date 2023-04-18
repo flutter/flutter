@@ -12,7 +12,7 @@ class ProgressIndicatorApp extends StatelessWidget {
   const ProgressIndicatorApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: ProgressIndicatorExample(),
     );
@@ -50,7 +50,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample> wit
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(20.0),

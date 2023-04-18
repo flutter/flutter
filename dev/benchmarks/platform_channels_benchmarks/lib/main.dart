@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:microbenchmarks/common.dart';
 
-List<Object?> _makeTestBuffer(int size) {
+List<Object?> _makeTestBuffer(final int size) {
   final List<Object?> answer = <Object?>[];
   for (int i = 0; i < size; ++i) {
     switch (i % 9) {
@@ -38,8 +38,8 @@ List<Object?> _makeTestBuffer(int size) {
 }
 
 Future<double> _runBasicStandardSmall(
-  BasicMessageChannel<Object?> basicStandard,
-  int count,
+  final BasicMessageChannel<Object?> basicStandard,
+  final int count,
 ) async {
   final Stopwatch watch = Stopwatch();
   watch.start();
@@ -55,17 +55,17 @@ class _Counter {
 }
 
 void _runBasicStandardParallelRecurse(
-  BasicMessageChannel<Object?> basicStandard,
-  _Counter counter,
-  int count,
-  Completer<int> completer,
-  Object? payload,
+  final BasicMessageChannel<Object?> basicStandard,
+  final _Counter counter,
+  final int count,
+  final Completer<int> completer,
+  final Object? payload,
 ) {
   counter.count += 1;
   if (counter.count == count) {
     completer.complete(counter.count);
   } else if (counter.count < count) {
-    basicStandard.send(payload).then((Object? result) {
+    basicStandard.send(payload).then((final Object? result) {
       _runBasicStandardParallelRecurse(
           basicStandard, counter, count, completer, payload);
     });
@@ -73,17 +73,17 @@ void _runBasicStandardParallelRecurse(
 }
 
 Future<double> _runBasicStandardParallel(
-  BasicMessageChannel<Object?> basicStandard,
-  int count,
-  Object? payload,
-  int parallel,
+  final BasicMessageChannel<Object?> basicStandard,
+  final int count,
+  final Object? payload,
+  final int parallel,
 ) async {
   final Stopwatch watch = Stopwatch();
   final Completer<int> completer = Completer<int>();
   final _Counter counter = _Counter();
   watch.start();
   for (int i = 0; i < parallel; ++i) {
-    basicStandard.send(payload).then((Object? result) {
+    basicStandard.send(payload).then((final Object? result) {
       _runBasicStandardParallelRecurse(
           basicStandard, counter, count, completer, payload);
     });
@@ -94,9 +94,9 @@ Future<double> _runBasicStandardParallel(
 }
 
 Future<double> _runBasicStandardLarge(
-  BasicMessageChannel<Object?> basicStandard,
-  List<Object?> largeBuffer,
-  int count,
+  final BasicMessageChannel<Object?> basicStandard,
+  final List<Object?> largeBuffer,
+  final int count,
 ) async {
   int size = 0;
   final Stopwatch watch = Stopwatch();
@@ -119,9 +119,9 @@ Future<double> _runBasicStandardLarge(
 }
 
 Future<double> _runBasicBinary(
-  BasicMessageChannel<ByteData> basicBinary,
-  ByteData buffer,
-  int count,
+  final BasicMessageChannel<ByteData> basicBinary,
+  final ByteData buffer,
+  final int count,
 ) async {
   int size = 0;
   final Stopwatch watch = Stopwatch();
@@ -142,12 +142,12 @@ Future<double> _runBasicBinary(
 }
 
 Future<void> _runTest({
-  required Future<double> Function(int) test,
-  required BasicMessageChannel<Object?> resetChannel,
-  required BenchmarkResultPrinter printer,
-  required String description,
-  required String name,
-  required int numMessages,
+  required final Future<double> Function(int) test,
+  required final BasicMessageChannel<Object?> resetChannel,
+  required final BenchmarkResultPrinter printer,
+  required final String description,
+  required final String name,
+  required final int numMessages,
 }) async {
   print('running $name');
   resetChannel.send(true);
@@ -196,7 +196,7 @@ Future<void> _runTests() async {
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   await _runTest(
-    test: (int x) => _runBasicStandardSmall(basicStandard, x),
+    test: (final int x) => _runBasicStandardSmall(basicStandard, x),
     resetChannel: resetChannel,
     printer: printer,
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Small',
@@ -204,7 +204,7 @@ Future<void> _runTests() async {
     numMessages: numMessages,
   );
   await _runTest(
-    test: (int x) => _runBasicStandardLarge(basicStandard, largeBuffer, x),
+    test: (final int x) => _runBasicStandardLarge(basicStandard, largeBuffer, x),
     resetChannel: resetChannel,
     printer: printer,
     description: 'BasicMessageChannel/StandardMessageCodec/Flutter->Host/Large',
@@ -212,7 +212,7 @@ Future<void> _runTests() async {
     numMessages: numMessages,
   );
   await _runTest(
-    test: (int x) => _runBasicBinary(basicBinary, largeBufferBytes, x),
+    test: (final int x) => _runBasicBinary(basicBinary, largeBufferBytes, x),
     resetChannel: resetChannel,
     printer: printer,
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/Large',
@@ -220,7 +220,7 @@ Future<void> _runTests() async {
     numMessages: numMessages,
   );
   await _runTest(
-    test: (int x) => _runBasicBinary(basicBinary, oneMB, x),
+    test: (final int x) => _runBasicBinary(basicBinary, oneMB, x),
     resetChannel: resetChannel,
     printer: printer,
     description: 'BasicMessageChannel/BinaryCodec/Flutter->Host/1MB',
@@ -228,7 +228,7 @@ Future<void> _runTests() async {
     numMessages: numMessages,
   );
   await _runTest(
-    test: (int x) => _runBasicStandardParallel(basicStandard, x, 1234, 3),
+    test: (final int x) => _runBasicStandardParallel(basicStandard, x, 1234, 3),
     resetChannel: resetChannel,
     printer: printer,
     description:
@@ -243,7 +243,7 @@ Future<void> _runTests() async {
     StandardMessageCodec(),
   );
   await _runTest(
-    test: (int x) => _runBasicStandardSmall(backgroundStandard, x),
+    test: (final int x) => _runBasicStandardSmall(backgroundStandard, x),
     resetChannel: resetChannel,
     printer: printer,
     description:
@@ -252,7 +252,7 @@ Future<void> _runTests() async {
     numMessages: numMessages,
   );
   await _runTest(
-    test: (int x) => _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
+    test: (final int x) => _runBasicStandardParallel(backgroundStandard, x, 1234, 3),
     resetChannel: resetChannel,
     printer: printer,
     description:
@@ -280,7 +280,7 @@ class _BenchmarkWidgetState extends State<_BenchmarkWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }
 
 void main() {

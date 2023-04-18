@@ -15,7 +15,7 @@ class PlatformView extends StatelessWidget {
   const PlatformView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Platform View',
       theme: ThemeData(
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(final BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
         ),

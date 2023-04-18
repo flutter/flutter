@@ -45,10 +45,10 @@ class ShortcutSerialization {
   /// Creates a [ShortcutSerialization] representing a single character.
   ///
   /// This is used by a [CharacterActivator] to serialize itself.
-  ShortcutSerialization.character(String character, {
-    bool alt = false,
-    bool control = false,
-    bool meta = false,
+  ShortcutSerialization.character(final String character, {
+    final bool alt = false,
+    final bool control = false,
+    final bool meta = false,
   })  : assert(character.length == 1),
         _character = character,
         _trigger = null,
@@ -68,11 +68,11 @@ class ShortcutSerialization {
   ///
   /// This is used by a [SingleActivator] to serialize itself.
   ShortcutSerialization.modifier(
-    LogicalKeyboardKey trigger, {
-    bool alt = false,
-    bool control = false,
-    bool meta = false,
-    bool shift = false,
+    final LogicalKeyboardKey trigger, {
+    final bool alt = false,
+    final bool control = false,
+    final bool meta = false,
+    final bool shift = false,
   })  : assert(trigger != LogicalKeyboardKey.alt &&
                trigger != LogicalKeyboardKey.altLeft &&
                trigger != LogicalKeyboardKey.altRight &&
@@ -223,7 +223,7 @@ abstract class PlatformMenuDelegate {
   ///    that appear in a cascading menu.
   ///  * [PlatformMenuItem], the class that describes the leaves of a menu
   ///    hierarchy.
-  void setMenus(List<PlatformMenuItem> topLevelMenus);
+  void setMenus(final List<PlatformMenuItem> topLevelMenus);
 
   /// Clears any existing platform-rendered menus and leaves the application
   /// with no menus.
@@ -246,7 +246,7 @@ abstract class PlatformMenuDelegate {
   /// See also:
   ///
   ///  * [debugUnlockDelegate], where the delegate is unlocked.
-  bool debugLockDelegate(BuildContext context);
+  bool debugLockDelegate(final BuildContext context);
 
   /// This is called by [PlatformMenuBar] when it is disposed, so that another
   /// one can take over.
@@ -257,7 +257,7 @@ abstract class PlatformMenuDelegate {
   /// See also:
   ///
   ///  * [debugLockDelegate], where the delegate is locked.
-  bool debugUnlockDelegate(BuildContext context);
+  bool debugUnlockDelegate(final BuildContext context);
 }
 
 /// The signature for a function that generates unique menu item IDs for
@@ -283,7 +283,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   ///
   /// The optional [channel] argument defines the channel used to communicate
   /// with the platform. It defaults to [SystemChannels.menu] if not supplied.
-  DefaultPlatformMenuDelegate({MethodChannel? channel})
+  DefaultPlatformMenuDelegate({final MethodChannel? channel})
       : channel = channel ?? SystemChannels.menu,
         _idMap = <int, PlatformMenuItem>{} {
     this.channel.setMethodCallHandler(_methodCallHandler);
@@ -301,7 +301,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   void clearMenus() => setMenus(<PlatformMenuItem>[]);
 
   @override
-  void setMenus(List<PlatformMenuItem> topLevelMenus) {
+  void setMenus(final List<PlatformMenuItem> topLevelMenus) {
     _idMap.clear();
     final List<Map<String, Object?>> representation = <Map<String, Object?>>[];
     if (topLevelMenus.isNotEmpty) {
@@ -327,14 +327,14 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   ///
   /// This is called by each DefaultPlatformMenuDelegateSerializer when
   /// serializing a new object so that it has a unique ID.
-  int _getId(PlatformMenuItem item) {
+  int _getId(final PlatformMenuItem item) {
     _serial += 1;
     _idMap[_serial] = item;
     return _serial;
   }
 
   @override
-  bool debugLockDelegate(BuildContext context) {
+  bool debugLockDelegate(final BuildContext context) {
     assert(() {
       // It's OK to lock if the lock isn't set, but not OK if a different
       // context is locking it.
@@ -348,7 +348,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
   }
 
   @override
-  bool debugUnlockDelegate(BuildContext context) {
+  bool debugUnlockDelegate(final BuildContext context) {
     assert(() {
       // It's OK to unlock if the lock isn't set, but not OK if a different
       // context is unlocking it.
@@ -363,7 +363,7 @@ class DefaultPlatformMenuDelegate extends PlatformMenuDelegate {
 
   // Handles the method calls from the plugin to forward to selection and
   // open/close callbacks.
-  Future<void> _methodCallHandler(MethodCall call) async {
+  Future<void> _methodCallHandler(final MethodCall call) async {
     final int id = call.arguments as int;
     assert(
       _idMap.containsKey(id),
@@ -479,7 +479,7 @@ class PlatformMenuBar extends StatefulWidget with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return menus.map<DiagnosticsNode>((PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus.map<DiagnosticsNode>((final PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
   }
 }
 
@@ -506,7 +506,7 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
   }
 
   @override
-  void didUpdateWidget(PlatformMenuBar oldWidget) {
+  void didUpdateWidget(final PlatformMenuBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     final List<PlatformMenuItem> newDescendants = <PlatformMenuItem>[
       for (final PlatformMenuItem item in widget.menus) ...<PlatformMenuItem>[
@@ -527,7 +527,7 @@ class _PlatformMenuBarState extends State<PlatformMenuBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // PlatformMenuBar is really about managing the platform menu bar, and
     // doesn't do any rendering or event handling in Flutter.
     return widget.child ?? widget.body ?? const SizedBox();
@@ -570,7 +570,7 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
   ///
   /// This API is supplied so that implementers of [PlatformMenu] can share
   /// this implementation.
-  static List<PlatformMenuItem> getDescendants(PlatformMenu item) {
+  static List<PlatformMenuItem> getDescendants(final PlatformMenu item) {
     return <PlatformMenuItem>[
       for (final PlatformMenuItem child in item.menus) ...<PlatformMenuItem>[
         child,
@@ -581,8 +581,8 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    PlatformMenuDelegate delegate, {
-    required MenuItemSerializableIdGenerator getId,
+    final PlatformMenuDelegate delegate, {
+    required final MenuItemSerializableIdGenerator getId,
   }) {
     return <Map<String, Object?>>[serialize(this, delegate, getId)];
   }
@@ -593,9 +593,9 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
   /// This API is supplied so that implementers of [PlatformMenu] can share
   /// this implementation.
   static Map<String, Object?> serialize(
-    PlatformMenu item,
-    PlatformMenuDelegate delegate,
-    MenuItemSerializableIdGenerator getId,
+    final PlatformMenu item,
+    final PlatformMenuDelegate delegate,
+    final MenuItemSerializableIdGenerator getId,
   ) {
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
     for (final PlatformMenuItem childItem in item.menus) {
@@ -609,7 +609,7 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
     // groups may be interleaved with non-groups, and non-groups may also add
     // dividers.
     Map<String, Object?>? previousItem;
-    result.removeWhere((Map<String, Object?> item) {
+    result.removeWhere((final Map<String, Object?> item) {
       if (previousItem == null && item[_kIsDividerKey] == true) {
         // Strip any leading dividers.
         return true;
@@ -634,11 +634,11 @@ class PlatformMenu extends PlatformMenuItem with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    return menus.map<DiagnosticsNode>((PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
+    return menus.map<DiagnosticsNode>((final PlatformMenuItem child) => child.toDiagnosticsNode()).toList();
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
     properties.add(FlagProperty('enabled', value: menus.isNotEmpty, ifFalse: 'DISABLED'));
@@ -664,8 +664,8 @@ class PlatformMenuItemGroup extends PlatformMenuItem {
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    PlatformMenuDelegate delegate, {
-    required MenuItemSerializableIdGenerator getId,
+    final PlatformMenuDelegate delegate, {
+    required final MenuItemSerializableIdGenerator getId,
   }) {
     assert(members.isNotEmpty, 'There must be at least one member in a PlatformMenuItemGroup');
     return serialize(this, delegate, getId: getId);
@@ -677,9 +677,9 @@ class PlatformMenuItemGroup extends PlatformMenuItem {
   /// This API is supplied so that implementers of [PlatformMenuItemGroup] can share
   /// this implementation.
   static Iterable<Map<String, Object?>> serialize(
-    PlatformMenuItem group,
-    PlatformMenuDelegate delegate, {
-    required MenuItemSerializableIdGenerator getId,
+    final PlatformMenuItem group,
+    final PlatformMenuDelegate delegate, {
+    required final MenuItemSerializableIdGenerator getId,
   }) {
     final List<Map<String, Object?>> result = <Map<String, Object?>>[];
     result.add(<String, Object?>{
@@ -700,7 +700,7 @@ class PlatformMenuItemGroup extends PlatformMenuItem {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IterableProperty<PlatformMenuItem>('members', members));
   }
@@ -787,8 +787,8 @@ class PlatformMenuItem with Diagnosticable {
   /// generates a unique ID for each menu item, which is to be returned in the
   /// "id" field of the menu item data.
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    PlatformMenuDelegate delegate, {
-    required MenuItemSerializableIdGenerator getId,
+    final PlatformMenuDelegate delegate, {
+    required final MenuItemSerializableIdGenerator getId,
   }) {
     return <Map<String, Object?>>[PlatformMenuItem.serialize(this, delegate, getId)];
   }
@@ -799,9 +799,9 @@ class PlatformMenuItem with Diagnosticable {
   /// This API is supplied so that implementers of [PlatformMenuItem] can share
   /// this implementation.
   static Map<String, Object?> serialize(
-    PlatformMenuItem item,
-    PlatformMenuDelegate delegate,
-    MenuItemSerializableIdGenerator getId,
+    final PlatformMenuItem item,
+    final PlatformMenuDelegate delegate,
+    final MenuItemSerializableIdGenerator getId,
   ) {
     final MenuSerializableShortcut? shortcut = item.shortcut;
     return <String, Object?>{
@@ -816,7 +816,7 @@ class PlatformMenuItem with Diagnosticable {
   String toStringShort() => '${describeIdentity(this)}($label)';
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('label', label));
     properties.add(DiagnosticsProperty<MenuSerializableShortcut?>('shortcut', shortcut, defaultValue: null));
@@ -870,7 +870,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
 
   /// Checks to see if the given default menu type is supported on this
   /// platform.
-  static bool hasMenu(PlatformProvidedMenuItemType menu) {
+  static bool hasMenu(final PlatformProvidedMenuItemType menu) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
@@ -898,8 +898,8 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
 
   @override
   Iterable<Map<String, Object?>> toChannelRepresentation(
-    PlatformMenuDelegate delegate, {
-    required MenuItemSerializableIdGenerator getId,
+    final PlatformMenuDelegate delegate, {
+    required final MenuItemSerializableIdGenerator getId,
   }) {
     assert(() {
       if (!hasMenu(type)) {
@@ -922,7 +922,7 @@ class PlatformProvidedMenuItem extends PlatformMenuItem {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'DISABLED'));
   }

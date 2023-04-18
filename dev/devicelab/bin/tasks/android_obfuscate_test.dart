@@ -12,7 +12,7 @@ Future<void> main() async {
   await task(() async {
     try {
       bool foundApkProjectName = false;
-      await runProjectTest((FlutterProject flutterProject) async {
+      await runProjectTest((final FlutterProject flutterProject) async {
         section('APK content for task assembleRelease with --obfuscate');
         await inDirectory(flutterProject.rootPath, () async {
           await flutter('build', options: <String>[
@@ -52,7 +52,7 @@ Future<void> main() async {
       });
 
       bool foundAarProjectName = false;
-      await runModuleProjectTest((FlutterModuleProject flutterProject) async {
+      await runModuleProjectTest((final FlutterModuleProject flutterProject) async {
         section('AAR content with --obfuscate');
 
         await inDirectory(flutterProject.rootPath, () async {

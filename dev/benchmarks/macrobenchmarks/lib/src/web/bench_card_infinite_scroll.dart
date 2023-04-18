@@ -77,11 +77,11 @@ class _InfiniteScrollCardsState extends State<_InfiniteScrollCards> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView.builder(
       controller: scrollController,
       itemExtent: 100.0,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         return SizedBox(
           height: 100.0,
           child: Card(

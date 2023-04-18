@@ -10,7 +10,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Flavor Test', () {
-    testWidgets('check flavor', (WidgetTester tester) async {
+    testWidgets('check flavor', (final WidgetTester tester) async {
       app.runMainApp();
       await tester.pumpAndSettle();
       await tester.pumpAndSettle();

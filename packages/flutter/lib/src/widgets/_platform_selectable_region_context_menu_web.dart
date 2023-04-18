@@ -51,12 +51,12 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
 
   /// See `_platform_selectable_region_context_menu_io.dart`.
   // ignore: use_setters_to_change_properties
-  static void attach(SelectionContainerDelegate client) {
+  static void attach(final SelectionContainerDelegate client) {
     _activeClient = client;
   }
 
   /// See `_platform_selectable_region_context_menu_io.dart`.
-  static void detach(SelectionContainerDelegate client) {
+  static void detach(final SelectionContainerDelegate client) {
     if (_activeClient != client) {
       _activeClient = null;
     }
@@ -75,7 +75,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // Registers the view factories for the interceptor widgets.
   static void _register() {
     assert(_registeredViewType == null);
-    _registeredViewType = _registerWebSelectionCallback((DomHTMLElement element, DomMouseEvent event) {
+    _registeredViewType = _registerWebSelectionCallback((final DomHTMLElement element, final DomMouseEvent event) {
       final SelectionContainerDelegate? client = _activeClient;
       if (client != null) {
         // Converts the html right click event to flutter coordinate.
@@ -99,8 +99,8 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
     });
   }
 
-  static String _registerWebSelectionCallback(_WebSelectionCallBack callback) {
-    registerViewFactory(_viewType, (int viewId) {
+  static String _registerWebSelectionCallback(final _WebSelectionCallBack callback) {
+    registerViewFactory(_viewType, (final int viewId) {
       final DomHTMLElement htmlElement = createDomHTMLDivElement();
       htmlElement
         ..style.width = '100%'
@@ -114,7 +114,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
       sheet.insertRule(_kClassRule, 0);
       sheet.insertRule(_kClassSelectionRule, 1);
 
-      htmlElement.addEventListener('mousedown', createDomEventListener((DomEvent event) {
+      htmlElement.addEventListener('mousedown', createDomEventListener((final DomEvent event) {
         final DomMouseEvent mouseEvent = event as DomMouseEvent;
         if (mouseEvent.button != _kRightClickButton) {
           return;
@@ -127,7 +127,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[

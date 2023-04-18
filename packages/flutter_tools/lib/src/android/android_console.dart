@@ -11,7 +11,7 @@ import '../convert.dart';
 ///
 /// The default implementation will create real connections to a device.
 /// Override this in tests with an implementation that returns mock responses.
-Future<Socket> kAndroidConsoleSocketFactory(String host, int port) => Socket.connect(host, port);
+Future<Socket> kAndroidConsoleSocketFactory(final String host, final int port) => Socket.connect(host, port);
 
 /// Currently active implementation of the AndroidConsoleFactory.
 ///
@@ -78,7 +78,7 @@ class AndroidConsole {
     return output.toString().trim();
   }
 
-  void _write(String text) {
+  void _write(final String text) {
     _socket?.add(ascii.encode(text));
   }
 }

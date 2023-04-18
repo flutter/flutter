@@ -126,7 +126,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   // the next paint call. Will be reset after each paint.
   bool _overflowReportNeeded = true;
 
-  String _formatPixels(double value) {
+  String _formatPixels(final double value) {
     assert(value > 0.0);
     final String pixels;
     if (value > 10.0) {
@@ -139,7 +139,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return pixels;
   }
 
-  List<_OverflowRegionData> _calculateOverflowRegions(RelativeRect overflow, Rect containerRect) {
+  List<_OverflowRegionData> _calculateOverflowRegions(final RelativeRect overflow, final Rect containerRect) {
     final List<_OverflowRegionData> regions = <_OverflowRegionData>[];
     if (overflow.left > 0.0) {
       final Rect markerRect = Rect.fromLTWH(
@@ -205,7 +205,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     return regions;
   }
 
-  void _reportOverflow(RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
+  void _reportOverflow(final RelativeRect overflow, List<DiagnosticsNode>? overflowHints) {
     overflowHints ??= <DiagnosticsNode>[];
     if (overflowHints.isEmpty) {
       overflowHints.add(ErrorDescription(
@@ -270,11 +270,11 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
   ///
   /// See example code in [DebugOverflowIndicatorMixin] documentation.
   void paintOverflowIndicator(
-    PaintingContext context,
-    Offset offset,
-    Rect containerRect,
-    Rect childRect, {
-    List<DiagnosticsNode>? overflowHints,
+    final PaintingContext context,
+    final Offset offset,
+    final Rect containerRect,
+    final Rect childRect, {
+    final List<DiagnosticsNode>? overflowHints,
   }) {
     final RelativeRect overflow = RelativeRect.fromRect(containerRect, childRect);
 

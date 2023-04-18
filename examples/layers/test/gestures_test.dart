@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/gestures.dart';
 
 void main() {
-  testWidgets('Tap on center change color', (WidgetTester tester) async {
+  testWidgets('Tap on center change color', (final WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: GestureDemo(),

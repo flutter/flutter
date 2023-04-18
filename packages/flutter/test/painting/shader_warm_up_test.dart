@@ -12,7 +12,7 @@ Future<void> main() async {
   test('ShaderWarmUp', () {
     final FakeShaderWarmUp shaderWarmUp = FakeShaderWarmUp();
     PaintingBinding.shaderWarmUp = shaderWarmUp;
-    debugCaptureShaderWarmUpImage = expectAsync1((ui.Image image) => true);
+    debugCaptureShaderWarmUpImage = expectAsync1((final ui.Image image) => true);
     WidgetsFlutterBinding.ensureInitialized();
     expect(shaderWarmUp.ranWarmUp, true);
   }, skip: kIsWeb && !isCanvasKit); // [intended] Testing only for canvasKit
@@ -22,7 +22,7 @@ class FakeShaderWarmUp extends ShaderWarmUp {
   bool ranWarmUp = false;
 
   @override
-  Future<bool> warmUpOnCanvas(ui.Canvas canvas) {
+  Future<bool> warmUpOnCanvas(final ui.Canvas canvas) {
     ranWarmUp = true;
     return Future<bool>.delayed(Duration.zero, () => true);
   }

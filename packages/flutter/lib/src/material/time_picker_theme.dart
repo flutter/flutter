@@ -243,29 +243,29 @@ class TimePickerThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   TimePickerThemeData copyWith({
-    Color? backgroundColor,
-    ButtonStyle? cancelButtonStyle,
-    ButtonStyle? confirmButtonStyle,
-    ButtonStyle? dayPeriodButtonStyle,
-    BorderSide? dayPeriodBorderSide,
-    Color? dayPeriodColor,
-    OutlinedBorder? dayPeriodShape,
-    Color? dayPeriodTextColor,
-    TextStyle? dayPeriodTextStyle,
-    Color? dialBackgroundColor,
-    Color? dialHandColor,
-    Color? dialTextColor,
-    TextStyle? dialTextStyle,
-    double? elevation,
-    Color? entryModeIconColor,
-    TextStyle? helpTextStyle,
-    Color? hourMinuteColor,
-    ShapeBorder? hourMinuteShape,
-    Color? hourMinuteTextColor,
-    TextStyle? hourMinuteTextStyle,
-    InputDecorationTheme? inputDecorationTheme,
-    EdgeInsetsGeometry? padding,
-    ShapeBorder? shape,
+    final Color? backgroundColor,
+    final ButtonStyle? cancelButtonStyle,
+    final ButtonStyle? confirmButtonStyle,
+    final ButtonStyle? dayPeriodButtonStyle,
+    final BorderSide? dayPeriodBorderSide,
+    final Color? dayPeriodColor,
+    final OutlinedBorder? dayPeriodShape,
+    final Color? dayPeriodTextColor,
+    final TextStyle? dayPeriodTextStyle,
+    final Color? dialBackgroundColor,
+    final Color? dialHandColor,
+    final Color? dialTextColor,
+    final TextStyle? dialTextStyle,
+    final double? elevation,
+    final Color? entryModeIconColor,
+    final TextStyle? helpTextStyle,
+    final Color? hourMinuteColor,
+    final ShapeBorder? hourMinuteShape,
+    final Color? hourMinuteTextColor,
+    final TextStyle? hourMinuteTextStyle,
+    final InputDecorationTheme? inputDecorationTheme,
+    final EdgeInsetsGeometry? padding,
+    final ShapeBorder? shape,
   }) {
     return TimePickerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -298,7 +298,7 @@ class TimePickerThemeData with Diagnosticable {
   /// The argument `t` must not be null.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TimePickerThemeData lerp(TimePickerThemeData? a, TimePickerThemeData? b, double t) {
+  static TimePickerThemeData lerp(final TimePickerThemeData? a, final TimePickerThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -366,7 +366,7 @@ class TimePickerThemeData with Diagnosticable {
   ]);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -399,7 +399,7 @@ class TimePickerThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonStyle>('cancelButtonStyle', cancelButtonStyle, defaultValue: null));
@@ -453,16 +453,16 @@ class TimePickerTheme extends InheritedTheme {
   /// ```dart
   /// TimePickerThemeData theme = TimePickerTheme.of(context);
   /// ```
-  static TimePickerThemeData of(BuildContext context) {
+  static TimePickerThemeData of(final BuildContext context) {
     final TimePickerTheme? timePickerTheme = context.dependOnInheritedWidgetOfExactType<TimePickerTheme>();
     return timePickerTheme?.data ?? Theme.of(context).timePickerTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return TimePickerTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(TimePickerTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final TimePickerTheme oldWidget) => data != oldWidget.data;
 }

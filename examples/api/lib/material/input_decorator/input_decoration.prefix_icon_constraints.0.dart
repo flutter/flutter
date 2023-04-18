@@ -12,7 +12,7 @@ class PrefixIconConstraintsExampleApp extends StatelessWidget {
   const PrefixIconConstraintsExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration Sample')),
@@ -26,7 +26,7 @@ class PrefixIconConstraintsExample extends StatelessWidget {
   const PrefixIconConstraintsExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(

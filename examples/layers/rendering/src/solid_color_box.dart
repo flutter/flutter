@@ -12,22 +12,22 @@ class RenderSolidColorBox extends RenderDecoratedBox {
   final Color backgroundColor;
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     return desiredSize.width == double.infinity ? 0.0 : desiredSize.width;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     return desiredSize.width == double.infinity ? 0.0 : desiredSize.width;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return desiredSize.height == double.infinity ? 0.0 : desiredSize.height;
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return desiredSize.height == double.infinity ? 0.0 : desiredSize.height;
   }
 
@@ -37,7 +37,7 @@ class RenderSolidColorBox extends RenderDecoratedBox {
   }
 
   @override
-  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
       decoration = const BoxDecoration(color: Color(0xFFFF0000));
     } else if (event is PointerUpEvent) {

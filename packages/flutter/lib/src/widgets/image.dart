@@ -50,7 +50,7 @@ export 'package:flutter/painting.dart' show
 /// See also:
 ///
 ///  * [ImageProvider], which has an example showing how this might be used.
-ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? size }) {
+ImageConfiguration createLocalImageConfiguration(final BuildContext context, { final Size? size }) {
   return ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
     devicePixelRatio: MediaQuery.maybeDevicePixelRatioOf(context) ?? 1.0,
@@ -105,28 +105,28 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size? s
 ///
 ///  * [ImageCache], which holds images that may be reused.
 Future<void> precacheImage(
-  ImageProvider provider,
-  BuildContext context, {
-  Size? size,
-  ImageErrorListener? onError,
+  final ImageProvider provider,
+  final BuildContext context, {
+  final Size? size,
+  final ImageErrorListener? onError,
 }) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
   final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
   ImageStreamListener? listener;
   listener = ImageStreamListener(
-    (ImageInfo? image, bool sync) {
+    (final ImageInfo? image, final bool sync) {
       if (!completer.isCompleted) {
         completer.complete();
       }
       // Give callers until at least the end of the frame to subscribe to the
       // image stream.
       // See ImageCache._liveImages
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      SchedulerBinding.instance.addPostFrameCallback((final Duration timeStamp) {
         stream.removeListener(listener!);
       });
     },
-    onError: (Object exception, StackTrace? stackTrace) {
+    onError: (final Object exception, final StackTrace? stackTrace) {
       if (!completer.isCompleted) {
         completer.complete();
       }
@@ -389,9 +389,9 @@ class Image extends StatefulWidget {
   /// and [cacheHeight] parameters are ignored as the web engine delegates
   /// image decoding to the web which does not support custom decode sizes.
   Image.network(
-    String src, {
+    final String src, {
     super.key,
-    double scale = 1.0,
+    final double scale = 1.0,
     this.frameBuilder,
     this.loadingBuilder,
     this.errorBuilder,
@@ -410,9 +410,9 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     this.isAntiAlias = false,
-    Map<String, String>? headers,
-    int? cacheWidth,
-    int? cacheHeight,
+    final Map<String, String>? headers,
+    final int? cacheWidth,
+    final int? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(cacheWidth == null || cacheWidth > 0),
        assert(cacheHeight == null || cacheHeight > 0);
@@ -448,9 +448,9 @@ class Image extends StatefulWidget {
   ///
   ///  * [FileImage] provider for evicting the underlying file easily.
   Image.file(
-    File file, {
+    final File file, {
     super.key,
-    double scale = 1.0,
+    final double scale = 1.0,
     this.frameBuilder,
     this.errorBuilder,
     this.semanticLabel,
@@ -468,8 +468,8 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
-    int? cacheWidth,
-    int? cacheHeight,
+    final int? cacheWidth,
+    final int? cacheHeight,
   }) :
        // FileImage is not supported on Flutter Web therefore neither this method.
        assert(
@@ -608,14 +608,14 @@ class Image extends StatefulWidget {
   ///  * <https://flutter.dev/assets-and-images/>, an introduction to assets in
   ///    Flutter.
   Image.asset(
-    String name, {
+    final String name, {
     super.key,
-    AssetBundle? bundle,
+    final AssetBundle? bundle,
     this.frameBuilder,
     this.errorBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
-    double? scale,
+    final double? scale,
     this.width,
     this.height,
     this.color,
@@ -628,10 +628,10 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
-    String? package,
+    final String? package,
     this.filterQuality = FilterQuality.low,
-    int? cacheWidth,
-    int? cacheHeight,
+    final int? cacheWidth,
+    final int? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(
          cacheWidth,
          cacheHeight,
@@ -674,9 +674,9 @@ class Image extends StatefulWidget {
   /// regardless of these parameters. These parameters are primarily intended
   /// to reduce the memory usage of [ImageCache].
   Image.memory(
-    Uint8List bytes, {
+    final Uint8List bytes, {
     super.key,
-    double scale = 1.0,
+    final double scale = 1.0,
     this.frameBuilder,
     this.errorBuilder,
     this.semanticLabel,
@@ -694,8 +694,8 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.isAntiAlias = false,
     this.filterQuality = FilterQuality.low,
-    int? cacheWidth,
-    int? cacheHeight,
+    final int? cacheWidth,
+    final int? cacheHeight,
   }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(cacheWidth == null || cacheWidth > 0),
@@ -1003,7 +1003,7 @@ class Image extends StatefulWidget {
   State<Image> createState() => _ImageState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ImageProvider>('image', image));
     properties.add(DiagnosticsProperty<Function>('frameBuilder', frameBuilder));
@@ -1070,7 +1070,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   @override
-  void didUpdateWidget(Image oldWidget) {
+  void didUpdateWidget(final Image oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isListeningToStream &&
         (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
@@ -1116,7 +1116,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   ImageStreamListener? _imageStreamListener;
-  ImageStreamListener _getListener({bool recreateListener = false}) {
+  ImageStreamListener _getListener({final bool recreateListener = false}) {
     if(_imageStreamListener == null || recreateListener) {
       _lastException = null;
       _lastStack = null;
@@ -1124,7 +1124,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         _handleImageFrame,
         onChunk: widget.loadingBuilder == null ? null : _handleImageChunk,
         onError: widget.errorBuilder != null || kDebugMode
-            ? (Object error, StackTrace? stackTrace) {
+            ? (final Object error, final StackTrace? stackTrace) {
                 setState(() {
                   _lastException = error;
                   _lastStack = stackTrace;
@@ -1143,7 +1143,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     return _imageStreamListener!;
   }
 
-  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
+  void _handleImageFrame(final ImageInfo imageInfo, final bool synchronousCall) {
     setState(() {
       _replaceImage(info: imageInfo);
       _loadingProgress = null;
@@ -1154,7 +1154,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
   }
 
-  void _handleImageChunk(ImageChunkEvent event) {
+  void _handleImageChunk(final ImageChunkEvent event) {
     assert(widget.loadingBuilder != null);
     setState(() {
       _loadingProgress = event;
@@ -1163,16 +1163,16 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     });
   }
 
-  void _replaceImage({required ImageInfo? info}) {
+  void _replaceImage({required final ImageInfo? info}) {
     final ImageInfo? oldImageInfo = _imageInfo;
-    SchedulerBinding.instance.addPostFrameCallback((_) => oldImageInfo?.dispose());
+    SchedulerBinding.instance.addPostFrameCallback((final _) => oldImageInfo?.dispose());
     _imageInfo = info;
   }
 
   // Updates _imageStream to newStream, and moves the stream listener
   // registration from the old stream to the new stream (if a listener was
   // registered).
-  void _updateSourceStream(ImageStream newStream) {
+  void _updateSourceStream(final ImageStream newStream) {
     if (_imageStream?.key == newStream.key) {
       return;
     }
@@ -1216,7 +1216,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   /// stream will be disposed. To keep the stream alive, set `keepStreamAlive`
   /// to true, which create [ImageStreamCompleterHandle] to keep the completer
   /// alive and is compatible with the [TickerMode] being off.
-  void _stopListeningToStream({bool keepStreamAlive = false}) {
+  void _stopListeningToStream({final bool keepStreamAlive = false}) {
     if (!_isListeningToStream) {
       return;
     }
@@ -1229,7 +1229,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _isListeningToStream = false;
   }
 
-  Widget _debugBuildErrorWidget(BuildContext context, Object error) {
+  Widget _debugBuildErrorWidget(final BuildContext context, final Object error) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
@@ -1258,7 +1258,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (_lastException != null) {
       if (widget.errorBuilder != null) {
         return widget.errorBuilder!(context, _lastException!, _lastStack);
@@ -1312,7 +1312,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ImageStream>('stream', _imageStream));
     description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));

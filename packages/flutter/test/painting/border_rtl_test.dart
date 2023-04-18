@@ -12,7 +12,7 @@ class SillyBorder extends BoxBorder {
   const SillyBorder();
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => null;
+  dynamic noSuchMethod(final Invocation invocation) => null;
 }
 
 void main() {
@@ -610,7 +610,7 @@ void main() {
 
   test('BorderDirectional.paint', () {
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
           .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
       },
@@ -622,7 +622,7 @@ void main() {
         ),
     );
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
           .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
       },
@@ -634,7 +634,7 @@ void main() {
         ),
     );
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
           .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
       },
@@ -660,7 +660,7 @@ void main() {
     );
     final BoxPainter painter = decoration2.createBoxPainter();
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         painter.paint(
           canvas,
           const Offset(30.0, 0.0),
@@ -674,7 +674,7 @@ void main() {
         ),
     );
     expect(
-      (Canvas canvas) {
+      (final Canvas canvas) {
         painter.paint(
           canvas,
           const Offset(30.0, 0.0),

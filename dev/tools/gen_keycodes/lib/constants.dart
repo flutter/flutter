@@ -7,7 +7,7 @@ import 'utils.dart';
 class MaskConstant {
   const MaskConstant({required this.name, required this.value, required this.description});
 
-  const MaskConstant.platform({required String platform, required int value})
+  const MaskConstant.platform({required final String platform, required final int value})
     : this(
         name: '$platform Plane',
         value: value,
@@ -21,7 +21,7 @@ class MaskConstant {
   String get upperCamelName {
     return name
       .split(' ')
-      .map<String>((String word) => lowerCamelToUpperCamel(word.toLowerCase()))
+      .map<String>((final String word) => lowerCamelToUpperCamel(word.toLowerCase()))
       .join();
   }
 

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/radio_list_tile/radio_list_tile.tog
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RadioListTile is toggleable', (WidgetTester tester) async {
+  testWidgets('RadioListTile is toggleable', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.RadioListTileApp(),
     );

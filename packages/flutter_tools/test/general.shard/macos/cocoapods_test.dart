@@ -41,7 +41,7 @@ void main() {
     );
   }
 
-  void pretendPodVersionIs(String versionText) {
+  void pretendPodVersionIs(final String versionText) {
     fakeProcessManager.addCommand(
       FakeCommand(
         command: const <String>['pod', '--version'],
@@ -497,8 +497,8 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       'incompatible architecture': "LoadError - (mach-o file, but is an incompatible architecture (have 'arm64', need 'x86_64')), '/usr/lib/ffi_c.bundle' (no such file) - /Library/Ruby/Gems/2.6.0/gems/ffi-1.15.4/lib/ffi_c.bundle",
       'bus error': '/Library/Ruby/Gems/2.6.0/gems/ffi-1.15.5/lib/ffi/library.rb:275: [BUG] Bus Error at 0x000000010072c000',
     };
-    possibleErrors.forEach((String errorName, String cocoaPodsError) {
-      void testToolExitsWithCocoapodsMessage(_StdioStream outputStream) {
+    possibleErrors.forEach((final String errorName, final String cocoaPodsError) {
+      void testToolExitsWithCocoapodsMessage(final _StdioStream outputStream) {
         final String streamName = outputStream == _StdioStream.stdout ? 'stdout' : 'stderr';
         testUsingContext('ffi $errorName failure to $streamName on ARM macOS prompts gem install', () async {
           final FlutterProject projectUnderTest = setupProjectUnderTest();
@@ -885,9 +885,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
-    XcodeProjectBuildContext? buildContext,
-    Duration timeout = const Duration(minutes: 1),
+    final String projectPath, {
+    final XcodeProjectBuildContext? buildContext,
+    final Duration timeout = const Duration(minutes: 1),
   }) async => buildSettings;
 
   final Map<String, String> buildSettings;

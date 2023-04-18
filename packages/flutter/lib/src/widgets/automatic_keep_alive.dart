@@ -54,7 +54,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   }
 
   @override
-  void didUpdateWidget(AutomaticKeepAlive oldWidget) {
+  void didUpdateWidget(final AutomaticKeepAlive oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateChild();
   }
@@ -76,7 +76,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     super.dispose();
   }
 
-  bool _addClient(KeepAliveNotification notification) {
+  bool _addClient(final KeepAliveNotification notification) {
     final Listenable handle = notification.handle;
     _handles ??= <Listenable, VoidCallback>{};
     assert(!_handles!.containsKey(handle));
@@ -92,7 +92,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
         // If the child doesn't exist yet, we got called during the very first
         // build of this subtree. Wait until the end of the frame to update
         // the child when the child is guaranteed to be present.
-        SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+        SchedulerBinding.instance.addPostFrameCallback((final Duration timeStamp) {
           if (!mounted) {
             return;
           }
@@ -132,18 +132,18 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
     // completes. It's the caller's responsibility to deal with this case.
     //
     // (We're only going down one level, to get our direct child.)
-    element.visitChildren((Element child) {
+    element.visitChildren((final Element child) {
       childElement = child;
     });
     assert(childElement == null || childElement is ParentDataElement<KeepAliveParentDataMixin>);
     return childElement as ParentDataElement<KeepAliveParentDataMixin>?;
   }
 
-  void _updateParentDataOfChild(ParentDataElement<KeepAliveParentDataMixin> childElement) {
+  void _updateParentDataOfChild(final ParentDataElement<KeepAliveParentDataMixin> childElement) {
     childElement.applyWidgetOutOfTurn(build(context) as ParentDataWidget<KeepAliveParentDataMixin>);
   }
 
-  VoidCallback _createCallback(Listenable handle) {
+  VoidCallback _createCallback(final Listenable handle) {
     late final VoidCallback callback;
     return callback = () {
       assert(() {
@@ -232,7 +232,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return KeepAlive(
       keepAlive: _keepingAlive,
       child: _child,
@@ -241,7 +241,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(FlagProperty('_keepingAlive', value: _keepingAlive, ifTrue: 'keeping subtree alive'));
     description.add(DiagnosticsProperty<Map<Listenable, VoidCallback>>(
@@ -413,7 +413,7 @@ mixin AutomaticKeepAliveClientMixin<T extends StatefulWidget> on State<T> {
 
   @mustCallSuper
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (wantKeepAlive && _keepAliveHandle == null) {
       _ensureKeepAlive();
     }
@@ -425,7 +425,7 @@ class _NullWidget extends StatelessWidget {
   const _NullWidget();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     throw FlutterError(
       'Widgets that mix AutomaticKeepAliveClientMixin into their State must '
       'call super.build() but must ignore the return value of the superclass.',

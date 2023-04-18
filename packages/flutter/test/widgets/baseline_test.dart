@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Baseline - control test', (WidgetTester tester) async {
+  testWidgets('Baseline - control test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: DefaultTextStyle(
@@ -20,7 +20,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
   });
 
-  testWidgets('Baseline - position test', (WidgetTester tester) async {
+  testWidgets('Baseline - position test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
         child: Baseline(
@@ -43,7 +43,7 @@ void main() {
     );
   });
 
-  testWidgets('Chip caches baseline', (WidgetTester tester) async {
+  testWidgets('Chip caches baseline', (final WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -68,7 +68,7 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgets('ListTile caches baseline', (WidgetTester tester) async {
+  testWidgets('ListTile caches baseline', (final WidgetTester tester) async {
     int calls = 0;
     await tester.pumpWidget(
       MaterialApp(
@@ -93,7 +93,7 @@ void main() {
     expect(calls, 2);
   });
 
-  testWidgets("LayoutBuilder returns child's baseline", (WidgetTester tester) async {
+  testWidgets("LayoutBuilder returns child's baseline", (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -101,7 +101,7 @@ void main() {
             baseline: 180.0,
             baselineType: TextBaseline.alphabetic,
             child: LayoutBuilder(
-              builder: (BuildContext context, BoxConstraints constraints) {
+              builder: (final BuildContext context, final BoxConstraints constraints) {
                 return BaselineDetector(() {});
               },
             ),
@@ -120,10 +120,10 @@ class BaselineDetector extends LeafRenderObjectWidget {
   final VoidCallback callback;
 
   @override
-  RenderBaselineDetector createRenderObject(BuildContext context) => RenderBaselineDetector(callback);
+  RenderBaselineDetector createRenderObject(final BuildContext context) => RenderBaselineDetector(callback);
 
   @override
-  void updateRenderObject(BuildContext context, RenderBaselineDetector renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderBaselineDetector renderObject) {
     renderObject.callback = callback;
   }
 }
@@ -137,19 +137,19 @@ class RenderBaselineDetector extends RenderBox {
   bool get sizedByParent => true;
 
   @override
-  double computeMinIntrinsicWidth(double height) => 0.0;
+  double computeMinIntrinsicWidth(final double height) => 0.0;
 
   @override
-  double computeMaxIntrinsicWidth(double height) => 0.0;
+  double computeMaxIntrinsicWidth(final double height) => 0.0;
 
   @override
-  double computeMinIntrinsicHeight(double width) => 0.0;
+  double computeMinIntrinsicHeight(final double width) => 0.0;
 
   @override
-  double computeMaxIntrinsicHeight(double width) => 0.0;
+  double computeMaxIntrinsicHeight(final double width) => 0.0;
 
   @override
-  double computeDistanceToActualBaseline(TextBaseline baseline) {
+  double computeDistanceToActualBaseline(final TextBaseline baseline) {
     callback();
     return 20.0;
   }
@@ -159,10 +159,10 @@ class RenderBaselineDetector extends RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return constraints.smallest;
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) { }
+  void paint(final PaintingContext context, final Offset offset) { }
 }

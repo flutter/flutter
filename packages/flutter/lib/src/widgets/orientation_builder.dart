@@ -41,7 +41,7 @@ class OrientationBuilder extends StatelessWidget {
   /// a vertical array.
   final OrientationWidgetBuilder builder;
 
-  Widget _buildWithConstraints(BuildContext context, BoxConstraints constraints) {
+  Widget _buildWithConstraints(final BuildContext context, final BoxConstraints constraints) {
     // If the constraints are fully unbounded (i.e., maxWidth and maxHeight are
     // both infinite), we prefer Orientation.portrait because its more common to
     // scroll vertically then horizontally.
@@ -50,7 +50,7 @@ class OrientationBuilder extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LayoutBuilder(builder: _buildWithConstraints);
   }
 }

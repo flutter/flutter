@@ -125,33 +125,33 @@ class SearchAnchor extends StatefulWidget {
   ///
   /// The [suggestionsBuilder] argument must not be null.
   factory SearchAnchor.bar({
-    Widget? barLeading,
-    Iterable<Widget>? barTrailing,
-    String? barHintText,
-    GestureTapCallback? onTap,
-    MaterialStateProperty<double?>? barElevation,
-    MaterialStateProperty<Color?>? barBackgroundColor,
-    MaterialStateProperty<Color?>? barOverlayColor,
-    MaterialStateProperty<BorderSide?>? barSide,
-    MaterialStateProperty<OutlinedBorder?>? barShape,
-    MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
-    MaterialStateProperty<TextStyle?>? barTextStyle,
-    MaterialStateProperty<TextStyle?>? barHintStyle,
-    Widget? viewLeading,
-    Iterable<Widget>? viewTrailing,
-    String? viewHintText,
-    Color? viewBackgroundColor,
-    double? viewElevation,
-    BorderSide? viewSide,
-    OutlinedBorder? viewShape,
-    TextStyle? viewHeaderTextStyle,
-    TextStyle? viewHeaderHintStyle,
-    Color? dividerColor,
-    BoxConstraints? constraints,
-    BoxConstraints? viewConstraints,
-    bool? isFullScreen,
-    SearchController searchController,
-    required SuggestionsBuilder suggestionsBuilder
+    final Widget? barLeading,
+    final Iterable<Widget>? barTrailing,
+    final String? barHintText,
+    final GestureTapCallback? onTap,
+    final MaterialStateProperty<double?>? barElevation,
+    final MaterialStateProperty<Color?>? barBackgroundColor,
+    final MaterialStateProperty<Color?>? barOverlayColor,
+    final MaterialStateProperty<BorderSide?>? barSide,
+    final MaterialStateProperty<OutlinedBorder?>? barShape,
+    final MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    final MaterialStateProperty<TextStyle?>? barTextStyle,
+    final MaterialStateProperty<TextStyle?>? barHintStyle,
+    final Widget? viewLeading,
+    final Iterable<Widget>? viewTrailing,
+    final String? viewHintText,
+    final Color? viewBackgroundColor,
+    final double? viewElevation,
+    final BorderSide? viewSide,
+    final OutlinedBorder? viewShape,
+    final TextStyle? viewHeaderTextStyle,
+    final TextStyle? viewHeaderHintStyle,
+    final Color? dividerColor,
+    final BoxConstraints? constraints,
+    final BoxConstraints? viewConstraints,
+    final bool? isFullScreen,
+    final SearchController searchController,
+    required final SuggestionsBuilder suggestionsBuilder
   }) = _SearchAnchorWithSearchBar;
 
   /// Whether the search view grows to fill the entire screen when the
@@ -332,14 +332,14 @@ class _SearchAnchorState extends State<SearchAnchor> {
     ));
   }
 
-  void _closeView(String? selectedText) {
+  void _closeView(final String? selectedText) {
     if (selectedText != null) {
       _searchController.text = selectedText;
     }
     Navigator.of(context).pop();
   }
 
-  Rect? getRect(GlobalKey key) {
+  Rect? getRect(final GlobalKey key) {
     final BuildContext? context = key.currentContext;
     if (context != null) {
       final RenderBox searchBarBox = context.findRenderObject()! as RenderBox;
@@ -375,7 +375,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedOpacity(
       key: _anchorKey,
       opacity: _anchorIsVisible ? 1.0 : 0.0,
@@ -466,20 +466,20 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   @override
-  bool didPop(_SearchViewRoute? result) {
+  bool didPop(final _SearchViewRoute? result) {
     assert(anchorKey.currentContext != null);
     updateTweens(anchorKey.currentContext!);
     toggleVisibility?.call();
     return super.didPop(result);
   }
 
-  void updateViewConfig(BuildContext context) {
+  void updateViewConfig(final BuildContext context) {
     viewDefaults = _SearchViewDefaultsM3(context, isFullScreen: showFullScreenView);
     viewTheme = SearchViewTheme.of(context);
     dividerTheme = DividerTheme.of(context);
   }
 
-  void updateTweens(BuildContext context) {
+  void updateTweens(final BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
@@ -525,13 +525,13 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation) {
 
     return Directionality(
       textDirection: textDirection ?? TextDirection.ltr,
       child: AnimatedBuilder(
         animation: animation,
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           final Animation<double> curvedAnimation = CurvedAnimation(
             parent: animation,
             curve: Curves.easeInOutCubicEmphasized,
@@ -657,7 +657,7 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   @override
-  void didUpdateWidget(covariant _ViewContent oldWidget) {
+  void didUpdateWidget(covariant final _ViewContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.viewRect != oldWidget.viewRect) {
       setState(() {
@@ -714,7 +714,7 @@ class _ViewContentState extends State<_ViewContent> {
     }
   }
 
-  Widget viewBuilder(Iterable<Widget> suggestions) {
+  Widget viewBuilder(final Iterable<Widget> suggestions) {
     if (widget.viewBuilder == null) {
       return MediaQuery.removePadding(
         context: context,
@@ -734,7 +734,7 @@ class _ViewContentState extends State<_ViewContent> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget defaultLeading = IconButton(
       icon: const Icon(Icons.arrow_back),
       onPressed: () { Navigator.of(context).pop(); },
@@ -825,7 +825,7 @@ class _ViewContentState extends State<_ViewContent> {
                         textStyle: MaterialStatePropertyAll<TextStyle?>(effectiveTextStyle),
                         hintStyle: MaterialStatePropertyAll<TextStyle?>(effectiveHintStyle),
                         controller: _controller,
-                        onChanged: (_) {
+                        onChanged: (final _) {
                           updateSuggestions();
                         },
                       ),
@@ -860,29 +860,29 @@ class _ViewContentState extends State<_ViewContent> {
 
 class _SearchAnchorWithSearchBar extends SearchAnchor {
   _SearchAnchorWithSearchBar({
-    Widget? barLeading,
-    Iterable<Widget>? barTrailing,
-    String? barHintText,
-    GestureTapCallback? onTap,
-    MaterialStateProperty<double?>? barElevation,
-    MaterialStateProperty<Color?>? barBackgroundColor,
-    MaterialStateProperty<Color?>? barOverlayColor,
-    MaterialStateProperty<BorderSide?>? barSide,
-    MaterialStateProperty<OutlinedBorder?>? barShape,
-    MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
-    MaterialStateProperty<TextStyle?>? barTextStyle,
-    MaterialStateProperty<TextStyle?>? barHintStyle,
+    final Widget? barLeading,
+    final Iterable<Widget>? barTrailing,
+    final String? barHintText,
+    final GestureTapCallback? onTap,
+    final MaterialStateProperty<double?>? barElevation,
+    final MaterialStateProperty<Color?>? barBackgroundColor,
+    final MaterialStateProperty<Color?>? barOverlayColor,
+    final MaterialStateProperty<BorderSide?>? barSide,
+    final MaterialStateProperty<OutlinedBorder?>? barShape,
+    final MaterialStateProperty<EdgeInsetsGeometry?>? barPadding,
+    final MaterialStateProperty<TextStyle?>? barTextStyle,
+    final MaterialStateProperty<TextStyle?>? barHintStyle,
     super.viewLeading,
     super.viewTrailing,
-    String? viewHintText,
+    final String? viewHintText,
     super.viewBackgroundColor,
     super.viewElevation,
     super.viewSide,
     super.viewShape,
-    TextStyle? viewHeaderTextStyle,
-    TextStyle? viewHeaderHintStyle,
+    final TextStyle? viewHeaderTextStyle,
+    final TextStyle? viewHeaderHintStyle,
     super.dividerColor,
-    BoxConstraints? constraints,
+    final BoxConstraints? constraints,
     super.viewConstraints,
     super.isFullScreen,
     super.searchController,
@@ -891,7 +891,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     viewHintText: viewHintText ?? barHintText,
     headerTextStyle: viewHeaderTextStyle,
     headerHintStyle: viewHeaderHintStyle,
-    builder: (BuildContext context, SearchController controller) {
+    builder: (final BuildContext context, final SearchController controller) {
       return SearchBar(
         constraints: constraints,
         controller: controller,
@@ -899,7 +899,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
           controller.openView();
           onTap?.call();
         },
-        onChanged: (_) {
+        onChanged: (final _) {
           controller.openView();
         },
         hintText: barHintText,
@@ -951,17 +951,17 @@ class SearchController extends TextEditingController {
   ///
   /// If `selectedText` is given, then the text value of the controller is set to
   /// `selectedText`.
-  void closeView(String? selectedText) {
+  void closeView(final String? selectedText) {
     assert(_anchor != null);
     _anchor!._closeView(selectedText);
   }
 
   // ignore: use_setters_to_change_properties
-  void _attach(_SearchAnchorState anchor) {
+  void _attach(final _SearchAnchorState anchor) {
     _anchor = anchor;
   }
 
-  void _detach(_SearchAnchorState anchor) {
+  void _detach(final _SearchAnchorState anchor) {
     if (_anchor == anchor) {
       _anchor = null;
     }
@@ -1162,7 +1162,7 @@ class _SearchBarState extends State<SearchBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final IconThemeData iconTheme = IconTheme.of(context);
@@ -1170,9 +1170,9 @@ class _SearchBarState extends State<SearchBar> {
     final SearchBarThemeData defaults = _SearchBarDefaultsM3(context);
 
     T? resolve<T>(
-      MaterialStateProperty<T>? widgetValue,
-      MaterialStateProperty<T>? themeValue,
-      MaterialStateProperty<T>? defaultValue,
+      final MaterialStateProperty<T>? widgetValue,
+      final MaterialStateProperty<T>? themeValue,
+      final MaterialStateProperty<T>? defaultValue,
     ) {
       final Set<MaterialState> states = _internalStatesController.value;
       return widgetValue?.resolve(states) ?? themeValue?.resolve(states) ?? defaultValue?.resolve(states);
@@ -1196,7 +1196,7 @@ class _SearchBarState extends State<SearchBar> {
       ?? defaults.hintStyle?.resolve(states);
 
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    bool isIconThemeColorDefault(Color? color) {
+    bool isIconThemeColorDefault(final Color? color) {
       if (isDark) {
         return color == kDefaultIconLightColor;
       }
@@ -1215,7 +1215,7 @@ class _SearchBarState extends State<SearchBar> {
 
     List<Widget>? trailing;
     if (widget.trailing != null) {
-      trailing = widget.trailing?.map((Widget trailing) => IconTheme.merge(
+      trailing = widget.trailing?.map((final Widget trailing) => IconTheme.merge(
         data: isIconThemeColorDefault(iconTheme.color)
           ? IconThemeData(color: colorScheme.onSurfaceVariant)
           : iconTheme,
@@ -1307,7 +1307,7 @@ class _SearchBarDefaultsM3 extends SearchBarThemeData {
 
   @override
   MaterialStateProperty<Color?>? get overlayColor =>
-    MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return _colors.onSurface.withOpacity(0.12);
       }

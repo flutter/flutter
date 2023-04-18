@@ -8,7 +8,7 @@ class ColorDemoHome extends StatelessWidget {
   const ColorDemoHome({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Color Demo')),
       body: ListView(
@@ -49,7 +49,7 @@ class GradientRow extends StatelessWidget {
   final Color rightColor;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       height: 100.0,
       decoration: BoxDecoration(
@@ -69,7 +69,7 @@ class ColorRow extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       height: 100.0,
       color: color,

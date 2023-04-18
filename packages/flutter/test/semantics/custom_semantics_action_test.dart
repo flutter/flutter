@@ -26,4 +26,4 @@ void main() {
   });
 }
 
-T _nonconst<T>(T value) => value;
+T _nonconst<T>(final T value) => value;

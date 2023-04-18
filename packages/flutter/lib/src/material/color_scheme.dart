@@ -84,44 +84,44 @@ class ColorScheme with Diagnosticable {
     required this.brightness,
     required this.primary,
     required this.onPrimary,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
     required this.secondary,
     required this.onSecondary,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
     required this.error,
     required this.onError,
-    Color? errorContainer,
-    Color? onErrorContainer,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
     required this.background,
     required this.onBackground,
     required this.surface,
     required this.onSurface,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? outline,
-    Color? outlineVariant,
-    Color? shadow,
-    Color? scrim,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? surfaceTint,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? primaryVariant,
+    final Color? primaryVariant,
     @Deprecated(
       'Use secondary or secondaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? secondaryVariant,
+    final Color? secondaryVariant,
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -168,38 +168,38 @@ class ColorScheme with Diagnosticable {
   ///  * <https://pub.dev/packages/material_color_utilities>, the package
   ///    used to generate the tonal palettes needed for the scheme.
   factory ColorScheme.fromSeed({
-    required Color seedColor,
-    Brightness brightness = Brightness.light,
-    Color? primary,
-    Color? onPrimary,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
-    Color? secondary,
-    Color? onSecondary,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
-    Color? error,
-    Color? onError,
-    Color? errorContainer,
-    Color? onErrorContainer,
-    Color? outline,
-    Color? outlineVariant,
-    Color? background,
-    Color? onBackground,
-    Color? surface,
-    Color? onSurface,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? shadow,
-    Color? scrim,
-    Color? surfaceTint,
+    required final Color seedColor,
+    final Brightness brightness = Brightness.light,
+    final Color? primary,
+    final Color? onPrimary,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
+    final Color? secondary,
+    final Color? onSecondary,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
+    final Color? error,
+    final Color? onError,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? background,
+    final Color? onBackground,
+    final Color? surface,
+    final Color? onSurface,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? surfaceTint,
   }) {
     final Scheme scheme;
     switch (brightness) {
@@ -249,44 +249,44 @@ class ColorScheme with Diagnosticable {
     this.brightness = Brightness.light,
     this.primary = const Color(0xff6200ee),
     this.onPrimary = Colors.white,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
     this.secondary = const Color(0xff03dac6),
     this.onSecondary = Colors.black,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
     this.error = const Color(0xffb00020),
     this.onError = Colors.white,
-    Color? errorContainer,
-    Color? onErrorContainer,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
     this.background = Colors.white,
     this.onBackground = Colors.black,
     this.surface = Colors.white,
     this.onSurface = Colors.black,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? outline,
-    Color? outlineVariant,
-    Color? shadow,
-    Color? scrim,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? surfaceTint,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? primaryVariant = const Color(0xff3700b3),
+    final Color? primaryVariant = const Color(0xff3700b3),
     @Deprecated(
       'Use secondary or secondaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? secondaryVariant = const Color(0xff018786),
+    final Color? secondaryVariant = const Color(0xff018786),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -316,44 +316,44 @@ class ColorScheme with Diagnosticable {
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffbb86fc),
     this.onPrimary = Colors.black,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
     this.secondary = const Color(0xff03dac6),
     this.onSecondary = Colors.black,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
     this.error = const Color(0xffcf6679),
     this.onError = Colors.black,
-    Color? errorContainer,
-    Color? onErrorContainer,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
     this.background = const Color(0xff121212),
     this.onBackground = Colors.white,
     this.surface = const Color(0xff121212),
     this.onSurface = Colors.white,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? outline,
-    Color? outlineVariant,
-    Color? shadow,
-    Color? scrim,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? surfaceTint,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? primaryVariant = const Color(0xff3700B3),
+    final Color? primaryVariant = const Color(0xff3700B3),
     @Deprecated(
       'Use secondary or secondaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? secondaryVariant = const Color(0xff03dac6),
+    final Color? secondaryVariant = const Color(0xff03dac6),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -383,44 +383,44 @@ class ColorScheme with Diagnosticable {
     this.brightness = Brightness.light,
     this.primary = const Color(0xff0000ba),
     this.onPrimary = Colors.white,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
     this.secondary = const Color(0xff66fff9),
     this.onSecondary = Colors.black,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
     this.error = const Color(0xff790000),
     this.onError = Colors.white,
-    Color? errorContainer,
-    Color? onErrorContainer,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
     this.background = Colors.white,
     this.onBackground = Colors.black,
     this.surface = Colors.white,
     this.onSurface = Colors.black,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? outline,
-    Color? outlineVariant,
-    Color? shadow,
-    Color? scrim,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? surfaceTint,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? primaryVariant = const Color(0xff000088),
+    final Color? primaryVariant = const Color(0xff000088),
     @Deprecated(
       'Use secondary or secondaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? secondaryVariant = const Color(0xff018786),
+    final Color? secondaryVariant = const Color(0xff018786),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -450,44 +450,44 @@ class ColorScheme with Diagnosticable {
     this.brightness = Brightness.dark,
     this.primary = const Color(0xffefb7ff),
     this.onPrimary = Colors.black,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
     this.secondary = const Color(0xff66fff9),
     this.onSecondary = Colors.black,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
     this.error = const Color(0xff9b374d),
     this.onError = Colors.black,
-    Color? errorContainer,
-    Color? onErrorContainer,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
     this.background = const Color(0xff121212),
     this.onBackground = Colors.white,
     this.surface = const Color(0xff121212),
     this.onSurface = Colors.white,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? outline,
-    Color? outlineVariant,
-    Color? shadow,
-    Color? scrim,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? surfaceTint,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? primaryVariant = const Color(0xffbe9eff),
+    final Color? primaryVariant = const Color(0xffbe9eff),
     @Deprecated(
       'Use secondary or secondaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? secondaryVariant = const Color(0xff66fff9),
+    final Color? secondaryVariant = const Color(0xff66fff9),
   }) : _primaryContainer = primaryContainer,
        _onPrimaryContainer = onPrimaryContainer,
        _secondaryContainer = secondaryContainer,
@@ -516,13 +516,13 @@ class ColorScheme with Diagnosticable {
   /// This constructor is used by [ThemeData] to create its default
   /// color scheme.
   factory ColorScheme.fromSwatch({
-    MaterialColor primarySwatch = Colors.blue,
-    Color? primaryColorDark,
-    Color? accentColor,
-    Color? cardColor,
-    Color? backgroundColor,
-    Color? errorColor,
-    Brightness brightness = Brightness.light,
+    final MaterialColor primarySwatch = Colors.blue,
+    final Color? primaryColorDark,
+    final Color? accentColor,
+    final Color? cardColor,
+    final Color? backgroundColor,
+    final Color? errorColor,
+    final Brightness brightness = Brightness.light,
   }) {
 
     final bool isDark = brightness == Brightness.dark;
@@ -547,7 +547,7 @@ class ColorScheme with Diagnosticable {
     );
   }
 
-  static Brightness _brightnessFor(Color color) => ThemeData.estimateBrightnessForColor(color);
+  static Brightness _brightnessFor(final Color color) => ThemeData.estimateBrightnessForColor(color);
 
   /// The overall brightness of this color scheme.
   final Brightness brightness;
@@ -745,47 +745,47 @@ class ColorScheme with Diagnosticable {
   /// Creates a copy of this color scheme with the given fields
   /// replaced by the non-null parameter values.
   ColorScheme copyWith({
-    Brightness? brightness,
-    Color? primary,
-    Color? onPrimary,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
-    Color? secondary,
-    Color? onSecondary,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
-    Color? error,
-    Color? onError,
-    Color? errorContainer,
-    Color? onErrorContainer,
-    Color? background,
-    Color? onBackground,
-    Color? surface,
-    Color? onSurface,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? outline,
-    Color? outlineVariant,
-    Color? shadow,
-    Color? scrim,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? surfaceTint,
+    final Brightness? brightness,
+    final Color? primary,
+    final Color? onPrimary,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
+    final Color? secondary,
+    final Color? onSecondary,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
+    final Color? error,
+    final Color? onError,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
+    final Color? background,
+    final Color? onBackground,
+    final Color? surface,
+    final Color? onSurface,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? surfaceTint,
     @Deprecated(
       'Use primary or primaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? primaryVariant,
+    final Color? primaryVariant,
     @Deprecated(
       'Use secondary or secondaryContainer instead. '
       'This feature was deprecated after v2.6.0-0.0.pre.'
     )
-    Color? secondaryVariant,
+    final Color? secondaryVariant,
   }) {
     return ColorScheme(
       brightness: brightness ?? this.brightness,
@@ -827,7 +827,7 @@ class ColorScheme with Diagnosticable {
   /// Linearly interpolate between two [ColorScheme] objects.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static ColorScheme lerp(ColorScheme a, ColorScheme b, double t) {
+  static ColorScheme lerp(final ColorScheme a, final ColorScheme b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -869,7 +869,7 @@ class ColorScheme with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -952,7 +952,7 @@ class ColorScheme with Diagnosticable {
   );
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const ColorScheme defaultScheme = ColorScheme.light();
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: defaultScheme.brightness));
@@ -1017,44 +1017,44 @@ class ColorScheme with Diagnosticable {
   ///  * <https://pub.dev/packages/material_color_utilities>, the package
   ///    used to generate the base color and tonal palettes needed for the scheme.
   static Future<ColorScheme> fromImageProvider({
-    required ImageProvider provider,
-    Brightness brightness = Brightness.light,
-    Color? primary,
-    Color? onPrimary,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
-    Color? secondary,
-    Color? onSecondary,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
-    Color? error,
-    Color? onError,
-    Color? errorContainer,
-    Color? onErrorContainer,
-    Color? outline,
-    Color? outlineVariant,
-    Color? background,
-    Color? onBackground,
-    Color? surface,
-    Color? onSurface,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? shadow,
-    Color? scrim,
-    Color? surfaceTint,
+    required final ImageProvider provider,
+    final Brightness brightness = Brightness.light,
+    final Color? primary,
+    final Color? onPrimary,
+    final Color? primaryContainer,
+    final Color? onPrimaryContainer,
+    final Color? secondary,
+    final Color? onSecondary,
+    final Color? secondaryContainer,
+    final Color? onSecondaryContainer,
+    final Color? tertiary,
+    final Color? onTertiary,
+    final Color? tertiaryContainer,
+    final Color? onTertiaryContainer,
+    final Color? error,
+    final Color? onError,
+    final Color? errorContainer,
+    final Color? onErrorContainer,
+    final Color? outline,
+    final Color? outlineVariant,
+    final Color? background,
+    final Color? onBackground,
+    final Color? surface,
+    final Color? onSurface,
+    final Color? surfaceVariant,
+    final Color? onSurfaceVariant,
+    final Color? inverseSurface,
+    final Color? onInverseSurface,
+    final Color? inversePrimary,
+    final Color? shadow,
+    final Color? scrim,
+    final Color? surfaceTint,
   }) async {
     // Extract dominant colors from image.
     final QuantizerResult quantizerResult =
         await _extractColorsFromImageProvider(provider);
     final Map<int, int> colorToCount = quantizerResult.colorToCount.map(
-      (int key, int value) => MapEntry<int, int>(_getArgbFromAbgr(key), value),
+      (final int key, final int value) => MapEntry<int, int>(_getArgbFromAbgr(key), value),
     );
 
     // Score colors for color scheme suitability.
@@ -1107,7 +1107,7 @@ class ColorScheme with Diagnosticable {
 
   // Extracts bytes from an [ImageProvider] and returns a [QuantizerResult]
   // containing the most dominant colors.
-  static Future<QuantizerResult> _extractColorsFromImageProvider(ImageProvider imageProvider) async {
+  static Future<QuantizerResult> _extractColorsFromImageProvider(final ImageProvider imageProvider) async {
     final ui.Image scaledImage = await _imageProviderToScaled(imageProvider);
     final ByteData? imageBytes = await scaledImage.toByteData();
 
@@ -1120,7 +1120,7 @@ class ColorScheme with Diagnosticable {
   }
 
   // Scale image size down to reduce computation time of color extraction.
-  static Future<ui.Image> _imageProviderToScaled(ImageProvider imageProvider) async {
+  static Future<ui.Image> _imageProviderToScaled(final ImageProvider imageProvider) async {
     const double maxDimension = 112.0;
     final ImageStream stream = imageProvider.resolve(
         const ImageConfiguration(size: Size(maxDimension, maxDimension)));
@@ -1129,7 +1129,7 @@ class ColorScheme with Diagnosticable {
     late ui.Image scaledImage;
     Timer? loadFailureTimeout;
 
-    listener = ImageStreamListener((ImageInfo info, bool sync) async {
+    listener = ImageStreamListener((final ImageInfo info, final bool sync) async {
       loadFailureTimeout?.cancel();
       stream.removeListener(listener);
       final ui.Image image = info.image;
@@ -1155,7 +1155,7 @@ class ColorScheme with Diagnosticable {
       final ui.Picture picture = pictureRecorder.endRecording();
       scaledImage = await picture.toImage(paintWidth.toInt(), paintHeight.toInt());
       imageCompleter.complete(info.image);
-    }, onError: (Object exception, StackTrace? stackTrace) {
+    }, onError: (final Object exception, final StackTrace? stackTrace) {
       stream.removeListener(listener);
       throw Exception('Failed to render image: $exception');
     });
@@ -1172,7 +1172,7 @@ class ColorScheme with Diagnosticable {
   }
 
   // Converts AABBGGRR color int to AARRGGBB format.
-  static int _getArgbFromAbgr(int abgr) {
+  static int _getArgbFromAbgr(final int abgr) {
     const int exceptRMask = 0xFF00FFFF;
     const int onlyRMask = ~exceptRMask;
     const int exceptBMask = 0xFFFFFF00;

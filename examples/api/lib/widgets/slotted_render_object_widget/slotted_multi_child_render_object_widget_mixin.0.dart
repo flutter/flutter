@@ -32,7 +32,7 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
   Iterable<DiagonalSlot> get slots => DiagonalSlot.values;
 
   @override
-  Widget? childForSlot(DiagonalSlot slot) {
+  Widget? childForSlot(final DiagonalSlot slot) {
     switch (slot) {
       case DiagonalSlot.topLeft:
         return topLeft;
@@ -50,7 +50,7 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
 
   @override
   SlottedContainerRenderObjectMixin<DiagonalSlot> createRenderObject(
-    BuildContext context,
+    final BuildContext context,
   ) {
     return RenderDiagonal(
       backgroundColor: backgroundColor,
@@ -59,8 +59,8 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
 
   @override
   void updateRenderObject(
-    BuildContext context,
-    SlottedContainerRenderObjectMixin<DiagonalSlot> renderObject,
+    final BuildContext context,
+    final SlottedContainerRenderObjectMixin<DiagonalSlot> renderObject,
   ) {
     (renderObject as RenderDiagonal).backgroundColor = backgroundColor;
   }
@@ -71,7 +71,7 @@ class Diagonal extends RenderObjectWidget with SlottedMultiChildRenderObjectWidg
 /// will be arranged diagonally.
 class RenderDiagonal extends RenderBox
     with SlottedContainerRenderObjectMixin<DiagonalSlot>, DebugOverflowIndicatorMixin {
-  RenderDiagonal({Color? backgroundColor}) : _backgroundColor = backgroundColor;
+  RenderDiagonal({final Color? backgroundColor}) : _backgroundColor = backgroundColor;
 
   // Getters and setters to configure the [RenderObject] with the configuration
   // of the [Widget]. These mostly contain boilerplate code, but depending on
@@ -79,7 +79,7 @@ class RenderDiagonal extends RenderBox
   // [markNeedsLayout], [markNeedsPaint], or [markNeedsSemanticsUpdate].
   Color? get backgroundColor => _backgroundColor;
   Color? _backgroundColor;
-  set backgroundColor(Color? value) {
+  set backgroundColor(final Color? value) {
     assert(value != null);
     if (_backgroundColor == value) {
       return;
@@ -144,14 +144,14 @@ class RenderDiagonal extends RenderBox
     size = constraints.constrain(_childrenSize);
   }
 
-  void _positionChild(RenderBox child, Offset offset) {
+  void _positionChild(final RenderBox child, final Offset offset) {
     (child.parentData! as BoxParentData).offset = offset;
   }
 
   // PAINT
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     // Paint the background.
     if (backgroundColor != null) {
       context.canvas.drawRect(
@@ -160,7 +160,7 @@ class RenderDiagonal extends RenderBox
       );
     }
 
-    void paintChild(RenderBox child, PaintingContext context, Offset offset) {
+    void paintChild(final RenderBox child, final PaintingContext context, final Offset offset) {
       final BoxParentData childParentData = child.parentData! as BoxParentData;
       context.paintChild(child, childParentData.offset + offset);
     }
@@ -191,13 +191,13 @@ class RenderDiagonal extends RenderBox
   // HIT TEST
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+  bool hitTestChildren(final BoxHitTestResult result, {required final Offset position}) {
     for (final RenderBox child in children) {
       final BoxParentData parentData = child.parentData! as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,
-        hitTest: (BoxHitTestResult result, Offset transformed) {
+        hitTest: (final BoxHitTestResult result, final Offset transformed) {
           assert(transformed == position - parentData.offset);
           return child.hitTest(result, position: transformed);
         },
@@ -214,35 +214,35 @@ class RenderDiagonal extends RenderBox
   // Incoming height/width are ignored as children are always laid out unconstrained.
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     final double topLeftWidth = _topLeft?.getMinIntrinsicWidth(double.infinity) ?? 0;
     final double bottomRightWith = _bottomRight?.getMinIntrinsicWidth(double.infinity) ?? 0;
     return topLeftWidth + bottomRightWith;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     final double topLeftWidth = _topLeft?.getMaxIntrinsicWidth(double.infinity) ?? 0;
     final double bottomRightWith = _bottomRight?.getMaxIntrinsicWidth(double.infinity) ?? 0;
     return topLeftWidth + bottomRightWith;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     final double topLeftHeight = _topLeft?.getMinIntrinsicHeight(double.infinity) ?? 0;
     final double bottomRightHeight = _bottomRight?.getMinIntrinsicHeight(double.infinity) ?? 0;
     return topLeftHeight + bottomRightHeight;
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     final double topLeftHeight = _topLeft?.getMaxIntrinsicHeight(double.infinity) ?? 0;
     final double bottomRightHeight = _bottomRight?.getMaxIntrinsicHeight(double.infinity) ?? 0;
     return topLeftHeight + bottomRightHeight;
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     const BoxConstraints childConstraints = BoxConstraints();
     final Size topLeftSize = _topLeft?.computeDryLayout(childConstraints) ?? Size.zero;
     final Size bottomRightSize = _bottomRight?.computeDryLayout(childConstraints) ?? Size.zero;
@@ -257,7 +257,7 @@ class ExampleWidget extends StatelessWidget {
   const ExampleWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Slotted RenderObject Example')),

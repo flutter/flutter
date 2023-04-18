@@ -12,7 +12,7 @@ class RefreshControlApp extends StatelessWidget {
   const RefreshControlApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: RefreshControlExample(),
@@ -40,7 +40,7 @@ class _RefreshControlExampleState extends State<RefreshControlExample> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoSliverRefreshControl Sample'),
@@ -68,7 +68,7 @@ class _RefreshControlExampleState extends State<RefreshControlExample> {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) => items[index],
+              (final BuildContext context, final int index) => items[index],
               childCount: items.length,
             ),
           ),

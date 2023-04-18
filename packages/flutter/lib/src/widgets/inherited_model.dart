@@ -125,7 +125,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// Return true if the changes between this model and [oldWidget] match any
   /// of the [dependencies].
   @protected
-  bool updateShouldNotifyDependent(covariant InheritedModel<T> oldWidget, Set<T> dependencies);
+  bool updateShouldNotifyDependent(covariant final InheritedModel<T> oldWidget, final Set<T> dependencies);
 
   /// Returns true if this model supports the given [aspect].
   ///
@@ -135,11 +135,11 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// all model aspects. This is typically done when a model can be used
   /// to "shadow" some aspects of an ancestor.
   @protected
-  bool isSupportedAspect(Object aspect) => true;
+  bool isSupportedAspect(final Object aspect) => true;
 
   // The [result] will be a list of all of context's type T ancestors concluding
   // with the one that supports the specified model [aspect].
-  static void _findModels<T extends InheritedModel<Object>>(BuildContext context, Object aspect, List<InheritedElement> results) {
+  static void _findModels<T extends InheritedModel<Object>>(final BuildContext context, final Object aspect, final List<InheritedElement> results) {
     final InheritedElement? model = context.getElementForInheritedWidgetOfExactType<T>();
     if (model == null) {
       return;
@@ -154,7 +154,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
     }
 
     Element? modelParent;
-    model.visitAncestorElements((Element ancestor) {
+    model.visitAncestorElements((final Element ancestor) {
       modelParent = ancestor;
       return false;
     });
@@ -180,7 +180,7 @@ abstract class InheritedModel<T> extends InheritedWidget {
   /// `context.dependOnInheritedWidgetOfExactType<T>()`.
   ///
   /// If no ancestor of type T exists, null is returned.
-  static T? inheritFrom<T extends InheritedModel<Object>>(BuildContext context, { Object? aspect }) {
+  static T? inheritFrom<T extends InheritedModel<Object>>(final BuildContext context, { final Object? aspect }) {
     if (aspect == null) {
       return context.dependOnInheritedWidgetOfExactType<T>();
     }
@@ -212,7 +212,7 @@ class InheritedModelElement<T> extends InheritedElement {
   InheritedModelElement(InheritedModel<T> super.widget);
 
   @override
-  void updateDependencies(Element dependent, Object? aspect) {
+  void updateDependencies(final Element dependent, final Object? aspect) {
     final Set<T>? dependencies = getDependencies(dependent) as Set<T>?;
     if (dependencies != null && dependencies.isEmpty) {
       return;
@@ -227,7 +227,7 @@ class InheritedModelElement<T> extends InheritedElement {
   }
 
   @override
-  void notifyDependent(InheritedModel<T> oldWidget, Element dependent) {
+  void notifyDependent(final InheritedModel<T> oldWidget, final Element dependent) {
     final Set<T>? dependencies = getDependencies(dependent) as Set<T>?;
     if (dependencies == null) {
       return;

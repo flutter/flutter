@@ -10,14 +10,14 @@ class LargeImagesPage extends StatelessWidget {
   const LargeImagesPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ImageCache imageCache = PaintingBinding.instance.imageCache;
     imageCache.maximumSize = 30;
     imageCache.maximumSizeBytes = 50 << 20;
     return GridView.builder(
       itemCount: 1000,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-      itemBuilder: (BuildContext context, int index) => DummyImage(index),
+      itemBuilder: (final BuildContext context, final int index) => DummyImage(index),
     ).build(context);
   }
 }
@@ -26,12 +26,12 @@ class DummyImage extends StatelessWidget {
   DummyImage(this.index) : super(key: ValueKey<int>(index));
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Future<ByteData> pngData = _getPngData(context);
 
     return FutureBuilder<ByteData>(
       future: pngData,
-      builder: (BuildContext context, AsyncSnapshot<ByteData> snapshot) {
+      builder: (final BuildContext context, final AsyncSnapshot<ByteData> snapshot) {
         // Use Image.memory instead of Image.asset to make sure that we're
         // creating many copies of the image to trigger the memory issue.
         return snapshot.data == null
@@ -43,7 +43,7 @@ class DummyImage extends StatelessWidget {
 
   final int index;
 
-  Future<ByteData> _getPngData(BuildContext context) async {
+  Future<ByteData> _getPngData(final BuildContext context) async {
     return DefaultAssetBundle.of(context).load('assets/999x1000.png');
   }
 }

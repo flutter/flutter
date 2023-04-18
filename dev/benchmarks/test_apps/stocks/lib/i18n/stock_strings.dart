@@ -66,11 +66,11 @@ import 'stock_strings_es.dart';
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 abstract class StockStrings {
-  StockStrings(String locale) : localeName = intl.Intl.canonicalizedLocale(locale);
+  StockStrings(final String locale) : localeName = intl.Intl.canonicalizedLocale(locale);
 
   final String localeName;
 
-  static StockStrings of(BuildContext context) {
+  static StockStrings of(final BuildContext context) {
     return Localizations.of<StockStrings>(context, StockStrings)!;
   }
 
@@ -123,18 +123,18 @@ class _StockStringsDelegate extends LocalizationsDelegate<StockStrings> {
   const _StockStringsDelegate();
 
   @override
-  Future<StockStrings> load(Locale locale) {
+  Future<StockStrings> load(final Locale locale) {
     return SynchronousFuture<StockStrings>(_lookupStockStrings(locale));
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
+  bool isSupported(final Locale locale) => <String>['en', 'es'].contains(locale.languageCode);
 
   @override
-  bool shouldReload(_StockStringsDelegate old) => false;
+  bool shouldReload(final _StockStringsDelegate old) => false;
 }
 
-StockStrings _lookupStockStrings(Locale locale) {
+StockStrings _lookupStockStrings(final Locale locale) {
 
   // Lookup logic when language+country codes are specified.
   switch (locale.languageCode) {

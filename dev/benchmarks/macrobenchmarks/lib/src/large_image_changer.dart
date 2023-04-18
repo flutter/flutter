@@ -29,8 +29,8 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
       allowUpscaling: true,
     );
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 3), (Timer timer) {
-      currentImage.evict().then((_) {
+    _timer = Timer.periodic(const Duration(seconds: 3), (final Timer timer) {
+      currentImage.evict().then((final _) {
         setState(() {
           imageIndex = (imageIndex + 1) % 6;
           currentImage = ResizeImage(
@@ -51,7 +51,7 @@ class _LargeImageChangerState extends State<LargeImageChangerPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Image(image: currentImage);
   }
 }

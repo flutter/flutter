@@ -74,7 +74,7 @@ void main() {
 
   testWithoutContext('exit does not throw a StateError if overridden', () {
     try {
-      setExitFunctionForTests((int value) {});
+      setExitFunctionForTests((final int value) {});
 
       expect(() => exit(0), returnsNormally);
     } finally {
@@ -89,9 +89,9 @@ void main() {
   testWithoutContext('listNetworkInterfaces() uses overrides', () async {
     setNetworkInterfaceLister(
       ({
-        bool? includeLoopback,
-        bool? includeLinkLocal,
-        InternetAddressType? type,
+        final bool? includeLoopback,
+        final bool? includeLinkLocal,
+        final InternetAddressType? type,
       }) async => <NetworkInterface>[],
     );
 

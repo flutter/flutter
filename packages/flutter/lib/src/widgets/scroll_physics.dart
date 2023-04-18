@@ -112,7 +112,7 @@ class ScrollPhysics {
   /// }
   /// ```
   @protected
-  ScrollPhysics? buildParent(ScrollPhysics? ancestor) => parent?.applyTo(ancestor) ?? ancestor;
+  ScrollPhysics? buildParent(final ScrollPhysics? ancestor) => parent?.applyTo(ancestor) ?? ancestor;
 
   /// Combines this [ScrollPhysics] instance with the given physics.
   ///
@@ -171,7 +171,7 @@ class ScrollPhysics {
   ///
   ///  * [buildParent], a utility method that's often used to define [applyTo]
   ///    methods for [ScrollPhysics] subclasses.
-  ScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  ScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return ScrollPhysics(parent: buildParent(ancestor));
   }
 
@@ -189,7 +189,7 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+  double applyPhysicsToUserOffset(final ScrollMetrics position, final double offset) {
     if (parent == null) {
       return offset;
     }
@@ -206,7 +206,7 @@ class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  bool shouldAcceptUserOffset(ScrollMetrics position) {
+  bool shouldAcceptUserOffset(final ScrollMetrics position) {
     if (!allowUserScrolling) {
       return false;
     }
@@ -258,7 +258,7 @@ class ScrollPhysics {
   /// Returning true from this method indicates that the current scroll velocity
   /// is great enough that expensive operations impacting the UI should be
   /// deferred.
-  bool recommendDeferredLoading(double velocity, ScrollMetrics metrics, BuildContext context) {
+  bool recommendDeferredLoading(final double velocity, final ScrollMetrics metrics, final BuildContext context) {
     if (parent == null) {
       final double maxPhysicalPixels = View.of(context).physicalSize.longestSide;
       return velocity.abs() > maxPhysicalPixels;
@@ -300,7 +300,7 @@ class ScrollPhysics {
   /// other words, it disallows scrolling past the boundary, but allows
   /// scrolling back from being overscrolled, if for some reason the position
   /// ends up overscrolled.
-  double applyBoundaryConditions(ScrollMetrics position, double value) {
+  double applyBoundaryConditions(final ScrollMetrics position, final double value) {
     if (parent == null) {
       return 0.0;
     }
@@ -352,10 +352,10 @@ class ScrollPhysics {
   ///    which prevents unexpected changes to the content dimensions from
   ///    causing the scroll position to get any further out of bounds.
   double adjustPositionForNewDimensions({
-    required ScrollMetrics oldPosition,
-    required ScrollMetrics newPosition,
-    required bool isScrolling,
-    required double velocity,
+    required final ScrollMetrics oldPosition,
+    required final ScrollMetrics newPosition,
+    required final bool isScrolling,
+    required final double velocity,
   }) {
     if (parent == null) {
       return newPosition.pixels;
@@ -397,7 +397,7 @@ class ScrollPhysics {
   //     https://github.com/flutter/flutter/issues/120338
   //     https://github.com/flutter/flutter/issues/120340
   //     https://github.com/flutter/flutter/issues/109675
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(final ScrollMetrics position, final double velocity) {
     if (parent == null) {
       return null;
     }
@@ -430,7 +430,7 @@ class ScrollPhysics {
   }
 
   /// The tolerance to use for ballistic simulations.
-  Tolerance toleranceFor(ScrollMetrics metrics) {
+  Tolerance toleranceFor(final ScrollMetrics metrics) {
     return parent?.toleranceFor(metrics) ?? Tolerance(
       velocity: 1.0 / (0.050 * metrics.devicePixelRatio), // logical pixels per second
       distance: 1.0 / metrics.devicePixelRatio, // logical pixels
@@ -470,7 +470,7 @@ class ScrollPhysics {
   /// scroll drag is applied in the same direction.
   ///
   /// By default, physics for platforms other than iOS doesn't carry momentum.
-  double carriedMomentum(double existingVelocity) {
+  double carriedMomentum(final double existingVelocity) {
     if (parent == null) {
       return 0.0;
     }
@@ -565,16 +565,16 @@ class RangeMaintainingScrollPhysics extends ScrollPhysics {
   const RangeMaintainingScrollPhysics({ super.parent });
 
   @override
-  RangeMaintainingScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  RangeMaintainingScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return RangeMaintainingScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
   double adjustPositionForNewDimensions({
-    required ScrollMetrics oldPosition,
-    required ScrollMetrics newPosition,
-    required bool isScrolling,
-    required double velocity,
+    required final ScrollMetrics oldPosition,
+    required final ScrollMetrics newPosition,
+    required final bool isScrolling,
+    required final double velocity,
   }) {
     bool maintainOverscroll = true;
     bool enforceBoundary = true;
@@ -675,7 +675,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   final ScrollDecelerationRate decelerationRate;
 
   @override
-  BouncingScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  BouncingScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return BouncingScrollPhysics(
       parent: buildParent(ancestor),
       decelerationRate: decelerationRate
@@ -690,7 +690,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// This factor starts at 0.52 and progressively becomes harder to overscroll
   /// as more of the area past the edge is dragged in (represented by an increasing
   /// `overscrollFraction` which starts at 0 when there is no overscroll).
-  double frictionFactor(double overscrollFraction) {
+  double frictionFactor(final double overscrollFraction) {
     switch (decelerationRate) {
       case ScrollDecelerationRate.fast:
         return 0.26 * math.pow(1 - overscrollFraction, 2);
@@ -700,7 +700,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+  double applyPhysicsToUserOffset(final ScrollMetrics position, final double offset) {
     assert(offset != 0.0);
     assert(position.minScrollExtent <= position.maxScrollExtent);
 
@@ -726,7 +726,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
     return direction * _applyFriction(overscrollPast, offset.abs(), friction);
   }
 
-  static double _applyFriction(double extentOutside, double absDelta, double gamma) {
+  static double _applyFriction(final double extentOutside, double absDelta, final double gamma) {
     assert(absDelta > 0);
     double total = 0.0;
     if (extentOutside > 0) {
@@ -741,10 +741,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
+  double applyBoundaryConditions(final ScrollMetrics position, final double value) => 0.0;
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(final ScrollMetrics position, final double velocity) {
     final Tolerance tolerance = toleranceFor(position);
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       double constantDeceleration;
@@ -787,7 +787,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   /// and (related) time since last fling are factors for the velocity transfer
   /// calculations.
   @override
-  double carriedMomentum(double existingVelocity) {
+  double carriedMomentum(final double existingVelocity) {
     return existingVelocity.sign *
         math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 40000.0);
   }
@@ -844,12 +844,12 @@ class ClampingScrollPhysics extends ScrollPhysics {
   const ClampingScrollPhysics({ super.parent });
 
   @override
-  ClampingScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  ClampingScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return ClampingScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
-  double applyBoundaryConditions(ScrollMetrics position, double value) {
+  double applyBoundaryConditions(final ScrollMetrics position, final double value) {
     assert(() {
       if (value == position.pixels) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -886,7 +886,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+  Simulation? createBallisticSimulation(final ScrollMetrics position, final double velocity) {
     final Tolerance tolerance = toleranceFor(position);
     if (position.outOfRange) {
       double? end;
@@ -945,12 +945,12 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   const AlwaysScrollableScrollPhysics({ super.parent });
 
   @override
-  AlwaysScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  AlwaysScrollableScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return AlwaysScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
-  bool shouldAcceptUserOffset(ScrollMetrics position) => true;
+  bool shouldAcceptUserOffset(final ScrollMetrics position) => true;
 }
 
 /// Scroll physics that does not allow the user to scroll.
@@ -968,7 +968,7 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
   const NeverScrollableScrollPhysics({ super.parent });
 
   @override
-  NeverScrollableScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  NeverScrollableScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return NeverScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 

@@ -13,7 +13,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('RawMaterialButton responds when tapped', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton responds when tapped', (final WidgetTester tester) async {
     bool pressed = false;
     const Color splashColor = Color(0xff00ff00);
     await tester.pumpWidget(
@@ -40,7 +40,7 @@ void main() {
     expect(pressed, isTrue);
   });
 
-  testWidgets('RawMaterialButton responds to shortcut when activated', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton responds to shortcut when activated', (final WidgetTester tester) async {
     bool pressed = false;
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Button');
     const Color splashColor = Color(0xff00ff00);
@@ -104,7 +104,7 @@ void main() {
     expect(pressed, isTrue);
   });
 
-  testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
+  testWidgets('materialTapTargetSize.padded expands hit test area', (final WidgetTester tester) async {
     int pressed = 0;
 
     await tester.pumpWidget(
@@ -126,7 +126,7 @@ void main() {
     expect(pressed, 1);
   });
 
-  testWidgets('materialTapTargetSize.padded expands semantics area', (WidgetTester tester) async {
+  testWidgets('materialTapTargetSize.padded expands semantics area', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       Directionality(
@@ -169,7 +169,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Ink splash from center tap originates in correct location', (WidgetTester tester) async {
+  testWidgets('Ink splash from center tap originates in correct location', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const Color fillColor = Color(0xFFEF5350);
@@ -201,7 +201,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Ink splash from tap above material originates in correct location', (WidgetTester tester) async {
+  testWidgets('Ink splash from tap above material originates in correct location', (final WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xAA0000FF);
     const Color fillColor = Color(0xFFEF5350);
@@ -232,7 +232,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('off-center child is hit testable', (WidgetTester tester) async {
+  testWidgets('off-center child is hit testable', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -262,7 +262,7 @@ void main() {
     expect(find.text('Material').hitTestable(), findsOneWidget);
   });
 
-  testWidgets('smaller child is hit testable', (WidgetTester tester) async {
+  testWidgets('smaller child is hit testable', (final WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -287,7 +287,7 @@ void main() {
     expect(find.byKey(key).hitTestable(), findsOneWidget);
   });
 
-  testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton can be expanded by parent constraints', (final WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -307,7 +307,7 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(800.0, 48.0));
   });
 
-  testWidgets('RawMaterialButton handles focus', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton handles focus', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button Focus');
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
@@ -335,7 +335,7 @@ void main() {
     expect(box, paints..rect(color: focusColor));
   });
 
-  testWidgets('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton loses focus when disabled.', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawMaterialButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -369,7 +369,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
+  testWidgets("Disabled RawMaterialButton can't be traversed to.", (final WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: '$RawMaterialButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: '$RawMaterialButton 2');
 
@@ -409,7 +409,7 @@ void main() {
     expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('RawMaterialButton handles hover', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton handles hover', (final WidgetTester tester) async {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
@@ -438,12 +438,12 @@ void main() {
     expect(box, paints..rect(color: hoverColor));
   });
 
-  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are correctly called when non-null', (final WidgetTester tester) async {
 
     bool wasPressed;
     Finder rawMaterialButton;
 
-    Widget buildFrame({ VoidCallback? onPressed, VoidCallback? onLongPress }) {
+    Widget buildFrame({ final VoidCallback? onPressed, final VoidCallback? onLongPress }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: RawMaterialButton(
@@ -482,7 +482,7 @@ void main() {
     expect(tester.widget<RawMaterialButton>(rawMaterialButton).enabled, false);
   });
 
-  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton onPressed and onLongPress callbacks are distinctly recognized', (final WidgetTester tester) async {
     bool didPressButton = false;
     bool didLongPressButton = false;
 
@@ -513,11 +513,11 @@ void main() {
     expect(didLongPressButton, isTrue);
   });
 
-  testWidgets('RawMaterialButton responds to density changes.', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton responds to density changes.', (final WidgetTester tester) async {
     const Key key = Key('test');
     const Key childKey = Key('test child');
 
-    Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
+    Future<void> buildTest(final VisualDensity visualDensity, {final bool useText = false}) async {
       return tester.pumpWidget(
         MaterialApp(
           home: Directionality(
@@ -573,7 +573,7 @@ void main() {
     expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 
-  testWidgets('RawMaterialButton changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton changes mouse cursor when hovered', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,

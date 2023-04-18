@@ -9,7 +9,7 @@ import '../build_info.dart';
 
 /// Quiver has this, but unfortunately we can't depend on it bc flutter_tools
 /// uses non-nullsafe quiver by default (because of dwds).
-bool _listsEqual(List<dynamic>? a, List<dynamic>? b) {
+bool _listsEqual(final List<dynamic>? a, final List<dynamic>? b) {
   if (a == b) {
     return true;
   }
@@ -20,7 +20,7 @@ bool _listsEqual(List<dynamic>? a, List<dynamic>? b) {
     return false;
   }
 
-  return a.asMap().entries.every((MapEntry<int, dynamic> e) => e.value == b[e.key]);
+  return a.asMap().entries.every((final MapEntry<int, dynamic> e) => e.value == b[e.key]);
 }
 
 /// The normal [RegExp.==] operator is inherited from [Object], so only
@@ -30,7 +30,7 @@ bool _listsEqual(List<dynamic>? a, List<dynamic>? b) {
 /// functionally the same, i.e. when they have the same matches & captures for
 /// any given input. At least that's the goal, in reality this has lots of false
 /// negatives (for example when the flags differ). Still better than [RegExp.==].
-bool _regexesEqual(RegExp? a, RegExp? b) {
+bool _regexesEqual(final RegExp? a, final RegExp? b) {
   if (a == b) {
     return true;
   }
@@ -53,8 +53,8 @@ class CustomDeviceRevivalException implements Exception {
   const CustomDeviceRevivalException(this.message);
 
   const CustomDeviceRevivalException.fromDescriptions(
-    String fieldDescription,
-    String expectedValueDescription
+    final String fieldDescription,
+    final String expectedValueDescription
   ) : message = 'Expected $fieldDescription to be $expectedValueDescription.';
 
   final String message;
@@ -65,7 +65,7 @@ class CustomDeviceRevivalException implements Exception {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return (other is CustomDeviceRevivalException) &&
         (other.message == message);
   }
@@ -107,7 +107,7 @@ class CustomDeviceConfig {
   /// some value is missing, etc) a [CustomDeviceRevivalException] with the description
   /// of the error is thrown. (No exceptions/errors other than JsonRevivalException
   /// should ever be thrown by this factory.)
-  factory CustomDeviceConfig.fromJson(dynamic json) {
+  factory CustomDeviceConfig.fromJson(final dynamic json) {
     final Map<String, dynamic> typedMap = _castJsonObject(
       json,
       'device configuration',
@@ -293,7 +293,7 @@ class CustomDeviceConfig {
   /// This is not the platform of the target device, it's the platform of the
   /// development machine. Examples for different platforms may be different
   /// because for example the ping command is different on Windows or Linux/macOS.
-  static CustomDeviceConfig getExampleForPlatform(Platform platform) {
+  static CustomDeviceConfig getExampleForPlatform(final Platform platform) {
     if (platform.isWindows) {
       return exampleWindows;
     }
@@ -331,7 +331,7 @@ class CustomDeviceConfig {
   /// If anything at all is thrown when executing the closure, a
   /// [CustomDeviceRevivalException] is thrown with the given [fieldDescription] and
   /// [expectedValueDescription].
-  static T _maybeRethrowAsRevivalException<T>(T Function() closure, String fieldDescription, String expectedValueDescription) {
+  static T _maybeRethrowAsRevivalException<T>(final T Function() closure, final String fieldDescription, final String expectedValueDescription) {
     try {
       return closure();
     } on Object {
@@ -343,7 +343,7 @@ class CustomDeviceConfig {
   ///
   /// If the value is null or not a valid string-keyed map, a [CustomDeviceRevivalException]
   /// with the given [fieldDescription] and [expectedValueDescription] is thrown.
-  static Map<String, dynamic> _castJsonObject(dynamic value, String fieldDescription, String expectedValueDescription) {
+  static Map<String, dynamic> _castJsonObject(final dynamic value, final String fieldDescription, final String expectedValueDescription) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
     }
@@ -359,7 +359,7 @@ class CustomDeviceConfig {
   ///
   /// If the value is null or not a bool, a [CustomDeviceRevivalException] with the given
   /// [fieldDescription] and [expectedValueDescription] is thrown.
-  static bool _castBool(dynamic value, String fieldDescription, String expectedValueDescription) {
+  static bool _castBool(final dynamic value, final String fieldDescription, final String expectedValueDescription) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
     }
@@ -375,7 +375,7 @@ class CustomDeviceConfig {
   ///
   /// If the value is null or not a String, a [CustomDeviceRevivalException] with the given
   /// [fieldDescription] and [expectedValueDescription] is thrown.
-  static String _castString(dynamic value, String fieldDescription, String expectedValueDescription) {
+  static String _castString(final dynamic value, final String fieldDescription, final String expectedValueDescription) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
     }
@@ -391,7 +391,7 @@ class CustomDeviceConfig {
   ///
   /// If the value not null and not a String, a [CustomDeviceRevivalException] with the given
   /// [fieldDescription] and [expectedValueDescription] is thrown.
-  static String? _castStringOrNull(dynamic value, String fieldDescription, String expectedValueDescription) {
+  static String? _castStringOrNull(final dynamic value, final String fieldDescription, final String expectedValueDescription) {
     if (value == null) {
       return null;
     }
@@ -405,10 +405,10 @@ class CustomDeviceConfig {
   /// a [CustomDeviceRevivalException] with the given [fieldDescription] and
   /// [expectedValueDescription] is thrown.
   static List<String> _castStringList(
-    dynamic value,
-    String fieldDescription,
-    String expectedValueDescription, {
-    int minLength = 0,
+    final dynamic value,
+    final String fieldDescription,
+    final String expectedValueDescription, {
+    final int minLength = 0,
   }) {
     if (value == null) {
       throw CustomDeviceRevivalException.fromDescriptions(fieldDescription, expectedValueDescription);
@@ -434,10 +434,10 @@ class CustomDeviceConfig {
   /// a [CustomDeviceRevivalException] with the given [fieldDescription] and
   /// [expectedValueDescription] is thrown.
   static List<String>? _castStringListOrNull(
-    dynamic value,
-    String fieldDescription,
-    String expectedValueDescription, {
-    int minLength = 0,
+    final dynamic value,
+    final String fieldDescription,
+    final String expectedValueDescription, {
+    final int minLength = 0,
   }) {
     if (value == null) {
       return null;
@@ -452,7 +452,7 @@ class CustomDeviceConfig {
   /// If the value is not null and not a valid string-ified regex,
   /// a [CustomDeviceRevivalException] with the given [fieldDescription] and
   /// [expectedValueDescription] is thrown.
-  static RegExp? _convertToRegexOrNull(dynamic value, String fieldDescription, String expectedValueDescription) {
+  static RegExp? _convertToRegexOrNull(final dynamic value, final String fieldDescription, final String expectedValueDescription) {
     if (value == null) {
       return null;
     }
@@ -484,26 +484,26 @@ class CustomDeviceConfig {
   }
 
   CustomDeviceConfig copyWith({
-    String? id,
-    String? label,
-    String? sdkNameAndVersion,
-    bool explicitPlatform = false,
-    TargetPlatform? platform,
-    bool? enabled,
-    List<String>? pingCommand,
-    bool explicitPingSuccessRegex = false,
-    RegExp? pingSuccessRegex,
-    bool explicitPostBuildCommand = false,
-    List<String>? postBuildCommand,
-    List<String>? installCommand,
-    List<String>? uninstallCommand,
-    List<String>? runDebugCommand,
-    bool explicitForwardPortCommand = false,
-    List<String>? forwardPortCommand,
-    bool explicitForwardPortSuccessRegex = false,
-    RegExp? forwardPortSuccessRegex,
-    bool explicitScreenshotCommand = false,
-    List<String>? screenshotCommand
+    final String? id,
+    final String? label,
+    final String? sdkNameAndVersion,
+    final bool explicitPlatform = false,
+    final TargetPlatform? platform,
+    final bool? enabled,
+    final List<String>? pingCommand,
+    final bool explicitPingSuccessRegex = false,
+    final RegExp? pingSuccessRegex,
+    final bool explicitPostBuildCommand = false,
+    final List<String>? postBuildCommand,
+    final List<String>? installCommand,
+    final List<String>? uninstallCommand,
+    final List<String>? runDebugCommand,
+    final bool explicitForwardPortCommand = false,
+    final List<String>? forwardPortCommand,
+    final bool explicitForwardPortSuccessRegex = false,
+    final RegExp? forwardPortSuccessRegex,
+    final bool explicitScreenshotCommand = false,
+    final List<String>? screenshotCommand
   }) {
     return CustomDeviceConfig(
       id: id ?? this.id,
@@ -524,7 +524,7 @@ class CustomDeviceConfig {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is CustomDeviceConfig
       && other.id == id
       && other.label == label

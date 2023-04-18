@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/basic/indexed_stack.0.dart' as examp
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('has correct forward rendering mechanism', (WidgetTester tester) async {
+  testWidgets('has correct forward rendering mechanism', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture2 = find.byKey(const Key('gesture2'));
@@ -30,7 +30,7 @@ void main() {
     expect(containerFinder1.renderObject!.debugNeedsPaint, false);
     expect(containerFinder2.renderObject!.debugNeedsPaint, false);
   });
-  testWidgets('has correct backward rendering mechanism', (WidgetTester tester) async {
+  testWidgets('has correct backward rendering mechanism', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture1 = find.byKey(const Key('gesture1'));
@@ -50,7 +50,7 @@ void main() {
     expect(containerFinder1.renderObject!.debugNeedsPaint, false);
     expect(containerFinder2.renderObject!.debugNeedsPaint, false);
   });
-  testWidgets('has correct element addition handling', (WidgetTester tester) async {
+  testWidgets('has correct element addition handling', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.IndexedStackApp());
 
     expect(find.byType(example.PersonTracker), findsOneWidget);
@@ -66,14 +66,14 @@ void main() {
     await tester.pump();
     expect(find.byType(example.PersonTracker, skipOffstage: false), findsNWidgets(5));
   });
-  testWidgets('has state preservation', (WidgetTester tester) async {
+  testWidgets('has state preservation', (final WidgetTester tester) async {
     await tester.pumpWidget(const example.IndexedStackApp());
 
     final Finder gesture1 = find.byKey(const Key('gesture1'));
     final Finder gesture2 = find.byKey(const Key('gesture2'));
     final Finder containerFinder = find.byKey(const Key('Dash'));
     final Finder incrementFinder = find.byKey(const Key('incrementDash'));
-    Finder counterFinder(int score) {
+    Finder counterFinder(final int score) {
       return find.descendant(of: containerFinder, matching: find.text('Score: $score'));
     }
 

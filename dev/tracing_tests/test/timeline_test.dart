@@ -39,7 +39,7 @@ class TestRootState extends State<TestRoot> {
 
   Widget _widget = const Placeholder();
 
-  void updateWidget(Widget newWidget) {
+  void updateWidget(final Widget newWidget) {
     setState(() {
       _widget = newWidget;
     });
@@ -52,7 +52,7 @@ class TestRootState extends State<TestRoot> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _widget;
   }
 }
@@ -107,7 +107,7 @@ void main() {
       events.map<String>(eventToName),
       <String>['BUILD', 'Placeholder', 'CustomPaint', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
-    args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    args = (events.where((final TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['color'], 'Color(0xffffffff)');
     debugProfileBuildsEnabled = false;
     debugEnhanceBuildTimelineArguments = false;
@@ -120,7 +120,7 @@ void main() {
       events.map<String>(eventToName),
       <String>['BUILD', 'Placeholder', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
-    args = (events.where((TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    args = (events.where((final TimelineEvent event) => event.json!['name'] == '$Placeholder').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['color'], 'Color(0xffffffff)');
     debugProfileBuildsEnabledUserWidgets = false;
     debugEnhanceBuildTimelineArguments = false;
@@ -133,7 +133,7 @@ void main() {
       events.map<String>(eventToName),
       <String>['BUILD', 'LAYOUT', 'RenderCustomPaint', 'UPDATING COMPOSITING BITS', 'PAINT', 'COMPOSITING', 'FINALIZE TREE'],
     );
-    args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    args = (events.where((final TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
     expect(args['painter'], startsWith('_PlaceholderPainter#'));
@@ -148,7 +148,7 @@ void main() {
       events.map<String>(eventToName),
       <String>['BUILD', 'LAYOUT', 'UPDATING COMPOSITING BITS', 'PAINT', 'RenderCustomPaint', 'COMPOSITING', 'FINALIZE TREE'],
     );
-    args = (events.where((TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
+    args = (events.where((final TimelineEvent event) => event.json!['name'] == '$RenderCustomPaint').single.json!['args'] as Map<String, Object?>).cast<String, String>();
     expect(args['creator'], startsWith('CustomPaint'));
     expect(args['creator'], contains('Placeholder'));
     expect(args['painter'], startsWith('_PlaceholderPainter#'));

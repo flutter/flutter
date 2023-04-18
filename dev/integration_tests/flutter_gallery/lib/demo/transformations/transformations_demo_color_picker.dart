@@ -19,10 +19,10 @@ class ColorPicker extends StatelessWidget {
   final ValueChanged<Color>? onColorSelection;
 
   @override
-  Widget build (BuildContext context) {
+  Widget build (final BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: colors.map((Color color) {
+      children: colors.map((final Color color) {
         return _ColorPickerSwatch(
           color: color,
           selected: color == selectedColor,
@@ -49,7 +49,7 @@ class _ColorPickerSwatch extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build (BuildContext context) {
+  Widget build (final BuildContext context) {
     return Container(
       width: 60.0,
       height: 60.0,

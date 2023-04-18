@@ -53,7 +53,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
     super.dispose();
   }
 
-  void _handleStatusChange(AnimationStatus status) {
+  void _handleStatusChange(final AnimationStatus status) {
     final bool value = widget.controller!.status == widget.status;
     if (_active != value) {
       setState(() {
@@ -63,7 +63,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget child = AbsorbPointer(
       absorbing: !_active!,
       child: widget.child,
@@ -83,7 +83,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 class _CrossFadeTransition extends AnimatedWidget {
   const _CrossFadeTransition({
     this.alignment = Alignment.center,
-    required Animation<double> progress,
+    required final Animation<double> progress,
     this.child0,
     this.child1,
   }) : super(listenable: progress);
@@ -93,7 +93,7 @@ class _CrossFadeTransition extends AnimatedWidget {
   final Widget? child1;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Animation<double> progress = listenable as Animation<double>;
 
     final double opacity1 = CurvedAnimation(
@@ -142,7 +142,7 @@ class _BackAppBar extends StatelessWidget {
   final Widget? trailing;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return IconTheme.merge(
       data: theme.primaryIconTheme,
@@ -212,7 +212,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
       value: 1.0,
       vsync: this,
     );
-    _controller!.addStatusListener((AnimationStatus status) {
+    _controller!.addStatusListener((final AnimationStatus status) {
       setState(() {
         // This is intentionally left empty. The state change itself takes
         // place inside the AnimationController, so there's nothing to update.
@@ -236,11 +236,11 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     return math.max(0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     _controller!.value -= details.primaryDelta! / _backdropHeight;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     if (_controller!.isAnimating || _controller!.status == AnimationStatus.completed) {
       return;
     }
@@ -261,7 +261,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     _controller!.fling(velocity: isOpen ? -2.0 : 2.0);
   }
 
-  Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+  Widget _buildStack(final BuildContext context, final BoxConstraints constraints) {
     final Animation<RelativeRect> frontRelativeRect = _controller!.drive(RelativeRectTween(
       begin: RelativeRect.fromLTRB(0.0, constraints.biggest.height - _kFrontClosedHeight, 0.0, 0.0),
       end: const RelativeRect.fromLTRB(0.0, _kBackAppBarHeight, 0.0, 0.0),
@@ -308,7 +308,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           rect: frontRelativeRect,
           child: AnimatedBuilder(
             animation: _controller!,
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return PhysicalShape(
                 elevation: 12.0,
                 color: Theme.of(context).canvasColor,
@@ -356,7 +356,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LayoutBuilder(builder: _buildStack);
   }
 }

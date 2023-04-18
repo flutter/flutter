@@ -30,11 +30,11 @@ class _ColorFilterWithUnstableChildPageState extends State<ColorFilterWithUnstab
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _offsetY,
-      builder: (BuildContext context, Widget? child) {
-        return Stack(children: List<Widget>.generate(50, (int i) => Positioned(
+      builder: (final BuildContext context, final Widget? child) {
+        return Stack(children: List<Widget>.generate(50, (final int i) => Positioned(
           left: 0,
           top: (200 * i).toDouble() + _offsetY.value,
             child: ColorFiltered(

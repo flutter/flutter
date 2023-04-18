@@ -12,7 +12,7 @@ class NestedScrollViewExampleApp extends StatelessWidget {
   const NestedScrollViewExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: NestedScrollViewExample(),
     );
@@ -23,13 +23,13 @@ class NestedScrollViewExample extends StatelessWidget {
   const NestedScrollViewExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<String> tabs = <String>['Tab 1', 'Tab 2'];
     return DefaultTabController(
       length: tabs.length, // This is the number of tabs.
       child: Scaffold(
         body: NestedScrollView(
-          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          headerSliverBuilder: (final BuildContext context, final bool innerBoxIsScrolled) {
             // These are the slivers that show up in the "outer" scroll view.
             return <Widget>[
               SliverOverlapAbsorber(
@@ -56,7 +56,7 @@ class NestedScrollViewExample extends StatelessWidget {
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
                     // These are the widgets to put in each tab in the tab bar.
-                    tabs: tabs.map((String name) => Tab(text: name)).toList(),
+                    tabs: tabs.map((final String name) => Tab(text: name)).toList(),
                   ),
                 ),
               ),
@@ -64,7 +64,7 @@ class NestedScrollViewExample extends StatelessWidget {
           },
           body: TabBarView(
             // These are the contents of the tab views, below the tabs.
-            children: tabs.map((String name) {
+            children: tabs.map((final String name) {
               return SafeArea(
                 top: false,
                 bottom: false,
@@ -73,7 +73,7 @@ class NestedScrollViewExample extends StatelessWidget {
                   // "inside" the NestedScrollView, so that
                   // sliverOverlapAbsorberHandleFor() can find the
                   // NestedScrollView.
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     return CustomScrollView(
                       // The "controller" and "primary" members should be left
                       // unset, so that the NestedScrollView can control this
@@ -102,7 +102,7 @@ class NestedScrollViewExample extends StatelessWidget {
                             // ListTile widgets.
                             itemExtent: 48.0,
                             delegate: SliverChildBuilderDelegate(
-                              (BuildContext context, int index) {
+                              (final BuildContext context, final int index) {
                                 // This builder is called for each child.
                                 // In this example, we just number each list item.
                                 return ListTile(

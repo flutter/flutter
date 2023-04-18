@@ -50,7 +50,7 @@ const String foundationImportDartCode = '''
 import 'package:flutter/foundation.dart';
 ''';
 
-void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
+void _standardFlutterDirectoryL10nSetup(final FileSystem fs) {
   final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
     ..createSync(recursive: true);
   l10nDirectory.childFile(defaultTemplateArbFileName)
@@ -81,7 +81,7 @@ void main() {
       expect(
         () => LocalizationsGenerator.inputDirectoryFromPath(fs, 'lib', fs.directory('bogus')),
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('Make sure that the correct path was provided'),
         )),
@@ -93,7 +93,7 @@ void main() {
       expect(
         () => LocalizationsGenerator.classNameFromString(''),
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('cannot be empty'),
         )),
@@ -177,7 +177,7 @@ void main() {
           logger: logger,
         ),
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('Directory does not exist'),
         )),
@@ -204,7 +204,7 @@ void main() {
           logger: logger,
         ),
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains(', does not exist.'),
         )),
@@ -220,7 +220,7 @@ void main() {
         expect(
           () => LocalizationsGenerator.classNameFromString('String with spaces'),
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('is not a valid public Dart class name'),
           )),
@@ -231,7 +231,7 @@ void main() {
         expect(
           () => LocalizationsGenerator.classNameFromString('TestClass@123'),
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('is not a valid public Dart class name'),
           )),
@@ -242,7 +242,7 @@ void main() {
         expect(
           () => LocalizationsGenerator.classNameFromString('camelCaseClassName'),
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('is not a valid public Dart class name'),
           )),
@@ -253,7 +253,7 @@ void main() {
         expect(
           () => LocalizationsGenerator.classNameFromString('123ClassName'),
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('is not a valid public Dart class name'),
           )),
@@ -343,7 +343,7 @@ void main() {
         ).loadResources();
       },
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains("The following .arb file's locale could not be determined"),
       )),
@@ -746,7 +746,7 @@ void main() {
         );
       },
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains('Cannot accept both header and header file arguments'),
       )),
@@ -777,7 +777,7 @@ void main() {
         );
       },
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains('Failed to read header file'),
       )),
@@ -1063,7 +1063,7 @@ class AppLocalizationsEn extends AppLocalizations {
             ).loadResources();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains("The preferred supported locale, 'am', cannot be added."),
           )),
@@ -1178,7 +1178,7 @@ class AppLocalizationsEn extends AppLocalizations {
           ).loadResources();
         },
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('The locale specified in @@locale and the arb filename do not match.'),
         )),
@@ -1203,7 +1203,7 @@ class AppLocalizationsEn extends AppLocalizations {
           ).loadResources();
         },
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('locale could not be determined'),
         )),
@@ -1235,7 +1235,7 @@ class AppLocalizationsEn extends AppLocalizations {
           logger: logger,
         ).loadResources(),
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('Invalid ARB resource name ""'),
         )),
@@ -1271,7 +1271,7 @@ class AppLocalizationsEn extends AppLocalizations {
           ).loadResources();
         },
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains("Multiple arb files with the same 'en' locale detected"),
         )),
@@ -1297,7 +1297,7 @@ class AppLocalizationsEn extends AppLocalizations {
           ).loadResources();
         },
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('Arb file for a fallback, en, does not exist'),
         )),
@@ -1642,7 +1642,7 @@ import 'output-localization-file.g.dart';
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             allOf(
               contains('output-localization-file'),
@@ -1668,7 +1668,7 @@ import 'output-localization-file.g.dart';
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             allOf(
               contains('output-localization-file'),
@@ -1847,7 +1847,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             allOf(
               contains('asdf'),
@@ -1967,7 +1967,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('the "format" attribute needs to be set'),
           )),
@@ -2047,7 +2047,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             allOf(
               contains('asdf'),
@@ -2181,7 +2181,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             allOf(
               contains('is not properly formatted'),
@@ -2252,7 +2252,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             allOf(
               contains('is not properly formatted'),
@@ -2807,7 +2807,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             allOf(
               contains('app_en.arb'),
@@ -2845,7 +2845,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             ..writeOutputFiles();
         },
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('Resource attribute "@title" was not found'),
         )),
@@ -2881,7 +2881,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('Invalid ARB resource name'),
           )),
@@ -2916,7 +2916,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('Invalid ARB resource name'),
           )),
@@ -2950,7 +2950,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
               ..writeOutputFiles();
           },
           throwsA(isA<L10nException>().having(
-            (L10nException e) => e.message,
+            (final L10nException e) => e.message,
             'message',
             contains('Invalid ARB resource name'),
           )),
@@ -3010,7 +3010,7 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
             ..writeOutputFiles();
         },
         throwsA(isA<L10nException>().having(
-          (L10nException e) => e.message,
+          (final L10nException e) => e.message,
           'message',
           contains('"invalid" is not a supported language code.'),
         )),

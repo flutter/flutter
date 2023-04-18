@@ -45,10 +45,10 @@ class StarBorder extends OutlinedBorder {
   const StarBorder({
     super.side,
     this.points = 5,
-    double innerRadiusRatio = 0.4,
+    final double innerRadiusRatio = 0.4,
     this.pointRounding = 0,
     this.valleyRounding = 0,
-    double rotation = 0,
+    final double rotation = 0,
     this.squash = 0,
   })  : assert(squash >= 0),
         assert(squash <= 1),
@@ -69,9 +69,9 @@ class StarBorder extends OutlinedBorder {
   /// Create a const polygon border with the given number of [sides].
   const StarBorder.polygon({
     super.side,
-    double sides = 5,
+    final double sides = 5,
     this.pointRounding = 0,
-    double rotation = 0,
+    final double rotation = 0,
     this.squash = 0,
   })  : assert(squash >= 0),
         assert(squash <= 1),
@@ -167,7 +167,7 @@ class StarBorder extends OutlinedBorder {
   final double squash;
 
   @override
-  ShapeBorder scale(double t) {
+  ShapeBorder scale(final double t) {
     return StarBorder(
       points: points,
       side: side.scale(t),
@@ -181,9 +181,9 @@ class StarBorder extends OutlinedBorder {
 
   ShapeBorder? _twoPhaseLerp(
     double t,
-    double split,
-    ShapeBorder? Function(double t) first,
-    ShapeBorder? Function(double t) second,
+    final double split,
+    final ShapeBorder? Function(double t) first,
+    final ShapeBorder? Function(double t) second,
   ) {
     // If the rectangle has square corners, then skip the extra lerp to round the corners.
     if (t < split) {
@@ -195,7 +195,7 @@ class StarBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (t == 0) {
       return a;
     }
@@ -248,8 +248,8 @@ class StarBorder extends OutlinedBorder {
       return _twoPhaseLerp(
         t,
         0.5,
-        (double t) => a.lerpTo(CircleBorder(side: lerpedSide), t),
-        (double t) => lerpFrom(CircleBorder(side: lerpedSide), t),
+        (final double t) => a.lerpTo(CircleBorder(side: lerpedSide), t),
+        (final double t) => lerpFrom(CircleBorder(side: lerpedSide), t),
       );
     }
     if (a is RoundedRectangleBorder) {
@@ -259,15 +259,15 @@ class StarBorder extends OutlinedBorder {
       return _twoPhaseLerp(
         t,
         1 / 3,
-        (double t) {
+        (final double t) {
           return StadiumBorder(side: lerpedSide).lerpFrom(a, t);
         },
-        (double t) {
+        (final double t) {
           return _twoPhaseLerp(
             t,
             0.5,
-            (double t) => StadiumBorder(side: lerpedSide).lerpTo(CircleBorder(side: lerpedSide), t),
-            (double t) => lerpFrom(CircleBorder(side: lerpedSide), t),
+            (final double t) => StadiumBorder(side: lerpedSide).lerpTo(CircleBorder(side: lerpedSide), t),
+            (final double t) => lerpFrom(CircleBorder(side: lerpedSide), t),
           );
         },
       );
@@ -276,7 +276,7 @@ class StarBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (t == 0) {
       return this;
     }
@@ -327,8 +327,8 @@ class StarBorder extends OutlinedBorder {
       return _twoPhaseLerp(
         t,
         0.5,
-        (double t) => lerpTo(CircleBorder(side: lerpedSide), t),
-        (double t) => b.lerpFrom(CircleBorder(side: lerpedSide), t),
+        (final double t) => lerpTo(CircleBorder(side: lerpedSide), t),
+        (final double t) => b.lerpFrom(CircleBorder(side: lerpedSide), t),
       );
     }
     if (b is RoundedRectangleBorder) {
@@ -337,15 +337,15 @@ class StarBorder extends OutlinedBorder {
       return _twoPhaseLerp(
         t,
         2 / 3,
-        (double t) {
+        (final double t) {
           return _twoPhaseLerp(
             t,
             0.5,
-            (double t) => lerpTo(CircleBorder(side: lerpedSide), t),
-            (double t) => StadiumBorder(side: lerpedSide).lerpFrom(CircleBorder(side: lerpedSide), t),
+            (final double t) => lerpTo(CircleBorder(side: lerpedSide), t),
+            (final double t) => StadiumBorder(side: lerpedSide).lerpFrom(CircleBorder(side: lerpedSide), t),
           );
         },
-        (double t) {
+        (final double t) {
           return StadiumBorder(side: lerpedSide).lerpTo(b, t);
         },
       );
@@ -355,13 +355,13 @@ class StarBorder extends OutlinedBorder {
 
   @override
   StarBorder copyWith({
-    BorderSide? side,
-    double? points,
-    double? innerRadiusRatio,
-    double? pointRounding,
-    double? valleyRounding,
-    double? rotation,
-    double? squash,
+    final BorderSide? side,
+    final double? points,
+    final double? innerRadiusRatio,
+    final double? pointRounding,
+    final double? valleyRounding,
+    final double? rotation,
+    final double? squash,
   }) {
     return StarBorder(
       side: side ?? this.side,
@@ -375,7 +375,7 @@ class StarBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+  Path getInnerPath(final Rect rect, {final TextDirection? textDirection}) {
     final Rect adjustedRect = rect.deflate(side.strokeInset);
     return _StarGenerator(
       points: points,
@@ -388,7 +388,7 @@ class StarBorder extends OutlinedBorder {
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+  Path getOuterPath(final Rect rect, {final TextDirection? textDirection}) {
     return _StarGenerator(
       points: points,
       rotation: _rotationRadians,
@@ -400,7 +400,7 @@ class StarBorder extends OutlinedBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+  void paint(final Canvas canvas, final Rect rect, {final TextDirection? textDirection}) {
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -419,7 +419,7 @@ class StarBorder extends OutlinedBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -486,7 +486,7 @@ class _StarGenerator {
   final double rotation;
   final double squash;
 
-  Path generate(Rect rect) {
+  Path generate(final Rect rect) {
     final double radius = rect.shortestSide / 2;
     final Offset center = rect.center;
 
@@ -532,10 +532,10 @@ class _StarGenerator {
   }
 
   double _generatePoints({
-    required List<_PointInfo> pointList,
-    required Offset center,
-    required double radius,
-    required double innerRadius,
+    required final List<_PointInfo> pointList,
+    required final Offset center,
+    required final double radius,
+    required final double innerRadius,
   }) {
     final double step = math.pi / points;
     // Start initial rotation one step before zero.
@@ -549,7 +549,7 @@ class _StarGenerator {
     // point, taking into account the rounding of the points and the weight of
     // the corner point. This effectively is evaluating the rational quadratic
     // bezier at the midpoint of the curve.
-    Offset getCurveMidpoint(Offset a, Offset b, Offset c, Offset a1, Offset c1) {
+    Offset getCurveMidpoint(final Offset a, final Offset b, final Offset c, final Offset a1, final Offset c1) {
       final double angle = _getAngle(a, b, c);
       final double w = _getWeight(angle) / 2;
       return (a1 / 4 + b * w + c1 / 4) / (0.5 + w);
@@ -557,9 +557,9 @@ class _StarGenerator {
 
     double addPoint(
       double pointAngle,
-      double pointStep,
-      double pointRadius,
-      double pointInnerRadius,
+      final double pointStep,
+      final double pointRadius,
+      final double pointInnerRadius,
     ) {
       pointAngle += pointStep;
       final Offset point = Offset(
@@ -624,7 +624,7 @@ class _StarGenerator {
     return clampDouble(math.max(valleyRadius, pointRadius), double.minPositive, double.maxFinite);
   }
 
-  void _drawPoints(Path path, List<_PointInfo> points) {
+  void _drawPoints(final Path path, final List<_PointInfo> points) {
     final Offset startingPoint = points.first.pointArc1;
     path.moveTo(startingPoint.dx, startingPoint.dy);
     final double pointAngle = _getAngle(points[0].valley, points[0].point, points[1].valley);
@@ -652,12 +652,12 @@ class _StarGenerator {
     path.close();
   }
 
-  double _getWeight(double angle) {
+  double _getWeight(final double angle) {
     return math.cos((angle / 2) % (math.pi / 2));
   }
 
   // Returns the included angle between points ABC in radians.
-  double _getAngle(Offset a, Offset b, Offset c) {
+  double _getAngle(final Offset a, final Offset b, final Offset c) {
     if (a == c || b == c || b == a) {
       return 0;
     }

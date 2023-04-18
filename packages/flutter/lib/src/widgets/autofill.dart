@@ -86,7 +86,7 @@ class AutofillGroup extends StatefulWidget {
   ///   [AutofillGroup] cannot be found.
   /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
-  static AutofillGroupState? maybeOf(BuildContext context) {
+  static AutofillGroupState? maybeOf(final BuildContext context) {
     final _AutofillScope? scope = context.dependOnInheritedWidgetOfExactType<_AutofillScope>();
     return scope?._scope;
   }
@@ -108,7 +108,7 @@ class AutofillGroup extends StatefulWidget {
   ///   null if an [AutofillGroup] cannot be found.
   /// * [EditableTextState], where this method is used to retrieve the closest
   ///   [AutofillGroupState].
-  static AutofillGroupState of(BuildContext context) {
+  static AutofillGroupState of(final BuildContext context) {
     final AutofillGroupState? groupState = maybeOf(context);
     assert(() {
       if (groupState == null) {
@@ -170,12 +170,12 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   bool _isTopmostAutofillGroup = false;
 
   @override
-  AutofillClient? getAutofillClient(String autofillId) => _clients[autofillId];
+  AutofillClient? getAutofillClient(final String autofillId) => _clients[autofillId];
 
   @override
   Iterable<AutofillClient> get autofillClients {
     return _clients.values
-      .where((AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
+      .where((final AutofillClient client) => client.textInputConfiguration.autofillConfiguration.enabled);
   }
 
   /// Adds the [AutofillClient] to this [AutofillGroup].
@@ -188,7 +188,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   ///
   /// * [EditableTextState.didChangeDependencies], where this method is called
   ///   to update the current [AutofillScope] when needed.
-  void register(AutofillClient client) {
+  void register(final AutofillClient client) {
     _clients.putIfAbsent(client.autofillId, () => client);
   }
 
@@ -205,7 +205,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   /// * [EditableTextState.dispose], where this method is called to unregister
   ///   from the current [AutofillScope] when the widget is about to be removed
   ///   from the tree.
-  void unregister(String autofillId) {
+  void unregister(final String autofillId) {
     assert(_clients.containsKey(autofillId));
     _clients.remove(autofillId);
   }
@@ -217,7 +217,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _AutofillScope(
       autofillScopeState: this,
       child: widget.child,
@@ -243,7 +243,7 @@ class AutofillGroupState extends State<AutofillGroup> with AutofillScopeMixin {
 class _AutofillScope extends InheritedWidget {
   const _AutofillScope({
     required super.child,
-    AutofillGroupState? autofillScopeState,
+    final AutofillGroupState? autofillScopeState,
   }) : _scope = autofillScopeState;
 
   final AutofillGroupState? _scope;
@@ -251,5 +251,5 @@ class _AutofillScope extends InheritedWidget {
   AutofillGroup get client => _scope!.widget;
 
   @override
-  bool updateShouldNotify(_AutofillScope old) => _scope != old._scope;
+  bool updateShouldNotify(final _AutofillScope old) => _scope != old._scope;
 }

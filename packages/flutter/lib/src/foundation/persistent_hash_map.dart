@@ -34,7 +34,7 @@ class PersistentHashMap<K extends Object, V> {
   /// mapping then create a new version of the map which contains
   /// all mappings from the current one plus the given [key] to [value]
   /// mapping.
-  PersistentHashMap<K, V> put(K key, V value) {
+  PersistentHashMap<K, V> put(final K key, final V value) {
     final _TrieNode newRoot =
         (_root ?? _CompressedNode.empty).put(0, key, key.hashCode, value);
     if (newRoot == _root) {
@@ -46,7 +46,7 @@ class PersistentHashMap<K extends Object, V> {
   /// Returns value associated with the given [key] or `null` if [key]
   /// is not in the map.
   @pragma('dart2js:as:trust')
-  V? operator[](K key) {
+  V? operator[](final K key) {
     if (_root == null) {
       return null;
     }
@@ -66,17 +66,17 @@ abstract class _TrieNode {
   static const int hashBitsPerLevelMask = (1 << hashBitsPerLevel) - 1;
 
   @pragma('vm:prefer-inline')
-  static int trieIndex(int hash, int bitIndex) {
+  static int trieIndex(final int hash, final int bitIndex) {
     return (hash >>> bitIndex) & hashBitsPerLevelMask;
   }
 
   /// Insert [key] to [value] mapping into the trie using bits from [keyHash]
   /// starting at [bitIndex].
-  _TrieNode put(int bitIndex, Object key, int keyHash, Object? value);
+  _TrieNode put(final int bitIndex, final Object key, final int keyHash, final Object? value);
 
   /// Lookup a value associated with the given [key] using bits from [keyHash]
   /// starting at [bitIndex].
-  Object? get(int bitIndex, Object key, int keyHash);
+  Object? get(final int bitIndex, final Object key, final int keyHash);
 }
 
 /// A full (uncompressed) node in the trie.
@@ -95,7 +95,7 @@ class _FullNode extends _TrieNode {
   final List<Object?> descendants;
 
   @override
-  _TrieNode put(int bitIndex, Object key, int keyHash, Object? value) {
+  _TrieNode put(final int bitIndex, final Object key, final int keyHash, final Object? value) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
     final _TrieNode node = _unsafeCast<_TrieNode?>(descendants[index]) ?? _CompressedNode.empty;
     final _TrieNode newNode = node.put(bitIndex + _TrieNode.hashBitsPerLevel, key, keyHash, value);
@@ -105,7 +105,7 @@ class _FullNode extends _TrieNode {
   }
 
   @override
-  Object? get(int bitIndex, Object key, int keyHash) {
+  Object? get(final int bitIndex, final Object key, final int keyHash) {
     final int index = _TrieNode.trieIndex(keyHash, bitIndex);
 
     final _TrieNode? node = _unsafeCast<_TrieNode?>(descendants[index]);
@@ -131,7 +131,7 @@ class _CompressedNode extends _TrieNode {
   _CompressedNode(this.occupiedIndices, this.keyValuePairs);
   _CompressedNode._empty() : this(0, _emptyArray);
 
-  factory _CompressedNode.single(int bitIndex, int keyHash, _TrieNode node) {
+  factory _CompressedNode.single(final int bitIndex, final int keyHash, final _TrieNode node) {
     final int bit = 1 << _TrieNode.trieIndex(keyHash, bitIndex);
     // A single (null, node) pair.
     final List<Object?> keyValuePairs = _makeArray(2)
@@ -152,7 +152,7 @@ class _CompressedNode extends _TrieNode {
   final List<Object?> keyValuePairs;
 
   @override
-  _TrieNode put(int bitIndex, Object key, int keyHash, Object? value) {
+  _TrieNode put(final int bitIndex, final Object key, final int keyHash, final Object? value) {
     final int bit = 1 << _TrieNode.trieIndex(keyHash, bitIndex);
     final int index = _compressedIndex(bit);
 
@@ -226,7 +226,7 @@ class _CompressedNode extends _TrieNode {
   }
 
   @override
-  Object? get(int bitIndex, Object key, int keyHash) {
+  Object? get(final int bitIndex, final Object key, final int keyHash) {
     final int bit = 1 << _TrieNode.trieIndex(keyHash, bitIndex);
     if ((occupiedIndices & bit) == 0) {
       return null;
@@ -245,7 +245,7 @@ class _CompressedNode extends _TrieNode {
   }
 
   /// Convert this node into an equivalent [_FullNode].
-  _FullNode _inflate(int bitIndex) {
+  _FullNode _inflate(final int bitIndex) {
     final List<Object?> nodes = _makeArray(_FullNode.numElements);
     int srcIndex = 0;
     for (int dstIndex = 0; dstIndex < _FullNode.numElements; dstIndex++) {
@@ -267,12 +267,12 @@ class _CompressedNode extends _TrieNode {
   }
 
   @pragma('vm:prefer-inline')
-  int _compressedIndex(int bit) {
+  int _compressedIndex(final int bit) {
     return _bitCount(occupiedIndices & (bit - 1));
   }
 
-  static _TrieNode _resolveCollision(int bitIndex, Object existingKey,
-      Object? existingValue, Object key, int keyHash, Object? value) {
+  static _TrieNode _resolveCollision(final int bitIndex, final Object existingKey,
+      final Object? existingValue, final Object key, final int keyHash, final Object? value) {
     final int existingKeyHash = existingKey.hashCode;
     // Check if this is a full hash collision and use _HashCollisionNode
     // in this case.
@@ -292,7 +292,7 @@ class _HashCollisionNode extends _TrieNode {
   _HashCollisionNode(this.hash, this.keyValuePairs);
 
   factory _HashCollisionNode.fromCollision(
-      int keyHash, Object keyA, Object? valueA, Object keyB, Object? valueB) {
+      final int keyHash, final Object keyA, final Object? valueA, final Object keyB, final Object? valueB) {
     final List<Object?> list = _makeArray(4);
     list[0] = keyA;
     list[1] = valueA;
@@ -305,7 +305,7 @@ class _HashCollisionNode extends _TrieNode {
   final List<Object?> keyValuePairs;
 
   @override
-  _TrieNode put(int bitIndex, Object key, int keyHash, Object? val) {
+  _TrieNode put(final int bitIndex, final Object key, final int keyHash, final Object? val) {
     // Is this another full hash collision?
     if (keyHash == hash) {
       final int index = _indexOf(key);
@@ -332,12 +332,12 @@ class _HashCollisionNode extends _TrieNode {
   }
 
   @override
-  Object? get(int bitIndex, Object key, int keyHash) {
+  Object? get(final int bitIndex, final Object key, final int keyHash) {
     final int index = _indexOf(key);
     return index < 0 ? null : keyValuePairs[index + 1];
   }
 
-  int _indexOf(Object key) {
+  int _indexOf(final Object key) {
     final int length = keyValuePairs.length;
     for (int i = 0; i < length; i += 2) {
       if (key == keyValuePairs[i]) {
@@ -369,7 +369,7 @@ int _bitCount(int n) {
 /// considerably slower.
 @pragma('vm:prefer-inline')
 @pragma('dart2js:tryInline')
-List<Object?> _copy(List<Object?> array) {
+List<Object?> _copy(final List<Object?> array) {
   final List<Object?> clone = _makeArray(array.length);
   for (int j = 0; j < array.length; j++) {
     clone[j] = array[j];
@@ -386,7 +386,7 @@ List<Object?> _copy(List<Object?> array) {
 /// memory and are faster to access (less indirections).
 @pragma('vm:prefer-inline')
 @pragma('dart2js:tryInline')
-List<Object?> _makeArray(int length) {
+List<Object?> _makeArray(final int length) {
   return List<Object?>.filled(length, null);
 }
 
@@ -395,6 +395,6 @@ List<Object?> _makeArray(int length) {
 @pragma('dart2js:tryInline')
 @pragma('dart2js:as:trust')
 @pragma('vm:prefer-inline')
-T _unsafeCast<T>(Object? o) {
+T _unsafeCast<T>(final Object? o) {
   return o as T;
 }

@@ -8,7 +8,7 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'keys.dart' as keys;
 
 void main() {
-  enableFlutterDriverExtension(handler: (String? message) async {
+  enableFlutterDriverExtension(handler: (final String? message) async {
     // TODO(cbernaschina): remove when test flakiness is resolved
     return 'keyboard_resize';
   });
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Text Editing',
       theme: ThemeData(primarySwatch: Colors.blue),
@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController _controller = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextField textField = TextField(
       key: const Key(keys.kDefaultTextField),
       controller: _controller,
@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
         alignment: Alignment.bottomCenter,
         children: <Widget>[
           LayoutBuilder(
-            builder: (BuildContext context, BoxConstraints constraints) {
+            builder: (final BuildContext context, final BoxConstraints constraints) {
               return Center(child: Text('${constraints.biggest.height}', key: const Key(keys.kHeightText)));
             }
           ),

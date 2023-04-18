@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('OverflowBar documented defaults', (WidgetTester tester) async {
+  testWidgets('OverflowBar documented defaults', (final WidgetTester tester) async {
     const OverflowBar bar = OverflowBar();
     expect(bar.spacing, 0);
     expect(bar.alignment, null);
@@ -17,7 +17,7 @@ void main() {
     expect(bar.children, const <Widget>[]);
   });
 
-  testWidgets('Empty OverflowBar', (WidgetTester tester) async {
+  testWidgets('Empty OverflowBar', (final WidgetTester tester) async {
     const Size size = Size(16, 24);
 
     await tester.pumpWidget(
@@ -46,12 +46,12 @@ void main() {
     expect(tester.getSize(find.byType(OverflowBar)), Size.zero);
   });
 
-  testWidgets('OverflowBar horizontal layout', (WidgetTester tester) async {
+  testWidgets('OverflowBar horizontal layout', (final WidgetTester tester) async {
     final Key child1Key = UniqueKey();
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
 
-    Widget buildFrame({ required double spacing, required TextDirection textDirection }) {
+    Widget buildFrame({ required final double spacing, required final TextDirection textDirection }) {
       return Directionality(
         textDirection: textDirection,
         child: Align(
@@ -93,16 +93,16 @@ void main() {
     expect(tester.getRect(find.byKey(child1Key)), const Rect.fromLTRB(10.0 + 96 + 10.0, 8, 10.0 + 10.0 + 144, 56));
   });
 
-  testWidgets('OverflowBar vertical layout', (WidgetTester tester) async {
+  testWidgets('OverflowBar vertical layout', (final WidgetTester tester) async {
     final Key child1Key = UniqueKey();
     final Key child2Key = UniqueKey();
     final Key child3Key = UniqueKey();
 
     Widget buildFrame({
-      double overflowSpacing = 0,
-      VerticalDirection overflowDirection = VerticalDirection.down,
-      OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
-      TextDirection textDirection = TextDirection.ltr,
+      final double overflowSpacing = 0,
+      final VerticalDirection overflowDirection = VerticalDirection.down,
+      final OverflowBarAlignment overflowAlignment = OverflowBarAlignment.start,
+      final TextDirection textDirection = TextDirection.ltr,
     }) {
       return Directionality(
         textDirection: textDirection,
@@ -174,8 +174,8 @@ void main() {
     expect(tester.getRect(find.byKey(child3Key)), const Rect.fromLTRB(100.0/2.0 - 32/2, 112, 100.0/2.0 + 32/2, 144));
   });
 
-  testWidgets('OverflowBar intrinsic width', (WidgetTester tester) async {
-    Widget buildFrame({ required double width }) {
+  testWidgets('OverflowBar intrinsic width', (final WidgetTester tester) async {
+    Widget buildFrame({ required final double width }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -205,8 +205,8 @@ void main() {
     expect(tester.getSize(find.byType(OverflowBar)).width, 150);
   });
 
-  testWidgets('OverflowBar intrinsic height', (WidgetTester tester) async {
-    Widget buildFrame({ required double maxWidth }) {
+  testWidgets('OverflowBar intrinsic height', (final WidgetTester tester) async {
+    Widget buildFrame({ required final double maxWidth }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
@@ -237,12 +237,12 @@ void main() {
   });
 
 
-  testWidgets('OverflowBar is wider that its intrinsic width', (WidgetTester tester) async {
+  testWidgets('OverflowBar is wider that its intrinsic width', (final WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
 
-    Widget buildFrame(TextDirection textDirection) {
+    Widget buildFrame(final TextDirection textDirection) {
       return Directionality(
         textDirection: textDirection,
         child: SizedBox(
@@ -273,7 +273,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(key2)).dx, 600);
   });
 
-  testWidgets('OverflowBar with alignment should match Row with mainAxisAlignment', (WidgetTester tester) async {
+  testWidgets('OverflowBar with alignment should match Row with mainAxisAlignment', (final WidgetTester tester) async {
     final Key key0 = UniqueKey();
     final Key key1 = UniqueKey();
     final Key key2 = UniqueKey();
@@ -300,7 +300,7 @@ void main() {
       TextDirection.rtl,
     ];
 
-    Widget buildFrame(MainAxisAlignment alignment, TextDirection textDirection) {
+    Widget buildFrame(final MainAxisAlignment alignment, final TextDirection textDirection) {
       return Directionality(
         textDirection: textDirection,
         child: Column(

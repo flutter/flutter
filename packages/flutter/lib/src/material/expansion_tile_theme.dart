@@ -93,18 +93,18 @@ class ExpansionTileThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   ExpansionTileThemeData copyWith({
-    Color? backgroundColor,
-    Color? collapsedBackgroundColor,
-    EdgeInsetsGeometry? tilePadding,
-    AlignmentGeometry? expandedAlignment,
-    EdgeInsetsGeometry? childrenPadding,
-    Color? iconColor,
-    Color? collapsedIconColor,
-    Color? textColor,
-    Color? collapsedTextColor,
-    ShapeBorder? shape,
-    ShapeBorder? collapsedShape,
-    Clip? clipBehavior,
+    final Color? backgroundColor,
+    final Color? collapsedBackgroundColor,
+    final EdgeInsetsGeometry? tilePadding,
+    final AlignmentGeometry? expandedAlignment,
+    final EdgeInsetsGeometry? childrenPadding,
+    final Color? iconColor,
+    final Color? collapsedIconColor,
+    final Color? textColor,
+    final Color? collapsedTextColor,
+    final ShapeBorder? shape,
+    final ShapeBorder? collapsedShape,
+    final Clip? clipBehavior,
   }) {
     return ExpansionTileThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
@@ -123,7 +123,7 @@ class ExpansionTileThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between ExpansionTileThemeData objects.
-  static ExpansionTileThemeData? lerp(ExpansionTileThemeData? a, ExpansionTileThemeData? b, double t) {
+  static ExpansionTileThemeData? lerp(final ExpansionTileThemeData? a, final ExpansionTileThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -161,7 +161,7 @@ class ExpansionTileThemeData with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -184,7 +184,7 @@ class ExpansionTileThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('collapsedBackgroundColor', collapsedBackgroundColor, defaultValue: null));
@@ -232,16 +232,16 @@ class ExpansionTileTheme extends InheritedTheme {
   /// ```dart
   /// ExpansionTileThemeData theme = ExpansionTileTheme.of(context);
   /// ```
-  static ExpansionTileThemeData of(BuildContext context) {
+  static ExpansionTileThemeData of(final BuildContext context) {
     final ExpansionTileTheme? inheritedTheme = context.dependOnInheritedWidgetOfExactType<ExpansionTileTheme>();
     return inheritedTheme?.data ?? Theme.of(context).expansionTileTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return ExpansionTileTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ExpansionTileTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ExpansionTileTheme oldWidget) => data != oldWidget.data;
  }

@@ -506,7 +506,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget result = child;
     final Map<ShortcutActivator, Intent>? disablingShortcut = _getDisablingShortcut();
     if (disablingShortcut != null) {
@@ -534,7 +534,7 @@ class DefaultTextEditingShortcuts extends StatelessWidget {
 
 /// Maps the selector from NSStandardKeyBindingResponding to the Intent if the
 /// selector is recognized.
-Intent? intentForMacOSSelector(String selectorName) {
+Intent? intentForMacOSSelector(final String selectorName) {
   const Map<String, Intent> selectorToIntent = <String, Intent>{
     'deleteBackward:': DeleteCharacterIntent(forward: false),
     'deleteWordBackward:': DeleteToNextWordBoundaryIntent(forward: false),

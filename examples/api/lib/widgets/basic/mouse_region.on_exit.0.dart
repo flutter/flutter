@@ -12,7 +12,7 @@ class MouseRegionApp extends StatelessWidget {
   const MouseRegionApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MouseRegion.onExit Sample')),
@@ -35,18 +35,18 @@ class _MouseRegionExampleState extends State<MouseRegionExample> {
   bool hovered = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       height: 100,
       width: 100,
       decoration: BoxDecoration(color: hovered ? Colors.yellow : Colors.blue),
       child: MouseRegion(
-        onEnter: (_) {
+        onEnter: (final _) {
           setState(() {
             hovered = true;
           });
         },
-        onExit: (_) {
+        onExit: (final _) {
           setState(() {
             hovered = false;
           });

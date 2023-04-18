@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:manual_tests/overlay_geometry.dart' as overlay_geometry;
 
 void main() {
-  testWidgets('Overlay geometry smoke test', (WidgetTester tester) async {
+  testWidgets('Overlay geometry smoke test', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: overlay_geometry.OverlayGeometryApp()));
     expect(find.byType(overlay_geometry.Marker), findsNothing);
     await tester.tap(find.text('Card 3'));

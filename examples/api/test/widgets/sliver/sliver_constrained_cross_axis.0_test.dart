@@ -9,7 +9,7 @@ import 'package:flutter_api_samples/widgets/sliver/sliver_constrained_cross_axis
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('SliverConstrainedCrossAxis example', (WidgetTester tester) async {
+  testWidgets('SliverConstrainedCrossAxis example', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SliverConstrainedCrossAxisExampleApp(),
     );

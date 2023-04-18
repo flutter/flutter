@@ -96,14 +96,14 @@ enum OverlayVisibilityMode {
 
 class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _CupertinoTextFieldSelectionGestureDetectorBuilder({
-    required _CupertinoTextFieldState state,
+    required final _CupertinoTextFieldState state,
   }) : _state = state,
        super(delegate: state);
 
   final _CupertinoTextFieldState _state;
 
   @override
-  void onSingleTapUp(TapDragUpDetails details) {
+  void onSingleTapUp(final TapDragUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger
     // this handler. If the clear button widget recognizes the up event,
@@ -121,7 +121,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   }
 
   @override
-  void onDragSelectionEnd(TapDragEndDetails details) {
+  void onDragSelectionEnd(final TapDragEndDetails details) {
     _state._requestKeyboard();
   }
 }
@@ -228,7 +228,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
-    TextInputType? keyboardType,
+    final TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.style,
@@ -247,8 +247,8 @@ class CupertinoTextField extends StatefulWidget {
     this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
-    SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType,
+    final SmartDashesType? smartDashesType,
+    final SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
@@ -271,7 +271,7 @@ class CupertinoTextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
-    bool? enableInteractiveSelection,
+    final bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
     this.scrollController,
@@ -360,7 +360,7 @@ class CupertinoTextField extends StatefulWidget {
     this.suffix,
     this.suffixMode = OverlayVisibilityMode.always,
     this.clearButtonMode = OverlayVisibilityMode.never,
-    TextInputType? keyboardType,
+    final TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.style,
@@ -379,8 +379,8 @@ class CupertinoTextField extends StatefulWidget {
     this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
-    SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType,
+    final SmartDashesType? smartDashesType,
+    final SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
@@ -403,7 +403,7 @@ class CupertinoTextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
-    bool? enableInteractiveSelection,
+    final bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
     this.scrollController,
@@ -745,7 +745,7 @@ class CupertinoTextField extends StatefulWidget {
   ///  * [CupertinoAdaptiveTextSelectionToolbar], which is built by default.
   final EditableTextContextMenuBuilder? contextMenuBuilder;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+  static Widget _defaultContextMenuBuilder(final BuildContext context, final EditableTextState editableTextState) {
     return CupertinoAdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -798,8 +798,8 @@ class CupertinoTextField extends StatefulWidget {
   ///    configured to show the Material style spell check suggestions toolbar.
   @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
-    BuildContext context,
-    EditableTextState editableTextState,
+    final BuildContext context,
+    final EditableTextState editableTextState,
   ) {
     final List<ContextMenuButtonItem>? buttonItems =
       CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
@@ -821,7 +821,7 @@ class CupertinoTextField extends StatefulWidget {
   State<CupertinoTextField> createState() => _CupertinoTextFieldState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
@@ -868,9 +868,9 @@ class CupertinoTextField extends StatefulWidget {
 
   static final TextMagnifierConfiguration _iosMagnifierConfiguration = TextMagnifierConfiguration(
     magnifierBuilder: (
-    BuildContext context,
-    MagnifierController controller,
-    ValueNotifier<MagnifierInfo> magnifierInfo
+    final BuildContext context,
+    final MagnifierController controller,
+    final ValueNotifier<MagnifierInfo> magnifierInfo
   ) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -929,7 +929,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   @override
-  void didUpdateWidget(CupertinoTextField oldWidget) {
+  void didUpdateWidget(final CupertinoTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null) {
       _createLocalController(oldWidget.controller!.value);
@@ -947,7 +947,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     if (_controller != null) {
       _registerController();
     }
@@ -959,7 +959,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     _controller!.value.addListener(updateKeepAlive);
   }
 
-  void _createLocalController([TextEditingValue? value]) {
+  void _createLocalController([final TextEditingValue? value]) {
     assert(_controller == null);
     _controller = value == null
         ? RestorableTextEditingController()
@@ -993,7 +993,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     });
   }
 
-  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+  bool _shouldShowSelectionHandles(final SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
@@ -1020,7 +1020,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     return false;
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(final TextSelection selection, final SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -1058,8 +1058,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   bool get wantKeepAlive => _controller?.value.text.isNotEmpty ?? false;
 
   bool _shouldShowAttachment({
-    required OverlayVisibilityMode attachment,
-    required bool hasText,
+    required final OverlayVisibilityMode attachment,
+    required final bool hasText,
   }) {
     switch (attachment) {
       case OverlayVisibilityMode.never:
@@ -1073,21 +1073,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     }
   }
 
-  bool _showPrefixWidget(TextEditingValue text) {
+  bool _showPrefixWidget(final TextEditingValue text) {
     return widget.prefix != null && _shouldShowAttachment(
       attachment: widget.prefixMode,
       hasText: text.text.isNotEmpty,
     );
   }
 
-  bool _showSuffixWidget(TextEditingValue text) {
+  bool _showSuffixWidget(final TextEditingValue text) {
     return widget.suffix != null && _shouldShowAttachment(
       attachment: widget.suffixMode,
       hasText: text.text.isNotEmpty,
     );
   }
 
-  bool _showClearButton(TextEditingValue text) {
+  bool _showClearButton(final TextEditingValue text) {
     return _shouldShowAttachment(
       attachment: widget.clearButtonMode,
       hasText: text.text.isNotEmpty,
@@ -1112,7 +1112,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     return _hasDecoration ? TextAlignVertical.center : TextAlignVertical.top;
   }
 
-  Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle, TextStyle placeholderStyle) {
+  Widget _addTextDependentAttachments(final Widget editableText, final TextStyle textStyle, final TextStyle placeholderStyle) {
     // If there are no surrounding widgets, just return the core editable text
     // part.
     if (!_hasDecoration) {
@@ -1123,7 +1123,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     return ValueListenableBuilder<TextEditingValue>(
       valueListenable: _effectiveController,
       child: editableText,
-      builder: (BuildContext context, TextEditingValue? text, Widget? child) {
+      builder: (final BuildContext context, final TextEditingValue? text, final Widget? child) {
         return Row(children: <Widget>[
           // Insert a prefix at the front if the prefix visibility mode matches
           // the current text state.
@@ -1185,7 +1185,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   String get autofillId => _editableText.autofillId;
 
   @override
-  void autofill(TextEditingValue newEditingValue) => _editableText.autofill(newEditingValue);
+  void autofill(final TextEditingValue newEditingValue) => _editableText.autofill(newEditingValue);
 
   @override
   TextInputConfiguration get textInputConfiguration {
@@ -1204,7 +1204,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
   // AutofillClient implementation end.
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
     assert(debugCheckHasDirectionality(context));
     final TextEditingController controller = _effectiveController;
@@ -1268,7 +1268,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     final BoxBorder? border = widget.decoration?.border;
     Border? resolvedBorder = border as Border?;
     if (border is Border) {
-      BorderSide resolveBorderSide(BorderSide side) {
+      BorderSide resolveBorderSide(final BorderSide side) {
         return side == BorderSide.none
           ? side
           : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));

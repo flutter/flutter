@@ -14,7 +14,7 @@ class StarBorderApp extends StatelessWidget {
   const StarBorderApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -56,7 +56,7 @@ class _StarBorderExampleState extends State<StarBorderExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTextStyle(
       style: const TextStyle(
         color: Colors.black,
@@ -142,7 +142,7 @@ class ExampleBorder extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.all(20),
@@ -174,7 +174,7 @@ class _OptionsState extends State<Options> {
   }
 
   @override
-  void didUpdateWidget(Options oldWidget) {
+  void didUpdateWidget(final Options oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.model != oldWidget.model) {
       oldWidget.model.removeListener(_modelChanged);
@@ -193,7 +193,7 @@ class _OptionsState extends State<Options> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 10.0),
       child: Column(
@@ -205,7 +205,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Point Rounding',
                   value: widget.model.pointRounding,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.pointRounding = value;
                   },
                 ),
@@ -214,7 +214,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Valley Rounding',
                   value: widget.model.valleyRounding,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.valleyRounding = value;
                   },
                 ),
@@ -227,7 +227,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Squash',
                   value: widget.model.squash,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.squash = value;
                   },
                 ),
@@ -237,7 +237,7 @@ class _OptionsState extends State<Options> {
                   label: 'Rotation',
                   value: widget.model.rotation,
                   max: 360,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.rotation = value;
                   },
                 ),
@@ -256,7 +256,7 @@ class _OptionsState extends State<Options> {
                         min: 3,
                         max: 20,
                         precision: 1,
-                        onChanged: (double value) {
+                        onChanged: (final double value) {
                           widget.model.points = value;
                         },
                       ),
@@ -280,7 +280,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Inner Radius',
                   value: widget.model.innerRadiusRatio,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.innerRadiusRatio = value;
                   },
                 ),
@@ -302,7 +302,7 @@ class _OptionsState extends State<Options> {
 class OptionModel extends ChangeNotifier {
   double get pointRounding => _pointRounding;
   double _pointRounding = 0.0;
-  set pointRounding(double value) {
+  set pointRounding(final double value) {
     if (value != _pointRounding) {
       _pointRounding = value;
       if (_valleyRounding + _pointRounding > 1) {
@@ -314,7 +314,7 @@ class OptionModel extends ChangeNotifier {
 
   double get valleyRounding => _valleyRounding;
   double _valleyRounding = 0.0;
-  set valleyRounding(double value) {
+  set valleyRounding(final double value) {
     if (value != _valleyRounding) {
       _valleyRounding = value;
       if (_valleyRounding + _pointRounding > 1) {
@@ -326,7 +326,7 @@ class OptionModel extends ChangeNotifier {
 
   double get squash => _squash;
   double _squash = 0.0;
-  set squash(double value) {
+  set squash(final double value) {
     if (value != _squash) {
       _squash = value;
       notifyListeners();
@@ -335,7 +335,7 @@ class OptionModel extends ChangeNotifier {
 
   double get rotation => _rotation;
   double _rotation = 0.0;
-  set rotation(double value) {
+  set rotation(final double value) {
     if (value != _rotation) {
       _rotation = value;
       notifyListeners();
@@ -344,7 +344,7 @@ class OptionModel extends ChangeNotifier {
 
   double get innerRadiusRatio => _innerRadiusRatio;
   double _innerRadiusRatio = 0.4;
-  set innerRadiusRatio(double value) {
+  set innerRadiusRatio(final double value) {
     if (value != _innerRadiusRatio) {
       _innerRadiusRatio = value.clamp(0.0001, double.infinity);
       notifyListeners();
@@ -353,7 +353,7 @@ class OptionModel extends ChangeNotifier {
 
   double get points => _points;
   double _points = 5;
-  set points(double value) {
+  set points(final double value) {
     if (value != _points) {
       _points = value;
       notifyListeners();
@@ -419,7 +419,7 @@ class ControlSlider extends StatelessWidget {
   final int precision;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Row(

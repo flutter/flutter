@@ -12,7 +12,7 @@ class TabBarApp extends StatelessWidget {
   const TabBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const TabBarExample(),
@@ -45,7 +45,7 @@ class _TabBarExampleState extends State<TabBarExample> with TickerProviderStateM
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('TabBar Sample'),

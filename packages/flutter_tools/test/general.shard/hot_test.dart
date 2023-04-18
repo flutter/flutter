@@ -174,11 +174,11 @@ void main() {
           target: 'main.dart',
           devtoolsHandler: createNoOpHandler,
           reassembleHelper: (
-            List<FlutterDevice?> flutterDevices,
-            Map<FlutterDevice?, List<FlutterView>> viewCache,
-            void Function(String message)? onSlow,
-            String reloadMessage,
-            String? fastReassembleClassName,
+            final List<FlutterDevice?> flutterDevices,
+            final Map<FlutterDevice?, List<FlutterView>> viewCache,
+            final void Function(String message)? onSlow,
+            final String reloadMessage,
+            final String? fastReassembleClassName,
           ) async => ReassembleResult(
               <FlutterView?, FlutterVmService?>{null: null},
               false,
@@ -358,14 +358,14 @@ void main() {
           devtoolsHandler: createNoOpHandler,
           stopwatchFactory: fakeStopwatchFactory,
           reloadSourcesHelper: (
-            HotRunner hotRunner,
-            List<FlutterDevice?> flutterDevices,
-            bool? pause,
-            Map<String, dynamic> firstReloadDetails,
-            String? targetPlatform,
-            String? sdkName,
-            bool? emulator,
-            String? reason,
+            final HotRunner hotRunner,
+            final List<FlutterDevice?> flutterDevices,
+            final bool? pause,
+            final Map<String, dynamic> firstReloadDetails,
+            final String? targetPlatform,
+            final String? sdkName,
+            final bool? emulator,
+            final String? reason,
           ) async {
             firstReloadDetails['finalLibraryCount'] = 2;
             firstReloadDetails['receivedLibraryCount'] = 3;
@@ -374,11 +374,11 @@ void main() {
             return OperationResult.ok;
           },
           reassembleHelper: (
-            List<FlutterDevice?> flutterDevices,
-            Map<FlutterDevice?, List<FlutterView>> viewCache,
-            void Function(String message)? onSlow,
-            String reloadMessage,
-            String? fastReassembleClassName,
+            final List<FlutterDevice?> flutterDevices,
+            final Map<FlutterDevice?, List<FlutterView>> viewCache,
+            final void Function(String message)? onSlow,
+            final String reloadMessage,
+            final String? fastReassembleClassName,
           ) async => ReassembleResult(
               <FlutterView?, FlutterVmService?>{null: null},
               false,
@@ -442,7 +442,7 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(fullRestart: true), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
+        await expectLater(runner.restart(fullRestart: true), throwsA(isA<Exception>().having((final Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -476,7 +476,7 @@ void main() {
           devtoolsHandler: createNoOpHandler,
         );
 
-        await expectLater(runner.restart(), throwsA(isA<Exception>().having((Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
+        await expectLater(runner.restart(), throwsA(isA<Exception>().having((final Exception e) => e.toString(), 'message', 'Exception: updateDevFS failed')));
         expect(testingConfig.updateDevFSCompleteCalled, true);
       }, overrides: <Type, Generator>{
         HotRunnerConfig: () => testingConfig,
@@ -611,8 +611,8 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
+    final ApplicationPackage? app, {
+    final String? userIdentifier,
   }) async {
     return true;
   }
@@ -648,26 +648,26 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<UpdateFSReport> updateDevFS({
-    Uri? mainUri,
-    String? target,
-    AssetBundle? bundle,
-    DateTime? firstBuildTime,
-    bool bundleFirstUpload = false,
-    bool bundleDirty = false,
-    bool fullRestart = false,
-    String? projectRootPath,
-    String? pathToReload,
-    required String dillOutputPath,
-    required List<Uri> invalidatedFiles,
-    required PackageConfig packageConfig,
+    final Uri? mainUri,
+    final String? target,
+    final AssetBundle? bundle,
+    final DateTime? firstBuildTime,
+    final bool bundleFirstUpload = false,
+    final bool bundleDirty = false,
+    final bool fullRestart = false,
+    final String? projectRootPath,
+    final String? pathToReload,
+    required final String dillOutputPath,
+    required final List<Uri> invalidatedFiles,
+    required final PackageConfig packageConfig,
   }) => updateDevFSReportCallback();
 }
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
-    required Device device,
+    required final Device device,
     required this.exception,
-    required ResidentCompiler generator,
+    required final ResidentCompiler generator,
   })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
@@ -675,19 +675,19 @@ class TestFlutterDevice extends FlutterDevice {
 
   @override
   Future<void> connect({
-    ReloadSources? reloadSources,
-    Restart? restart,
-    CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
-    FlutterProject? flutterProject,
-    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    bool disableServiceAuthCodes = false,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    bool? ipv6 = false,
-    int? hostVmServicePort,
-    int? ddsPort,
-    bool allowExistingDdsInstance = false,
+    final ReloadSources? reloadSources,
+    final Restart? restart,
+    final CompileExpression? compileExpression,
+    final GetSkSLMethod? getSkSLMethod,
+    final FlutterProject? flutterProject,
+    final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    final bool disableServiceAuthCodes = false,
+    final bool enableDds = true,
+    final bool cacheStartupProfile = false,
+    final bool? ipv6 = false,
+    final int? hostVmServicePort,
+    final int? ddsPort,
+    final bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
   }
@@ -733,7 +733,7 @@ class FakeFlutterVmService extends Fake implements FlutterVmService {
   vm_service.VmService get service => FakeVmService();
 
   @override
-  Future<List<FlutterView>> getFlutterViews({bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
+  Future<List<FlutterView>> getFlutterViews({final bool returnEarly = false, final Duration delay = const Duration(milliseconds: 50)}) async {
     return <FlutterView>[];
   }
 }
@@ -753,12 +753,12 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
+    final TargetPlatform? platform, {
+    required final ImpellerStatus impellerStatus,
   }) { }
 
   @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+  Future<DevFSContent> recompileShader(final DevFSContent inputShader) {
     throw UnimplementedError();
   }
 }

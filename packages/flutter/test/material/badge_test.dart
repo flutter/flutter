@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 
 
 void main() {
-  testWidgets('Large Badge defaults', (WidgetTester tester) async {
+  testWidgets('Large Badge defaults', (final WidgetTester tester) async {
     late final ThemeData theme;
 
     await tester.pumpWidget(
@@ -19,7 +19,7 @@ void main() {
         home: Align(
           alignment: Alignment.topLeft,
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               // theme.textTheme is updated when the MaterialApp is built.
               theme = Theme.of(context);
               return const Badge(
@@ -53,7 +53,7 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(12, -4, 32, 12, const Radius.circular(8)), color: theme.colorScheme.error));
   });
 
-  testWidgets('Large Badge defaults with RTL', (WidgetTester tester) async {
+  testWidgets('Large Badge defaults with RTL', (final WidgetTester tester) async {
     late final ThemeData theme;
 
     await tester.pumpWidget(
@@ -64,7 +64,7 @@ void main() {
           child: Align(
             alignment: Alignment.topLeft,
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 // theme.textTheme is updated when the MaterialApp is built.
                 theme = Theme.of(context);
                 return const Badge(
@@ -93,16 +93,16 @@ void main() {
   });
 
   // Essentially the same as 'Large Badge defaults'
-  testWidgets('Badge.count', (WidgetTester tester) async {
+  testWidgets('Badge.count', (final WidgetTester tester) async {
     late final ThemeData theme;
 
-    Widget buildFrame(int count) {
+    Widget buildFrame(final int count) {
       return MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
         home: Align(
           alignment: Alignment.topLeft,
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               // theme.textTheme is updated when the MaterialApp is built.
               if (count == 0) {
                 theme = Theme.of(context);
@@ -149,7 +149,7 @@ void main() {
     expect(find.text('999+'), findsOneWidget);
   });
 
-  testWidgets('Small Badge defaults', (WidgetTester tester) async {
+  testWidgets('Small Badge defaults', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -180,7 +180,7 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(18, 0, 24, 6, const Radius.circular(3)), color: theme.colorScheme.error));
   });
 
-  testWidgets('Small Badge RTL defaults', (WidgetTester tester) async {
+  testWidgets('Small Badge RTL defaults', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
 
     await tester.pumpWidget(
@@ -213,7 +213,7 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(0, 0, 6, 6, const Radius.circular(3)), color: theme.colorScheme.error));
   });
 
-  testWidgets('Large Badge textStyle and colors', (WidgetTester tester) async {
+  testWidgets('Large Badge textStyle and colors', (final WidgetTester tester) async {
     final ThemeData theme = ThemeData.light(useMaterial3: true);
     const Color green = Color(0xff00ff00);
     const Color black = Color(0xff000000);
@@ -240,7 +240,7 @@ void main() {
     expect(tester.renderObject(find.byType(Badge)), paints..rrect(color: black));
   });
 
-  testWidgets('isLabelVisible', (WidgetTester tester) async {
+  testWidgets('isLabelVisible', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
@@ -264,10 +264,10 @@ void main() {
     expect(box, isNot(paints..rrect()));
   });
 
-  testWidgets('Large Badge alignment', (WidgetTester tester) async {
+  testWidgets('Large Badge alignment', (final WidgetTester tester) async {
     const Radius badgeRadius = Radius.circular(8);
 
-    Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
+    Widget buildFrame(final Alignment alignment, [final Offset offset = Offset.zero]) {
       return MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
         home: Align(
@@ -339,10 +339,10 @@ void main() {
     expect(box, paints..rrect(rrect: RRect.fromLTRBR(200 - 16, 200 - 16, 200, 200, badgeRadius).shift(offset)));
   });
 
-  testWidgets('Small Badge alignment', (WidgetTester tester) async {
+  testWidgets('Small Badge alignment', (final WidgetTester tester) async {
     const Radius badgeRadius = Radius.circular(3);
 
-    Widget buildFrame(Alignment alignment, [Offset offset = Offset.zero]) {
+    Widget buildFrame(final Alignment alignment, [final Offset offset = Offset.zero]) {
       return MaterialApp(
         theme: ThemeData.light(useMaterial3: true),
         home: Align(

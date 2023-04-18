@@ -12,7 +12,7 @@ class ShowSharedValue extends StatelessWidget {
   final String appDataKey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // The SharedAppData.getValue() call causes this widget to depend on the
     // value of the SharedAppData's 'foo' key. If it's changed, with
     // SharedAppData.setValue(), then this widget will be rebuilt.
@@ -36,7 +36,7 @@ class _HomeState extends State<Home> {
   int _barVersion = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: Column(

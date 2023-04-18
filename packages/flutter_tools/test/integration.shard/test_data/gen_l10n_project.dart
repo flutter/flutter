@@ -9,9 +9,9 @@ import 'project.dart';
 
 class GenL10nProject extends Project {
   @override
-  Future<void> setUpIn(Directory dir, {
-    bool useDeferredLoading = false,
-    bool useSyntheticPackage = false,
+  Future<void> setUpIn(final Directory dir, {
+    final bool useDeferredLoading = false,
+    final bool useSyntheticPackage = false,
   }) {
     this.dir = dir;
     writeFile(fileSystem.path.join(dir.path, 'lib', 'l10n', 'app_en.arb'), appEn);
@@ -774,8 +774,8 @@ void main() {
 ''';
 
   String l10nYaml({
-    required bool useDeferredLoading,
-    required bool useSyntheticPackage,
+    required final bool useDeferredLoading,
+    required final bool useSyntheticPackage,
   }) {
     String l10nYamlString = '';
 

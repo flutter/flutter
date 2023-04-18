@@ -168,7 +168,7 @@ void main() {
   }
 }
 
-void _checkFatBinary(File file, String buildModeLower, String expectedType) {
+void _checkFatBinary(final File file, final String buildModeLower, final String expectedType) {
   final String archs = processManager.runSync(
     <String>['file', file.path],
   ).stdout as String;

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/inherited_model/inherited_model.0.da
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Rebuild widget using InheritedModel', (WidgetTester tester) async {
+  testWidgets('Rebuild widget using InheritedModel', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.InheritedModelApp(),
     );

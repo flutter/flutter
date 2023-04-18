@@ -20,14 +20,14 @@ import 'package:path/path.dart' as path;
 
 import '../localizations_utils.dart';
 
-Map<String, dynamic> _loadBundle(File file) {
+Map<String, dynamic> _loadBundle(final File file) {
   if (!FileSystemEntity.isFileSync(file.path)) {
     exitWithError('Unable to find input file: ${file.path}');
   }
   return json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
-void _encodeBundleTranslations(Map<String, dynamic> bundle) {
+void _encodeBundleTranslations(final Map<String, dynamic> bundle) {
   for (final String key in bundle.keys) {
     // The ARB file resource "attributes" for foo are called @foo. Don't need
     // to encode them.
@@ -37,14 +37,14 @@ void _encodeBundleTranslations(Map<String, dynamic> bundle) {
     final String translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
-    bundle[key] = translation.runes.map((int code) {
+    bundle[key] = translation.runes.map((final int code) {
       final String codeString = '00${code.toRadixString(16)}';
       return '\\u${codeString.substring(codeString.length - 4)}';
     }).join();
   }
 }
 
-void _checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, dynamic> bundle) {
+void _checkEncodedTranslations(final Map<String, dynamic> encodedBundle, final Map<String, dynamic> bundle) {
   bool errorFound = false;
   const JsonDecoder decoder = JsonDecoder();
   for (final String key in bundle.keys) {
@@ -58,7 +58,7 @@ void _checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, d
   }
 }
 
-void _rewriteBundle(File file, Map<String, dynamic> bundle) {
+void _rewriteBundle(final File file, final Map<String, dynamic> bundle) {
   final StringBuffer contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {
@@ -68,7 +68,7 @@ void _rewriteBundle(File file, Map<String, dynamic> bundle) {
   file.writeAsStringSync(contents.toString());
 }
 
-void encodeKnArbFiles(Directory directory) {
+void encodeKnArbFiles(final Directory directory) {
   final File widgetsArbFile = File(path.join(directory.path, 'widgets_kn.arb'));
   final File materialArbFile = File(path.join(directory.path, 'material_kn.arb'));
   final File cupertinoArbFile = File(path.join(directory.path, 'cupertino_kn.arb'));

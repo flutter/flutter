@@ -27,7 +27,7 @@ class _BannerDemoState extends State<BannerDemo> {
   bool _showMultipleActions = true;
   bool _showLeading = true;
 
-  void handleDemoAction(BannerDemoAction action) {
+  void handleDemoAction(final BannerDemoAction action) {
     setState(() {
       switch (action) {
         case BannerDemoAction.reset:
@@ -43,7 +43,7 @@ class _BannerDemoState extends State<BannerDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Widget banner = MaterialBanner(
       content: const Text('Your password was updated on your other device. Please sign in again.'),
       leading: _showLeading ? const CircleAvatar(child: Icon(Icons.access_alarm)) : null,
@@ -75,7 +75,7 @@ class _BannerDemoState extends State<BannerDemo> {
           MaterialDemoDocumentationButton(BannerDemo.routeName),
           PopupMenuButton<BannerDemoAction>(
             onSelected: handleDemoAction,
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<BannerDemoAction>>[
+            itemBuilder: (final BuildContext context) => <PopupMenuEntry<BannerDemoAction>>[
               const PopupMenuItem<BannerDemoAction>(
                 value: BannerDemoAction.reset,
                 child: Text('Reset the banner'),
@@ -95,7 +95,7 @@ class _BannerDemoState extends State<BannerDemo> {
           ),
         ],
       ),
-      body: ListView.builder(itemCount: _displayBanner ? _numItems + 1 : _numItems, itemBuilder: (BuildContext context, int index) {
+      body: ListView.builder(itemCount: _displayBanner ? _numItems + 1 : _numItems, itemBuilder: (final BuildContext context, final int index) {
         if (index == 0 && _displayBanner) {
           return banner;
         }

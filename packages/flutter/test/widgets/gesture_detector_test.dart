@@ -10,19 +10,19 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const Offset forcePressOffset = Offset(400.0, 50.0);
 
-  testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
+  testWidgets('Uncontested scrolls start immediately', (final WidgetTester tester) async {
     bool didStartDrag = false;
     double? updatedDragDelta;
     bool didEndDrag = false;
 
     final Widget widget = GestureDetector(
-      onVerticalDragStart: (DragStartDetails details) {
+      onVerticalDragStart: (final DragStartDetails details) {
         didStartDrag = true;
       },
-      onVerticalDragUpdate: (DragUpdateDetails details) {
+      onVerticalDragUpdate: (final DragUpdateDetails details) {
         updatedDragDelta = details.primaryDelta;
       },
-      onVerticalDragEnd: (DragEndDetails details) {
+      onVerticalDragEnd: (final DragEndDetails details) {
         didEndDrag = true;
       },
       child: Container(
@@ -58,7 +58,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Match two scroll gestures in succession', (WidgetTester tester) async {
+  testWidgets('Match two scroll gestures in succession', (final WidgetTester tester) async {
     int gestureCount = 0;
     double dragDistance = 0.0;
 
@@ -67,10 +67,10 @@ void main() {
 
     final Widget widget = GestureDetector(
       dragStartBehavior: DragStartBehavior.down,
-      onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta ?? 0; },
-      onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
-      onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
-      onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
+      onVerticalDragUpdate: (final DragUpdateDetails details) { dragDistance += details.primaryDelta ?? 0; },
+      onVerticalDragEnd: (final DragEndDetails details) { gestureCount += 1; },
+      onHorizontalDragUpdate: (final DragUpdateDetails details) { fail('gesture should not match'); },
+      onHorizontalDragEnd: (final DragEndDetails details) { fail('gesture should not match'); },
       child: Container(
         color: const Color(0xFF00FF00),
       ),
@@ -91,20 +91,20 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets("Pan doesn't crash", (WidgetTester tester) async {
+  testWidgets("Pan doesn't crash", (final WidgetTester tester) async {
     bool didStartPan = false;
     Offset? panDelta;
     bool didEndPan = false;
 
     await tester.pumpWidget(
       GestureDetector(
-        onPanStart: (DragStartDetails details) {
+        onPanStart: (final DragStartDetails details) {
           didStartPan = true;
         },
-        onPanUpdate: (DragUpdateDetails details) {
+        onPanUpdate: (final DragUpdateDetails details) {
           panDelta = (panDelta ?? Offset.zero) + details.delta;
         },
-        onPanEnd: (DragEndDetails details) {
+        onPanEnd: (final DragEndDetails details) {
           didEndPan = true;
         },
         child: Container(
@@ -135,18 +135,18 @@ void main() {
       },
     );
 
-    testWidgets('Translucent', (WidgetTester tester) async {
+    testWidgets('Translucent', (final WidgetTester tester) async {
       bool didReceivePointerDown;
       bool didTap;
 
-      Future<void> pumpWidgetTree(HitTestBehavior? behavior) {
+      Future<void> pumpWidgetTree(final HitTestBehavior? behavior) {
         return tester.pumpWidget(
           Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
               children: <Widget>[
                 Listener(
-                  onPointerDown: (_) {
+                  onPointerDown: (final _) {
                     didReceivePointerDown = true;
                   },
                   child: Container(
@@ -165,7 +165,7 @@ void main() {
                     onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
                       didTap = true;
                     } : null,
-                    onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (_) {
+                    onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (final _) {
                       didTap = true;
                     } : null,
                     behavior: behavior,
@@ -206,7 +206,7 @@ void main() {
       expect(didTap, isTrue);
     }, variant: buttonVariant);
 
-    testWidgets('Empty', (WidgetTester tester) async {
+    testWidgets('Empty', (final WidgetTester tester) async {
       bool didTap = false;
       await tester.pumpWidget(
         Center(
@@ -217,7 +217,7 @@ void main() {
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
               didTap = true;
             } : null,
-            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) {
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (final _) {
               didTap = true;
             } : null,
           ),
@@ -228,7 +228,7 @@ void main() {
       expect(didTap, isTrue);
     }, variant: buttonVariant);
 
-    testWidgets('Only container', (WidgetTester tester) async {
+    testWidgets('Only container', (final WidgetTester tester) async {
       bool didTap = false;
       await tester.pumpWidget(
         Center(
@@ -239,7 +239,7 @@ void main() {
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
               didTap = true;
             } : null,
-            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) {
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (final _) {
               didTap = true;
             } : null,
             child: Container(),
@@ -251,7 +251,7 @@ void main() {
       expect(didTap, isFalse);
     }, variant: buttonVariant);
 
-    testWidgets('cache render object', (WidgetTester tester) async {
+    testWidgets('cache render object', (final WidgetTester tester) async {
       void inputCallback() { }
 
       await tester.pumpWidget(
@@ -259,7 +259,7 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
-            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (final _) => inputCallback() : null,
             child: Container(),
           ),
         ),
@@ -272,7 +272,7 @@ void main() {
           child: GestureDetector(
             onTap: ButtonVariant.button == kPrimaryButton ? inputCallback : null,
             onSecondaryTap: ButtonVariant.button == kSecondaryButton ? inputCallback : null,
-            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (_) => inputCallback() : null,
+            onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (final _) => inputCallback() : null,
             child: Container(),
           ),
         ),
@@ -283,7 +283,7 @@ void main() {
       expect(renderObj1, same(renderObj2));
     }, variant: buttonVariant);
 
-    testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
+    testWidgets('Tap down occurs after kPressTimeout', (final WidgetTester tester) async {
       int tapDown = 0;
       int tap = 0;
       int tapCancel = 0;
@@ -311,7 +311,7 @@ void main() {
               gestures: <Type, GestureRecognizerFactory>{
                 LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
                   () => LongPressGestureRecognizer(),
-                  (LongPressGestureRecognizer instance) {
+                  (final LongPressGestureRecognizer instance) {
                     instance
                       ..onLongPress = ButtonVariant.button == kPrimaryButton ? () {
                         longPress += 1;
@@ -326,13 +326,13 @@ void main() {
                 ),
               },
               child: GestureDetector(
-                onTapDown: ButtonVariant.button == kPrimaryButton ? (TapDownDetails details) {
+                onTapDown: ButtonVariant.button == kPrimaryButton ? (final TapDownDetails details) {
                   tapDown += 1;
                 } : null,
-                onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (TapDownDetails details) {
+                onSecondaryTapDown: ButtonVariant.button == kSecondaryButton ? (final TapDownDetails details) {
                   tapDown += 1;
                 } : null,
-                onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (TapDownDetails details) {
+                onTertiaryTapDown: ButtonVariant.button == kTertiaryButton ? (final TapDownDetails details) {
                   tapDown += 1;
                 } : null,
                 onTap: ButtonVariant.button == kPrimaryButton ? () {
@@ -341,7 +341,7 @@ void main() {
                 onSecondaryTap: ButtonVariant.button == kSecondaryButton ? () {
                   tap += 1;
                 } : null,
-                onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (TapUpDetails details) {
+                onTertiaryTapUp: ButtonVariant.button == kTertiaryButton ? (final TapUpDetails details) {
                   tap += 1;
                 } : null,
                 onTapCancel: ButtonVariant.button == kPrimaryButton ? () {
@@ -361,7 +361,7 @@ void main() {
 
       // Pointer is dragged from the center of the 800x100 gesture detector
       // to a point (400,300) below it. This should never call onTap.
-      Future<void> dragOut(Duration timeout) async {
+      Future<void> dragOut(final Duration timeout) async {
         final TestGesture gesture =
         await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
         // If the timeout is less than kPressTimeout the recognizer will not
@@ -391,7 +391,7 @@ void main() {
       expect(longPress, 1);
     }, variant: buttonVariant);
 
-    testWidgets('Long Press Up Callback called after long press', (WidgetTester tester) async {
+    testWidgets('Long Press Up Callback called after long press', (final WidgetTester tester) async {
       int longPressUp = 0;
 
       await tester.pumpWidget(
@@ -411,7 +411,7 @@ void main() {
               gestures: <Type, GestureRecognizerFactory>{
                 LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
                       () => LongPressGestureRecognizer(),
-                      (LongPressGestureRecognizer instance) {
+                      (final LongPressGestureRecognizer instance) {
                     instance
                       ..onLongPressUp = ButtonVariant.button == kPrimaryButton ? () {
                         longPressUp += 1;
@@ -430,7 +430,7 @@ void main() {
         ),
       );
 
-      Future<void> longPress(Duration timeout) async {
+      Future<void> longPress(final Duration timeout) async {
         final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), buttons: ButtonVariant.button);
         await tester.pump(timeout);
         await gesture.up();
@@ -441,7 +441,7 @@ void main() {
     }, variant: buttonVariant);
   });
 
-  testWidgets('Primary and secondary long press callbacks should work together in GestureDetector', (WidgetTester tester) async {
+  testWidgets('Primary and secondary long press callbacks should work together in GestureDetector', (final WidgetTester tester) async {
     bool primaryLongPress = false, secondaryLongPress = false;
 
     await tester.pumpWidget(
@@ -463,7 +463,7 @@ void main() {
       ),
     );
 
-    Future<void> longPress(Duration timeout, int buttons) async {
+    Future<void> longPress(final Duration timeout, final int buttons) async {
       final TestGesture gesture = await tester.startGesture(const Offset(400.0, 50.0), buttons: buttons);
       await tester.pump(timeout);
       await gesture.up();
@@ -477,7 +477,7 @@ void main() {
     expect(secondaryLongPress, isTrue);
   });
 
-  testWidgets('Force Press Callback called after force press', (WidgetTester tester) async {
+  testWidgets('Force Press Callback called after force press', (final WidgetTester tester) async {
     int forcePressStart = 0;
     int forcePressPeaked = 0;
     int forcePressUpdate = 0;
@@ -491,10 +491,10 @@ void main() {
           height: 100.0,
           color: const Color(0xFF00FF00),
           child: GestureDetector(
-            onForcePressStart: (_) => forcePressStart += 1,
-            onForcePressEnd: (_) => forcePressEnded += 1,
-            onForcePressPeak: (_) => forcePressPeaked += 1,
-            onForcePressUpdate: (_) => forcePressUpdate += 1,
+            onForcePressStart: (final _) => forcePressStart += 1,
+            onForcePressEnd: (final _) => forcePressEnded += 1,
+            onForcePressPeak: (final _) => forcePressPeaked += 1,
+            onForcePressUpdate: (final _) => forcePressUpdate += 1,
           ),
         ),
       ),
@@ -580,7 +580,7 @@ void main() {
     expect(forcePressEnded, 1);
   });
 
-  testWidgets('Force Press Callback not called if long press triggered before force press', (WidgetTester tester) async {
+  testWidgets('Force Press Callback not called if long press triggered before force press', (final WidgetTester tester) async {
     int forcePressStart = 0;
     int longPressTimes = 0;
 
@@ -592,7 +592,7 @@ void main() {
           height: 100.0,
           color: const Color(0xFF00FF00),
           child: GestureDetector(
-            onForcePressStart: (_) => forcePressStart += 1,
+            onForcePressStart: (final _) => forcePressStart += 1,
             onLongPress: () => longPressTimes += 1,
           ),
         ),
@@ -645,7 +645,7 @@ void main() {
     expect(forcePressStart, 0);
   });
 
-  testWidgets('Force Press Callback not called if drag triggered before force press', (WidgetTester tester) async {
+  testWidgets('Force Press Callback not called if drag triggered before force press', (final WidgetTester tester) async {
     int forcePressStart = 0;
     int horizontalDragStart = 0;
 
@@ -657,8 +657,8 @@ void main() {
           height: 100.0,
           color: const Color(0xFF00FF00),
           child: GestureDetector(
-            onForcePressStart: (_) => forcePressStart += 1,
-            onHorizontalDragStart: (_) => horizontalDragStart += 1,
+            onForcePressStart: (final _) => forcePressStart += 1,
+            onHorizontalDragStart: (final _) => horizontalDragStart += 1,
           ),
         ),
       ),
@@ -706,7 +706,7 @@ void main() {
   });
 
   group("RawGestureDetectorState's debugFillProperties", () {
-    testWidgets('when default', (WidgetTester tester) async {
+    testWidgets('when default', (final WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
@@ -715,8 +715,8 @@ void main() {
       key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
       expect(description, <String>[
@@ -724,7 +724,7 @@ void main() {
       ]);
     });
 
-    testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
+    testWidgets('should show gestures, custom semantics and behavior', (final WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
@@ -733,13 +733,13 @@ void main() {
         gestures: <Type, GestureRecognizerFactory>{
           TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
             () => TapGestureRecognizer(),
-            (TapGestureRecognizer recognizer) {
+            (final TapGestureRecognizer recognizer) {
               recognizer.onTap = () {};
             },
           ),
           LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
             () => LongPressGestureRecognizer(),
-            (LongPressGestureRecognizer recognizer) {
+            (final LongPressGestureRecognizer recognizer) {
               recognizer.onLongPress = () {};
             },
           ),
@@ -750,8 +750,8 @@ void main() {
       key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
       expect(description, <String>[
@@ -761,7 +761,7 @@ void main() {
       ]);
     });
 
-    testWidgets('should not show semantics when excludeFromSemantics is true', (WidgetTester tester) async {
+    testWidgets('should not show semantics when excludeFromSemantics is true', (final WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(RawGestureDetector(
@@ -773,8 +773,8 @@ void main() {
       key.currentState!.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
       expect(description, <String>[
@@ -787,7 +787,7 @@ void main() {
       test('constructor redundant pan and scale', () {
         late FlutterError error;
         try {
-          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {});
+          GestureDetector(onScaleStart: (final _) {}, onPanStart: (final _) {});
         } on FlutterError catch (e) {
           error = e;
         } finally {
@@ -813,9 +813,9 @@ void main() {
         late FlutterError error;
         try {
           GestureDetector(
-            onVerticalDragStart: (_) {},
-            onHorizontalDragStart: (_) {},
-            onPanStart: (_) {},
+            onVerticalDragStart: (final _) {},
+            onHorizontalDragStart: (final _) {},
+            onPanStart: (final _) {},
           );
         } on FlutterError catch (e) {
           error = e;
@@ -832,7 +832,7 @@ void main() {
         }
       });
 
-      testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
+      testWidgets('replaceGestureRecognizers not during layout', (final WidgetTester tester) async {
         final GlobalKey<RawGestureDetectorState> key = GlobalKey<RawGestureDetectorState>();
         await tester.pumpWidget(
           Directionality(
@@ -876,20 +876,20 @@ void main() {
     });
   });
 
-  testWidgets('supportedDevices update test', (WidgetTester tester) async {
+  testWidgets('supportedDevices update test', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/111716
     bool didStartPan = false;
     Offset? panDelta;
     bool didEndPan = false;
-    Widget buildFrame(Set<PointerDeviceKind>? supportedDevices) {
+    Widget buildFrame(final Set<PointerDeviceKind>? supportedDevices) {
       return GestureDetector(
-        onPanStart: (DragStartDetails details) {
+        onPanStart: (final DragStartDetails details) {
           didStartPan = true;
         },
-        onPanUpdate: (DragUpdateDetails details) {
+        onPanUpdate: (final DragUpdateDetails details) {
           panDelta = (panDelta ?? Offset.zero) + details.delta;
         },
-        onPanEnd: (DragEndDetails details) {
+        onPanEnd: (final DragEndDetails details) {
           didEndPan = true;
         },
         supportedDevices: supportedDevices,
@@ -946,20 +946,20 @@ void main() {
     expect(didEndPan, isTrue);
   });
 
-  testWidgets('supportedDevices is respected', (WidgetTester tester) async {
+  testWidgets('supportedDevices is respected', (final WidgetTester tester) async {
     bool didStartPan = false;
     Offset? panDelta;
     bool didEndPan = false;
 
     await tester.pumpWidget(
       GestureDetector(
-        onPanStart: (DragStartDetails details) {
+        onPanStart: (final DragStartDetails details) {
           didStartPan = true;
         },
-        onPanUpdate: (DragUpdateDetails details) {
+        onPanUpdate: (final DragUpdateDetails details) {
           panDelta = (panDelta ?? Offset.zero) + details.delta;
         },
-        onPanEnd: (DragEndDetails details) {
+        onPanEnd: (final DragEndDetails details) {
           didEndPan = true;
         },
         supportedDevices: const <PointerDeviceKind>{PointerDeviceKind.mouse},
@@ -994,7 +994,7 @@ void main() {
   });
 
   group('DoubleTap', () {
-    testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (WidgetTester tester) async {
+    testWidgets('onDoubleTap is called even if onDoubleTapDown has not been not provided', (final WidgetTester tester) async {
       final List<String> log = <String>[];
       await tester.pumpWidget(
         Directionality(
@@ -1017,13 +1017,13 @@ void main() {
       expect(log, <String>['double-tap']);
     });
 
-    testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (WidgetTester tester) async {
+    testWidgets('onDoubleTapDown is called even if onDoubleTap has not been not provided', (final WidgetTester tester) async {
       final List<String> log = <String>[];
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: GestureDetector(
-            onDoubleTapDown: (_) => log.add('double-tap-down'),
+            onDoubleTapDown: (final _) => log.add('double-tap-down'),
             child: Container(
               width: 100.0,
               height: 100.0,
@@ -1044,7 +1044,7 @@ void main() {
 
 class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
   @override
-  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  void assignSemantics(final RenderSemanticsGestureHandler renderObject) {
   }
 }
 
@@ -1063,20 +1063,20 @@ class ButtonVariant extends TestVariant<int> {
   static int button = 0;
 
   @override
-  String describeValue(int value) {
+  String describeValue(final int value) {
     assert(descriptions.containsKey(value), 'Unknown button');
     return descriptions[value]!;
   }
 
   @override
-  Future<int> setUp(int value) async {
+  Future<int> setUp(final int value) async {
     final int oldValue = button;
     button = value;
     return oldValue;
   }
 
   @override
-  Future<void> tearDown(int value, int memento) async {
+  Future<void> tearDown(final int value, final int memento) async {
     button = memento;
   }
 }

@@ -15,7 +15,7 @@ const Offset _kGestureOffset = Offset(0, -25);
 const Radius _kScrollbarRadius = Radius.circular(1.5);
 
 void main() {
-  testWidgets('Paints iOS spec', (WidgetTester tester) async {
+  testWidgets('Paints iOS spec', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
@@ -53,7 +53,7 @@ void main() {
     ));
   });
 
-  testWidgets('Paints iOS spec with nav bar', (WidgetTester tester) async {
+  testWidgets('Paints iOS spec with nav bar', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(
@@ -98,7 +98,7 @@ void main() {
     ));
   });
 
-  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+  testWidgets("should not paint when there isn't enough space", (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: MediaQuery(

@@ -22,21 +22,21 @@ void main() {
   });
 
   testWidgets('Default ActionIconThemeData debugFillProperties',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ActionIconThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
   testWidgets('ActionIconThemeData implements debugFillProperties',
-      (WidgetTester tester) async {
-    Widget actionButtonIconBuilder(BuildContext context) {
+      (final WidgetTester tester) async {
+    Widget actionButtonIconBuilder(final BuildContext context) {
       return const Icon(IconData(0));
     }
 
@@ -49,8 +49,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     final Matcher containsBuilderCallback = contains('Closure: (BuildContext) =>');
@@ -62,11 +62,11 @@ void main() {
     ]);
   });
 
-  testWidgets('Action buttons use ThemeData action icon theme', (WidgetTester tester) async {
+  testWidgets('Action buttons use ThemeData action icon theme', (final WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 
-    Widget buildSampleIcon(BuildContext context) {
+    Widget buildSampleIcon(final BuildContext context) {
       return const Icon(
         icon,
         size: 20,
@@ -123,11 +123,11 @@ void main() {
   // This test is essentially the same as 'Action buttons use ThemeData action icon theme'. In
   // this case the theme is introduced with the ActionIconTheme widget instead of
   // ThemeData.actionIconTheme.
-  testWidgets('Action buttons use ActionIconTheme', (WidgetTester tester) async {
+  testWidgets('Action buttons use ActionIconTheme', (final WidgetTester tester) async {
     const Color green = Color(0xff00ff00);
     const IconData icon = IconData(0);
 
-    Widget buildSampleIcon(BuildContext context) {
+    Widget buildSampleIcon(final BuildContext context) {
       return const Icon(
         icon,
         size: 20,

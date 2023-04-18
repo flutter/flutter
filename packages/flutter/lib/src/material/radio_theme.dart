@@ -91,12 +91,12 @@ class RadioThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   RadioThemeData copyWith({
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    MaterialStateProperty<Color?>? fillColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    double? splashRadius,
-    MaterialTapTargetSize? materialTapTargetSize,
-    VisualDensity? visualDensity,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final MaterialStateProperty<Color?>? fillColor,
+    final MaterialStateProperty<Color?>? overlayColor,
+    final double? splashRadius,
+    final MaterialTapTargetSize? materialTapTargetSize,
+    final VisualDensity? visualDensity,
   }) {
     return RadioThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -111,7 +111,7 @@ class RadioThemeData with Diagnosticable {
   /// Linearly interpolate between two [RadioThemeData]s.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static RadioThemeData lerp(RadioThemeData? a, RadioThemeData? b, double t) {
+  static RadioThemeData lerp(final RadioThemeData? a, final RadioThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -136,7 +136,7 @@ class RadioThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -153,7 +153,7 @@ class RadioThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
@@ -196,11 +196,11 @@ class RadioTheme extends InheritedWidget {
   /// ```dart
   /// RadioThemeData theme = RadioTheme.of(context);
   /// ```
-  static RadioThemeData of(BuildContext context) {
+  static RadioThemeData of(final BuildContext context) {
     final RadioTheme? radioTheme = context.dependOnInheritedWidgetOfExactType<RadioTheme>();
     return radioTheme?.data ?? Theme.of(context).radioTheme;
   }
 
   @override
-  bool updateShouldNotify(RadioTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final RadioTheme oldWidget) => data != oldWidget.data;
 }

@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
+void _checkCaretOffsetsLtrAt(final String text, final List<int> boundaries) {
   expect(boundaries.first, 0);
   expect(boundaries.last, text.length);
 
@@ -24,7 +24,7 @@ void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
   }
 
   // The painter has the full text laid out.  Check the caret offsets.
-  double caretOffset(int offset) {
+  double caretOffset(final int offset) {
     final TextPosition position = ui.TextPosition(offset: offset);
     return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
   }
@@ -50,7 +50,7 @@ void _checkCaretOffsetsLtrAt(String text, List<int> boundaries) {
 ///
 /// If you have a [TextSpan] instead of a plain [String],
 /// see [caretOffsetsForTextSpan].
-void checkCaretOffsetsLtr(String text) {
+void checkCaretOffsetsLtr(final String text) {
   final List<int> characterBoundaries = <int>[];
   final CharacterRange range = CharacterRange.at(text, 0);
   while (true) {
@@ -76,7 +76,7 @@ void checkCaretOffsetsLtr(String text) {
 ///
 /// Consider using [checkCaretOffsetsLtr] instead of this function.  If that
 /// doesn't pass, you may have an instance of <https://github.com/flutter/flutter/issues/122478>.
-void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
+void checkCaretOffsetsLtrFromPieces(final List<String> clusters) {
   final StringBuffer buffer = StringBuffer();
   final List<int> boundaries = <int>[];
   boundaries.add(buffer.length);
@@ -97,13 +97,13 @@ void checkCaretOffsetsLtrFromPieces(List<String> clusters) {
 ///
 /// If you have a [String] instead of a nontrivial [TextSpan],
 /// consider using [checkCaretOffsetsLtr] instead.
-List<double> caretOffsetsForTextSpan(TextDirection textDirection, TextSpan text) {
+List<double> caretOffsetsForTextSpan(final TextDirection textDirection, final TextSpan text) {
   final TextPainter painter = TextPainter()
     ..textDirection = textDirection
     ..text = text
     ..layout();
   final int length = text.toPlainText().length;
-  final List<double> result = List<double>.generate(length + 1, (int offset) {
+  final List<double> result = List<double>.generate(length + 1, (final int offset) {
     final TextPosition position = ui.TextPosition(offset: offset);
     return painter.getOffsetForCaret(position, ui.Rect.zero).dx;
   });
@@ -1194,7 +1194,7 @@ void main() {
 
   test('TextPainter handles invalid UTF-16', () {
     Object? exception;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exception = details.exception;
     };
 

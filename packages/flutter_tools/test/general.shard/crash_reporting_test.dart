@@ -48,8 +48,8 @@ void main() {
 #1      _rootRunUnary (dart:async/zone.dart:1141:38)''');
   });
 
-  Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
-    int crashes = 1,
+  Future<void> verifyCrashReportSent(final RequestInfo crashInfo, {
+    final int crashes = 1,
   }) async {
     // Verify that we sent the crash report.
     expect(crashInfo.method, 'POST');
@@ -254,7 +254,7 @@ void main() {
       String? method;
       Uri? uri;
 
-      final MockClient mockClient = MockClient((Request request) async {
+      final MockClient mockClient = MockClient((final Request request) async {
         method = request.method;
         uri = request.url;
 
@@ -288,7 +288,7 @@ void main() {
 
     testWithoutContext('can override base URL', () async {
       Uri? uri;
-      final MockClient mockClient = MockClient((Request request) async {
+      final MockClient mockClient = MockClient((final Request request) async {
         uri = request.url;
         return Response('test-report-id', 200);
       });
@@ -339,7 +339,7 @@ class RequestInfo {
 }
 
 class MockCrashReportSender extends MockClient {
-  MockCrashReportSender(RequestInfo crashInfo) : super((Request request) async {
+  MockCrashReportSender(final RequestInfo crashInfo) : super((final Request request) async {
     MockCrashReportSender.sendCalls++;
     crashInfo.method = request.method;
     crashInfo.uri = request.url;
@@ -350,7 +350,7 @@ class MockCrashReportSender extends MockClient {
     crashInfo.fields = Map<String, String>.fromIterable(
       utf8.decode(request.bodyBytes)
         .split('--$boundary')
-        .map<List<String>?>((String part) {
+        .map<List<String>?>((final String part) {
         final Match? nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
         if (nameMatch == null) {
           return null;
@@ -359,11 +359,11 @@ class MockCrashReportSender extends MockClient {
         final String value = part.split('\n').skip(2).join('\n').trim();
         return <String>[name, value];
       }).whereType<List<String>>(),
-      key: (dynamic key) {
+      key: (final dynamic key) {
         final List<String> pair = key as List<String>;
         return pair[0];
       },
-      value: (dynamic value) {
+      value: (final dynamic value) {
         final List<String> pair = value as List<String>;
         return pair[1];
       },
@@ -379,13 +379,13 @@ class MockCrashReportSender extends MockClient {
 }
 
 class CrashingCrashReportSender extends MockClient {
-  CrashingCrashReportSender(Exception exception) : super((Request request) async {
+  CrashingCrashReportSender(final Exception exception) : super((final Request request) async {
     throw exception;
   });
 }
 
 class FakeDoctorText extends Fake implements DoctorText {
-  FakeDoctorText(String text, String piiStrippedText)
+  FakeDoctorText(final String text, final String piiStrippedText)
       : _text = text, _piiStrippedText = piiStrippedText;
 
   @override

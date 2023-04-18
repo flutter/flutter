@@ -21,7 +21,7 @@ class _FlutterLogo extends StatelessWidget {
   const _FlutterLogo();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Container(
         width: 34.0,
@@ -49,7 +49,7 @@ class _CategoryItem extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
 
@@ -102,7 +102,7 @@ class _CategoriesPage extends StatelessWidget {
   final ValueChanged<GalleryDemoCategory>? onCategoryTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const double aspectRatio = 160.0 / 180.0;
     final List<GalleryDemoCategory> categoriesList = categories!.toList();
     final int columnCount = (MediaQuery.of(context).orientation == Orientation.portrait) ? 2 : 3;
@@ -115,7 +115,7 @@ class _CategoriesPage extends StatelessWidget {
       child: SingleChildScrollView(
         key: const PageStorageKey<String>('categories'),
         child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
+          builder: (final BuildContext context, final BoxConstraints constraints) {
             final double columnWidth = constraints.biggest.width / columnCount.toDouble();
             final double rowHeight = math.min(225.0, columnWidth * aspectRatio);
             final int rowCount = (categories!.length + columnCount - 1) ~/ columnCount;
@@ -127,13 +127,13 @@ class _CategoriesPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List<Widget>.generate(rowCount, (int rowIndex) {
+                children: List<Widget>.generate(rowCount, (final int rowIndex) {
                   final int columnCountForRow = rowIndex == rowCount - 1
                     ? categories!.length - columnCount * math.max<int>(0, rowCount - 1)
                     : columnCount;
 
                   return Row(
-                    children: List<Widget>.generate(columnCountForRow, (int columnIndex) {
+                    children: List<Widget>.generate(columnCountForRow, (final int columnIndex) {
                       final int index = rowIndex * columnCount + columnIndex;
                       final GalleryDemoCategory category = categoriesList[index];
 
@@ -164,7 +164,7 @@ class _DemoItem extends StatelessWidget {
 
   final GalleryDemo? demo;
 
-  void _launchDemo(BuildContext context) {
+  void _launchDemo(final BuildContext context) {
     if (demo != null) {
       Timeline.instantSync('Start Transition', arguments: <String, String>{
         'from': '/',
@@ -175,7 +175,7 @@ class _DemoItem extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     final double textScaleFactor = MediaQuery.textScaleFactorOf(context);
@@ -234,7 +234,7 @@ class _DemosPage extends StatelessWidget {
   final GalleryDemoCategory? category;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // When overriding ListView.padding, it is necessary to manually handle
     // safe areas.
     final double windowBottomPadding = MediaQuery.of(context).padding.bottom;
@@ -249,7 +249,7 @@ class _DemosPage extends StatelessWidget {
           dragStartBehavior: DragStartBehavior.down,
           key: PageStorageKey<String>(category!.name),
           padding: EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
-          children: kGalleryCategoryToDemos[category!]!.map<Widget>((GalleryDemo demo) {
+          children: kGalleryCategoryToDemos[category!]!.map<Widget>((final GalleryDemo demo) {
             return _DemoItem(demo: demo);
           }).toList(),
         ),
@@ -281,7 +281,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   late AnimationController _controller;
   GalleryDemoCategory? _category;
 
-  static Widget _topHomeLayout(Widget? currentChild, List<Widget> previousChildren) {
+  static Widget _topHomeLayout(final Widget? currentChild, final List<Widget> previousChildren) {
     return Stack(
       alignment: Alignment.topCenter,
       children: <Widget>[
@@ -310,7 +310,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
     final MediaQueryData media = MediaQuery.of(context);
@@ -364,7 +364,7 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
                 ? _DemosPage(_category)
                 : _CategoriesPage(
                   categories: kAllGalleryDemoCategories,
-                  onCategoryTap: (GalleryDemoCategory category) {
+                  onCategoryTap: (final GalleryDemoCategory category) {
                     setState(() => _category = category);
                   },
                 ),

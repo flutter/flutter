@@ -85,7 +85,7 @@ void main() {
     );
   });
 
-  testWidgets('Flutter Logo golden test', (WidgetTester tester) async {
+  testWidgets('Flutter Logo golden test', (final WidgetTester tester) async {
     final Key logo = UniqueKey();
     await tester.pumpWidget(Container(
       key: logo,

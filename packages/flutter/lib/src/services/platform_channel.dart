@@ -34,11 +34,11 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
   final String codecTypeName;
 
   @override
-  Future<void> handlePlatformMessage(String channel, ByteData? data, PlatformMessageResponseCallback? callback) {
+  Future<void> handlePlatformMessage(final String channel, final ByteData? data, final PlatformMessageResponseCallback? callback) {
     return proxy.handlePlatformMessage(channel, data, callback);
   }
 
-  Future<ByteData?>? sendWithPostfix(String channel, String postfix, ByteData? message) async {
+  Future<ByteData?>? sendWithPostfix(final String channel, final String postfix, final ByteData? message) async {
     final TimelineTask task = TimelineTask();
     _debugRecordUpStream(channelTypeName, '$channel$postfix', codecTypeName, message);
     task.start('Platform Channel send $channel$postfix');
@@ -53,11 +53,11 @@ class _ProfiledBinaryMessenger implements BinaryMessenger {
   }
 
   @override
-  Future<ByteData?>? send(String channel, ByteData? message) =>
+  Future<ByteData?>? send(final String channel, final ByteData? message) =>
     sendWithPostfix(channel, '', message);
 
   @override
-  void setMessageHandler(String channel, MessageHandler? handler) {
+  void setMessageHandler(final String channel, final MessageHandler? handler) {
     proxy.setMessageHandler(channel, handler);
   }
 }
@@ -72,7 +72,7 @@ class _PlatformChannelStats {
   int _upCount = 0;
   int _upBytes = 0;
   int get upBytes => _upBytes;
-  void addUpStream(int bytes) {
+  void addUpStream(final int bytes) {
     _upCount += 1;
     _upBytes += bytes;
   }
@@ -80,7 +80,7 @@ class _PlatformChannelStats {
   int _downCount = 0;
   int _downBytes = 0;
   int get downBytes => _downBytes;
-  void addDownStream(int bytes) {
+  void addDownStream(final int bytes) {
     _downCount += 1;
     _downBytes += bytes;
   }
@@ -101,7 +101,7 @@ Future<void> _debugLaunchProfilePlatformChannels() async {
     final List<_PlatformChannelStats> allStats =
         _debugProfilePlatformChannelsStats.values.toList();
     // Sort highest combined bandwidth first.
-    allStats.sort((_PlatformChannelStats x, _PlatformChannelStats y) =>
+    allStats.sort((final _PlatformChannelStats x, final _PlatformChannelStats y) =>
         (y.upBytes + y.downBytes) - (x.upBytes + x.downBytes));
     for (final _PlatformChannelStats stats in allStats) {
       log.writeln(
@@ -112,8 +112,8 @@ Future<void> _debugLaunchProfilePlatformChannels() async {
   }
 }
 
-void _debugRecordUpStream(String channelTypeName, String name,
-    String codecTypeName, ByteData? bytes) {
+void _debugRecordUpStream(final String channelTypeName, final String name,
+    final String codecTypeName, final ByteData? bytes) {
   final _PlatformChannelStats stats =
       _debugProfilePlatformChannelsStats[name] ??=
           _PlatformChannelStats(name, codecTypeName, channelTypeName);
@@ -121,8 +121,8 @@ void _debugRecordUpStream(String channelTypeName, String name,
   _debugLaunchProfilePlatformChannels();
 }
 
-void _debugRecordDownStream(String channelTypeName, String name,
-    String codecTypeName, ByteData? bytes) {
+void _debugRecordDownStream(final String channelTypeName, final String name,
+    final String codecTypeName, final ByteData? bytes) {
   final _PlatformChannelStats stats =
       _debugProfilePlatformChannelsStats[name] ??=
           _PlatformChannelStats(name, codecTypeName, channelTypeName);
@@ -162,7 +162,7 @@ class BasicMessageChannel<T> {
   ///
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
-  const BasicMessageChannel(this.name, this.codec, { BinaryMessenger? binaryMessenger })
+  const BasicMessageChannel(this.name, this.codec, { final BinaryMessenger? binaryMessenger })
       : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
@@ -191,7 +191,7 @@ class BasicMessageChannel<T> {
   ///
   /// Returns a [Future] which completes to the received response, which may
   /// be null.
-  Future<T?> send(T message) async {
+  Future<T?> send(final T message) async {
     return codec.decodeMessage(await binaryMessenger.send(name, codec.encodeMessage(message)));
   }
 
@@ -204,11 +204,11 @@ class BasicMessageChannel<T> {
   ///
   /// The handler's return value is sent back to the platform plugins as a
   /// message reply. It may be null.
-  void setMessageHandler(Future<T> Function(T? message)? handler) {
+  void setMessageHandler(final Future<T> Function(T? message)? handler) {
     if (handler == null) {
       binaryMessenger.setMessageHandler(name, null);
     } else {
-      binaryMessenger.setMessageHandler(name, (ByteData? message) async {
+      binaryMessenger.setMessageHandler(name, (final ByteData? message) async {
         return codec.encodeMessage(await handler(codec.decodeMessage(message)));
       });
     }
@@ -250,7 +250,7 @@ class MethodChannel {
   ///
   /// The [name] and [codec] arguments cannot be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
-  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger ])
+  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), final BinaryMessenger? binaryMessenger ])
       : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
@@ -295,7 +295,7 @@ class MethodChannel {
   /// The `T` type argument is the expected return type. It is treated as
   /// nullable.
   @optionalTypeArgs
-  Future<T?> _invokeMethod<T>(String method, { required bool missingOk, dynamic arguments }) async {
+  Future<T?> _invokeMethod<T>(final String method, { required final bool missingOk, final dynamic arguments }) async {
     final ByteData input = codec.encodeMethodCall(MethodCall(method, arguments));
     final ByteData? result =
       !kReleaseMode && debugProfilePlatformChannels ?
@@ -479,7 +479,7 @@ class MethodChannel {
   ///  * <https://api.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) {
+  Future<T?> invokeMethod<T>(final String method, [ final dynamic arguments ]) {
     return _invokeMethod<T>(method, missingOk: false, arguments: arguments);
   }
 
@@ -492,7 +492,7 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<List<T>?> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
+  Future<List<T>?> invokeListMethod<T>(final String method, [ final dynamic arguments ]) async {
     final List<dynamic>? result = await invokeMethod<List<dynamic>>(method, arguments);
     return result?.cast<T>();
   }
@@ -506,7 +506,7 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<Map<K, V>?> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
+  Future<Map<K, V>?> invokeMapMethod<K, V>(final String method, [ final dynamic arguments ]) async {
     final Map<dynamic, dynamic>? result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
     return result?.cast<K, V>();
   }
@@ -525,7 +525,7 @@ class MethodChannel {
   /// completes with a [MissingPluginException], an empty reply is sent
   /// similarly to what happens if no method call handler has been set.
   /// Any other exception results in an error envelope being sent.
-  void setMethodCallHandler(Future<dynamic> Function(MethodCall call)? handler) {
+  void setMethodCallHandler(final Future<dynamic> Function(MethodCall call)? handler) {
     assert(
       _binaryMessenger != null || BindingBase.debugBindingType() != null,
       'Cannot set the method call handler before the binary messenger has been initialized. '
@@ -537,11 +537,11 @@ class MethodChannel {
       name,
       handler == null
         ? null
-        : (ByteData? message) => _handleAsMethodCall(message, handler),
+        : (final ByteData? message) => _handleAsMethodCall(message, handler),
     );
   }
 
-  Future<ByteData?> _handleAsMethodCall(ByteData? message, Future<dynamic> Function(MethodCall call) handler) async {
+  Future<ByteData?> _handleAsMethodCall(final ByteData? message, final Future<dynamic> Function(MethodCall call) handler) async {
     final MethodCall call = codec.decodeMethodCall(message);
     try {
       return codec.encodeSuccessEnvelope(await handler(call));
@@ -573,7 +573,7 @@ class OptionalMethodChannel extends MethodChannel {
   const OptionalMethodChannel(super.name, [super.codec, super.binaryMessenger]);
 
   @override
-  Future<T?> invokeMethod<T>(String method, [ dynamic arguments ]) async {
+  Future<T?> invokeMethod<T>(final String method, [ final dynamic arguments ]) async {
     return super._invokeMethod<T>(method, missingOk: true, arguments: arguments);
   }
 }
@@ -600,7 +600,7 @@ class EventChannel {
   ///
   /// Neither [name] nor [codec] may be null. The default [ServicesBinding.defaultBinaryMessenger]
   /// instance is used if [binaryMessenger] is null.
-  const EventChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger? binaryMessenger])
+  const EventChannel(this.name, [this.codec = const StandardMethodCodec(), final BinaryMessenger? binaryMessenger])
       : _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
@@ -632,11 +632,11 @@ class EventChannel {
   /// through the [FlutterError] facility. Stream activation happens only when
   /// stream listener count changes from 0 to 1. Stream deactivation happens
   /// only when stream listener count changes from 1 to 0.
-  Stream<dynamic> receiveBroadcastStream([ dynamic arguments ]) {
+  Stream<dynamic> receiveBroadcastStream([ final dynamic arguments ]) {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     late StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {
-      binaryMessenger.setMessageHandler(name, (ByteData? reply) async {
+      binaryMessenger.setMessageHandler(name, (final ByteData? reply) async {
         if (reply == null) {
           controller.close();
         } else {

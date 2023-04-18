@@ -64,7 +64,7 @@ class TestRootState extends State<TestRoot> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       key: _localKey,
       child: SizedBox(

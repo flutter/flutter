@@ -25,7 +25,7 @@ mixin ViewportNotificationMixin on Notification {
   int _depth = 0;
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
   }
@@ -39,7 +39,7 @@ mixin ViewportNotificationMixin on Notification {
 ///     this in.
 mixin ViewportElementMixin  on NotifiableElementMixin {
   @override
-  bool onNotification(Notification notification) {
+  bool onNotification(final Notification notification) {
     if (notification is ViewportNotificationMixin) {
       notification._depth += 1;
     }
@@ -103,7 +103,7 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
   final BuildContext? context;
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     description.add('$metrics');
   }
@@ -130,7 +130,7 @@ class ScrollStartNotification extends ScrollNotification {
   final DragStartDetails? dragDetails;
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     if (dragDetails != null) {
       description.add('$dragDetails');
@@ -154,7 +154,7 @@ class ScrollUpdateNotification extends ScrollNotification {
     required BuildContext super.context,
     this.dragDetails,
     this.scrollDelta,
-    int? depth,
+    final int? depth,
   }) {
     if (depth != null) {
       _depth = depth;
@@ -171,7 +171,7 @@ class ScrollUpdateNotification extends ScrollNotification {
   final double? scrollDelta;
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     description.add('scrollDelta: $scrollDelta');
     if (dragDetails != null) {
@@ -222,7 +222,7 @@ class OverscrollNotification extends ScrollNotification {
   final double velocity;
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     description.add('overscroll: ${overscroll.toStringAsFixed(1)}');
     description.add('velocity: ${velocity.toStringAsFixed(1)}');
@@ -260,7 +260,7 @@ class ScrollEndNotification extends ScrollNotification {
   final DragEndDetails? dragDetails;
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     if (dragDetails != null) {
       description.add('$dragDetails');
@@ -299,7 +299,7 @@ class UserScrollNotification extends ScrollNotification {
   final ScrollDirection direction;
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     description.add('direction: $direction');
   }
@@ -312,6 +312,6 @@ typedef ScrollNotificationPredicate = bool Function(ScrollNotification notificat
 /// A [ScrollNotificationPredicate] that checks whether
 /// `notification.depth == 0`, which means that the notification did not bubble
 /// through any intervening scrolling widgets.
-bool defaultScrollNotificationPredicate(ScrollNotification notification) {
+bool defaultScrollNotificationPredicate(final ScrollNotification notification) {
   return notification.depth == 0;
 }

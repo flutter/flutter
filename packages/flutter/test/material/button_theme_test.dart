@@ -66,12 +66,12 @@ void main() {
     expect(theme.colorScheme, const ColorScheme.dark());
   });
 
-  testWidgets('ButtonTheme alignedDropdown', (WidgetTester tester) async {
+  testWidgets('ButtonTheme alignedDropdown', (final WidgetTester tester) async {
     final Key dropdownKey = UniqueKey();
 
-    Widget buildFrame({ required bool alignedDropdown, required TextDirection textDirection }) {
+    Widget buildFrame({ required final bool alignedDropdown, required final TextDirection textDirection }) {
       return MaterialApp(
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return Directionality(
             textDirection: textDirection,
             child: child!,
@@ -81,7 +81,7 @@ void main() {
           alignedDropdown: alignedDropdown,
           child: Material(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return Container(
                   alignment: Alignment.center,
                   child: DropdownButtonHideUnderline(
@@ -89,7 +89,7 @@ void main() {
                       width: 200.0,
                       child: DropdownButton<String>(
                         key: dropdownKey,
-                        onChanged: (String? value) { },
+                        onChanged: (final String? value) { },
                         value: 'foo',
                         items: const <DropdownMenuItem<String>>[
                           DropdownMenuItem<String>(
@@ -113,7 +113,7 @@ void main() {
     }
 
     final Finder button = find.byKey(dropdownKey);
-    final Finder menu = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DropdownMenu<String>');
+    final Finder menu = find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == '_DropdownMenu<String>');
 
     await tester.pumpWidget(
       buildFrame(

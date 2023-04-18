@@ -13,7 +13,7 @@ class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: MyWidget(),
     );
@@ -36,7 +36,7 @@ class _MyWidgetState extends State<MyWidget> {
   final UniqueKey _center = UniqueKey();
   AxisDirection _axisDirection = AxisDirection.down;
 
-  Widget _getArrows(AxisDirection axisDirection) {
+  Widget _getArrows(final AxisDirection axisDirection) {
     final Widget arrow;
     switch (axisDirection) {
       case AxisDirection.up:
@@ -66,7 +66,7 @@ class _MyWidgetState extends State<MyWidget> {
     }
   }
 
-  void _onAxisDirectionChanged(AxisDirection? axisDirection) {
+  void _onAxisDirectionChanged(final AxisDirection? axisDirection) {
     if (axisDirection != null && axisDirection != _axisDirection) {
       setState(() {
         // Respond to change in axis direction.
@@ -75,7 +75,7 @@ class _MyWidgetState extends State<MyWidget> {
     }
   }
 
-  Widget _getLeading(SliverConstraints constraints, bool isForward) {
+  Widget _getLeading(final SliverConstraints constraints, final bool isForward) {
     return Container(
       color: isForward ? Colors.orange[300] : Colors.green[400],
       padding: const EdgeInsets.all(8.0),
@@ -147,15 +147,15 @@ class _MyWidgetState extends State<MyWidget> {
     );
   }
 
-  Widget _getList({required bool isForward}) {
+  Widget _getList({required final bool isForward}) {
     // The SliverLayoutBuilder is not necessary, and is here to allow us to see
     // the SliverConstraints & directional information that is provided to the
     // SliverList when laying out.
     return SliverLayoutBuilder(
-      builder: (BuildContext context, SliverConstraints constraints) {
+      builder: (final BuildContext context, final SliverConstraints constraints) {
         return SliverList.builder(
           itemCount: 27,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             final Widget child;
             if (index == 0) {
               child = _getLeading(constraints, isForward);
@@ -179,7 +179,7 @@ class _MyWidgetState extends State<MyWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('GrowthDirections'),

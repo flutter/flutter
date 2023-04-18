@@ -25,12 +25,12 @@ import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({
-    required FileSystem fileSystem,
-    required BuildSystem buildSystem,
-    required OperatingSystemUtils osUtils,
-    required Logger logger,
-    required AndroidSdk? androidSdk,
-    bool verboseHelp = false,
+    required final FileSystem fileSystem,
+    required final BuildSystem buildSystem,
+    required final OperatingSystemUtils osUtils,
+    required final Logger logger,
+    required final AndroidSdk? androidSdk,
+    final bool verboseHelp = false,
   }){
     _addSubcommand(
         BuildAarCommand(
@@ -69,7 +69,7 @@ class BuildCommand extends FlutterCommand {
     _addSubcommand(BuildWindowsCommand(logger: logger, verboseHelp: verboseHelp));
   }
 
-  void _addSubcommand(BuildSubCommand command) {
+  void _addSubcommand(final BuildSubCommand command) {
     if (command.supported) {
       addSubcommand(command);
     }
@@ -90,8 +90,8 @@ class BuildCommand extends FlutterCommand {
 
 abstract class BuildSubCommand extends FlutterCommand {
   BuildSubCommand({
-    required Logger logger,
-    required bool verboseHelp
+    required final Logger logger,
+    required final bool verboseHelp
   }): _logger = logger {
     requiresPubspecYaml();
     usesFatalWarningsOption(verboseHelp: verboseHelp);
@@ -109,7 +109,7 @@ abstract class BuildSubCommand extends FlutterCommand {
   ///
   /// This is similar to the run message in run_hot.dart
   @protected
-  void displayNullSafetyMode(BuildInfo buildInfo) {
+  void displayNullSafetyMode(final BuildInfo buildInfo) {
     if (buildInfo.nullSafetyMode != NullSafetyMode.sound) {
       _logger.printStatus('');
       _logger.printStatus(

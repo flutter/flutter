@@ -10,13 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/87099
-  testWidgets('TextField.autofocus should skip the element that never layout', (WidgetTester tester) async {
+  testWidgets('TextField.autofocus should skip the element that never layout', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Navigator(
             pages: const <Page<void>>[_APage(), _BPage()],
-            onPopPage: (Route<dynamic> route, dynamic result) {
+            onPopPage: (final Route<dynamic> route, final dynamic result) {
               return false;
             },
           ),
@@ -27,7 +27,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Dialog interaction', (WidgetTester tester) async {
+  testWidgets('Dialog interaction', (final WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
@@ -52,7 +52,7 @@ void main() {
 
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
+      builder: (final BuildContext context) => const SimpleDialog(title: Text('Dialog')),
     );
 
     await tester.pump();
@@ -70,7 +70,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
+  testWidgets('Request focus shows keyboard', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -97,7 +97,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('Autofocus shows keyboard', (WidgetTester tester) async {
+  testWidgets('Autofocus shows keyboard', (final WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
@@ -119,7 +119,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('Tap shows keyboard', (WidgetTester tester) async {
+  testWidgets('Tap shows keyboard', (final WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     await tester.pumpWidget(
@@ -158,7 +158,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
+  testWidgets('Focus triggers keep-alive', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
     await tester.pumpWidget(
@@ -198,10 +198,10 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('Focus keep-alive works with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Focus keep-alive works with GlobalKey reparenting', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    Widget makeTest(String? prefix) {
+    Widget makeTest(final String? prefix) {
       return MaterialApp(
         home: Material(
           child: ListView(
@@ -233,7 +233,7 @@ void main() {
     expect(find.byType(TextField, skipOffstage: false), findsOneWidget);
   });
 
-  testWidgets('TextField with decoration:null', (WidgetTester tester) async {
+  testWidgets('TextField with decoration:null', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/16880
 
     await tester.pumpWidget(
@@ -254,7 +254,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isTrue);
   });
 
-  testWidgets('Sibling FocusScopes', (WidgetTester tester) async {
+  testWidgets('Sibling FocusScopes', (final WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final FocusScopeNode focusScopeNode0 = FocusScopeNode();
@@ -272,13 +272,13 @@ void main() {
                 FocusScope(
                   node: focusScopeNode0,
                   child: Builder(
-                    builder: (BuildContext context) => TextField(key: textField0),
+                    builder: (final BuildContext context) => TextField(key: textField0),
                   ),
                 ),
                 FocusScope(
                   node: focusScopeNode1,
                   child: Builder(
-                    builder: (BuildContext context) => TextField(key: textField1),
+                    builder: (final BuildContext context) => TextField(key: textField1),
                   ),
                 ),
               ],
@@ -320,7 +320,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('Sibling Navigators', (WidgetTester tester) async {
+  testWidgets('Sibling Navigators', (final WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
     final Key textField0 = UniqueKey();
@@ -334,9 +334,9 @@ void main() {
               children: <Widget>[
                 Expanded(
                   child: Navigator(
-                    onGenerateRoute: (RouteSettings settings) {
+                    onGenerateRoute: (final RouteSettings settings) {
                       return MaterialPageRoute<void>(
-                        builder: (BuildContext context) {
+                        builder: (final BuildContext context) {
                           return TextField(key: textField0);
                         },
                         settings: settings,
@@ -346,9 +346,9 @@ void main() {
                 ),
                 Expanded(
                   child: Navigator(
-                    onGenerateRoute: (RouteSettings settings) {
+                    onGenerateRoute: (final RouteSettings settings) {
                       return MaterialPageRoute<void>(
-                        builder: (BuildContext context) {
+                        builder: (final BuildContext context) {
                           return TextField(key: textField1);
                         },
                         settings: settings,
@@ -395,7 +395,7 @@ void main() {
     expect(tester.testTextInput.isVisible, isFalse);
   });
 
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop', (final WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final FocusNode focusNodeB = FocusNode();
     final Key key = UniqueKey();
@@ -452,7 +452,7 @@ void main() {
     expect(focusNodeB.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will not lose focus when clicking on its decoration', (final WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode();
     final Key iconKey = UniqueKey();
 
@@ -489,7 +489,7 @@ void main() {
     expect(focusNodeA.hasFocus, true);
   }, variant: TargetPlatformVariant.desktop());
 
-  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (WidgetTester tester) async {
+  testWidgets('A Focused text-field will lose focus when clicking outside of its hitbox with a mouse on desktop after tab navigation', (final WidgetTester tester) async {
     final FocusNode focusNodeA = FocusNode(debugLabel: 'A');
     final FocusNode focusNodeB = FocusNode(debugLabel: 'B');
     final Key key = UniqueKey();
@@ -522,7 +522,7 @@ void main() {
       await tester.pump();
     }
 
-    Future<void> click(Finder finder) async {
+    Future<void> click(final Finder finder) async {
       final TestGesture gesture = await tester.startGesture(
         tester.getCenter(finder),
         kind: PointerDeviceKind.mouse,
@@ -555,9 +555,9 @@ class _APage extends Page<void> {
   const _APage();
 
   @override
-  Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
+  Route<void> createRoute(final BuildContext context) => PageRouteBuilder<void>(
     settings: this,
-    pageBuilder: (_, __, ___) => const TextField(autofocus: true),
+    pageBuilder: (final _, final __, final ___) => const TextField(autofocus: true),
   );
 }
 
@@ -565,8 +565,8 @@ class _BPage extends Page<void> {
   const _BPage();
 
   @override
-  Route<void> createRoute(BuildContext context) => PageRouteBuilder<void>(
+  Route<void> createRoute(final BuildContext context) => PageRouteBuilder<void>(
     settings: this,
-    pageBuilder: (_, __, ___) => const Text('B'),
+    pageBuilder: (final _, final __, final ___) => const Text('B'),
   );
 }

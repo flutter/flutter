@@ -138,7 +138,7 @@ class FittedSizes {
 ///  * [paintImage], a function that applies this algorithm to images for painting.
 ///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
 ///    provide access to [paintImage] at the widgets layer.
-FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
+FittedSizes applyBoxFit(final BoxFit fit, final Size inputSize, final Size outputSize) {
   if (inputSize.height <= 0.0 || inputSize.width <= 0.0 || outputSize.height <= 0.0 || outputSize.width <= 0.0) {
     return const FittedSizes(Size.zero, Size.zero);
   }

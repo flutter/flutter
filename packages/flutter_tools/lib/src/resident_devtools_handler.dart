@@ -14,7 +14,7 @@ import 'vmservice.dart';
 
 typedef ResidentDevtoolsHandlerFactory = ResidentDevtoolsHandler Function(DevtoolsLauncher?, ResidentRunner, Logger);
 
-ResidentDevtoolsHandler createDefaultHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
+ResidentDevtoolsHandler createDefaultHandler(final DevtoolsLauncher? launcher, final ResidentRunner runner, final Logger logger) {
   return FlutterResidentDevtoolsHandler(launcher, runner, logger);
 }
 
@@ -30,14 +30,14 @@ abstract class ResidentDevtoolsHandler {
   /// of the DevTools.
   bool get readyToAnnounce;
 
-  Future<void> hotRestart(List<FlutterDevice?> flutterDevices);
+  Future<void> hotRestart(final List<FlutterDevice?> flutterDevices);
 
   Future<void> serveAndAnnounceDevTools({
-    Uri? devToolsServerAddress,
-    required List<FlutterDevice?> flutterDevices,
+    final Uri? devToolsServerAddress,
+    required final List<FlutterDevice?> flutterDevices,
   });
 
-  bool launchDevToolsInBrowser({required List<FlutterDevice?> flutterDevices});
+  bool launchDevToolsInBrowser({required final List<FlutterDevice?> flutterDevices});
 
   Future<void> shutdown();
 }
@@ -69,8 +69,8 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   // This must be guaranteed not to return a Future that fails.
   @override
   Future<void> serveAndAnnounceDevTools({
-    Uri? devToolsServerAddress,
-    required List<FlutterDevice?> flutterDevices,
+    final Uri? devToolsServerAddress,
+    required final List<FlutterDevice?> flutterDevices,
   }) async {
     assert(!_readyToAnnounce);
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
@@ -120,13 +120,13 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 
   // This must be guaranteed not to return a Future that fails.
   @override
-  bool launchDevToolsInBrowser({required List<FlutterDevice?> flutterDevices}) {
+  bool launchDevToolsInBrowser({required final List<FlutterDevice?> flutterDevices}) {
     if (!_residentRunner.supportsServiceProtocol || _devToolsLauncher == null) {
       return false;
     }
     if (_devToolsLauncher!.devToolsUrl == null) {
       _logger.startProgress('Waiting for Flutter DevTools to be served...');
-      unawaited(_devToolsLauncher!.ready.then((_) {
+      unawaited(_devToolsLauncher!.ready.then((final _) {
         _launchDevToolsForDevices(flutterDevices);
       }));
     } else {
@@ -135,7 +135,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     return true;
   }
 
-  void _launchDevToolsForDevices(List<FlutterDevice?> flutterDevices) {
+  void _launchDevToolsForDevices(final List<FlutterDevice?> flutterDevices) {
     assert(activeDevToolsServer != null);
     for (final FlutterDevice? device in flutterDevices) {
       final String devToolsUrl = activeDevToolsServer!.uri!.replace(
@@ -148,7 +148,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   Future<void> _maybeCallDevToolsUriServiceExtension(
-    List<FlutterDevice?> flutterDevices,
+    final List<FlutterDevice?> flutterDevices,
   ) async {
     if (_devToolsLauncher?.activeDevToolsServer == null) {
       return;
@@ -160,7 +160,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   Future<void> _callDevToolsUriExtension(
-    FlutterDevice device,
+    final FlutterDevice device,
   ) async {
     try {
       await _invokeRpcOnFirstView(
@@ -178,14 +178,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
   }
 
-  Future<List<FlutterDevice?>> _devicesWithExtensions(List<FlutterDevice?> flutterDevices) async {
+  Future<List<FlutterDevice?>> _devicesWithExtensions(final List<FlutterDevice?> flutterDevices) async {
     return Future.wait(<Future<FlutterDevice?>>[
       for (final FlutterDevice? device in flutterDevices) _waitForExtensionsForDevice(device!),
     ]);
   }
 
   /// Returns null if the service extension cannot be found on the device.
-  Future<FlutterDevice?> _waitForExtensionsForDevice(FlutterDevice flutterDevice) async {
+  Future<FlutterDevice?> _waitForExtensionsForDevice(final FlutterDevice flutterDevice) async {
     const String extension = 'ext.flutter.connectedVmServiceUri';
     try {
       await flutterDevice.vmService?.findExtensionIsolate(
@@ -202,14 +202,14 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
     }
   }
 
-  Future<void> _callConnectedVmServiceUriExtension(List<FlutterDevice?> flutterDevices) async {
+  Future<void> _callConnectedVmServiceUriExtension(final List<FlutterDevice?> flutterDevices) async {
     await Future.wait(<Future<void>>[
       for (final FlutterDevice? device in flutterDevices)
         if (device?.vmService != null) _callConnectedVmServiceExtension(device!),
     ]);
   }
 
-  Future<void> _callConnectedVmServiceExtension(FlutterDevice device) async {
+  Future<void> _callConnectedVmServiceExtension(final FlutterDevice device) async {
     final Uri? uri = device.vmService!.httpAddress ?? device.vmService!.wsAddress;
     if (uri == null) {
       return;
@@ -232,9 +232,9 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   Future<void> _invokeRpcOnFirstView(
-    String method, {
-    required FlutterDevice device,
-    required Map<String, dynamic> params,
+    final String method, {
+    required final FlutterDevice device,
+    required final Map<String, dynamic> params,
   }) async {
     if (device.targetPlatform == TargetPlatform.web_javascript) {
       await device.vmService!.callMethodWrapper(
@@ -255,7 +255,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
   }
 
   @override
-  Future<void> hotRestart(List<FlutterDevice?> flutterDevices) async {
+  Future<void> hotRestart(final List<FlutterDevice?> flutterDevices) async {
     final List<FlutterDevice?> devicesWithExtension = await _devicesWithExtensions(flutterDevices);
     await Future.wait(<Future<void>>[
       _maybeCallDevToolsUriServiceExtension(devicesWithExtension),
@@ -275,7 +275,7 @@ class FlutterResidentDevtoolsHandler implements ResidentDevtoolsHandler {
 }
 
 @visibleForTesting
-NoOpDevtoolsHandler createNoOpHandler(DevtoolsLauncher? launcher, ResidentRunner runner, Logger logger) {
+NoOpDevtoolsHandler createNoOpHandler(final DevtoolsLauncher? launcher, final ResidentRunner runner, final Logger logger) {
   return NoOpDevtoolsHandler();
 }
 
@@ -290,17 +290,17 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
   bool get readyToAnnounce => false;
 
   @override
-  Future<void> hotRestart(List<FlutterDevice?> flutterDevices) async {
+  Future<void> hotRestart(final List<FlutterDevice?> flutterDevices) async {
     return;
   }
 
   @override
-  Future<void> serveAndAnnounceDevTools({Uri? devToolsServerAddress, List<FlutterDevice?>? flutterDevices}) async {
+  Future<void> serveAndAnnounceDevTools({final Uri? devToolsServerAddress, final List<FlutterDevice?>? flutterDevices}) async {
     return;
   }
 
   @override
-  bool launchDevToolsInBrowser({List<FlutterDevice?>? flutterDevices}) {
+  bool launchDevToolsInBrowser({final List<FlutterDevice?>? flutterDevices}) {
     return false;
   }
 
@@ -313,10 +313,10 @@ class NoOpDevtoolsHandler implements ResidentDevtoolsHandler {
 
 /// Convert a [URI] with query parameters into a display format instead
 /// of the default URI encoding.
-String urlToDisplayString(Uri uri) {
+String urlToDisplayString(final Uri uri) {
   final StringBuffer base = StringBuffer(uri.replace(
     queryParameters: <String, String>{},
   ).toString());
-  base.write(uri.queryParameters.keys.map((String key) => '$key=${uri.queryParameters[key]}').join('&'));
+  base.write(uri.queryParameters.keys.map((final String key) => '$key=${uri.queryParameters[key]}').join('&'));
   return base.toString();
 }

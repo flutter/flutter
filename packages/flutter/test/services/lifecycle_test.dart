@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('initialLifecycleState is used to init state paused', (WidgetTester tester) async {
+  testWidgets('initialLifecycleState is used to init state paused', (final WidgetTester tester) async {
     // The lifecycleState is null initially in tests as there is no
     // initialLifecycleState.
     expect(ServicesBinding.instance.lifecycleState, equals(null));

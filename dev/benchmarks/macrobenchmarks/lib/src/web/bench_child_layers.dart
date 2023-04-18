@@ -59,7 +59,7 @@ class BenchUpdateManyChildLayers extends SceneBuilderRecorder {
   final Map<int, OffsetEngineLayer> _layers = <int, OffsetEngineLayer>{};
 
   @override
-  void onDrawFrame(SceneBuilder sceneBuilder) {
+  void onDrawFrame(final SceneBuilder sceneBuilder) {
     _rootLayer = sceneBuilder.pushOffset(0, 0, oldLayer: _rootLayer);
     for (int row = 0; row < kRows; row++) {
       for (int col = 0; col < kColumns; col++) {

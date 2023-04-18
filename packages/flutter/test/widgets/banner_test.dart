@@ -13,7 +13,7 @@ class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
 
   @override
-  void noSuchMethod(Invocation invocation) {
+  void noSuchMethod(final Invocation invocation) {
     invocations.add(invocation);
   }
 }
@@ -35,7 +35,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -43,7 +43,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -63,7 +63,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -71,7 +71,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -91,7 +91,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -99,7 +99,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -119,7 +119,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -127,7 +127,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], lessThan(100.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -147,7 +147,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -155,7 +155,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -175,7 +175,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -183,7 +183,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -203,7 +203,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -211,7 +211,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], greaterThan(900.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -231,7 +231,7 @@ void main() {
 
     bannerPainter.paint(canvas, const Size(1000.0, 1000.0));
 
-    final Invocation translateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation translateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #translate;
     });
 
@@ -239,7 +239,7 @@ void main() {
     expect(translateCommand.positionalArguments[0], lessThan(100.0));
     expect(translateCommand.positionalArguments[1], greaterThan(900.0));
 
-    final Invocation rotateCommand = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation rotateCommand = canvas.invocations.firstWhere((final Invocation invocation) {
       return invocation.memberName == #rotate;
     });
 
@@ -247,7 +247,7 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(math.pi / 4.0));
   });
 
-  testWidgets('Banner widget', (WidgetTester tester) async {
+  testWidgets('Banner widget', (final WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
       const Directionality(
@@ -267,7 +267,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
+  testWidgets('Banner widget in MaterialApp', (final WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(const MaterialApp(home: Placeholder()));
     expect(find.byType(CheckedModeBanner), paints

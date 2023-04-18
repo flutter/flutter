@@ -22,7 +22,7 @@ class _NotImplementedDialog extends StatelessWidget {
   const _NotImplementedDialog();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AlertDialog(
       title: const Text('Not Implemented'),
       content: const Text('This feature has not yet been implemented.'),
@@ -84,11 +84,11 @@ class StockHomeState extends State<StockHome> {
     });
   }
 
-  void _handleStockModeChange(StockMode? value) {
+  void _handleStockModeChange(final StockMode? value) {
     widget.updater(widget.configuration.copyWith(stockMode: value));
   }
 
-  void _handleStockMenu(BuildContext context, _StockMenuItem value) {
+  void _handleStockMenu(final BuildContext context, final _StockMenuItem value) {
     switch (value) {
       case _StockMenuItem.autorefresh:
         setState(() {
@@ -97,7 +97,7 @@ class StockHomeState extends State<StockHome> {
       case _StockMenuItem.refresh:
         showDialog<void>(
           context: context,
-          builder: (BuildContext context) => const _NotImplementedDialog(),
+          builder: (final BuildContext context) => const _NotImplementedDialog(),
         );
       case _StockMenuItem.speedUp:
         timeDilation /= 5.0;
@@ -106,7 +106,7 @@ class StockHomeState extends State<StockHome> {
     }
   }
 
-  Widget _buildDrawer(BuildContext context) {
+  Widget _buildDrawer(final BuildContext context) {
     return Drawer(
       child: ListView(
         dragStartBehavior: DragStartBehavior.down,
@@ -196,8 +196,8 @@ class StockHomeState extends State<StockHome> {
           tooltip: 'Search',
         ),
         PopupMenuButton<_StockMenuItem>(
-          onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
-          itemBuilder: (BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
+          onSelected: (final _StockMenuItem value) { _handleStockMenu(context, value); },
+          itemBuilder: (final BuildContext context) => <PopupMenuItem<_StockMenuItem>>[
             CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
               checked: _autorefresh,
@@ -227,21 +227,21 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  static Iterable<Stock> _getStockList(StockData stocks, Iterable<String> symbols) {
-    return symbols.map<Stock?>((String symbol) => stocks[symbol])
-      .where((Stock? stock) => stock != null)
+  static Iterable<Stock> _getStockList(final StockData stocks, final Iterable<String> symbols) {
+    return symbols.map<Stock?>((final String symbol) => stocks[symbol])
+      .where((final Stock? stock) => stock != null)
       .cast<Stock>();
   }
 
-  Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
+  Iterable<Stock> _filterBySearchQuery(final Iterable<Stock> stocks) {
     if (_searchQuery.text.isEmpty) {
       return stocks;
     }
     final RegExp regexp = RegExp(_searchQuery.text, caseSensitive: false);
-    return stocks.where((Stock stock) => stock.symbol.contains(regexp));
+    return stocks.where((final Stock stock) => stock.symbol.contains(regexp));
   }
 
-  void _buyStock(Stock stock) {
+  void _buyStock(final Stock stock) {
     setState(() {
       stock.percentChange = 100.0 * (1.0 / stock.lastSale);
       stock.lastSale += 1.0;
@@ -257,24 +257,24 @@ class StockHomeState extends State<StockHome> {
     ));
   }
 
-  Widget _buildStockList(BuildContext context, Iterable<Stock> stocks, StockHomeTab tab) {
+  Widget _buildStockList(final BuildContext context, final Iterable<Stock> stocks, final StockHomeTab tab) {
     return StockList(
       stocks: stocks.toList(),
       onAction: _buyStock,
-      onOpen: (Stock stock) {
+      onOpen: (final Stock stock) {
         Navigator.pushNamed(context, '/stock', arguments: stock.symbol);
       },
-      onShow: (Stock stock) {
-        _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) => StockSymbolBottomSheet(stock: stock));
+      onShow: (final Stock stock) {
+        _scaffoldKey.currentState!.showBottomSheet<void>((final BuildContext context) => StockSymbolBottomSheet(stock: stock));
       },
     );
   }
 
-  Widget _buildStockTab(BuildContext context, StockHomeTab tab, List<String> stockSymbols) {
+  Widget _buildStockTab(final BuildContext context, final StockHomeTab tab, final List<String> stockSymbols) {
     return AnimatedBuilder(
       key: ValueKey<StockHomeTab>(tab),
       animation: Listenable.merge(<Listenable>[_searchQuery, widget.stocks]),
-      builder: (BuildContext context, Widget? child) {
+      builder: (final BuildContext context, final Widget? child) {
         return _buildStockList(context, _filterBySearchQuery(_getStockList(widget.stocks, stockSymbols)).toList(), tab);
       },
     );
@@ -301,7 +301,7 @@ class StockHomeState extends State<StockHome> {
   void _handleCreateCompany() {
     showModalBottomSheet<void>(
       context: context,
-      builder: (BuildContext context) => const _CreateCompanySheet(),
+      builder: (final BuildContext context) => const _CreateCompanySheet(),
     );
   }
 
@@ -315,7 +315,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -340,7 +340,7 @@ class _CreateCompanySheet extends StatelessWidget {
   const _CreateCompanySheet();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Column(
       children: <Widget>[
         TextField(

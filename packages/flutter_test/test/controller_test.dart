@@ -25,7 +25,7 @@ void main() {
   testWidgets(
     'WidgetTester.drag must break the offset into multiple parallel components if '
     'the drag goes outside the touch slop values',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       // This test checks to make sure that the total drag will be correctly split into
       // pieces such that the first (and potentially second) moveBy function call(s) in
       // controller.drag() will never have a component greater than the touch
@@ -225,7 +225,7 @@ void main() {
 
       await tester.pumpWidget(
         Listener(
-          onPointerMove: (PointerMoveEvent event) {
+          onPointerMove: (final PointerMoveEvent event) {
             dragOffsets.add(event.delta);
           },
           child: const Text('test', textDirection: TextDirection.ltr),
@@ -267,16 +267,16 @@ void main() {
 
   testWidgets(
     'WidgetTester.tap must respect buttons',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -299,16 +299,16 @@ void main() {
 
   testWidgets(
     'WidgetTester.press must respect buttons',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -323,16 +323,16 @@ void main() {
 
   testWidgets(
     'WidgetTester.longPress must respect buttons',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -356,16 +356,16 @@ void main() {
 
   testWidgets(
     'WidgetTester.drag must respect buttons',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -388,19 +388,19 @@ void main() {
 
   testWidgets(
     'WidgetTester.drag works with trackpad kind',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
-            onPointerPanZoomStart: (PointerPanZoomStartEvent event) => logs.add('panZoomStart'),
-            onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) => logs.add('panZoomUpdate ${event.pan}'),
-            onPointerPanZoomEnd: (PointerPanZoomEndEvent event) => logs.add('panZoomEnd'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerPanZoomStart: (final PointerPanZoomStartEvent event) => logs.add('panZoomStart'),
+            onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) => logs.add('panZoomUpdate ${event.pan}'),
+            onPointerPanZoomEnd: (final PointerPanZoomEndEvent event) => logs.add('panZoomEnd'),
             child: const Text('test'),
           ),
         ),
@@ -422,16 +422,16 @@ void main() {
 
   testWidgets(
     'WidgetTester.fling must respect buttons',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -456,7 +456,7 @@ void main() {
   testWidgets(
     'WidgetTester.fling produces strictly monotonically increasing timestamps, '
     'when given a large velocity',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       // Velocity trackers may misbehave if the `PointerMoveEvent`s' have the
       // same timestamp. This is more likely to happen when the velocity tracker
       // has a small sample size.
@@ -466,7 +466,7 @@ void main() {
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerMove: (PointerMoveEvent event) => logs.add(event.timeStamp),
+            onPointerMove: (final PointerMoveEvent event) => logs.add(event.timeStamp),
             child: const Text('test'),
           ),
         ),
@@ -482,16 +482,16 @@ void main() {
 
   testWidgets(
     'WidgetTester.timedDrag must respect buttons',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
             child: const Text('test'),
           ),
         ),
@@ -520,14 +520,14 @@ void main() {
 
   testWidgets(
     'WidgetTester.timedDrag uses correct pointer',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<String> logs = <String>[];
 
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: Listener(
-            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.pointer}'),
+            onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.pointer}'),
             child: const Text('test'),
           ),
         ),
@@ -558,7 +558,7 @@ void main() {
 
   testWidgets(
     'WidgetTester.tap appears in stack trace on error',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       // Regression test from https://github.com/flutter/flutter/pull/123946
       await tester.pumpWidget(
           const MaterialApp(home: Scaffold(body: Text('target'))));
@@ -576,7 +576,7 @@ void main() {
       expect(stackTrace, isNotNull);
 
       final int tapFrame = stackTrace!.frames.indexWhere(
-              (Frame frame) => frame.member == 'WidgetController.tap');
+              (final Frame frame) => frame.member == 'WidgetController.tap');
       expect(tapFrame, greaterThanOrEqualTo(0));
       expect(stackTrace.frames[tapFrame].package, 'flutter_test');
       expect(stackTrace.frames[tapFrame+1].member, 'main.<fn>');
@@ -586,14 +586,14 @@ void main() {
 
   testWidgets(
     'ensureVisible: scrolls to make widget visible',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: ListView.builder(
               itemCount: 20,
               shrinkWrap: true,
-              itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+              itemBuilder: (final BuildContext context, final int i) => ListTile(title: Text('Item $i')),
             ),
           ),
         ),
@@ -612,14 +612,14 @@ void main() {
   group('scrollUntilVisible: scrolls to make unbuilt widget visible', () {
     testWidgets(
       'Vertical',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: ListView.builder(
                 itemCount: 50,
                 shrinkWrap: true,
-                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+                itemBuilder: (final BuildContext context, final int i) => ListTile(title: Text('Item $i')),
               ),
             ),
           ),
@@ -641,7 +641,7 @@ void main() {
 
     testWidgets(
       'Horizontal',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -650,7 +650,7 @@ void main() {
                 shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 // ListTile does not support horizontal list
-                itemBuilder: (BuildContext context, int i) => Text('Item $i'),
+                itemBuilder: (final BuildContext context, final int i) => Text('Item $i'),
               ),
             ),
           ),
@@ -672,14 +672,14 @@ void main() {
 
     testWidgets(
       'Fail',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: ListView.builder(
                 itemCount: 50,
                 shrinkWrap: true,
-                itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item $i')),
+                itemBuilder: (final BuildContext context, final int i) => ListTile(title: Text('Item $i')),
               ),
             ),
           ),
@@ -696,7 +696,7 @@ void main() {
       },
     );
 
-    testWidgets('Drag Until Visible', (WidgetTester tester) async {
+    testWidgets('Drag Until Visible', (final WidgetTester tester) async {
       // when there are two implicit [Scrollable], `scrollUntilVisible` is hard
       // to use.
       await tester.pumpWidget(
@@ -708,14 +708,14 @@ void main() {
                   key: const Key('listView-a'),
                   itemCount: 50,
                   shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item a-$i')),
+                  itemBuilder: (final BuildContext context, final int i) => ListTile(title: Text('Item a-$i')),
                 )),
                 const Divider(thickness: 5),
                 Expanded(child: ListView.builder(
                   key: const Key('listView-b'),
                   itemCount: 50,
                   shrinkWrap: true,
-                  itemBuilder: (BuildContext context, int i) => ListTile(title: Text('Item b-$i')),
+                  itemBuilder: (final BuildContext context, final int i) => ListTile(title: Text('Item b-$i')),
                 )),
               ],
             ),
@@ -740,15 +740,15 @@ void main() {
     });
   });
 
-  testWidgets('platformDispatcher exposes the platformDispatcher from binding', (WidgetTester tester) async {
+  testWidgets('platformDispatcher exposes the platformDispatcher from binding', (final WidgetTester tester) async {
     expect(tester.platformDispatcher, tester.binding.platformDispatcher);
   });
 
-  testWidgets('view exposes the implicitView from platformDispatcher', (WidgetTester tester) async {
+  testWidgets('view exposes the implicitView from platformDispatcher', (final WidgetTester tester) async {
     expect(tester.view, tester.platformDispatcher.implicitView);
   });
 
-  testWidgets('viewOf finds a view when the view is implicit', (WidgetTester tester) async {
+  testWidgets('viewOf finds a view when the view is implicit', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: Center(
         child: Text('Test'),
@@ -761,7 +761,7 @@ void main() {
 
   group('SemanticsController', () {
     group('find', () {
-      testWidgets('throws when there are no semantics', (WidgetTester tester) async {
+      testWidgets('throws when there are no semantics', (final WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
@@ -773,7 +773,7 @@ void main() {
         expect(() => tester.semantics.find(find.text('hello')), throwsStateError);
       }, semanticsEnabled: false);
 
-      testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
+      testWidgets('throws when there are multiple results from the finder', (final WidgetTester tester) async {
         await tester.pumpWidget(
           const MaterialApp(
             home: Scaffold(
@@ -790,7 +790,7 @@ void main() {
         expect(() => tester.semantics.find(find.text('hello')), throwsStateError);
       });
 
-      testWidgets('Returns the correct SemanticsData', (WidgetTester tester) async {
+      testWidgets('Returns the correct SemanticsData', (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -809,7 +809,7 @@ void main() {
         expect(semantics.hasFlag(SemanticsFlag.isButton), true);
       });
 
-      testWidgets('Can enable semantics for tests via semanticsEnabled', (WidgetTester tester) async {
+      testWidgets('Can enable semantics for tests via semanticsEnabled', (final WidgetTester tester) async {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -828,7 +828,7 @@ void main() {
         expect(semantics.hasFlag(SemanticsFlag.isButton), true);
       });
 
-      testWidgets('Returns merged SemanticsData', (WidgetTester tester) async {
+      testWidgets('Returns merged SemanticsData', (final WidgetTester tester) async {
         const Key key = Key('test');
         await tester.pumpWidget(
           MaterialApp(
@@ -853,7 +853,7 @@ void main() {
         expect(semantics.label, 'A\nB\nC');
       });
 
-      testWidgets('Does not return partial semantics', (WidgetTester tester) async {
+      testWidgets('Does not return partial semantics', (final WidgetTester tester) async {
         final Key key = UniqueKey();
         await tester.pumpWidget(
           MaterialApp(
@@ -901,7 +901,7 @@ void main() {
         containsSemantics(hasCheckedState: true, isChecked: false),
       ];
 
-      testWidgets('produces expected traversal', (WidgetTester tester) async {
+      testWidgets('produces expected traversal', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         expect(
@@ -909,7 +909,7 @@ void main() {
           orderedEquals(fullTraversalMatchers));
       });
 
-      testWidgets('starts traversal at semantics node for `start`', (WidgetTester tester) async {
+      testWidgets('starts traversal at semantics node for `start`', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start where the slider is.
@@ -920,7 +920,7 @@ void main() {
           orderedEquals(expectedMatchers));
       });
 
-      testWidgets('throws StateError if `start` not found in traversal', (WidgetTester tester) async {
+      testWidgets('throws StateError if `start` not found in traversal', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We look for a SingleChildScrollView since the view itself isn't
@@ -931,7 +931,7 @@ void main() {
         );
       });
 
-      testWidgets('ends traversal at semantics node for `end`', (WidgetTester tester) async {
+      testWidgets('ends traversal at semantics node for `end`', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to end where the slider is, inclusive.
@@ -942,7 +942,7 @@ void main() {
           orderedEquals(expectedMatchers));
       });
 
-      testWidgets('throws StateError if `end` not found in traversal', (WidgetTester tester) async {
+      testWidgets('throws StateError if `end` not found in traversal', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We look for a SingleChildScrollView since the view itself isn't
@@ -953,7 +953,7 @@ void main() {
         );
       });
 
-      testWidgets('returns traversal between `start` and `end` if both are provided', (WidgetTester tester) async {
+      testWidgets('returns traversal between `start` and `end` if both are provided', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // We're expecting the traversal to start at the text field and end at the slider.
@@ -967,7 +967,7 @@ void main() {
           orderedEquals(expectedMatchers));
       });
 
-      testWidgets('can do fuzzy traversal match with `containsAllInOrder`', (WidgetTester tester) async {
+      testWidgets('can do fuzzy traversal match with `containsAllInOrder`', (final WidgetTester tester) async {
         await tester.pumpWidget(const MaterialApp(home: _SemanticsTestWidget()));
 
         // Grab a sample of the matchers to validate that not every matcher is
@@ -975,7 +975,7 @@ void main() {
         final Iterable<Matcher> expectedMatchers = <Matcher>[...fullTraversalMatchers]
           ..removeAt(0)
           ..removeLast()
-          ..mapIndexed<Matcher?>((int i, Matcher element) => i.isEven ? element : null)
+          ..mapIndexed<Matcher?>((final int i, final Matcher element) => i.isEven ? element : null)
           .whereNotNull();
 
         expect(
@@ -990,7 +990,7 @@ class _SemanticsTestWidget extends StatelessWidget {
   const _SemanticsTestWidget();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Semantics Test')),
       body: SingleChildScrollView(
@@ -1002,11 +1002,11 @@ class _SemanticsTestWidget extends StatelessWidget {
             ),
             _SemanticsTestCard(
               label: 'Off Switch',
-              widget: Switch(value: false, onChanged: (bool value) {}),
+              widget: Switch(value: false, onChanged: (final bool value) {}),
             ),
             _SemanticsTestCard(
               label: 'On Switch',
-              widget: Switch(value: true, onChanged: (bool value) {}),
+              widget: Switch(value: true, onChanged: (final bool value) {}),
             ),
             const _SemanticsTestCard(
               label: 'Multiline',
@@ -1014,7 +1014,7 @@ class _SemanticsTestWidget extends StatelessWidget {
             ),
             _SemanticsTestCard(
               label: 'Slider',
-              widget: Slider(value: .5, onChanged: (double value) {}),
+              widget: Slider(value: .5, onChanged: (final double value) {}),
             ),
             _SemanticsTestCard(
               label: 'Enabled Button',
@@ -1029,7 +1029,7 @@ class _SemanticsTestWidget extends StatelessWidget {
               widget: Radio<String>(
                 value: 'checked',
                 groupValue: 'checked',
-                onChanged: (String? value) {},
+                onChanged: (final String? value) {},
               ),
             ),
             _SemanticsTestCard(
@@ -1037,7 +1037,7 @@ class _SemanticsTestWidget extends StatelessWidget {
               widget: Radio<String>(
                 value: 'unchecked',
                 groupValue: 'checked',
-                onChanged: (String? value) {},
+                onChanged: (final String? value) {},
               ),
             ),
           ],
@@ -1054,7 +1054,7 @@ class _SemanticsTestCard extends StatelessWidget {
   final Widget widget;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Card(
       child: ListTile(
         title: Text(label),

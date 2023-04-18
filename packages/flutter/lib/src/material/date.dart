@@ -10,7 +10,7 @@ import 'material_localizations.dart';
 abstract final class DateUtils {
   /// Returns a [DateTime] with the date of the original, but time set to
   /// midnight.
-  static DateTime dateOnly(DateTime date) {
+  static DateTime dateOnly(final DateTime date) {
     return DateTime(date.year, date.month, date.day);
   }
 
@@ -19,13 +19,13 @@ abstract final class DateUtils {
   ///
   /// See also:
   ///  * [dateOnly], which does the same thing for a single date.
-  static DateTimeRange datesOnly(DateTimeRange range) {
+  static DateTimeRange datesOnly(final DateTimeRange range) {
     return DateTimeRange(start: dateOnly(range.start), end: dateOnly(range.end));
   }
 
   /// Returns true if the two [DateTime] objects have the same day, month, and
   /// year, or are both null.
-  static bool isSameDay(DateTime? dateA, DateTime? dateB) {
+  static bool isSameDay(final DateTime? dateA, final DateTime? dateB) {
     return
       dateA?.year == dateB?.year &&
       dateA?.month == dateB?.month &&
@@ -34,7 +34,7 @@ abstract final class DateUtils {
 
   /// Returns true if the two [DateTime] objects have the same month and
   /// year, or are both null.
-  static bool isSameMonth(DateTime? dateA, DateTime? dateB) {
+  static bool isSameMonth(final DateTime? dateA, final DateTime? dateB) {
     return
       dateA?.year == dateB?.year &&
       dateA?.month == dateB?.month;
@@ -51,7 +51,7 @@ abstract final class DateUtils {
   /// ```
   ///
   /// The value for `delta` would be `7`.
-  static int monthDelta(DateTime startDate, DateTime endDate) {
+  static int monthDelta(final DateTime startDate, final DateTime endDate) {
     return (endDate.year - startDate.year) * 12 + endDate.month - startDate.month;
   }
 
@@ -67,13 +67,13 @@ abstract final class DateUtils {
   ///
   /// `date` would be January 15, 2019.
   /// `futureDate` would be April 1, 2019 since it adds 3 months.
-  static  DateTime addMonthsToMonthDate(DateTime monthDate, int monthsToAdd) {
+  static  DateTime addMonthsToMonthDate(final DateTime monthDate, final int monthsToAdd) {
     return DateTime(monthDate.year, monthDate.month + monthsToAdd);
   }
 
   /// Returns a [DateTime] with the added number of days and time set to
   /// midnight.
-  static DateTime addDaysToDate(DateTime date, int days) {
+  static DateTime addDaysToDate(final DateTime date, final int days) {
     return DateTime(date.year, date.month, date.day + days);
   }
 
@@ -105,7 +105,7 @@ abstract final class DateUtils {
   ///   into the [MaterialLocalizations.narrowWeekdays] list.
   /// - [MaterialLocalizations.narrowWeekdays] list provides localized names of
   ///   days of week, always starting with Sunday and ending with Saturday.
-  static int firstDayOffset(int year, int month, MaterialLocalizations localizations) {
+  static int firstDayOffset(final int year, final int month, final MaterialLocalizations localizations) {
     // 0-based day of week for the month and year, with 0 representing Monday.
     final int weekdayFromMonday = DateTime(year, month).weekday - 1;
 
@@ -126,7 +126,7 @@ abstract final class DateUtils {
   ///
   /// This applies the leap year logic introduced by the Gregorian reforms of
   /// 1582. It will not give valid results for dates prior to that time.
-  static int getDaysInMonth(int year, int month) {
+  static int getDaysInMonth(final int year, final int month) {
     if (month == DateTime.february) {
       final bool isLeapYear = (year % 4 == 0) && (year % 100 != 0) || (year % 400 == 0);
       return isLeapYear ? 29 : 28;
@@ -222,7 +222,7 @@ class DateTimeRange {
   Duration get duration => end.difference(start);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

@@ -9,20 +9,20 @@ import 'package:test/test.dart';
 export 'package:test/test.dart' hide isInstanceOf;
 export '../../../../packages/flutter_tools/test/src/fake_process_manager.dart';
 
-Matcher throwsAssertionWith(String messageSubString) {
+Matcher throwsAssertionWith(final String messageSubString) {
   return throwsA(
       isA<AssertionError>().having(
-          (AssertionError e) => e.toString(),
+          (final AssertionError e) => e.toString(),
           'description',
           contains(messageSubString),
       ),
   );
 }
 
-Matcher throwsExceptionWith(String messageSubString) {
+Matcher throwsExceptionWith(final String messageSubString) {
   return throwsA(
       isA<Exception>().having(
-          (Exception e) => e.toString(),
+          (final Exception e) => e.toString(),
           'description',
           contains(messageSubString),
       ),
@@ -32,12 +32,12 @@ Matcher throwsExceptionWith(String messageSubString) {
 class TestStdio extends Stdio {
   TestStdio({
     this.verbose = false,
-    List<String>? stdin,
+    final List<String>? stdin,
   }) : stdin = stdin ?? <String>[];
 
-  String get error => logs.where((String log) => log.startsWith(r'[error] ')).join('\n');
+  String get error => logs.where((final String log) => log.startsWith(r'[error] ')).join('\n');
 
-  String get stdout => logs.where((String log) {
+  String get stdout => logs.where((final String log) {
     return log.startsWith(r'[status] ') || log.startsWith(r'[trace] ') || log.startsWith(r'[write] ');
   }).join('\n');
 
@@ -55,14 +55,14 @@ class TestStdio extends Stdio {
 
 class FakeArgResults implements ArgResults {
   FakeArgResults({
-    required String? level,
-    required String candidateBranch,
-    String remote = 'upstream',
-    bool justPrint = false,
-    bool autoApprove = true, // so we don't have to mock stdin
-    bool help = false,
-    bool force = false,
-    bool skipTagging = false,
+    required final String? level,
+    required final String candidateBranch,
+    final String remote = 'upstream',
+    final bool justPrint = false,
+    final bool autoApprove = true, // so we don't have to mock stdin
+    final bool help = false,
+    final bool force = false,
+    final bool skipTagging = false,
   }) : _parsedArgs = <String, dynamic>{
     'increment': level,
     'candidate-branch': candidateBranch,
@@ -98,12 +98,12 @@ class FakeArgResults implements ArgResults {
   }
 
   @override
-  dynamic operator [](String name) {
+  dynamic operator [](final String name) {
     return _parsedArgs[name];
   }
 
   @override
-  bool wasParsed(String name) {
+  bool wasParsed(final String name) {
     assert(false, 'not yet implemented');
     return false;
   }

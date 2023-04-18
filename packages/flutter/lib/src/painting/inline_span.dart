@@ -27,7 +27,7 @@ class Accumulator {
   int _value;
 
   /// Increases the [value] by the `addend`.
-  void increment(int addend) {
+  void increment(final int addend) {
     assert(addend >= 0);
     _value += addend;
   }
@@ -89,7 +89,7 @@ class InlineSpanSemanticsInformation {
   final List<ui.StringAttribute> stringAttributes;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is InlineSpanSemanticsInformation
         && other.text == text
         && other.semanticsLabel == semanticsLabel
@@ -109,7 +109,7 @@ class InlineSpanSemanticsInformation {
 ///
 /// Consecutive inline spans can be combined if their
 /// [InlineSpanSemanticsInformation.requiresOwnNode] return false.
-List<InlineSpanSemanticsInformation> combineSemanticsInfo(List<InlineSpanSemanticsInformation> infoList) {
+List<InlineSpanSemanticsInformation> combineSemanticsInfo(final List<InlineSpanSemanticsInformation> infoList) {
   final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
   String workingText = '';
   String workingLabel = '';
@@ -218,21 +218,21 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// in the same order as defined in the [InlineSpan] tree.
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions });
+  void build(final ui.ParagraphBuilder builder, { final double textScaleFactor = 1.0, final List<PlaceholderDimensions>? dimensions });
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
   ///
   /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
-  bool visitChildren(InlineSpanVisitor visitor);
+  bool visitChildren(final InlineSpanVisitor visitor);
 
   /// Returns the [InlineSpan] that contains the given position in the text.
-  InlineSpan? getSpanForPosition(TextPosition position) {
+  InlineSpan? getSpanForPosition(final TextPosition position) {
     assert(debugAssertIsValid());
     final Accumulator offset = Accumulator();
     InlineSpan? result;
-    visitChildren((InlineSpan span) {
+    visitChildren((final InlineSpan span) {
       result = span.getSpanForPositionVisitor(position, offset);
       return result == null;
     });
@@ -248,7 +248,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This method should not be directly called. Use [getSpanForPosition] instead.
   @protected
-  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset);
+  InlineSpan? getSpanForPositionVisitor(final TextPosition position, final Accumulator offset);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
@@ -258,7 +258,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.
-  String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
+  String toPlainText({final bool includeSemanticsLabels = true, final bool includePlaceholders = true}) {
     final StringBuffer buffer = StringBuffer();
     computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
     return buffer.toString();
@@ -284,7 +284,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// [PlaceholderSpan]s in the tree will be represented with a
   /// [InlineSpanSemanticsInformation.placeholder] value.
   @protected
-  void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector);
+  void computeSemanticsInformation(final List<InlineSpanSemanticsInformation> collector);
 
   /// Walks the [InlineSpan] tree and writes the plain text representation to `buffer`.
   ///
@@ -301,20 +301,20 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// This method will then recursively call [computeToPlainText] on its children
   /// [InlineSpan]s if available.
   @protected
-  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
+  void computeToPlainText(final StringBuffer buffer, {final bool includeSemanticsLabels = true, final bool includePlaceholders = true});
 
   /// Returns the UTF-16 code unit at the given `index` in the flattened string.
   ///
   /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpan]s.
   ///
   /// Returns null if the `index` is out of bounds.
-  int? codeUnitAt(int index) {
+  int? codeUnitAt(final int index) {
     if (index < 0) {
       return null;
     }
     final Accumulator offset = Accumulator();
     int? result;
-    visitChildren((InlineSpan span) {
+    visitChildren((final InlineSpan span) {
       result = span.codeUnitAtVisitor(index, offset);
       return result == null;
     });
@@ -330,7 +330,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
-  int? codeUnitAtVisitor(int index, Accumulator offset);
+  int? codeUnitAtVisitor(final int index, final Accumulator offset);
 
   /// In debug mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -351,10 +351,10 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
-  RenderComparison compareTo(InlineSpan other);
+  RenderComparison compareTo(final InlineSpan other);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -369,7 +369,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   int get hashCode => style.hashCode;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
 

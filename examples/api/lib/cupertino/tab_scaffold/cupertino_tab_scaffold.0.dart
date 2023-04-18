@@ -12,7 +12,7 @@ class TabScaffoldApp extends StatelessWidget {
   const TabScaffoldApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: TabScaffoldExample(),
@@ -29,7 +29,7 @@ class TabScaffoldExample extends StatefulWidget {
 
 class _TabScaffoldExampleState extends State<TabScaffoldExample> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
@@ -43,9 +43,9 @@ class _TabScaffoldExampleState extends State<TabScaffoldExample> {
           ),
         ],
       ),
-      tabBuilder: (BuildContext context, int index) {
+      tabBuilder: (final BuildContext context, final int index) {
         return CupertinoTabView(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return CupertinoPageScaffold(
               navigationBar: CupertinoNavigationBar(
                 middle: Text('Page 1 of tab $index'),
@@ -56,7 +56,7 @@ class _TabScaffoldExampleState extends State<TabScaffoldExample> {
                   onPressed: () {
                     Navigator.of(context).push(
                       CupertinoPageRoute<void>(
-                        builder: (BuildContext context) {
+                        builder: (final BuildContext context) {
                           return CupertinoPageScaffold(
                             navigationBar: CupertinoNavigationBar(
                               middle: Text('Page 2 of tab $index'),

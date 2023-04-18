@@ -81,7 +81,7 @@ List<Target> _kDefaultTargets = <Target>[
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
-  AssembleCommand({ bool verboseHelp = false, required BuildSystem buildSystem })
+  AssembleCommand({ final bool verboseHelp = false, required final BuildSystem buildSystem })
     : _buildSystem = buildSystem {
     argParser.addMultiOption(
       'define',
@@ -242,7 +242,7 @@ class AssembleCommand extends FlutterCommand {
     return result;
   }
 
-  Map<String, String> _parseDefines(List<String> values) {
+  Map<String, String> _parseDefines(final List<String> values) {
     final Map<String, String> results = <String, String>{};
     for (final String chunk in values) {
       final int indexEquals = chunk.indexOf('=');
@@ -357,7 +357,7 @@ class AssembleCommand extends FlutterCommand {
 }
 
 @visibleForTesting
-void writeListIfChanged(List<File> files, String path) {
+void writeListIfChanged(final List<File> files, final String path) {
   final File file = globals.fs.file(path);
   final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
@@ -376,7 +376,7 @@ void writeListIfChanged(List<File> files, String path) {
 
 /// Output performance measurement data in [outFile].
 @visibleForTesting
-void writePerformanceData(Iterable<PerformanceMeasurement> measurements, File outFile) {
+void writePerformanceData(final Iterable<PerformanceMeasurement> measurements, final File outFile) {
   final Map<String, Object> jsonData = <String, Object>{
     'targets': <Object>[
       for (final PerformanceMeasurement measurement in measurements)

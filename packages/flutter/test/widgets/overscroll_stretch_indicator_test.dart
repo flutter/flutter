@@ -13,16 +13,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   Widget buildTest(
-    GlobalKey box1Key,
-    GlobalKey box2Key,
-    GlobalKey box3Key,
-    ScrollController controller, {
-    Axis axis = Axis.vertical,
-    bool reverse = false,
-    TextDirection textDirection = TextDirection.ltr,
-    double boxHeight = 250.0,
-    double boxWidth = 300.0,
-    ScrollPhysics? physics,
+    final GlobalKey box1Key,
+    final GlobalKey box2Key,
+    final GlobalKey box3Key,
+    final ScrollController controller, {
+    final Axis axis = Axis.vertical,
+    final bool reverse = false,
+    final TextDirection textDirection = TextDirection.ltr,
+    final double boxHeight = 250.0,
+    final double boxWidth = 300.0,
+    final ScrollPhysics? physics,
   }) {
     final AxisDirection axisDirection;
     switch (axis) {
@@ -76,7 +76,7 @@ void main() {
     );
   }
 
-  testWidgets('Stretch overscroll will do nothing when axes do not match', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll will do nothing when axes do not match', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final ScrollController controller = ScrollController();
@@ -135,7 +135,7 @@ void main() {
     expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
   });
 
-  testWidgets('Stretch overscroll vertically', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll vertically', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -212,7 +212,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, 350.0);
   });
 
-  testWidgets('Stretch overscroll works in reverse - vertical', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll works in reverse - vertical', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -245,7 +245,7 @@ void main() {
     );
   });
 
-  testWidgets('Stretch overscroll works in reverse - horizontal', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll works in reverse - horizontal', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -285,7 +285,7 @@ void main() {
     );
   });
 
-  testWidgets('Stretch overscroll works in reverse - horizontal - RTL', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll works in reverse - horizontal - RTL', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -371,7 +371,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dx, 500.0);
   });
 
-  testWidgets('Stretch overscroll horizontally', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll horizontally', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -448,7 +448,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dx, 500.0);
   });
 
-  testWidgets('Stretch overscroll horizontally RTL', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll horizontally RTL', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -488,7 +488,7 @@ void main() {
     );
   });
 
-  testWidgets('Disallow stretching overscroll', (WidgetTester tester) async {
+  testWidgets('Disallow stretching overscroll', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -496,7 +496,7 @@ void main() {
     double indicatorNotification =0;
     await tester.pumpWidget(
       NotificationListener<OverscrollIndicatorNotification>(
-        onNotification: (OverscrollIndicatorNotification notification) {
+        onNotification: (final OverscrollIndicatorNotification notification) {
           notification.disallowIndicator();
           indicatorNotification += 1;
           return false;
@@ -530,7 +530,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Stretch does not overflow bounds of container', (WidgetTester tester) async {
+  testWidgets('Stretch does not overflow bounds of container', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/90197
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -546,7 +546,7 @@ void main() {
                   height: 300,
                   child: ListView.builder(
                     itemCount: 20,
-                    itemBuilder: (BuildContext context, int index){
+                    itemBuilder: (final BuildContext context, final int index){
                       return Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: Text('Index $index'),
@@ -587,7 +587,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Clip behavior is updated as needed', (WidgetTester tester) async {
+  testWidgets('Clip behavior is updated as needed', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/97867
     await tester.pumpWidget(
       Directionality(
@@ -604,7 +604,7 @@ void main() {
                     height: 300,
                     child: ListView.builder(
                       itemCount: 20,
-                      itemBuilder: (BuildContext context, int index){
+                      itemBuilder: (final BuildContext context, final int index){
                         return Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: Text('Index $index'),
@@ -647,10 +647,10 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('clipBehavior parameter updates overscroll clipping behavior', (WidgetTester tester) async {
+  testWidgets('clipBehavior parameter updates overscroll clipping behavior', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/103491
 
-    Widget buildFrame(Clip clipBehavior) {
+    Widget buildFrame(final Clip clipBehavior) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
@@ -666,7 +666,7 @@ void main() {
                     height: 300,
                     child: ListView.builder(
                       itemCount: 20,
-                      itemBuilder: (BuildContext context, int index){
+                      itemBuilder: (final BuildContext context, final int index){
                         return Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: Text('Index $index'),
@@ -711,7 +711,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Stretch limit', (WidgetTester tester) async {
+  testWidgets('Stretch limit', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99264
     await tester.pumpWidget(
       Directionality(
@@ -726,7 +726,7 @@ void main() {
                 height: 300,
                 child: ListView.builder(
                   itemCount: 20,
-                  itemBuilder: (BuildContext context, int index){
+                  itemBuilder: (final BuildContext context, final int index){
                     return Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Text('Index $index'),
@@ -762,7 +762,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Multiple pointers will not exceed stretch limit', (WidgetTester tester) async {
+  testWidgets('Multiple pointers will not exceed stretch limit', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/99264
     await tester.pumpWidget(
       Directionality(
@@ -777,7 +777,7 @@ void main() {
                 height: 300,
                 child: ListView.builder(
                   itemCount: 20,
-                  itemBuilder: (BuildContext context, int index){
+                  itemBuilder: (final BuildContext context, final int index){
                     return Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: Text('Index $index'),
@@ -832,7 +832,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Stretch overscroll vertically, change direction mid scroll', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll vertically, change direction mid scroll', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -901,7 +901,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero), const Offset(0.0, 200.0));
   });
 
-  testWidgets('Stretch overscroll horizontally, change direction mid scroll', (WidgetTester tester) async {
+  testWidgets('Stretch overscroll horizontally, change direction mid scroll', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -971,7 +971,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero), const Offset(200.0, 0.0));
   });
 
-  testWidgets('Fling toward the trailing edge causes stretch toward the leading edge', (WidgetTester tester) async {
+  testWidgets('Fling toward the trailing edge causes stretch toward the leading edge', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -1011,7 +1011,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, 350.0);
   });
 
-  testWidgets('Fling toward the leading edge causes stretch toward the trailing edge', (WidgetTester tester) async {
+  testWidgets('Fling toward the leading edge causes stretch toward the trailing edge', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();
@@ -1063,7 +1063,7 @@ void main() {
     expect(box3.localToGlobal(Offset.zero).dy, 500.0);
   });
 
-  testWidgets('changing scroll direction during recede animation will not change the stretch direction', (WidgetTester tester) async {
+  testWidgets('changing scroll direction during recede animation will not change the stretch direction', (final WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();
     final GlobalKey box2Key = GlobalKey();
     final GlobalKey box3Key = GlobalKey();

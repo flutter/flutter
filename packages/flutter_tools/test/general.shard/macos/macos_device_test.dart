@@ -241,7 +241,7 @@ void main() {
   });
 }
 
-FlutterProject setUpFlutterProject(Directory directory) {
+FlutterProject setUpFlutterProject(final Directory directory) {
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
@@ -251,7 +251,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeMacOSApp extends Fake implements MacOSApp {
   @override
-  String executable(BuildInfo buildInfo) {
+  String executable(final BuildInfo buildInfo) {
     switch (buildInfo) {
       case BuildInfo.debug:
         return 'debug/executable';

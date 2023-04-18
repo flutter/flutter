@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/dialog/dialog.0.dart' as example;
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Show Dialog', (WidgetTester tester) async {
+  testWidgets('Show Dialog', (final WidgetTester tester) async {
     const String dialogText = 'This is a typical dialog.';
 
     await tester.pumpWidget(
@@ -29,7 +29,7 @@ void main() {
     expect(find.text(dialogText), findsNothing);
   });
 
-  testWidgets('Show Dialog.fullscreen', (WidgetTester tester) async {
+  testWidgets('Show Dialog.fullscreen', (final WidgetTester tester) async {
     const String dialogText = 'This is a fullscreen dialog.';
 
     await tester.pumpWidget(

@@ -12,7 +12,7 @@ class ExpansionPanelListExampleApp extends StatelessWidget {
   const ExpansionPanelListExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('ExpansionPanelList Sample')),
@@ -35,8 +35,8 @@ class Item {
   bool isExpanded;
 }
 
-List<Item> generateItems(int numberOfItems) {
-  return List<Item>.generate(numberOfItems, (int index) {
+List<Item> generateItems(final int numberOfItems) {
+  return List<Item>.generate(numberOfItems, (final int index) {
     return Item(
       headerValue: 'Panel $index',
       expandedValue: 'This is item number $index',
@@ -55,7 +55,7 @@ class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
   final List<Item> _data = generateItems(8);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SingleChildScrollView(
       child: Container(
         child: _buildPanel(),
@@ -65,14 +65,14 @@ class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
 
   Widget _buildPanel() {
     return ExpansionPanelList(
-      expansionCallback: (int index, bool isExpanded) {
+      expansionCallback: (final int index, final bool isExpanded) {
         setState(() {
           _data[index].isExpanded = !isExpanded;
         });
       },
-      children: _data.map<ExpansionPanel>((Item item) {
+      children: _data.map<ExpansionPanel>((final Item item) {
         return ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
+          headerBuilder: (final BuildContext context, final bool isExpanded) {
             return ListTile(
               title: Text(item.headerValue),
             );
@@ -83,7 +83,7 @@ class _ExpansionPanelListExampleState extends State<ExpansionPanelListExample> {
               trailing: const Icon(Icons.delete),
               onTap: () {
                 setState(() {
-                  _data.removeWhere((Item currentItem) => item == currentItem);
+                  _data.removeWhere((final Item currentItem) => item == currentItem);
                 });
               }),
           isExpanded: item.isExpanded,

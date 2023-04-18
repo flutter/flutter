@@ -12,7 +12,7 @@ class ListTileApp extends StatelessWidget {
   const ListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
         listTileTheme: const ListTileThemeData(
@@ -70,7 +70,7 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile Samples')),
       body: Column(
@@ -88,7 +88,7 @@ class _LisTileExampleState extends State<LisTileExample> with TickerProviderStat
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute<Widget>(builder: (BuildContext context) {
+                    MaterialPageRoute<Widget>(builder: (final BuildContext context) {
                       return Scaffold(
                         appBar: AppBar(title: const Text('ListTile Hero')),
                         body: Center(

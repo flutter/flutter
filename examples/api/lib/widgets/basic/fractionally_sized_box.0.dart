@@ -12,7 +12,7 @@ class FractionallySizedBoxApp extends StatelessWidget {
   const FractionallySizedBoxApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('FractionallySizedBox Sample')),
@@ -26,7 +26,7 @@ class FractionallySizedBoxExample extends StatelessWidget {
   const FractionallySizedBoxExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox.expand(
       child: FractionallySizedBox(
         widthFactor: 0.5,

@@ -26,16 +26,16 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
   // ignore: prefer_const_constructors_in_immutables
   PlatformSelectableRegionContextMenu({
     // ignore: avoid_unused_constructor_parameters
-    required Widget child,
+    required final Widget child,
     super.key,
   });
 
   /// Attaches the `client` to be able to open platform-appropriate context menus.
-  static void attach(SelectionContainerDelegate client) => throw UnimplementedError();
+  static void attach(final SelectionContainerDelegate client) => throw UnimplementedError();
 
   /// Detaches the `client` from the platform-appropriate selection context menus.
-  static void detach(SelectionContainerDelegate client) => throw UnimplementedError();
+  static void detach(final SelectionContainerDelegate client) => throw UnimplementedError();
 
   @override
-  Widget build(BuildContext context) => throw UnimplementedError();
+  Widget build(final BuildContext context) => throw UnimplementedError();
 }

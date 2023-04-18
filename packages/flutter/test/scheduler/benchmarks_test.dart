@@ -14,7 +14,7 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   late bool handleBeginFrameMicrotaskRun;
 
   @override
-  void handleBeginFrame(Duration? rawTimeStamp) {
+  void handleBeginFrame(final Duration? rawTimeStamp) {
     handleBeginFrameMicrotaskRun = false;
     framesBegun += 1;
     Future<void>.microtask(() { handleBeginFrameMicrotaskRun = true; });
@@ -40,7 +40,7 @@ void main() {
 
   test('test pumpBenchmark() only runs one frame', () async {
     await benchmarkWidgets(
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         const Key root = Key('root');
         binding.attachRootWidget(Container(key: root));
         await tester.pump();

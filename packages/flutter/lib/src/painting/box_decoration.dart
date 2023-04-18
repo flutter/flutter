@@ -102,14 +102,14 @@ class BoxDecoration extends Decoration {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   BoxDecoration copyWith({
-    Color? color,
-    DecorationImage? image,
-    BoxBorder? border,
-    BorderRadiusGeometry? borderRadius,
-    List<BoxShadow>? boxShadow,
-    Gradient? gradient,
-    BlendMode? backgroundBlendMode,
-    BoxShape? shape,
+    final Color? color,
+    final DecorationImage? image,
+    final BoxBorder? border,
+    final BorderRadiusGeometry? borderRadius,
+    final List<BoxShadow>? boxShadow,
+    final Gradient? gradient,
+    final BlendMode? backgroundBlendMode,
+    final BoxShape? shape,
   }) {
     return BoxDecoration(
       color: color ?? this.color,
@@ -211,7 +211,7 @@ class BoxDecoration extends Decoration {
   EdgeInsetsGeometry get padding => border?.dimensions ?? EdgeInsets.zero;
 
   @override
-  Path getClipPath(Rect rect, TextDirection textDirection) {
+  Path getClipPath(final Rect rect, final TextDirection textDirection) {
     switch (shape) {
       case BoxShape.circle:
         final Offset center = rect.center;
@@ -227,7 +227,7 @@ class BoxDecoration extends Decoration {
   }
 
   /// Returns a new box decoration that is scaled by the given factor.
-  BoxDecoration scale(double factor) {
+  BoxDecoration scale(final double factor) {
     return BoxDecoration(
       color: Color.lerp(null, color, factor),
       image: image, // TODO(ianh): fade the image from transparent
@@ -243,7 +243,7 @@ class BoxDecoration extends Decoration {
   bool get isComplex => boxShadow != null;
 
   @override
-  BoxDecoration? lerpFrom(Decoration? a, double t) {
+  BoxDecoration? lerpFrom(final Decoration? a, final double t) {
     if (a == null) {
       return scale(t);
     }
@@ -254,7 +254,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  BoxDecoration? lerpTo(Decoration? b, double t) {
+  BoxDecoration? lerpTo(final Decoration? b, final double t) {
     if (b == null) {
       return scale(1.0 - t);
     }
@@ -287,7 +287,7 @@ class BoxDecoration extends Decoration {
   ///  * [lerpFrom] and [lerpTo], which are used to implement [Decoration.lerp]
   ///    and which use [BoxDecoration.lerp] when interpolating two
   ///    [BoxDecoration]s or a [BoxDecoration] to or from null.
-  static BoxDecoration? lerp(BoxDecoration? a, BoxDecoration? b, double t) {
+  static BoxDecoration? lerp(final BoxDecoration? a, final BoxDecoration? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -315,7 +315,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -346,7 +346,7 @@ class BoxDecoration extends Decoration {
   );
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties
       ..defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace
@@ -362,7 +362,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  bool hitTest(Size size, Offset position, { TextDirection? textDirection }) {
+  bool hitTest(final Size size, final Offset position, { final TextDirection? textDirection }) {
     assert((Offset.zero & size).contains(position));
     switch (shape) {
       case BoxShape.rectangle:
@@ -380,7 +380,7 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  BoxPainter createBoxPainter([ VoidCallback? onChanged ]) {
+  BoxPainter createBoxPainter([ final VoidCallback? onChanged ]) {
     assert(onChanged != null || image == null);
     return _BoxDecorationPainter(this, onChanged);
   }
@@ -394,7 +394,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
   Paint? _cachedBackgroundPaint;
   Rect? _rectForCachedBackgroundPaint;
-  Paint _getBackgroundPaint(Rect rect, TextDirection? textDirection) {
+  Paint _getBackgroundPaint(final Rect rect, final TextDirection? textDirection) {
     assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
 
     if (_cachedBackgroundPaint == null ||
@@ -416,7 +416,7 @@ class _BoxDecorationPainter extends BoxPainter {
     return _cachedBackgroundPaint!;
   }
 
-  void _paintBox(Canvas canvas, Rect rect, Paint paint, TextDirection? textDirection) {
+  void _paintBox(final Canvas canvas, final Rect rect, final Paint paint, final TextDirection? textDirection) {
     switch (_decoration.shape) {
       case BoxShape.circle:
         assert(_decoration.borderRadius == null);
@@ -432,7 +432,7 @@ class _BoxDecorationPainter extends BoxPainter {
     }
   }
 
-  void _paintShadows(Canvas canvas, Rect rect, TextDirection? textDirection) {
+  void _paintShadows(final Canvas canvas, final Rect rect, final TextDirection? textDirection) {
     if (_decoration.boxShadow == null) {
       return;
     }
@@ -443,14 +443,14 @@ class _BoxDecorationPainter extends BoxPainter {
     }
   }
 
-  void _paintBackgroundColor(Canvas canvas, Rect rect, TextDirection? textDirection) {
+  void _paintBackgroundColor(final Canvas canvas, final Rect rect, final TextDirection? textDirection) {
     if (_decoration.color != null || _decoration.gradient != null) {
       _paintBox(canvas, rect, _getBackgroundPaint(rect, textDirection), textDirection);
     }
   }
 
   DecorationImagePainter? _imagePainter;
-  void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
+  void _paintBackgroundImage(final Canvas canvas, final Rect rect, final ImageConfiguration configuration) {
     if (_decoration.image == null) {
       return;
     }
@@ -479,7 +479,7 @@ class _BoxDecorationPainter extends BoxPainter {
 
   /// Paint the box decoration into the given location on the given canvas.
   @override
-  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+  void paint(final Canvas canvas, final Offset offset, final ImageConfiguration configuration) {
     assert(configuration.size != null);
     final Rect rect = offset & configuration.size!;
     final TextDirection? textDirection = configuration.textDirection;

@@ -14,22 +14,22 @@ class RenderTestBox extends RenderBox {
   final BoxConstraints _intrinsicDimensions;
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     return _intrinsicDimensions.minWidth;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     return _intrinsicDimensions.maxWidth;
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return _intrinsicDimensions.minHeight;
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return _intrinsicDimensions.maxHeight;
   }
 

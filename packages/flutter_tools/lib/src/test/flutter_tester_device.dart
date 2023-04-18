@@ -80,7 +80,7 @@ class FlutterTesterTestDevice extends TestDevice {
   /// [entrypointPath] is the path to the entrypoint file which must be compiled
   /// as a dill.
   @override
-  Future<StreamChannel<String>> start(String entrypointPath) async {
+  Future<StreamChannel<String>> start(final String entrypointPath) async {
     assert(!_exitCode.isCompleted);
     assert(_process == null);
     assert(_server == null);
@@ -148,7 +148,7 @@ class FlutterTesterTestDevice extends TestDevice {
     _process = await processManager.start(command, environment: environment);
 
     // Unawaited to update state.
-    unawaited(_process!.exitCode.then((int exitCode) {
+    unawaited(_process!.exitCode.then((final int exitCode) {
       logger.printTrace('test $id: flutter_tester process at pid ${_process!.pid} exited with code=$exitCode');
       _exitCode.complete(exitCode);
     }));
@@ -159,7 +159,7 @@ class FlutterTesterTestDevice extends TestDevice {
     // We also keep track of what VM Service port the engine used, if any.
     _pipeStandardStreamsToConsole(
       process: _process!,
-      reportVmServiceUri: (Uri detectedUri) async {
+      reportVmServiceUri: (final Uri detectedUri) async {
         assert(!_gotProcessVmServiceUri.isCompleted);
         assert(debuggingOptions.hostVmServicePort == null ||
             debuggingOptions.hostVmServicePort == detectedUri.port);
@@ -185,7 +185,7 @@ class FlutterTesterTestDevice extends TestDevice {
           compileExpression: compileExpression,
           logger: logger,
         );
-        unawaited(localVmService.then((FlutterVmService vmservice) async {
+        unawaited(localVmService.then((final FlutterVmService vmservice) async {
           logger.printTrace('test $id: Successfully connected to service protocol: $forwardingUri');
           if (debuggingOptions.serveObservatory) {
             try {
@@ -258,7 +258,7 @@ class FlutterTesterTestDevice extends TestDevice {
 
   @visibleForTesting
   @protected
-  Future<DartDevelopmentService> startDds(Uri uri, {UriConverter? uriConverter}) {
+  Future<DartDevelopmentService> startDds(final Uri uri, {final UriConverter? uriConverter}) {
     return DartDevelopmentService.startDartDevelopmentService(
       uri,
       serviceUri: _ddsServiceUri,
@@ -268,7 +268,7 @@ class FlutterTesterTestDevice extends TestDevice {
     );
   }
 
-  Future<void> _startDevTools(Uri forwardingUri, DartDevelopmentService? dds) async {
+  Future<void> _startDevTools(final Uri forwardingUri, final DartDevelopmentService? dds) async {
     _devToolsLauncher = DevtoolsLauncher.instance;
     logger.printTrace('test $id: Serving DevTools...');
     final DevToolsServerAddress? devToolsServerAddress = await _devToolsLauncher?.serve();
@@ -296,7 +296,7 @@ class FlutterTesterTestDevice extends TestDevice {
   /// Only intended to be overridden in tests.
   @protected
   @visibleForTesting
-  Future<HttpServer> bind(InternetAddress? host, int port) => HttpServer.bind(host, port);
+  Future<HttpServer> bind(final InternetAddress? host, final int port) => HttpServer.bind(host, port);
 
   @protected
   @visibleForTesting
@@ -321,8 +321,8 @@ class FlutterTesterTestDevice extends TestDevice {
   }
 
   void _pipeStandardStreamsToConsole({
-    required Process process,
-    required Future<void> Function(Uri uri) reportVmServiceUri,
+    required final Process process,
+    required final Future<void> Function(Uri uri) reportVmServiceUri,
   }) {
     for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
@@ -332,7 +332,7 @@ class FlutterTesterTestDevice extends TestDevice {
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen(
-            (String line) async {
+            (final String line) async {
           logger.printTrace('test $id: Shell: $line');
 
           final Match? match = globals.kVMServiceMessageRegExp.firstMatch(line);
@@ -348,7 +348,7 @@ class FlutterTesterTestDevice extends TestDevice {
           }
 
         },
-        onError: (dynamic error) {
+        onError: (final dynamic error) {
           logger.printError('shell console stream for process pid ${process.pid} experienced an unexpected error: $error');
         },
         cancelOnError: true,
@@ -357,7 +357,7 @@ class FlutterTesterTestDevice extends TestDevice {
   }
 }
 
-String _getExitCodeMessage(int exitCode) {
+String _getExitCodeMessage(final int exitCode) {
   switch (exitCode) {
     case 1:
       return 'Shell subprocess cleanly reported an error. Check the logs above for an error message.';
@@ -376,15 +376,15 @@ String _getExitCodeMessage(int exitCode) {
   }
 }
 
-StreamChannel<String> _webSocketToStreamChannel(WebSocket webSocket) {
+StreamChannel<String> _webSocketToStreamChannel(final WebSocket webSocket) {
   final StreamChannelController<String> controller = StreamChannelController<String>();
 
   controller.local.stream
-      .map<dynamic>((String message) => message as dynamic)
+      .map<dynamic>((final String message) => message as dynamic)
       .pipe(webSocket);
   webSocket
       // We're only communicating with string encoded JSON.
-      .map<String>((dynamic message) => message as String)
+      .map<String>((final dynamic message) => message as String)
       .pipe(controller.local.sink);
 
   return controller.foreign;

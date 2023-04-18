@@ -100,7 +100,7 @@ class CategoryView extends StatelessWidget {
   final Category? category;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scrollbar(
       child: ListView(
@@ -110,7 +110,7 @@ class CategoryView extends StatelessWidget {
           vertical: 16.0,
           horizontal: 64.0,
         ),
-        children: category!.assets!.map<Widget>((String asset) {
+        children: category!.assets!.map<Widget>((final String asset) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
@@ -165,7 +165,7 @@ class BackdropPanel extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Material(
       elevation: 2.0,
@@ -210,7 +210,7 @@ class BackdropTitle extends AnimatedWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Animation<double> animation = listenable as Animation<double>;
     return DefaultTextStyle(
       style: Theme.of(context).primaryTextTheme.titleLarge!,
@@ -269,7 +269,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     super.dispose();
   }
 
-  void _changeCategory(Category category) {
+  void _changeCategory(final Category category) {
     setState(() {
       _category = category;
       _controller.fling(velocity: 2.0);
@@ -293,7 +293,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // By design: the panel can only be opened with a swipe. To close the panel
   // the user must either tap its heading or the backdrop's menu icon.
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(final DragUpdateDetails details) {
     if (_controller.isAnimating || _controller.status == AnimationStatus.completed) {
       return;
     }
@@ -301,7 +301,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     _controller.value -= details.primaryDelta! / _backdropHeight;
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(final DragEndDetails details) {
     if (_controller.isAnimating || _controller.status == AnimationStatus.completed) {
       return;
     }
@@ -321,7 +321,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   // can be selected at a time. This is a LayoutWidgetBuild function because
   // we need to know how big the BackdropPanel will be to set up its
   // animation.
-  Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+  Widget _buildStack(final BuildContext context, final BoxConstraints constraints) {
     const double panelTitleHeight = 48.0;
     final Size panelSize = constraints.biggest;
     final double panelTop = panelSize.height - panelTitleHeight;
@@ -339,7 +339,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
     );
 
     final ThemeData theme = Theme.of(context);
-    final List<Widget> backdropItems = allCategories.map<Widget>((Category category) {
+    final List<Widget> backdropItems = allCategories.map<Widget>((final Category category) {
       final bool selected = category == _category;
       return Material(
         shape: const RoundedRectangleBorder(
@@ -391,7 +391,7 @@ class _BackdropDemoState extends State<BackdropDemo> with SingleTickerProviderSt
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,

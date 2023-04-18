@@ -40,7 +40,7 @@ abstract class TickerProvider {
   ///
   /// The kind of ticker provided depends on the kind of ticker provider.
   @factory
-  Ticker createTicker(TickerCallback onTick);
+  Ticker createTicker(final TickerCallback onTick);
 }
 
 // TODO(jacobr): make Ticker use Diagnosticable to simplify reporting errors
@@ -91,7 +91,7 @@ class Ticker {
   /// By convention, the [muted] property is controlled by the object that
   /// created the [Ticker] (typically a [TickerProvider]), not the object that
   /// listens to the ticker's ticks.
-  set muted(bool value) {
+  set muted(final bool value) {
     if (value == muted) {
       return;
     }
@@ -179,7 +179,7 @@ class Ticker {
 
   /// Adds a debug representation of a [Ticker] optimized for including in error
   /// messages.
-  DiagnosticsNode describeForError(String name) {
+  DiagnosticsNode describeForError(final String name) {
     // TODO(jacobr): make this more structured.
     return DiagnosticsProperty<Ticker>(name, this, description: toString(debugIncludeStack: true));
   }
@@ -198,7 +198,7 @@ class Ticker {
   ///
   /// By convention, this method is used by the object that receives the ticks
   /// (as opposed to the [TickerProvider] which created the ticker).
-  void stop({ bool canceled = false }) {
+  void stop({ final bool canceled = false }) {
     if (!isActive) {
       return;
     }
@@ -240,7 +240,7 @@ class Ticker {
   @protected
   bool get shouldScheduleTick => !muted && isActive && !scheduled;
 
-  void _tick(Duration timeStamp) {
+  void _tick(final Duration timeStamp) {
     assert(isTicking);
     assert(scheduled);
     _animationId = null;
@@ -259,7 +259,7 @@ class Ticker {
   ///
   /// This should only be called if [shouldScheduleTick] is true.
   @protected
-  void scheduleTick({ bool rescheduling = false }) {
+  void scheduleTick({ final bool rescheduling = false }) {
     assert(!scheduled);
     assert(shouldScheduleTick);
     _animationId = SchedulerBinding.instance.scheduleFrameCallback(_tick, rescheduling: rescheduling);
@@ -289,7 +289,7 @@ class Ticker {
   /// function of the original [Ticker] if the original ticker is active.
   ///
   /// This ticker must not be active when this method is called.
-  void absorbTicker(Ticker originalTicker) {
+  void absorbTicker(final Ticker originalTicker) {
     assert(!isActive);
     assert(_future == null);
     assert(_startTime == null);
@@ -342,7 +342,7 @@ class Ticker {
   late StackTrace _debugCreationStack;
 
   @override
-  String toString({ bool debugIncludeStack = false }) {
+  String toString({ final bool debugIncludeStack = false }) {
     final StringBuffer buffer = StringBuffer();
     buffer.write('${objectRuntimeType(this, 'Ticker')}(');
     assert(() {
@@ -403,7 +403,7 @@ class TickerFuture implements Future<void> {
     _secondaryCompleter?.complete();
   }
 
-  void _cancel(Ticker ticker) {
+  void _cancel(final Ticker ticker) {
     assert(_completed == null);
     _completed = false;
     _secondaryCompleter?.completeError(TickerCanceled(ticker));
@@ -415,8 +415,8 @@ class TickerFuture implements Future<void> {
   /// Calling this method registers an exception handler for the [orCancel]
   /// future, so even if the [orCancel] property is accessed, canceling the
   /// ticker will not cause an uncaught exception in the current zone.
-  void whenCompleteOrCancel(VoidCallback callback) {
-    void thunk(dynamic value) {
+  void whenCompleteOrCancel(final VoidCallback callback) {
+    void thunk(final dynamic value) {
       callback();
     }
     orCancel.then<void>(thunk, onError: thunk);
@@ -450,22 +450,22 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<void> catchError(Function onError, { bool Function(Object)? test }) {
+  Future<void> catchError(final Function onError, { final bool Function(Object)? test }) {
     return _primaryCompleter.future.catchError(onError, test: test);
   }
 
   @override
-  Future<R> then<R>(FutureOr<R> Function(void value) onValue, { Function? onError }) {
+  Future<R> then<R>(final FutureOr<R> Function(void value) onValue, { final Function? onError }) {
     return _primaryCompleter.future.then<R>(onValue, onError: onError);
   }
 
   @override
-  Future<void> timeout(Duration timeLimit, { FutureOr<void> Function()? onTimeout }) {
+  Future<void> timeout(final Duration timeLimit, { final FutureOr<void> Function()? onTimeout }) {
     return _primaryCompleter.future.timeout(timeLimit, onTimeout: onTimeout);
   }
 
   @override
-  Future<void> whenComplete(dynamic Function() action) {
+  Future<void> whenComplete(final dynamic Function() action) {
     return _primaryCompleter.future.whenComplete(action);
   }
 

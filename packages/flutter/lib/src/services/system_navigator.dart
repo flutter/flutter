@@ -24,7 +24,7 @@ abstract final class SystemNavigator {
   /// This method should be preferred over calling `dart:io`'s [exit]
   /// method, as the latter may cause the underlying platform to act
   /// as if the application had crashed.
-  static Future<void> pop({bool? animated}) async {
+  static Future<void> pop({final bool? animated}) async {
     await SystemChannels.platform.invokeMethod<void>('SystemNavigator.pop', animated);
   }
 
@@ -80,9 +80,9 @@ abstract final class SystemNavigator {
   ///
   /// The `replace` flag defaults to false.
   static Future<void> routeInformationUpdated({
-    required String location,
-    Object? state,
-    bool replace = false,
+    required final String location,
+    final Object? state,
+    final bool replace = false,
   }) {
     return SystemChannels.navigation.invokeMethod<void>(
       'routeInformationUpdated',

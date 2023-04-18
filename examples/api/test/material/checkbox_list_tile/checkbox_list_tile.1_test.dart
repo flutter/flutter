@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/checkbox_list_tile/checkbox_list_ti
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Checkbox aligns appropriately', (WidgetTester tester) async {
+  testWidgets('Checkbox aligns appropriately', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CheckboxListTileApp(),
     );
@@ -33,7 +33,7 @@ void main() {
     expect(checkboxTopLeft - tileTopLeft, const Offset(736.0, 8.0));
   });
 
-  testWidgets('Checkboxes can be checked', (WidgetTester tester) async {
+  testWidgets('Checkboxes can be checked', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CheckboxListTileApp(),
     );

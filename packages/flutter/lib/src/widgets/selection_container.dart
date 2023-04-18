@@ -90,7 +90,7 @@ class SelectionContainer extends StatefulWidget {
   /// If this returns null, either there is no [SelectionContainer] above
   /// the [BuildContext] or the immediate [SelectionContainer] is not
   /// enabled.
-  static SelectionRegistrar? maybeOf(BuildContext context) {
+  static SelectionRegistrar? maybeOf(final BuildContext context) {
     final SelectionRegistrarScope? scope = context.dependOnInheritedWidgetOfExactType<SelectionRegistrarScope>();
     return scope?.registrar;
   }
@@ -121,7 +121,7 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
-  void didUpdateWidget(SelectionContainer oldWidget) {
+  void didUpdateWidget(final SelectionContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.delegate != widget.delegate) {
       if (!oldWidget._disabled) {
@@ -157,20 +157,20 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     assert(!widget._disabled);
     widget.delegate!.addListener(listener);
     _listeners.add(listener);
   }
 
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     widget.delegate?.removeListener(listener);
     _listeners.remove(listener);
   }
 
   @override
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle) {
+  void pushHandleLayers(final LayerLink? startHandle, final LayerLink? endHandle) {
     assert(!widget._disabled);
     widget.delegate!.pushHandleLayers(startHandle, endHandle);
   }
@@ -182,7 +182,7 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
-  SelectionResult dispatchSelectionEvent(SelectionEvent event) {
+  SelectionResult dispatchSelectionEvent(final SelectionEvent event) {
     assert(!widget._disabled);
     return widget.delegate!.dispatchSelectionEvent(event);
   }
@@ -196,7 +196,7 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
-  Matrix4 getTransformTo(RenderObject? ancestor) {
+  Matrix4 getTransformTo(final RenderObject? ancestor) {
     assert(!widget._disabled);
     return context.findRenderObject()!.getTransformTo(ancestor);
   }
@@ -214,7 +214,7 @@ class _SelectionContainerState extends State<SelectionContainer> with Selectable
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (widget._disabled) {
       return SelectionRegistrarScope._disabled(child: widget.child);
     }
@@ -252,7 +252,7 @@ class SelectionRegistrarScope extends InheritedWidget {
   final SelectionRegistrar? registrar;
 
   @override
-  bool updateShouldNotify(SelectionRegistrarScope oldWidget) {
+  bool updateShouldNotify(final SelectionRegistrarScope oldWidget) {
     return oldWidget.registrar != registrar;
   }
 }
@@ -271,7 +271,7 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
   /// coordinate system of [SelectionContainer].
   ///
   /// Can only be called after [SelectionContainer] is laid out.
-  Matrix4 getTransformFrom(Selectable child) {
+  Matrix4 getTransformFrom(final Selectable child) {
     assert(
       _selectionContainerContext?.findRenderObject() != null,
       'getTransformFrom cannot be called before SelectionContainer is laid out.',
@@ -290,7 +290,7 @@ abstract class SelectionContainerDelegate implements SelectionHandler, Selection
   /// [PipelineOwner.rootNode].
   ///
   /// Can only be called after [SelectionContainer] is laid out.
-  Matrix4 getTransformTo(RenderObject? ancestor) {
+  Matrix4 getTransformTo(final RenderObject? ancestor) {
     assert(
       _selectionContainerContext?.findRenderObject() != null,
       'getTransformTo cannot be called before SelectionContainer is laid out.',

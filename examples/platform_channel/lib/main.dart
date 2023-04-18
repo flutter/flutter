@@ -46,21 +46,21 @@ class _PlatformChannelState extends State<PlatformChannel> {
     eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
   }
 
-  void _onEvent(Object? event) {
+  void _onEvent(final Object? event) {
     setState(() {
       _chargingStatus =
           "Battery status: ${event == 'charging' ? '' : 'dis'}charging.";
     });
   }
 
-  void _onError(Object error) {
+  void _onError(final Object error) {
     setState(() {
       _chargingStatus = 'Battery status: unknown.';
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

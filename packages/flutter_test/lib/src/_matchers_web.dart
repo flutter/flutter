@@ -14,7 +14,7 @@ import 'finders.dart';
 import 'goldens.dart';
 
 /// An unsupported method that exists for API compatibility.
-Future<ui.Image> captureImage(Element element) {
+Future<ui.Image> captureImage(final Element element) {
   throw UnsupportedError('captureImage is not supported on the web.');
 }
 
@@ -34,7 +34,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   const MatchesGoldenFile(this.key, this.version);
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(final String path, this.version) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
@@ -43,7 +43,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   final int? version;
 
   @override
-  Future<String?> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(final dynamic item) async {
     if (item is! Finder) {
       return 'web goldens only supports matching finders.';
     }
@@ -82,13 +82,13 @@ class MatchesGoldenFile extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     final Uri testNameUri = webGoldenComparator.getTestUri(key, version);
     return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 
-RenderObject _findRepaintBoundary(Element element) {
+RenderObject _findRepaintBoundary(final Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
@@ -97,7 +97,7 @@ RenderObject _findRepaintBoundary(Element element) {
   return renderObject;
 }
 
-void _renderElement(ui.FlutterView window, RenderObject renderObject) {
+void _renderElement(final ui.FlutterView window, final RenderObject renderObject) {
   assert(renderObject.debugLayer != null);
   final Layer layer = renderObject.debugLayer!;
   final ui.SceneBuilder sceneBuilder = ui.SceneBuilder();

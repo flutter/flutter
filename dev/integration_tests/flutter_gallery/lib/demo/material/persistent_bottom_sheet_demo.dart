@@ -30,7 +30,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     setState(() { // disable the button
       _showBottomSheetCallback = null;
     });
-    _scaffoldKey.currentState!.showBottomSheet<void>((BuildContext context) {
+    _scaffoldKey.currentState!.showBottomSheet<void>((final BuildContext context) {
       final ThemeData themeData = Theme.of(context);
       return Container(
         decoration: BoxDecoration(
@@ -60,7 +60,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   void _showMessage() {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return AlertDialog(
           content: const Text('You tapped the floating action button.'),
           actions: <Widget>[
@@ -77,7 +77,7 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(

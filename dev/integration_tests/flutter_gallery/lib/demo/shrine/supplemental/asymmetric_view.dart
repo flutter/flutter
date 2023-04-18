@@ -12,7 +12,7 @@ class AsymmetricView extends StatelessWidget {
 
   final List<Product>? products;
 
-  List<SizedBox> _buildColumns(BuildContext context) {
+  List<SizedBox> _buildColumns(final BuildContext context) {
     if (products == null || products!.isEmpty) {
       return const <SizedBox>[];
     }
@@ -25,7 +25,7 @@ class AsymmetricView extends StatelessWidget {
     // some kinda awkward math so we use _evenCasesIndex and _oddCasesIndex as
     // helpers for creating the index of the product list that will correspond
     // to the index of the list of columns.
-    return List<SizedBox>.generate(_listItemCount(products!.length), (int index) {
+    return List<SizedBox>.generate(_listItemCount(products!.length), (final int index) {
       double width = .59 * MediaQuery.of(context).size.width;
       Widget column;
       if (index.isEven) {
@@ -54,7 +54,7 @@ class AsymmetricView extends StatelessWidget {
     }).toList();
   }
 
-  int _evenCasesIndex(int input) {
+  int _evenCasesIndex(final int input) {
     // The operator ~/ is a cool one. It's the truncating division operator. It
     // divides the number and if there's a remainder / decimal, it cuts it off.
     // This is like dividing and then casting the result to int. Also, it's
@@ -62,19 +62,19 @@ class AsymmetricView extends StatelessWidget {
     return input ~/ 2 * 3;
   }
 
-  int _oddCasesIndex(int input) {
+  int _oddCasesIndex(final int input) {
     assert(input > 0);
     return (input / 2).ceil() * 3 - 1;
   }
 
-  int _listItemCount(int totalItems) {
+  int _listItemCount(final int totalItems) {
     return (totalItems % 3 == 0)
       ? totalItems ~/ 3 * 2
       : (totalItems / 3).ceil() * 2 - 1;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListView(
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.fromLTRB(0.0, 34.0, 16.0, 44.0),

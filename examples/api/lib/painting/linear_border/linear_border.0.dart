@@ -14,7 +14,7 @@ class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData.light(useMaterial3: true),
       home: const Directionality(
@@ -33,7 +33,7 @@ class SampleCard extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextTheme textTheme = theme.textTheme;
     final ColorScheme colorScheme = theme.colorScheme;
@@ -49,7 +49,7 @@ class SampleCard extends StatelessWidget {
             Text(subtitle, style: textTheme.bodyMedium!.copyWith(color: colorScheme.secondary)),
             const SizedBox(height: 16),
             Row(
-              children: List<Widget>.generate(children.length * 2 - 1, (int index) {
+              children: List<Widget>.generate(children.length * 2 - 1, (final int index) {
                 return index.isEven ? children[index ~/ 2] : const SizedBox(width: 16);
               }),
             ),
@@ -73,7 +73,7 @@ class _HomeState extends State<Home> {
   late LinearBorder shape = shape0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final BorderSide primarySide0 = BorderSide(width: 0, color: colorScheme.inversePrimary); // hairline
     final BorderSide primarySide2 = BorderSide(width: 2, color: colorScheme.onPrimaryContainer);
@@ -280,10 +280,10 @@ class _HomeState extends State<Home> {
                   ),
                   TextButton(
                     style: ButtonStyle(
-                      side: MaterialStateProperty.resolveWith<BorderSide?>((Set<MaterialState> states) {
+                      side: MaterialStateProperty.resolveWith<BorderSide?>((final Set<MaterialState> states) {
                         return states.contains(MaterialState.hovered) ? primarySide3 : null;
                       }),
-                      shape: MaterialStateProperty.resolveWith<OutlinedBorder>((Set<MaterialState> states) {
+                      shape: MaterialStateProperty.resolveWith<OutlinedBorder>((final Set<MaterialState> states) {
                         return states.contains(MaterialState.hovered) ? shape0 : shape1;
                       }),
                     ),

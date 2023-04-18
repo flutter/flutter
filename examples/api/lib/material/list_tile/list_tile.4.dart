@@ -12,7 +12,7 @@ class ListTileApp extends StatelessWidget {
   const ListTileApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const ListTileExample(),
@@ -31,7 +31,7 @@ class _ListTileExampleState extends State<ListTileExample> {
   ListTileTitleAlignment? titleAlignment;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ListTile.titleAlignment Sample')),
       body: Column(
@@ -41,18 +41,18 @@ class _ListTileExampleState extends State<ListTileExample> {
             titleAlignment: titleAlignment,
             leading: Checkbox(
               value: true,
-              onChanged: (bool? value) {},
+              onChanged: (final bool? value) {},
             ),
             title: const Text('Headline Text'),
             subtitle: const Text(
                 'Tapping on the trailing widget will show a menu that allows you to change the title alignment. The title alignment is set to threeLine by default if `ThemeData.useMaterial3` is true. Otherwise, defaults to titleHeight.'),
             trailing: PopupMenuButton<ListTileTitleAlignment>(
-              onSelected: (ListTileTitleAlignment? value) {
+              onSelected: (final ListTileTitleAlignment? value) {
                 setState(() {
                   titleAlignment = value;
                 });
               },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<ListTileTitleAlignment>>[
+              itemBuilder: (final BuildContext context) => <PopupMenuEntry<ListTileTitleAlignment>>[
                 const PopupMenuItem<ListTileTitleAlignment>(
                   value: ListTileTitleAlignment.threeLine,
                   child: Text('threeLine'),

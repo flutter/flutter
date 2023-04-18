@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('ScrollMetricsNotification test', (WidgetTester tester) async {
+  testWidgets('ScrollMetricsNotification test', (final WidgetTester tester) async {
     final List<Notification> events = <Notification>[];
-    Widget buildFrame(double height) {
+    Widget buildFrame(final double height) {
       return NotificationListener<Notification>(
-        onNotification: (Notification value) {
+        onNotification: (final Notification value) {
           events.add(value);
           return false;
         },
@@ -60,11 +60,11 @@ void main() {
     expect(events.length, 0);
   });
 
-  testWidgets('Scroll notification basics', (WidgetTester tester) async {
+  testWidgets('Scroll notification basics', (final WidgetTester tester) async {
     late ScrollNotification notification;
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification value) {
+      onNotification: (final ScrollNotification value) {
         if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification) {
           notification = value;
         }
@@ -101,14 +101,14 @@ void main() {
     expect(end.dragDetails!.velocity, equals(Velocity.zero));
   });
 
-  testWidgets('Scroll notification depth', (WidgetTester tester) async {
+  testWidgets('Scroll notification depth', (final WidgetTester tester) async {
     final List<Type> depth0Types = <Type>[];
     final List<Type> depth1Types = <Type>[];
     final List<int> depth0Values = <int>[];
     final List<int> depth1Values = <int>[];
 
     await tester.pumpWidget(NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification value) {
+      onNotification: (final ScrollNotification value) {
         depth1Types.add(value.runtimeType);
         depth1Values.add(value.depth);
         return false;
@@ -118,7 +118,7 @@ void main() {
         child: SizedBox(
           height: 1200.0,
           child: NotificationListener<ScrollNotification>(
-            onNotification: (ScrollNotification value) {
+            onNotification: (final ScrollNotification value) {
               depth0Types.add(value.runtimeType);
               depth0Values.add(value.depth);
               return false;
@@ -156,13 +156,13 @@ void main() {
     expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
   });
 
-  testWidgets('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
+  testWidgets('ScrollNotifications bubble past Scaffold Material', (final WidgetTester tester) async {
     final List<Type> notificationTypes = <Type>[];
 
     await tester.pumpWidget(
       MaterialApp(
         home: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification value) {
+          onNotification: (final ScrollNotification value) {
             notificationTypes.add(value.runtimeType);
             return false;
           },
@@ -204,11 +204,11 @@ void main() {
     expect(notificationTypes, equals(types));
   });
 
-  testWidgets('ScrollNotificationObserver', (WidgetTester tester) async {
+  testWidgets('ScrollNotificationObserver', (final WidgetTester tester) async {
     late ScrollNotificationObserverState observer;
     ScrollNotification? notification;
 
-    void handleNotification(ScrollNotification value) {
+    void handleNotification(final ScrollNotification value) {
       if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification) {
         notification = value;
       }
@@ -217,7 +217,7 @@ void main() {
     await tester.pumpWidget(
       ScrollNotificationObserver(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             observer = ScrollNotificationObserver.of(context);
             return const SingleChildScrollView(
               child: SizedBox(height: 1200.0),

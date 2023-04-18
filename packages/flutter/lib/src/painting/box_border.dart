@@ -83,7 +83,7 @@ abstract class BoxBorder extends ShapeBorder {
   // We override this to tighten the return value, so that callers can assume
   // that we'll return a [BoxBorder].
   @override
-  BoxBorder? add(ShapeBorder other, { bool reversed = false }) => null;
+  BoxBorder? add(final ShapeBorder other, { final bool reversed = false }) => null;
 
   /// Linearly interpolate between two borders.
   ///
@@ -169,21 +169,21 @@ abstract class BoxBorder extends ShapeBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(final Rect rect, { final TextDirection? textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getInnerPath must not be null.');
     return Path()
       ..addRect(dimensions.resolve(textDirection).deflateRect(rect));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(final Rect rect, { final TextDirection? textDirection }) {
     assert(textDirection != null, 'The textDirection argument to $runtimeType.getOuterPath must not be null.');
     return Path()
       ..addRect(rect);
   }
 
   @override
-  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+  void paintInterior(final Canvas canvas, final Rect rect, final Paint paint, { final TextDirection? textDirection }) {
     // For `ShapeDecoration(shape: Border.all())`, a rectangle with sharp edges
     // is always painted. There is no borderRadius parameter for
     // ShapeDecoration or Border, only for BoxDecoration, which doesn't call
@@ -217,14 +217,14 @@ abstract class BoxBorder extends ShapeBorder {
   ///    and provides more details on each parameter than described here.
   @override
   void paint(
-    Canvas canvas,
-    Rect rect, {
-    TextDirection? textDirection,
-    BoxShape shape = BoxShape.rectangle,
-    BorderRadius? borderRadius,
+    final Canvas canvas,
+    final Rect rect, {
+    final TextDirection? textDirection,
+    final BoxShape shape = BoxShape.rectangle,
+    final BorderRadius? borderRadius,
   });
 
-  static void _paintUniformBorderWithRadius(Canvas canvas, Rect rect, BorderSide side, BorderRadius borderRadius) {
+  static void _paintUniformBorderWithRadius(final Canvas canvas, final Rect rect, final BorderSide side, final BorderRadius borderRadius) {
     assert(side.style != BorderStyle.none);
     final Paint paint = Paint()
       ..color = side.color;
@@ -243,15 +243,15 @@ abstract class BoxBorder extends ShapeBorder {
   }
 
   static void _paintNonUniformBorder(
-    Canvas canvas,
-    Rect rect, {
-    required BorderRadius? borderRadius,
-    required BoxShape shape,
-    required TextDirection? textDirection,
-    required BorderSide left,
-    required BorderSide top,
-    required BorderSide right,
-    required BorderSide bottom,
+    final Canvas canvas,
+    final Rect rect, {
+    required final BorderRadius? borderRadius,
+    required final BoxShape shape,
+    required final TextDirection? textDirection,
+    required final BorderSide left,
+    required final BorderSide top,
+    required final BorderSide right,
+    required final BorderSide bottom,
   }) {
     final RRect borderRect;
     switch(shape) {
@@ -272,7 +272,7 @@ abstract class BoxBorder extends ShapeBorder {
     canvas.drawDRRect(outer, inner, paint);
   }
 
-  static RRect _inflateRRect(RRect rect, EdgeInsets insets) {
+  static RRect _inflateRRect(final RRect rect, final EdgeInsets insets) {
     return RRect.fromLTRBAndCorners(
       rect.left - insets.left,
       rect.top - insets.top,
@@ -285,7 +285,7 @@ abstract class BoxBorder extends ShapeBorder {
     );
   }
 
-  static RRect _deflateRRect(RRect rect, EdgeInsets insets) {
+  static RRect _deflateRRect(final RRect rect, final EdgeInsets insets) {
     return RRect.fromLTRBAndCorners(
       rect.left + insets.left,
       rect.top + insets.top,
@@ -298,13 +298,13 @@ abstract class BoxBorder extends ShapeBorder {
     );
   }
 
-  static void _paintUniformBorderWithCircle(Canvas canvas, Rect rect, BorderSide side) {
+  static void _paintUniformBorderWithCircle(final Canvas canvas, final Rect rect, final BorderSide side) {
     assert(side.style != BorderStyle.none);
     final double radius = (rect.shortestSide + side.strokeOffset) / 2;
     canvas.drawCircle(rect.center, radius, side.toPaint());
   }
 
-  static void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect, BorderSide side) {
+  static void _paintUniformBorderWithRectangle(final Canvas canvas, final Rect rect, final BorderSide side) {
     assert(side.style != BorderStyle.none);
     canvas.drawRect(rect.inflate(side.strokeOffset / 2), side.toPaint());
   }
@@ -391,7 +391,7 @@ class Border extends BoxBorder {
   /// Creates a border whose sides are all the same.
   ///
   /// The `side` argument must not be null.
-  const Border.fromBorderSide(BorderSide side)
+  const Border.fromBorderSide(final BorderSide side)
       : top = side,
         right = side,
         bottom = side,
@@ -404,8 +404,8 @@ class Border extends BoxBorder {
   ///
   /// All arguments default to [BorderSide.none] and must not be null.
   const Border.symmetric({
-    BorderSide vertical = BorderSide.none,
-    BorderSide horizontal = BorderSide.none,
+    final BorderSide vertical = BorderSide.none,
+    final BorderSide horizontal = BorderSide.none,
   }) : left = vertical,
        top = horizontal,
        right = vertical,
@@ -415,10 +415,10 @@ class Border extends BoxBorder {
   ///
   /// The sides default to black solid borders, one logical pixel wide.
   factory Border.all({
-    Color color = const Color(0xFF000000),
-    double width = 1.0,
-    BorderStyle style = BorderStyle.solid,
-    double strokeAlign = BorderSide.strokeAlignInside,
+    final Color color = const Color(0xFF000000),
+    final double width = 1.0,
+    final BorderStyle style = BorderStyle.solid,
+    final double strokeAlign = BorderSide.strokeAlignInside,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style, strokeAlign: strokeAlign);
     return Border.fromBorderSide(side);
@@ -431,7 +431,7 @@ class Border extends BoxBorder {
   /// the pairwise combination of each side on both [Border]s.
   ///
   /// The arguments must not be null.
-  static Border merge(Border a, Border b) {
+  static Border merge(final Border a, final Border b) {
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.right, b.right));
     assert(BorderSide.canMerge(a.bottom, b.bottom));
@@ -490,7 +490,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  Border? add(ShapeBorder other, { bool reversed = false }) {
+  Border? add(final ShapeBorder other, { final bool reversed = false }) {
     if (other is Border &&
         BorderSide.canMerge(top, other.top) &&
         BorderSide.canMerge(right, other.right) &&
@@ -502,7 +502,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  Border scale(double t) {
+  Border scale(final double t) {
     return Border(
       top: top.scale(t),
       right: right.scale(t),
@@ -512,7 +512,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (a is Border) {
       return Border.lerp(a, this, t);
     }
@@ -520,7 +520,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (b is Border) {
       return Border.lerp(this, b, t);
     }
@@ -533,7 +533,7 @@ class Border extends BoxBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Border? lerp(Border? a, Border? b, double t) {
+  static Border? lerp(final Border? a, final Border? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -577,11 +577,11 @@ class Border extends BoxBorder {
   ///    buttons and other widgets, under the "shape" field.
   @override
   void paint(
-    Canvas canvas,
-    Rect rect, {
-    TextDirection? textDirection,
-    BoxShape shape = BoxShape.rectangle,
-    BorderRadius? borderRadius,
+    final Canvas canvas,
+    final Rect rect, {
+    final TextDirection? textDirection,
+    final BoxShape shape = BoxShape.rectangle,
+    final BorderRadius? borderRadius,
   }) {
     if (isUniform) {
       switch (top.style) {
@@ -656,7 +656,7 @@ class Border extends BoxBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -734,7 +734,7 @@ class BorderDirectional extends BoxBorder {
   /// the pairwise combination of each side on both [BorderDirectional]s.
   ///
   /// The arguments must not be null.
-  static BorderDirectional merge(BorderDirectional a, BorderDirectional b) {
+  static BorderDirectional merge(final BorderDirectional a, final BorderDirectional b) {
     assert(BorderSide.canMerge(a.top, b.top));
     assert(BorderSide.canMerge(a.start, b.start));
     assert(BorderSide.canMerge(a.end, b.end));
@@ -807,7 +807,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  BoxBorder? add(ShapeBorder other, { bool reversed = false }) {
+  BoxBorder? add(final ShapeBorder other, { final bool reversed = false }) {
     if (other is BorderDirectional) {
       final BorderDirectional typedOther = other;
       if (BorderSide.canMerge(top, typedOther.top) &&
@@ -852,7 +852,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  BorderDirectional scale(double t) {
+  BorderDirectional scale(final double t) {
     return BorderDirectional(
       top: top.scale(t),
       start: start.scale(t),
@@ -862,7 +862,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (a is BorderDirectional) {
       return BorderDirectional.lerp(a, this, t);
     }
@@ -870,7 +870,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (b is BorderDirectional) {
       return BorderDirectional.lerp(this, b, t);
     }
@@ -883,7 +883,7 @@ class BorderDirectional extends BoxBorder {
   /// borders.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static BorderDirectional? lerp(BorderDirectional? a, BorderDirectional? b, double t) {
+  static BorderDirectional? lerp(final BorderDirectional? a, final BorderDirectional? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -925,11 +925,11 @@ class BorderDirectional extends BoxBorder {
   ///  * [paintBorder], which is used if the border has non-uniform colors or styles and no borderRadius.
   @override
   void paint(
-    Canvas canvas,
-    Rect rect, {
-    TextDirection? textDirection,
-    BoxShape shape = BoxShape.rectangle,
-    BorderRadius? borderRadius,
+    final Canvas canvas,
+    final Rect rect, {
+    final TextDirection? textDirection,
+    final BoxShape shape = BoxShape.rectangle,
+    final BorderRadius? borderRadius,
   }) {
     if (isUniform) {
       switch (top.style) {
@@ -988,7 +988,7 @@ class BorderDirectional extends BoxBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

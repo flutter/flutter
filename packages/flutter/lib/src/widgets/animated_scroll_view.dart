@@ -73,7 +73,7 @@ class AnimatedList extends _AnimatedScrollView {
   ///
   ///  * [maybeOf], a similar function that will return null if no
   ///    [AnimatedList] ancestor is found.
-  static AnimatedListState of(BuildContext context) {
+  static AnimatedListState of(final BuildContext context) {
     final AnimatedListState? result = AnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -114,7 +114,7 @@ class AnimatedList extends _AnimatedScrollView {
   ///
   ///  * [of], a similar function that will throw if no [AnimatedList] ancestor
   ///    is found.
-  static AnimatedListState? maybeOf(BuildContext context) {
+  static AnimatedListState? maybeOf(final BuildContext context) {
     return context.findAncestorStateOfType<AnimatedListState>();
   }
 
@@ -169,7 +169,7 @@ class AnimatedList extends _AnimatedScrollView {
 class AnimatedListState extends _AnimatedScrollViewState<AnimatedList> {
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _wrap(
       SliverAnimatedList(
         key: _sliverAnimatedMultiBoxKey,
@@ -252,7 +252,7 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///
   ///  * [maybeOf], a similar function that will return null if no
   ///    [AnimatedGrid] ancestor is found.
-  static AnimatedGridState of(BuildContext context) {
+  static AnimatedGridState of(final BuildContext context) {
     final AnimatedGridState? result = AnimatedGrid.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -293,7 +293,7 @@ class AnimatedGrid extends _AnimatedScrollView {
   ///
   ///  * [of], a similar function that will throw if no [AnimatedGrid] ancestor
   ///    is found.
-  static AnimatedGridState? maybeOf(BuildContext context) {
+  static AnimatedGridState? maybeOf(final BuildContext context) {
     return context.findAncestorStateOfType<AnimatedGridState>();
   }
 
@@ -345,7 +345,7 @@ class AnimatedGrid extends _AnimatedScrollView {
 class AnimatedGridState extends _AnimatedScrollViewState<AnimatedGrid> {
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _wrap(
       SliverAnimatedGrid(
         key: _sliverAnimatedMultiBoxKey,
@@ -485,14 +485,14 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
-  void insertItem(int index, { Duration duration = _kDuration }) {
+  void insertItem(final int index, { final Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.insertItem(index, duration: duration);
   }
 
   /// Insert multiple items at [index] and start an animation that will be passed
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
   /// are visible.
-  void insertAllItems(int index, int length, { Duration duration = _kDuration, bool isAsync = false }) {
+  void insertAllItems(final int index, final int length, { final Duration duration = _kDuration, final bool isAsync = false }) {
     _sliverAnimatedMultiBoxKey.currentState!.insertAllItems(index, length, duration: duration);
   }
 
@@ -512,7 +512,7 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///
   ///   * [AnimatedRemovedItemBuilder], which describes the arguments to the
   ///     `builder` argument.
-  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeItem(final int index, final AnimatedRemovedItemBuilder builder, { final Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeItem(index, builder, duration: duration);
   }
 
@@ -525,11 +525,11 @@ abstract class _AnimatedScrollViewState<T extends _AnimatedScrollView> extends S
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
-  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeAllItems(final AnimatedRemovedItemBuilder builder, { final Duration duration = _kDuration }) {
     _sliverAnimatedMultiBoxKey.currentState!.removeAllItems(builder, duration: duration);
   }
 
-  Widget _wrap(Widget sliver) {
+  Widget _wrap(final Widget sliver) {
     return CustomScrollView(
       scrollDirection: widget.scrollDirection,
       reverse: widget.reverse,
@@ -611,7 +611,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
   int itemIndex;
 
   @override
-  int compareTo(_ActiveItem other) => itemIndex - other.itemIndex;
+  int compareTo(final _ActiveItem other) => itemIndex - other.itemIndex;
 }
 
 /// A [SliverList] that animates items when they are inserted or removed.
@@ -669,7 +669,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   ///
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedList] ancestor is found.
-  static SliverAnimatedListState of(BuildContext context) {
+  static SliverAnimatedListState of(final BuildContext context) {
     final SliverAnimatedListState? result = SliverAnimatedList.maybeOf(context);
     assert(() {
       if (result == null) {
@@ -708,7 +708,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
   ///
   ///  * [of], a similar function that will throw if no [SliverAnimatedList]
   ///    ancestor is found.
-  static SliverAnimatedListState? maybeOf(BuildContext context) {
+  static SliverAnimatedListState? maybeOf(final BuildContext context) {
     return context.findAncestorStateOfType<SliverAnimatedListState>();
   }
 }
@@ -756,7 +756,7 @@ class SliverAnimatedList extends _SliverAnimatedMultiBoxAdaptor {
 class SliverAnimatedListState extends _SliverAnimatedMultiBoxAdaptorState<SliverAnimatedList> {
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SliverList(
       delegate: _createDelegate(),
     );
@@ -818,7 +818,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   ///
   ///  * [maybeOf], a similar function that will return null if no
   ///    [SliverAnimatedGrid] ancestor is found.
-  static SliverAnimatedGridState of(BuildContext context) {
+  static SliverAnimatedGridState of(final BuildContext context) {
     final SliverAnimatedGridState? result = context.findAncestorStateOfType<SliverAnimatedGridState>();
     assert(() {
       if (result == null) {
@@ -854,7 +854,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
   ///
   ///  * [of], a similar function that will throw if no [SliverAnimatedGrid]
   ///    ancestor is found.
-  static SliverAnimatedGridState? maybeOf(BuildContext context) {
+  static SliverAnimatedGridState? maybeOf(final BuildContext context) {
     return context.findAncestorStateOfType<SliverAnimatedGridState>();
   }
 }
@@ -903,7 +903,7 @@ class SliverAnimatedGrid extends _SliverAnimatedMultiBoxAdaptor {
 class SliverAnimatedGridState extends _SliverAnimatedMultiBoxAdaptorState<SliverAnimatedGrid> {
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SliverGrid(
       gridDelegate: widget.gridDelegate,
       delegate: _createDelegate(),
@@ -950,12 +950,12 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
 
-  _ActiveItem? _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
+  _ActiveItem? _removeActiveItemAt(final List<_ActiveItem> items, final int itemIndex) {
     final int i = binarySearch(items, _ActiveItem.index(itemIndex));
     return i == -1 ? null : items.removeAt(i);
   }
 
-  _ActiveItem? _activeItemAt(List<_ActiveItem> items, int itemIndex) {
+  _ActiveItem? _activeItemAt(final List<_ActiveItem> items, final int itemIndex) {
     final int i = binarySearch(items, _ActiveItem.index(itemIndex));
     return i == -1 ? null : items[i];
   }
@@ -967,7 +967,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   // to _outgoingItems when removeItem is called and removed from
   // _outgoingItems when the remove animation finishes.
 
-  int _indexToItemIndex(int index) {
+  int _indexToItemIndex(final int index) {
     int itemIndex = index;
     for (final _ActiveItem item in _outgoingItems) {
       if (item.itemIndex <= itemIndex) {
@@ -979,7 +979,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
     return itemIndex;
   }
 
-  int _itemIndexToIndex(int itemIndex) {
+  int _itemIndexToIndex(final int itemIndex) {
     int index = itemIndex;
     for (final _ActiveItem item in _outgoingItems) {
       assert(item.itemIndex != itemIndex);
@@ -998,14 +998,14 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
       childCount: _itemsCount,
       findChildIndexCallback: widget.findChildIndexCallback == null
           ? null
-          : (Key key) {
+          : (final Key key) {
         final int? index = widget.findChildIndexCallback!(key);
         return index != null ? _indexToItemIndex(index) : null;
       },
     );
   }
 
-  Widget _itemBuilder(BuildContext context, int itemIndex) {
+  Widget _itemBuilder(final BuildContext context, final int itemIndex) {
     final _ActiveItem? outgoingItem = _activeItemAt(_outgoingItems, itemIndex);
     if (outgoingItem != null) {
       return outgoingItem.removedItemBuilder!(
@@ -1030,7 +1030,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// This method's semantics are the same as Dart's [List.insert] method: it
   /// increases the length of the list of items by one and shifts
   /// all items at or after [index] towards the end of the list of items.
-  void insertItem(int index, { Duration duration = _kDuration }) {
+  void insertItem(final int index, { final Duration duration = _kDuration }) {
     assert(index >= 0);
 
     final int itemIndex = _indexToItemIndex(index);
@@ -1064,7 +1064,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
       _itemsCount += 1;
     });
 
-    controller.forward().then<void>((_) {
+    controller.forward().then<void>((final _) {
       _removeActiveItemAt(_incomingItems, incomingItem.itemIndex)!.controller!.dispose();
     });
   }
@@ -1072,7 +1072,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// Insert multiple items at [index] and start an animation that will be passed
   /// to [AnimatedGrid.itemBuilder] or [AnimatedList.itemBuilder] when the items
   /// are visible.
-  void insertAllItems(int index, int length, { Duration duration = _kDuration }) {
+  void insertAllItems(final int index, final int length, { final Duration duration = _kDuration }) {
     for (int i = 0; i < length; i++) {
       insertItem(index + i, duration: duration);
     }
@@ -1090,7 +1090,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   /// This method's semantics are the same as Dart's [List.remove] method: it
   /// decreases the length of items by one and shifts
   /// all items at or before [index] towards the beginning of the list of items.
-  void removeItem(int index, AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeItem(final int index, final AnimatedRemovedItemBuilder builder, { final Duration duration = _kDuration }) {
     assert(index >= 0);
 
     final int itemIndex = _indexToItemIndex(index);
@@ -1107,7 +1107,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
         ..sort();
     });
 
-    controller.reverse().then<void>((void value) {
+    controller.reverse().then<void>((final void value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex)!.controller!.dispose();
 
       // Decrement the incoming and outgoing item indices to account
@@ -1136,7 +1136,7 @@ abstract class _SliverAnimatedMultiBoxAdaptorState<T extends _SliverAnimatedMult
   ///
   /// This method's semantics are the same as Dart's [List.clear] method: it
   /// removes all the items in the list.
-  void removeAllItems(AnimatedRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeAllItems(final AnimatedRemovedItemBuilder builder, { final Duration duration = _kDuration }) {
     for(int i = _itemsCount - 1 ; i >= 0; i--) {
       removeItem(i, builder, duration: duration);
     }

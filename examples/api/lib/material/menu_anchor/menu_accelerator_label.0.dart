@@ -13,7 +13,7 @@ class MyMenuBar extends StatelessWidget {
   const MyMenuBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         Row(
@@ -101,7 +101,7 @@ class MenuAcceleratorApp extends StatelessWidget {
   const MenuAcceleratorApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Shortcuts(
         shortcuts: <ShortcutActivator, Intent>{

@@ -36,7 +36,7 @@ void main() {
     shared = 0;
 
     /// Create various test targets.
-    fooTarget = TestTarget((Environment environment) async {
+    fooTarget = TestTarget((final Environment environment) async {
       environment
         .buildDir
         .childFile('out')
@@ -52,7 +52,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/out'),
       ]
       ..dependencies = <Target>[];
-    barTarget = TestTarget((Environment environment) async {
+    barTarget = TestTarget((final Environment environment) async {
       environment.buildDir
         .childFile('bar')
         ..createSync(recursive: true)
@@ -67,7 +67,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/bar'),
       ]
       ..dependencies = <Target>[];
-    fizzTarget = TestTarget((Environment environment) async {
+    fizzTarget = TestTarget((final Environment environment) async {
       throw Exception('something bad happens');
     })
       ..name = 'fizz'
@@ -78,7 +78,7 @@ void main() {
         Source.pattern('{BUILD_DIR}/fizz'),
       ]
       ..dependencies = <Target>[fooTarget];
-    sharedTarget = TestTarget((Environment environment) async {
+    sharedTarget = TestTarget((final Environment environment) async {
       shared += 1;
     })
       ..name = 'shared'
@@ -114,7 +114,7 @@ void main() {
 
     // This target is document as producing foo.dart but does not actually
     // output this value.
-    final Target badTarget = TestTarget((Environment environment) async {})
+    final Target badTarget = TestTarget((final Environment environment) async {})
       ..inputs = const <Source>[
         Source.pattern('{PROJECT_DIR}/foo.dart'),
       ]
@@ -227,7 +227,7 @@ void main() {
 
   testWithoutContext('Automatically cleans old outputs when build graph changes', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testTarget = TestTarget((Environment environment) async {
+    final TestTarget testTarget = TestTarget((final Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -238,7 +238,7 @@ void main() {
 
     expect(environment.buildDir.childFile('foo.out'), exists);
 
-    final TestTarget testTarget2 = TestTarget((Environment environment) async {
+    final TestTarget testTarget2 = TestTarget((final Environment environment) async {
       environment.buildDir.childFile('bar.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -252,7 +252,7 @@ void main() {
 
   testWithoutContext('Does not crash when filesystem and cache are out of sync', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
+    final TestTarget testWithoutContextTarget = TestTarget((final Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -264,7 +264,7 @@ void main() {
     expect(environment.buildDir.childFile('foo.out'), exists);
     environment.buildDir.childFile('foo.out').deleteSync();
 
-    final TestTarget testWithoutContextTarget2 = TestTarget((Environment environment) async {
+    final TestTarget testWithoutContextTarget2 = TestTarget((final Environment environment) async {
       environment.buildDir.childFile('bar.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -278,7 +278,7 @@ void main() {
 
   testWithoutContext('Reruns build if stamp is corrupted', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
-    final TestTarget testWithoutContextTarget = TestTarget((Environment environment) async {
+    final TestTarget testWithoutContextTarget = TestTarget((final Environment environment) async {
       environment.buildDir.childFile('foo.out').createSync();
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
@@ -335,7 +335,7 @@ void main() {
   testWithoutContext('Target with depfile dependency will not run twice without invalidation', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     int called = 0;
-    final TestTarget target = TestTarget((Environment environment) async {
+    final TestTarget target = TestTarget((final Environment environment) async {
       environment.buildDir
         .childFile('example.d')
         .writeAsStringSync('a.txt: b.txt');
@@ -360,7 +360,7 @@ void main() {
     'invalidation in incremental builds', () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     int called = 0;
-    final TestTarget target = TestTarget((Environment environment) async {
+    final TestTarget target = TestTarget((final Environment environment) async {
       environment.buildDir
         .childFile('example.d')
         .writeAsStringSync('a.txt: b.txt');
@@ -431,7 +431,7 @@ void main() {
   testWithoutContext('A target with depfile dependencies can delete stale outputs on the first run',  () async {
     final BuildSystem buildSystem = setUpBuildSystem(fileSystem);
     int called = 0;
-    final TestTarget target = TestTarget((Environment environment) async {
+    final TestTarget target = TestTarget((final Environment environment) async {
       if (called == 0) {
         environment.buildDir.childFile('example.d')
           .writeAsStringSync('a.txt c.txt: b.txt');
@@ -578,10 +578,10 @@ void main() {
       fileSystem: fileSystem,
     );
 
-    final TestTarget debugTarget = TestTarget((Environment environment) async {
+    final TestTarget debugTarget = TestTarget((final Environment environment) async {
       environment.outputDir.childFile('debug').createSync();
     })..outputs = const <Source>[Source.pattern('{OUTPUT_DIR}/debug')];
-    final TestTarget releaseTarget = TestTarget((Environment environment) async {
+    final TestTarget releaseTarget = TestTarget((final Environment environment) async {
       environment.outputDir.childFile('release').createSync();
     })..outputs = const <Source>[Source.pattern('{OUTPUT_DIR}/release')];
 
@@ -609,13 +609,13 @@ void main() {
 
     // The target will write a file `foo`, but only if `bar` already exists.
     final TestTarget target = TestTarget(
-      (Environment environment) async {
+      (final Environment environment) async {
         foo.writeAsStringSync(bar.readAsStringSync());
         environment.buildDir
           .childFile('example.d')
           .writeAsStringSync('${foo.path}: ${bar.path}');
       },
-      (Environment environment) {
+      (final Environment environment) {
         return !environment.buildDir.childFile('bar').existsSync();
       }
     )
@@ -633,8 +633,8 @@ void main() {
     final BuildResult secondResult = await buildSystem.build(target, environment);
 
     expect(foo, exists);
-    expect(secondResult.inputFiles.map((File file) => file.path), <String>[bar.path]);
-    expect(secondResult.outputFiles.map((File file) => file.path), <String>[foo.path]);
+    expect(secondResult.inputFiles.map((final File file) => file.path), <String>[bar.path]);
+    expect(secondResult.outputFiles.map((final File file) => file.path), <String>[foo.path]);
 
     // bar is destroyed, foo is also deleted.
     bar.deleteSync();
@@ -654,15 +654,15 @@ void main() {
     final Completer<void> startC = Completer<void>();
     final Completer<void> finishB = Completer<void>();
 
-    final TestTarget a = TestTarget((Environment environment) {
+    final TestTarget a = TestTarget((final Environment environment) {
       throw StateError('Should not run');
     })..name = 'A';
-    final TestTarget b = TestTarget((Environment environment) async {
+    final TestTarget b = TestTarget((final Environment environment) async {
       startB.complete();
       await finishB.future;
       throw Exception('1');
     })..name = 'B';
-    final TestTarget c = TestTarget((Environment environment) {
+    final TestTarget c = TestTarget((final Environment environment) {
       startC.complete();
       throw Exception('2');
     })..name = 'C';
@@ -682,7 +682,7 @@ void main() {
 
 }
 
-BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
+BuildSystem setUpBuildSystem(final FileSystem fileSystem, [final FakePlatform? platform]) {
   return FlutterBuildSystem(
     fileSystem: fileSystem,
     logger: BufferLogger.test(),
@@ -691,15 +691,15 @@ BuildSystem setUpBuildSystem(FileSystem fileSystem, [FakePlatform? platform]) {
 }
 
 class TestTarget extends Target {
-  TestTarget([Future<void> Function(Environment environment)? build, this._canSkip])
-      : _build = build ?? ((Environment environment) async {});
+  TestTarget([final Future<void> Function(Environment environment)? build, this._canSkip])
+      : _build = build ?? ((final Environment environment) async {});
 
   final Future<void> Function(Environment environment) _build;
 
   final bool Function(Environment environment)? _canSkip;
 
   @override
-  bool canSkip(Environment environment) {
+  bool canSkip(final Environment environment) {
     if (_canSkip != null) {
       return _canSkip!(environment);
     }
@@ -707,7 +707,7 @@ class TestTarget extends Target {
   }
 
   @override
-  Future<void> build(Environment environment) => _build(environment);
+  Future<void> build(final Environment environment) => _build(environment);
 
   @override
   List<Target> dependencies = <Target>[];

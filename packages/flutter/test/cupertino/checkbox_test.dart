@@ -16,7 +16,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  testWidgets('CupertinoCheckbox semantics', (WidgetTester tester) async {
+  testWidgets('CupertinoCheckbox semantics', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -24,7 +24,7 @@ void main() {
         home: Center(
           child: CupertinoCheckbox(
             value: false,
-            onChanged: (bool? b) { },
+            onChanged: (final bool? b) { },
           ),
         )
       ),
@@ -43,7 +43,7 @@ void main() {
         home: Center(
           child: CupertinoCheckbox(
             value: true,
-            onChanged: (bool? b) { },
+            onChanged: (final bool? b) { },
           ),
         )
       ),
@@ -156,7 +156,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('Can wrap CupertinoCheckbox with Semantics', (WidgetTester tester) async {
+  testWidgets('Can wrap CupertinoCheckbox with Semantics', (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -166,7 +166,7 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CupertinoCheckbox(
             value: false,
-            onChanged: (bool? b) { },
+            onChanged: (final bool? b) { },
           ),
         ),
       ),
@@ -184,17 +184,17 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CupertinoCheckbox tristate: true', (WidgetTester tester) async {
+  testWidgets('CupertinoCheckbox tristate: true', (final WidgetTester tester) async {
     bool? checkBoxValue;
 
     await tester.pumpWidget(
       CupertinoApp(
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return CupertinoCheckbox(
               tristate: true,
               value: checkBoxValue,
-              onChanged: (bool? value) {
+              onChanged: (final bool? value) {
                 setState(() {
                   checkBoxValue = value;
                 });
@@ -228,14 +228,14 @@ void main() {
     expect(checkBoxValue, null);
   });
 
-  testWidgets('has semantics for tristate', (WidgetTester tester) async {
+  testWidgets('has semantics for tristate', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoCheckbox(
           tristate: true,
           value: null,
-          onChanged: (bool? newValue) { },
+          onChanged: (final bool? newValue) { },
         ),
       ),
     );
@@ -256,7 +256,7 @@ void main() {
         home: CupertinoCheckbox(
           tristate: true,
           value: true,
-          onChanged: (bool? newValue) { },
+          onChanged: (final bool? newValue) { },
         ),
       ),
     );
@@ -277,7 +277,7 @@ void main() {
         home: CupertinoCheckbox(
           tristate: true,
           value: false,
-          onChanged: (bool? newValue) { },
+          onChanged: (final bool? newValue) { },
         ),
       ),
     );
@@ -295,10 +295,10 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('has semantic events', (WidgetTester tester) async {
+  testWidgets('has semantic events', (final WidgetTester tester) async {
     dynamic semanticEvent;
     bool? checkboxValue = false;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (final dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -306,10 +306,10 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return CupertinoCheckbox(
               value: checkboxValue,
-              onChanged: (bool? value) {
+              onChanged: (final bool? value) {
                 setState(() {
                   checkboxValue = value;
                 });
@@ -335,16 +335,16 @@ void main() {
     semanticsTester.dispose();
   });
 
-  testWidgets('Checkbox can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('Checkbox can be toggled by keyboard shortcuts', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool? value = true;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
             return CupertinoCheckbox(
               value: value,
-              onChanged: enabled ? (bool? newValue) {
+              onChanged: enabled ? (final bool? newValue) {
                 setState(() {
                   value = newValue;
                 });
@@ -372,7 +372,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Checkbox respects shape and side', (WidgetTester tester) async {
+  testWidgets('Checkbox respects shape and side', (final WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder =
         RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5)));
 
@@ -384,10 +384,10 @@ void main() {
     Widget buildApp() {
       return CupertinoApp(
         home: Center(
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+          child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
             return CupertinoCheckbox(
               value: false,
-              onChanged: (bool? newValue) {},
+              onChanged: (final bool? newValue) {},
               shape: roundedRectangleBorder,
               side: side,
             );

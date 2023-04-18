@@ -12,7 +12,7 @@ class MouseRegionApp extends StatelessWidget {
   const MouseRegionApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('MouseRegion.onExit Sample')),
@@ -55,7 +55,7 @@ class _MyTimedButton extends State<MyTimedButton> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(
       width: 100,
       height: 100,
@@ -63,14 +63,14 @@ class _MyTimedButton extends State<MyTimedButton> {
         child: regionIsHidden
             ? null
             : MouseRegion(
-                onEnter: (_) {
+                onEnter: (final _) {
                   widget.onEnterButton();
                   setState(() {
                     hovered = true;
                   });
                   startCountdown();
                 },
-                onExit: (_) {
+                onExit: (final _) {
                   setState(() {
                     hovered = false;
                   });
@@ -95,7 +95,7 @@ class _MouseRegionExampleState extends State<MouseRegionExample> {
   bool hovering = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         ElevatedButton(

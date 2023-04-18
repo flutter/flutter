@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/search_field/cupertino_search_fiel
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Value changed callback updates entered text', (WidgetTester tester) async {
+  testWidgets('Value changed callback updates entered text', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SearchTextFieldApp(),
     );

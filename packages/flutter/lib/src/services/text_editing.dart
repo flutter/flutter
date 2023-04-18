@@ -32,7 +32,7 @@ class TextSelection extends TextRange {
   ///
   /// The [offset] argument must not be null.
   const TextSelection.collapsed({
-    required int offset,
+    required final int offset,
     this.affinity = TextAffinity.downstream,
   }) : baseOffset = offset,
        extentOffset = offset,
@@ -44,7 +44,7 @@ class TextSelection extends TextRange {
   /// A collapsed selection starts and ends at the same offset, which means it
   /// contains zero characters but instead serves as an insertion point in the
   /// text.
-  TextSelection.fromPosition(TextPosition position)
+  TextSelection.fromPosition(final TextPosition position)
     : baseOffset = position.offset,
       extentOffset = position.offset,
       affinity = position.affinity,
@@ -139,7 +139,7 @@ class TextSelection extends TextRange {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -169,10 +169,10 @@ class TextSelection extends TextRange {
   /// Creates a new [TextSelection] based on the current selection, with the
   /// provided parameters overridden.
   TextSelection copyWith({
-    int? baseOffset,
-    int? extentOffset,
-    TextAffinity? affinity,
-    bool? isDirectional,
+    final int? baseOffset,
+    final int? extentOffset,
+    final TextAffinity? affinity,
+    final bool? isDirectional,
   }) {
     return TextSelection(
       baseOffset: baseOffset ?? this.baseOffset,
@@ -201,7 +201,7 @@ class TextSelection extends TextRange {
   /// [TextSelection.baseOffset] fixed while moving [TextSelection.extentOffset]
   /// to the given [TextPosition]. It doesn't strictly grow the selection and
   /// may collapse it or flip its order.
-  TextSelection expandTo(TextPosition position, [bool extentAtIndex = false]) {
+  TextSelection expandTo(final TextPosition position, [final bool extentAtIndex = false]) {
     // If position is already within in the selection, there's nothing to do.
     if (position.offset >= start && position.offset <= end) {
       return this;
@@ -247,7 +247,7 @@ class TextSelection extends TextRange {
   /// In contrast with this method, [expandTo] is strictly growth; the
   /// selection is grown to include the given [TextPosition] and will never
   /// shrink.
-  TextSelection extendTo(TextPosition position) {
+  TextSelection extendTo(final TextPosition position) {
     // If the selection's extent is at the position already, then nothing
     // happens.
     if (extent == position) {

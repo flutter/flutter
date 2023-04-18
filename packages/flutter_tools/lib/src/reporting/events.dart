@@ -34,7 +34,7 @@ class UsageEvent {
 /// [invalidatedSourcesCount] to [syncedLibraryCount] should help understand
 /// sync/transfer "overhead" of updating this number of source files.
 class HotEvent extends UsageEvent {
-  HotEvent(String parameter, {
+  HotEvent(final String parameter, {
     required this.targetPlatform,
     required this.sdkName,
     required this.emulator,
@@ -108,7 +108,7 @@ class DoctorResultEvent extends UsageEvent {
   DoctorResultEvent({
     required this.validator,
     required this.result,
-    Usage? flutterUsage,
+    final Usage? flutterUsage,
   }) : super(
     'doctor-result',
     '${validator.runtimeType}',
@@ -142,20 +142,20 @@ class DoctorResultEvent extends UsageEvent {
 /// An event that reports on the result of a pub invocation.
 class PubResultEvent extends UsageEvent {
   PubResultEvent({
-    required String context,
-    required String result,
-    required Usage usage,
+    required final String context,
+    required final String result,
+    required final Usage usage,
   }) : super('pub-result', context, label: result, flutterUsage: usage);
 }
 
 /// An event that reports something about a build.
 class BuildEvent extends UsageEvent {
-  BuildEvent(String label, {
-    String? command,
-    String? settings,
-    String? eventError,
-    required Usage flutterUsage,
-    required String type,
+  BuildEvent(final String label, {
+    final String? command,
+    final String? settings,
+    final String? eventError,
+    required final Usage flutterUsage,
+    required final String type,
   }) : _command = command,
   _settings = settings,
   _eventError = eventError,
@@ -224,7 +224,7 @@ class CommandResultEvent extends UsageEvent {
 class AnalyticsConfigEvent extends UsageEvent {
   AnalyticsConfigEvent({
     /// Whether analytics reporting is being enabled (true) or disabled (false).
-    required bool enabled,
+    required final bool enabled,
   }) : super(
     'analytics',
     'enabled',
@@ -235,8 +235,8 @@ class AnalyticsConfigEvent extends UsageEvent {
 
 /// An event that reports when the code size measurement is run via `--analyze-size`.
 class CodeSizeEvent extends UsageEvent {
-  CodeSizeEvent(String platform, {
-    required Usage flutterUsage,
+  CodeSizeEvent(final String platform, {
+    required final Usage flutterUsage,
   }) : super(
     'code-size-analysis',
     platform,
@@ -246,7 +246,7 @@ class CodeSizeEvent extends UsageEvent {
 
 /// An event for tracking the usage of specific error handling fallbacks.
 class ErrorHandlingEvent extends UsageEvent {
-  ErrorHandlingEvent(String parameter) : super('error-handling', parameter, flutterUsage: globals.flutterUsage);
+  ErrorHandlingEvent(final String parameter) : super('error-handling', parameter, flutterUsage: globals.flutterUsage);
 }
 
 /// Emit various null safety analytic events.

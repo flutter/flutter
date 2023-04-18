@@ -48,14 +48,14 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     isLight = true;
     isLoading = true;
     currentColorScheme = const ColorScheme.light();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
       _updateImage(widget.images[selectedImage]);
       isLoading = false;
     });
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ColorScheme colorScheme = currentColorScheme;
     final Color selectedColor = currentColorScheme.primary;
 
@@ -70,7 +70,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
       useMaterial3: false,
     );
 
-    Widget schemeLabel(String brightness, ColorScheme colorScheme) {
+    Widget schemeLabel(final String brightness, final ColorScheme colorScheme) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 15),
         child: Text(
@@ -80,7 +80,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
       );
     }
 
-    Widget schemeView(ThemeData theme) {
+    Widget schemeView(final ThemeData theme) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15),
         child: ColorSchemeView(colorScheme: theme.colorScheme),
@@ -91,7 +91,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
       theme: ThemeData(useMaterial3: true, colorScheme: colorScheme),
       debugShowCheckedModeBanner: false,
       home: Builder(
-        builder: (BuildContext context) => Scaffold(
+        builder: (final BuildContext context) => Scaffold(
           appBar: AppBar(
             title: const Text('Content Based Dynamic Color'),
             backgroundColor: colorScheme.primary,
@@ -103,7 +103,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                   activeTrackColor: colorScheme.surface,
                   inactiveTrackColor: colorScheme.onSecondary,
                   value: isLight,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       isLight = value;
                       _updateImage(widget.images[selectedImage]);
@@ -128,7 +128,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                         Expanded(
                           child: ColoredBox(
                             color: colorScheme.background,
-                            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+                            child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
                               if (constraints.maxWidth < narrowScreenWidthThreshold) {
                                 return SingleChildScrollView(
                                   child: Column(
@@ -186,7 +186,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     );
   }
 
-  Future<void> _updateImage(ImageProvider provider) async {
+  Future<void> _updateImage(final ImageProvider provider) async {
     final ColorScheme newColorScheme = await ColorScheme.fromImageProvider(
         provider: provider, brightness: isLight ? Brightness.light : Brightness.dark);
     setState(() {
@@ -197,12 +197,12 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
 
   // For small screens, have two rows of image selection. For wide screens,
   // fit them onto one row.
-  Widget _imagesRow(BuildContext context, List<ImageProvider> images, ColorScheme colorScheme) {
+  Widget _imagesRow(final BuildContext context, final List<ImageProvider> images, final ColorScheme colorScheme) {
     final double windowHeight = MediaQuery.of(context).size.height;
     final double windowWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+      child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
         if (constraints.maxWidth > 800) {
           return _adaptiveLayoutImagesRow(images, colorScheme, windowHeight);
         } else {
@@ -215,12 +215,12 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     );
   }
 
-  Widget _adaptiveLayoutImagesRow(List<ImageProvider> images, ColorScheme colorScheme, double windowWidth) {
+  Widget _adaptiveLayoutImagesRow(final List<ImageProvider> images, final ColorScheme colorScheme, final double windowWidth) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: images
           .map(
-            (ImageProvider image) => Flexible(
+            (final ImageProvider image) => Flexible(
               flex: (images.length / 3).floor(),
               child: GestureDetector(
                 onTap: () => _updateImage(image),
@@ -253,7 +253,7 @@ class ColorSchemeView extends StatelessWidget {
   final ColorScheme colorScheme;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         ColorGroup(children: <ColorChip>[
@@ -346,7 +346,7 @@ class ColorGroup extends StatelessWidget {
   final List<Widget> children;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RepaintBoundary(
       child: Card(clipBehavior: Clip.antiAlias, child: Column(children: children)),
     );
@@ -365,7 +365,7 @@ class ColorChip extends StatelessWidget {
   final Color? onColor;
   final String label;
 
-  static Color contrastColor(Color color) {
+  static Color contrastColor(final Color color) {
     final Brightness brightness = ThemeData.estimateBrightnessForColor(color);
     switch (brightness) {
       case Brightness.dark:
@@ -376,7 +376,7 @@ class ColorChip extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Color labelColor = onColor ?? contrastColor(color);
     return ColoredBox(
       color: color,

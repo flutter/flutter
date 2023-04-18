@@ -38,9 +38,9 @@ DebugPrintCallback debugPrint = debugPrintThrottled;
 
 /// Alternative implementation of [debugPrint] that does not throttle.
 /// Used by tests.
-void debugPrintSynchronously(String? message, { int? wrapWidth }) {
+void debugPrintSynchronously(final String? message, { final int? wrapWidth }) {
   if (message != null && wrapWidth != null) {
-    print(message.split('\n').expand<String>((String line) => debugWordWrap(line, wrapWidth)).join('\n'));
+    print(message.split('\n').expand<String>((final String line) => debugWordWrap(line, wrapWidth)).join('\n'));
   } else {
     print(message);
   }
@@ -48,10 +48,10 @@ void debugPrintSynchronously(String? message, { int? wrapWidth }) {
 
 /// Implementation of [debugPrint] that throttles messages. This avoids dropping
 /// messages on platforms that rate-limit their logging (for example, Android).
-void debugPrintThrottled(String? message, { int? wrapWidth }) {
+void debugPrintThrottled(final String? message, { final int? wrapWidth }) {
   final List<String> messageLines = message?.split('\n') ?? <String>['null'];
   if (wrapWidth != null) {
-    _debugPrintBuffer.addAll(messageLines.expand<String>((String line) => debugWordWrap(line, wrapWidth)));
+    _debugPrintBuffer.addAll(messageLines.expand<String>((final String line) => debugWordWrap(line, wrapWidth)));
   } else {
     _debugPrintBuffer.addAll(messageLines);
   }
@@ -114,7 +114,7 @@ enum _WordWrapParseMode { inSpace, inWord, atBreak }
 /// and so forth. It is only intended for formatting error messages.
 ///
 /// The default [debugPrint] implementation uses this for its line wrapping.
-Iterable<String> debugWordWrap(String message, int width, { String wrapIndent = '' }) {
+Iterable<String> debugWordWrap(final String message, final int width, { final String wrapIndent = '' }) {
   if (message.length < width || message.trimLeft()[0] == '#') {
     return <String>[message];
   }

@@ -148,8 +148,8 @@ class Ink extends StatefulWidget {
   Ink({
     super.key,
     this.padding,
-    Color? color,
-    Decoration? decoration,
+    final Color? color,
+    final Decoration? decoration,
     this.width,
     this.height,
     this.child,
@@ -181,14 +181,14 @@ class Ink extends StatefulWidget {
   Ink.image({
     super.key,
     this.padding,
-    required ImageProvider image,
-    ImageErrorListener? onImageError,
-    ColorFilter? colorFilter,
-    BoxFit? fit,
-    AlignmentGeometry alignment = Alignment.center,
-    Rect? centerSlice,
-    ImageRepeat repeat = ImageRepeat.noRepeat,
-    bool matchTextDirection = false,
+    required final ImageProvider image,
+    final ImageErrorListener? onImageError,
+    final ColorFilter? colorFilter,
+    final BoxFit? fit,
+    final AlignmentGeometry alignment = Alignment.center,
+    final Rect? centerSlice,
+    final ImageRepeat repeat = ImageRepeat.noRepeat,
+    final bool matchTextDirection = false,
     this.width,
     this.height,
     this.child,
@@ -248,7 +248,7 @@ class Ink extends StatefulWidget {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
@@ -273,7 +273,7 @@ class _InkState extends State<Ink> {
     super.deactivate();
   }
 
-  Widget _build(BuildContext context) {
+  Widget _build(final BuildContext context) {
     // By creating the InkDecoration from within a Builder widget, we can
     // use the RenderBox of the Padding widget.
     if (_ink == null) {
@@ -294,7 +294,7 @@ class _InkState extends State<Ink> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Widget result = Padding(
       key: _boxKey,
@@ -330,9 +330,9 @@ class _InkState extends State<Ink> {
 class InkDecoration extends InkFeature {
   /// Draws a decoration on a [Material].
   InkDecoration({
-    required Decoration? decoration,
-    bool isVisible = true,
-    required ImageConfiguration configuration,
+    required final Decoration? decoration,
+    final bool isVisible = true,
+    required final ImageConfiguration configuration,
     required super.controller,
     required super.referenceBox,
     super.onRemoved,
@@ -350,7 +350,7 @@ class InkDecoration extends InkFeature {
   /// on the [Material] that owns the [controller].
   Decoration? get decoration => _decoration;
   Decoration? _decoration;
-  set decoration(Decoration? value) {
+  set decoration(final Decoration? value) {
     if (value == _decoration) {
       return;
     }
@@ -365,7 +365,7 @@ class InkDecoration extends InkFeature {
   /// Defaults to true.
   bool get isVisible => _isVisible;
   bool _isVisible = true;
-  set isVisible(bool value) {
+  set isVisible(final bool value) {
     if (value == _isVisible) {
       return;
     }
@@ -380,7 +380,7 @@ class InkDecoration extends InkFeature {
   /// of the [referenceBox], at paint time).
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration(ImageConfiguration value) {
+  set configuration(final ImageConfiguration value) {
     if (value == _configuration) {
       return;
     }
@@ -399,7 +399,7 @@ class InkDecoration extends InkFeature {
   }
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {
+  void paintFeature(final Canvas canvas, final Matrix4 transform) {
     if (_painter == null || !isVisible) {
       return;
     }

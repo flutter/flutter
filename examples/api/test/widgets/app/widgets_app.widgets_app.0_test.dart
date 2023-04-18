@@ -6,7 +6,7 @@ import 'package:flutter_api_samples/widgets/app/widgets_app.widgets_app.0.dart' 
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('WidgetsApp test', (WidgetTester tester) async {
+  testWidgets('WidgetsApp test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.WidgetsAppExampleApp(),
     );

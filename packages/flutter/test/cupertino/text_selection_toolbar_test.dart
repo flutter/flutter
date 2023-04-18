@@ -17,14 +17,14 @@ const double _kToolbarHeight = 43.0;
 class _CustomCupertinoTextSelectionControls extends CupertinoTextSelectionControls {
   @override
   Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueNotifier<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
+    final BuildContext context,
+    final Rect globalEditableRegion,
+    final double textLineHeight,
+    final Offset selectionMidpoint,
+    final List<TextSelectionPoint> endpoints,
+    final TextSelectionDelegate delegate,
+    final ValueNotifier<ClipboardStatus>? clipboardStatus,
+    final Offset? lastSecondaryTapDownPosition,
   ) {
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
     final double anchorX = (selectionMidpoint.dx + globalEditableRegion.left).clamp(
@@ -69,10 +69,10 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   // Find by a runtimeType String, including private types.
-  Finder findPrivate(String type) {
+  Finder findPrivate(final String type) {
     return find.descendant(
       of: find.byType(CupertinoApp),
-      matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == type),
+      matching: find.byWidgetPredicate((final Widget w) => '${w.runtimeType}' == type),
     );
   }
 
@@ -84,14 +84,14 @@ void main() {
   Finder findOverflowNextButton() => find.text('▶');
   Finder findOverflowBackButton() => find.text('◀');
 
-  testWidgets('paginates children if they overflow', (WidgetTester tester) async {
+  testWidgets('paginates children if they overflow', (final WidgetTester tester) async {
     late StateSetter setState;
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+    final List<Widget> children = List<Widget>.generate(7, (final int i) => const TestBox());
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               return CupertinoTextSelectionToolbar(
                 anchorAbove: const Offset(50.0, 100.0),
@@ -186,8 +186,8 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('does not paginate if children fit with zero margin', (WidgetTester tester) async {
-    final List<Widget> children = List<Widget>.generate(7, (int i) => const TestBox());
+  testWidgets('does not paginate if children fit with zero margin', (final WidgetTester tester) async {
+    final List<Widget> children = List<Widget>.generate(7, (final int i) => const TestBox());
     final double spacerWidth = 1.0 / tester.view.devicePixelRatio;
     final double dividerWidth = 1.0 / tester.view.devicePixelRatio;
     const double borderRadius = 8.0; // Should match _kToolbarBorderRadius
@@ -213,7 +213,7 @@ void main() {
     expect(findOverflowBackButton(), findsNothing);
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('positions itself at anchorAbove if it fits', (WidgetTester tester) async {
+  testWidgets('positions itself at anchorAbove if it fits', (final WidgetTester tester) async {
     late StateSetter setState;
     const double height = _kToolbarHeight;
     const double anchorBelowY = 500.0;
@@ -224,7 +224,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               final MediaQueryData data = MediaQuery.of(context);
               // Add some custom vertical padding to make this test more strict.
@@ -279,7 +279,7 @@ void main() {
     expect(toolbarY, equals(anchorAboveY - height - _kToolbarContentDistance));
   }, skip: kIsWeb); // [intended] We do not use Flutter-rendered context menu on the Web.
 
-  testWidgets('can create and use a custom toolbar', (WidgetTester tester) async {
+  testWidgets('can create and use a custom toolbar', (final WidgetTester tester) async {
     final TextEditingController controller = TextEditingController(
       text: 'Select me custom menu',
     );
@@ -314,7 +314,7 @@ void main() {
 
   for (final Brightness? themeBrightness in <Brightness?>[...Brightness.values, null]) {
     for (final Brightness? mediaBrightness in <Brightness?>[...Brightness.values, null]) {
-      testWidgets('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (WidgetTester tester) async {
+      testWidgets('draws dark buttons in dark mode and light button in light mode when theme is $themeBrightness and MediaQuery is $mediaBrightness', (final WidgetTester tester) async {
         await tester.pumpWidget(
           CupertinoApp(
             theme: CupertinoThemeData(
@@ -322,7 +322,7 @@ void main() {
             ),
             home: Center(
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   return MediaQuery(
                     data: MediaQuery.of(context).copyWith(platformBrightness: mediaBrightness),
                     child: CupertinoTextSelectionToolbar(
@@ -372,7 +372,7 @@ void main() {
     }
   }
 
-  testWidgets('draws a shadow below the toolbar in light mode', (WidgetTester tester) async {
+  testWidgets('draws a shadow below the toolbar in light mode', (final WidgetTester tester) async {
     late StateSetter setState;
     const double height = _kToolbarHeight;
     double anchorAboveY = 0.0;
@@ -384,7 +384,7 @@ void main() {
         ),
         home: Center(
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setter) {
+            builder: (final BuildContext context, final StateSetter setter) {
               setState = setter;
               final MediaQueryData data = MediaQuery.of(context);
               // Add some custom vertical padding to make this test more strict.

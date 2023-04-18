@@ -12,7 +12,7 @@ class RawScrollbarExampleApp extends StatelessWidget {
   const RawScrollbarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('RawScrollbar Sample')),
@@ -35,8 +35,8 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
   final ScrollController _firstController = ScrollController();
 
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+  Widget build(final BuildContext context) {
+    return LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
       return Row(
         children: <Widget>[
           SizedBox(
@@ -52,7 +52,7 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
                 child: ListView.builder(
                     controller: _firstController,
                     itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
+                    itemBuilder: (final BuildContext context, final int index) {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text('Scrollable 1 : Index $index'),
@@ -71,7 +71,7 @@ class _RawScrollbarExampleState extends State<RawScrollbarExample> {
                 child: ListView.builder(
                     primary: true,
                     itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
+                    itemBuilder: (final BuildContext context, final int index) {
                       return Container(
                           height: 50,
                           color: index.isEven ? Colors.amberAccent : Colors.blueAccent,

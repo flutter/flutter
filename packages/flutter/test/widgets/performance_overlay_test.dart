@@ -7,13 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Performance overlay smoke test', (WidgetTester tester) async {
+  testWidgets('Performance overlay smoke test', (final WidgetTester tester) async {
     await tester.pumpWidget(const PerformanceOverlay());
     await tester.pumpWidget(PerformanceOverlay.allEnabled());
   });
 
   testWidgets('update widget field checkerboardRasterCacheImages',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     await tester.pumpWidget(const PerformanceOverlay());
     await tester.pumpWidget(
         const PerformanceOverlay(checkerboardRasterCacheImages: true));
@@ -26,7 +26,7 @@ void main() {
   });
 
   testWidgets('update widget field checkerboardOffscreenLayers',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     await tester.pumpWidget(const PerformanceOverlay());
     await tester.pumpWidget(
         const PerformanceOverlay(checkerboardOffscreenLayers: true));

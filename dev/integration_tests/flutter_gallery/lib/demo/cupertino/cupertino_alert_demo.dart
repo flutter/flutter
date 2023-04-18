@@ -18,22 +18,22 @@ class CupertinoAlertDemo extends StatefulWidget {
 class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   String? lastSelectedValue;
 
-  void showDemoDialog({required BuildContext context, Widget? child}) {
+  void showDemoDialog({required final BuildContext context, final Widget? child}) {
     showCupertinoDialog<String>(
       context: context,
-      builder: (BuildContext context) => child!,
-    ).then((String? value) {
+      builder: (final BuildContext context) => child!,
+    ).then((final String? value) {
       if (value != null) {
         setState(() { lastSelectedValue = value; });
       }
     });
   }
 
-  void showDemoActionSheet({required BuildContext context, Widget? child}) {
+  void showDemoActionSheet({required final BuildContext context, final Widget? child}) {
     showCupertinoModalPopup<String>(
       context: context,
-      builder: (BuildContext context) => child!,
-    ).then((String? value) {
+      builder: (final BuildContext context) => child!,
+    ).then((final String? value) {
       if (value != null) {
         setState(() { lastSelectedValue = value; });
       }
@@ -41,7 +41,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('Alerts'),
@@ -54,7 +54,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Stack(
               alignment: Alignment.center,
               children: <Widget>[
@@ -114,7 +114,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     );
   }
 
-  void _onAlertPress(BuildContext context) {
+  void _onAlertPress(final BuildContext context) {
     showDemoDialog(
       context: context,
       child: CupertinoAlertDialog(
@@ -135,7 +135,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     );
   }
 
-  void _onAlertWithTitlePress(BuildContext context) {
+  void _onAlertWithTitlePress(final BuildContext context) {
     showDemoDialog(
       context: context,
       child: CupertinoAlertDialog(
@@ -156,7 +156,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     );
   }
 
-  void _onAlertWithButtonsPress(BuildContext context) {
+  void _onAlertWithButtonsPress(final BuildContext context) {
     showDemoDialog(
       context: context,
       child: const CupertinoDessertDialog(
@@ -168,7 +168,7 @@ class _CupertinoAlertDemoState extends State<CupertinoAlertDemo> {
     );
   }
 
-  void _onActionSheetPress(BuildContext context)  {
+  void _onActionSheetPress(final BuildContext context)  {
     showDemoActionSheet(
       context: context,
       child: CupertinoActionSheet(
@@ -205,7 +205,7 @@ class CupertinoDessertDialog extends StatelessWidget {
   final Widget? content;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoAlertDialog(
       title: title,
       content: content,

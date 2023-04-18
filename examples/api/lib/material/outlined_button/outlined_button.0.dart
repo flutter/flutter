@@ -12,7 +12,7 @@ class OutlinedButtonExampleApp extends StatelessWidget {
   const OutlinedButtonExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('OutlinedButton Sample')),
@@ -28,7 +28,7 @@ class OutlinedButtonExample extends StatelessWidget {
   const OutlinedButtonExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return OutlinedButton(
       onPressed: () {
         debugPrint('Received click');

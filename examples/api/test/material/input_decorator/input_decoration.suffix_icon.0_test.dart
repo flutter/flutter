@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.su
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InputDecorator suffixIcon alignment', (WidgetTester tester) async {
+  testWidgets('InputDecorator suffixIcon alignment', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.SuffixIconExampleApp(),
     );

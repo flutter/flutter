@@ -19,13 +19,13 @@ class MockCupertinoTabController extends CupertinoTabController {
   int numOfListeners = 0;
 
   @override
-  void addListener(VoidCallback listener) {
+  void addListener(final VoidCallback listener) {
     numOfListeners++;
     super.addListener(listener);
   }
 
   @override
-  void removeListener(VoidCallback listener) {
+  void removeListener(final VoidCallback listener) {
     numOfListeners--;
     super.removeListener(listener);
   }
@@ -42,21 +42,21 @@ void main() {
     selectedTabs = <int>[];
   });
 
-  BottomNavigationBarItem tabGenerator(int index) {
+  BottomNavigationBarItem tabGenerator(final int index) {
     return BottomNavigationBarItem(
       icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))),
       label: 'Tab ${index + 1}',
     );
   }
 
-  testWidgets('Tab switching', (WidgetTester tester) async {
+  testWidgets('Tab switching', (final WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
@@ -103,14 +103,14 @@ void main() {
     expect(selectedTabs, const <int>[1, 0]);
   });
 
-  testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
+  testWidgets('Tabs are lazy built and moved offstage when inactive', (final WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             tabsBuilt.add(index);
             return Text('Page ${index + 1}');
           },
@@ -138,7 +138,7 @@ void main() {
     expect(find.text('Page 2', skipOffstage: false), isOffstage);
   });
 
-  testWidgets('Last tab gets focus', (WidgetTester tester) async {
+  testWidgets('Last tab gets focus', (final WidgetTester tester) async {
     // 2 nodes for 2 tabs
     final List<FocusNode> focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
@@ -149,7 +149,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return CupertinoTextField(
               focusNode: focusNodes[index],
               autofocus: true,
@@ -174,7 +174,7 @@ void main() {
     expect(focusNodes[1].hasFocus, isFalse);
   });
 
-  testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
+  testWidgets('Do not affect focus order in the route', (final WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
       FocusNode(debugLabel: 'Node 1'),
       FocusNode(debugLabel: 'Node 2'),
@@ -186,7 +186,7 @@ void main() {
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return Column(
               children: <Widget>[
                 CupertinoTextField(
@@ -205,14 +205,14 @@ void main() {
     );
 
     expect(
-      focusNodes.any((FocusNode node) => node.hasFocus),
+      focusNodes.any((final FocusNode node) => node.hasFocus),
       isFalse,
     );
 
     await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 2'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((final FocusNode node) => node.hasFocus)),
       1,
     );
 
@@ -222,7 +222,7 @@ void main() {
     await tester.tap(find.widgetWithText(CupertinoTextField, 'TextField 1'));
 
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((final FocusNode node) => node.hasFocus)),
       2,
     );
 
@@ -232,12 +232,12 @@ void main() {
     // Upon going back to tab 1, the item it tab 1 that previously had the focus
     // (TextField 2) gets it back.
     expect(
-      focusNodes.indexOf(focusNodes.singleWhere((FocusNode node) => node.hasFocus)),
+      focusNodes.indexOf(focusNodes.singleWhere((final FocusNode node) => node.hasFocus)),
       1,
     );
   });
 
-  testWidgets('Programmatic tab switching by changing the index of an existing controller', (WidgetTester tester) async {
+  testWidgets('Programmatic tab switching by changing the index of an existing controller', (final WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 1);
     final List<int> tabsPainted = <int>[];
 
@@ -246,7 +246,7 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
@@ -275,14 +275,14 @@ void main() {
     expect(selectedTabs, const <int>[1]);
   });
 
-  testWidgets('Programmatic tab switching by passing in a new controller', (WidgetTester tester) async {
+  testWidgets('Programmatic tab switching by passing in a new controller', (final WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
 
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
@@ -301,7 +301,7 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
           controller: CupertinoTabController(initialIndex: 1), // Programmatically change the tab now.
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
@@ -325,12 +325,12 @@ void main() {
     expect(selectedTabs, const <int>[0]);
   });
 
-  testWidgets('Tab bar respects themes', (WidgetTester tester) async {
+  testWidgets('Tab bar respects themes', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -356,7 +356,7 @@ void main() {
         ),
         home: CupertinoTabScaffold(
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -383,7 +383,7 @@ void main() {
     expect(tab2.text.style!.color, isSameColorAs(CupertinoColors.systemRed.darkColor));
   });
 
-  testWidgets('Tab contents are padded when there are view insets', (WidgetTester tester) async {
+  testWidgets('Tab contents are padded when there are view insets', (final WidgetTester tester) async {
     late BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -394,7 +394,7 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               innerContext = context;
               return const Placeholder();
             },
@@ -409,7 +409,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+  testWidgets('Tab contents are not inset when resizeToAvoidBottomInset overridden', (final WidgetTester tester) async {
     late BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -421,7 +421,7 @@ void main() {
           child: CupertinoTabScaffold(
             resizeToAvoidBottomInset: false,
             tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               innerContext = context;
               return const Placeholder();
             },
@@ -436,7 +436,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
   });
 
-  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (WidgetTester tester) async {
+  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overridden', (final WidgetTester tester) async {
     final Widget child = Localizations(
       locale: const Locale('en', 'US'),
       delegates: const <LocalizationsDelegate<dynamic>>[
@@ -448,7 +448,7 @@ void main() {
         child: CupertinoTabScaffold(
           resizeToAvoidBottomInset: false,
           tabBar: _buildTabBar(),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return const Placeholder();
           },
         ),
@@ -486,9 +486,9 @@ void main() {
 
   testWidgets(
     'Opaque tab bar consumes bottom padding while non opaque tab bar does not',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/43581.
-      Future<EdgeInsets> getContentPaddingWithTabBarColor(Color color) async {
+      Future<EdgeInsets> getContentPaddingWithTabBarColor(final Color color) async {
         late EdgeInsets contentPadding;
 
         await tester.pumpWidget(
@@ -500,7 +500,7 @@ void main() {
                   backgroundColor: color,
                   items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
                 ),
-                tabBuilder: (BuildContext context, int index) {
+                tabBuilder: (final BuildContext context, final int index) {
                   contentPadding = MediaQuery.paddingOf(context);
                   return const Placeholder();
                 },
@@ -516,7 +516,7 @@ void main() {
     },
   );
 
-  testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
+  testWidgets('Tab and page scaffolds do not double stack view insets', (final WidgetTester tester) async {
     late BuildContext innerContext;
 
     await tester.pumpWidget(
@@ -527,10 +527,10 @@ void main() {
           ),
           child: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               return CupertinoPageScaffold(
                 child: Builder(
-                  builder: (BuildContext context) {
+                  builder: (final BuildContext context) {
                     innerContext = context;
                     return const Placeholder();
                   },
@@ -546,7 +546,7 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 
-  testWidgets('Deleting tabs after selecting them should switch to the last available tab', (WidgetTester tester) async {
+  testWidgets('Deleting tabs after selecting them should switch to the last available tab', (final WidgetTester tester) async {
     final List<int> tabsBuilt = <int>[];
 
     await tester.pumpWidget(
@@ -554,9 +554,9 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             items: List<BottomNavigationBarItem>.generate(4, tabGenerator),
-            onTap: (int newTab) => selectedTabs.add(newTab),
+            onTap: (final int newTab) => selectedTabs.add(newTab),
           ),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             tabsBuilt.add(index);
             return Text('Page ${index + 1}');
           },
@@ -586,9 +586,9 @@ void main() {
         home: CupertinoTabScaffold(
           tabBar: CupertinoTabBar(
             items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
-            onTap: (int newTab) => selectedTabs.add(newTab),
+            onTap: (final int newTab) => selectedTabs.add(newTab),
           ),
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             tabsBuilt.add(index);
             // Change the builder too.
             return Text('Different page ${index + 1}');
@@ -616,7 +616,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/33455
-  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
+  testWidgets('Adding new tabs does not crash the app', (final WidgetTester tester) async {
     final List<int> tabsPainted = <int>[];
     final CupertinoTabController controller = CupertinoTabController();
 
@@ -627,7 +627,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
@@ -649,7 +649,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(20, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) {
+          tabBuilder: (final BuildContext context, final int index) {
             return CustomPaint(
               painter: TestCallbackPainter(
                 onPaint: () { tabsPainted.add(index); },
@@ -674,7 +674,7 @@ void main() {
     'If a controller is initially provided then the parent stops doing so for rebuilds, '
     'a new instance of CupertinoTabController should be created and used by the widget, '
     "while preserving the previous controller's tab index",
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<int> tabsPainted = <int>[];
       final CupertinoTabController oldController = CupertinoTabController();
 
@@ -685,7 +685,7 @@ void main() {
               items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
             ),
             controller: oldController,
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               return CustomPaint(
                 painter: TestCallbackPainter(
                   onPaint: () { tabsPainted.add(index); },
@@ -706,7 +706,7 @@ void main() {
               items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
             ),
             tabBuilder:
-            (BuildContext context, int index) {
+            (final BuildContext context, final int index) {
               return CustomPaint(
                 painter: TestCallbackPainter(
                   onPaint: () { tabsPainted.add(index); },
@@ -737,7 +737,7 @@ void main() {
   testWidgets(
     'Do not call dispose on a controller that we do not own '
     'but do remove from its listeners when done listening to it',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
 
       await tester.pumpWidget(
@@ -747,7 +747,7 @@ void main() {
               items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
             ),
             controller: mockController,
-            tabBuilder: (BuildContext context, int index) => const Placeholder(),
+            tabBuilder: (final BuildContext context, final int index) => const Placeholder(),
           ),
         ),
       );
@@ -761,7 +761,7 @@ void main() {
             tabBar: CupertinoTabBar(
               items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
             ),
-            tabBuilder: (BuildContext context, int index) => const Placeholder(),
+            tabBuilder: (final BuildContext context, final int index) => const Placeholder(),
           ),
         ),
       );
@@ -771,7 +771,7 @@ void main() {
     },
   );
 
-  testWidgets('The owner can dispose the old controller', (WidgetTester tester) async {
+  testWidgets('The owner can dispose the old controller', (final WidgetTester tester) async {
     CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
 
     await tester.pumpWidget(
@@ -781,7 +781,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder(),
+          tabBuilder: (final BuildContext context, final int index) => const Placeholder(),
         ),
       ),
     );
@@ -798,7 +798,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => const Placeholder(),
+          tabBuilder: (final BuildContext context, final int index) => const Placeholder(),
         ),
       ),
     );
@@ -811,7 +811,7 @@ void main() {
 
   testWidgets('A controller can control more than one CupertinoTabScaffold, '
     'removal of listeners does not break the controller',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       final List<int> tabsPainted0 = <int>[];
       final List<int> tabsPainted1 = <int>[];
       MockCupertinoTabController controller = MockCupertinoTabController(initialIndex: 2);
@@ -826,7 +826,7 @@ void main() {
                     items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
                   ),
                   controller: controller,
-                  tabBuilder: (BuildContext context, int index) {
+                  tabBuilder: (final BuildContext context, final int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
                         onPaint: () => tabsPainted0.add(index),
@@ -839,7 +839,7 @@ void main() {
                     items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
                   ),
                   controller: controller,
-                  tabBuilder: (BuildContext context, int index) {
+                  tabBuilder: (final BuildContext context, final int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
                         onPaint: () => tabsPainted1.add(index),
@@ -873,7 +873,7 @@ void main() {
                     items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
                   ),
                   controller: controller,
-                  tabBuilder: (BuildContext context, int index) {
+                  tabBuilder: (final BuildContext context, final int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
                         onPaint: () => tabsPainted0.add(index),
@@ -903,7 +903,7 @@ void main() {
                     items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
                   ),
                   controller: controller,
-                  tabBuilder: (BuildContext context, int index) {
+                  tabBuilder: (final BuildContext context, final int index) {
                     return CustomPaint(
                       painter: TestCallbackPainter(
                         onPaint: () => tabsPainted0.add(index),
@@ -922,7 +922,7 @@ void main() {
     },
   );
 
-  testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
+  testWidgets('Assert when current tab index >= number of tabs', (final WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
 
     try {
@@ -933,7 +933,7 @@ void main() {
               items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
             ),
             controller: controller,
-            tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
+            tabBuilder: (final BuildContext context, final int index) => Text('Different page ${index + 1}'),
           ),
         ),
       );
@@ -948,7 +948,7 @@ void main() {
             items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
           ),
           controller: controller,
-          tabBuilder: (BuildContext context, int index) => Text('Different page ${index + 1}'),
+          tabBuilder: (final BuildContext context, final int index) => Text('Different page ${index + 1}'),
         ),
       ),
     );
@@ -963,7 +963,7 @@ void main() {
     expect(message, contains('with 3 tabs'));
   });
 
-  testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (WidgetTester tester) async {
+  testWidgets("Don't replace focus nodes for existing tabs when changing tab count", (final WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
 
     final List<FocusScopeNode> scopes = List<FocusScopeNode>.filled(5, FocusScopeNode());
@@ -974,7 +974,7 @@ void main() {
               items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
             ),
             controller: controller,
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               scopes[index] = FocusScope.of(context);
               return Container();
             },
@@ -996,7 +996,7 @@ void main() {
               items: List<BottomNavigationBarItem>.generate(5, tabGenerator),
             ),
             controller: controller,
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               newScopes.add(FocusScope.of(context));
               return Container();
             },
@@ -1012,8 +1012,8 @@ void main() {
     expect(scopes.sublist(0, 3), equals(newScopes.sublist(0, 3)));
   });
 
-  testWidgets('Current tab index cannot go below zero or be null', (WidgetTester tester) async {
-    void expectAssertionError(VoidCallback callback, String errorMessage) {
+  testWidgets('Current tab index cannot go below zero or be null', (final WidgetTester tester) async {
+    void expectAssertionError(final VoidCallback callback, final String errorMessage) {
       try {
         callback();
       } on AssertionError catch (e) {
@@ -1028,7 +1028,7 @@ void main() {
     expectAssertionError(() => controller.index = -1, '>= 0');
   });
 
-  testWidgets('Does not lose state when focusing on text input', (WidgetTester tester) async {
+  testWidgets('Does not lose state when focusing on text input', (final WidgetTester tester) async {
     // Regression testing for https://github.com/flutter/flutter/issues/28457.
 
     await tester.pumpWidget(
@@ -1037,7 +1037,7 @@ void main() {
         child: CupertinoApp(
           home: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               return const CupertinoTextField();
             },
           ),
@@ -1057,7 +1057,7 @@ void main() {
         child: CupertinoApp(
           home: CupertinoTabScaffold(
             tabBar: _buildTabBar(),
-            tabBuilder: (BuildContext context, int index) {
+            tabBuilder: (final BuildContext context, final int index) {
               return const CupertinoTextField();
             },
           ),
@@ -1070,20 +1070,20 @@ void main() {
     expect(find.text("don't lose me"), findsOneWidget);
   });
 
-  testWidgets('textScaleFactor is set to 1.0', (WidgetTester tester) async {
+  testWidgets('textScaleFactor is set to 1.0', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: Builder(builder: (BuildContext context) {
+        home: Builder(builder: (final BuildContext context) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 99),
             child: CupertinoTabScaffold(
               tabBar: CupertinoTabBar(
                 items: List<BottomNavigationBarItem>.generate(
                   10,
-                  (int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
+                  (final int i) => BottomNavigationBarItem(icon: ImageIcon(MemoryImage(Uint8List.fromList(kTransparentImage))), label: '$i'),
                 ),
               ),
-              tabBuilder: (BuildContext context, int index) => const Text('content'),
+              tabBuilder: (final BuildContext context, final int index) => const Text('content'),
             ),
           );
         }),
@@ -1106,13 +1106,13 @@ void main() {
     );
 
     expect(barItems.length, greaterThan(0));
-    expect(barItems.any((RichText t) => t.textScaleFactor != 1), isFalse);
+    expect(barItems.any((final RichText t) => t.textScaleFactor != 1), isFalse);
 
     expect(contents.length, greaterThan(0));
-    expect(contents.any((RichText t) => t.textScaleFactor != 99), isFalse);
+    expect(contents.any((final RichText t) => t.textScaleFactor != 99), isFalse);
   });
 
-  testWidgets('state restoration', (WidgetTester tester) async {
+  testWidgets('state restoration', (final WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         restorationScopeId: 'app',
@@ -1121,10 +1121,10 @@ void main() {
           tabBar: CupertinoTabBar(
             items: List<BottomNavigationBarItem>.generate(
               4,
-              (int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+              (final int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
             ),
           ),
-          tabBuilder: (BuildContext context, int i) => Text('Content $i'),
+          tabBuilder: (final BuildContext context, final int i) => Text('Content $i'),
         ),
       ),
     );
@@ -1167,8 +1167,8 @@ void main() {
     expect(find.text('Content 3'), findsNothing);
   });
 
-  testWidgets('switch from internal to external controller with state restoration', (WidgetTester tester) async {
-    Widget buildWidget({CupertinoTabController? controller}) {
+  testWidgets('switch from internal to external controller with state restoration', (final WidgetTester tester) async {
+    Widget buildWidget({final CupertinoTabController? controller}) {
       return CupertinoApp(
         restorationScopeId: 'app',
         home: CupertinoTabScaffold(
@@ -1177,10 +1177,10 @@ void main() {
           tabBar: CupertinoTabBar(
             items: List<BottomNavigationBarItem>.generate(
               4,
-              (int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
+              (final int i) => BottomNavigationBarItem(icon: const Icon(CupertinoIcons.map), label: 'Tab $i'),
             ),
           ),
-          tabBuilder: (BuildContext context, int i) => Text('Content $i'),
+          tabBuilder: (final BuildContext context, final int i) => Text('Content $i'),
         ),
       );
     }
@@ -1217,7 +1217,7 @@ void main() {
   });
 }
 
-CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
+CupertinoTabBar _buildTabBar({ final int selectedTab = 0 }) {
   return CupertinoTabBar(
     items: <BottomNavigationBarItem>[
       BottomNavigationBarItem(
@@ -1230,6 +1230,6 @@ CupertinoTabBar _buildTabBar({ int selectedTab = 0 }) {
       ),
     ],
     currentIndex: selectedTab,
-    onTap: (int newTab) => selectedTabs.add(newTab),
+    onTap: (final int newTab) => selectedTabs.add(newTab),
   );
 }

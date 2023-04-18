@@ -79,10 +79,10 @@ abstract class BuildTestTask {
   }
 
   /// Args passed to flutter build to build the application under test.
-  List<String> getBuildArgs(DeviceOperatingSystem deviceOperatingSystem) => throw UnimplementedError('getBuildArgs is not implemented');
+  List<String> getBuildArgs(final DeviceOperatingSystem deviceOperatingSystem) => throw UnimplementedError('getBuildArgs is not implemented');
 
   /// Args passed to flutter drive to test the built application.
-  List<String> getTestArgs(DeviceOperatingSystem deviceOperatingSystem, String deviceId) => throw UnimplementedError('getTestArgs is not implemented');
+  List<String> getTestArgs(final DeviceOperatingSystem deviceOperatingSystem, final String deviceId) => throw UnimplementedError('getTestArgs is not implemented');
 
   /// Copy artifacts to [applicationBinaryPath] if specified.
   ///

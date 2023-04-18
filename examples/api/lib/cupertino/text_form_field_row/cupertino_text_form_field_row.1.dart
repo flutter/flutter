@@ -12,7 +12,7 @@ class FormSectionApp extends StatelessWidget {
   const FormSectionApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: FromSectionExample(),
@@ -24,7 +24,7 @@ class FromSectionExample extends StatelessWidget {
   const FromSectionExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoFormSection Sample'),
@@ -38,11 +38,11 @@ class FromSectionExample extends StatelessWidget {
           },
           child: CupertinoFormSection.insetGrouped(
             header: const Text('SECTION 1'),
-            children: List<Widget>.generate(5, (int index) {
+            children: List<Widget>.generate(5, (final int index) {
               return CupertinoTextFormFieldRow(
                 prefix: const Text('Enter text'),
                 placeholder: 'Enter text',
-                validator: (String? value) {
+                validator: (final String? value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a value';
                   }

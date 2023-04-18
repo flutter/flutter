@@ -7,10 +7,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('FadeTransition', (WidgetTester tester) async {
+  testWidgets('FadeTransition', (final WidgetTester tester) async {
     final DebugPrintCallback oldPrint = debugPrint;
     final List<String> log = <String>[];
-    debugPrint = (String? message, { int? wrapWidth }) {
+    debugPrint = (final String? message, { final int? wrapWidth }) {
       log.add(message!);
     };
     debugPrintBuildScope = true;

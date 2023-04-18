@@ -12,7 +12,7 @@ class ControlsBuilderExampleApp extends StatelessWidget {
   const ControlsBuilderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Stepper Sample')),
@@ -26,9 +26,9 @@ class ControlsBuilderExample extends StatelessWidget {
   const ControlsBuilderExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stepper(
-      controlsBuilder: (BuildContext context, ControlsDetails details) {
+      controlsBuilder: (final BuildContext context, final ControlsDetails details) {
         return Row(
           children: <Widget>[
             TextButton(

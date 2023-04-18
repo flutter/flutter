@@ -64,16 +64,16 @@ class StackFrame {
   /// Parses a list of [StackFrame]s from a [StackTrace] object.
   ///
   /// This is normally useful with [StackTrace.current].
-  static List<StackFrame> fromStackTrace(StackTrace stack) {
+  static List<StackFrame> fromStackTrace(final StackTrace stack) {
     return fromStackString(stack.toString());
   }
 
   /// Parses a list of [StackFrame]s from the [StackTrace.toString] method.
-  static List<StackFrame> fromStackString(String stack) {
+  static List<StackFrame> fromStackString(final String stack) {
     return stack
         .trim()
         .split('\n')
-        .where((String line) => line.isNotEmpty)
+        .where((final String line) => line.isNotEmpty)
         .map(fromStackTraceLine)
         // On the Web in non-debug builds the stack trace includes the exception
         // message that precedes the stack trace itself. fromStackTraceLine will
@@ -82,7 +82,7 @@ class StackFrame {
         .toList();
   }
 
-  static StackFrame? _parseWebFrame(String line) {
+  static StackFrame? _parseWebFrame(final String line) {
     if (kDebugMode) {
       return _parseWebDebugFrame(line);
     } else {
@@ -90,7 +90,7 @@ class StackFrame {
     }
   }
 
-  static StackFrame _parseWebDebugFrame(String line) {
+  static StackFrame _parseWebDebugFrame(final String line) {
     // This RegExp is only partially correct for flutter run/test differences.
     // https://github.com/flutter/flutter/issues/52685
     final bool hasPackage = line.startsWith('package');
@@ -132,7 +132,7 @@ class StackFrame {
 
   // Parses `line` as a stack frame in profile and release Web builds. If not
   // recognized as a stack frame, returns null.
-  static StackFrame? _parseWebNonDebugFrame(String line) {
+  static StackFrame? _parseWebNonDebugFrame(final String line) {
     final Match? match = _webNonDebugFramePattern.firstMatch(line);
     if (match == null) {
       // On the Web in non-debug builds the stack trace includes the exception
@@ -169,7 +169,7 @@ class StackFrame {
   }
 
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
-  static StackFrame? fromStackTraceLine(String line) {
+  static StackFrame? fromStackTraceLine(final String line) {
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
     } else if (line == '...') {
@@ -285,7 +285,7 @@ class StackFrame {
   int get hashCode => Object.hash(number, package, line, column, className, method, source);
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

@@ -31,7 +31,7 @@ class TestDiagnosticsNode extends DiagnosticsNode {
   }
 
   @override
-  String toDescription({TextTreeConfiguration? parentConfiguration}) {
+  String toDescription({final TextTreeConfiguration? parentConfiguration}) {
     return 'Test Description';
   }
 

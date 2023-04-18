@@ -63,7 +63,7 @@ class TestRootState extends State<TestRoot> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _showRow
       ? const Row(
           children: <Widget>[
@@ -79,7 +79,7 @@ class TestChildWidget extends StatelessWidget {
   const TestChildWidget({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container();
   }
 }

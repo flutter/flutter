@@ -30,8 +30,8 @@ class _VersionInfo {
 /// A validator that checks for Clang and Make build dependencies.
 class LinuxDoctorValidator extends DoctorValidator {
   LinuxDoctorValidator({
-    required ProcessManager processManager,
-    required UserMessages userMessages,
+    required final ProcessManager processManager,
+    required final UserMessages userMessages,
   }) : _processManager = processManager,
        _userMessages = userMessages,
        super('Linux toolchain - develop for Linux desktop');
@@ -69,9 +69,9 @@ class LinuxDoctorValidator extends DoctorValidator {
     };
 
     // Determine overall validation level.
-    if (installedVersions.values.any((_VersionInfo? versionInfo) => versionInfo?.number == null)) {
+    if (installedVersions.values.any((final _VersionInfo? versionInfo) => versionInfo?.number == null)) {
       validationType = ValidationType.missing;
-    } else if (installedVersions.keys.any((String binary) =>
+    } else if (installedVersions.keys.any((final String binary) =>
           installedVersions[binary]!.number! < _requiredBinaryVersions[binary]!)) {
       validationType = ValidationType.partial;
     }
@@ -162,7 +162,7 @@ class LinuxDoctorValidator extends DoctorValidator {
   ///
   /// Requires tha [binary] take a '--version' flag, and print a version of the
   /// form x.y.z somewhere on the first line of output.
-  Future<_VersionInfo?> _getBinaryVersion(String binary) async {
+  Future<_VersionInfo?> _getBinaryVersion(final String binary) async {
     ProcessResult? result;
     try {
       result = await _processManager.run(<String>[
@@ -182,7 +182,7 @@ class LinuxDoctorValidator extends DoctorValidator {
   }
 
   /// Checks that [library] is available via pkg-config.
-  Future<bool> _libraryIsPresent(String library) async {
+  Future<bool> _libraryIsPresent(final String library) async {
     ProcessResult? result;
     try {
       result = await _processManager.run(<String>[

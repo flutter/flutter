@@ -59,7 +59,7 @@ class TickerMode extends StatefulWidget {
   /// ```dart
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
-  static bool of(BuildContext context) {
+  static bool of(final BuildContext context) {
     final _EffectiveTickerMode? widget = context.dependOnInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.enabled ?? true;
   }
@@ -94,7 +94,7 @@ class TickerMode extends StatefulWidget {
   ///
   /// In the absence of a [TickerMode] widget, this function returns a
   /// [ValueNotifier], whose [ValueNotifier.value] is always true.
-  static ValueNotifier<bool> getNotifier(BuildContext context) {
+  static ValueNotifier<bool> getNotifier(final BuildContext context) {
     final _EffectiveTickerMode? widget = context.getInheritedWidgetOfExactType<_EffectiveTickerMode>();
     return widget?.notifier ?? ValueNotifier<bool>(true);
   }
@@ -115,7 +115,7 @@ class _TickerModeState extends State<TickerMode> {
   }
 
   @override
-  void didUpdateWidget(TickerMode oldWidget) {
+  void didUpdateWidget(final TickerMode oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateEffectiveMode();
   }
@@ -131,7 +131,7 @@ class _TickerModeState extends State<TickerMode> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return _EffectiveTickerMode(
       enabled: _effectiveMode.value,
       notifier: _effectiveMode,
@@ -140,7 +140,7 @@ class _TickerModeState extends State<TickerMode> {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('requested mode', value: widget.enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
   }
@@ -157,10 +157,10 @@ class _EffectiveTickerMode extends InheritedWidget {
   final ValueNotifier<bool> notifier;
 
   @override
-  bool updateShouldNotify(_EffectiveTickerMode oldWidget) => enabled != oldWidget.enabled;
+  bool updateShouldNotify(final _EffectiveTickerMode oldWidget) => enabled != oldWidget.enabled;
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('effective mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
   }
@@ -181,7 +181,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   Ticker? _ticker;
 
   @override
-  Ticker createTicker(TickerCallback onTick) {
+  Ticker createTicker(final TickerCallback onTick) {
     assert(() {
       if (_ticker == null) {
         return true;
@@ -255,7 +255,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     String? tickerDescription;
     if (_ticker != null) {
@@ -288,7 +288,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   Set<Ticker>? _tickers;
 
   @override
-  Ticker createTicker(TickerCallback onTick) {
+  Ticker createTicker(final TickerCallback onTick) {
     if (_tickerModeNotifier == null) {
       // Setup TickerMode notifier before we vend the first ticker.
       _updateTickerModeNotifier();
@@ -301,7 +301,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
     return result;
   }
 
-  void _removeTicker(_WidgetTicker ticker) {
+  void _removeTicker(final _WidgetTicker ticker) {
     assert(_tickers != null);
     assert(_tickers!.contains(ticker));
     _tickers!.remove(ticker);
@@ -367,7 +367,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Set<Ticker>>(
       'tickers',

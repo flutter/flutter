@@ -12,7 +12,7 @@ void main() {
     'textfield_perf',
     kTextRouteName,
     pageDelay: const Duration(seconds: 1),
-    driverOps: (FlutterDriver driver) async {
+    driverOps: (final FlutterDriver driver) async {
       final SerializableFinder textfield = find.byValueKey('basic-textfield');
       driver.tap(textfield);
       // Caret should be cached, so repeated blinking should not require recompute.

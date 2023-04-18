@@ -37,7 +37,7 @@ class Evaluation {
   ///
   /// The [reason] will be concatenated with a newline, and [passed] will be
   /// combined with an `&&` operator.
-  Evaluation operator +(Evaluation? other) {
+  Evaluation operator +(final Evaluation? other) {
     if (other == null) {
       return this;
     }
@@ -92,7 +92,7 @@ abstract class AccessibilityGuideline {
   const AccessibilityGuideline();
 
   /// Evaluate whether the current state of the `tester` conforms to the rule.
-  FutureOr<Evaluation> evaluate(WidgetTester tester);
+  FutureOr<Evaluation> evaluate(final WidgetTester tester);
 
   /// A description of the policy restrictions and criteria.
   String get description;
@@ -122,7 +122,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   final String link;
 
   @override
-  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+  FutureOr<Evaluation> evaluate(final WidgetTester tester) {
     Evaluation result = const Evaluation.pass();
     for (final FlutterView view in tester.platformDispatcher.views) {
       result += _traverse(
@@ -135,9 +135,9 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     return result;
   }
 
-  Evaluation _traverse(FlutterView view, SemanticsNode node) {
+  Evaluation _traverse(final FlutterView view, final SemanticsNode node) {
     Evaluation result = const Evaluation.pass();
-    node.visitChildren((SemanticsNode child) {
+    node.visitChildren((final SemanticsNode child) {
       result += _traverse(view, child);
       return true;
     });
@@ -183,7 +183,7 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   /// guideline.
   ///
   /// Skips nodes which are link, hidden, or do not have actions.
-  bool shouldSkipNode(SemanticsNode node) {
+  bool shouldSkipNode(final SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     // Skip node if it has no actions, or is marked as hidden.
     if ((!data.hasAction(ui.SemanticsAction.longPress) &&
@@ -216,7 +216,7 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
   String get description => 'Tappable widgets should have a semantic label';
 
   @override
-  FutureOr<Evaluation> evaluate(WidgetTester tester) {
+  FutureOr<Evaluation> evaluate(final WidgetTester tester) {
     Evaluation result = const Evaluation.pass();
 
     // TODO(pdblasi-google): Use view to retrieve the appropriate root semantics node when available.
@@ -228,9 +228,9 @@ class LabeledTapTargetGuideline extends AccessibilityGuideline {
     return result;
   }
 
-  Evaluation _traverse(SemanticsNode node) {
+  Evaluation _traverse(final SemanticsNode node) {
     Evaluation result = const Evaluation.pass();
-    node.visitChildren((SemanticsNode child) {
+    node.visitChildren((final SemanticsNode child) {
       result += _traverse(child);
       return true;
     });
@@ -296,7 +296,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   static const double _tolerance = -0.01;
 
   @override
-  Future<Evaluation> evaluate(WidgetTester tester) async {
+  Future<Evaluation> evaluate(final WidgetTester tester) async {
     Evaluation result = const Evaluation.pass();
     for (final FlutterView view in tester.platformDispatcher.views) {
       // TODO(pdblasi): This renderView will need to be retrieved from view when available.
@@ -322,11 +322,11 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   }
 
   Future<Evaluation> _evaluateNode(
-    SemanticsNode node,
-    WidgetTester tester,
-    ui.Image image,
-    ByteData byteData,
-    FlutterView view,
+    final SemanticsNode node,
+    final WidgetTester tester,
+    final ui.Image image,
+    final ByteData byteData,
+    final FlutterView view,
   ) async {
     Evaluation result = const Evaluation.pass();
 
@@ -343,7 +343,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
     final SemanticsData data = node.getSemanticsData();
     final List<SemanticsNode> children = <SemanticsNode>[];
-    node.visitChildren((SemanticsNode child) {
+    node.visitChildren((final SemanticsNode child) {
       children.add(child);
       return true;
     });
@@ -362,12 +362,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   }
 
   Future<Evaluation> _evaluateElement(
-    SemanticsNode node,
-    Element element,
-    WidgetTester tester,
-    ui.Image image,
-    ByteData byteData,
-    FlutterView view,
+    final SemanticsNode node,
+    final Element element,
+    final WidgetTester tester,
+    final ui.Image image,
+    final ByteData byteData,
+    final FlutterView view,
   ) async {
     // Look up inherited text properties to determine text size and weight.
     late bool isBold;
@@ -457,14 +457,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Returns whether node should be skipped.
   ///
   /// Skip routes which might have labels, and nodes without any text.
-  bool shouldSkipNode(SemanticsData data) =>
+  bool shouldSkipNode(final SemanticsData data) =>
       data.hasFlag(ui.SemanticsFlag.scopesRoute) ||
       (data.label.trim().isEmpty && data.value.trim().isEmpty);
 
   /// Returns if a rectangle of node is off the screen.
   ///
   /// Allows node to be of screen partially before culling the node.
-  bool isNodeOffScreen(Rect paintBounds, ui.FlutterView window) {
+  bool isNodeOffScreen(final Rect paintBounds, final ui.FlutterView window) {
     final Size windowPhysicalSize = window.physicalSize * window.devicePixelRatio;
     return paintBounds.top < -50.0 ||
            paintBounds.left < -50.0 ||
@@ -475,7 +475,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   /// Returns the required contrast ratio for the [fontSize] and [bold] setting.
   ///
   /// Defined by http://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html
-  double targetContrastRatio(double? fontSize, {required bool bold}) {
+  double targetContrastRatio(final double? fontSize, {required final bool bold}) {
     final double fontSizeOrDefault = fontSize ?? _kDefaultFontSize;
     if ((bold && fontSizeOrDefault >= kBoldTextMinimumSize) ||
         fontSizeOrDefault >= kLargeTextMinimumSize) {
@@ -503,7 +503,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     required this.finder,
     this.minimumRatio = 4.5,
     this.tolerance = 0.01,
-    String description = 'Contrast should follow custom guidelines',
+    final String description = 'Contrast should follow custom guidelines',
   }) : _description = description;
 
   /// The minimum contrast ratio allowed.
@@ -532,7 +532,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   String get description => _description;
 
   @override
-  Future<Evaluation> evaluate(WidgetTester tester) async {
+  Future<Evaluation> evaluate(final WidgetTester tester) async {
     // Compute elements to be evaluated.
     final List<Element> elements = finder.evaluate().toList();
     final Map<FlutterView, ui.Image> images = <FlutterView, ui.Image>{};
@@ -541,7 +541,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
     // Collate all evaluations into a final evaluation, then return.
     Evaluation result = const Evaluation.pass();
     for (final Element element in elements) {
-      final FlutterView view = tester.viewOf(find.byElementPredicate((Element e) => e == element));
+      final FlutterView view = tester.viewOf(find.byElementPredicate((final Element e) => e == element));
 
       // TODO(pdblasi): Obtain this renderView from view when possible.
       final RenderView renderView = tester.binding.renderView;
@@ -568,7 +568,7 @@ class CustomMinimumContrastGuideline extends AccessibilityGuideline {
   }
 
   // How to evaluate a single element.
-  Evaluation _evaluateElement(Element element, ByteData byteData, ui.Image image) {
+  Evaluation _evaluateElement(final Element element, final ByteData byteData, final ui.Image image) {
     final RenderBox renderObject = element.renderObject! as RenderBox;
 
     final Rect originalPaintBounds = renderObject.paintBounds;
@@ -613,7 +613,7 @@ class _ContrastReport {
   /// The contrast ratio of the most frequent light color and the most
   /// frequent dark color is calculated. Colors are divided into light and
   /// dark colors based on their lightness as an [HSLColor].
-  factory _ContrastReport(Map<Color, int> colorHistogram) {
+  factory _ContrastReport(final Map<Color, int> colorHistogram) {
     // To determine the lighter and darker color, partition the colors
     // by HSL lightness and then choose the mode from each group.
     double totalLightness = 0.0;
@@ -672,10 +672,10 @@ class _ContrastReport {
 /// and [paintBounds], the rectangle, and [width] and [height],
 //  the dimensions of the [ByteData] returns color histogram.
 Map<Color, int> _colorsWithinRect(
-    ByteData data,
-    Rect paintBounds,
-    int width,
-    int height,
+    final ByteData data,
+    final Rect paintBounds,
+    final int width,
+    final int height,
 ) {
   final Rect truePaintBounds = paintBounds.intersect(Rect.fromLTWH(0.0, 0.0, width.toDouble(), height.toDouble()));
 
@@ -686,7 +686,7 @@ Map<Color, int> _colorsWithinRect(
 
   final Map<int, int> rgbaToCount = <int, int>{};
 
-  int getPixel(ByteData data, int x, int y) {
+  int getPixel(final ByteData data, final int x, final int y) {
     final int offset = (y * width + x) * 4;
     return data.getUint32(offset);
   }
@@ -695,13 +695,13 @@ Map<Color, int> _colorsWithinRect(
     for (int y = topY; y < bottomY; y++) {
       rgbaToCount.update(
         getPixel(data, x, y),
-        (int count) => count + 1,
+        (final int count) => count + 1,
         ifAbsent: () => 1,
       );
     }
   }
 
-  return rgbaToCount.map<Color, int>((int rgba, int count) {
+  return rgbaToCount.map<Color, int>((final int rgba, final int count) {
     final int argb =  (rgba << 24) | (rgba >> 8) & 0xFFFFFFFF;
     return MapEntry<Color, int>(Color(argb), count);
   });

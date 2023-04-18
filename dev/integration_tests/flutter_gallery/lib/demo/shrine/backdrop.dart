@@ -42,7 +42,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
     super.dispose();
   }
 
-  void _handleStatusChange(AnimationStatus status) {
+  void _handleStatusChange(final AnimationStatus status) {
     final bool value = widget.controller!.status == widget.status;
     if (_active != value) {
       setState(() {
@@ -52,7 +52,7 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget child = AbsorbPointer(
       absorbing: !_active!,
       child: widget.child,
@@ -79,7 +79,7 @@ class _FrontLayer extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       elevation: 16.0,
       shape: const BeveledRectangleBorder(
@@ -118,7 +118,7 @@ class _BackdropTitle extends AnimatedWidget {
   final Widget backTitle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Animation<double> animation = CurvedAnimation(
       parent: listenable as Animation<double>,
       curve: const Interval(0.0, 0.78),
@@ -245,7 +245,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   // _layerAnimation animates the front layer between open and close.
   // _getLayerAnimation adjusts the values in the TweenSequence so the
   // curve and timing are correct in both directions.
-  Animation<RelativeRect> _getLayerAnimation(Size layerSize, double layerTop) {
+  Animation<RelativeRect> _getLayerAnimation(final Size layerSize, final double layerTop) {
     Curve firstCurve; // Curve for first TweenSequenceItem
     Curve secondCurve; // Curve for second TweenSequenceItem
     double firstWeight; // Weight of first TweenSequenceItem
@@ -305,7 +305,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     ).animate(animation);
   }
 
-  Widget _buildStack(BuildContext context, BoxConstraints constraints) {
+  Widget _buildStack(final BuildContext context, final BoxConstraints constraints) {
     const double layerTitleHeight = 48.0;
     final Size layerSize = constraints.biggest;
     final double layerTop = layerSize.height - layerTitleHeight;
@@ -336,7 +336,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final AppBar appBar = AppBar(
       elevation: 0.0,
       titleSpacing: 0.0,
@@ -352,7 +352,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => const LoginPage()),
+              MaterialPageRoute<void>(builder: (final BuildContext context) => const LoginPage()),
             );
           },
         ),
@@ -361,7 +361,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => const LoginPage()),
+              MaterialPageRoute<void>(builder: (final BuildContext context) => const LoginPage()),
             );
           },
         ),

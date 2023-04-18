@@ -12,7 +12,7 @@ class CustomListItemApp extends StatelessWidget {
   const CustomListItemApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: CustomListItemExample(),
     );
@@ -34,7 +34,7 @@ class CustomListItem extends StatelessWidget {
   final int viewCount;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
@@ -74,7 +74,7 @@ class _VideoDescription extends StatelessWidget {
   final int viewCount;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
       child: Column(
@@ -107,7 +107,7 @@ class CustomListItemExample extends StatelessWidget {
   const CustomListItemExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView(

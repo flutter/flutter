@@ -29,7 +29,7 @@ void _usage() {
     ''');
 }
 
-Future<void> main(List<String> args) async {
+Future<void> main(final List<String> args) async {
   // TODO(gspencergoog): Convert to using the args package once it has been
   // converted to be non-nullable by default.
   if (args.isNotEmpty && args[0] == '--help') {
@@ -37,7 +37,7 @@ Future<void> main(List<String> args) async {
     exit(0);
   }
 
-  void errorExit(String message, {int exitCode = -1}) {
+  void errorExit(final String message, {final int exitCode = -1}) {
     stderr.write('Error: $message\n\n');
     _usage();
     exit(exitCode);
@@ -108,7 +108,7 @@ Future<void> main(List<String> args) async {
   exit(success ? 0 : 1);
 }
 
-File makeAbsolute(File file, {Directory? workingDirectory}) {
+File makeAbsolute(final File file, {Directory? workingDirectory}) {
   workingDirectory ??= Directory.current;
   return File(path.join(workingDirectory.absolute.path, file.path));
 }
@@ -136,7 +136,7 @@ class TestCase {
 
   Map<String, dynamic> _json = <String, dynamic>{};
 
-  Iterable<File> _getList(String name) sync* {
+  Iterable<File> _getList(final String name) sync* {
     for (final dynamic entry in _json[name] as List<dynamic>) {
       final String name = entry as String;
       yield File(path.joinAll(name.split('/')));
@@ -241,10 +241,10 @@ class TestCase {
   }
 }
 
-Stream<TestCase> getTestCases(Directory tmpdir) async* {
+Stream<TestCase> getTestCases(final Directory tmpdir) async* {
   final Directory testDir = Directory(path.join(testPrivateDir.path, 'test'));
   await for (final FileSystemEntity entity in testDir.list(recursive: true)) {
-    if (path.split(entity.path).where((String element) => element.startsWith('.')).isNotEmpty) {
+    if (path.split(entity.path).where((final String element) => element.startsWith('.')).isNotEmpty) {
       // Skip hidden files, directories, and the files inside them, like
       // .dart_tool, which contains a (non-hidden) .json file.
       continue;

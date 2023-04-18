@@ -24,7 +24,7 @@ class _TextFieldPageState extends State<TextFieldPage> {
   final Key passwordTextFieldKey = const ValueKey<String>(passwordTextFieldKeyValue);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(leading: BackButton(key: backButtonKey)),
       body: Material(

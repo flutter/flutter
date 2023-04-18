@@ -12,7 +12,7 @@ class TableExampleApp extends StatelessWidget {
   const TableExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Table Sample')),
@@ -26,7 +26,7 @@ class TableExample extends StatelessWidget {
   const TableExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Table(
       border: TableBorder.all(),
       columnWidths: const <int, TableColumnWidth>{

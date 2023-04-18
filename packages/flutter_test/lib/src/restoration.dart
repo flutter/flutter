@@ -48,7 +48,7 @@ class TestRestorationManager extends RestorationManager {
   /// See also:
   ///
   ///  * [WidgetTester.restoreFrom], which exposes this method to a widget test.
-  void restoreFrom(TestRestorationData data) {
+  void restoreFrom(final TestRestorationData data) {
     _restorationData = data;
     handleRestorationUpdateFromEngine(enabled: true, data: data.binary);
   }
@@ -62,7 +62,7 @@ class TestRestorationManager extends RestorationManager {
   }
 
   @override
-  Future<void> sendToEngine(Uint8List encodedData) async {
+  Future<void> sendToEngine(final Uint8List encodedData) async {
     _restorationData = TestRestorationData._(encodedData);
   }
 }

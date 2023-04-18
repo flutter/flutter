@@ -63,10 +63,10 @@ class RenderPerformanceOverlay extends RenderBox {
   /// The [optionsMask], [rasterizerThreshold], [checkerboardRasterCacheImages],
   /// and [checkerboardOffscreenLayers] arguments must not be null.
   RenderPerformanceOverlay({
-    int optionsMask = 0,
-    int rasterizerThreshold = 0,
-    bool checkerboardRasterCacheImages = false,
-    bool checkerboardOffscreenLayers = false,
+    final int optionsMask = 0,
+    final int rasterizerThreshold = 0,
+    final bool checkerboardRasterCacheImages = false,
+    final bool checkerboardOffscreenLayers = false,
   }) : _optionsMask = optionsMask,
        _rasterizerThreshold = rasterizerThreshold,
        _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
@@ -76,7 +76,7 @@ class RenderPerformanceOverlay extends RenderBox {
   /// [PerformanceOverlayOption] to enable.
   int get optionsMask => _optionsMask;
   int _optionsMask;
-  set optionsMask(int value) {
+  set optionsMask(final int value) {
     if (value == _optionsMask) {
       return;
     }
@@ -89,7 +89,7 @@ class RenderPerformanceOverlay extends RenderBox {
   /// is suitable for capturing an SkPicture trace for further analysis.
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
-  set rasterizerThreshold(int value) {
+  set rasterizerThreshold(final int value) {
     if (value == _rasterizerThreshold) {
       return;
     }
@@ -100,7 +100,7 @@ class RenderPerformanceOverlay extends RenderBox {
   /// Whether the raster cache should checkerboard cached entries.
   bool get checkerboardRasterCacheImages => _checkerboardRasterCacheImages;
   bool _checkerboardRasterCacheImages;
-  set checkerboardRasterCacheImages(bool value) {
+  set checkerboardRasterCacheImages(final bool value) {
     if (value == _checkerboardRasterCacheImages) {
       return;
     }
@@ -111,7 +111,7 @@ class RenderPerformanceOverlay extends RenderBox {
   /// Whether the compositor should checkerboard layers rendered to offscreen bitmaps.
   bool get checkerboardOffscreenLayers => _checkerboardOffscreenLayers;
   bool _checkerboardOffscreenLayers;
-  set checkerboardOffscreenLayers(bool value) {
+  set checkerboardOffscreenLayers(final bool value) {
     if (value == _checkerboardOffscreenLayers) {
       return;
     }
@@ -126,12 +126,12 @@ class RenderPerformanceOverlay extends RenderBox {
   bool get alwaysNeedsCompositing => true;
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     return 0.0;
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     return 0.0;
   }
 
@@ -150,22 +150,22 @@ class RenderPerformanceOverlay extends RenderBox {
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     return _intrinsicHeight;
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     return _intrinsicHeight;
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return constraints.constrain(Size(double.infinity, _intrinsicHeight));
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     assert(needsCompositing);
     context.addLayer(PerformanceOverlayLayer(
       overlayRect: Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),

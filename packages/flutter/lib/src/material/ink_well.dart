@@ -40,8 +40,8 @@ abstract class InteractiveInkFeature extends InkFeature {
   InteractiveInkFeature({
     required super.controller,
     required super.referenceBox,
-    required Color color,
-    ShapeBorder? customBorder,
+    required final Color color,
+    final ShapeBorder? customBorder,
     super.onRemoved,
   }) : _color = color,
        _customBorder = customBorder;
@@ -61,7 +61,7 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// The ink's color.
   Color get color => _color;
   Color _color;
-  set color(Color value) {
+  set color(final Color value) {
     if (value == _color) {
       return;
     }
@@ -72,7 +72,7 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// The ink's optional custom border.
   ShapeBorder? get customBorder => _customBorder;
   ShapeBorder? _customBorder;
-  set customBorder(ShapeBorder? value) {
+  set customBorder(final ShapeBorder? value) {
     if (value == _customBorder) {
       return;
     }
@@ -112,15 +112,15 @@ abstract class InteractiveInkFeature extends InkFeature {
   /// For examples on how the function is used, see [InkSplash] and [InkRipple].
   @protected
   void paintInkCircle({
-    required Canvas canvas,
-    required Matrix4 transform,
-    required Paint paint,
-    required Offset center,
-    required double radius,
-    TextDirection? textDirection,
-    ShapeBorder? customBorder,
-    BorderRadius borderRadius = BorderRadius.zero,
-    RectCallback? clipCallback,
+    required final Canvas canvas,
+    required final Matrix4 transform,
+    required final Paint paint,
+    required final Offset center,
+    required final double radius,
+    final TextDirection? textDirection,
+    final ShapeBorder? customBorder,
+    final BorderRadius borderRadius = BorderRadius.zero,
+    final RectCallback? clipCallback,
   }) {
 
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
@@ -173,22 +173,22 @@ abstract class InteractiveInkFeatureFactory {
   /// [InteractiveInkFeature].
   @factory
   InteractiveInkFeature create({
-    required MaterialInkController controller,
-    required RenderBox referenceBox,
-    required Offset position,
-    required Color color,
-    required TextDirection textDirection,
-    bool containedInkWell = false,
-    RectCallback? rectCallback,
-    BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
-    double? radius,
-    VoidCallback? onRemoved,
+    required final MaterialInkController controller,
+    required final RenderBox referenceBox,
+    required final Offset position,
+    required final Color color,
+    required final TextDirection textDirection,
+    final bool containedInkWell = false,
+    final RectCallback? rectCallback,
+    final BorderRadius? borderRadius,
+    final ShapeBorder? customBorder,
+    final double? radius,
+    final VoidCallback? onRemoved,
   });
 }
 
 abstract class _ParentInkResponseState {
-  void markChildInkResponsePressed(_ParentInkResponseState childState, bool value);
+  void markChildInkResponsePressed(final _ParentInkResponseState childState, final bool value);
 }
 
 class _ParentInkResponseProvider extends InheritedWidget {
@@ -200,9 +200,9 @@ class _ParentInkResponseProvider extends InheritedWidget {
   final _ParentInkResponseState state;
 
   @override
-  bool updateShouldNotify(_ParentInkResponseProvider oldWidget) => state != oldWidget.state;
+  bool updateShouldNotify(final _ParentInkResponseProvider oldWidget) => state != oldWidget.state;
 
-  static _ParentInkResponseState? maybeOf(BuildContext context) {
+  static _ParentInkResponseState? maybeOf(final BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_ParentInkResponseProvider>()?.state;
   }
 }
@@ -606,7 +606,7 @@ class InkResponse extends StatelessWidget {
   /// The default behavior returns null, which is equivalent to
   /// returning the referenceBox argument's bounding box (though
   /// slightly more efficient).
-  RectCallback? getRectCallback(RenderBox referenceBox) => null;
+  RectCallback? getRectCallback(final RenderBox referenceBox) => null;
 
   /// {@template flutter.material.inkwell.statesController}
   /// Represents the interactive "state" of this widget in terms of
@@ -622,7 +622,7 @@ class InkResponse extends StatelessWidget {
   final MaterialStatesController? statesController;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final _ParentInkResponseState? parentState = _ParentInkResponseProvider.maybeOf(context);
     return _InkResponseStateWidget(
       onTap: onTap,
@@ -671,7 +671,7 @@ class InkResponse extends StatelessWidget {
   /// [TableRowInkWell] implements this method to verify that the widget is
   /// in a table.
   @mustCallSuper
-  bool debugCheckContext(BuildContext context) {
+  bool debugCheckContext(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasDirectionality(context));
     return true;
@@ -757,7 +757,7 @@ class _InkResponseStateWidget extends StatefulWidget {
   _InkResponseState createState() => _InkResponseState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final List<String> gestures = <String>[
       if (onTap != null) 'tap',
@@ -805,12 +805,12 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   };
   MaterialStatesController? internalStatesController;
 
-  bool get highlightsExist => _highlights.values.where((InkHighlight? highlight) => highlight != null).isNotEmpty;
+  bool get highlightsExist => _highlights.values.where((final InkHighlight? highlight) => highlight != null).isNotEmpty;
 
   final ObserverList<_ParentInkResponseState> _activeChildren = ObserverList<_ParentInkResponseState>();
 
   @override
-  void markChildInkResponsePressed(_ParentInkResponseState childState, bool value) {
+  void markChildInkResponsePressed(final _ParentInkResponseState childState, final bool value) {
     final bool lastAnyPressed = _anyChildInkResponsePressed;
     if (value) {
       _activeChildren.add(childState);
@@ -824,7 +824,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
   bool get _anyChildInkResponsePressed => _activeChildren.isNotEmpty;
 
-  void simulateTap([Intent? intent]) {
+  void simulateTap([final Intent? intent]) {
     _startNewSplash(context: context);
     handleTap();
   }
@@ -857,7 +857,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   @override
-  void didUpdateWidget(_InkResponseStateWidget oldWidget) {
+  void didUpdateWidget(final _InkResponseStateWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.statesController != oldWidget.statesController) {
       oldWidget.statesController?.removeListener(handleStatesControllerChange);
@@ -914,7 +914,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   @override
   bool get wantKeepAlive => highlightsExist || (_splashes != null && _splashes!.isNotEmpty);
 
-  Duration getFadeDurationForType(_HighlightType type) {
+  Duration getFadeDurationForType(final _HighlightType type) {
     switch (type) {
       case _HighlightType.pressed:
         return const Duration(milliseconds: 200);
@@ -924,7 +924,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  void updateHighlight(_HighlightType type, { required bool value, bool callOnHover = true }) {
+  void updateHighlight(final _HighlightType type, { required final bool value, final bool callOnHover = true }) {
     final InkHighlight? highlight = _highlights[type];
     void handleInkRemoval() {
       assert(_highlights[type] != null);
@@ -1017,7 +1017,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     }
   }
 
-  InteractiveInkFeature _createSplash(Offset globalPosition) {
+  InteractiveInkFeature _createSplash(final Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
@@ -1055,7 +1055,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     return splash;
   }
 
-  void handleFocusHighlightModeChange(FocusHighlightMode mode) {
+  void handleFocusHighlightModeChange(final FocusHighlightMode mode) {
     if (!mounted) {
       return;
     }
@@ -1086,7 +1086,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool _hasFocus = false;
-  void handleFocusUpdate(bool hasFocus) {
+  void handleFocusUpdate(final bool hasFocus) {
     _hasFocus = hasFocus;
     // Set here rather than updateHighlight because this widget's
     // (MaterialState) states include MaterialState.focused if
@@ -1097,32 +1097,32 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     widget.onFocusChange?.call(hasFocus);
   }
 
-  void handleAnyTapDown(TapDownDetails details) {
+  void handleAnyTapDown(final TapDownDetails details) {
     if (_anyChildInkResponsePressed) {
       return;
     }
     _startNewSplash(details: details);
   }
 
-  void handleTapDown(TapDownDetails details) {
+  void handleTapDown(final TapDownDetails details) {
     handleAnyTapDown(details);
     widget.onTapDown?.call(details);
   }
 
-  void handleTapUp(TapUpDetails details) {
+  void handleTapUp(final TapUpDetails details) {
     widget.onTapUp?.call(details);
   }
 
-  void handleSecondaryTapDown(TapDownDetails details) {
+  void handleSecondaryTapDown(final TapDownDetails details) {
     handleAnyTapDown(details);
     widget.onSecondaryTapDown?.call(details);
   }
 
-  void handleSecondaryTapUp(TapUpDetails details) {
+  void handleSecondaryTapUp(final TapUpDetails details) {
     widget.onSecondaryTapUp?.call(details);
   }
 
-  void _startNewSplash({TapDownDetails? details, BuildContext? context}) {
+  void _startNewSplash({final TapDownDetails? details, final BuildContext? context}) {
     assert(details != null || context != null);
 
     final Offset globalPosition;
@@ -1213,11 +1213,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     super.deactivate();
   }
 
-  bool isWidgetEnabled(_InkResponseStateWidget widget) {
+  bool isWidgetEnabled(final _InkResponseStateWidget widget) {
     return _primaryButtonEnabled(widget) || _secondaryButtonEnabled(widget);
   }
 
-  bool _primaryButtonEnabled(_InkResponseStateWidget widget) {
+  bool _primaryButtonEnabled(final _InkResponseStateWidget widget) {
     return widget.onTap != null
       || widget.onDoubleTap != null
       || widget.onLongPress != null
@@ -1225,7 +1225,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       || widget.onTapDown != null;
   }
 
-  bool _secondaryButtonEnabled(_InkResponseStateWidget widget) {
+  bool _secondaryButtonEnabled(final _InkResponseStateWidget widget) {
     return widget.onSecondaryTap != null
       || widget.onSecondaryTapUp != null
       || widget.onSecondaryTapDown != null;
@@ -1235,14 +1235,14 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   bool get _primaryEnabled => _primaryButtonEnabled(widget);
   bool get _secondaryEnabled => _secondaryButtonEnabled(widget);
 
-  void handleMouseEnter(PointerEnterEvent event) {
+  void handleMouseEnter(final PointerEnterEvent event) {
     _hovering = true;
     if (enabled) {
       handleHoverChange();
     }
   }
 
-  void handleMouseExit(PointerExitEvent event) {
+  void handleMouseExit(final PointerExitEvent event) {
     _hovering = false;
     // If the exit occurs after we've been disabled, we still
     // want to take down the highlights and run widget.onHover.
@@ -1264,11 +1264,11 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
-    Color getHighlightColorForType(_HighlightType type) {
+    Color getHighlightColorForType(final _HighlightType type) {
       const Set<MaterialState> pressed = <MaterialState>{MaterialState.pressed};
       const Set<MaterialState> focused = <MaterialState>{MaterialState.focused};
       const Set<MaterialState> hovered = <MaterialState>{MaterialState.hovered};
@@ -1446,7 +1446,7 @@ class InkWell extends InkResponse {
     super.radius,
     super.borderRadius,
     super.customBorder,
-    bool? enableFeedback = true,
+    final bool? enableFeedback = true,
     super.excludeFromSemantics,
     super.focusNode,
     super.canRequestFocus,

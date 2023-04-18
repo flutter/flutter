@@ -11,7 +11,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:wide_gamut_test/main.dart' as app;
 
 // See: https://developer.apple.com/documentation/metal/mtlpixelformat/mtlpixelformatbgr10_xr.
-double _decodeBGR10(int x) {
+double _decodeBGR10(final int x) {
   const double max = 1.25098;
   const double min = -0.752941;
   const double intercept = min;
@@ -19,14 +19,14 @@ double _decodeBGR10(int x) {
   return (x * slope) + intercept;
 }
 
-bool _isAlmost(double x, double y, double epsilon) {
+bool _isAlmost(final double x, final double y, final double epsilon) {
   return (x - y).abs() < epsilon;
 }
 
 List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
 
 bool _findBGRA10Color(
-    Uint8List bytes, int width, int height, List<double> color) {
+    final Uint8List bytes, final int width, final int height, final List<double> color) {
   final ByteData byteData = ByteData.sublistView(bytes);
   expect(bytes.lengthInBytes, width * height * 8);
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
@@ -46,7 +46,7 @@ bool _findBGRA10Color(
 }
 
 bool _findBGR10Color(
-    Uint8List bytes, int width, int height, List<double> color) {
+    final Uint8List bytes, final int width, final int height, final List<double> color) {
   final ByteData byteData = ByteData.sublistView(bytes);
   expect(bytes.lengthInBytes, width * height * 4);
   expect(bytes.lengthInBytes, byteData.lengthInBytes);
@@ -65,7 +65,7 @@ bool _findBGR10Color(
   return foundDeepRed;
 }
 
-bool _findColor(List<Object?> result, List<double> color) {
+bool _findColor(final List<Object?> result, final List<double> color) {
   expect(result, isNotNull);
   expect(result.length, 4);
   final int width = (result[0] as int?)!;
@@ -84,7 +84,7 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('end-to-end test', () {
-    testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
+    testWidgets('look for display p3 deepest red', (final WidgetTester tester) async {
       app.run(app.Setup.image);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -93,7 +93,7 @@ void main() {
           await channel.invokeMethod('test') as List<Object?>;
       expect(_findColor(result, _deepRed), isTrue);
     });
-    testWidgets('look for display p3 deepest red', (WidgetTester tester) async {
+    testWidgets('look for display p3 deepest red', (final WidgetTester tester) async {
       app.run(app.Setup.canvasSaveLayer);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -102,7 +102,7 @@ void main() {
           await channel.invokeMethod('test') as List<Object?>;
       expect(_findColor(result, _deepRed), isTrue);
     });
-    testWidgets('no p3 deepest red without image', (WidgetTester tester) async {
+    testWidgets('no p3 deepest red without image', (final WidgetTester tester) async {
       app.run(app.Setup.none);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 
@@ -112,7 +112,7 @@ void main() {
       expect(_findColor(result, _deepRed), isFalse);
       expect(_findColor(result, <double>[0.0, 1.0, 0.0]), isFalse);
     });
-    testWidgets('p3 deepest red with blur', (WidgetTester tester) async {
+    testWidgets('p3 deepest red with blur', (final WidgetTester tester) async {
       app.run(app.Setup.blur);
       await tester.pumpAndSettle(const Duration(seconds: 2));
 

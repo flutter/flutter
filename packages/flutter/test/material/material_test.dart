@@ -17,17 +17,17 @@ import '../widgets/test_border.dart' show TestBorder;
 class NotifyMaterial extends StatelessWidget {
   const NotifyMaterial({ super.key });
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const LayoutChangedNotification().dispatch(context);
     return Container();
   }
 }
 
 Widget buildMaterial({
-  double elevation = 0.0,
-  Color shadowColor = const Color(0xFF00FF00),
-  Color? surfaceTintColor,
-  Color color = const Color(0xFF0000FF),
+  final double elevation = 0.0,
+  final Color shadowColor = const Color(0xFF00FF00),
+  final Color? surfaceTintColor,
+  final Color color = const Color(0xFF0000FF),
 }) {
   return Center(
     child: SizedBox(
@@ -44,7 +44,7 @@ Widget buildMaterial({
   );
 }
 
-RenderPhysicalShape getModel(WidgetTester tester) {
+RenderPhysicalShape getModel(final WidgetTester tester) {
   return tester.renderObject(find.byType(PhysicalShape));
 }
 
@@ -54,14 +54,14 @@ class PaintRecorder extends CustomPainter {
   final List<Size> log;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     log.add(size);
     final Paint paint = Paint()..color = const Color(0xFF0000FF);
     canvas.drawRect(Offset.zero & size, paint);
   }
 
   @override
-  bool shouldRepaint(PaintRecorder oldDelegate) => false;
+  bool shouldRepaint(final PaintRecorder oldDelegate) => false;
 }
 
 class ElevationColor {
@@ -72,7 +72,7 @@ class ElevationColor {
 
 void main() {
   // Regression test for https://github.com/flutter/flutter/issues/81504
-  testWidgets('MaterialApp.home nullable and update test', (WidgetTester tester) async {
+  testWidgets('MaterialApp.home nullable and update test', (final WidgetTester tester) async {
     // _WidgetsAppState._usesNavigator == true
     await tester.pumpWidget(const MaterialApp(home: SizedBox.shrink()));
 
@@ -85,19 +85,19 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('default Material debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default Material debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>['type: canvas']);
   });
 
-  testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Material implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const Material(
       color: Color(0xFFFFFFFF),
@@ -108,8 +108,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[
@@ -123,7 +123,7 @@ void main() {
     ]);
   });
 
-  testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
+  testWidgets('LayoutChangedNotification test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Material(
         child: NotifyMaterial(),
@@ -131,7 +131,7 @@ void main() {
     );
   });
 
-  testWidgets('ListView scroll does not repaint', (WidgetTester tester) async {
+  testWidgets('ListView scroll does not repaint', (final WidgetTester tester) async {
     final List<Size> log = <Size>[];
 
     await tester.pumpWidget(
@@ -190,8 +190,8 @@ void main() {
     expect(log, isEmpty);
   });
 
-  testWidgets('Shadow color defaults', (WidgetTester tester) async {
-    Widget buildWithShadow(Color? shadowColor) {
+  testWidgets('Shadow color defaults', (final WidgetTester tester) async {
+    Widget buildWithShadow(final Color? shadowColor) {
       return Center(
         child: SizedBox(
           height: 100.0,
@@ -242,7 +242,7 @@ void main() {
     expect(getModel(tester).shadowColor, Colors.transparent);
   });
 
-  testWidgets('Shadows animate smoothly', (WidgetTester tester) async {
+  testWidgets('Shadows animate smoothly', (final WidgetTester tester) async {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
 
@@ -267,7 +267,7 @@ void main() {
     expect(modelE.elevation, equals(9.0));
   });
 
-  testWidgets('Shadow colors animate smoothly', (WidgetTester tester) async {
+  testWidgets('Shadow colors animate smoothly', (final WidgetTester tester) async {
     // This code verifies that the PhysicalModel's shadowColor animates over
     // a kThemeChangeDuration time interval.
 
@@ -292,7 +292,7 @@ void main() {
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
   });
 
-  testWidgets('Transparent material widget does not absorb hit test', (WidgetTester tester) async {
+  testWidgets('Transparent material widget does not absorb hit test', (final WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/58665.
     bool pressed = false;
     await tester.pumpWidget(
@@ -323,7 +323,7 @@ void main() {
   });
 
   group('Surface Tint Overlay', () {
-    testWidgets('applyElevationOverlayColor does not effect anything with useMaterial3 set to true', (WidgetTester tester) async {
+    testWidgets('applyElevationOverlayColor does not effect anything with useMaterial3 set to true', (final WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       await tester.pumpWidget(Theme(
         data: ThemeData(
@@ -337,7 +337,7 @@ void main() {
       expect(model.color, equals(surfaceColor));
     });
 
-    testWidgets('surfaceTintColor is used to as an overlay to indicate elevation', (WidgetTester tester) async {
+    testWidgets('surfaceTintColor is used to as an overlay to indicate elevation', (final WidgetTester tester) async {
       const Color baseColor = Color(0xFF121212);
       const Color surfaceTintColor = Color(0xff44CCFF);
 
@@ -400,7 +400,7 @@ void main() {
   group('Elevation Overlay M2', () {
     // These tests only apply to the Material 2 overlay mechanism. This group
     // can be removed after migration to Material 3 is complete.
-    testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {
+    testWidgets('applyElevationOverlayColor set to false does not change surface color', (final WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       await tester.pumpWidget(Theme(
           data: ThemeData(
@@ -414,7 +414,7 @@ void main() {
       expect(model.color, equals(surfaceColor));
     });
 
-    testWidgets('applyElevationOverlayColor set to true applies a semi-transparent onSurface color to the surface color', (WidgetTester tester) async {
+    testWidgets('applyElevationOverlayColor set to true applies a semi-transparent onSurface color to the surface color', (final WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       const Color onSurfaceColor = Colors.greenAccent;
 
@@ -456,7 +456,7 @@ void main() {
       }
     });
 
-    testWidgets('overlay will not apply to materials using a non-surface color', (WidgetTester tester) async {
+    testWidgets('overlay will not apply to materials using a non-surface color', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Theme(
           data: ThemeData(
@@ -475,7 +475,7 @@ void main() {
       expect(model.color, equals(Colors.cyan));
     });
 
-    testWidgets('overlay will not apply to materials using a light theme', (WidgetTester tester) async {
+    testWidgets('overlay will not apply to materials using a light theme', (final WidgetTester tester) async {
       await tester.pumpWidget(
           Theme(
             data: ThemeData(
@@ -494,7 +494,7 @@ void main() {
       expect(model.color, equals(Colors.cyan));
     });
 
-    testWidgets('overlay will apply to materials with a non-opaque surface color', (WidgetTester tester) async {
+    testWidgets('overlay will apply to materials with a non-opaque surface color', (final WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       const Color surfaceColorWithOverlay = Color(0xC6353535);
 
@@ -517,7 +517,7 @@ void main() {
       expect(model.color, isNot(equals(surfaceColor)));
     });
 
-    testWidgets('Expected overlay color can be computed using colorWithOverlay', (WidgetTester tester) async {
+    testWidgets('Expected overlay color can be computed using colorWithOverlay', (final WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF123456);
       const Color onSurfaceColor = Color(0xFF654321);
       const double elevation = 8.0;
@@ -550,7 +550,7 @@ void main() {
   }); // Elevation Overlay M2 group
 
   group('Transparency clipping', () {
-    testWidgets('No clip by default', (WidgetTester tester) async {
+    testWidgets('No clip by default', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
           Material(
@@ -564,7 +564,7 @@ void main() {
       expect(renderClip.clipBehavior, equals(Clip.none));
     });
 
-    testWidgets('clips to bounding rect by default given Clip.antiAlias', (WidgetTester tester) async {
+    testWidgets('clips to bounding rect by default given Clip.antiAlias', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -578,7 +578,7 @@ void main() {
       expect(find.byKey(materialKey), clipsWithBoundingRect);
     });
 
-    testWidgets('clips to rounded rect when borderRadius provided given Clip.antiAlias', (WidgetTester tester) async {
+    testWidgets('clips to rounded rect when borderRadius provided given Clip.antiAlias', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -598,7 +598,7 @@ void main() {
       );
     });
 
-    testWidgets('clips to shape when provided given Clip.antiAlias', (WidgetTester tester) async {
+    testWidgets('clips to shape when provided given Clip.antiAlias', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -618,9 +618,9 @@ void main() {
       );
     });
 
-    testWidgets('supports directional clips', (WidgetTester tester) async {
+    testWidgets('supports directional clips', (final WidgetTester tester) async {
       final List<String> logs = <String>[];
-      final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+      final ShapeBorder shape = TestBorder((final String message) { logs.add(message); });
       Widget buildMaterial() {
         return Material(
           type: MaterialType.transparency,
@@ -683,7 +683,7 @@ void main() {
   });
 
   group('PhysicalModels', () {
-    testWidgets('canvas', (WidgetTester tester) async {
+    testWidgets('canvas', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -699,7 +699,7 @@ void main() {
       ));
     });
 
-    testWidgets('canvas with borderRadius and elevation', (WidgetTester tester) async {
+    testWidgets('canvas with borderRadius and elevation', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -717,7 +717,7 @@ void main() {
       ));
     });
 
-    testWidgets('canvas with shape and elevation', (WidgetTester tester) async {
+    testWidgets('canvas with shape and elevation', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -734,7 +734,7 @@ void main() {
       ));
     });
 
-    testWidgets('card', (WidgetTester tester) async {
+    testWidgets('card', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -751,7 +751,7 @@ void main() {
       ));
     });
 
-    testWidgets('card with borderRadius and elevation', (WidgetTester tester) async {
+    testWidgets('card with borderRadius and elevation', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -770,7 +770,7 @@ void main() {
       ));
     });
 
-    testWidgets('card with shape and elevation', (WidgetTester tester) async {
+    testWidgets('card with shape and elevation', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -788,7 +788,7 @@ void main() {
       ));
     });
 
-    testWidgets('circle', (WidgetTester tester) async {
+    testWidgets('circle', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -805,7 +805,7 @@ void main() {
       ));
     });
 
-    testWidgets('button', (WidgetTester tester) async {
+    testWidgets('button', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -823,7 +823,7 @@ void main() {
       ));
     });
 
-    testWidgets('button with elevation and borderRadius', (WidgetTester tester) async {
+    testWidgets('button with elevation and borderRadius', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -843,7 +843,7 @@ void main() {
       ));
     });
 
-    testWidgets('button with elevation and shape', (WidgetTester tester) async {
+    testWidgets('button with elevation and shape', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -864,7 +864,7 @@ void main() {
   });
 
   group('Border painting', () {
-    testWidgets('border is painted on physical layers', (WidgetTester tester) async {
+    testWidgets('border is painted on physical layers', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -885,7 +885,7 @@ void main() {
       expect(box, paints..circle());
     });
 
-    testWidgets('border is painted for transparent material', (WidgetTester tester) async {
+    testWidgets('border is painted for transparent material', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -905,7 +905,7 @@ void main() {
       expect(box, paints..circle());
     });
 
-    testWidgets('border is not painted for when border side is none', (WidgetTester tester) async {
+    testWidgets('border is not painted for when border side is none', (final WidgetTester tester) async {
       final GlobalKey materialKey = GlobalKey();
       await tester.pumpWidget(
         Material(
@@ -920,7 +920,7 @@ void main() {
       expect(box, isNot(paints..circle()));
     });
 
-    testWidgets('border is painted above child by default', (WidgetTester tester) async {
+    testWidgets('border is painted above child by default', (final WidgetTester tester) async {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
@@ -958,7 +958,7 @@ void main() {
       );
     });
 
-    testWidgets('border is painted below child when specified', (WidgetTester tester) async {
+    testWidgets('border is painted below child when specified', (final WidgetTester tester) async {
       final Key painterKey = UniqueKey();
 
       await tester.pumpWidget(MaterialApp(
@@ -998,7 +998,7 @@ void main() {
     });
   });
 
-  testWidgets('InkFeature skips painting if intermediate node skips', (WidgetTester tester) async {
+  testWidgets('InkFeature skips painting if intermediate node skips', (final WidgetTester tester) async {
     final GlobalKey sizedBoxKey = GlobalKey();
     final GlobalKey materialKey = GlobalKey();
     await tester.pumpWidget(Material(
@@ -1037,14 +1037,14 @@ void main() {
   });
 
   group('LookupBoundary', () {
-    testWidgets('hides Material from Material.maybeOf', (WidgetTester tester) async {
+    testWidgets('hides Material from Material.maybeOf', (final WidgetTester tester) async {
       MaterialInkController? material;
 
       await tester.pumpWidget(
         Material(
           child: LookupBoundary(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 material = Material.maybeOf(context);
                 return Container();
               },
@@ -1056,12 +1056,12 @@ void main() {
       expect(material, isNull);
     });
 
-    testWidgets('hides Material from Material.of', (WidgetTester tester) async {
+    testWidgets('hides Material from Material.of', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Material(
           child: LookupBoundary(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 Material.of(context);
                 return Container();
               },
@@ -1088,12 +1088,12 @@ void main() {
       );
     });
 
-    testWidgets('hides Material from debugCheckHasMaterial', (WidgetTester tester) async {
+    testWidgets('hides Material from debugCheckHasMaterial', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Material(
           child: LookupBoundary(
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 debugCheckHasMaterial(context);
                 return Container();
               },
@@ -1137,7 +1137,7 @@ class TrackPaintInkFeature extends InkFeature {
 
   int paintCount = 0;
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {
+  void paintFeature(final Canvas canvas, final Matrix4 transform) {
     paintCount += 1;
   }
 }

@@ -138,7 +138,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   bool get isEnabled => onPressed != null;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     final ChipThemeData? defaults = Theme.of(context).useMaterial3
       ? _ActionChipDefaultsM3(context, isEnabled)

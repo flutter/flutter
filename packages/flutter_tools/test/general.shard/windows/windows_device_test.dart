@@ -107,7 +107,7 @@ void main() {
   });
 }
 
-FlutterProject setUpFlutterProject(Directory directory) {
+FlutterProject setUpFlutterProject(final Directory directory) {
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
@@ -116,9 +116,9 @@ FlutterProject setUpFlutterProject(Directory directory) {
 }
 
 WindowsDevice setUpWindowsDevice({
-  FileSystem? fileSystem,
-  Logger? logger,
-  ProcessManager? processManager,
+  final FileSystem? fileSystem,
+  final Logger? logger,
+  final ProcessManager? processManager,
 }) {
   return WindowsDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -130,5 +130,5 @@ WindowsDevice setUpWindowsDevice({
 
 class FakeWindowsApp extends Fake implements WindowsApp {
   @override
-  String executable(BuildMode buildMode) => '${buildMode.cliName}/executable';
+  String executable(final BuildMode buildMode) => '${buildMode.cliName}/executable';
 }

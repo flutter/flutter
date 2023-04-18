@@ -28,18 +28,18 @@ import '../../src/context.dart';
 import '../../src/fakes.dart';
 
 
-void _writeCustomDevicesConfigFile(Directory dir, List<CustomDeviceConfig> configs) {
+void _writeCustomDevicesConfigFile(final Directory dir, final List<CustomDeviceConfig> configs) {
   dir.createSync();
 
   final File file = dir.childFile('.flutter_custom_devices.json');
   file.writeAsStringSync(jsonEncode(
     <String, dynamic>{
-      'custom-devices': configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList(),
+      'custom-devices': configs.map<dynamic>((final CustomDeviceConfig c) => c.toJson()).toList(),
     }
   ));
 }
 
-FlutterProject _setUpFlutterProject(Directory directory) {
+FlutterProject _setUpFlutterProject(final Directory directory) {
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
@@ -587,7 +587,7 @@ void main() {
   testWithoutContext('CustomDeviceLogReader cancels subscriptions before closing logLines stream', () async {
     final CustomDeviceLogReader logReader = CustomDeviceLogReader('testname');
 
-    final Iterable<List<int>> lines = Iterable<List<int>>.generate(5, (int _) => utf8.encode('test'));
+    final Iterable<List<int>> lines = Iterable<List<int>>.generate(5, (final int _) => utf8.encode('test'));
 
     logReader.listenToProcessOutput(
       FakeProcess(
@@ -599,8 +599,8 @@ void main() {
 
     final List<MyFakeStreamSubscription<String>> subscriptions = <MyFakeStreamSubscription<String>>[];
     bool logLinesStreamDone = false;
-    logReader.logLines.listen((_) {}, onDone: () {
-      expect(subscriptions, everyElement((MyFakeStreamSubscription<String> s) => s.canceled));
+    logReader.logLines.listen((final _) {}, onDone: () {
+      expect(subscriptions, everyElement((final MyFakeStreamSubscription<String> s) => s.canceled));
       logLinesStreamDone = true;
     });
 
@@ -608,7 +608,7 @@ void main() {
       0,
       logReader.subscriptions.length,
       logReader.subscriptions.map(
-        (StreamSubscription<String> e) => MyFakeStreamSubscription<String>(e)
+        (final StreamSubscription<String> e) => MyFakeStreamSubscription<String>(e)
       ),
     );
 
@@ -636,14 +636,14 @@ class MyFakeStreamSubscription<T> extends Fake implements StreamSubscription<T> 
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   @override
   Future<void> build({
-    TargetPlatform? platform,
-    BuildInfo? buildInfo,
-    FlutterProject? project,
-    String? mainPath,
-    String manifestPath = defaultManifestPath,
-    String? applicationKernelFilePath,
-    String? depfilePath,
-    String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem
+    final TargetPlatform? platform,
+    final BuildInfo? buildInfo,
+    final FlutterProject? project,
+    final String? mainPath,
+    final String manifestPath = defaultManifestPath,
+    final String? applicationKernelFilePath,
+    final String? depfilePath,
+    final String? assetDirPath,
+    @visibleForTesting final BuildSystem? buildSystem
   }) async {}
 }

@@ -12,7 +12,7 @@ class LabeledCheckboxApp extends StatelessWidget {
   const LabeledCheckboxApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const LabeledCheckboxExample(),
@@ -35,7 +35,7 @@ class LabeledCheckbox extends StatelessWidget {
   final ValueChanged<bool> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return InkWell(
       onTap: () {
         onChanged(!value);
@@ -47,7 +47,7 @@ class LabeledCheckbox extends StatelessWidget {
             Expanded(child: Text(label)),
             Checkbox(
               value: value,
-              onChanged: (bool? newValue) {
+              onChanged: (final bool? newValue) {
                 onChanged(newValue!);
               },
             ),
@@ -69,7 +69,7 @@ class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
   bool _isSelected = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom Labeled Checkbox Sample')),
       body: Center(
@@ -77,7 +77,7 @@ class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
           label: 'This is the label text',
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           value: _isSelected,
-          onChanged: (bool newValue) {
+          onChanged: (final bool newValue) {
             setState(() {
               _isSelected = newValue;
             });

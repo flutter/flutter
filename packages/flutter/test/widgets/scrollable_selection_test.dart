@@ -12,13 +12,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'clipboard_utils.dart';
 import 'keyboard_utils.dart';
 
-Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
+Offset textOffsetToPosition(final RenderParagraph paragraph, final int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
   return paragraph.localToGlobal(localOffset);
 }
 
-Offset globalize(Offset point, RenderBox box) {
+Offset globalize(final Offset point, final RenderBox box) {
   return box.localToGlobal(point);
 }
 
@@ -35,13 +35,13 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
-  testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
+  testWidgets('mouse can select multiple widgets', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
         child: ListView.builder(
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -73,14 +73,14 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('mouse can select multiple widgets - horizontal', (WidgetTester tester) async {
+  testWidgets('mouse can select multiple widgets - horizontal', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         selectionControls: materialTextSelectionControls,
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -106,7 +106,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll forward', (WidgetTester tester) async {
+  testWidgets('select to scroll forward', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -114,7 +114,7 @@ void main() {
         child: ListView.builder(
           controller: controller,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -155,7 +155,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll works for small scrollable', (WidgetTester tester) async {
+  testWidgets('select to scroll works for small scrollable', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -166,7 +166,7 @@ void main() {
             child: ListView.builder(
               controller: controller,
               itemCount: 100,
-              itemBuilder: (BuildContext context, int index) {
+              itemBuilder: (final BuildContext context, final int index) {
                 return Text('Item $index');
               },
             ),
@@ -200,7 +200,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('select to scroll backward', (WidgetTester tester) async {
+  testWidgets('select to scroll backward', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -208,7 +208,7 @@ void main() {
         child: ListView.builder(
           controller: controller,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -248,7 +248,7 @@ void main() {
     expect(paragraph3.selections[0], const TextSelection(baseOffset: 6, extentOffset: 0));
   });
 
-  testWidgets('select to scroll forward - horizontal', (WidgetTester tester) async {
+  testWidgets('select to scroll forward - horizontal', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -257,7 +257,7 @@ void main() {
           scrollDirection: Axis.horizontal,
           controller: controller,
           itemCount: 10,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -296,7 +296,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll backward - horizontal', (WidgetTester tester) async {
+  testWidgets('select to scroll backward - horizontal', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -305,7 +305,7 @@ void main() {
           scrollDirection: Axis.horizontal,
           controller: controller,
           itemCount: 10,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -345,7 +345,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('preserve selection when out of view.', (WidgetTester tester) async {
+  testWidgets('preserve selection when out of view.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -353,7 +353,7 @@ void main() {
         child: ListView.builder(
           controller: controller,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -392,7 +392,7 @@ void main() {
     expect(paragraph50.selections[0], const TextSelection(baseOffset: 2, extentOffset: 4));
   });
 
-  testWidgets('can select all non-Apple', (WidgetTester tester) async {
+  testWidgets('can select all non-Apple', (final WidgetTester tester) async {
     final FocusNode node = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -400,7 +400,7 @@ void main() {
         selectionControls: materialTextSelectionControls,
         child: ListView.builder(
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -418,7 +418,7 @@ void main() {
     expect(find.text('Item 13'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.windows, TargetPlatform.linux, TargetPlatform.fuchsia }));
 
-  testWidgets('can select all - Apple', (WidgetTester tester) async {
+  testWidgets('can select all - Apple', (final WidgetTester tester) async {
     final FocusNode node = FocusNode();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -426,7 +426,7 @@ void main() {
         selectionControls: materialTextSelectionControls,
         child: ListView.builder(
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -444,7 +444,7 @@ void main() {
     expect(find.text('Item 13'), findsNothing);
   }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-  testWidgets('select to scroll by dragging selection handles forward', (WidgetTester tester) async {
+  testWidgets('select to scroll by dragging selection handles forward', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -452,7 +452,7 @@ void main() {
         child: ListView.builder(
           controller: controller,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -501,7 +501,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('select to scroll by dragging start selection handle stops scroll when released', (WidgetTester tester) async {
+  testWidgets('select to scroll by dragging start selection handle stops scroll when released', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -509,7 +509,7 @@ void main() {
         child: ListView.builder(
           controller: controller,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -555,7 +555,7 @@ void main() {
     expect(controller.offset, previousOffset);
   });
 
-  testWidgets('select to scroll by dragging end selection handle stops scroll when released', (WidgetTester tester) async {
+  testWidgets('select to scroll by dragging end selection handle stops scroll when released', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
@@ -563,7 +563,7 @@ void main() {
         child: ListView.builder(
           controller: controller,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -608,7 +608,7 @@ void main() {
     expect(controller.offset, previousOffset);
   });
 
-  testWidgets('keyboard selection should auto scroll - vertical', (WidgetTester tester) async {
+  testWidgets('keyboard selection should auto scroll - vertical', (final WidgetTester tester) async {
     final FocusNode node = FocusNode();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
@@ -618,7 +618,7 @@ void main() {
         child: ListView.builder(
           controller: controller,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -671,7 +671,7 @@ void main() {
     expect(controller.offset, 72.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('keyboard selection should auto scroll - vertical reversed', (WidgetTester tester) async {
+  testWidgets('keyboard selection should auto scroll - vertical reversed', (final WidgetTester tester) async {
     final FocusNode node = FocusNode();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
@@ -682,7 +682,7 @@ void main() {
           controller: controller,
           reverse: true,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -735,7 +735,7 @@ void main() {
     expect(controller.offset, 72.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('keyboard selection should auto scroll - horizontal', (WidgetTester tester) async {
+  testWidgets('keyboard selection should auto scroll - horizontal', (final WidgetTester tester) async {
     final FocusNode node = FocusNode();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
@@ -746,7 +746,7 @@ void main() {
           controller: controller,
           scrollDirection: Axis.horizontal,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -781,7 +781,7 @@ void main() {
     expect(controller.offset, 352.0);
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('keyboard selection should auto scroll - horizontal reversed', (WidgetTester tester) async {
+  testWidgets('keyboard selection should auto scroll - horizontal reversed', (final WidgetTester tester) async {
     final FocusNode node = FocusNode();
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(MaterialApp(
@@ -793,7 +793,7 @@ void main() {
           scrollDirection: Axis.horizontal,
           reverse: true,
           itemCount: 100,
-          itemBuilder: (BuildContext context, int index) {
+          itemBuilder: (final BuildContext context, final int index) {
             return Text('Item $index');
           },
         ),
@@ -837,7 +837,7 @@ void main() {
   }, variant: TargetPlatformVariant.all());
 
   group('Complex cases', () {
-    testWidgets('selection starts outside of the scrollable', (WidgetTester tester) async {
+    testWidgets('selection starts outside of the scrollable', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       await tester.pumpWidget(MaterialApp(
         home: SelectionArea(
@@ -850,7 +850,7 @@ void main() {
                 child: ListView.builder(
                   controller: controller,
                   itemCount: 100,
-                  itemBuilder: (BuildContext context, int index) {
+                  itemBuilder: (final BuildContext context, final int index) {
                     return Text('Inner item $index');
                   },
                 ),
@@ -881,7 +881,7 @@ void main() {
       expect(controller.offset, 1000.0);
     });
 
-    testWidgets('nested scrollables keep selection alive', (WidgetTester tester) async {
+    testWidgets('nested scrollables keep selection alive', (final WidgetTester tester) async {
       final ScrollController outerController = ScrollController();
       final ScrollController innerController = ScrollController();
       await tester.pumpWidget(MaterialApp(
@@ -890,14 +890,14 @@ void main() {
           child: ListView.builder(
             controller: outerController,
             itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               if (index == 2) {
                 return SizedBox(
                   height: 700,
                   child: ListView.builder(
                     controller: innerController,
                     itemCount: 100,
-                    itemBuilder: (BuildContext context, int index) {
+                    itemBuilder: (final BuildContext context, final int index) {
                       return Text('Iteminner $index');
                     },
                   ),
@@ -945,7 +945,7 @@ void main() {
       expect(innerParagraph24.selections[0], const TextSelection(baseOffset: 0, extentOffset: 2));
     });
 
-    testWidgets('can copy off screen selection - Apple', (WidgetTester tester) async {
+    testWidgets('can copy off screen selection - Apple', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(MaterialApp(
@@ -955,7 +955,7 @@ void main() {
           child: ListView.builder(
             controller: controller,
             itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return Text('Item $index');
             },
           ),
@@ -986,7 +986,7 @@ void main() {
       expect(clipboardData['text'], 'em 0It');
     }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    testWidgets('can copy off screen selection - non-Apple', (WidgetTester tester) async {
+    testWidgets('can copy off screen selection - non-Apple', (final WidgetTester tester) async {
       final ScrollController controller = ScrollController();
       final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(MaterialApp(
@@ -996,7 +996,7 @@ void main() {
           child: ListView.builder(
             controller: controller,
             itemCount: 100,
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return Text('Item $index');
             },
           ),

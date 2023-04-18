@@ -13120,15 +13120,15 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalCupertinoLocalizations.delegate].
 GlobalCupertinoLocalizations? getCupertinoTranslation(
-  Locale locale,
-  intl.DateFormat fullYearFormat,
-  intl.DateFormat dayFormat,
-  intl.DateFormat mediumDateFormat,
-  intl.DateFormat singleDigitHourFormat,
-  intl.DateFormat singleDigitMinuteFormat,
-  intl.DateFormat doubleDigitMinuteFormat,
-  intl.DateFormat singleDigitSecondFormat,
-  intl.NumberFormat decimalFormat,
+  final Locale locale,
+  final intl.DateFormat fullYearFormat,
+  final intl.DateFormat dayFormat,
+  final intl.DateFormat mediumDateFormat,
+  final intl.DateFormat singleDigitHourFormat,
+  final intl.DateFormat singleDigitMinuteFormat,
+  final intl.DateFormat doubleDigitMinuteFormat,
+  final intl.DateFormat singleDigitSecondFormat,
+  final intl.NumberFormat decimalFormat,
 ) {
   switch (locale.languageCode) {
     case 'af':

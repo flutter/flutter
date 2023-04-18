@@ -20,7 +20,7 @@ class AppLifecycleStateObserver with WidgetsBindingObserver {
   late AppLifecycleState lifecycleState;
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  void didChangeAppLifecycleState(final AppLifecycleState state) {
     lifecycleState = state;
   }
 }
@@ -29,7 +29,7 @@ class PushRouteObserver with WidgetsBindingObserver {
   late String pushedRoute;
 
   @override
-  Future<bool> didPushRoute(String route) async {
+  Future<bool> didPushRoute(final String route) async {
     pushedRoute = route;
     return true;
   }
@@ -39,30 +39,30 @@ class PushRouteInformationObserver with WidgetsBindingObserver {
   late RouteInformation pushedRouteInformation;
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async {
+  Future<bool> didPushRouteInformation(final RouteInformation routeInformation) async {
     pushedRouteInformation = routeInformation;
     return true;
   }
 }
 
 void main() {
-  Future<void> setAppLifeCycleState(AppLifecycleState state) async {
+  Future<void> setAppLifeCycleState(final AppLifecycleState state) async {
     final ByteData? message =
         const StringCodec().encodeMessage(state.toString());
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .handlePlatformMessage('flutter/lifecycle', message, (_) { });
+        .handlePlatformMessage('flutter/lifecycle', message, (final _) { });
   }
 
-  testWidgets('didHaveMemoryPressure callback', (WidgetTester tester) async {
+  testWidgets('didHaveMemoryPressure callback', (final WidgetTester tester) async {
     final MemoryPressureObserver observer = MemoryPressureObserver();
     WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (final _) { });
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
+  testWidgets('handleLifecycleStateChanged callback', (final WidgetTester tester) async {
     final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -81,19 +81,19 @@ void main() {
     setAppLifeCycleState(AppLifecycleState.resumed);
   });
 
-  testWidgets('didPushRoute callback', (WidgetTester tester) async {
+  testWidgets('didPushRoute callback', (final WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
     const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('pushRoute', testRouteName));
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (final _) { });
     expect(observer.pushedRoute, testRouteName);
 
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgets('didPushRouteInformation calls didPushRoute by default', (WidgetTester tester) async {
+  testWidgets('didPushRouteInformation calls didPushRoute by default', (final WidgetTester tester) async {
     final PushRouteObserver observer = PushRouteObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -106,12 +106,12 @@ void main() {
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
     await tester.binding.defaultBinaryMessenger
-        .handlePlatformMessage('flutter/navigation', message, (_) {});
+        .handlePlatformMessage('flutter/navigation', message, (final _) {});
     expect(observer.pushedRoute, 'testRouteName');
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgets('didPushRouteInformation callback', (WidgetTester tester) async {
+  testWidgets('didPushRouteInformation callback', (final WidgetTester tester) async {
     final PushRouteInformationObserver observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -122,13 +122,13 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (final _) { });
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, 'state');
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgets('didPushRouteInformation callback with null state', (WidgetTester tester) async {
+  testWidgets('didPushRouteInformation callback with null state', (final WidgetTester tester) async {
     final PushRouteInformationObserver observer = PushRouteInformationObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -139,13 +139,13 @@ void main() {
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRouteInformation', testRouteInformation),
     );
-    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (final _) { });
     expect(observer.pushedRouteInformation.location, 'testRouteName');
     expect(observer.pushedRouteInformation.state, null);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
-  testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
+  testWidgets('Application lifecycle affects frame scheduling', (final WidgetTester tester) async {
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     setAppLifeCycleState(AppLifecycleState.paused);
@@ -178,7 +178,7 @@ void main() {
     await tester.pump();
 
     int frameCount = 0;
-    tester.binding.addPostFrameCallback((Duration duration) {
+    tester.binding.addPostFrameCallback((final Duration duration) {
       frameCount += 1;
     });
     expect(tester.binding.hasScheduledFrame, isFalse);
@@ -196,10 +196,10 @@ void main() {
     await tester.pump();
   });
 
-  testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
+  testWidgets('scheduleFrameCallback error control test', (final WidgetTester tester) async {
     late FlutterError error;
     try {
-      tester.binding.scheduleFrameCallback((Duration _) { }, rescheduling: true);
+      tester.binding.scheduleFrameCallback((final Duration _) { }, rescheduling: true);
     } on FlutterError catch (e) {
       error = e;
     }
@@ -228,21 +228,21 @@ void main() {
     );
   });
 
-  testWidgets('defaultStackFilter elides framework Element mounting stacks', (WidgetTester tester) async {
+  testWidgets('defaultStackFilter elides framework Element mounting stacks', (final WidgetTester tester) async {
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
     late FlutterErrorDetails errorDetails;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       errorDetails = details;
     };
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: TestStatefulWidget(
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Opacity(
               opacity: .5,
               child: Builder(
-                builder: (BuildContext context) {
+                builder: (final BuildContext context) {
                   assert(false);
                   return const Text('');
                 },
@@ -270,7 +270,7 @@ class TestStatefulWidget extends StatefulWidget {
 
 class TestStatefulWidgetState extends State<TestStatefulWidget> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.child;
   }
 }

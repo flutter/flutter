@@ -9,7 +9,7 @@ const String kGooglePlayVersioning = 'https://developer.android.com/studio/publi
 const String kSupportedAbis = 'https://flutter.dev/docs/deployment/android#what-are-the-supported-target-architectures';
 
 /// Validates that the build mode and build number are valid for a given build.
-void validateBuild(AndroidBuildInfo androidBuildInfo) {
+void validateBuild(final AndroidBuildInfo androidBuildInfo) {
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
   if (buildInfo.codeSizeDirectory != null && androidBuildInfo.targetArchs.length > 1) {
     throwToolExit(

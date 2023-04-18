@@ -15,7 +15,7 @@ void main() {
     final FakeAutofillScope scope = FakeAutofillScope();
 
     setUp(() {
-      fakeTextChannel = FakeTextChannel((MethodCall call) async {});
+      fakeTextChannel = FakeTextChannel((final MethodCall call) async {});
       TextInput.setChannel(fakeTextChannel);
       scope.clients.clear();
     });
@@ -101,7 +101,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   late TextInputConfiguration textInputConfiguration;
 
   @override
-  void updateEditingValue(TextEditingValue newEditingValue) {
+  void updateEditingValue(final TextEditingValue newEditingValue) {
     currentTextEditingValue = newEditingValue;
     latestMethodCall = 'updateEditingValue';
   }
@@ -115,22 +115,22 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   TextEditingValue currentTextEditingValue;
 
   @override
-  void performAction(TextInputAction action) {
+  void performAction(final TextInputAction action) {
     latestMethodCall = 'performAction';
   }
 
   @override
-  void performPrivateCommand(String action, Map<String, dynamic> data) {
+  void performPrivateCommand(final String action, final Map<String, dynamic> data) {
     latestMethodCall = 'performPrivateCommand';
   }
 
   @override
-  void insertContent(KeyboardInsertedContent content) {
+  void insertContent(final KeyboardInsertedContent content) {
     latestMethodCall = 'commitContent';
   }
 
   @override
-  void updateFloatingCursor(RawFloatingCursorPoint point) {
+  void updateFloatingCursor(final RawFloatingCursorPoint point) {
     latestMethodCall = 'updateFloatingCursor';
   }
 
@@ -140,17 +140,17 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void showAutocorrectionPromptRect(int start, int end) {
+  void showAutocorrectionPromptRect(final int start, final int end) {
     latestMethodCall = 'showAutocorrectionPromptRect';
   }
 
   @override
-  void didChangeInputControl(TextInputControl? oldControl, TextInputControl? newControl) {
+  void didChangeInputControl(final TextInputControl? oldControl, final TextInputControl? newControl) {
     latestMethodCall = 'didChangeInputControl';
   }
 
   @override
-  void autofill(TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
+  void autofill(final TextEditingValue newEditingValue) => updateEditingValue(newEditingValue);
 
   @override
   void showToolbar() {
@@ -158,7 +158,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void insertTextPlaceholder(Size size) {
+  void insertTextPlaceholder(final Size size) {
     latestMethodCall = 'insertTextPlaceholder';
   }
 
@@ -168,7 +168,7 @@ class FakeAutofillClient implements TextInputClient, AutofillClient {
   }
 
   @override
-  void performSelector(String selectorName) {
+  void performSelector(final String selectorName) {
     latestMethodCall = 'performSelector';
   }
 }
@@ -180,9 +180,9 @@ class FakeAutofillScope with AutofillScopeMixin implements AutofillScope {
   Iterable<AutofillClient> get autofillClients => clients.values;
 
   @override
-  AutofillClient getAutofillClient(String autofillId) => clients[autofillId]!;
+  AutofillClient getAutofillClient(final String autofillId) => clients[autofillId]!;
 
-  void register(AutofillClient client) {
+  void register(final AutofillClient client) {
     clients.putIfAbsent(client.autofillId, () => client);
   }
 }

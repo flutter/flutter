@@ -49,7 +49,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollPositionWithSingleContext({
     required super.physics,
     required super.context,
-    double? initialPixels = 0.0,
+    final double? initialPixels = 0.0,
     super.keepScrollOffset,
     super.oldPosition,
     super.debugLabel,
@@ -73,13 +73,13 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   AxisDirection get axisDirection => context.axisDirection;
 
   @override
-  double setPixels(double newPixels) {
+  double setPixels(final double newPixels) {
     assert(activity!.isScrolling);
     return super.setPixels(newPixels);
   }
 
   @override
-  void absorb(ScrollPosition other) {
+  void absorb(final ScrollPosition other) {
     super.absorb(other);
     if (other is! ScrollPositionWithSingleContext) {
       goIdle();
@@ -102,7 +102,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void beginActivity(ScrollActivity? newActivity) {
+  void beginActivity(final ScrollActivity? newActivity) {
     _heldPreviousVelocity = 0.0;
     if (newActivity == null) {
       return;
@@ -117,7 +117,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void applyUserOffset(double delta) {
+  void applyUserOffset(final double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
     setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
   }
@@ -137,7 +137,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ///
   /// The velocity should be in logical pixels per second.
   @override
-  void goBallistic(double velocity) {
+  void goBallistic(final double velocity) {
     assert(hasPixels);
     final Simulation? simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
@@ -161,7 +161,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// If this changes the value, then a [UserScrollNotification] is dispatched.
   @protected
   @visibleForTesting
-  void updateUserScrollDirection(ScrollDirection value) {
+  void updateUserScrollDirection(final ScrollDirection value) {
     if (userScrollDirection == value) {
       return;
     }
@@ -171,9 +171,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @override
   Future<void> animateTo(
-    double to, {
-    required Duration duration,
-    required Curve curve,
+    final double to, {
+    required final Duration duration,
+    required final Curve curve,
   }) {
     if (nearEqual(to, pixels, physics.toleranceFor(this).distance)) {
       // Skip the animation, go straight to the position as we are already close.
@@ -194,7 +194,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void jumpTo(double value) {
+  void jumpTo(final double value) {
     goIdle();
     if (pixels != value) {
       final double oldPixels = pixels;
@@ -207,7 +207,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void pointerScroll(double delta) {
+  void pointerScroll(final double delta) {
     // If an update is made to pointer scrolling here, consider if the same
     // (or similar) change should be made in
     // _NestedScrollCoordinator.pointerScroll.
@@ -238,7 +238,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
 
   @Deprecated('This will lead to bugs.') // flutter_ignore: deprecation_syntax, https://github.com/flutter/flutter/issues/44609
   @override
-  void jumpToWithoutSettling(double value) {
+  void jumpToWithoutSettling(final double value) {
     goIdle();
     if (pixels != value) {
       final double oldPixels = pixels;
@@ -250,7 +250,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  ScrollHoldController hold(VoidCallback holdCancelCallback) {
+  ScrollHoldController hold(final VoidCallback holdCancelCallback) {
     final double previousVelocity = activity!.velocity;
     final HoldScrollActivity holdActivity = HoldScrollActivity(
       delegate: this,
@@ -264,7 +264,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ScrollDragController? _currentDrag;
 
   @override
-  Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
+  Drag drag(final DragStartDetails details, final VoidCallback dragCancelCallback) {
     final ScrollDragController drag = ScrollDragController(
       delegate: this,
       details: details,
@@ -286,7 +286,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     super.debugFillDescription(description);
     description.add('${context.runtimeType}');
     description.add('$physics');

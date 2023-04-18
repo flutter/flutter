@@ -21,9 +21,9 @@ void main() {
 
   testWidgets(
     '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       ObjectEvent? receivedEvent;
-      ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
+      ObjectEvent listener(final ObjectEvent event) => receivedEvent = event;
 
       ma.addListener(listener);
       _checkSdkHandlersNotSet();
@@ -48,7 +48,7 @@ void _checkSdkHandlersNotSet() {
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<void> _activateFlutterObjects(WidgetTester tester) async {
+Future<void> _activateFlutterObjects(final WidgetTester tester) async {
   final ValueNotifier<bool> valueNotifier = ValueNotifier<bool>(true);
   final ChangeNotifier changeNotifier = ChangeNotifier()..addListener(() {});
   final Picture picture = _createPicture();

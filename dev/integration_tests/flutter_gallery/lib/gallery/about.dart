@@ -22,7 +22,7 @@ class _LinkTextSpan extends TextSpan {
   // manage the recognizer from outside the TextSpan, e.g. in the State of a
   // stateful widget that then hands the recognizer to the TextSpan.
 
-  _LinkTextSpan({ super.style, required String url, String? text }) : super(
+  _LinkTextSpan({ super.style, required final String url, final String? text }) : super(
     text: text ?? url,
     recognizer: TapGestureRecognizer()..onTap = () {
       launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
@@ -30,7 +30,7 @@ class _LinkTextSpan extends TextSpan {
   );
 }
 
-void showGalleryAboutDialog(BuildContext context) {
+void showGalleryAboutDialog(final BuildContext context) {
   final ThemeData themeData = Theme.of(context);
   final TextStyle? aboutTextStyle = themeData.textTheme.bodyLarge;
   final TextStyle linkStyle = themeData.textTheme.bodyLarge!.copyWith(color: themeData.colorScheme.primary);

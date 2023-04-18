@@ -106,8 +106,8 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   /// ```
   /// {@end-tool}
   @protected
-  ValueChanged<bool> updateMaterialState(MaterialState key, {ValueChanged<bool>? onChanged}) {
-    return (bool value) {
+  ValueChanged<bool> updateMaterialState(final MaterialState key, {final ValueChanged<bool>? onChanged}) {
+    return (final bool value) {
       if (materialStates.contains(key) == value) {
         return;
       }
@@ -118,13 +118,13 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
 
   /// Mutator to mark a [MaterialState] value as either active or inactive.
   @protected
-  void setMaterialState(MaterialState state, bool isSet) {
+  void setMaterialState(final MaterialState state, final bool isSet) {
     return isSet ? addMaterialState(state) : removeMaterialState(state);
   }
 
   /// Mutator to mark a [MaterialState] value as active.
   @protected
-  void addMaterialState(MaterialState state) {
+  void addMaterialState(final MaterialState state) {
     if (materialStates.add(state)) {
       setState((){});
     }
@@ -132,7 +132,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
 
   /// Mutator to mark a [MaterialState] value as inactive.
   @protected
-  void removeMaterialState(MaterialState state) {
+  void removeMaterialState(final MaterialState state) {
     if (materialStates.remove(state)) {
       setState((){});
     }
@@ -163,7 +163,7 @@ mixin MaterialStateMixin<T extends StatefulWidget> on State<T> {
   bool get isSelected => materialStates.contains(MaterialState.selected);
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Set<MaterialState>>('materialStates', materialStates, defaultValue: <MaterialState>{}));
   }

@@ -280,7 +280,7 @@ class FakeWebRunnerFactory implements WebRunnerFactory {
   final bool doResolveToError;
 
   @override
-  ResidentRunner createWebRunner(FlutterDevice device, {String? target, bool? stayResident, FlutterProject? flutterProject, bool? ipv6, DebuggingOptions? debuggingOptions, UrlTunneller? urlTunneller, Logger? logger, FileSystem? fileSystem, SystemClock? systemClock, Usage? usage, bool machine = false}) {
+  ResidentRunner createWebRunner(final FlutterDevice device, {final String? target, final bool? stayResident, final FlutterProject? flutterProject, final bool? ipv6, final DebuggingOptions? debuggingOptions, final UrlTunneller? urlTunneller, final Logger? logger, final FileSystem? fileSystem, final SystemClock? systemClock, final Usage? usage, final bool machine = false}) {
     expect(stayResident, isTrue);
     return FakeResidentRunner(
       doResolveToError: doResolveToError,
@@ -306,10 +306,10 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
-    String? route,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool enableDevTools = false,
+    final String? route,
   }) async {
     callLog.add('run');
 

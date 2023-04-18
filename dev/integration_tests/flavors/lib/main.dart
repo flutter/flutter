@@ -28,7 +28,7 @@ class _FlavorState extends State<Flavor> {
   @override
   void initState() {
     super.initState();
-    const MethodChannel('flavor').invokeMethod<String>('getFlavor').then((String? flavor) {
+    const MethodChannel('flavor').invokeMethod<String>('getFlavor').then((final String? flavor) {
       setState(() {
         _flavor = flavor;
       });
@@ -36,7 +36,7 @@ class _FlavorState extends State<Flavor> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: _flavor == null

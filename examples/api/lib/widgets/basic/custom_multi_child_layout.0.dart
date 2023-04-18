@@ -12,7 +12,7 @@ class ExampleApp extends StatelessWidget {
   const ExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: Directionality(
         // TRY THIS: Try changing the direction here and hot-reloading to
@@ -43,7 +43,7 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
 
   // Perform layout will be called when re-layout is needed.
   @override
-  void performLayout(Size size) {
+  void performLayout(final Size size) {
     final double columnWidth = size.width / colors.length;
     Offset childPosition = Offset.zero;
     switch (textDirection) {
@@ -77,7 +77,7 @@ class _CascadeLayoutDelegate extends MultiChildLayoutDelegate {
   // changes: changes in the CustomMultiChildLayout attributes will
   // automatically cause a relayout, like any other widget.
   @override
-  bool shouldRelayout(_CascadeLayoutDelegate oldDelegate) {
+  bool shouldRelayout(final _CascadeLayoutDelegate oldDelegate) {
     return oldDelegate.textDirection != textDirection || oldDelegate.overlap != overlap;
   }
 }
@@ -93,7 +93,7 @@ class ExampleWidget extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomMultiChildLayout(
       delegate: _CascadeLayoutDelegate(
         colors: _colors,

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets(
       '_SliverScrollingPersistentHeader should update stretchConfiguration',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
@@ -27,7 +27,7 @@ void main() {
     }
 
     expect(
-        tester.allWidgets.where((Widget w) =>
+        tester.allWidgets.where((final Widget w) =>
             w.runtimeType.toString() == '_SliverScrollingPersistentHeader'),
         isNotEmpty);
 
@@ -39,7 +39,7 @@ void main() {
 
   testWidgets(
       '_SliverPinnedPersistentHeader should update stretchConfiguration',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     for (final double stretchTriggerOffset in <double>[10.0, 20.0]) {
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
@@ -58,7 +58,7 @@ void main() {
     }
 
     expect(
-        tester.allWidgets.where((Widget w) =>
+        tester.allWidgets.where((final Widget w) =>
             w.runtimeType.toString() == '_SliverPinnedPersistentHeader'),
         isNotEmpty);
 
@@ -70,7 +70,7 @@ void main() {
 
   testWidgets(
       '_SliverPinnedPersistentHeader should update showOnScreenConfiguration',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     for (final double maxShowOnScreenExtent in <double>[1000, 2000]) {
       await tester.pumpWidget(MaterialApp(
         home: CustomScrollView(
@@ -89,7 +89,7 @@ void main() {
     }
 
     expect(
-        tester.allWidgets.where((Widget w) =>
+        tester.allWidgets.where((final Widget w) =>
             w.runtimeType.toString() == '_SliverPinnedPersistentHeader'),
         isNotEmpty);
 
@@ -111,12 +111,12 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+      final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     return Container(height: maxExtent);
   }
 
   @override
-  bool shouldRebuild(TestDelegate oldDelegate) => false;
+  bool shouldRebuild(final TestDelegate oldDelegate) => false;
 
   @override
   final OverScrollHeaderStretchConfiguration? stretchConfiguration;

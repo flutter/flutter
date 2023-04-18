@@ -215,7 +215,7 @@ class AnimatedCrossFade extends StatefulWidget {
   ///
   /// This is the default value for [layoutBuilder]. It implements
   /// [AnimatedCrossFadeBuilder].
-  static Widget defaultLayoutBuilder(Widget topChild, Key topChildKey, Widget bottomChild, Key bottomChildKey) {
+  static Widget defaultLayoutBuilder(final Widget topChild, final Key topChildKey, final Widget bottomChild, final Key bottomChildKey) {
     return Stack(
       clipBehavior: Clip.none,
       children: <Widget>[
@@ -238,7 +238,7 @@ class AnimatedCrossFade extends StatefulWidget {
   State<AnimatedCrossFade> createState() => _AnimatedCrossFadeState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
@@ -265,7 +265,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     }
     _firstAnimation = _initAnimation(widget.firstCurve, true);
     _secondAnimation = _initAnimation(widget.secondCurve, false);
-    _controller.addStatusListener((AnimationStatus status) {
+    _controller.addStatusListener((final AnimationStatus status) {
       setState(() {
         // Trigger a rebuild because it depends on _isTransitioning, which
         // changes its value together with animation status.
@@ -273,7 +273,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     });
   }
 
-  Animation<double> _initAnimation(Curve curve, bool inverted) {
+  Animation<double> _initAnimation(final Curve curve, final bool inverted) {
     Animation<double> result = _controller.drive(CurveTween(curve: curve));
     if (inverted) {
       result = result.drive(Tween<double>(begin: 1.0, end: 0.0));
@@ -288,7 +288,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   @override
-  void didUpdateWidget(AnimatedCrossFade oldWidget) {
+  void didUpdateWidget(final AnimatedCrossFade oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.duration != oldWidget.duration) {
       _controller.duration = widget.duration;
@@ -316,7 +316,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   bool get _isTransitioning => _controller.status == AnimationStatus.forward || _controller.status == AnimationStatus.reverse;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const Key kFirstChildKey = ValueKey<CrossFadeState>(CrossFadeState.showFirst);
     const Key kSecondChildKey = ValueKey<CrossFadeState>(CrossFadeState.showSecond);
     final bool transitioningForwards = _controller.status == AnimationStatus.completed ||
@@ -387,7 +387,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(EnumProperty<CrossFadeState>('crossFadeState', widget.crossFadeState));
     description.add(DiagnosticsProperty<AnimationController>('controller', _controller, showName: false));

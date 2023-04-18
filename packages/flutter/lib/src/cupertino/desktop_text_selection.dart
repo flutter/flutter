@@ -23,7 +23,7 @@ class _CupertinoDesktopTextSelectionHandleControls extends CupertinoDesktopTextS
 class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   /// Desktop has no text selection handles.
   @override
-  Size getHandleSize(double textLineHeight) {
+  Size getHandleSize(final double textLineHeight) {
     return Size.zero;
   }
 
@@ -34,14 +34,14 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
   )
   @override
   Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
+    final BuildContext context,
+    final Rect globalEditableRegion,
+    final double textLineHeight,
+    final Offset selectionMidpoint,
+    final List<TextSelectionPoint> endpoints,
+    final TextSelectionDelegate delegate,
+    final ClipboardStatusNotifier? clipboardStatus,
+    final Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoDesktopTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
@@ -59,13 +59,13 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
 
   /// Builds the text selection handles, but desktop has none.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(final BuildContext context, final TextSelectionHandleType type, final double textLineHeight, [final VoidCallback? onTap]) {
     return const SizedBox.shrink();
   }
 
   /// Gets the position for the text selection handles, but desktop has none.
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(final TextSelectionHandleType type, final double textLineHeight) {
     return Offset.zero;
   }
 
@@ -74,7 +74,7 @@ class CupertinoDesktopTextSelectionControls extends TextSelectionControls {
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
-  void handleSelectAll(TextSelectionDelegate delegate) {
+  void handleSelectAll(final TextSelectionDelegate delegate) {
     super.handleSelectAll(delegate);
     delegate.hideToolbar();
   }
@@ -136,7 +136,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
   }
 
   @override
-  void didUpdateWidget(_CupertinoDesktopTextSelectionControlsToolbar oldWidget) {
+  void didUpdateWidget(final _CupertinoDesktopTextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.clipboardStatus != widget.clipboardStatus) {
       oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
@@ -151,7 +151,7 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
@@ -174,8 +174,8 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
         SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
 
     void addToolbarButton(
-      String text,
-      VoidCallback onPressed,
+      final String text,
+      final VoidCallback onPressed,
     ) {
       if (items.isNotEmpty) {
         items.add(onePhysicalPixelVerticalDivider);

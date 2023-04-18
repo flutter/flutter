@@ -10,231 +10,231 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('All material demos meet recommended tap target sizes', () {
-    testWidgets('backdrop_demo', (WidgetTester tester) async {
+    testWidgets('backdrop_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: BackdropDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('bottom_app_bar_demo', (WidgetTester tester) async {
+    testWidgets('bottom_app_bar_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: BottomAppBarDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('bottom_navigation_demo', (WidgetTester tester) async {
+    testWidgets('bottom_navigation_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: BottomNavigationDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('buttons_demo', (WidgetTester tester) async {
+    testWidgets('buttons_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ButtonsDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('cards_demo', (WidgetTester tester) async {
+    testWidgets('cards_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: CardsDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('chip_demo', (WidgetTester tester) async {
+    testWidgets('chip_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ChipDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     }, skip: true); // https://github.com/flutter/flutter/issues/42455
 
-    testWidgets('data_table_demo', (WidgetTester tester) async {
+    testWidgets('data_table_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DataTableDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('date_and_time_picker_demo', (WidgetTester tester) async {
+    testWidgets('date_and_time_picker_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DateAndTimePickerDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('dialog_demo', (WidgetTester tester) async {
+    testWidgets('dialog_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DialogDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('drawer_demo', (WidgetTester tester) async {
+    testWidgets('drawer_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DrawerDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('elevation_demo', (WidgetTester tester) async {
+    testWidgets('elevation_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ElevationDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('expansion_panels_demo', (WidgetTester tester) async {
+    testWidgets('expansion_panels_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ExpansionPanelsDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('grid_list_demo', (WidgetTester tester) async {
+    testWidgets('grid_list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: GridListDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('icons_demo', (WidgetTester tester) async {
+    testWidgets('icons_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: IconsDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('leave_behind_demo', (WidgetTester tester) async {
+    testWidgets('leave_behind_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: LeaveBehindDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('list_demo', (WidgetTester tester) async {
+    testWidgets('list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ListDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('menu_demo', (WidgetTester tester) async {
+    testWidgets('menu_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: MenuDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('modal_bottom_sheet_demo', (WidgetTester tester) async {
+    testWidgets('modal_bottom_sheet_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ModalBottomSheetDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('overscroll_demo', (WidgetTester tester) async {
+    testWidgets('overscroll_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: OverscrollDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('page_selector_demo', (WidgetTester tester) async {
+    testWidgets('page_selector_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: PageSelectorDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('persistent_bottom_sheet_demo', (WidgetTester tester) async {
+    testWidgets('persistent_bottom_sheet_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: PersistentBottomSheetDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('progress_indicator_demo', (WidgetTester tester) async {
+    testWidgets('progress_indicator_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ProgressIndicatorDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('reorderable_list_demo', (WidgetTester tester) async {
+    testWidgets('reorderable_list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ReorderableListDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('scrollable_tabs_demo', (WidgetTester tester) async {
+    testWidgets('scrollable_tabs_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ScrollableTabsDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('search_demo', (WidgetTester tester) async {
+    testWidgets('search_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SearchDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('selection_controls_demo', (WidgetTester tester) async {
+    testWidgets('selection_controls_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SelectionControlsDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('slider_demo', (WidgetTester tester) async {
+    testWidgets('slider_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SliderDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('snack_bar_demo', (WidgetTester tester) async {
+    testWidgets('snack_bar_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SnackBarDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('tabs_demo', (WidgetTester tester) async {
+    testWidgets('tabs_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TabsDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('tabs_fab_demo', (WidgetTester tester) async {
+    testWidgets('tabs_fab_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TabsFabDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('text_form_field_demo', (WidgetTester tester) async {
+    testWidgets('text_form_field_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('tooltip_demo', (WidgetTester tester) async {
+    testWidgets('tooltip_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TooltipDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('expansion_tile_list_demo', (WidgetTester tester) async {
+    testWidgets('expansion_tile_list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
@@ -243,231 +243,231 @@ void main() {
   });
 
   group('All material demos have labeled tap targets', () {
-    testWidgets('backdrop_demo', (WidgetTester tester) async {
+    testWidgets('backdrop_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: BackdropDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('bottom_app_bar_demo', (WidgetTester tester) async {
+    testWidgets('bottom_app_bar_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: BottomAppBarDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('bottom_navigation_demo', (WidgetTester tester) async {
+    testWidgets('bottom_navigation_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: BottomNavigationDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('buttons_demo', (WidgetTester tester) async {
+    testWidgets('buttons_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ButtonsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('cards_demo', (WidgetTester tester) async {
+    testWidgets('cards_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: CardsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('chip_demo', (WidgetTester tester) async {
+    testWidgets('chip_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ChipDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('data_table_demo', (WidgetTester tester) async {
+    testWidgets('data_table_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DataTableDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     }, skip: true); // DataTables are not accessible, https://github.com/flutter/flutter/issues/10830
 
-    testWidgets('date_and_time_picker_demo', (WidgetTester tester) async {
+    testWidgets('date_and_time_picker_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DateAndTimePickerDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('dialog_demo', (WidgetTester tester) async {
+    testWidgets('dialog_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DialogDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('drawer_demo', (WidgetTester tester) async {
+    testWidgets('drawer_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: DrawerDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('elevation_demo', (WidgetTester tester) async {
+    testWidgets('elevation_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ElevationDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('expansion_panels_demo', (WidgetTester tester) async {
+    testWidgets('expansion_panels_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ExpansionPanelsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('grid_list_demo', (WidgetTester tester) async {
+    testWidgets('grid_list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: GridListDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('icons_demo', (WidgetTester tester) async {
+    testWidgets('icons_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: IconsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('leave_behind_demo', (WidgetTester tester) async {
+    testWidgets('leave_behind_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: LeaveBehindDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('list_demo', (WidgetTester tester) async {
+    testWidgets('list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ListDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('menu_demo', (WidgetTester tester) async {
+    testWidgets('menu_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: MenuDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('modal_bottom_sheet_demo', (WidgetTester tester) async {
+    testWidgets('modal_bottom_sheet_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ModalBottomSheetDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('overscroll_demo', (WidgetTester tester) async {
+    testWidgets('overscroll_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: OverscrollDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('page_selector_demo', (WidgetTester tester) async {
+    testWidgets('page_selector_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: PageSelectorDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('persistent_bottom_sheet_demo', (WidgetTester tester) async {
+    testWidgets('persistent_bottom_sheet_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: PersistentBottomSheetDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('progress_indicator_demo', (WidgetTester tester) async {
+    testWidgets('progress_indicator_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ProgressIndicatorDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('reorderable_list_demo', (WidgetTester tester) async {
+    testWidgets('reorderable_list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ReorderableListDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('scrollable_tabs_demo', (WidgetTester tester) async {
+    testWidgets('scrollable_tabs_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ScrollableTabsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('search_demo', (WidgetTester tester) async {
+    testWidgets('search_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SearchDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('selection_controls_demo', (WidgetTester tester) async {
+    testWidgets('selection_controls_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SelectionControlsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('slider_demo', (WidgetTester tester) async {
+    testWidgets('slider_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SliderDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('snack_bar_demo', (WidgetTester tester) async {
+    testWidgets('snack_bar_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: SnackBarDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('tabs_demo', (WidgetTester tester) async {
+    testWidgets('tabs_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TabsDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('tabs_fab_demo', (WidgetTester tester) async {
+    testWidgets('tabs_fab_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TabsFabDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('text_form_field_demo', (WidgetTester tester) async {
+    testWidgets('text_form_field_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TextFormFieldDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('tooltip_demo', (WidgetTester tester) async {
+    testWidgets('tooltip_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: TooltipDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       handle.dispose();
     });
 
-    testWidgets('expansion_tile_list_demo', (WidgetTester tester) async {
+    testWidgets('expansion_tile_list_demo', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(const MaterialApp(home: ExpansionTileListDemo()));
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
@@ -490,126 +490,126 @@ void main() {
       final ThemeData theme = themes[themeIndex];
       final String themeName = themeNames[themeIndex];
 
-      testWidgets('backdrop_demo $themeName', (WidgetTester tester) async {
+      testWidgets('backdrop_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const BackdropDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('bottom_app_bar_demo $themeName', (WidgetTester tester) async {
+      testWidgets('bottom_app_bar_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const BottomAppBarDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('bottom_navigation_demo $themeName', (WidgetTester tester) async {
+      testWidgets('bottom_navigation_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const BottomNavigationDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('buttons_demo $themeName', (WidgetTester tester) async {
+      testWidgets('buttons_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ButtonsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('cards_demo $themeName', (WidgetTester tester) async {
+      testWidgets('cards_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const CardsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('chip_demo $themeName', (WidgetTester tester) async {
+      testWidgets('chip_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ChipDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('data_table_demo $themeName', (WidgetTester tester) async {
+      testWidgets('data_table_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const DataTableDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('date_and_time_picker_demo $themeName', (WidgetTester tester) async {
+      testWidgets('date_and_time_picker_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const DateAndTimePickerDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('dialog_demo $themeName', (WidgetTester tester) async {
+      testWidgets('dialog_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const DialogDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('drawer_demo $themeName', (WidgetTester tester) async {
+      testWidgets('drawer_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const DrawerDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('elevation_demo $themeName', (WidgetTester tester) async {
+      testWidgets('elevation_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ElevationDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('expansion_panels_demo $themeName', (WidgetTester tester) async {
+      testWidgets('expansion_panels_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ExpansionPanelsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('grid_list_demo $themeName', (WidgetTester tester) async {
+      testWidgets('grid_list_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const GridListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('icons_demo $themeName', (WidgetTester tester) async {
+      testWidgets('icons_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const IconsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('leave_behind_demo $themeName', (WidgetTester tester) async {
+      testWidgets('leave_behind_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const LeaveBehindDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('list_demo $themeName', (WidgetTester tester) async {
+      testWidgets('list_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('menu_demo $themeName', (WidgetTester tester) async {
+      testWidgets('menu_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const MenuDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('modal_bottom_sheet_demo $themeName', (WidgetTester tester) async {
+      testWidgets('modal_bottom_sheet_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
           MaterialApp(theme: theme, home: const ModalBottomSheetDemo())
@@ -618,21 +618,21 @@ void main() {
         handle.dispose();
       });
 
-      testWidgets('overscroll_demo', (WidgetTester tester) async {
+      testWidgets('overscroll_demo', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(const MaterialApp(home: OverscrollDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('page_selector_demo $themeName', (WidgetTester tester) async {
+      testWidgets('page_selector_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const PageSelectorDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('persistent_bottom_sheet_demo $themeName', (WidgetTester tester) async {
+      testWidgets('persistent_bottom_sheet_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
           MaterialApp(theme: theme, home: const PersistentBottomSheetDemo())
@@ -641,49 +641,49 @@ void main() {
         handle.dispose();
       });
 
-      testWidgets('progress_indicator_demo $themeName', (WidgetTester tester) async {
+      testWidgets('progress_indicator_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ProgressIndicatorDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('reorderable_list_demo $themeName', (WidgetTester tester) async {
+      testWidgets('reorderable_list_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ReorderableListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('scrollable_tabs_demo $themeName', (WidgetTester tester) async {
+      testWidgets('scrollable_tabs_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ScrollableTabsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('search_demo $themeName', (WidgetTester tester) async {
+      testWidgets('search_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const SearchDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('selection_controls_demo $themeName', (WidgetTester tester) async {
+      testWidgets('selection_controls_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const SelectionControlsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('slider_demo $themeName', (WidgetTester tester) async {
+      testWidgets('slider_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const SliderDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('snack_bar_demo $themeName', (WidgetTester tester) async {
+      testWidgets('snack_bar_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
           MaterialApp(theme: theme, home: const SnackBarDemo())
@@ -692,35 +692,35 @@ void main() {
         handle.dispose();
       });
 
-      testWidgets('tabs_demo $themeName', (WidgetTester tester) async {
+      testWidgets('tabs_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const TabsDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('tabs_fab_demo $themeName', (WidgetTester tester) async {
+      testWidgets('tabs_fab_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const TabsFabDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('text_form_field_demo $themeName', (WidgetTester tester) async {
+      testWidgets('text_form_field_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const TextFormFieldDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('tooltip_demo $themeName', (WidgetTester tester) async {
+      testWidgets('tooltip_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const TooltipDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
       });
 
-      testWidgets('expansion_tile_list_demo $themeName', (WidgetTester tester) async {
+      testWidgets('expansion_tile_list_demo $themeName', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ExpansionTileListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -730,14 +730,14 @@ void main() {
   });
 
   group('Gallery home page meets text contrast guidelines', () {
-    testWidgets('options menu', (WidgetTester tester) async {
+    testWidgets('options menu', (final WidgetTester tester) async {
       await tester.pumpWidget(const GalleryApp(testMode: true));
       await tester.tap(find.byTooltip('Toggle options page'));
       await tester.pumpAndSettle();
       await expectLater(tester, meetsGuideline(textContrastGuideline));
     });
 
-    testWidgets('options menu - dark theme', (WidgetTester tester) async {
+    testWidgets('options menu - dark theme', (final WidgetTester tester) async {
       await tester.pumpWidget(const GalleryApp(testMode: true));
       await tester.tap(find.byTooltip('Toggle options page'));
       await tester.pumpAndSettle();

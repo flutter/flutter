@@ -51,13 +51,13 @@ abstract class BinaryMessenger {
     'or TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage. '
     'This feature was deprecated after v3.9.0-19.0.pre.'
   )
-  Future<void> handlePlatformMessage(String channel, ByteData? data, ui.PlatformMessageResponseCallback? callback);
+  Future<void> handlePlatformMessage(final String channel, final ByteData? data, final ui.PlatformMessageResponseCallback? callback);
 
   /// Send a binary message to the platform plugins on the given channel.
   ///
   /// Returns a [Future] which completes to the received response, undecoded,
   /// in binary form.
-  Future<ByteData?>? send(String channel, ByteData? message);
+  Future<ByteData?>? send(final String channel, final ByteData? message);
 
   /// Set a callback for receiving messages from the platform plugins on the
   /// given channel, without decoding them.
@@ -67,7 +67,7 @@ abstract class BinaryMessenger {
   /// argument.
   ///
   /// The handler's return value, if non-null, is sent as a response, unencoded.
-  void setMessageHandler(String channel, MessageHandler? handler);
+  void setMessageHandler(final String channel, final MessageHandler? handler);
 
   // Looking for setMockMessageHandler or checkMockMessageHandler?
   // See this shim package: packages/flutter_test/lib/src/deprecated.dart

@@ -346,7 +346,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   @override
-  void didUpdateWidget(CupertinoSearchTextField oldWidget) {
+  void didUpdateWidget(final CupertinoSearchTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null) {
       _createLocalController(oldWidget.controller!.value);
@@ -358,7 +358,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     if (_controller != null) {
       _registerController();
     }
@@ -369,7 +369,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
     registerForRestoration(_controller!, 'controller');
   }
 
-  void _createLocalController([TextEditingValue? value]) {
+  void _createLocalController([final TextEditingValue? value]) {
     assert(_controller == null);
     _controller = value == null
         ? RestorableTextEditingController()
@@ -391,7 +391,7 @@ class _CupertinoSearchTextFieldState extends State<CupertinoSearchTextField>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final String placeholder = widget.placeholder ??
         CupertinoLocalizations.of(context).searchTextFieldPlaceholderLabel;
 

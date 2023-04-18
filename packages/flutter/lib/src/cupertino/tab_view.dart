@@ -148,7 +148,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   }
 
   @override
-  void didUpdateWidget(CupertinoTabView oldWidget) {
+  void didUpdateWidget(final CupertinoTabView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.navigatorKey != oldWidget.navigatorKey
         || widget.navigatorObservers != oldWidget.navigatorObservers) {
@@ -163,7 +163,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Navigator(
       key: widget.navigatorKey,
       onGenerateRoute: _onGenerateRoute,
@@ -173,7 +173,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     );
   }
 
-  Route<dynamic>? _onGenerateRoute(RouteSettings settings) {
+  Route<dynamic>? _onGenerateRoute(final RouteSettings settings) {
     final String? name = settings.name;
     final WidgetBuilder? routeBuilder;
     String? title;
@@ -193,7 +193,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     return widget.onGenerateRoute?.call(settings);
   }
 
-  Route<dynamic>? _onUnknownRoute(RouteSettings settings) {
+  Route<dynamic>? _onUnknownRoute(final RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
         throw FlutterError(

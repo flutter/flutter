@@ -97,7 +97,7 @@ class _ChipsTile extends StatelessWidget {
 
   // Wraps a list of chips into a ListTile for display as a section in the demo.
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Card(
       semanticContainer: false,
       child: Column(
@@ -110,7 +110,7 @@ class _ChipsTile extends StatelessWidget {
           ),
           if (children!.isNotEmpty)
             Wrap(
-              children: children!.map<Widget>((Widget chip) {
+              children: children!.map<Widget>((final Widget chip) {
                 return Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: chip,
@@ -174,7 +174,7 @@ class _ChipDemoState extends State<ChipDemo> {
     _selectedTools.clear();
   }
 
-  void _removeMaterial(String name) {
+  void _removeMaterial(final String name) {
     _materialsA.remove(name);
     _materialsB.remove(name);
     if (_selectedMaterial == name) {
@@ -182,13 +182,13 @@ class _ChipDemoState extends State<ChipDemo> {
     }
   }
 
-  void _removeTool(String name) {
+  void _removeTool(final String name) {
     _toolsA.remove(name);
     _toolsB.remove(name);
     _selectedTools.remove(name);
   }
 
-  String _capitalize(String name) {
+  String _capitalize(final String name) {
     assert(name.isNotEmpty);
     return name.substring(0, 1).toUpperCase() + name.substring(1);
   }
@@ -199,7 +199,7 @@ class _ChipDemoState extends State<ChipDemo> {
   // saturation and value). This means that any unique strings will also have
   // unique colors, but they'll all be readable, since they have the same
   // saturation and value.
-  Color _nameToColor(String name, ThemeData theme) {
+  Color _nameToColor(final String name, final ThemeData theme) {
     assert(name.length > 1);
     final int hash = name.hashCode & 0xffff;
     final double hue = (360.0 * hash / (1 << 15)) % 360.0;
@@ -207,7 +207,7 @@ class _ChipDemoState extends State<ChipDemo> {
     return HSVColor.fromAHSV(1.0, hue, 0.4, themeValue).toColor();
   }
 
-  AssetImage _nameToAvatar(String name) {
+  AssetImage _nameToAvatar(final String name) {
     assert(_avatars.containsKey(name));
     return AssetImage(
       _avatars[name]!,
@@ -224,9 +224,9 @@ class _ChipDemoState extends State<ChipDemo> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final List<Widget> chips = _materialsA.map<Widget>((String name) {
+    final List<Widget> chips = _materialsA.map<Widget>((final String name) {
       return Chip(
         key: ValueKey<String>(name),
         backgroundColor: _nameToColor(name, theme),
@@ -239,7 +239,7 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }).toList();
 
-    final List<Widget> inputChips = _toolsA.map<Widget>((String name) {
+    final List<Widget> inputChips = _toolsA.map<Widget>((final String name) {
       return InputChip(
           key: ValueKey<String>(name),
           avatar: CircleAvatar(
@@ -253,13 +253,13 @@ class _ChipDemoState extends State<ChipDemo> {
           });
     }).toList();
 
-    final List<Widget> choiceChips = _materialsB.map<Widget>((String name) {
+    final List<Widget> choiceChips = _materialsB.map<Widget>((final String name) {
       return ChoiceChip(
         key: ValueKey<String>(name),
         backgroundColor: _nameToColor(name, theme),
         label: Text(_capitalize(name)),
         selected: _selectedMaterial == name,
-        onSelected: (bool value) {
+        onSelected: (final bool value) {
           setState(() {
             _selectedMaterial = value ? name : '';
           });
@@ -267,14 +267,14 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }).toList();
 
-    final List<Widget> filterChips = _toolsB.map<Widget>((String name) {
+    final List<Widget> filterChips = _toolsB.map<Widget>((final String name) {
       return FilterChip(
         key: ValueKey<String>(name),
         label: Text(_capitalize(name)),
         selected: _toolsB.contains(name) && _selectedTools.contains(name),
         onSelected: !_toolsB.contains(name)
             ? null
-            : (bool value) {
+            : (final bool value) {
                 setState(() {
                   if (!value) {
                     _selectedTools.remove(name);
@@ -294,7 +294,7 @@ class _ChipDemoState extends State<ChipDemo> {
       allowedActions = allowedActions.intersection(_materialActions[_selectedMaterial]!);
     }
 
-    final List<Widget> actionChips = allowedActions.map<Widget>((String name) {
+    final List<Widget> actionChips = allowedActions.map<Widget>((final String name) {
       return ActionChip(
         label: Text(_capitalize(name)),
         onPressed: () {

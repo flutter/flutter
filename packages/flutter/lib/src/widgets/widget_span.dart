@@ -97,7 +97,7 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions>? dimensions }) {
+  void build(final ui.ParagraphBuilder builder, { final double textScaleFactor = 1.0, final List<PlaceholderDimensions>? dimensions }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
@@ -121,12 +121,12 @@ class WidgetSpan extends PlaceholderSpan {
 
   /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
-  bool visitChildren(InlineSpanVisitor visitor) {
+  bool visitChildren(final InlineSpanVisitor visitor) {
     return visitor(this);
   }
 
   @override
-  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+  InlineSpan? getSpanForPositionVisitor(final TextPosition position, final Accumulator offset) {
     if (position.offset == offset.value) {
       return this;
     }
@@ -135,7 +135,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  int? codeUnitAtVisitor(int index, Accumulator offset) {
+  int? codeUnitAtVisitor(final int index, final Accumulator offset) {
     final int localOffset = index - offset.value;
     assert(localOffset >= 0);
     offset.increment(1);
@@ -143,7 +143,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  RenderComparison compareTo(InlineSpan other) {
+  RenderComparison compareTo(final InlineSpan other) {
     if (identical(this, other)) {
       return RenderComparison.identical;
     }
@@ -171,7 +171,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -192,7 +192,7 @@ class WidgetSpan extends PlaceholderSpan {
 
   /// Returns the text span that contains the given position in the text.
   @override
-  InlineSpan? getSpanForPosition(TextPosition position) {
+  InlineSpan? getSpanForPosition(final TextPosition position) {
     assert(debugAssertIsValid());
     return null;
   }

@@ -71,7 +71,7 @@ Future<TaskResult> flutterToolStartupBenchmarkTask() async {
   return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
 }
 
-String pathWithoutWhereHits(List<String> whats) {
+String pathWithoutWhereHits(final List<String> whats) {
   final String pathEnvironment = Platform.environment['PATH'] ?? '';
   List<String> paths;
   if (Platform.isWindows) {
@@ -118,7 +118,7 @@ class _BenchmarkResult {
 
   final int max; // Milliseconds
 
-  Map<String, dynamic> asMap(String name) {
+  Map<String, dynamic> asMap(final String name) {
     return <String, dynamic>{
       name: mean,
       '${name}_minimum': min,
@@ -141,7 +141,7 @@ class _Benchmark {
 
   final Map<String, String>? environment;
 
-  Future<int> execute(int iteration, int targetIterations) async {
+  Future<int> execute(final int iteration, final int targetIterations) async {
     section('Benchmark $title - ${iteration + 1} / $targetIterations');
     final Stopwatch stopwatch = Stopwatch();
     await inDirectory<void>(directory, () async {

@@ -12,7 +12,7 @@ import '../framework/task_result.dart';
 import '../framework/utils.dart';
 
 /// Combines several TaskFunctions with trivial success value into one.
-TaskFunction combine(List<TaskFunction> tasks) {
+TaskFunction combine(final List<TaskFunction> tasks) {
   return () async {
     for (final TaskFunction task in tasks) {
       final TaskResult result = await task();
@@ -111,7 +111,7 @@ class _FlutterProject {
     return _FlutterProject(Directory(path.join(rootPath)), 'example');
   }
 
-  Future<void> addPlugin(String plugin, {String? pluginPath}) async {
+  Future<void> addPlugin(final String plugin, {final String? pluginPath}) async {
     final File pubspec = pubspecFile;
     String content = await pubspec.readAsString();
     final String dependency =
@@ -247,7 +247,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
     });
   }
 
-  Future<void> runNativeTests(String buildTarget) async {
+  Future<void> runNativeTests(final String buildTarget) async {
     // Native unit tests rely on building the app first to generate necessary
     // build files.
     await build(buildTarget, validateNativeBuildProject: false);
@@ -263,7 +263,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
           throw TaskResult.failure('Platform unit tests failed');
         }
       case 'ios':
-        await testWithNewIOSSimulator('TestNativeUnitTests', (String deviceId) async {
+        await testWithNewIOSSimulator('TestNativeUnitTests', (final String deviceId) async {
           if (!await runXcodeTests(
             platformDirectory: path.join(rootPath, 'ios'),
             destination: 'id=$deviceId',
@@ -304,13 +304,13 @@ public class $pluginClass: NSObject, FlutterPlugin {
   }
 
   static Future<_FlutterProject> create(
-      Directory directory,
-      List<String> options,
-      String target,
+      final Directory directory,
+      final List<String> options,
+      final String target,
       {
-        required String name,
-        required String template,
-        Map<String, String>? environment,
+        required final String name,
+        required final String template,
+        final Map<String, String>? environment,
       }) async {
     await inDirectory(directory, () async {
       await flutter(
@@ -335,7 +335,7 @@ public class $pluginClass: NSObject, FlutterPlugin {
 
   // Make the platform version artificially low to test that the "deployment
   // version too low" warning is never emitted.
-  void _reduceDarwinPluginMinimumVersion(String plugin, String target) {
+  void _reduceDarwinPluginMinimumVersion(final String plugin, final String target) {
     final File podspec = File(path.join(rootPath, target, '$plugin.podspec'));
     if (!podspec.existsSync()) {
       throw TaskResult.failure('podspec file missing at ${podspec.path}');
@@ -363,7 +363,7 @@ s.dependency 'AppAuth', '1.6.0'
     podspec.writeAsStringSync(podspecContent, flush: true);
   }
 
-  Future<void> build(String target, {bool validateNativeBuildProject = true}) async {
+  Future<void> build(final String target, {final bool validateNativeBuildProject = true}) async {
     await inDirectory(Directory(rootPath), () async {
       final String buildOutput =  await evalFlutter('build', options: <String>[
         target,

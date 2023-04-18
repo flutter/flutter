@@ -408,10 +408,10 @@ void main() {
 
     group('java gradle agp compatibility', () {
       Future<FlutterProject?> configureJavaGradleAgpForTest(
-        FakeAndroidSdkWithDir androidSdk, {
-        required String javaV,
-        required String gradleV,
-        required String agpV,
+        final FakeAndroidSdkWithDir androidSdk, {
+        required final String javaV,
+        required final String gradleV,
+        required final String agpV,
       }) async {
         final FlutterProject project = await someProject();
         addRootGradleFile(project.directory, gradleFileContent: () {
@@ -708,7 +708,7 @@ apply plugin: 'kotlin-android'
         );
       });
 
-      void testWithMocks(String description, Future<void> Function() testMethod) {
+      void testWithMocks(final String description, final Future<void> Function() testMethod) {
         testUsingContext(description, testMethod, overrides: <Type, Generator>{
           FileSystem: () => fs,
           ProcessManager: () => FakeProcessManager.any(),
@@ -1200,8 +1200,8 @@ apply plugin: 'kotlin-android'
 }
 
 Future<FlutterProject> someProject({
-  String? androidManifestOverride,
-  bool includePubspec = false,
+  final String? androidManifestOverride,
+  final bool includePubspec = false,
 }) async {
   final Directory directory = globals.fs.directory('some_project');
   directory.childDirectory('.dart_tool')
@@ -1223,7 +1223,7 @@ Future<FlutterProject> someProject({
   return FlutterProject.fromDirectory(directory);
 }
 
-Future<FlutterProject> aPluginProject({bool legacy = true}) async {
+Future<FlutterProject> aPluginProject({final bool legacy = true}) async {
   final Directory directory = globals.fs.directory('plugin_project');
   directory.childDirectory('ios').createSync(recursive: true);
   directory.childDirectory('android').createSync(recursive: true);
@@ -1281,12 +1281,12 @@ flutter:
 /// is in memory.
 @isTest
 void _testInMemory(
-  String description,
-  Future<void> Function() testMethod, {
-  FileSystem? fileSystem,
-  AndroidStudio? androidStudio,
-  ProcessManager? processManager,
-  AndroidSdk? androidSdk,
+  final String description,
+  final Future<void> Function() testMethod, {
+  final FileSystem? fileSystem,
+  final AndroidStudio? androidStudio,
+  final ProcessManager? processManager,
+  final AndroidSdk? androidSdk,
 }) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = fileSystem ?? getFileSystemForPlatform();
@@ -1366,7 +1366,7 @@ void _testInMemory(
 
 /// Transfers files and folders from the local file system's Flutter
 /// installation to an (in-memory) file system used for testing.
-void transfer(FileSystemEntity entity, FileSystem target) {
+void transfer(final FileSystemEntity entity, final FileSystem target) {
   if (entity is Directory) {
     target.directory(entity.absolute.path).createSync(recursive: true);
     for (final FileSystemEntity child in entity.listSync()) {
@@ -1379,15 +1379,15 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   }
 }
 
-void expectExists(FileSystemEntity entity) {
+void expectExists(final FileSystemEntity entity) {
   expect(entity.existsSync(), isTrue);
 }
 
-void expectNotExists(FileSystemEntity entity) {
+void expectNotExists(final FileSystemEntity entity) {
   expect(entity.existsSync(), isFalse);
 }
 
-void addIosProjectFile(Directory directory, {required String Function() projectFileContent}) {
+void addIosProjectFile(final Directory directory, {required final String Function() projectFileContent}) {
   directory
       .childDirectory('ios')
       .childDirectory('Runner.xcodeproj')
@@ -1396,7 +1396,7 @@ void addIosProjectFile(Directory directory, {required String Function() projectF
     ..writeAsStringSync(projectFileContent());
 }
 
-void addAndroidGradleFile(Directory directory, { required String Function() gradleFileContent }) {
+void addAndroidGradleFile(final Directory directory, { required final String Function() gradleFileContent }) {
   directory
       .childDirectory('android')
       .childDirectory('app')
@@ -1405,14 +1405,14 @@ void addAndroidGradleFile(Directory directory, { required String Function() grad
     ..writeAsStringSync(gradleFileContent());
 }
 
-void addRootGradleFile(Directory directory,
-    {required String Function() gradleFileContent}) {
+void addRootGradleFile(final Directory directory,
+    {required final String Function() gradleFileContent}) {
   directory.childDirectory('android').childFile('build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileContent());
 }
 
-void addGradleWrapperFile(Directory directory, String gradleVersion) {
+void addGradleWrapperFile(final Directory directory, final String gradleVersion) {
   directory
       .childDirectory('android')
       .childDirectory(gradle_utils.gradleDirectoryName)
@@ -1437,7 +1437,7 @@ FileSystem getFileSystemForPlatform() {
   );
 }
 
-void addAndroidWithGroup(Directory directory, String id) {
+void addAndroidWithGroup(final Directory directory, final String id) {
   directory.childDirectory('android').childFile('build.gradle')
     ..createSync(recursive: true)
     ..writeAsStringSync(gradleFileWithGroupId(id));
@@ -1472,7 +1472,7 @@ flutter:
   something_else:
 ''';
 
-String projectFileWithBundleId(String id, {String? qualifier}) {
+String projectFileWithBundleId(final String id, {final String? qualifier}) {
   return '''
 97C147061CF9000F007C117D /* Debug */ = {
   isa = XCBuildConfiguration;
@@ -1486,7 +1486,7 @@ String projectFileWithBundleId(String id, {String? qualifier}) {
 ''';
 }
 
-String gradleFileWithApplicationId(String id) {
+String gradleFileWithApplicationId(final String id) {
   return '''
 apply plugin: 'com.android.application'
 android {
@@ -1499,7 +1499,7 @@ android {
 ''';
 }
 
-String gradleFileWithGroupId(String id) {
+String gradleFileWithGroupId(final String id) {
   return '''
 group '$id'
 version '1.0-SNAPSHOT'
@@ -1512,7 +1512,7 @@ android {
 ''';
 }
 
-File androidPluginRegistrant(Directory parent) {
+File androidPluginRegistrant(final Directory parent) {
   return parent.childDirectory('src')
     .childDirectory('main')
     .childDirectory('java')
@@ -1527,9 +1527,9 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   late XcodeProjectInfo xcodeProjectInfo;
 
   @override
-  Future<Map<String, String>> getBuildSettings(String projectPath, {
-    XcodeProjectBuildContext? buildContext,
-    Duration timeout = const Duration(minutes: 1),
+  Future<Map<String, String>> getBuildSettings(final String projectPath, {
+    final XcodeProjectBuildContext? buildContext,
+    final Duration timeout = const Duration(minutes: 1),
   }) async {
     if (buildSettingsByBuildContext[buildContext] == null) {
       return <String, String>{};
@@ -1538,7 +1538,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(final String projectPath, {final String? projectFilename}) async {
     return xcodeProjectInfo;
   }
 
@@ -1547,7 +1547,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 }
 
 class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
-  FakeAndroidSdkWithDir(this._directory, AndroidStudio _androidStudio) {
+  FakeAndroidSdkWithDir(this._directory, final AndroidStudio _androidStudio) {
     _javaPath = '${_androidStudio.javaPath}/bin/java';
   }
   late String _javaPath;
@@ -1572,11 +1572,11 @@ class FakeAndroidSdkWithDir extends Fake implements AndroidSdk {
 
   @override
   String? getJavaVersion({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessUtils processUtils,
+    required final AndroidStudio? androidStudio,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Platform platform,
+    required final ProcessUtils processUtils,
   }) {
     return javaVersion;
   }

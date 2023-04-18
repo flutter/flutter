@@ -12,7 +12,7 @@ class ConstrainedExampleApp extends StatelessWidget {
   const ConstrainedExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Constrained Sample')),
@@ -26,7 +26,7 @@ class ConstrainedExample extends StatelessWidget {
   const ConstrainedExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const int rowCount = 48;
     const int columnCount = 6;
 

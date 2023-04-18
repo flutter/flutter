@@ -29,10 +29,10 @@ class Config {
   /// - reports an empty config in that case
   /// - logs and catches any exceptions
   factory Config(
-    String name, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform
+    final String name, {
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Platform platform
   }) {
     return Config._common(
       name,
@@ -50,10 +50,10 @@ class Config {
   ///
   /// Useful if you want some more control.
   factory Config.managed(
-    String name, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform
+    final String name, {
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Platform platform
   }) {
     return Config._common(
       name,
@@ -65,11 +65,11 @@ class Config {
   }
 
   factory Config._common(
-    String name, {
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    bool managed = false
+    final String name, {
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Platform platform,
+    final bool managed = false
   }) {
     final String filePath = _configPath(platform, fileSystem, name);
     final File file = fileSystem.file(filePath);
@@ -82,10 +82,10 @@ class Config {
   ///
   /// Defaults to [BufferLogger], [MemoryFileSystem], and [name]=test.
   factory Config.test({
-    String name = 'test',
+    final String name = 'test',
     Directory? directory,
-    Logger? logger,
-    bool managed = false
+    final Logger? logger,
+    final bool managed = false
   }) {
     directory ??= MemoryFileSystem.test().directory('/');
     return Config.createForTesting(
@@ -97,7 +97,7 @@ class Config {
 
   /// Test only access to the Config constructor.
   @visibleForTesting
-  Config.createForTesting(File file, Logger logger, {bool managed = false}) : _file = file, _logger = logger {
+  Config.createForTesting(final File file, final Logger logger, {final bool managed = false}) : _file = file, _logger = logger {
     if (!_file.existsSync()) {
       return;
     }
@@ -165,16 +165,16 @@ class Config {
 
   Iterable<String> get keys => _values.keys;
 
-  bool containsKey(String key) => _values.containsKey(key);
+  bool containsKey(final String key) => _values.containsKey(key);
 
-  Object? getValue(String key) => _values[key];
+  Object? getValue(final String key) => _values[key];
 
-  void setValue(String key, Object value) {
+  void setValue(final String key, final Object value) {
     _values[key] = value;
     _flushValues();
   }
 
-  void removeValue(String key) {
+  void removeValue(final String key) {
     _values.remove(key);
     _flushValues();
   }
@@ -190,13 +190,13 @@ class Config {
   // If the searched environment variables are not set, '.' is returned instead.
   //
   // This is different from [FileSystemUtils.homeDirPath].
-  static String _userHomePath(Platform platform) {
+  static String _userHomePath(final Platform platform) {
     final String envKey = platform.isWindows ? 'APPDATA' : 'HOME';
     return platform.environment[envKey] ?? '.';
   }
 
   static String _configPath(
-      Platform platform, FileSystem fileSystem, String name) {
+      final Platform platform, final FileSystem fileSystem, final String name) {
     final String homeDirFile =
         fileSystem.path.join(_userHomePath(platform), '.${kConfigDir}_$name');
     if (platform.isLinux || platform.isMacOS) {

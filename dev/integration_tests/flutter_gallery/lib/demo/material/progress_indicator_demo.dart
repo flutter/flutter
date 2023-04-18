@@ -32,7 +32,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       parent: _controller,
       curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn,
-    )..addStatusListener((AnimationStatus status) {
+    )..addStatusListener((final AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
         _controller.forward();
       } else if (status == AnimationStatus.completed) {
@@ -65,7 +65,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     });
   }
 
-  Widget _buildIndicators(BuildContext context, Widget? child) {
+  Widget _buildIndicators(final BuildContext context, final Widget? child) {
     final List<Widget> indicators = <Widget>[
       const SizedBox(
         width: 200.0,
@@ -95,7 +95,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
     ];
     return Column(
       children: indicators
-        .map<Widget>((Widget c) => Container(
+        .map<Widget>((final Widget c) => Container(
           margin: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
           child: c,
         ))
@@ -104,7 +104,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Progress indicators'),

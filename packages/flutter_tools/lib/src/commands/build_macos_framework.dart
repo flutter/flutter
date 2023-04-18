@@ -119,7 +119,7 @@ class BuildMacOSFrameworkCommand extends BuildFrameworkCommand {
   /// Create podspec that will download and unzip remote engine assets so host apps can leverage CocoaPods
   /// vendored framework caching.
   @visibleForTesting
-  void produceFlutterPodspec(BuildMode mode, Directory modeDirectory, {bool force = false}) {
+  void produceFlutterPodspec(final BuildMode mode, final Directory modeDirectory, {final bool force = false}) {
     final Status status = globals.logger.startProgress(' ├─Creating FlutterMacOS.podspec...');
     try {
       final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
@@ -177,8 +177,8 @@ end
   }
 
   Future<void> _produceAppFramework(
-    BuildInfo buildInfo,
-    Directory outputBuildDirectory,
+    final BuildInfo buildInfo,
+    final Directory outputBuildDirectory,
   ) async {
     final Status status = globals.logger.startProgress(
       ' ├─Building App.xcframework and FlutterMacOS.xcframework...',
@@ -252,9 +252,9 @@ end
   }
 
   Future<void> _producePlugins(
-    String xcodeBuildConfiguration,
-    Directory buildOutput,
-    Directory modeDirectory,
+    final String xcodeBuildConfiguration,
+    final Directory buildOutput,
+    final Directory modeDirectory,
   ) async {
     final Status status = globals.logger.startProgress(' ├─Building plugins...');
     try {

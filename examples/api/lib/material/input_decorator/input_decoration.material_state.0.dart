@@ -12,7 +12,7 @@ class MaterialStateExampleApp extends StatelessWidget {
   const MaterialStateExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InputDecoration Sample')),
@@ -26,12 +26,12 @@ class MaterialStateExample extends StatelessWidget {
   const MaterialStateExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return TextFormField(
       initialValue: 'abc',
       decoration: InputDecoration(
         prefixIcon: const Icon(Icons.person),
-        prefixIconColor: MaterialStateColor.resolveWith((Set<MaterialState> states) {
+        prefixIconColor: MaterialStateColor.resolveWith((final Set<MaterialState> states) {
           if (states.contains(MaterialState.focused)) {
             return Colors.green;
           }

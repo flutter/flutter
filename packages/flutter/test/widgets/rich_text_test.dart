@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RichText with recognizers without handlers does not throw', (WidgetTester tester) async {
+  testWidgets('RichText with recognizers without handlers does not throw', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -40,7 +40,7 @@ void main() {
     ));
   });
 
-  testWidgets('TextSpan Locale works', (WidgetTester tester) async {
+  testWidgets('TextSpan Locale works', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -89,7 +89,7 @@ void main() {
     ));
   });
 
-  testWidgets('TextSpan spellOut works', (WidgetTester tester) async {
+  testWidgets('TextSpan spellOut works', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -138,7 +138,7 @@ void main() {
     ));
   });
 
-  testWidgets('WidgetSpan calculate correct intrinsic heights', (WidgetTester tester) async {
+  testWidgets('WidgetSpan calculate correct intrinsic heights', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -170,7 +170,7 @@ void main() {
     expect(tester.getSize(find.byType(IntrinsicHeight)).height, 3 * 16);
   });
 
-  testWidgets('RichText implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('RichText implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RichText(
       text: const TextSpan(text: 'rich text'),
@@ -189,8 +189,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, unorderedMatches(<dynamic>[

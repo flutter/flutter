@@ -12,7 +12,7 @@ class FocusExampleApp extends StatelessWidget {
   const FocusExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: FocusExample(),
     );
@@ -33,10 +33,10 @@ class FocusableText extends StatelessWidget {
   final bool autofocus;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Focus(
       autofocus: autofocus,
-      child: Builder(builder: (BuildContext context) {
+      child: Builder(builder: (final BuildContext context) {
         // The contents of this Builder are being made focusable. It is inside
         // of a Builder because the builder provides the correct context
         // variable for Focus.of() to be able to find the Focus widget that is
@@ -59,10 +59,10 @@ class FocusExample extends StatelessWidget {
   const FocusExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemBuilder: (BuildContext context, int index) => FocusableText(
+        itemBuilder: (final BuildContext context, final int index) => FocusableText(
           'Item $index',
           autofocus: index == 0,
         ),

@@ -79,8 +79,8 @@ import 'dart:async';
 /// `FutureOr<T> Function(Object error, StackTrace stackTrace)` otherwise an
 /// [ArgumentError] will be thrown synchronously.
 Future<T> asyncGuard<T>(
-  Future<T> Function() fn, {
-  Function? onError,
+  final Future<T> Function() fn, {
+  final Function? onError,
 }) {
   if (onError != null &&
       onError is! _UnaryOnError<T> &&
@@ -91,7 +91,7 @@ Future<T> asyncGuard<T>(
   }
   final Completer<T> completer = Completer<T>();
 
-  void handleError(Object e, StackTrace s) {
+  void handleError(final Object e, final StackTrace s) {
     if (completer.isCompleted) {
       return;
     }
@@ -117,7 +117,7 @@ Future<T> asyncGuard<T>(
     } catch (e, s) { // ignore: avoid_catches_without_on_clauses, forwards to Future
       handleError(e, s);
     }
-  }, onError: (Object e, StackTrace s) { // ignore: deprecated_member_use
+  }, onError: (final Object e, final StackTrace s) { // ignore: deprecated_member_use
     handleError(e, s);
   });
 

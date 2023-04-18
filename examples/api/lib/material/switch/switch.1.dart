@@ -12,7 +12,7 @@ class SwitchApp extends StatelessWidget {
   const SwitchApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
@@ -36,9 +36,9 @@ class _SwitchExampleState extends State<SwitchExample> {
   bool light = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final MaterialStateProperty<Color?> trackColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
+      (final Set<MaterialState> states) {
         // Track color when the switch is selected.
         if (states.contains(MaterialState.selected)) {
           return Colors.amber;
@@ -50,7 +50,7 @@ class _SwitchExampleState extends State<SwitchExample> {
       },
     );
     final MaterialStateProperty<Color?> overlayColor = MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) {
+      (final Set<MaterialState> states) {
         // Material color when switch is selected.
         if (states.contains(MaterialState.selected)) {
           return Colors.amber.withOpacity(0.54);
@@ -72,7 +72,7 @@ class _SwitchExampleState extends State<SwitchExample> {
       overlayColor: overlayColor,
       trackColor: trackColor,
       thumbColor: const MaterialStatePropertyAll<Color>(Colors.black),
-      onChanged: (bool value) {
+      onChanged: (final bool value) {
         // This is called when the user toggles the switch.
         setState(() {
           light = value;

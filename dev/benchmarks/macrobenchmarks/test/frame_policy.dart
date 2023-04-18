@@ -13,12 +13,12 @@ void main() {
   final IntegrationTestWidgetsFlutterBinding binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   testWidgets(
     'Frame Counter and Input Delay for benchmarkLive',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SimpleScroll())));
       await tester.pumpAndSettle();
       final Offset location = tester.getCenter(find.byType(ListView));
       int frameCount = 0;
-      void frameCounter(Duration elapsed) {
+      void frameCounter(final Duration elapsed) {
         frameCount += 1;
       }
       tester.binding.addPersistentFrameCallback(frameCounter);
@@ -83,12 +83,12 @@ Map<String, dynamic> _summarizeResult(
 ) {
   assert(delays.length > 1);
   final List<int> delayedInMicro = delays.map<int>(
-    (Duration delay) => delay.inMicroseconds,
+    (final Duration delay) => delay.inMicroseconds,
   ).toList();
   final List<int> delayedInMicroSorted = List<int>.from(delayedInMicro)..sort();
   final int index90th = (delayedInMicroSorted.length * 0.90).round();
   final int percentile90th = delayedInMicroSorted[index90th];
-  final int sum = delayedInMicroSorted.reduce((int a, int b) => a + b);
+  final int sum = delayedInMicroSorted.reduce((final int a, final int b) => a + b);
   final double averageDelay = sum.toDouble() / delayedInMicroSorted.length;
   return <String, dynamic>{
     'frame_count': frameCount,

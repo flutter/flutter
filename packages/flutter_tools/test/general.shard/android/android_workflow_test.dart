@@ -488,7 +488,7 @@ Review licenses that have not been accepted (y/N)?
     validationResult = await androidValidator.validate();
     expect(validationResult.type, ValidationType.partial); // No Java binary
     expect(
-      validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
+      validationResult.messages.any((final ValidationMessage message) => message.message == errorMessage),
       isFalse,
     );
   });
@@ -564,7 +564,7 @@ Review licenses that have not been accepted (y/N)?
     );
     expect(
       validationResult.messages.any(
-        (ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
+        (final ValidationMessage message) => message.message.contains('Unable to locate Android SDK')
       ),
       false,
     );
@@ -583,7 +583,7 @@ Review licenses that have not been accepted (y/N)?
 
     expect(
       validationResult.messages.any(
-        (ValidationMessage message) => message.message.contains('flutter config --android-sdk')
+        (final ValidationMessage message) => message.message.contains('flutter config --android-sdk')
       ),
       true,
     );
@@ -650,7 +650,7 @@ class ThrowingStdin<T> extends Fake implements IOSink {
   final Exception exception;
 
   @override
-  Future<dynamic> addStream(Stream<List<int>> stream) {
+  Future<dynamic> addStream(final Stream<List<int>> stream) {
     return Future<T>.error(exception);
   }
 }

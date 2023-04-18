@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (WidgetTester tester) async {
+  testWidgets('Verify that a tap on modal barrier dismisses an action sheet', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -32,7 +32,7 @@ void main() {
     expect(find.text('Action Sheet'), findsNothing);
   });
 
-  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (WidgetTester tester) async {
+  testWidgets('Verify that a tap on title section (not buttons) does not dismiss an action sheet', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -52,7 +52,7 @@ void main() {
     expect(find.text('Action Sheet'), findsOneWidget);
   });
 
-  testWidgets('Action sheet destructive text style', (WidgetTester tester) async {
+  testWidgets('Action sheet destructive text style', (final WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         CupertinoActionSheetAction(
@@ -73,7 +73,7 @@ void main() {
     ));
   });
 
-  testWidgets('Action sheet dark mode', (WidgetTester tester) async {
+  testWidgets('Action sheet dark mode', (final WidgetTester tester) async {
     final Widget action = CupertinoActionSheetAction(
       child: const Text('action'),
       onPressed: () {},
@@ -82,7 +82,7 @@ void main() {
     Brightness brightness = Brightness.light;
     late StateSetter stateSetter;
 
-    TextStyle actionTextStyle(String text) {
+    TextStyle actionTextStyle(final String text) {
       return tester.widget<DefaultTextStyle>(
         find.descendant(
           of: find.widgetWithText(CupertinoActionSheetAction, text),
@@ -94,7 +94,7 @@ void main() {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (final BuildContext context, final StateSetter setter) {
             stateSetter = setter;
             return CupertinoTheme(
               data: CupertinoThemeData(
@@ -130,7 +130,7 @@ void main() {
     );
   });
 
-  testWidgets('Action sheet default text style', (WidgetTester tester) async {
+  testWidgets('Action sheet default text style', (final WidgetTester tester) async {
     await tester.pumpWidget(
       boilerplate(
         CupertinoActionSheetAction(
@@ -146,7 +146,7 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Action sheet text styles are correct when both title and message are included', (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when both title and message are included', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -166,7 +166,7 @@ void main() {
     expect(messageStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when title but no message is included', (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when title but no message is included', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -183,7 +183,7 @@ void main() {
     expect(titleStyle.style.fontWeight, FontWeight.w400);
   });
 
-  testWidgets('Action sheet text styles are correct when message but no title is included', (WidgetTester tester) async {
+  testWidgets('Action sheet text styles are correct when message but no title is included', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         const CupertinoActionSheet(
@@ -200,7 +200,7 @@ void main() {
     expect(messageStyle.style.fontWeight, FontWeight.w600);
   });
 
-  testWidgets('Content section but no actions', (WidgetTester tester) async {
+  testWidgets('Content section but no actions', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -237,7 +237,7 @@ void main() {
     );
   });
 
-  testWidgets('Actions but no content section', (WidgetTester tester) async {
+  testWidgets('Actions but no content section', (final WidgetTester tester) async {
     final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -263,7 +263,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     final Finder finder = find.byElementPredicate(
-      (Element element) {
+      (final Element element) {
         return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
       },
     );
@@ -285,11 +285,11 @@ void main() {
     );
   });
 
-  testWidgets('Action section is scrollable', (WidgetTester tester) async {
+  testWidgets('Action section is scrollable', (final WidgetTester tester) async {
     final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
+        Builder(builder: (final BuildContext context) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(
@@ -350,12 +350,12 @@ void main() {
     expect(tester.getSize(find.widgetWithText(CupertinoActionSheetAction, 'Five')).height, equals(92.0));
   });
 
-  testWidgets('Content section is scrollable', (WidgetTester tester) async {
+  testWidgets('Content section is scrollable', (final WidgetTester tester) async {
     final ScrollController messageScrollController = ScrollController();
     late double screenHeight;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
+        Builder(builder: (final BuildContext context) {
           screenHeight = MediaQuery.sizeOf(context).height;
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
@@ -392,7 +392,7 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoActionSheet)).height, screenHeight);
   });
 
-  testWidgets('CupertinoActionSheet scrollbars controllers should be different', (WidgetTester tester) async {
+  testWidgets('CupertinoActionSheet scrollbars controllers should be different', (final WidgetTester tester) async {
     // https://github.com/flutter/flutter/pull/81278
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
@@ -416,17 +416,17 @@ void main() {
       find.descendant(
         of: find.byType(CupertinoActionSheet),
         matching: find.byType(CupertinoScrollbar),
-      ).evaluate().map((Element e) => e.widget as CupertinoScrollbar).toList();
+      ).evaluate().map((final Element e) => e.widget as CupertinoScrollbar).toList();
 
     expect(scrollbars.length, 2);
     expect(scrollbars[0].controller != scrollbars[1].controller, isTrue);
   });
 
-  testWidgets('Tap on button calls onPressed', (WidgetTester tester) async {
+  testWidgets('Tap on button calls onPressed', (final WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
+        Builder(builder: (final BuildContext context) {
           return CupertinoActionSheet(
             actions: <Widget>[
               CupertinoActionSheetAction(
@@ -459,7 +459,7 @@ void main() {
     expect(find.text('One'), findsNothing);
   });
 
-  testWidgets('Action sheet width is correct when given infinite horizontal space', (WidgetTester tester) async {
+  testWidgets('Action sheet width is correct when given infinite horizontal space', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Row(
@@ -487,7 +487,7 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoActionSheet)).width, 600.0);
   });
 
-  testWidgets('Action sheet height is correct when given infinite vertical space', (WidgetTester tester) async {
+  testWidgets('Action sheet height is correct when given infinite vertical space', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         Column(
@@ -515,7 +515,7 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoActionSheet)).height, moreOrLessEquals(132.33333333333334));
   });
 
-  testWidgets('1 action button with cancel button', (WidgetTester tester) async {
+  testWidgets('1 action button with cancel button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -542,7 +542,7 @@ void main() {
     expect(findScrollableActionsSectionRenderBox(tester).size.height, 56.0);
   });
 
-  testWidgets('2 action buttons with cancel button', (WidgetTester tester) async {
+  testWidgets('2 action buttons with cancel button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -572,7 +572,7 @@ void main() {
     expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(112.33333333333331));
   });
 
-  testWidgets('3 action buttons with cancel button', (WidgetTester tester) async {
+  testWidgets('3 action buttons with cancel button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -606,7 +606,7 @@ void main() {
     expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(168.66666666666669));
   });
 
-  testWidgets('4+ action buttons with cancel button', (WidgetTester tester) async {
+  testWidgets('4+ action buttons with cancel button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -644,7 +644,7 @@ void main() {
     expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.33333333333337));
   });
 
-  testWidgets('1 action button without cancel button', (WidgetTester tester) async {
+  testWidgets('1 action button without cancel button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -666,7 +666,7 @@ void main() {
     expect(findScrollableActionsSectionRenderBox(tester).size.height, 56.0);
   });
 
-  testWidgets('2+ action buttons without cancel button', (WidgetTester tester) async {
+  testWidgets('2+ action buttons without cancel button', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -692,7 +692,7 @@ void main() {
     expect(findScrollableActionsSectionRenderBox(tester).size.height, moreOrLessEquals(84.33333333333337));
   });
 
-  testWidgets('Action sheet with just cancel button is correct', (WidgetTester tester) async {
+  testWidgets('Action sheet with just cancel button is correct', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -712,11 +712,11 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoActionSheet)).width, 600.0);
   });
 
-  testWidgets('Cancel button tap calls onPressed', (WidgetTester tester) async {
+  testWidgets('Cancel button tap calls onPressed', (final WidgetTester tester) async {
     bool wasPressed = false;
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
+        Builder(builder: (final BuildContext context) {
           return CupertinoActionSheet(
             cancelButton: CupertinoActionSheetAction(
               child: const Text('Cancel'),
@@ -747,7 +747,7 @@ void main() {
     expect(find.text('Cancel'), findsNothing);
   });
 
-  testWidgets('Layout is correct when cancel button is present', (WidgetTester tester) async {
+  testWidgets('Layout is correct when cancel button is present', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -784,7 +784,7 @@ void main() {
     expect(tester.getBottomLeft(find.widgetWithText(CupertinoActionSheetAction, 'Two')).dy, 526.0);
   });
 
-  testWidgets('Enter/exit animation is correct', (WidgetTester tester) async {
+  testWidgets('Enter/exit animation is correct', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -861,7 +861,7 @@ void main() {
     expect(find.byType(CupertinoActionSheet), findsNothing);
   });
 
-  testWidgets('Modal barrier is pressed during transition', (WidgetTester tester) async {
+  testWidgets('Modal barrier is pressed during transition', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -919,7 +919,7 @@ void main() {
   });
 
 
-  testWidgets('Action sheet semantics', (WidgetTester tester) async {
+  testWidgets('Action sheet semantics', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1028,12 +1028,12 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet', (WidgetTester tester) async {
+  testWidgets('Conflicting scrollbars are not applied by ScrollBehavior to CupertinoActionSheet', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/83819
     final ScrollController actionScrollController = ScrollController();
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
-        Builder(builder: (BuildContext context) {
+        Builder(builder: (final BuildContext context) {
           return MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 3.0),
             child: CupertinoActionSheet(
@@ -1068,7 +1068,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), findsNWidgets(2));
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Hovering over Cupertino action sheet action updates cursor to clickable on Web', (WidgetTester tester) async {
+  testWidgets('Hovering over Cupertino action sheet action updates cursor to clickable on Web', (final WidgetTester tester) async {
     await tester.pumpWidget(
       createAppWithButtonThatLaunchesActionSheet(
         CupertinoActionSheet(
@@ -1101,9 +1101,9 @@ void main() {
   });
 }
 
-RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
+RenderBox findScrollableActionsSectionRenderBox(final WidgetTester tester) {
   final RenderObject actionsSection = tester.renderObject(
-    find.byElementPredicate((Element element) {
+    find.byElementPredicate((final Element element) {
       return element.widget.runtimeType.toString() == '_CupertinoAlertActionSection';
     }),
   );
@@ -1111,15 +1111,15 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
   return actionsSection as RenderBox;
 }
 
-Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
+Widget createAppWithButtonThatLaunchesActionSheet(final Widget actionSheet) {
   return CupertinoApp(
     home: Center(
-      child: Builder(builder: (BuildContext context) {
+      child: Builder(builder: (final BuildContext context) {
         return CupertinoButton(
           onPressed: () {
             showCupertinoModalPopup<void>(
               context: context,
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return actionSheet;
               },
             );
@@ -1131,7 +1131,7 @@ Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {
   );
 }
 
-Widget boilerplate(Widget child) {
+Widget boilerplate(final Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: child,

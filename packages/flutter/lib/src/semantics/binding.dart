@@ -53,7 +53,7 @@ mixin SemanticsBinding on BindingBase {
   ///  * [removeSemanticsEnabledListener] to remove the listener again.
   ///  * [ValueNotifier.addListener], which documents how and when listeners are
   ///    called.
-  void addSemanticsEnabledListener(VoidCallback listener) {
+  void addSemanticsEnabledListener(final VoidCallback listener) {
     _semanticsEnabled.addListener(listener);
   }
 
@@ -63,7 +63,7 @@ mixin SemanticsBinding on BindingBase {
   ///
   ///  * [ValueNotifier.removeListener], which documents how listeners are
   ///    removed.
-  void removeSemanticsEnabledListener(VoidCallback listener) {
+  void removeSemanticsEnabledListener(final VoidCallback listener) {
     _semanticsEnabled.removeListener(listener);
   }
 
@@ -111,7 +111,7 @@ mixin SemanticsBinding on BindingBase {
     }
   }
 
-  void _handleSemanticsAction(int id, ui.SemanticsAction action, ByteData? args) {
+  void _handleSemanticsAction(final int id, final ui.SemanticsAction action, final ByteData? args) {
     performSemanticsAction(SemanticsActionEvent(
       nodeId: id,
       type: action,
@@ -132,7 +132,7 @@ mixin SemanticsBinding on BindingBase {
   ///
   /// See [dart:ui.PlatformDispatcher.onSemanticsAction].
   @protected
-  void performSemanticsAction(SemanticsActionEvent action);
+  void performSemanticsAction(final SemanticsActionEvent action);
 
   /// The currently active set of [AccessibilityFeatures].
   ///

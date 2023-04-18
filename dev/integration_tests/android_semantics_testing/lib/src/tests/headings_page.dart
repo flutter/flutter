@@ -15,7 +15,7 @@ class HeadingsPage extends StatelessWidget {
   static const ValueKey<String> _bodyTextKey = ValueKey<String>(bodyTextKeyValue);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: const BackButton(key: ValueKey<String>('back')),

@@ -77,7 +77,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   ///
   /// Standard Material [TextSelectionToolbar]s have buttons with different
   /// padding depending on their position in the toolbar.
-  static EdgeInsets getPadding(int index, int total) {
+  static EdgeInsets getPadding(final int index, final int total) {
     assert(total > 0 && index >= 0 && index < total);
     final _TextSelectionToolbarItemPosition position = _getPosition(index, total);
     return EdgeInsets.only(
@@ -86,7 +86,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     );
   }
 
-  static double _getLeftPadding(_TextSelectionToolbarItemPosition position) {
+  static double _getLeftPadding(final _TextSelectionToolbarItemPosition position) {
     if (position == _TextSelectionToolbarItemPosition.first
         || position == _TextSelectionToolbarItemPosition.only) {
       return _kEndPadding;
@@ -94,7 +94,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     return _kMiddlePadding;
   }
 
-  static double _getRightPadding(_TextSelectionToolbarItemPosition position) {
+  static double _getRightPadding(final _TextSelectionToolbarItemPosition position) {
     if (position == _TextSelectionToolbarItemPosition.last
         || position == _TextSelectionToolbarItemPosition.only) {
       return _kEndPadding;
@@ -102,7 +102,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
     return _kMiddlePadding;
   }
 
-  static _TextSelectionToolbarItemPosition _getPosition(int index, int total) {
+  static _TextSelectionToolbarItemPosition _getPosition(final int index, final int total) {
     if (index == 0) {
       return total == 1
           ? _TextSelectionToolbarItemPosition.only
@@ -117,10 +117,10 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   /// Returns a copy of the current [TextSelectionToolbarTextButton] instance
   /// with specific overrides.
   TextSelectionToolbarTextButton copyWith({
-    Widget? child,
-    VoidCallback? onPressed,
-    EdgeInsets? padding,
-    AlignmentGeometry? alignment,
+    final Widget? child,
+    final VoidCallback? onPressed,
+    final EdgeInsets? padding,
+    final AlignmentGeometry? alignment,
   }) {
     return TextSelectionToolbarTextButton(
       onPressed: onPressed ?? this.onPressed,
@@ -131,7 +131,7 @@ class TextSelectionToolbarTextButton extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // TODO(hansmuller): Should be colorScheme.onSurface
     final ThemeData theme = Theme.of(context);
     final bool isDark = theme.colorScheme.brightness == Brightness.dark;

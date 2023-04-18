@@ -89,11 +89,11 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
   CupertinoAdaptiveTextSelectionToolbar.editable({
     super.key,
-    required ClipboardStatus clipboardStatus,
-    required VoidCallback? onCopy,
-    required VoidCallback? onCut,
-    required VoidCallback? onPaste,
-    required VoidCallback? onSelectAll,
+    required final ClipboardStatus clipboardStatus,
+    required final VoidCallback? onCopy,
+    required final VoidCallback? onCut,
+    required final VoidCallback? onPaste,
+    required final VoidCallback? onSelectAll,
     required this.anchors,
   }) : children = null,
        buttonItems = EditableText.getEditableButtonItems(
@@ -117,7 +117,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.selectable}
   CupertinoAdaptiveTextSelectionToolbar.editableText({
     super.key,
-    required EditableTextState editableTextState,
+    required final EditableTextState editableTextState,
   }) : children = null,
        buttonItems = editableTextState.contextMenuButtonItems,
        anchors = editableTextState.contextMenuAnchors;
@@ -135,9 +135,9 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// {@macro flutter.cupertino.CupertinoAdaptiveTextSelectionToolbar.editableText}
   CupertinoAdaptiveTextSelectionToolbar.selectable({
     super.key,
-    required VoidCallback onCopy,
-    required VoidCallback onSelectAll,
-    required SelectionGeometry selectionGeometry,
+    required final VoidCallback onCopy,
+    required final VoidCallback onSelectAll,
+    required final SelectionGeometry selectionGeometry,
     required this.anchors,
   }) : children = null,
        buttonItems = SelectableRegion.getSelectableButtonItems(
@@ -174,12 +174,12 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   /// * [AdaptiveTextSelectionToolbar.getAdaptiveButtons], which is the Material
   ///   equivalent of this class and builds only the Material buttons. It
   ///   includes a live example of using `getAdaptiveButtons`.
-  static Iterable<Widget> getAdaptiveButtons(BuildContext context, List<ContextMenuButtonItem> buttonItems) {
+  static Iterable<Widget> getAdaptiveButtons(final BuildContext context, final List<ContextMenuButtonItem> buttonItems) {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
-        return buttonItems.map((ContextMenuButtonItem buttonItem) {
+        return buttonItems.map((final ContextMenuButtonItem buttonItem) {
           return CupertinoTextSelectionToolbarButton.buttonItem(
             buttonItem: buttonItem,
           );
@@ -187,7 +187,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
       case TargetPlatform.linux:
       case TargetPlatform.windows:
       case TargetPlatform.macOS:
-        return buttonItems.map((ContextMenuButtonItem buttonItem) {
+        return buttonItems.map((final ContextMenuButtonItem buttonItem) {
           return CupertinoDesktopTextSelectionToolbarButton.buttonItem(
             buttonItem: buttonItem,
           );
@@ -196,7 +196,7 @@ class CupertinoAdaptiveTextSelectionToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // If there aren't any buttons to build, build an empty toolbar.
     if ((children?.isEmpty ?? false) || (buttonItems?.isEmpty ?? false)) {
       return const SizedBox.shrink();

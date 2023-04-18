@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Sliver appBars - floating and pinned - correct elevation', (WidgetTester tester) async {
+  testWidgets('Sliver appBars - floating and pinned - correct elevation', (final WidgetTester tester) async {
     await tester.pumpWidget(Localizations(
         locale: const Locale('en', 'us'),
         delegates: const <LocalizationsDelegate<dynamic>>[
@@ -46,7 +46,7 @@ void main() {
     expect(renderObject.elevation, 0.0);
   });
 
-  testWidgets('Sliver appbars - floating and pinned - correct semantics', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating and pinned - correct semantics', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Localizations(
         locale: const Locale('en', 'us'),
@@ -69,7 +69,7 @@ void main() {
                 SliverFixedExtentList(
                   itemExtent: 100.0,
                   delegate: SliverChildBuilderDelegate(
-                    (BuildContext _, int index) {
+                    (final BuildContext _, final int index) {
                       return Container(
                         height: 100.0,
                         color: index.isEven ? Colors.red : Colors.yellow,
@@ -241,7 +241,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (WidgetTester tester) async {
+  testWidgets('Sliver appbars - floating and pinned - second app bar stacks below', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Localizations(
@@ -302,7 +302,7 @@ void main() {
     expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
   });
 
-  testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
+  testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.
     final ScrollController controller = ScrollController();
     const double availableHeight = 50.0;
@@ -321,7 +321,7 @@ void main() {
                   expandedHeight: 120.0,
                 ),
                 SliverList(
-                  delegate: SliverChildListDelegate(List<Widget>.generate(20, (int i) {
+                  delegate: SliverChildListDelegate(List<Widget>.generate(20, (final int i) {
                     return SizedBox(
                       height: 100.0,
                       child: Text('Tile $i'),
@@ -347,7 +347,7 @@ void main() {
     expect(render.geometry!.layoutExtent, 0.0);
   });
 
-  testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+  testWidgets('Pinned and floating SliverAppBar sticks to top the content is scroll down', (final WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(
@@ -381,7 +381,7 @@ void main() {
     expect(render.geometry!.paintOrigin, -scrollDistance);
   });
 
-  testWidgets('Floating SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+  testWidgets('Floating SliverAppBar sticks to top the content is scroll down', (final WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(
@@ -414,7 +414,7 @@ void main() {
     expect(render.geometry!.paintOrigin, -scrollDistance);
   });
 
-  testWidgets('Pinned SliverAppBar sticks to top the content is scroll down', (WidgetTester tester) async {
+  testWidgets('Pinned SliverAppBar sticks to top the content is scroll down', (final WidgetTester tester) async {
     const Key anchor = Key('drag');
     await tester.pumpWidget(
       MaterialApp(

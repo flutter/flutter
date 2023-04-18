@@ -13,7 +13,7 @@ class IVBuilderExampleApp extends StatelessWidget {
   const IVBuilderExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -38,7 +38,7 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
 
   // Returns the axis aligned bounding box for the given Quad, which might not
   // be axis aligned.
-  Rect axisAlignedBoundingBox(Quad quad) {
+  Rect axisAlignedBoundingBox(final Quad quad) {
     double xMin = quad.point0.x;
     double xMax = quad.point0.x;
     double yMin = quad.point0.y;
@@ -65,18 +65,18 @@ class _IVBuilderExampleState extends State<_IVBuilderExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (final BuildContext context, final BoxConstraints constraints) {
           return InteractiveViewer.builder(
             boundaryMargin: const EdgeInsets.all(double.infinity),
-            builder: (BuildContext context, Quad viewport) {
+            builder: (final BuildContext context, final Quad viewport) {
               return _TableBuilder(
                 cellWidth: _cellWidth,
                 cellHeight: _cellHeight,
                 viewport: axisAlignedBoundingBox(viewport),
-                builder: (BuildContext context, int row, int column) {
+                builder: (final BuildContext context, final int row, final int column) {
                   return Container(
                     height: _cellHeight,
                     width: _cellWidth,
@@ -111,7 +111,7 @@ class _TableBuilder extends StatelessWidget {
   final _CellBuilder builder;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final int firstRow = (viewport.top / cellHeight).floor();
     final int lastRow = (viewport.bottom / cellHeight).ceil();
     final int firstCol = (viewport.left / cellWidth).floor();

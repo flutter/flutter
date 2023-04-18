@@ -75,18 +75,18 @@ class CupertinoScrollbar extends RawScrollbar {
     super.key,
     required super.child,
     super.controller,
-    bool? thumbVisibility,
+    final bool? thumbVisibility,
     double super.thickness = defaultThickness,
     this.thicknessWhileDragging = defaultThicknessWhileDragging,
     Radius super.radius = defaultRadius,
     this.radiusWhileDragging = defaultRadiusWhileDragging,
-    ScrollNotificationPredicate? notificationPredicate,
+    final ScrollNotificationPredicate? notificationPredicate,
     super.scrollbarOrientation,
     @Deprecated(
       'Use thumbVisibility instead. '
       'This feature was deprecated after v2.9.0-1.0.pre.',
     )
-    bool? isAlwaysShown,
+    final bool? isAlwaysShown,
   }) : assert(thickness < double.infinity),
        assert(thicknessWhileDragging < double.infinity),
        assert(
@@ -179,7 +179,7 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
   // on the scrollbar thumb and then drags the scrollbar without releasing.
 
   @override
-  void handleThumbPressStart(Offset localPosition) {
+  void handleThumbPressStart(final Offset localPosition) {
     super.handleThumbPressStart(localPosition);
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
@@ -200,12 +200,12 @@ class _CupertinoScrollbarState extends RawScrollbarState<CupertinoScrollbar> {
     }
     super.handleThumbPress();
     _thicknessAnimationController.forward().then<void>(
-          (_) => HapticFeedback.mediumImpact(),
+          (final _) => HapticFeedback.mediumImpact(),
     );
   }
 
   @override
-  void handleThumbPressEnd(Offset localPosition, Velocity velocity) {
+  void handleThumbPressEnd(final Offset localPosition, final Velocity velocity) {
     final Axis? direction = getScrollbarDirection();
     if (direction == null) {
       return;

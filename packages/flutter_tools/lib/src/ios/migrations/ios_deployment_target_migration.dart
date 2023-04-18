@@ -9,7 +9,7 @@ import '../../xcode_project.dart';
 /// Update the minimum iOS deployment version to the minimum allowed by Xcode without causing a warning.
 class IOSDeploymentTargetMigration extends ProjectMigrator {
   IOSDeploymentTargetMigration(
-    IosProject project,
+    final IosProject project,
     super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
         _podfile = project.podfile,
@@ -41,7 +41,7 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateFileContents(String fileContents) {
+  String migrateFileContents(final String fileContents) {
     const String minimumOSVersionOriginal8 = '''
   <key>MinimumOSVersion</key>
   <string>8.0</string>
@@ -61,7 +61,7 @@ class IOSDeploymentTargetMigration extends ProjectMigrator {
   }
 
   @override
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     // Xcode project file changes.
     const String deploymentTargetOriginal8 = 'IPHONEOS_DEPLOYMENT_TARGET = 8.0;';
     const String deploymentTargetOriginal9 = 'IPHONEOS_DEPLOYMENT_TARGET = 9.0;';

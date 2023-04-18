@@ -97,7 +97,7 @@ void main() {
       ),
     );
     expect(
-      flutterError.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+      flutterError.diagnostics.singleWhere((final DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
       'This usually indicates an error in the Flutter framework itself.',
     );
   });
@@ -105,7 +105,7 @@ void main() {
 
 class TestReentrantPaintingErrorRenderBox extends RenderBox {
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     // Cause a reentrant painting bug that would show up as a stack overflow if
     // it was not for debugging checks in RenderObject.
     context.paintChild(this, offset);

@@ -15,7 +15,7 @@ void main() {
     debugDisableShadows = true;
   });
 
-  testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
+  testWidgets('Shadows on BoxDecoration', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -45,7 +45,7 @@ void main() {
   });
 
   group('Shadows on ShapeDecoration', () {
-    Widget build(int elevation) {
+    Widget build(final int elevation) {
       return Center(
         child: RepaintBoundary(
           child: Container(
@@ -61,7 +61,7 @@ void main() {
       );
     }
     for (final int elevation in kElevationToShadow.keys) {
-      testWidgets('elevation $elevation', (WidgetTester tester) async {
+      testWidgets('elevation $elevation', (final WidgetTester tester) async {
         debugDisableShadows = false;
         await tester.pumpWidget(build(elevation));
         await expectLater(
@@ -73,7 +73,7 @@ void main() {
     }
   });
 
-  testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
+  testWidgets('Shadows with PhysicalLayer', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -107,7 +107,7 @@ void main() {
   });
 
   group('Shadows with PhysicalShape', () {
-    Widget build(double elevation) {
+    Widget build(final double elevation) {
       return Center(
         child: RepaintBoundary(
           child: Container(
@@ -132,7 +132,7 @@ void main() {
     }
 
     for (final int elevation in kElevationToShadow.keys) {
-      testWidgets('elevation $elevation', (WidgetTester tester) async {
+      testWidgets('elevation $elevation', (final WidgetTester tester) async {
         debugDisableShadows = false;
         await tester.pumpWidget(build(elevation.toDouble()));
         await expectLater(

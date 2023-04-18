@@ -37,7 +37,7 @@ class MaterialTextSelectionHandleControls extends MaterialTextSelectionControls 
 class MaterialTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Material handle.
   @override
-  Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
+  Size getHandleSize(final double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
   @Deprecated(
@@ -46,14 +46,14 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   )
   @override
   Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
+    final BuildContext context,
+    final Rect globalEditableRegion,
+    final double textLineHeight,
+    final Offset selectionMidpoint,
+    final List<TextSelectionPoint> endpoints,
+    final TextSelectionDelegate delegate,
+    final ClipboardStatusNotifier? clipboardStatus,
+    final Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
       globalEditableRegion: globalEditableRegion,
@@ -71,7 +71,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(final BuildContext context, final TextSelectionHandleType type, final double textHeight, [final VoidCallback? onTap]) {
     final ThemeData theme = Theme.of(context);
     final Color handleColor = TextSelectionTheme.of(context).selectionHandleColor ?? theme.colorScheme.primary;
     final Widget handle = SizedBox(
@@ -111,7 +111,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(final TextSelectionHandleType type, final double textLineHeight) {
     switch (type) {
       case TextSelectionHandleType.left:
         return const Offset(_kHandleSize, 0);
@@ -127,7 +127,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     'This feature was deprecated after v3.3.0-0.5.pre.',
   )
   @override
-  bool canSelectAll(TextSelectionDelegate delegate) {
+  bool canSelectAll(final TextSelectionDelegate delegate) {
     // Android allows SelectAll when selection is not collapsed, unless
     // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
@@ -192,7 +192,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
   }
 
   @override
-  void didUpdateWidget(_TextSelectionControlsToolbar oldWidget) {
+  void didUpdateWidget(final _TextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.clipboardStatus != oldWidget.clipboardStatus) {
       widget.clipboardStatus?.addListener(_onChangedClipboardStatus);
@@ -207,7 +207,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // If there are no buttons to be shown, don't render anything.
     if (widget.handleCut == null && widget.handleCopy == null
         && widget.handlePaste == null && widget.handleSelectAll == null) {
@@ -275,7 +275,7 @@ class _TextSelectionControlsToolbarState extends State<_TextSelectionControlsToo
     return TextSelectionToolbar(
       anchorAbove: anchorAbove,
       anchorBelow: anchorBelow,
-      children: itemDatas.asMap().entries.map((MapEntry<int, _TextSelectionToolbarItemData> entry) {
+      children: itemDatas.asMap().entries.map((final MapEntry<int, _TextSelectionToolbarItemData> entry) {
         return TextSelectionToolbarTextButton(
           padding: TextSelectionToolbarTextButton.getPadding(entry.key, itemDatas.length),
           onPressed: entry.value.onPressed,
@@ -293,7 +293,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   final Color color;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint()..color = color;
     final double radius = size.width/2.0;
     final Rect circle = Rect.fromCircle(center: Offset(radius, radius), radius: radius);
@@ -303,7 +303,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) {
+  bool shouldRepaint(final _TextSelectionHandlePainter oldPainter) {
     return color != oldPainter.color;
   }
 }

@@ -9,7 +9,7 @@ import 'package:flutter_api_samples/widgets/hardware_keyboard/key_event_manager.
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('App tracks lifecycle states', (WidgetTester tester) async {
+  testWidgets('App tracks lifecycle states', (final WidgetTester tester) async {
     Future<String> getCapturedKey() async {
       final Widget textWidget = tester.firstWidget(
           find.textContaining('is not handled by shortcuts.'));

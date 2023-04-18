@@ -85,8 +85,8 @@ void main() {
       insertionDelta.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString()).toList();
 
       expect(
         description,
@@ -176,8 +176,8 @@ void main() {
       deletionDelta.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString()).toList();
 
       expect(
         description,
@@ -297,8 +297,8 @@ void main() {
       replacementDelta.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString()).toList();
 
       expect(
         description,
@@ -359,8 +359,8 @@ void main() {
       nonTextUpdateDelta.debugFillProperties(builder);
 
       final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString()).toList();
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString()).toList();
 
       expect(
         description,

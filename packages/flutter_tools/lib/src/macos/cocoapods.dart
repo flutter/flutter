@@ -84,12 +84,12 @@ const Version cocoaPodsRecommendedVersion = Version.withText(1, 11, 0, '1.11.0')
 ///     installing iOS/macOS dependencies.
 class CocoaPods {
   CocoaPods({
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required XcodeProjectInterpreter xcodeProjectInterpreter,
-    required Logger logger,
-    required Platform platform,
-    required Usage usage,
+    required final FileSystem fileSystem,
+    required final ProcessManager processManager,
+    required final XcodeProjectInterpreter xcodeProjectInterpreter,
+    required final Logger logger,
+    required final Platform platform,
+    required final Usage usage,
   }) : _fileSystem = fileSystem,
       _processManager = processManager,
       _xcodeProjectInterpreter = xcodeProjectInterpreter,
@@ -122,9 +122,9 @@ class CocoaPods {
       environment: <String, String>{
         'LANG': 'en_US.UTF-8',
       },
-    ).then<String?>((RunResult result) {
+    ).then<String?>((final RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
-    }, onError: (dynamic _) => null);
+    }, onError: (final dynamic _) => null);
     return _versionText!;
   }
 
@@ -154,9 +154,9 @@ class CocoaPods {
   }
 
   Future<bool> processPods({
-    required XcodeBasedProject xcodeProject,
-    required BuildMode buildMode,
-    bool dependenciesChanged = true,
+    required final XcodeBasedProject xcodeProject,
+    required final BuildMode buildMode,
+    final bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
       throwToolExit('Podfile missing');
@@ -232,7 +232,7 @@ class CocoaPods {
   /// Ensures the given Xcode-based sub-project of a parent Flutter project
   /// contains a suitable `Podfile` and that its `Flutter/Xxx.xcconfig` files
   /// include pods configuration.
-  Future<void> setupPodfile(XcodeBasedProject xcodeProject) async {
+  Future<void> setupPodfile(final XcodeBasedProject xcodeProject) async {
     if (!_xcodeProjectInterpreter.isInstalled) {
       // Don't do anything for iOS when host platform doesn't support it.
       return;
@@ -270,12 +270,12 @@ class CocoaPods {
 
   /// Ensures all `Flutter/Xxx.xcconfig` files for the given Xcode-based
   /// sub-project of a parent Flutter project include pods configuration.
-  void addPodsDependencyToFlutterXcconfig(XcodeBasedProject xcodeProject) {
+  void addPodsDependencyToFlutterXcconfig(final XcodeBasedProject xcodeProject) {
     _addPodsDependencyToFlutterXcconfig(xcodeProject, 'Debug');
     _addPodsDependencyToFlutterXcconfig(xcodeProject, 'Release');
   }
 
-  void _addPodsDependencyToFlutterXcconfig(XcodeBasedProject xcodeProject, String mode) {
+  void _addPodsDependencyToFlutterXcconfig(final XcodeBasedProject xcodeProject, final String mode) {
     final File file = xcodeProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
@@ -289,7 +289,7 @@ class CocoaPods {
   }
 
   /// Ensures that pod install is deemed needed on next check.
-  void invalidatePodInstallOutput(XcodeBasedProject xcodeProject) {
+  void invalidatePodInstallOutput(final XcodeBasedProject xcodeProject) {
     final File manifestLock = xcodeProject.podManifestLock;
     ErrorHandlingFileSystem.deleteIfExists(manifestLock);
   }
@@ -300,7 +300,7 @@ class CocoaPods {
   // 2. Podfile.lock doesn't exist or is older than Podfile
   // 3. Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
   // 4. Podfile.lock doesn't match Pods/Manifest.lock.
-  bool _shouldRunPodInstall(XcodeBasedProject xcodeProject, bool dependenciesChanged) {
+  bool _shouldRunPodInstall(final XcodeBasedProject xcodeProject, final bool dependenciesChanged) {
     if (dependenciesChanged) {
       return true;
     }
@@ -315,7 +315,7 @@ class CocoaPods {
         || podfileLockFile.readAsStringSync() != manifestLockFile.readAsStringSync();
   }
 
-  Future<void> _runPodInstall(XcodeBasedProject xcodeProject, BuildMode buildMode) async {
+  Future<void> _runPodInstall(final XcodeBasedProject xcodeProject, final BuildMode buildMode) async {
     final Status status = _logger.startProgress('Running pod install...');
     final ProcessResult result = await _processManager.run(
       <String>['pod', 'install', '--verbose'],
@@ -355,7 +355,7 @@ class CocoaPods {
     }
   }
 
-  void _diagnosePodInstallFailure(ProcessResult result) {
+  void _diagnosePodInstallFailure(final ProcessResult result) {
     final Object? stdout = result.stdout;
     final Object? stderr = result.stderr;
     if (stdout is! String || stderr is! String) {
@@ -384,11 +384,11 @@ class CocoaPods {
     }
   }
 
-  bool _isFfiX86Error(String error) {
+  bool _isFfiX86Error(final String error) {
     return error.contains('ffi_c.bundle') || error.contains('/ffi/');
   }
 
-  void _warnIfPodfileOutOfDate(XcodeBasedProject xcodeProject) {
+  void _warnIfPodfileOutOfDate(final XcodeBasedProject xcodeProject) {
     final bool isIos = xcodeProject is IosProject;
     if (isIos) {
       // Previously, the Podfile created a symlink to the cached artifacts engine framework

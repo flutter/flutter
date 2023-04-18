@@ -49,10 +49,10 @@ class ActionIconThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   ActionIconThemeData copyWith({
-    WidgetBuilder? backButtonIconBuilder,
-    WidgetBuilder? closeButtonIconBuilder,
-    WidgetBuilder? drawerButtonIconBuilder,
-    WidgetBuilder? endDrawerButtonIconBuilder,
+    final WidgetBuilder? backButtonIconBuilder,
+    final WidgetBuilder? closeButtonIconBuilder,
+    final WidgetBuilder? drawerButtonIconBuilder,
+    final WidgetBuilder? endDrawerButtonIconBuilder,
   }) {
     return ActionIconThemeData(
       backButtonIconBuilder: backButtonIconBuilder ?? backButtonIconBuilder,
@@ -63,7 +63,7 @@ class ActionIconThemeData with Diagnosticable {
   }
 
   /// Linearly interpolate between two action icon themes.
-  static ActionIconThemeData? lerp(ActionIconThemeData? a, ActionIconThemeData? b, double t) {
+  static ActionIconThemeData? lerp(final ActionIconThemeData? a, final ActionIconThemeData? b, final double t) {
     if (a == null && b == null) {
       return null;
     }
@@ -87,7 +87,7 @@ class ActionIconThemeData with Diagnosticable {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -102,7 +102,7 @@ class ActionIconThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<WidgetBuilder>('backButtonIconBuilder', backButtonIconBuilder, defaultValue: null));
     properties.add(DiagnosticsProperty<WidgetBuilder>('closeButtonIconBuilder', closeButtonIconBuilder, defaultValue: null));
@@ -138,16 +138,16 @@ class ActionIconTheme extends InheritedTheme {
   /// ```dart
   /// ActionIconThemeData? theme = ActionIconTheme.of(context);
   /// ```
-  static ActionIconThemeData? of(BuildContext context) {
+  static ActionIconThemeData? of(final BuildContext context) {
     final ActionIconTheme? actionIconTheme = context.dependOnInheritedWidgetOfExactType<ActionIconTheme>();
     return actionIconTheme?.data ?? Theme.of(context).actionIconTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return ActionIconTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(ActionIconTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final ActionIconTheme oldWidget) => data != oldWidget.data;
 }

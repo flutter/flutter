@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('English translations exist for all MaterialLocalizations properties', (WidgetTester tester) async {
+  testWidgets('English translations exist for all MaterialLocalizations properties', (final WidgetTester tester) async {
     const MaterialLocalizations localizations = DefaultMaterialLocalizations();
 
     expect(localizations.openAppDrawerTooltip, isNotNull);
@@ -164,7 +164,7 @@ void main() {
     expect(localizations.licensesPackageDetailText(100).contains(r'$licensesCount'), isFalse);
   });
 
-  testWidgets('MaterialLocalizations.of throws', (WidgetTester tester) async {
+  testWidgets('MaterialLocalizations.of throws', (final WidgetTester tester) async {
     final GlobalKey noLocalizationsAvailable = GlobalKey();
     final GlobalKey localizationsAvailable = GlobalKey();
 
@@ -180,7 +180,7 @@ void main() {
     );
 
     expect(() => MaterialLocalizations.of(noLocalizationsAvailable.currentContext!), throwsA(isAssertionError.having(
-      (AssertionError e) => e.message,
+      (final AssertionError e) => e.message,
       'message',
       contains('No MaterialLocalizations found'),
     )));

@@ -18,7 +18,7 @@ import 'package:gen_keycodes/windows_code_gen.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
-String readDataFile(String fileName) {
+String readDataFile(final String fileName) {
   return File(path.join(dataRoot, fileName)).readAsStringSync();
 }
 
@@ -38,7 +38,7 @@ void main() {
     testDataRoot = null;
   });
 
-  void checkCommonOutput(String output) {
+  void checkCommonOutput(final String output) {
     expect(output, contains(RegExp('Copyright 201[34]')));
     expect(output, contains('DO NOT EDIT'));
     expect(output, contains(RegExp(r'\b[kK]eyA\b')));
@@ -152,19 +152,19 @@ void main() {
     // Regression tests for https://github.com/flutter/flutter/pull/87098
 
     expect(
-      entries.indexWhere((LogicalKeyEntry entry) => entry.name == 'ShiftLeft'),
+      entries.indexWhere((final LogicalKeyEntry entry) => entry.name == 'ShiftLeft'),
       isNot(-1));
     expect(
-      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('ShiftLeft')),
+      entries.indexWhere((final LogicalKeyEntry entry) => entry.webNames.contains('ShiftLeft')),
       -1);
     // 'Shift' maps to both 'ShiftLeft' and 'ShiftRight', and should be resolved
     // by other ways.
     expect(
-      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Shift')),
+      entries.indexWhere((final LogicalKeyEntry entry) => entry.webNames.contains('Shift')),
       -1);
     // Printable keys must not be added with Web key of their names.
     expect(
-      entries.indexWhere((LogicalKeyEntry entry) => entry.webNames.contains('Slash')),
+      entries.indexWhere((final LogicalKeyEntry entry) => entry.webNames.contains('Slash')),
       -1);
   });
 }

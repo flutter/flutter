@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder parent size', (final WidgetTester tester) async {
     late Size layoutBuilderSize;
     final Key childKey = UniqueKey();
     final Key parentKey = UniqueKey();
@@ -18,7 +18,7 @@ void main() {
           constraints: const BoxConstraints(maxWidth: 100.0, maxHeight: 200.0),
           child: LayoutBuilder(
             key: parentKey,
-            builder: (BuildContext context, BoxConstraints constraints) {
+            builder: (final BuildContext context, final BoxConstraints constraints) {
               layoutBuilderSize = constraints.biggest;
               return SizedBox(
                 key: childKey,
@@ -38,7 +38,7 @@ void main() {
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
-  testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
+  testWidgets('SliverLayoutBuilder parent geometry', (final WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey1 = UniqueKey();
@@ -53,14 +53,14 @@ void main() {
           slivers: <Widget>[
             SliverLayoutBuilder(
               key: parentKey1,
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 parentConstraints1 = constraint;
                 return SliverPadding(key: childKey1, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
               },
             ),
             SliverLayoutBuilder(
               key: parentKey2,
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 parentConstraints2 = constraint;
                 return SliverPadding(key: childKey2, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
@@ -88,7 +88,7 @@ void main() {
     expect(childSliver2.geometry, parentSliver2.geometry);
   });
 
-  testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder stateful child', (final WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -100,10 +100,10 @@ void main() {
       Center(
         child: LayoutBuilder(
           key: parentKey,
-          builder: (BuildContext context, BoxConstraints constraints) {
+          builder: (final BuildContext context, final BoxConstraints constraints) {
             layoutBuilderSize = constraints.biggest;
             return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setter) {
+              builder: (final BuildContext context, final StateSetter setter) {
                 setState = setter;
                 return SizedBox(
                   key: childKey,
@@ -134,7 +134,7 @@ void main() {
     expect(childBox.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgets('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
+  testWidgets('SliverLayoutBuilder stateful descendants', (final WidgetTester tester) async {
     late StateSetter setState;
     double childWidth = 10.0;
     double childHeight = 20.0;
@@ -148,10 +148,10 @@ void main() {
           slivers: <Widget>[
             SliverLayoutBuilder(
               key: parentKey,
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 return SliverToBoxAdapter(
                   child: StatefulBuilder(
-                    builder: (BuildContext context, StateSetter setter) {
+                    builder: (final BuildContext context, final StateSetter setter) {
                       setState = setter;
                       return SizedBox(
                         key: childKey,
@@ -203,7 +203,7 @@ void main() {
     expect(parentSliver.geometry!.paintExtent, 600);
   });
 
-  testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder stateful parent', (final WidgetTester tester) async {
     late Size layoutBuilderSize;
     late StateSetter setState;
     final Key childKey = UniqueKey();
@@ -213,13 +213,13 @@ void main() {
     await tester.pumpWidget(
       Center(
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (final BuildContext context, final StateSetter setter) {
             setState = setter;
             return SizedBox(
               width: childWidth,
               height: childHeight,
               child: LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
+                builder: (final BuildContext context, final BoxConstraints constraints) {
                   layoutBuilderSize = constraints.biggest;
                   return SizedBox(
                     key: childKey,
@@ -247,10 +247,10 @@ void main() {
     expect(box.size, equals(const Size(100.0, 200.0)));
   });
 
-  testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (final WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         built += 1;
         return Container();
       },
@@ -270,10 +270,10 @@ void main() {
     expect(built, 1);
   });
 
-  testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (final WidgetTester tester) async {
     int built = 0;
     final Widget target = LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         built += 1;
         MediaQuery.of(context);
         return Container();
@@ -294,14 +294,14 @@ void main() {
     expect(built, 2);
   });
 
-  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
+  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited', (final WidgetTester tester) async {
     int built = 0;
     final Widget target = Directionality(
       textDirection: TextDirection.ltr,
       child: CustomScrollView(
         slivers: <Widget>[
           SliverLayoutBuilder(
-            builder: (BuildContext context, SliverConstraints constraint) {
+            builder: (final BuildContext context, final SliverConstraints constraint) {
               built++;
               return SliverToBoxAdapter(child: Container());
             },
@@ -327,14 +327,14 @@ void main() {
 
   testWidgets(
     'SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       int built = 0;
       final Widget target = Directionality(
         textDirection: TextDirection.ltr,
         child: CustomScrollView(
           slivers: <Widget>[
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 built++;
                 MediaQuery.of(context);
                 return SliverToBoxAdapter(child: Container());
@@ -360,7 +360,7 @@ void main() {
     },
   );
 
-  testWidgets('nested SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('nested SliverLayoutBuilder', (final WidgetTester tester) async {
     late SliverConstraints parentConstraints1;
     late SliverConstraints parentConstraints2;
     final Key childKey = UniqueKey();
@@ -374,11 +374,11 @@ void main() {
           slivers: <Widget>[
             SliverLayoutBuilder(
               key: parentKey1,
-              builder: (BuildContext context, SliverConstraints constraint) {
+              builder: (final BuildContext context, final SliverConstraints constraint) {
                 parentConstraints1 = constraint;
                 return SliverLayoutBuilder(
                   key: parentKey2,
-                  builder: (BuildContext context, SliverConstraints constraint) {
+                  builder: (final BuildContext context, final SliverConstraints constraint) {
                     parentConstraints2 = constraint;
                     return SliverPadding(key: childKey, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
                   },
@@ -405,7 +405,7 @@ void main() {
     expect(parentSliver1.geometry, parentSliver2.geometry);
   });
 
-  testWidgets('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('localToGlobal works with SliverLayoutBuilder', (final WidgetTester tester) async {
     final Key childKey1 = UniqueKey();
     final Key childKey2 = UniqueKey();
     final ScrollController scrollController = ScrollController();
@@ -420,7 +420,7 @@ void main() {
               child: SizedBox(height: 300),
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+              builder: (final BuildContext context, final SliverConstraints constraint) => SliverToBoxAdapter(
                 child: SizedBox(key: childKey1, height: 200),
               ),
             ),
@@ -461,7 +461,7 @@ void main() {
     );
   });
 
-  testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
+  testWidgets('hitTest works within SliverLayoutBuilder', (final WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     List<int> hitCounts = <int> [0, 0, 0];
 
@@ -480,7 +480,7 @@ void main() {
                 ),
               ),
               SliverLayoutBuilder(
-                builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                builder: (final BuildContext context, final SliverConstraints constraint) => SliverToBoxAdapter(
                   child: SizedBox(
                     height: 200,
                     child: GestureDetector(onTap: () => hitCounts[1]++),
@@ -566,7 +566,7 @@ void main() {
               ),
             ),
             SliverLayoutBuilder(
-              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+              builder: (final BuildContext context, final SliverConstraints constraint) => SliverToBoxAdapter(
                 child: SizedBox(
                   height: 100,
                   child: GestureDetector(onTap: () => hitCounts[1]++),
@@ -589,16 +589,16 @@ void main() {
     expect(hitCounts, const <int> [0, 0, 0]);
   });
 
-  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder does not call builder when layout happens but layout constraints do not change', (final WidgetTester tester) async {
     int builderInvocationCount = 0;
 
-    Future<void> pumpTestWidget(Size size) async {
+    Future<void> pumpTestWidget(final Size size) async {
       await tester.pumpWidget(
         // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
         Center(
           child: SizedBox.fromSize(
             size: size,
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
               builderInvocationCount += 1;
               return const _LayoutSpy();
             }),
@@ -665,17 +665,17 @@ void main() {
     expect(spy.performResizeCount, 2);
   });
 
-  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (WidgetTester tester) async {
+  testWidgets('LayoutBuilder descendant widget can access [RenderBox.size] when rebuilding during layout', (final WidgetTester tester) async {
     Size? childSize;
     int buildCount = 0;
 
-    Future<void> pumpTestWidget(Size size) async {
+    Future<void> pumpTestWidget(final Size size) async {
       await tester.pumpWidget(
         // Center is used to give the SizedBox the power to determine constraints for LayoutBuilder
         Center(
           child: SizedBox.fromSize(
             size: size,
-            child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            child: LayoutBuilder(builder: (final BuildContext context, final BoxConstraints constraints) {
               buildCount++;
               if (buildCount > 1) {
                 final _RenderLayoutSpy spy = tester.renderObject(find.byType(_LayoutSpy));
@@ -705,7 +705,7 @@ class _LayoutSpy extends LeafRenderObjectWidget {
   LeafRenderObjectElement createElement() => _LayoutSpyElement(this);
 
   @override
-  RenderObject createRenderObject(BuildContext context) => _RenderLayoutSpy();
+  RenderObject createRenderObject(final BuildContext context) => _RenderLayoutSpy();
 }
 
 class _LayoutSpyElement extends LeafRenderObjectElement {
@@ -726,7 +726,7 @@ class _RenderLayoutSpy extends RenderBox {
   }
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return constraints.biggest;
   }
 

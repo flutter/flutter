@@ -81,7 +81,7 @@ tasks.register("clean", Delete) {
 }
 
 class FakeAndroidProject extends Fake implements AndroidProject {
-  FakeAndroidProject({required Directory root}) : hostAppGradleRoot = root;
+  FakeAndroidProject({required final Directory root}) : hostAppGradleRoot = root;
 
   @override
   Directory hostAppGradleRoot;

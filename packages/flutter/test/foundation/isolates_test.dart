@@ -12,75 +12,75 @@ import 'package:platform/platform.dart';
 
 final Matcher throwsRemoteError = throwsA(isA<RemoteError>());
 
-int test1(int value) {
+int test1(final int value) {
   return value + 1;
 }
 
-int test2(int value) {
+int test2(final int value) {
   throw 2;
 }
 
-int test3(int value) {
+int test3(final int value) {
   Isolate.exit();
 }
 
-int test4(int value) {
+int test4(final int value) {
   Isolate.current.kill();
 
   return value + 1;
 }
 
-int test5(int value) {
+int test5(final int value) {
   Isolate.current.kill(priority: Isolate.immediate);
 
   return value + 1;
 }
 
-Future<int> test1Async(int value) async {
+Future<int> test1Async(final int value) async {
   return value + 1;
 }
 
-Future<int> test2Async(int value) async {
+Future<int> test2Async(final int value) async {
   throw 2;
 }
 
-Future<int> test3Async(int value) async {
+Future<int> test3Async(final int value) async {
   Isolate.exit();
 }
 
-Future<int> test4Async(int value) async {
+Future<int> test4Async(final int value) async {
   Isolate.current.kill();
 
   return value + 1;
 }
 
-Future<int> test5Async(int value) async {
+Future<int> test5Async(final int value) async {
   Isolate.current.kill(priority: Isolate.immediate);
 
   return value + 1;
 }
 
-Future<int> test1CallCompute(int value) {
+Future<int> test1CallCompute(final int value) {
   return compute(test1, value);
 }
 
-Future<int> test2CallCompute(int value) {
+Future<int> test2CallCompute(final int value) {
   return compute(test2, value);
 }
 
-Future<int> test3CallCompute(int value) {
+Future<int> test3CallCompute(final int value) {
   return compute(test3, value);
 }
 
-Future<int> test4CallCompute(int value) {
+Future<int> test4CallCompute(final int value) {
   return compute(test4, value);
 }
 
-Future<int> test5CallCompute(int value) {
+Future<int> test5CallCompute(final int value) {
   return compute(test5, value);
 }
 
-Future<void> expectFileSuccessfullyCompletes(String filename) async {
+Future<void> expectFileSuccessfullyCompletes(final String filename) async {
   // Run a Dart script that calls compute().
   // The Dart process will terminate only if the script exits cleanly with
   // all isolate ports closed.
@@ -105,44 +105,44 @@ class ComputeTestSubject {
   final int base;
   final dynamic additional;
 
-  int method(int x) {
+  int method(final int x) {
     return base * x;
   }
 
-  static int staticMethod(int square) {
+  static int staticMethod(final int square) {
     return square * square;
   }
 }
 
-Future<int> computeStaticMethod(int square) {
+Future<int> computeStaticMethod(final int square) {
   return compute(ComputeTestSubject.staticMethod, square);
 }
 
-Future<int> computeClosure(int square) {
-  return compute((_) => square * square, null);
+Future<int> computeClosure(final int square) {
+  return compute((final _) => square * square, null);
 }
 
-Future<int> computeInvalidClosure(int square) {
+Future<int> computeInvalidClosure(final int square) {
   final ReceivePort r = ReceivePort();
 
-  return compute((_) {
+  return compute((final _) {
     r.sendPort.send('Computing!');
 
     return square * square;
   }, null);
 }
 
-Future<int> computeInstanceMethod(int square) {
+Future<int> computeInstanceMethod(final int square) {
   final ComputeTestSubject subject = ComputeTestSubject(square);
   return compute(subject.method, square);
 }
 
-Future<int> computeInvalidInstanceMethod(int square) {
+Future<int> computeInvalidInstanceMethod(final int square) {
   final ComputeTestSubject subject = ComputeTestSubject(square, ReceivePort());
   return compute(subject.method, square);
 }
 
-dynamic testInvalidResponse(int square) {
+dynamic testInvalidResponse(final int square) {
   final ReceivePort r = ReceivePort();
   try {
     return r;
@@ -151,7 +151,7 @@ dynamic testInvalidResponse(int square) {
   }
 }
 
-dynamic testInvalidError(int square) {
+dynamic testInvalidError(final int square) {
   final ReceivePort r = ReceivePort();
   try {
     throw r;
@@ -160,11 +160,11 @@ dynamic testInvalidError(int square) {
   }
 }
 
-String? testDebugName(_) {
+String? testDebugName(final _) {
   return Isolate.current.debugName;
 }
 
-int? testReturnNull(_) {
+int? testReturnNull(final _) {
   return null;
 }
 

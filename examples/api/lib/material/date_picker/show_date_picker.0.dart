@@ -12,7 +12,7 @@ class DatePickerApp extends StatelessWidget {
   const DatePickerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       restorationScopeId: 'app',
@@ -40,7 +40,7 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
   final RestorableDateTime _selectedDate = RestorableDateTime(DateTime(2021, 7, 25));
   late final RestorableRouteFuture<DateTime?> _restorableDatePickerRouteFuture = RestorableRouteFuture<DateTime?>(
     onComplete: _selectDate,
-    onPresent: (NavigatorState navigator, Object? arguments) {
+    onPresent: (final NavigatorState navigator, final Object? arguments) {
       return navigator.restorablePush(
         _datePickerRoute,
         arguments: _selectedDate.value.millisecondsSinceEpoch,
@@ -50,12 +50,12 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
 
   @pragma('vm:entry-point')
   static Route<DateTime> _datePickerRoute(
-    BuildContext context,
-    Object? arguments,
+    final BuildContext context,
+    final Object? arguments,
   ) {
     return DialogRoute<DateTime>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return DatePickerDialog(
           restorationId: 'date_picker_dialog',
           initialEntryMode: DatePickerEntryMode.calendarOnly,
@@ -68,12 +68,12 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(_selectedDate, 'selected_date');
     registerForRestoration(_restorableDatePickerRouteFuture, 'date_picker_route_future');
   }
 
-  void _selectDate(DateTime? newSelectedDate) {
+  void _selectDate(final DateTime? newSelectedDate) {
     if (newSelectedDate != null) {
       setState(() {
         _selectedDate.value = newSelectedDate;
@@ -86,7 +86,7 @@ class _DatePickerExampleState extends State<DatePickerExample> with RestorationM
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       body: Center(
         child: OutlinedButton(

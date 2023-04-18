@@ -355,7 +355,7 @@ class Radio<T> extends StatefulWidget {
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, ToggleableStateMixin {
   final _RadioPainter _painter = _RadioPainter();
 
-  void _handleChanged(bool? selected) {
+  void _handleChanged(final bool? selected) {
     if (selected == null) {
       widget.onChanged!(null);
       return;
@@ -366,7 +366,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   }
 
   @override
-  void didUpdateWidget(Radio<T> oldWidget) {
+  void didUpdateWidget(final Radio<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget._selected != oldWidget._selected) {
       animateToValue();
@@ -389,7 +389,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   bool? get value => widget._selected;
 
   MaterialStateProperty<Color?> get _widgetFillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return null;
       }
@@ -401,7 +401,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     switch (widget._radioType) {
       case _RadioType.material:
@@ -447,7 +447,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
     }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
-    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((Set<MaterialState> states) {
+    final MaterialStateProperty<MouseCursor> effectiveMouseCursor = MaterialStateProperty.resolveWith<MouseCursor>((final Set<MaterialState> states) {
       return MaterialStateProperty.resolveAs<MouseCursor?>(widget.mouseCursor, states)
         ?? radioTheme.mouseCursor?.resolve(states)
         ?? MaterialStateProperty.resolveAs<MouseCursor>(MaterialStateMouseCursor.clickable, states);
@@ -529,7 +529,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin, Togg
 
 class _RadioPainter extends ToggleablePainter {
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     paintRadialReaction(canvas: canvas, origin: size.center(Offset.zero));
 
     final Offset center = (Offset.zero & size).center;
@@ -559,7 +559,7 @@ class _RadioDefaultsM2 extends RadioThemeData {
 
   @override
   MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return _theme.disabledColor;
       }
@@ -572,7 +572,7 @@ class _RadioDefaultsM2 extends RadioThemeData {
 
   @override
   MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         return fillColor.resolve(states).withAlpha(kRadialReactionAlpha);
       }
@@ -611,7 +611,7 @@ class _RadioDefaultsM3 extends RadioThemeData {
 
   @override
   MaterialStateProperty<Color> get fillColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.disabled)) {
           return _colors.onSurface.withOpacity(0.38);
@@ -645,7 +645,7 @@ class _RadioDefaultsM3 extends RadioThemeData {
 
   @override
   MaterialStateProperty<Color> get overlayColor {
-    return MaterialStateProperty.resolveWith((Set<MaterialState> states) {
+    return MaterialStateProperty.resolveWith((final Set<MaterialState> states) {
       if (states.contains(MaterialState.selected)) {
         if (states.contains(MaterialState.pressed)) {
           return _colors.onSurface.withOpacity(0.12);

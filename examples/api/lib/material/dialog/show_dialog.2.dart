@@ -12,7 +12,7 @@ class ShowDialogExampleApp extends StatelessWidget {
   const ShowDialogExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       restorationScopeId: 'app',
       home: DialogExample(),
@@ -24,7 +24,7 @@ class DialogExample extends StatelessWidget {
   const DialogExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('AlertDialog Sample')),
       body: Center(
@@ -39,10 +39,10 @@ class DialogExample extends StatelessWidget {
   }
 
   @pragma('vm:entry-point')
-  static Route<Object?> _dialogBuilder(BuildContext context, Object? arguments) {
+  static Route<Object?> _dialogBuilder(final BuildContext context, final Object? arguments) {
     return DialogRoute<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return AlertDialog(
           title: const Text('Basic dialog title'),
           content: const Text(

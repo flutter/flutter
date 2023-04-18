@@ -11,7 +11,7 @@ class FakeFlutterDestination implements FlutterDestination {
   /// Overrides the skia perf `update` function, which uploads new data to gcs if there
   /// doesn't exist the commit, otherwise updates existing data by appending new ones.
   @override
-  Future<void> update(List<MetricPoint> points, DateTime commitTime, String taskName) async {
+  Future<void> update(final List<MetricPoint> points, final DateTime commitTime, final String taskName) async {
     lastUpdatedPoints = points;
     time = commitTime;
     name = taskName;

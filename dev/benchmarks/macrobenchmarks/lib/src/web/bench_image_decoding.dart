@@ -58,7 +58,7 @@ class BenchImageDecoding extends RawRecorder {
   static const int _measuredSampleCount = 20;
 
   @override
-  Future<void> body(Profile profile) async {
+  Future<void> body(final Profile profile) async {
     await profile.recordAsync('recordImageDecode', () async {
       final List<Future<void>> allDecodes = <Future<void>>[
         for (final Uint8List data in _imageData)
@@ -77,7 +77,7 @@ class BenchImageDecoding extends RawRecorder {
   }
 }
 
-Future<void> _decodeImage(Uint8List data) async {
+Future<void> _decodeImage(final Uint8List data) async {
   final ui.Codec codec = await ui.instantiateImageCodec(data);
   const int decodeFrameCount = 5;
   if (codec.frameCount < decodeFrameCount) {

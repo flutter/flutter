@@ -10,11 +10,11 @@ import 'package:flutter/services.dart';
 import 'page.dart';
 
 class WindowManagerIntegrationsPage extends PageWidget {
-  const WindowManagerIntegrationsPage({Key? key})
+  const WindowManagerIntegrationsPage({final Key? key})
       : super('Window Manager Integrations Tests', const ValueKey<String>('WmIntegrationsListTile'), key: key);
 
   @override
-  Widget build(BuildContext context) => const WindowManagerBody();
+  Widget build(final BuildContext context) => const WindowManagerBody();
 }
 
 class WindowManagerBody extends StatefulWidget {
@@ -39,7 +39,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
   int windowClickCount = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Window Manager Integrations'),
@@ -146,7 +146,7 @@ class WindowManagerBodyState extends State<WindowManagerBody> {
     await Process.run('input', const <String>['tap', '250', '550']);
   }
 
-  void onPlatformViewCreated(int id) {
+  void onPlatformViewCreated(final int id) {
     this.id = id;
     setState(() {
       viewChannel = MethodChannel('simple_view/$id');

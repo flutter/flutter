@@ -47,7 +47,7 @@ class _BenchmarkResult {
 
   final double max; // seconds
 
-  Map<String, dynamic> asMap(String benchmark, String mode) {
+  Map<String, dynamic> asMap(final String benchmark, final String mode) {
     return <String, dynamic>{
       '${benchmark}_$mode': mean,
       '${benchmark}_${mode}_minimum': min,
@@ -70,7 +70,7 @@ abstract class _Benchmark {
         if (watch) '--watch',
       ];
 
-  Future<double> execute(int iteration, int targetIterations) async {
+  Future<double> execute(final int iteration, final int targetIterations) async {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');
     final Stopwatch stopwatch = Stopwatch();
     await inDirectory<void>(directory, () async {
@@ -110,7 +110,7 @@ class _MegaGalleryBenchmark extends _Benchmark {
 }
 
 /// Runs `benchmark` several times and reports the results.
-Future<_BenchmarkResult> _run(_Benchmark benchmark) async {
+Future<_BenchmarkResult> _run(final _Benchmark benchmark) async {
   final List<double> results = <double>[];
   for (int i = 0; i < _kRunsPerBenchmark; i += 1) {
     // Delete cached analysis results.
@@ -120,7 +120,7 @@ Future<_BenchmarkResult> _run(_Benchmark benchmark) async {
   results.sort();
   final double sum = results.fold<double>(
     0.0,
-    (double previousValue, double element) => previousValue + element,
+    (final double previousValue, final double element) => previousValue + element,
   );
   return _BenchmarkResult(sum / results.length, results.first, results.last);
 }

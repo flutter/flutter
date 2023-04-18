@@ -94,7 +94,7 @@ Widget builds: $_widgetBuilds''';
     late DateTime startTime;
     int tickCount = 0;
     Ticker? ticker;
-    ticker = createTicker((Duration time) {
+    ticker = createTicker((final Duration time) {
       tickCount += 1;
       if (tickCount == calibrationTickCount) { // about 10 seconds
         final Duration elapsed = DateTime.now().difference(startTime);
@@ -124,7 +124,7 @@ Press play to produce texture frames.''';
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     _widgetBuilds += 1;
     return MaterialApp(
       home: Scaffold(

@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
-int countSemanticsChildren(RenderObject object) {
+int countSemanticsChildren(final RenderObject object) {
   int count = 0;
-  object.visitChildrenForSemantics((RenderObject child) {
+  object.visitChildrenForSemantics((final RenderObject child) {
     count += 1;
   });
   return count;

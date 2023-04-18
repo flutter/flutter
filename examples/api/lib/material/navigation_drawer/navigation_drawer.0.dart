@@ -49,7 +49,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   int screenIndex = 0;
   late bool showNavigationDrawer;
 
-  void handleScreenChanged(int selectedScreen) {
+  void handleScreenChanged(final int selectedScreen) {
     setState(() {
       screenIndex = selectedScreen;
     });
@@ -71,13 +71,13 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: screenIndex,
-        onDestinationSelected: (int index) {
+        onDestinationSelected: (final int index) {
           setState(() {
             screenIndex = index;
           });
         },
         destinations: destinations.map(
-          (ExampleDestination destination) {
+          (final ExampleDestination destination) {
             return NavigationDestination(
               label: destination.label,
               icon: destination.icon,
@@ -90,7 +90,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
     );
   }
 
-  Widget buildDrawerScaffold(BuildContext context) {
+  Widget buildDrawerScaffold(final BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
       body: SafeArea(
@@ -103,7 +103,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
               child: NavigationRail(
                 minWidth: 50,
                 destinations: destinations.map(
-                  (ExampleDestination destination) {
+                  (final ExampleDestination destination) {
                     return NavigationRailDestination(
                       label: Text(destination.label),
                       icon: destination.icon,
@@ -113,7 +113,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
                 ).toList(),
                 selectedIndex: screenIndex,
                 useIndicator: true,
-                onDestinationSelected: (int index) {
+                onDestinationSelected: (final int index) {
                   setState(() {
                     screenIndex = index;
                   });
@@ -148,7 +148,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
             ),
           ),
           ...destinations.map(
-            (ExampleDestination destination) {
+            (final ExampleDestination destination) {
               return NavigationDrawerDestination(
                 label: Text(destination.label),
                 icon: destination.icon,
@@ -172,7 +172,7 @@ class _NavigationDrawerExampleState extends State<NavigationDrawerExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return showNavigationDrawer ? buildDrawerScaffold(context) : buildBottomBarScaffold();
   }
 }

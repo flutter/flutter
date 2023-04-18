@@ -15,9 +15,9 @@ import 'version.dart';
 /// must persist across tool invocations.
 abstract class PersistentToolState {
   factory PersistentToolState({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Platform platform,
   }) => _DefaultPersistentToolState(
     fileSystem: fileSystem,
     logger: logger,
@@ -25,8 +25,8 @@ abstract class PersistentToolState {
   );
 
   factory PersistentToolState.test({
-    required Directory directory,
-    required Logger logger,
+    required final Directory directory,
+    required final Logger logger,
   }) => _DefaultPersistentToolState.test(
     directory: directory,
     logger: logger,
@@ -38,30 +38,30 @@ abstract class PersistentToolState {
   ///
   /// May give null if the value has not been set.
   bool? get shouldRedisplayWelcomeMessage;
-  void setShouldRedisplayWelcomeMessage(bool value); // Enforced nonnull setter.
+  void setShouldRedisplayWelcomeMessage(final bool value); // Enforced nonnull setter.
 
   /// Returns the last active version for a given [channel].
   ///
   /// If there was no active prior version, returns `null` instead.
-  String? lastActiveVersion(Channel channel);
+  String? lastActiveVersion(final Channel channel);
 
   /// Update the last active version for a given [channel].
-  void updateLastActiveVersion(String fullGitHash, Channel channel);
+  void updateLastActiveVersion(final String fullGitHash, final Channel channel);
 
   /// Return the hash of the last active license terms.
   String? get lastActiveLicenseTermsHash;
-  void setLastActiveLicenseTermsHash(String value); // Enforced nonnull setter.
+  void setLastActiveLicenseTermsHash(final String value); // Enforced nonnull setter.
 
   /// Whether this client was already determined to be or not be a bot.
   bool? get isRunningOnBot;
-  void setIsRunningOnBot(bool value); // Enforced nonnull setter.
+  void setIsRunningOnBot(final bool value); // Enforced nonnull setter.
 }
 
 class _DefaultPersistentToolState implements PersistentToolState {
   _DefaultPersistentToolState({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Platform platform,
   }) : _config = Config(
       _kFileName,
       fileSystem: fileSystem,
@@ -71,8 +71,8 @@ class _DefaultPersistentToolState implements PersistentToolState {
 
   @visibleForTesting
   _DefaultPersistentToolState.test({
-    required Directory directory,
-    required Logger logger,
+    required final Directory directory,
+    required final Logger logger,
   }) : _config = Config.test(
       name: _kFileName,
       directory: directory,
@@ -98,19 +98,19 @@ class _DefaultPersistentToolState implements PersistentToolState {
   }
 
   @override
-  void setShouldRedisplayWelcomeMessage(bool value) {
+  void setShouldRedisplayWelcomeMessage(final bool value) {
     _config.setValue(_kRedisplayWelcomeMessage, value);
   }
 
   @override
-  String? lastActiveVersion(Channel channel) {
+  String? lastActiveVersion(final Channel channel) {
     final String? versionKey = _versionKeyFor(channel);
     assert(versionKey != null);
     return _config.getValue(versionKey!) as String?;
   }
 
   @override
-  void updateLastActiveVersion(String fullGitHash, Channel channel) {
+  void updateLastActiveVersion(final String fullGitHash, final Channel channel) {
     final String? versionKey = _versionKeyFor(channel);
     assert(versionKey != null);
     _config.setValue(versionKey!, fullGitHash);
@@ -120,11 +120,11 @@ class _DefaultPersistentToolState implements PersistentToolState {
   String? get lastActiveLicenseTermsHash => _config.getValue(_kLicenseHash) as String?;
 
   @override
-  void setLastActiveLicenseTermsHash(String value) {
+  void setLastActiveLicenseTermsHash(final String value) {
     _config.setValue(_kLicenseHash, value);
   }
 
-  String? _versionKeyFor(Channel channel) {
+  String? _versionKeyFor(final Channel channel) {
     return _lastActiveVersionKeys[channel];
   }
 
@@ -132,7 +132,7 @@ class _DefaultPersistentToolState implements PersistentToolState {
   bool? get isRunningOnBot => _config.getValue(_kBotKey) as bool?;
 
   @override
-  void setIsRunningOnBot(bool value) {
+  void setIsRunningOnBot(final bool value) {
     _config.setValue(_kBotKey, value);
   }
 }

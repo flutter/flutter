@@ -161,7 +161,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   // Return the scene point at the given viewport point.
-  static Offset fromViewport(Offset viewportPoint, Matrix4 transform) {
+  static Offset fromViewport(final Offset viewportPoint, final Matrix4 transform) {
     // On viewportPoint, perform the inverse transformation of the scene to get
     // where the point would be in the scene before the transformation.
     final Matrix4 inverseMatrix = Matrix4.inverted(transform);
@@ -174,7 +174,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   // Get the offset of the current widget from the global screen coordinates.
-  static Offset getOffset(BuildContext context) {
+  static Offset getOffset(final BuildContext context) {
     assert(context.findRenderObject() != null, 'The given context must have a renderObject, such as after the first build has completed.');
     final RenderBox renderObject = context.findRenderObject()! as RenderBox;
     return renderObject.localToGlobal(Offset.zero);
@@ -197,7 +197,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   @override
-  void didUpdateWidget(GestureTransformable oldWidget) {
+  void didUpdateWidget(final GestureTransformable oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.reset && !oldWidget.reset && _animationReset == null) {
       _animateResetInitialize();
@@ -207,17 +207,17 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // A GestureDetector allows the detection of panning and zooming gestures on
     // its child, which is the CustomPaint.
     return GestureDetector(
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
-      onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) {
+      onTapDown: widget.onTapDown == null ? null : (final TapDownDetails details) {
         widget.onTapDown!(TapDownDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
-      onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) {
+      onTapUp: widget.onTapUp == null ? null : (final TapUpDetails details) {
         widget.onTapUp!(TapUpDetails(
           kind: details.kind,
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
@@ -228,51 +228,51 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
       onDoubleTap: widget.onDoubleTap,
       onLongPress: widget.onLongPress,
       onLongPressUp: widget.onLongPressUp,
-      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) {
+      onVerticalDragDown: widget.onVerticalDragDown == null ? null : (final DragDownDetails details) {
         widget.onVerticalDragDown!(DragDownDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
-      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) {
+      onVerticalDragStart: widget.onVerticalDragStart == null ? null : (final DragStartDetails details) {
         widget.onVerticalDragStart!(DragStartDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
-      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
+      onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (final DragUpdateDetails details) {
         widget.onVerticalDragUpdate!(DragUpdateDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
       onVerticalDragEnd: widget.onVerticalDragEnd,
       onVerticalDragCancel: widget.onVerticalDragCancel,
-      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) {
+      onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (final DragDownDetails details) {
         widget.onHorizontalDragDown!(DragDownDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
-      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) {
+      onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (final DragStartDetails details) {
         widget.onHorizontalDragStart!(DragStartDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
-      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
+      onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (final DragUpdateDetails details) {
         widget.onHorizontalDragUpdate!(DragUpdateDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
       onHorizontalDragEnd: widget.onHorizontalDragEnd,
       onHorizontalDragCancel: widget.onHorizontalDragCancel,
-      onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) {
+      onPanDown: widget.onPanDown == null ? null : (final DragDownDetails details) {
         widget.onPanDown!(DragDownDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
-      onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) {
+      onPanStart: widget.onPanStart == null ? null : (final DragStartDetails details) {
         widget.onPanStart!(DragStartDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
       },
-      onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) {
+      onPanUpdate: widget.onPanUpdate == null ? null : (final DragUpdateDetails details) {
         widget.onPanUpdate!(DragUpdateDetails(
           globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
         ));
@@ -298,7 +298,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
 
   // Return a new matrix representing the given matrix after applying the given
   // translation.
-  Matrix4 matrixTranslate(Matrix4 matrix, Offset? translation) {
+  Matrix4 matrixTranslate(final Matrix4 matrix, final Offset? translation) {
     if (widget.disableTranslation || translation == Offset.zero) {
       return matrix;
     }
@@ -341,7 +341,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
 
   // Return a new matrix representing the given matrix after applying the given
   // scale transform.
-  Matrix4 matrixScale(Matrix4 matrix, double? scale) {
+  Matrix4 matrixScale(final Matrix4 matrix, final double? scale) {
     if (widget.disableScale || scale == 1) {
       return matrix;
     }
@@ -377,7 +377,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   // Return a new matrix representing the given matrix after applying the given
   // rotation transform.
   // Rotating the scene cannot cause the viewport to view beyond _boundaryRect.
-  Matrix4 matrixRotate(Matrix4 matrix, double? rotation, Offset focalPoint) {
+  Matrix4 matrixRotate(final Matrix4 matrix, final double? rotation, final Offset focalPoint) {
     if (widget.disableRotation || rotation == 0) {
       return matrix;
     }
@@ -389,7 +389,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   // Handle the start of a gesture of _GestureType.
-  void _onScaleStart(ScaleStartDetails details) {
+  void _onScaleStart(final ScaleStartDetails details) {
     widget.onScaleStart?.call(details);
 
     if (_controller.isAnimating) {
@@ -411,7 +411,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   // Handle an update to an ongoing gesture of _GestureType.
-  void _onScaleUpdate(ScaleUpdateDetails details) {
+  void _onScaleUpdate(final ScaleUpdateDetails details) {
     double scale = _transform.getMaxScaleOnAxis();
     widget.onScaleUpdate?.call(ScaleUpdateDetails(
       focalPoint: fromViewport(details.focalPoint, _transform),
@@ -469,7 +469,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   // Handle the end of a gesture of _GestureType.
-  void _onScaleEnd(ScaleEndDetails details) {
+  void _onScaleEnd(final ScaleEndDetails details) {
     widget.onScaleEnd?.call(details);
     setState(() {
       _scaleStart = null;

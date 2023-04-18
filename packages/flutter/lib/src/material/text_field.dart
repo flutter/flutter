@@ -46,14 +46,14 @@ typedef InputCounterWidgetBuilder = Widget? Function(
 
 class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _TextFieldSelectionGestureDetectorBuilder({
-    required _TextFieldState state,
+    required final _TextFieldState state,
   }) : _state = state,
        super(delegate: state);
 
   final _TextFieldState _state;
 
   @override
-  void onForcePressStart(ForcePressDetails details) {
+  void onForcePressStart(final ForcePressDetails details) {
     super.onForcePressStart(details);
     if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
       editableText.showToolbar();
@@ -61,19 +61,19 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
   }
 
   @override
-  void onForcePressEnd(ForcePressDetails details) {
+  void onForcePressEnd(final ForcePressDetails details) {
     // Not required.
   }
 
   @override
-  void onSingleTapUp(TapDragUpDetails details) {
+  void onSingleTapUp(final TapDragUpDetails details) {
     super.onSingleTapUp(details);
     _state._requestKeyboard();
     _state.widget.onTap?.call();
   }
 
   @override
-  void onSingleLongTapStart(LongPressStartDetails details) {
+  void onSingleLongTapStart(final LongPressStartDetails details) {
     super.onSingleLongTapStart(details);
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
@@ -249,7 +249,7 @@ class TextField extends StatefulWidget {
     this.focusNode,
     this.undoController,
     this.decoration = const InputDecoration(),
-    TextInputType? keyboardType,
+    final TextInputType? keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
     this.style,
@@ -268,8 +268,8 @@ class TextField extends StatefulWidget {
     this.obscuringCharacter = '•',
     this.obscureText = false,
     this.autocorrect = true,
-    SmartDashesType? smartDashesType,
-    SmartQuotesType? smartQuotesType,
+    final SmartDashesType? smartDashesType,
+    final SmartQuotesType? smartQuotesType,
     this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
@@ -292,7 +292,7 @@ class TextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
-    bool? enableInteractiveSelection,
+    final bool? enableInteractiveSelection,
     this.selectionControls,
     this.onTap,
     this.onTapOutside,
@@ -774,7 +774,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
+  static Widget _defaultContextMenuBuilder(final BuildContext context, final EditableTextState editableTextState) {
     return AdaptiveTextSelectionToolbar.editableText(
       editableTextState: editableTextState,
     );
@@ -810,8 +810,8 @@ class TextField extends StatefulWidget {
   ///    configured to show the Material style spell check suggestions toolbar.
   @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
-    BuildContext context,
-    EditableTextState editableTextState,
+    final BuildContext context,
+    final EditableTextState editableTextState,
   ) {
     final Offset anchor =
       SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
@@ -832,7 +832,7 @@ class TextField extends StatefulWidget {
   State<TextField> createState() => _TextFieldState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
@@ -1016,7 +1016,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   @override
-  void didUpdateWidget(TextField oldWidget) {
+  void didUpdateWidget(final TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null) {
       _createLocalController(oldWidget.controller!.value);
@@ -1041,7 +1041,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     if (_controller != null) {
       _registerController();
     }
@@ -1052,7 +1052,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     registerForRestoration(_controller!, 'controller');
   }
 
-  void _createLocalController([TextEditingValue? value]) {
+  void _createLocalController([final TextEditingValue? value]) {
     assert(_controller == null);
     _controller = value == null
         ? RestorableTextEditingController()
@@ -1079,7 +1079,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     _editableText?.requestKeyboard();
   }
 
-  bool _shouldShowSelectionHandles(SelectionChangedCause? cause) {
+  bool _shouldShowSelectionHandles(final SelectionChangedCause? cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
     if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar) {
@@ -1116,7 +1116,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     });
   }
 
-  void _handleSelectionChanged(TextSelection selection, SelectionChangedCause? cause) {
+  void _handleSelectionChanged(final TextSelection selection, final SelectionChangedCause? cause) {
     final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
     if (willShowSelectionHandles != _showSelectionHandles) {
       setState(() {
@@ -1157,7 +1157,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     }
   }
 
-  void _handleHover(bool hovering) {
+  void _handleHover(final bool hovering) {
     if (hovering != _isHovering) {
       setState(() {
         _isHovering = hovering;
@@ -1170,7 +1170,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   String get autofillId => _editableText!.autofillId;
 
   @override
-  void autofill(TextEditingValue newEditingValue) => _editableText!.autofill(newEditingValue);
+  void autofill(final TextEditingValue newEditingValue) => _editableText!.autofill(newEditingValue);
 
   @override
   TextInputConfiguration get textInputConfiguration {
@@ -1197,7 +1197,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     };
   }
 
-  TextStyle _getInputStyleForState(TextStyle style) {
+  TextStyle _getInputStyleForState(final TextStyle style) {
     final ThemeData theme = Theme.of(context);
     final TextStyle stateStyle = MaterialStateProperty.resolveAs(theme.useMaterial3 ? _m3StateInputStyle(context)! : _m2StateInputStyle(context)!, _materialState);
     final TextStyle providedStyle = MaterialStateProperty.resolveAs(style, _materialState);
@@ -1205,7 +1205,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     assert(debugCheckHasDirectionality(context));
@@ -1392,7 +1392,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     if (widget.decoration != null) {
       child = AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[ focusNode, controller ]),
-        builder: (BuildContext context, Widget? child) {
+        builder: (final BuildContext context, final Widget? child) {
           return InputDecorator(
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
@@ -1424,14 +1424,14 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
 
     return MouseRegion(
       cursor: effectiveMouseCursor,
-      onEnter: (PointerEnterEvent event) => _handleHover(true),
-      onExit: (PointerExitEvent event) => _handleHover(false),
+      onEnter: (final PointerEnterEvent event) => _handleHover(true),
+      onExit: (final PointerExitEvent event) => _handleHover(false),
       child: TextFieldTapRegion(
         child: IgnorePointer(
           ignoring: !_isEnabled,
           child: AnimatedBuilder(
             animation: controller, // changes the _currentLength
-            builder: (BuildContext context, Widget? child) {
+            builder: (final BuildContext context, final Widget? child) {
               return Semantics(
                 maxValueLength: semanticsMaxValueLength,
                 currentValueLength: _currentLength,
@@ -1456,7 +1456,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
   }
 }
 
-TextStyle? _m2StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+TextStyle? _m2StateInputStyle(final BuildContext context) => MaterialStateTextStyle.resolveWith((final Set<MaterialState> states) {
   final ThemeData theme = Theme.of(context);
   if (states.contains(MaterialState.disabled)) {
     return TextStyle(color: theme.disabledColor);
@@ -1464,7 +1464,7 @@ TextStyle? _m2StateInputStyle(BuildContext context) => MaterialStateTextStyle.re
   return TextStyle(color: theme.textTheme.titleMedium?.color);
 });
 
-TextStyle _m2CounterErrorStyle(BuildContext context) =>
+TextStyle _m2CounterErrorStyle(final BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // BEGIN GENERATED TOKEN PROPERTIES - TextField
@@ -1476,16 +1476,16 @@ TextStyle _m2CounterErrorStyle(BuildContext context) =>
 
 // Token database version: v0_162
 
-TextStyle? _m3StateInputStyle(BuildContext context) => MaterialStateTextStyle.resolveWith((Set<MaterialState> states) {
+TextStyle? _m3StateInputStyle(final BuildContext context) => MaterialStateTextStyle.resolveWith((final Set<MaterialState> states) {
   if (states.contains(MaterialState.disabled)) {
     return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color?.withOpacity(0.38));
   }
   return TextStyle(color: Theme.of(context).textTheme.bodyLarge!.color);
 });
 
-TextStyle _m3InputStyle(BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
+TextStyle _m3InputStyle(final BuildContext context) => Theme.of(context).textTheme.bodyLarge!;
 
-TextStyle _m3CounterErrorStyle(BuildContext context) =>
+TextStyle _m3CounterErrorStyle(final BuildContext context) =>
   Theme.of(context).textTheme.bodySmall!.copyWith(color: Theme.of(context).colorScheme.error);
 
 // END GENERATED TOKEN PROPERTIES - TextField

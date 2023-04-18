@@ -12,7 +12,7 @@ class CardExampleApp extends StatelessWidget {
   const CardExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Card Sample')),
@@ -26,7 +26,7 @@ class CardExample extends StatelessWidget {
   const CardExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: Card(
         // clipBehavior is necessary because, without it, the InkWell's animation

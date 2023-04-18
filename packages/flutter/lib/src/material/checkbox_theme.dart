@@ -103,15 +103,15 @@ class CheckboxThemeData with Diagnosticable {
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
   CheckboxThemeData copyWith({
-    MaterialStateProperty<MouseCursor?>? mouseCursor,
-    MaterialStateProperty<Color?>? fillColor,
-    MaterialStateProperty<Color?>? checkColor,
-    MaterialStateProperty<Color?>? overlayColor,
-    double? splashRadius,
-    MaterialTapTargetSize? materialTapTargetSize,
-    VisualDensity? visualDensity,
-    OutlinedBorder? shape,
-    BorderSide? side,
+    final MaterialStateProperty<MouseCursor?>? mouseCursor,
+    final MaterialStateProperty<Color?>? fillColor,
+    final MaterialStateProperty<Color?>? checkColor,
+    final MaterialStateProperty<Color?>? overlayColor,
+    final double? splashRadius,
+    final MaterialTapTargetSize? materialTapTargetSize,
+    final VisualDensity? visualDensity,
+    final OutlinedBorder? shape,
+    final BorderSide? side,
   }) {
     return CheckboxThemeData(
       mouseCursor: mouseCursor ?? this.mouseCursor,
@@ -129,7 +129,7 @@ class CheckboxThemeData with Diagnosticable {
   /// Linearly interpolate between two [CheckboxThemeData]s.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static CheckboxThemeData lerp(CheckboxThemeData? a, CheckboxThemeData? b, double t) {
+  static CheckboxThemeData lerp(final CheckboxThemeData? a, final CheckboxThemeData? b, final double t) {
     if (identical(a, b) && a != null) {
       return a;
     }
@@ -160,7 +160,7 @@ class CheckboxThemeData with Diagnosticable {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -180,7 +180,7 @@ class CheckboxThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<MaterialStateProperty<MouseCursor?>>('mouseCursor', mouseCursor, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialStateProperty<Color?>>('fillColor', fillColor, defaultValue: null));
@@ -194,7 +194,7 @@ class CheckboxThemeData with Diagnosticable {
   }
 
   // Special case because BorderSide.lerp() doesn't support null arguments
-  static BorderSide? _lerpSides(BorderSide? a, BorderSide? b, double t) {
+  static BorderSide? _lerpSides(final BorderSide? a, final BorderSide? b, final double t) {
     if (a == null || b == null) {
       return null;
     }
@@ -238,11 +238,11 @@ class CheckboxTheme extends InheritedWidget {
   /// ```dart
   /// CheckboxThemeData theme = CheckboxTheme.of(context);
   /// ```
-  static CheckboxThemeData of(BuildContext context) {
+  static CheckboxThemeData of(final BuildContext context) {
     final CheckboxTheme? checkboxTheme = context.dependOnInheritedWidgetOfExactType<CheckboxTheme>();
     return checkboxTheme?.data ?? Theme.of(context).checkboxTheme;
   }
 
   @override
-  bool updateShouldNotify(CheckboxTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final CheckboxTheme oldWidget) => data != oldWidget.data;
 }

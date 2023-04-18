@@ -12,7 +12,7 @@ class TooltipExampleApp extends StatelessWidget {
   const TooltipExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: TooltipSample(title: 'Tooltip Sample'),
     );
@@ -25,7 +25,7 @@ class TooltipSample extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final GlobalKey<TooltipState> tooltipkey = GlobalKey<TooltipState>();
 
     return Scaffold(

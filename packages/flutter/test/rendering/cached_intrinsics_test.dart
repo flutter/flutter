@@ -16,13 +16,13 @@ class RenderTestBox extends RenderBox {
     return value;
   }
   @override
-  double computeMinIntrinsicWidth(double height) => next();
+  double computeMinIntrinsicWidth(final double height) => next();
   @override
-  double computeMaxIntrinsicWidth(double height) => next();
+  double computeMaxIntrinsicWidth(final double height) => next();
   @override
-  double computeMinIntrinsicHeight(double width) => next();
+  double computeMinIntrinsicHeight(final double width) => next();
   @override
-  double computeMaxIntrinsicHeight(double width) => next();
+  double computeMaxIntrinsicHeight(final double width) => next();
 
   @override
   void performLayout() {
@@ -31,7 +31,7 @@ class RenderTestBox extends RenderBox {
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(final TextBaseline baseline) {
     calls += 1;
     return boxSize.height / 2.0;
   }

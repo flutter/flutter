@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('SemanticNode.rect is clipped', (WidgetTester tester) async {
+  testWidgets('SemanticNode.rect is clipped', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const Directionality(
@@ -67,7 +67,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('SemanticsNode is not removed if out of bounds and merged into something within bounds', (WidgetTester tester) async {
+  testWidgets('SemanticsNode is not removed if out of bounds and merged into something within bounds', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(const Directionality(

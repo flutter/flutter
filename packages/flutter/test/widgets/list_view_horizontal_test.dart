@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const List<int> items = <int>[0, 1, 2, 3, 4, 5];
 
-Widget buildFrame({ bool reverse = false, required TextDirection textDirection }) {
+Widget buildFrame({ final bool reverse = false, required final TextDirection textDirection }) {
   return Directionality(
     textDirection: textDirection,
     child: Center(
@@ -18,7 +18,7 @@ Widget buildFrame({ bool reverse = false, required TextDirection textDirection }
           scrollDirection: Axis.horizontal,
           reverse: reverse,
           physics: const BouncingScrollPhysics(),
-          children: items.map<Widget>((int item) {
+          children: items.map<Widget>((final int item) {
             return Text('$item');
           }).toList(),
         ),
@@ -28,7 +28,7 @@ Widget buildFrame({ bool reverse = false, required TextDirection textDirection }
 }
 
 void main() {
-  testWidgets('Drag horizontally with scroll anchor at start (LTR)', (WidgetTester tester) async {
+  testWidgets('Drag horizontally with scroll anchor at start (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.ltr));
 
     await tester.pump(const Duration(seconds: 1));
@@ -147,7 +147,7 @@ void main() {
     expect(find.text('5'), findsNothing);
   });
 
-  testWidgets('Drag horizontally with scroll anchor at end (LTR)', (WidgetTester tester) async {
+  testWidgets('Drag horizontally with scroll anchor at end (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.ltr));
 
     await tester.pump(const Duration(seconds: 1));
@@ -247,7 +247,7 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
-  testWidgets('Drag horizontally with scroll anchor at start (RTL)', (WidgetTester tester) async {
+  testWidgets('Drag horizontally with scroll anchor at start (RTL)', (final WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(textDirection: TextDirection.rtl));
 
     await tester.pump(const Duration(seconds: 1));
@@ -347,7 +347,7 @@ void main() {
     expect(find.text('5'), findsOneWidget);
   });
 
-  testWidgets('Drag horizontally with scroll anchor at end (LTR)', (WidgetTester tester) async {
+  testWidgets('Drag horizontally with scroll anchor at end (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(buildFrame(reverse: true, textDirection: TextDirection.rtl));
 
     await tester.pump(const Duration(seconds: 1));

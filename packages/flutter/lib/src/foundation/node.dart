@@ -52,7 +52,7 @@ class AbstractNode {
   ///
   /// Only call this method from overrides of [redepthChildren].
   @protected
-  void redepthChild(AbstractNode child) {
+  void redepthChild(final AbstractNode child) {
     assert(child.owner == owner);
     if (child._depth <= _depth) {
       child._depth = _depth + 1;
@@ -91,7 +91,7 @@ class AbstractNode {
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.attach(owner)`.
   @mustCallSuper
-  void attach(covariant Object owner) {
+  void attach(covariant final Object owner) {
     assert(_owner == null);
     _owner = owner;
   }
@@ -122,7 +122,7 @@ class AbstractNode {
   /// Subclasses should call this function when they acquire a new child.
   @protected
   @mustCallSuper
-  void adoptChild(covariant AbstractNode child) {
+  void adoptChild(covariant final AbstractNode child) {
     assert(child._parent == null);
     assert(() {
       AbstractNode node = this;
@@ -144,7 +144,7 @@ class AbstractNode {
   /// Subclasses should call this function when they lose a child.
   @protected
   @mustCallSuper
-  void dropChild(covariant AbstractNode child) {
+  void dropChild(covariant final AbstractNode child) {
     assert(child._parent == this);
     assert(child.attached == attached);
     child._parent = null;

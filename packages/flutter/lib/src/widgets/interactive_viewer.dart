@@ -420,7 +420,7 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Returns the closest point to the given point on the given line segment.
   @visibleForTesting
-  static Vector3 getNearestPointOnLine(Vector3 point, Vector3 l1, Vector3 l2) {
+  static Vector3 getNearestPointOnLine(final Vector3 point, final Vector3 l1, final Vector3 l2) {
     final double lengthSquared = math.pow(l2.x - l1.x, 2.0).toDouble()
         + math.pow(l2.y - l1.y, 2.0).toDouble();
 
@@ -439,7 +439,7 @@ class InteractiveViewer extends StatefulWidget {
 
   /// Given a quad, return its axis aligned bounding box.
   @visibleForTesting
-  static Quad getAxisAlignedBoundingBox(Quad quad) {
+  static Quad getAxisAlignedBoundingBox(final Quad quad) {
     final double minX = math.min(
       quad.point0.x,
       math.min(
@@ -492,7 +492,7 @@ class InteractiveViewer extends StatefulWidget {
   /// inclusively.
   /// Algorithm from https://math.stackexchange.com/a/190373.
   @visibleForTesting
-  static bool pointIsInside(Vector3 point, Quad quad) {
+  static bool pointIsInside(final Vector3 point, final Quad quad) {
     final Vector3 aM = point - quad.point0;
     final Vector3 aB = quad.point1 - quad.point0;
     final Vector3 aD = quad.point3 - quad.point0;
@@ -508,7 +508,7 @@ class InteractiveViewer extends StatefulWidget {
   /// Get the point inside (inclusively) the given Quad that is nearest to the
   /// given Vector3.
   @visibleForTesting
-  static Vector3 getNearestPointInside(Vector3 point, Quad quad) {
+  static Vector3 getNearestPointInside(final Vector3 point, final Quad quad) {
     // If the point is inside the axis aligned bounding box, then it's ok where
     // it is.
     if (pointIsInside(point, quad)) {
@@ -600,7 +600,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Return a new matrix representing the given matrix after applying the given
   // translation.
-  Matrix4 _matrixTranslate(Matrix4 matrix, Offset translation) {
+  Matrix4 _matrixTranslate(final Matrix4 matrix, final Offset translation) {
     if (translation == Offset.zero) {
       return matrix.clone();
     }
@@ -700,7 +700,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Return a new matrix representing the given matrix after applying the given
   // scale.
-  Matrix4 _matrixScale(Matrix4 matrix, double scale) {
+  Matrix4 _matrixScale(final Matrix4 matrix, final double scale) {
     if (scale == 1.0) {
       return matrix.clone();
     }
@@ -728,7 +728,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Return a new matrix representing the given matrix after applying the given
   // rotation.
-  Matrix4 _matrixRotate(Matrix4 matrix, double rotation, Offset focalPoint) {
+  Matrix4 _matrixRotate(final Matrix4 matrix, final double rotation, final Offset focalPoint) {
     if (rotation == 0) {
       return matrix.clone();
     }
@@ -743,7 +743,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   }
 
   // Returns true iff the given _GestureType is enabled.
-  bool _gestureIsSupported(_GestureType? gestureType) {
+  bool _gestureIsSupported(final _GestureType? gestureType) {
     switch (gestureType) {
       case _GestureType.rotate:
         return _rotateEnabled;
@@ -761,7 +761,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   // and rotation in the gesture, if any. Scale starts at 1 and rotation
   // starts at 0. Pan will have no scale and no rotation because it uses only one
   // finger.
-  _GestureType _getGestureType(ScaleUpdateDetails details) {
+  _GestureType _getGestureType(final ScaleUpdateDetails details) {
     final double scale = !widget.scaleEnabled ? 1.0 : details.scale;
     final double rotation = !_rotateEnabled ? 0.0 : details.rotation;
     if ((scale - 1).abs() > rotation.abs()) {
@@ -775,7 +775,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle the start of a gesture. All of pan, scale, and rotate are handled
   // with GestureDetector's scale gesture.
-  void _onScaleStart(ScaleStartDetails details) {
+  void _onScaleStart(final ScaleStartDetails details) {
     widget.onInteractionStart?.call(details);
 
     if (_controller.isAnimating) {
@@ -802,7 +802,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle an update to an ongoing gesture. All of pan, scale, and rotate are
   // handled with GestureDetector's scale gesture.
-  void _onScaleUpdate(ScaleUpdateDetails details) {
+  void _onScaleUpdate(final ScaleUpdateDetails details) {
     final double scale = _transformationController!.value.getMaxScaleOnAxis();
     _scaleAnimationFocalPoint = details.localFocalPoint;
     final Offset focalPointScene = _transformationController!.toScene(
@@ -899,7 +899,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
 
   // Handle the end of a gesture of _GestureType. All of pan, scale, and rotate
   // are handled with GestureDetector's scale gesture.
-  void _onScaleEnd(ScaleEndDetails details) {
+  void _onScaleEnd(final ScaleEndDetails details) {
     widget.onInteractionEnd?.call(details);
     _scaleStart = null;
     _rotationStart = null;
@@ -972,7 +972,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   }
 
   // Handle mousewheel and web trackpad scroll events.
-  void _receivedPointerSignal(PointerSignalEvent event) {
+  void _receivedPointerSignal(final PointerSignalEvent event) {
     final double scaleChange;
     if (event is PointerScrollEvent) {
       if (event.kind == PointerDeviceKind.trackpad) {
@@ -1156,7 +1156,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   }
 
   @override
-  void didUpdateWidget(InteractiveViewer oldWidget) {
+  void didUpdateWidget(final InteractiveViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Handle all cases of needing to dispose and initialize
     // transformationControllers.
@@ -1192,7 +1192,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget child;
     if (widget.child != null) {
       child = _InteractiveViewerBuilt(
@@ -1209,7 +1209,7 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       assert(widget.builder != null);
       assert(!widget.constrained);
       child = LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+        builder: (final BuildContext context, final BoxConstraints constraints) {
           final Matrix4 matrix = _transformationController!.value;
           return _InteractiveViewerBuilt(
             childKey: _childKey,
@@ -1262,7 +1262,7 @@ class _InteractiveViewerBuilt extends StatelessWidget {
   final Alignment? alignment;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget child = Transform(
       transform: matrix,
       alignment: alignment,
@@ -1305,7 +1305,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///
   /// The [value] defaults to the identity matrix, which corresponds to no
   /// transformation.
-  TransformationController([Matrix4? value]) : super(value ?? Matrix4.identity());
+  TransformationController([final Matrix4? value]) : super(value ?? Matrix4.identity());
 
   /// Return the scene point at the given viewport point.
   ///
@@ -1337,7 +1337,7 @@ class TransformationController extends ValueNotifier<Matrix4> {
   ///   );
   /// }
   /// ```
-  Offset toScene(Offset viewportPoint) {
+  Offset toScene(final Offset viewportPoint) {
     // On viewportPoint, perform the inverse transformation of the scene to get
     // where the point would be in the scene before the transformation.
     final Matrix4 inverseMatrix = Matrix4.inverted(value);
@@ -1360,12 +1360,12 @@ enum _GestureType {
 
 // Given a velocity and drag, calculate the time at which motion will come to
 // a stop, within the margin of effectivelyMotionless.
-double _getFinalTime(double velocity, double drag, {double effectivelyMotionless = 10}) {
+double _getFinalTime(final double velocity, final double drag, {final double effectivelyMotionless = 10}) {
   return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
 }
 
 // Return the translation from the given Matrix4 as an Offset.
-Offset _getMatrixTranslation(Matrix4 matrix) {
+Offset _getMatrixTranslation(final Matrix4 matrix) {
   final Vector3 nextTranslation = matrix.getTranslation();
   return Offset(nextTranslation.x, nextTranslation.y);
 }
@@ -1374,7 +1374,7 @@ Offset _getMatrixTranslation(Matrix4 matrix) {
 // matrix. This gives the viewport after the child has been transformed by the
 // given matrix. The viewport transforms as the inverse of the child (i.e.
 // moving the child left is equivalent to moving the viewport right).
-Quad _transformViewport(Matrix4 matrix, Rect viewport) {
+Quad _transformViewport(final Matrix4 matrix, final Rect viewport) {
   final Matrix4 inverseMatrix = matrix.clone()..invert();
   return Quad.points(
     inverseMatrix.transform3(Vector3(
@@ -1402,7 +1402,7 @@ Quad _transformViewport(Matrix4 matrix, Rect viewport) {
 
 // Find the axis aligned bounding box for the rect rotated about its center by
 // the given amount.
-Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
+Quad _getAxisAlignedBoundingBoxWithRotation(final Rect rect, final double rotation) {
   final Matrix4 rotationMatrix = Matrix4.identity()
       ..translate(rect.size.width / 2, rect.size.height / 2)
       ..rotateZ(rotation)
@@ -1419,7 +1419,7 @@ Quad _getAxisAlignedBoundingBoxWithRotation(Rect rect, double rotation) {
 // Return the amount that viewport lies outside of boundary. If the viewport
 // is completely contained within the boundary (inclusively), then returns
 // Offset.zero.
-Offset _exceedsBy(Quad boundary, Quad viewport) {
+Offset _exceedsBy(final Quad boundary, final Quad viewport) {
   final List<Vector3> viewportPoints = <Vector3>[
     viewport.point0, viewport.point1, viewport.point2, viewport.point3,
   ];
@@ -1443,7 +1443,7 @@ Offset _exceedsBy(Quad boundary, Quad viewport) {
 
 // Round the output values. This works around a precision problem where
 // values that should have been zero were given as within 10^-10 of zero.
-Offset _round(Offset offset) {
+Offset _round(final Offset offset) {
   return Offset(
     double.parse(offset.dx.toStringAsFixed(9)),
     double.parse(offset.dy.toStringAsFixed(9)),
@@ -1452,7 +1452,7 @@ Offset _round(Offset offset) {
 
 // Align the given offset to the given axis by allowing movement only in the
 // axis direction.
-Offset _alignAxis(Offset offset, Axis axis) {
+Offset _alignAxis(final Offset offset, final Axis axis) {
   switch (axis) {
     case Axis.horizontal:
       return Offset(offset.dx, 0.0);
@@ -1463,7 +1463,7 @@ Offset _alignAxis(Offset offset, Axis axis) {
 
 // Given two points, return the axis where the distance between the points is
 // greatest. If they are equal, return null.
-Axis? _getPanAxis(Offset point1, Offset point2) {
+Axis? _getPanAxis(final Offset point1, final Offset point2) {
   if (point1 == point2) {
     return null;
   }

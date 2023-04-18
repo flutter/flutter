@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMaterial control test', (final WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: Chip(label: Text('label'))));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -47,7 +47,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugCheckHasMaterialLocalizations control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasMaterialLocalizations control test', (final WidgetTester tester) async {
     await tester.pumpWidget(const Center(child: BackButton()));
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
@@ -84,7 +84,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugCheckHasScaffold control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffold control test', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -95,10 +95,10 @@ void main() {
           ),
         ),
         home: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             showBottomSheet<void>(
               context: context,
-              builder: (BuildContext context) => Container(),
+              builder: (final BuildContext context) => Container(),
             );
             return Container();
           },
@@ -242,7 +242,7 @@ void main() {
     ));
   });
 
-  testWidgets('debugCheckHasScaffoldMessenger control test', (WidgetTester tester) async {
+  testWidgets('debugCheckHasScaffoldMessenger control test', (final WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
     final SnackBar snackBar = SnackBar(
@@ -254,7 +254,7 @@ void main() {
       child: ScaffoldMessenger(
         key: scaffoldMessengerKey,
         child: Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Scaffold(
               key: scaffoldKey,
               body: Container(),
@@ -265,7 +265,7 @@ void main() {
     ));
     final List<dynamic> exceptions = <dynamic>[];
     final FlutterExceptionHandler? oldHandler = FlutterError.onError;
-    FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.onError = (final FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
     // ScaffoldMessenger shows SnackBar.

@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/widgets/basic/aspect_ratio.1.dart' as exampl
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AspectRatio applies 2.0 aspect ratio on its child', (WidgetTester tester) async {
+  testWidgets('AspectRatio applies 2.0 aspect ratio on its child', (final WidgetTester tester) async {
     const Size containerSize = Size(100, 100);
 
     await tester.pumpWidget(

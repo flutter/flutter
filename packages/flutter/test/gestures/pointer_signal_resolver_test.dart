@@ -11,7 +11,7 @@ class TestPointerSignalListener {
   final PointerSignalEvent event;
   bool callbackRan = false;
 
-  void callback(PointerSignalEvent event) {
+  void callback(final PointerSignalEvent event) {
     expect(event, equals(this.event));
     expect(callbackRan, isFalse);
     callbackRan = true;
@@ -82,13 +82,13 @@ void main() {
     expect(anotherTransformedEvent.original, same(originalEvent));
 
     final List<PointerSignalEvent> events = <PointerSignalEvent>[];
-    resolver.register(transformedEvent, (PointerSignalEvent event) {
+    resolver.register(transformedEvent, (final PointerSignalEvent event) {
       events.add(event);
     });
 
     // Registering a second transformed event should not throw an assertion.
     expect(() {
-      resolver.register(anotherTransformedEvent, (PointerSignalEvent event) {
+      resolver.register(anotherTransformedEvent, (final PointerSignalEvent event) {
         // This shouldn't be called because only the first registered callback is
         // invoked.
         events.add(event);

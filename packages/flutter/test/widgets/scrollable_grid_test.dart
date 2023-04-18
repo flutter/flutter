@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('GridView default control', (WidgetTester tester) async {
+  testWidgets('GridView default control', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -20,7 +20,7 @@ void main() {
   });
 
   // Tests https://github.com/flutter/flutter/issues/5522
-  testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
+  testWidgets('GridView displays correct children with nonzero padding', (final WidgetTester tester) async {
     const EdgeInsets padding = EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
     final Widget testWidget = Directionality(
@@ -32,7 +32,7 @@ void main() {
           child: GridView.count(
             crossAxisCount: 1,
             padding: padding,
-            children: List<Widget>.generate(10, (int index) {
+            children: List<Widget>.generate(10, (final int index) {
               return Text('$index', key: ValueKey<int>(index));
             }).toList(),
           ),
@@ -76,14 +76,14 @@ void main() {
     expect(find.text('4'), findsNothing);
   });
 
-  testWidgets('GridView.count() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+  testWidgets('GridView.count() fixed itemExtent, scroll to end, append, scroll', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
-    Widget buildFrame(int itemCount) {
+    Widget buildFrame(final int itemCount) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: GridView.count(
           crossAxisCount: itemCount,
-          children: List<Widget>.generate(itemCount, (int index) {
+          children: List<Widget>.generate(itemCount, (final int index) {
             return SizedBox(
               height: 200.0,
               child: Text('item $index'),

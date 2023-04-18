@@ -17,7 +17,7 @@ import '../../xcode_project.dart';
 /// we apply the reverse migration for anyone who was previously migrated.
 class FlutterApplicationMigration extends ProjectMigrator {
   FlutterApplicationMigration(
-    MacOSProject project,
+    final MacOSProject project,
     super.logger,
   ) : _infoPlistFile = project.defaultHostInfoPlist;
 

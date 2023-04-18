@@ -12,7 +12,7 @@ class StandardFabLocationExampleApp extends StatelessWidget {
   const StandardFabLocationExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: StandardFabLocationExample(),
     );
@@ -21,7 +21,7 @@ class StandardFabLocationExampleApp extends StatelessWidget {
 
 class AlmostEndFloatFabLocation extends StandardFabLocation with FabEndOffsetX, FabFloatOffsetY {
   @override
-  double getOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, double adjustment) {
+  double getOffsetX(final ScaffoldPrelayoutGeometry scaffoldGeometry, final double adjustment) {
     final double directionalAdjustment = scaffoldGeometry.textDirection == TextDirection.ltr ? -50.0 : 50.0;
     return super.getOffsetX(scaffoldGeometry, adjustment) + directionalAdjustment;
   }
@@ -31,7 +31,7 @@ class StandardFabLocationExample extends StatelessWidget {
   const StandardFabLocationExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home page'),

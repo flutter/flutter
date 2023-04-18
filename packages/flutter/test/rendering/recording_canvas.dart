@@ -27,7 +27,7 @@ class RecordedInvocation {
   String toString() => _describeInvocation(invocation);
 
   /// Converts [stack] to a string using the [FlutterError.defaultStackFilter] logic.
-  String stackToString({ String indent = '' }) {
+  String stackToString({ final String indent = '' }) {
     return indent + FlutterError.defaultStackFilter(
       stack.toString().trimRight().split('\n'),
     ).join('\n$indent');
@@ -69,7 +69,7 @@ class TestRecordingCanvas implements Canvas {
   }
 
   @override
-  void saveLayer(Rect? bounds, Paint paint) {
+  void saveLayer(final Rect? bounds, final Paint paint) {
     _saveCount += 1;
     invocations.add(RecordedInvocation(_MethodCall(#saveLayer, <dynamic>[bounds, paint]), stack: StackTrace.current));
   }
@@ -82,7 +82,7 @@ class TestRecordingCanvas implements Canvas {
   }
 
   @override
-  void noSuchMethod(Invocation invocation) {
+  void noSuchMethod(final Invocation invocation) {
     invocations.add(RecordedInvocation(invocation, stack: StackTrace.current));
   }
 }
@@ -96,18 +96,18 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   final Canvas canvas;
 
   @override
-  void paintChild(RenderObject child, Offset offset) {
+  void paintChild(final RenderObject child, final Offset offset) {
     child.paint(this, offset);
   }
 
   @override
   ClipRectLayer? pushClipRect(
-    bool needsCompositing,
-    Offset offset,
-    Rect clipRect,
-    PaintingContextCallback painter, {
-    Clip clipBehavior = Clip.hardEdge,
-    ClipRectLayer? oldLayer,
+    final bool needsCompositing,
+    final Offset offset,
+    final Rect clipRect,
+    final PaintingContextCallback painter, {
+    final Clip clipBehavior = Clip.hardEdge,
+    final ClipRectLayer? oldLayer,
   }) {
     clipRectAndPaint(clipRect.shift(offset), clipBehavior, clipRect.shift(offset), () => painter(this, offset));
     return null;
@@ -115,13 +115,13 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
 
   @override
   ClipRRectLayer? pushClipRRect(
-    bool needsCompositing,
-    Offset offset,
-    Rect bounds,
-    RRect clipRRect,
-    PaintingContextCallback painter, {
-    Clip clipBehavior = Clip.antiAlias,
-    ClipRRectLayer? oldLayer,
+    final bool needsCompositing,
+    final Offset offset,
+    final Rect bounds,
+    final RRect clipRRect,
+    final PaintingContextCallback painter, {
+    final Clip clipBehavior = Clip.antiAlias,
+    final ClipRRectLayer? oldLayer,
   }) {
     clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
     return null;
@@ -129,13 +129,13 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
 
   @override
   ClipPathLayer? pushClipPath(
-    bool needsCompositing,
-    Offset offset,
-    Rect bounds,
-    Path clipPath,
-    PaintingContextCallback painter, {
-    Clip clipBehavior = Clip.antiAlias,
-    ClipPathLayer? oldLayer,
+    final bool needsCompositing,
+    final Offset offset,
+    final Rect bounds,
+    final Path clipPath,
+    final PaintingContextCallback painter, {
+    final Clip clipBehavior = Clip.antiAlias,
+    final ClipPathLayer? oldLayer,
   }) {
     clipPathAndPaint(clipPath.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
     return null;
@@ -143,11 +143,11 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
 
   @override
   TransformLayer? pushTransform(
-    bool needsCompositing,
-    Offset offset,
-    Matrix4 transform,
-    PaintingContextCallback painter, {
-    TransformLayer? oldLayer,
+    final bool needsCompositing,
+    final Offset offset,
+    final Matrix4 transform,
+    final PaintingContextCallback painter, {
+    final TransformLayer? oldLayer,
   }) {
     canvas.save();
     canvas.transform(transform.storage);
@@ -158,10 +158,10 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
 
   @override
   OpacityLayer pushOpacity(
-    Offset offset,
-    int alpha,
-    PaintingContextCallback painter, {
-    OpacityLayer? oldLayer,
+    final Offset offset,
+    final int alpha,
+    final PaintingContextCallback painter, {
+    final OpacityLayer? oldLayer,
   }) {
     canvas.saveLayer(null, Paint()); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
@@ -171,19 +171,19 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
 
   @override
   void pushLayer(
-    Layer childLayer,
-    PaintingContextCallback painter,
-    Offset offset, {
-    Rect? childPaintBounds,
+    final Layer childLayer,
+    final PaintingContextCallback painter,
+    final Offset offset, {
+    final Rect? childPaintBounds,
   }) {
     painter(this, offset);
   }
 
   @override
-  VoidCallback addCompositionCallback(CompositionCallback callback) => () {};
+  VoidCallback addCompositionCallback(final CompositionCallback callback) => () {};
 
   @override
-  void noSuchMethod(Invocation invocation) { }
+  void noSuchMethod(final Invocation invocation) { }
 }
 
 class _MethodCall implements Invocation {
@@ -208,7 +208,7 @@ class _MethodCall implements Invocation {
   List<Type> get typeArguments => const <Type> [];
 }
 
-String _valueName(Object? value) {
+String _valueName(final Object? value) {
   if (value is double) {
     return value.toStringAsFixed(1);
   }
@@ -216,7 +216,7 @@ String _valueName(Object? value) {
 }
 
 // Workaround for https://github.com/dart-lang/sdk/issues/28372
-String _symbolName(Symbol symbol) {
+String _symbolName(final Symbol symbol) {
   // WARNING: Assumes a fixed format for Symbol.toString which is *not*
   // guaranteed anywhere.
   final String s = '$symbol';
@@ -224,7 +224,7 @@ String _symbolName(Symbol symbol) {
 }
 
 // Workaround for https://github.com/dart-lang/sdk/issues/28373
-String _describeInvocation(Invocation call) {
+String _describeInvocation(final Invocation call) {
   final StringBuffer buffer = StringBuffer();
   buffer.write(_symbolName(call.memberName));
   if (call.isSetter) {
@@ -233,7 +233,7 @@ String _describeInvocation(Invocation call) {
     buffer.write('(');
     buffer.writeAll(call.positionalArguments.map<String>(_valueName), ', ');
     String separator = call.positionalArguments.isEmpty ? '' : ', ';
-    call.namedArguments.forEach((Symbol name, Object? value) {
+    call.namedArguments.forEach((final Symbol name, final Object? value) {
       buffer.write(separator);
       buffer.write(_symbolName(name));
       buffer.write(': ');

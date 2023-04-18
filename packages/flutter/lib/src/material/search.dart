@@ -58,10 +58,10 @@ import 'theme.dart';
 ///
 ///  * [SearchDelegate] to define the content of the search page.
 Future<T?> showSearch<T>({
-  required BuildContext context,
-  required SearchDelegate<T> delegate,
-  String? query = '',
-  bool useRootNavigator = false,
+  required final BuildContext context,
+  required final SearchDelegate<T> delegate,
+  final String? query = '',
+  final bool useRootNavigator = false,
 }) {
   delegate.query = query ?? delegate.query;
   delegate._currentBody = _SearchBody.suggestions;
@@ -157,7 +157,7 @@ abstract class SearchDelegate<T> {
   /// suggestion. When [ListTile.onTap] is called, [query] should be updated
   /// with the corresponding suggestion and the results page should be shown
   /// by calling [showResults].
-  Widget buildSuggestions(BuildContext context);
+  Widget buildSuggestions(final BuildContext context);
 
   /// The results shown after the user submits a search from the search page.
   ///
@@ -172,7 +172,7 @@ abstract class SearchDelegate<T> {
   /// When the user taps on a particular search result, [close] should be called
   /// with the selected result as argument. This will close the search page and
   /// communicate the result back to the initial caller of [showSearch].
-  Widget buildResults(BuildContext context);
+  Widget buildResults(final BuildContext context);
 
   /// A widget to display before the current query in the [AppBar].
   ///
@@ -186,7 +186,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.leading], the intended use for the return value of this method.
-  Widget? buildLeading(BuildContext context);
+  Widget? buildLeading(final BuildContext context);
 
   /// Widgets to display after the search query in the [AppBar].
   ///
@@ -199,7 +199,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [AppBar.actions], the intended use for the return value of this method.
-  List<Widget>? buildActions(BuildContext context);
+  List<Widget>? buildActions(final BuildContext context);
 
   /// Widget to display across the bottom of the [AppBar].
   ///
@@ -209,7 +209,7 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [AppBar.bottom], the intended use for the return value of this method.
   ///
-  PreferredSizeWidget? buildBottom(BuildContext context) => null;
+  PreferredSizeWidget? buildBottom(final BuildContext context) => null;
 
   /// The theme used to configure the search page.
   ///
@@ -227,7 +227,7 @@ abstract class SearchDelegate<T> {
   ///  * [AppBarTheme], which configures the AppBar's appearance.
   ///  * [InputDecorationTheme], which configures the appearance of the search
   ///    text field.
-  ThemeData appBarTheme(BuildContext context) {
+  ThemeData appBarTheme(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
     return theme.copyWith(
@@ -259,7 +259,7 @@ abstract class SearchDelegate<T> {
   /// Changes the current query string.
   ///
   /// Setting the query string programmatically moves the cursor to the end of the text field.
-  set query(String value) {
+  set query(final String value) {
     _queryTextController.text = value;
     if (_queryTextController.text.isNotEmpty) {
       _queryTextController.selection = TextSelection.fromPosition(TextPosition(offset: _queryTextController.text.length));
@@ -277,7 +277,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [showSuggestions] to show the search suggestions again.
-  void showResults(BuildContext context) {
+  void showResults(final BuildContext context) {
     _focusNode?.unfocus();
     _currentBody = _SearchBody.results;
   }
@@ -294,7 +294,7 @@ abstract class SearchDelegate<T> {
   /// See also:
   ///
   ///  * [showResults] to show the search results.
-  void showSuggestions(BuildContext context) {
+  void showSuggestions(final BuildContext context) {
     assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
     _focusNode!.requestFocus();
     _currentBody = _SearchBody.suggestions;
@@ -304,11 +304,11 @@ abstract class SearchDelegate<T> {
   ///
   /// The value provided for `result` is used as the return value of the call
   /// to [showSearch] that launched the search initially.
-  void close(BuildContext context, T result) {
+  void close(final BuildContext context, final T result) {
     _currentBody = null;
     _focusNode?.unfocus();
     Navigator.of(context)
-      ..popUntil((Route<dynamic> route) => route == _route)
+      ..popUntil((final Route<dynamic> route) => route == _route)
       ..pop(result);
   }
 
@@ -363,7 +363,7 @@ abstract class SearchDelegate<T> {
   final ValueNotifier<_SearchBody?> _currentBodyNotifier = ValueNotifier<_SearchBody?>(null);
 
   _SearchBody? get _currentBody => _currentBodyNotifier.value;
-  set _currentBody(_SearchBody? value) {
+  set _currentBody(final _SearchBody? value) {
     _currentBodyNotifier.value = value;
   }
 
@@ -413,10 +413,10 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
+    final BuildContext context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
+    final Widget child,
   ) {
     return FadeTransition(
       opacity: animation,
@@ -433,9 +433,9 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
+    final BuildContext context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
   ) {
     return _SearchPage<T>(
       delegate: delegate,
@@ -444,7 +444,7 @@ class _SearchPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  void didComplete(T? result) {
+  void didComplete(final T? result) {
     super.didComplete(result);
     assert(delegate._route == this);
     delegate._route = null;
@@ -490,7 +490,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     focusNode.dispose();
   }
 
-  void _onAnimationStatusChanged(AnimationStatus status) {
+  void _onAnimationStatusChanged(final AnimationStatus status) {
     if (status != AnimationStatus.completed) {
       return;
     }
@@ -501,7 +501,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   @override
-  void didUpdateWidget(_SearchPage<T> oldWidget) {
+  void didUpdateWidget(final _SearchPage<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.delegate != oldWidget.delegate) {
       oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
@@ -532,7 +532,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
@@ -581,7 +581,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
               style: widget.delegate.searchFieldStyle ?? theme.textTheme.titleLarge,
               textInputAction: widget.delegate.textInputAction,
               keyboardType: widget.delegate.keyboardType,
-              onSubmitted: (String _) {
+              onSubmitted: (final String _) {
                 widget.delegate.showResults(context);
               },
               decoration: InputDecoration(hintText: searchFieldLabel),

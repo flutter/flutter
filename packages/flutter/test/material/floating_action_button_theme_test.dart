@@ -19,7 +19,7 @@ void main() {
     expect(identical(FloatingActionButtonThemeData.lerp(data, data, 0.5), data), true);
   });
 
-  testWidgets('Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified', (WidgetTester tester) async {
+  testWidgets('Default values are used when no FloatingActionButton or FloatingActionButtonThemeData properties are specified', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         floatingActionButton: FloatingActionButton(
@@ -44,7 +44,7 @@ void main() {
     expect(_getIconSize(tester).height, 24.0);
   });
 
-  testWidgets('FloatingActionButtonThemeData values are used when no FloatingActionButton properties are specified', (WidgetTester tester) async {
+  testWidgets('FloatingActionButtonThemeData values are used when no FloatingActionButton properties are specified', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0xBEEFBEEF);
     const Color foregroundColor = Color(0xFACEFACE);
     const Color splashColor = Color(0xCAFEFEED);
@@ -85,7 +85,7 @@ void main() {
     expect(_getRawMaterialButton(tester).constraints, constraints);
   });
 
-  testWidgets('FloatingActionButton values take priority over FloatingActionButtonThemeData values when both properties are specified', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton values take priority over FloatingActionButtonThemeData values when both properties are specified', (final WidgetTester tester) async {
     const Color backgroundColor = Color(0x00000001);
     const Color foregroundColor = Color(0x00000002);
     const Color splashColor = Color(0x00000003);
@@ -130,7 +130,7 @@ void main() {
     expect(_getRawMaterialButton(tester).splashColor, splashColor);
   });
 
-  testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton uses a custom shape when specified in the theme', (final WidgetTester tester) async {
     const ShapeBorder customShape = BeveledRectangleBorder();
 
     await tester.pumpWidget(MaterialApp(
@@ -145,7 +145,7 @@ void main() {
     expect(_getRawMaterialButton(tester).shape, customShape);
   });
 
-  testWidgets('FloatingActionButton.small uses custom constraints when specified in the theme', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.small uses custom constraints when specified in the theme', (final WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     const double iconSize = 24.0;
 
@@ -168,7 +168,7 @@ void main() {
     expect(_getIconSize(tester).height, iconSize);
   });
 
-  testWidgets('FloatingActionButton.large uses custom constraints when specified in the theme', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.large uses custom constraints when specified in the theme', (final WidgetTester tester) async {
     const BoxConstraints constraints = BoxConstraints.tightFor(width: 100.0, height: 100.0);
     const double iconSize = 36.0;
 
@@ -191,7 +191,7 @@ void main() {
     expect(_getIconSize(tester).height, iconSize);
   });
 
-  testWidgets('FloatingActionButton.extended uses custom properties when specified in the theme', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.extended uses custom properties when specified in the theme', (final WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const BoxConstraints constraints = BoxConstraints.tightFor(height: 100.0);
@@ -225,7 +225,7 @@ void main() {
     expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const Color(0xffffffff)));
   });
 
-  testWidgets('FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.extended custom properties takes priority over FloatingActionButtonThemeData spacing', (final WidgetTester tester) async {
     const Key iconKey = Key('icon');
     const Key labelKey = Key('label');
     const double iconLabelSpacing = 33.0;
@@ -259,19 +259,19 @@ void main() {
     expect(_getRawMaterialButton(tester).textStyle, textStyle.copyWith(color: const Color(0xffffffff)));
   });
 
-  testWidgets('default FloatingActionButton debugFillProperties', (WidgetTester tester) async {
+  testWidgets('default FloatingActionButton debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const FloatingActionButtonThemeData ().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Material implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const FloatingActionButtonThemeData(
       foregroundColor: Color(0xFEEDFEED),
@@ -298,8 +298,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-      .map((DiagnosticsNode node) => node.toString())
+      .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((final DiagnosticsNode node) => node.toString())
       .toList();
 
     expect(description, <String>[
@@ -327,7 +327,7 @@ void main() {
     ]);
   });
 
-  testWidgets('FloatingActionButton.mouseCursor uses FloatingActionButtonThemeData.mouseCursor when specified.', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton.mouseCursor uses FloatingActionButtonThemeData.mouseCursor when specified.', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -352,7 +352,7 @@ void main() {
   });
 }
 
-RawMaterialButton _getRawMaterialButton(WidgetTester tester) {
+RawMaterialButton _getRawMaterialButton(final WidgetTester tester) {
   return tester.widget<RawMaterialButton>(
     find.descendant(
       of: find.byType(FloatingActionButton),
@@ -361,7 +361,7 @@ RawMaterialButton _getRawMaterialButton(WidgetTester tester) {
   );
 }
 
-RichText _getRichText(WidgetTester tester) {
+RichText _getRichText(final WidgetTester tester) {
   return tester.widget<RichText>(
     find.descendant(
       of: find.byType(FloatingActionButton),
@@ -370,7 +370,7 @@ RichText _getRichText(WidgetTester tester) {
   );
 }
 
-SizedBox _getIconSize(WidgetTester tester) {
+SizedBox _getIconSize(final WidgetTester tester) {
   return tester.widget<SizedBox>(
     find.descendant(
       of: find.descendant(

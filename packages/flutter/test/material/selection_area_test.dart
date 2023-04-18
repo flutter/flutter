@@ -9,14 +9,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Offset textOffsetToPosition(RenderParagraph paragraph, int offset) {
+Offset textOffsetToPosition(final RenderParagraph paragraph, final int offset) {
   const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
   final Offset localOffset = paragraph.getOffsetForCaret(TextPosition(offset: offset), caret);
   return paragraph.localToGlobal(localOffset);
 }
 
 void main() {
-  testWidgets('SelectionArea uses correct selection controls', (WidgetTester tester) async {
+  testWidgets('SelectionArea uses correct selection controls', (final WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
       home: SelectionArea(
         child: Text('abc'),
@@ -38,7 +38,7 @@ void main() {
     }
   }, variant: TargetPlatformVariant.all());
 
-  testWidgets('Does not crash when long pressing on padding after dragging', (WidgetTester tester) async {
+  testWidgets('Does not crash when long pressing on padding after dragging', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/123378
     await tester.pumpWidget(
       const MaterialApp(
@@ -69,7 +69,7 @@ void main() {
   });
 
 
-  testWidgets('builds the default context menu by default', (WidgetTester tester) async {
+  testWidgets('builds the default context menu by default', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
@@ -96,15 +96,15 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('builds a custom context menu if provided', (WidgetTester tester) async {
+  testWidgets('builds a custom context menu if provided', (final WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
       MaterialApp(
         home: SelectionArea(
           focusNode: FocusNode(),
           contextMenuBuilder: (
-            BuildContext context,
-            SelectableRegionState selectableRegionState,
+            final BuildContext context,
+            final SelectableRegionState selectableRegionState,
           ) {
             return Placeholder(key: key);
           },
@@ -132,13 +132,13 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('onSelectionChange is called when the selection changes', (WidgetTester tester) async {
+  testWidgets('onSelectionChange is called when the selection changes', (final WidgetTester tester) async {
     SelectedContent? content;
 
     await tester.pumpWidget(MaterialApp(
       home: SelectionArea(
         child: const Text('How are you'),
-        onSelectionChanged: (SelectedContent? selectedContent) => content = selectedContent,
+        onSelectionChanged: (final SelectedContent? selectedContent) => content = selectedContent,
       ),
     ));
     final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you'), matching: find.byType(RichText)));
@@ -163,7 +163,7 @@ void main() {
     expect(content!.plainText, 'How');
   });
 
-  testWidgets('stopping drag of end handle will show the toolbar', (WidgetTester tester) async {
+  testWidgets('stopping drag of end handle will show the toolbar', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/119314
     await tester.pumpWidget(
       MaterialApp(

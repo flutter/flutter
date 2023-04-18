@@ -17,7 +17,7 @@ void main() {
   }
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
-  testWidgets('update dialog', (WidgetTester tester) async {
+  testWidgets('update dialog', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const GalleryApp(
         testMode: true,

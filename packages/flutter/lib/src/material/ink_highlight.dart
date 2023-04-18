@@ -40,14 +40,14 @@ class InkHighlight extends InteractiveInkFeature {
     required super.controller,
     required super.referenceBox,
     required super.color,
-    required TextDirection textDirection,
-    BoxShape shape = BoxShape.rectangle,
-    double? radius,
-    BorderRadius? borderRadius,
+    required final TextDirection textDirection,
+    final BoxShape shape = BoxShape.rectangle,
+    final double? radius,
+    final BorderRadius? borderRadius,
     super.customBorder,
-    RectCallback? rectCallback,
+    final RectCallback? rectCallback,
     super.onRemoved,
-    Duration fadeDuration = _kDefaultHighlightFadeDuration,
+    final Duration fadeDuration = _kDefaultHighlightFadeDuration,
   }) : _shape = shape,
        _radius = radius,
        _borderRadius = borderRadius ?? BorderRadius.zero,
@@ -91,7 +91,7 @@ class InkHighlight extends InteractiveInkFeature {
     _alphaController.reverse();
   }
 
-  void _handleAlphaStatusChanged(AnimationStatus status) {
+  void _handleAlphaStatusChanged(final AnimationStatus status) {
     if (status == AnimationStatus.dismissed && !_active) {
       dispose();
     }
@@ -103,7 +103,7 @@ class InkHighlight extends InteractiveInkFeature {
     super.dispose();
   }
 
-  void _paintHighlight(Canvas canvas, Rect rect, Paint paint) {
+  void _paintHighlight(final Canvas canvas, final Rect rect, final Paint paint) {
     canvas.save();
     if (customBorder != null) {
       canvas.clipPath(customBorder!.getOuterPath(rect, textDirection: _textDirection));
@@ -127,7 +127,7 @@ class InkHighlight extends InteractiveInkFeature {
   }
 
   @override
-  void paintFeature(Canvas canvas, Matrix4 transform) {
+  void paintFeature(final Canvas canvas, final Matrix4 transform) {
     final Paint paint = Paint()..color = color.withAlpha(_alpha.value);
     final Offset? originOffset = MatrixUtils.getAsTranslation(transform);
     final Rect rect = _rectCallback != null ? _rectCallback!() : Offset.zero & referenceBox.size;

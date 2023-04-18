@@ -12,7 +12,7 @@ class TabBarApp extends StatelessWidget {
   const TabBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       home: const TabBarExample(),
@@ -24,7 +24,7 @@ class TabBarExample extends StatelessWidget {
   const TabBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return DefaultTabController(
       initialIndex: 1,
       length: 3,
@@ -86,7 +86,7 @@ class _NestedTabBarState extends State<NestedTabBar> with TickerProviderStateMix
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: <Widget>[
         TabBar.secondary(

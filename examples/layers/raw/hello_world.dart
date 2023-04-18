@@ -10,7 +10,7 @@ import 'dart:ui' as ui;
 // The FlutterView into which this example will draw; set in the main method.
 late final ui.FlutterView view;
 
-void beginFrame(Duration timeStamp) {
+void beginFrame(final Duration timeStamp) {
   final double devicePixelRatio = view.devicePixelRatio;
   final ui.Size logicalSize = view.physicalSize / devicePixelRatio;
 

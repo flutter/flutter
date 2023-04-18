@@ -19,12 +19,12 @@ class _GenerationTextState extends State<GenerationText> {
   _GenerationTextState() : generation = globalGeneration;
   final int generation;
   @override
-  Widget build(BuildContext context) => Text('${widget.value}:$generation ', textDirection: TextDirection.ltr);
+  Widget build(final BuildContext context) => Text('${widget.value}:$generation ', textDirection: TextDirection.ltr);
 }
 
 // Creates a SliverList with `keys.length` children and each child having a key from `keys` and a text of `key:generation`.
 // The generation is increased with every call to this method.
-Future<void> test(WidgetTester tester, double offset, List<int> keys) {
+Future<void> test(final WidgetTester tester, final double offset, final List<int> keys) {
   globalGeneration += 1;
   return tester.pumpWidget(
     Directionality(
@@ -34,7 +34,7 @@ Future<void> test(WidgetTester tester, double offset, List<int> keys) {
         offset: ViewportOffset.fixed(offset),
         slivers: <Widget>[
           SliverList(
-            delegate: SliverChildListDelegate(keys.map<Widget>((int key) {
+            delegate: SliverChildListDelegate(keys.map<Widget>((final int key) {
               return SizedBox(key: GlobalObjectKey(key), height: 100.0, child: GenerationText(key));
             }).toList()),
           ),
@@ -46,20 +46,20 @@ Future<void> test(WidgetTester tester, double offset, List<int> keys) {
 
 // `answerKey`: Expected offsets of visible SliverList children in global coordinate system.
 // `text`: A space-separated list of expected `key:generation` pairs for the visible SliverList children.
-void verify(WidgetTester tester, List<Offset> answerKey, String text) {
+void verify(final WidgetTester tester, final List<Offset> answerKey, final String text) {
   final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
-    (RenderBox target) => target.localToGlobal(Offset.zero),
+    (final RenderBox target) => target.localToGlobal(Offset.zero),
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
     tester.widgetList<Text>(find.byType(Text))
-        .map<String>((Text widget) => widget.data!)
-        .reduce((String value, String element) => value + element);
+        .map<String>((final Text widget) => widget.data!)
+        .reduce((final String value, final String element) => value + element);
   expect(foundText, equals(text));
 }
 
 void main() {
-  testWidgets('Viewport+SliverBlock with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Viewport+SliverBlock with GlobalKey reparenting', (final WidgetTester tester) async {
     await test(tester, 0.0, <int>[1,2,3,4,5,6,7,8,9]);
     verify(tester, <Offset>[
       Offset.zero,

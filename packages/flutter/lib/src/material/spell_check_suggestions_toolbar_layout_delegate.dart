@@ -23,12 +23,12 @@ class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelega
   final Offset anchor;
 
   @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+  BoxConstraints getConstraintsForChild(final BoxConstraints constraints) {
     return constraints.loosen();
   }
 
   @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  Offset getPositionForChild(final Size size, final Size childSize) {
     return Offset(
       TextSelectionToolbarLayoutDelegate.centerOn(
         anchor.dx,
@@ -44,7 +44,7 @@ class SpellCheckSuggestionsToolbarLayoutDelegate extends SingleChildLayoutDelega
   }
 
   @override
-  bool shouldRelayout(SpellCheckSuggestionsToolbarLayoutDelegate oldDelegate) {
+  bool shouldRelayout(final SpellCheckSuggestionsToolbarLayoutDelegate oldDelegate) {
     return anchor != oldDelegate.anchor;
   }
 }

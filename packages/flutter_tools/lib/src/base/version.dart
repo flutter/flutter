@@ -15,7 +15,7 @@ class Version implements Comparable<Version> {
   /// A null [minor] or [patch] version is logically equivalent to 0. Using null
   /// for these parameters only affects the generation of [text], if no value
   /// for it is provided.
-  factory Version(int major, int? minor, int? patch, {String? text}) {
+  factory Version(final int major, final int? minor, final int? patch, {String? text}) {
     if (text == null) {
       text = '$major';
       if (minor != null) {
@@ -45,7 +45,7 @@ class Version implements Comparable<Version> {
   }
 
   /// Creates a new [Version] by parsing [text].
-  static Version? parse(String? text) {
+  static Version? parse(final String? text) {
     final Match? match = versionPattern.firstMatch(text ?? '');
     if (match == null) {
       return null;
@@ -64,7 +64,7 @@ class Version implements Comparable<Version> {
   /// Returns the primary version out of a list of candidates.
   ///
   /// This is the highest-numbered stable version.
-  static Version? primary(List<Version> versions) {
+  static Version? primary(final List<Version> versions) {
     Version? primary;
     for (final Version version in versions) {
       if (primary == null || (version > primary)) {
@@ -95,7 +95,7 @@ class Version implements Comparable<Version> {
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is Version
         && other.major == major
         && other.minor == minor
@@ -105,13 +105,13 @@ class Version implements Comparable<Version> {
   @override
   int get hashCode => Object.hash(major, minor, patch);
 
-  bool operator <(Version other) => compareTo(other) < 0;
-  bool operator >(Version other) => compareTo(other) > 0;
-  bool operator <=(Version other) => compareTo(other) <= 0;
-  bool operator >=(Version other) => compareTo(other) >= 0;
+  bool operator <(final Version other) => compareTo(other) < 0;
+  bool operator >(final Version other) => compareTo(other) > 0;
+  bool operator <=(final Version other) => compareTo(other) <= 0;
+  bool operator >=(final Version other) => compareTo(other) >= 0;
 
   @override
-  int compareTo(Version other) {
+  int compareTo(final Version other) {
     if (major != other.major) {
       return major.compareTo(other.major);
     }
@@ -133,11 +133,11 @@ class Version implements Comparable<Version> {
 /// Pass [inclusiveMin] = false for greater than and not equal to min.
 /// Pass [inclusiveMax] = false for less than and not equal to max.
 bool isWithinVersionRange(
-  String targetVersion, {
-  required String min,
-  required String max,
-  bool inclusiveMax = true,
-  bool inclusiveMin = true,
+  final String targetVersion, {
+  required final String min,
+  required final String max,
+  final bool inclusiveMax = true,
+  final bool inclusiveMin = true,
 }) {
   final Version? parsedTargetVersion = Version.parse(targetVersion);
   final Version? minVersion = Version.parse(min);

@@ -12,7 +12,7 @@ class CupertinoTextFieldApp extends StatelessWidget {
   const CupertinoTextFieldApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoTextFieldExample(),
@@ -43,7 +43,7 @@ class _CupertinoTextFieldExampleState extends State<CupertinoTextFieldExample> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('CupertinoTextField Sample'),

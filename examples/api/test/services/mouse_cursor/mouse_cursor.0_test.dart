@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/services/mouse_cursor/mouse_cursor.0.dart' a
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Uses Text Cursor', (WidgetTester tester) async {
+  testWidgets('Uses Text Cursor', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.MouseCursorExampleApp(),
     );

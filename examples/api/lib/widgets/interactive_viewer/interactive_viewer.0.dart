@@ -12,7 +12,7 @@ class InteractiveViewerExampleApp extends StatelessWidget {
   const InteractiveViewerExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('InteractiveViewer Sample')),
@@ -26,7 +26,7 @@ class InteractiveViewerExample extends StatelessWidget {
   const InteractiveViewerExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Center(
       child: InteractiveViewer(
         boundaryMargin: const EdgeInsets.all(20.0),

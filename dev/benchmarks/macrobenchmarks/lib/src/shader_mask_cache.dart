@@ -32,7 +32,7 @@ class _ShaderMaskCachePageState extends State<ShaderMaskCachePage>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.lightBlue,
       body: ListView(
@@ -48,9 +48,9 @@ class _ShaderMaskCachePageState extends State<ShaderMaskCachePage>
     );
   }
 
-  Widget buildShaderMask(int index) {
+  Widget buildShaderMask(final int index) {
     return ShaderMask(
-      shaderCallback: (Rect bounds) {
+      shaderCallback: (final Rect bounds) {
         return const RadialGradient(
           center: Alignment.topLeft,
           radius: 1.0,

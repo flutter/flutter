@@ -17,7 +17,7 @@ class ButtonMatrixAppState extends State<ButtonMatrixApp> {
   int increment = 1;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(

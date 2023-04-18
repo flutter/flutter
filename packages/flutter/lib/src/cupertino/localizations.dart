@@ -67,7 +67,7 @@ abstract class CupertinoLocalizations {
   ///  - US English: 2018
   ///  - Korean: 2018년
   // The global version uses date symbols data from the intl package.
-  String datePickerYear(int yearIndex);
+  String datePickerYear(final int yearIndex);
 
   /// Month that is shown in [CupertinoDatePicker] spinner corresponding to
   /// the given month index.
@@ -77,7 +77,7 @@ abstract class CupertinoLocalizations {
   ///  - US English: January
   ///  - Korean: 1월
   // The global version uses date symbols data from the intl package.
-  String datePickerMonth(int monthIndex);
+  String datePickerMonth(final int monthIndex);
 
   /// Day of month that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given day index.
@@ -92,7 +92,7 @@ abstract class CupertinoLocalizations {
   ///
   ///  - US English: Mon 1
   // The global version uses date symbols data from the intl package.
-  String datePickerDayOfMonth(int dayIndex, [int? weekDay]);
+  String datePickerDayOfMonth(final int dayIndex, [final int? weekDay]);
 
   /// The medium-width date format that is shown in [CupertinoDatePicker]
   /// spinner. Abbreviates month and days of week.
@@ -102,7 +102,7 @@ abstract class CupertinoLocalizations {
   /// - US English: Wed Sep 27
   /// - Russian: ср сент. 27
   // The global version is based on intl package's DateFormat.MMMEd.
-  String datePickerMediumDate(DateTime date);
+  String datePickerMediumDate(final DateTime date);
 
   /// Hour that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given hour value.
@@ -112,11 +112,11 @@ abstract class CupertinoLocalizations {
   ///  - US English: 1
   ///  - Arabic: ٠١
   // The global version uses date symbols data from the intl package.
-  String datePickerHour(int hour);
+  String datePickerHour(final int hour);
 
   /// Semantics label for the given hour value in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
-  String? datePickerHourSemanticsLabel(int hour);
+  String? datePickerHourSemanticsLabel(final int hour);
 
   /// Minute that is shown in [CupertinoDatePicker] spinner corresponding
   /// to the given minute value.
@@ -126,11 +126,11 @@ abstract class CupertinoLocalizations {
   ///  - US English: 01
   ///  - Arabic: ٠١
   // The global version uses date symbols data from the intl package.
-  String datePickerMinute(int minute);
+  String datePickerMinute(final int minute);
 
   /// Semantics label for the given minute value in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
-  String? datePickerMinuteSemanticsLabel(int minute);
+  String? datePickerMinuteSemanticsLabel(final int minute);
 
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
@@ -162,7 +162,7 @@ abstract class CupertinoLocalizations {
   /// there are, e.g. 'tab, 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabSemanticsLabel({required int tabIndex, required int tabCount});
+  String tabSemanticsLabel({required final int tabIndex, required final int tabCount});
 
   /// Hour that is shown in [CupertinoTimerPicker] corresponding to
   /// the given hour value.
@@ -172,7 +172,7 @@ abstract class CupertinoLocalizations {
   ///  - US English: 1
   ///  - Arabic: ١
   // The global version uses date symbols data from the intl package.
-  String timerPickerHour(int hour);
+  String timerPickerHour(final int hour);
 
   /// Minute that is shown in [CupertinoTimerPicker] corresponding to
   /// the given minute value.
@@ -182,7 +182,7 @@ abstract class CupertinoLocalizations {
   ///  - US English: 1
   ///  - Arabic: ١
   // The global version uses date symbols data from the intl package.
-  String timerPickerMinute(int minute);
+  String timerPickerMinute(final int minute);
 
   /// Second that is shown in [CupertinoTimerPicker] corresponding to
   /// the given second value.
@@ -192,13 +192,13 @@ abstract class CupertinoLocalizations {
   ///  - US English: 1
   ///  - Arabic: ١
   // The global version uses date symbols data from the intl package.
-  String timerPickerSecond(int second);
+  String timerPickerSecond(final int second);
 
   /// Label that appears next to the hour picker in
   /// [CupertinoTimerPicker] when selected hour value is `hour`.
   /// This function will deal with pluralization based on the `hour` parameter.
   // The global version uses the translated string from the arb file.
-  String? timerPickerHourLabel(int hour);
+  String? timerPickerHourLabel(final int hour);
 
   /// All possible hour labels that appears next to the hour picker in
   /// [CupertinoTimerPicker]
@@ -208,7 +208,7 @@ abstract class CupertinoLocalizations {
   /// [CupertinoTimerPicker] when selected minute value is `minute`.
   /// This function will deal with pluralization based on the `minute` parameter.
   // The global version uses the translated string from the arb file.
-  String? timerPickerMinuteLabel(int minute);
+  String? timerPickerMinuteLabel(final int minute);
 
   /// All possible minute labels that appears next to the minute picker in
   /// [CupertinoTimerPicker]
@@ -218,7 +218,7 @@ abstract class CupertinoLocalizations {
   /// [CupertinoTimerPicker] when selected minute value is `second`.
   /// This function will deal with pluralization based on the `second` parameter.
   // The global version uses the translated string from the arb file.
-  String? timerPickerSecondLabel(int second);
+  String? timerPickerSecondLabel(final int second);
 
   /// All possible second labels that appears next to the second picker in
   /// [CupertinoTimerPicker]
@@ -271,7 +271,7 @@ abstract class CupertinoLocalizations {
   /// ```dart
   /// CupertinoLocalizations.of(context).anteMeridiemAbbreviation;
   /// ```
-  static CupertinoLocalizations of(BuildContext context) {
+  static CupertinoLocalizations of(final BuildContext context) {
     assert(debugCheckHasCupertinoLocalizations(context));
     return Localizations.of<CupertinoLocalizations>(context, CupertinoLocalizations)!;
   }
@@ -281,13 +281,13 @@ class _CupertinoLocalizationsDelegate extends LocalizationsDelegate<CupertinoLoc
   const _CupertinoLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => locale.languageCode == 'en';
+  bool isSupported(final Locale locale) => locale.languageCode == 'en';
 
   @override
-  Future<CupertinoLocalizations> load(Locale locale) => DefaultCupertinoLocalizations.load(locale);
+  Future<CupertinoLocalizations> load(final Locale locale) => DefaultCupertinoLocalizations.load(locale);
 
   @override
-  bool shouldReload(_CupertinoLocalizationsDelegate old) => false;
+  bool shouldReload(final _CupertinoLocalizationsDelegate old) => false;
 
   @override
   String toString() => 'DefaultCupertinoLocalizations.delegate(en_US)';
@@ -346,13 +346,13 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
 
 
   @override
-  String datePickerYear(int yearIndex) => yearIndex.toString();
+  String datePickerYear(final int yearIndex) => yearIndex.toString();
 
   @override
-  String datePickerMonth(int monthIndex) => _months[monthIndex - 1];
+  String datePickerMonth(final int monthIndex) => _months[monthIndex - 1];
 
   @override
-  String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
+  String datePickerDayOfMonth(final int dayIndex, [final int? weekDay]) {
     if (weekDay != null) {
       return ' ${shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
     }
@@ -361,16 +361,16 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerHour(int hour) => hour.toString();
+  String datePickerHour(final int hour) => hour.toString();
 
   @override
-  String datePickerHourSemanticsLabel(int hour) => "$hour o'clock";
+  String datePickerHourSemanticsLabel(final int hour) => "$hour o'clock";
 
   @override
-  String datePickerMinute(int minute) => minute.toString().padLeft(2, '0');
+  String datePickerMinute(final int minute) => minute.toString().padLeft(2, '0');
 
   @override
-  String datePickerMinuteSemanticsLabel(int minute) {
+  String datePickerMinuteSemanticsLabel(final int minute) {
     if (minute == 1) {
       return '1 minute';
     }
@@ -378,7 +378,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerMediumDate(DateTime date) {
+  String datePickerMediumDate(final DateTime date) {
     return '${shortWeekdays[date.weekday - DateTime.monday]} '
       '${_shortMonths[date.month - DateTime.january]} '
       '${date.day.toString().padRight(2)}';
@@ -403,35 +403,35 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get alertDialogLabel => 'Alert';
 
   @override
-  String tabSemanticsLabel({required int tabIndex, required int tabCount}) {
+  String tabSemanticsLabel({required final int tabIndex, required final int tabCount}) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';
   }
 
   @override
-  String timerPickerHour(int hour) => hour.toString();
+  String timerPickerHour(final int hour) => hour.toString();
 
   @override
-  String timerPickerMinute(int minute) => minute.toString();
+  String timerPickerMinute(final int minute) => minute.toString();
 
   @override
-  String timerPickerSecond(int second) => second.toString();
+  String timerPickerSecond(final int second) => second.toString();
 
   @override
-  String timerPickerHourLabel(int hour) => hour == 1 ? 'hour' : 'hours';
+  String timerPickerHourLabel(final int hour) => hour == 1 ? 'hour' : 'hours';
 
   @override
   List<String> get timerPickerHourLabels => const <String>['hour', 'hours'];
 
   @override
-  String timerPickerMinuteLabel(int minute) => 'min.';
+  String timerPickerMinuteLabel(final int minute) => 'min.';
 
   @override
   List<String> get timerPickerMinuteLabels => const <String>['min.'];
 
   @override
-  String timerPickerSecondLabel(int second) => 'sec.';
+  String timerPickerSecondLabel(final int second) => 'sec.';
 
   @override
   List<String> get timerPickerSecondLabels => const <String>['sec.'];
@@ -463,7 +463,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   /// The [locale] parameter is ignored.
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
-  static Future<CupertinoLocalizations> load(Locale locale) {
+  static Future<CupertinoLocalizations> load(final Locale locale) {
     return SynchronousFuture<CupertinoLocalizations>(const DefaultCupertinoLocalizations());
   }
 

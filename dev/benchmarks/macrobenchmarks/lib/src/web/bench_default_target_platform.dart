@@ -20,7 +20,7 @@ class BenchDefaultTargetPlatform extends RawRecorder {
   int counter = 0;
 
   @override
-  void body(Profile profile) {
+  void body(final Profile profile) {
     profile.record('runtime', () {
       for (int i = 0; i < 10000; i++) {
         counter += defaultTargetPlatform.index;

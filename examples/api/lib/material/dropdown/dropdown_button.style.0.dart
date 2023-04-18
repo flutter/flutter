@@ -12,7 +12,7 @@ class DropdownButtonApp extends StatelessWidget {
   const DropdownButtonApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('DropdownButton Sample')),
@@ -34,24 +34,24 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
   String dropdownValue = 'One';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       alignment: Alignment.center,
       color: Colors.blue,
       child: DropdownButton<String>(
         value: dropdownValue,
-        onChanged: (String? value) {
+        onChanged: (final String? value) {
           // This is called when the user selects an item.
           setState(() {
             dropdownValue = value!;
           });
         },
         style: const TextStyle(color: Colors.blue),
-        selectedItemBuilder: (BuildContext context) {
+        selectedItemBuilder: (final BuildContext context) {
           // This is the widget that will be shown when you select an item.
           // Here custom text style, alignment and layout size can be applied
           // to selected item string.
-          return options.map((String value) {
+          return options.map((final String value) {
             return Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -61,7 +61,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
             );
           }).toList();
         },
-        items: options.map<DropdownMenuItem<String>>((String value) {
+        items: options.map<DropdownMenuItem<String>>((final String value) {
           return DropdownMenuItem<String>(
             value: value,
             child: Text(value),

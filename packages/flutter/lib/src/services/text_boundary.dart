@@ -31,7 +31,7 @@ abstract class TextBoundary {
   /// `position`, or null if no boundaries can be found.
   ///
   /// The return value, if not null, is usually less than or equal to `position`.
-  int? getLeadingTextBoundaryAt(int position) {
+  int? getLeadingTextBoundaryAt(final int position) {
     if (position < 0) {
       return null;
     }
@@ -43,7 +43,7 @@ abstract class TextBoundary {
   /// or null if there is no boundaries can be found after `position`.
   ///
   /// The return value, if not null, is usually greater than `position`.
-  int? getTrailingTextBoundaryAt(int position) {
+  int? getTrailingTextBoundaryAt(final int position) {
     final int end = getTextBoundaryAt(max(0, position)).end;
     return end >= 0 ? end : null;
   }
@@ -52,7 +52,7 @@ abstract class TextBoundary {
   ///
   /// The returned [TextRange] may contain `-1`, which indicates no boundaries
   /// can be found in that direction.
-  TextRange getTextBoundaryAt(int position) {
+  TextRange getTextBoundaryAt(final int position) {
     final int start = getLeadingTextBoundaryAt(position) ?? -1;
     final int end = getTrailingTextBoundaryAt(position) ?? -1;
     return TextRange(start: start, end: end);
@@ -71,7 +71,7 @@ class CharacterBoundary extends TextBoundary {
   final String _text;
 
   @override
-  int? getLeadingTextBoundaryAt(int position) {
+  int? getLeadingTextBoundaryAt(final int position) {
     if (position < 0) {
       return null;
     }
@@ -81,7 +81,7 @@ class CharacterBoundary extends TextBoundary {
   }
 
   @override
-  int? getTrailingTextBoundaryAt(int position) {
+  int? getTrailingTextBoundaryAt(final int position) {
     if (position >= _text.length) {
       return null;
     }
@@ -92,7 +92,7 @@ class CharacterBoundary extends TextBoundary {
   }
 
   @override
-  TextRange getTextBoundaryAt(int position) {
+  TextRange getTextBoundaryAt(final int position) {
     if (position < 0) {
       return TextRange(start: -1, end: getTrailingTextBoundaryAt(position) ?? -1);
     } else if (position >= _text.length) {
@@ -120,7 +120,7 @@ class LineBoundary extends TextBoundary {
   final TextLayoutMetrics _textLayout;
 
   @override
-  TextRange getTextBoundaryAt(int position) => _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
+  TextRange getTextBoundaryAt(final int position) => _textLayout.getLineAtOffset(TextPosition(offset: max(position, 0)));
 }
 
 /// A text boundary that uses paragraphs as logical boundaries.
@@ -137,7 +137,7 @@ class ParagraphBoundary extends TextBoundary {
   /// bounds the given `position`. The returned [int] is the position of the code unit
   /// that follows the line terminator that encloses the desired paragraph.
   @override
-  int? getLeadingTextBoundaryAt(int position) {
+  int? getLeadingTextBoundaryAt(final int position) {
     if (position < 0 || _text.isEmpty) {
       return null;
     }
@@ -173,7 +173,7 @@ class ParagraphBoundary extends TextBoundary {
   /// code unit representing the trailing line terminator that encloses the
   /// desired paragraph.
   @override
-  int? getTrailingTextBoundaryAt(int position) {
+  int? getTrailingTextBoundaryAt(final int position) {
     if (position >= _text.length || _text.isEmpty) {
       return null;
     }
@@ -207,7 +207,7 @@ class DocumentBoundary extends TextBoundary {
   final String _text;
 
   @override
-  int? getLeadingTextBoundaryAt(int position) => position < 0 ? null : 0;
+  int? getLeadingTextBoundaryAt(final int position) => position < 0 ? null : 0;
   @override
-  int? getTrailingTextBoundaryAt(int position) => position >= _text.length ? null : _text.length;
+  int? getTrailingTextBoundaryAt(final int position) => position >= _text.length ? null : _text.length;
 }

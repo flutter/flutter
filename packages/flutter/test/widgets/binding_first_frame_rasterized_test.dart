@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Deferred frames will trigger the first frame callback', () {
-    FakeAsync().run((FakeAsync fakeAsync) {
+    FakeAsync().run((final FakeAsync fakeAsync) {
       final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
       binding.deferFirstFrame();
 

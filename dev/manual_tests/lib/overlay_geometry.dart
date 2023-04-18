@@ -28,7 +28,7 @@ class _MarkerPainter extends CustomPainter {
   final MarkerType type;
 
   @override
-  void paint(Canvas canvas, _) {
+  void paint(final Canvas canvas, final _) {
     final Paint paint = Paint()..color = const Color(0x8000FF00);
     final double r = size / 2.0;
     canvas.drawCircle(Offset(r, r), r, paint);
@@ -48,7 +48,7 @@ class _MarkerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_MarkerPainter oldPainter) {
+  bool shouldRepaint(final _MarkerPainter oldPainter) {
     return oldPainter.size != size
         || oldPainter.type != type;
   }
@@ -67,7 +67,7 @@ class Marker extends StatelessWidget {
   final MarkerType type;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Positioned(
       left: position!.dx - size / 2.0,
       top: position!.dy - size / 2.0,
@@ -95,7 +95,7 @@ class OverlayGeometryApp extends StatefulWidget {
 typedef CardTapCallback = void Function(GlobalKey targetKey, Offset globalPosition);
 
 class CardBuilder extends SliverChildDelegate {
-  CardBuilder({List<CardModel>? cardModels, this.onTapUp }) : cardModels = cardModels ?? <CardModel>[];
+  CardBuilder({final List<CardModel>? cardModels, this.onTapUp }) : cardModels = cardModels ?? <CardModel>[];
 
   final List<CardModel> cardModels;
   final CardTapCallback? onTapUp;
@@ -104,14 +104,14 @@ class CardBuilder extends SliverChildDelegate {
     TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   @override
-  Widget? build(BuildContext context, int index) {
+  Widget? build(final BuildContext context, final int index) {
     if (index >= cardModels.length) {
       return null;
     }
     final CardModel cardModel = cardModels[index];
     return GestureDetector(
       key: cardModel.key,
-      onTapUp: (TapUpDetails details) { onTapUp!(cardModel.targetKey, details.globalPosition); },
+      onTapUp: (final TapUpDetails details) { onTapUp!(cardModel.targetKey, details.globalPosition); },
       child: Card(
         key: cardModel.targetKey,
         color: cardModel.color,
@@ -128,7 +128,7 @@ class CardBuilder extends SliverChildDelegate {
   int get estimatedChildCount => cardModels.length;
 
   @override
-  bool shouldRebuild(CardBuilder oldDelegate) {
+  bool shouldRebuild(final CardBuilder oldDelegate) {
     return oldDelegate.cardModels != cardModels;
   }
 }
@@ -146,18 +146,18 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     ];
-    cardModels = List<CardModel>.generate(cardHeights.length, (int i) {
+    cardModels = List<CardModel>.generate(cardHeights.length, (final int i) {
       final Color? color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
       return CardModel(i, cardHeights[i], color!);
     });
   }
 
-  bool handleScrollNotification(ScrollNotification notification) {
+  bool handleScrollNotification(final ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && notification.depth == 0) {
       setState(() {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;
-        markers.forEach((MarkerType type, Offset oldPosition) {
+        markers.forEach((final MarkerType type, final Offset oldPosition) {
           markers[type] = oldPosition.translate(0.0, dy);
         });
       });
@@ -165,7 +165,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     return false;
   }
 
-  void handleTapUp(GlobalKey target, Offset globalPosition) {
+  void handleTapUp(final GlobalKey target, final Offset globalPosition) {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
       final RenderBox? box = target.currentContext?.findRenderObject() as RenderBox?;
@@ -178,7 +178,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       children: <Widget>[
         Scaffold(

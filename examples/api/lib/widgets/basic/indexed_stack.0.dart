@@ -12,7 +12,7 @@ class IndexedStackApp extends StatelessWidget {
   const IndexedStackApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('IndexedStack Sample')),
@@ -35,7 +35,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
   final TextEditingController fieldText = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -46,7 +46,7 @@ class _IndexedStackExampleState extends State<IndexedStackExample> {
               border: OutlineInputBorder(),
               hintText: 'Enter the name for a person to track',
             ),
-            onSubmitted: (String value) {
+            onSubmitted: (final String value) {
               setState(() {
                 names.add(value);
               });
@@ -109,7 +109,7 @@ class PersonTracker extends StatefulWidget {
 class _PersonTrackerState extends State<PersonTracker> {
   int counter = 0;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       key: Key(widget.name),
       decoration: BoxDecoration(

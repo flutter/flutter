@@ -18,12 +18,12 @@ class ScrollableButtonRoute {
 }
 
 void macroPerfTestE2E(
-  String testName,
-  String routeName, {
-  Duration? pageDelay,
-  Duration duration = const Duration(seconds: 3),
-  ControlCallback? body,
-  ControlCallback? setup,
+  final String testName,
+  final String routeName, {
+  final Duration? pageDelay,
+  final Duration duration = const Duration(seconds: 3),
+  final ControlCallback? body,
+  final ControlCallback? setup,
 }) {
   macroPerfTestMultiPageE2E(
     testName,
@@ -38,19 +38,19 @@ void macroPerfTestE2E(
 }
 
 void macroPerfTestMultiPageE2E(
-    String testName,
-    List<ScrollableButtonRoute> routes, {
-      Duration? pageDelay,
-      Duration duration = const Duration(seconds: 3),
-      ControlCallback? body,
-      ControlCallback? setup,
+    final String testName,
+    final List<ScrollableButtonRoute> routes, {
+      final Duration? pageDelay,
+      final Duration duration = const Duration(seconds: 3),
+      final ControlCallback? body,
+      final ControlCallback? setup,
     }) {
   final WidgetsBinding widgetsBinding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   assert(widgetsBinding is IntegrationTestWidgetsFlutterBinding);
   final IntegrationTestWidgetsFlutterBinding binding = widgetsBinding as IntegrationTestWidgetsFlutterBinding;
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmarkLive;
 
-  testWidgets(testName, (WidgetTester tester) async {
+  testWidgets(testName, (final WidgetTester tester) async {
     assert(tester.binding == binding);
     app.main();
     await tester.pumpAndSettle();

@@ -15,5 +15,5 @@ class Empty extends StatelessWidget {
   const Empty({super.key});
 
   @override
-  Widget build(BuildContext context) => Container();
+  Widget build(final BuildContext context) => Container();
 }

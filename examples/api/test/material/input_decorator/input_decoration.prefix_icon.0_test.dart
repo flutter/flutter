@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/material/input_decorator/input_decoration.pr
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('InputDecorator prefixIcon alignment', (WidgetTester tester) async {
+  testWidgets('InputDecorator prefixIcon alignment', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.PrefixIconExampleApp(),
     );

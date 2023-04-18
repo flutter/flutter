@@ -16,7 +16,7 @@ class StockArrowPainter extends CustomPainter {
   final double percentChange;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint paint = Paint()..color = color;
     paint.strokeWidth = 1.0;
     const double padding = 2.0;
@@ -49,7 +49,7 @@ class StockArrowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(StockArrowPainter oldDelegate) {
+  bool shouldRepaint(final StockArrowPainter oldDelegate) {
     return oldDelegate.color != color
         || oldDelegate.percentChange != percentChange;
   }
@@ -60,13 +60,13 @@ class StockArrow extends StatelessWidget {
 
   final double percentChange;
 
-  int _colorIndexForPercentChange(double percentChange) {
+  int _colorIndexForPercentChange(final double percentChange) {
     const double maxPercent = 10.0;
     final double normalizedPercentChange = math.min(percentChange.abs(), maxPercent) / maxPercent;
     return 100 + (normalizedPercentChange * 8.0).floor() * 100;
   }
 
-  Color _colorForPercentChange(double percentChange) {
+  Color _colorForPercentChange(final double percentChange) {
     if (percentChange > 0) {
       return Colors.green[_colorIndexForPercentChange(percentChange)]!;
     }
@@ -74,7 +74,7 @@ class StockArrow extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       width: 40.0,
       height: 40.0,

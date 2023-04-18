@@ -12,10 +12,10 @@ import 'stub_finder.dart';
 class StubFinderExtension extends FinderExtension {
   @override
   Finder createFinder(
-    SerializableFinder finder,
-    CreateFinderFactory finderFactory,
+    final SerializableFinder finder,
+    final CreateFinderFactory finderFactory,
   ) {
-    return find.byWidgetPredicate((Widget widget) {
+    return find.byWidgetPredicate((final Widget widget) {
       final Key? key = widget.key;
       if (key is! ValueKey<String>) {
         return false;
@@ -26,8 +26,8 @@ class StubFinderExtension extends FinderExtension {
 
   @override
   SerializableFinder deserialize(
-    Map<String, String> params,
-    DeserializeFinderFactory finderFactory,
+    final Map<String, String> params,
+    final DeserializeFinderFactory finderFactory,
   ) {
     return StubFinder(params['keyString']!);
   }

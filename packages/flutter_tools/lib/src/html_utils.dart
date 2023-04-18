@@ -60,8 +60,8 @@ class IndexHtml {
 
   /// Applies substitutions to the content of the index.html file.
   void applySubstitutions({
-    required String baseHref,
-    required String? serviceWorkerVersion,
+    required final String baseHref,
+    required final String? serviceWorkerVersion,
   }) {
     if (_content.contains(kBaseHrefPlaceholder)) {
       _content = _content.replaceAll(kBaseHrefPlaceholder, baseHref);

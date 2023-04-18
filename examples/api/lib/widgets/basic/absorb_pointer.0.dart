@@ -12,7 +12,7 @@ class AbsorbPointerApp extends StatelessWidget {
   const AbsorbPointerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('AbsorbPointer Sample')),
@@ -28,7 +28,7 @@ class AbsorbPointerExample extends StatelessWidget {
   const AbsorbPointerExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Stack(
       alignment: AlignmentDirectional.center,
       children: <Widget>[

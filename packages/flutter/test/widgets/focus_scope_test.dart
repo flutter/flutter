@@ -11,7 +11,7 @@ import 'semantics_tester.dart';
 
 void main() {
   group('FocusScope', () {
-    testWidgets('Can focus', (WidgetTester tester) async {
+    testWidgets('Can focus', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
       await tester.pumpWidget(
@@ -27,7 +27,7 @@ void main() {
       expect(find.text('A FOCUSED'), findsOneWidget);
     });
 
-    testWidgets('Can unfocus', (WidgetTester tester) async {
+    testWidgets('Can unfocus', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       await tester.pumpWidget(
@@ -62,7 +62,7 @@ void main() {
       expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
-    testWidgets('Autofocus works', (WidgetTester tester) async {
+    testWidgets('Autofocus works', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       await tester.pumpWidget(
@@ -82,7 +82,7 @@ void main() {
       expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
-    testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
+    testWidgets('Can have multiple focused children and they update accordingly', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
 
@@ -129,7 +129,7 @@ void main() {
 
     // This moves a focus node first into a focus scope that is added to its
     // parent, and then out of that focus scope again.
-    testWidgets('Can move focus in and out of FocusScope', (WidgetTester tester) async {
+    testWidgets('Can move focus in and out of FocusScope', (final WidgetTester tester) async {
       final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope Node');
       final FocusScopeNode childFocusScope = FocusScopeNode(debugLabel: 'Child Scope Node');
       final GlobalKey<TestFocusState> key = GlobalKey();
@@ -274,7 +274,7 @@ void main() {
       childAttachment.detach();
     });
 
-    testWidgets('Setting first focus requests focus for the scope properly.', (WidgetTester tester) async {
+    testWidgets('Setting first focus requests focus for the scope properly.', (final WidgetTester tester) async {
       final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope Node');
       final FocusScopeNode childFocusScope1 = FocusScopeNode(debugLabel: 'Child Scope Node 1');
       final FocusScopeNode childFocusScope2 = FocusScopeNode(debugLabel: 'Child Scope Node 2');
@@ -376,7 +376,7 @@ void main() {
       expect(childFocusScope2.isFirstFocus, isFalse);
     });
 
-    testWidgets('Removing focused widget moves focus to next widget', (WidgetTester tester) async {
+    testWidgets('Removing focused widget moves focus to next widget', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
 
@@ -420,7 +420,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Adding a new FocusScope attaches the child to its parent.', (WidgetTester tester) async {
+    testWidgets('Adding a new FocusScope attaches the child to its parent.', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope Node');
       final FocusScopeNode childFocusScope = FocusScopeNode(debugLabel: 'Child Scope Node');
@@ -466,7 +466,7 @@ void main() {
       expect(find.text('A FOCUSED'), findsOneWidget);
     });
 
-    testWidgets('Setting parentNode determines focus tree hierarchy.', (WidgetTester tester) async {
+    testWidgets('Setting parentNode determines focus tree hierarchy.', (final WidgetTester tester) async {
       final FocusNode topNode = FocusNode(debugLabel: 'Top');
       final FocusNode parentNode = FocusNode(debugLabel: 'Parent');
       final FocusNode childNode = FocusNode(debugLabel: 'Child');
@@ -532,7 +532,7 @@ void main() {
       expect(insertedNode.hasFocus, isFalse);
     });
 
-    testWidgets('Setting parentNode determines focus scope tree hierarchy.', (WidgetTester tester) async {
+    testWidgets('Setting parentNode determines focus scope tree hierarchy.', (final WidgetTester tester) async {
       final FocusScopeNode topNode = FocusScopeNode(debugLabel: 'Top');
       final FocusScopeNode parentNode = FocusScopeNode(debugLabel: 'Parent');
       final FocusScopeNode childNode = FocusScopeNode(debugLabel: 'Child');
@@ -599,7 +599,7 @@ void main() {
     });
 
     // Arguably, this isn't correct behavior, but it is what happens now.
-    testWidgets("Removing focused widget doesn't move focus to next widget within FocusScope", (WidgetTester tester) async {
+    testWidgets("Removing focused widget doesn't move focus to next widget within FocusScope", (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       final FocusScopeNode parentFocusScope = FocusScopeNode(debugLabel: 'Parent Scope');
@@ -656,7 +656,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Removing a FocusScope removes its node from the tree', (WidgetTester tester) async {
+    testWidgets('Removing a FocusScope removes its node from the tree', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       final GlobalKey<TestFocusState> scopeKeyA = GlobalKey();
@@ -719,7 +719,7 @@ void main() {
     });
 
     // By "pinned", it means kept in the tree by a GlobalKey.
-    testWidgets("Removing pinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
+    testWidgets("Removing pinned focused scope doesn't move focus to focused widget within next FocusScope", (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       final GlobalKey<TestFocusState> scopeKeyA = GlobalKey();
@@ -805,7 +805,7 @@ void main() {
       expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
-    testWidgets("Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope", (WidgetTester tester) async {
+    testWidgets("Removing unpinned focused scope doesn't move focus to focused widget within next FocusScope", (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> keyA = GlobalKey();
       final GlobalKey<TestFocusState> keyB = GlobalKey();
       final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Parent Scope 1');
@@ -885,7 +885,7 @@ void main() {
       expect(find.text('B FOCUSED'), findsOneWidget);
     });
 
-    testWidgets('Moving widget from one scope to another retains focus', (WidgetTester tester) async {
+    testWidgets('Moving widget from one scope to another retains focus', (final WidgetTester tester) async {
       final FocusScopeNode parentFocusScope1 = FocusScopeNode();
       final FocusScopeNode parentFocusScope2 = FocusScopeNode();
       final GlobalKey<TestFocusState> keyA = GlobalKey();
@@ -966,7 +966,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Moving FocusScopeNodes retains focus', (WidgetTester tester) async {
+    testWidgets('Moving FocusScopeNodes retains focus', (final WidgetTester tester) async {
       final FocusScopeNode parentFocusScope1 = FocusScopeNode(debugLabel: 'Scope 1');
       final FocusScopeNode parentFocusScope2 = FocusScopeNode(debugLabel: 'Scope 2');
       final GlobalKey<TestFocusState> keyA = GlobalKey();
@@ -1052,7 +1052,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Can focus root node.', (WidgetTester tester) async {
+    testWidgets('Can focus root node.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       await tester.pumpWidget(
         Focus(
@@ -1071,7 +1071,7 @@ void main() {
       expect(rootNode, equals(firstElement.owner!.focusManager.rootScope));
     });
 
-    testWidgets('Can autofocus a node.', (WidgetTester tester) async {
+    testWidgets('Can autofocus a node.', (final WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
       await tester.pumpWidget(
         Focus(
@@ -1095,7 +1095,7 @@ void main() {
       expect(focusNode.hasPrimaryFocus, isTrue);
     });
 
-    testWidgets("Won't autofocus a node if one is already focused.", (WidgetTester tester) async {
+    testWidgets("Won't autofocus a node if one is already focused.", (final WidgetTester tester) async {
       final FocusNode focusNodeA = FocusNode(debugLabel: 'Test Node A');
       final FocusNode focusNodeB = FocusNode(debugLabel: 'Test Node B');
       await tester.pumpWidget(
@@ -1134,20 +1134,20 @@ void main() {
       expect(focusNodeA.hasPrimaryFocus, isTrue);
     });
 
-    testWidgets("FocusScope doesn't update the focusNode attributes when the widget updates if withExternalFocusNode is used", (WidgetTester tester) async {
+    testWidgets("FocusScope doesn't update the focusNode attributes when the widget updates if withExternalFocusNode is used", (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusScopeNode focusScopeNode = FocusScopeNode();
       bool? keyEventHandled;
-      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(final FocusNode node, final RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
       }
-      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
+      KeyEventResult handleEventCallback(final FocusNode node, final KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
       }
-      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
-      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreCallback(final FocusNode node, final RawKeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreEventCallback(final FocusNode node, final KeyEvent event) => KeyEventResult.ignored;
       focusScopeNode.onKey = ignoreCallback;
       focusScopeNode.onKeyEvent = ignoreEventCallback;
       focusScopeNode.descendantsAreFocusable = false;
@@ -1205,7 +1205,7 @@ void main() {
   });
 
   group('Focus', () {
-    testWidgets('Focus.of stops at the nearest Focus widget.', (WidgetTester tester) async {
+    testWidgets('Focus.of stops at the nearest Focus widget.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
@@ -1252,7 +1252,7 @@ void main() {
       expect(Focus.of(element5).parent!.parent, equals(root));
       expect(Focus.of(element6).parent!.parent!.parent, equals(root));
     });
-    testWidgets('Can traverse Focus children.', (WidgetTester tester) async {
+    testWidgets('Can traverse Focus children.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
@@ -1303,7 +1303,7 @@ void main() {
       final Element firstScope = tester.element(find.byKey(key1));
       final List<FocusNode> nodes = <FocusNode>[];
       final List<Key> keys = <Key>[];
-      bool visitor(FocusNode node) {
+      bool visitor(final FocusNode node) {
         nodes.add(node);
         keys.add(node.context!.widget.key!);
         return true;
@@ -1326,12 +1326,12 @@ void main() {
       expect(keys, equals(<Key>[key7, key8]));
     });
 
-    testWidgets('Can set focus.', (WidgetTester tester) async {
+    testWidgets('Can set focus.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       late bool gotFocus;
       await tester.pumpWidget(
         Focus(
-          onFocusChange: (bool focused) => gotFocus = focused,
+          onFocusChange: (final bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
       );
@@ -1346,13 +1346,13 @@ void main() {
       expect(node.hasFocus, isTrue);
     });
 
-    testWidgets('Focus is ignored when set to not focusable.', (WidgetTester tester) async {
+    testWidgets('Focus is ignored when set to not focusable.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       bool? gotFocus;
       await tester.pumpWidget(
         Focus(
           canRequestFocus: false,
-          onFocusChange: (bool focused) => gotFocus = focused,
+          onFocusChange: (final bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
       );
@@ -1367,14 +1367,14 @@ void main() {
       expect(node.hasFocus, isFalse);
     });
 
-    testWidgets('Focus is lost when set to not focusable.', (WidgetTester tester) async {
+    testWidgets('Focus is lost when set to not focusable.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       bool? gotFocus;
       await tester.pumpWidget(
         Focus(
           autofocus: true,
           canRequestFocus: true,
-          onFocusChange: (bool focused) => gotFocus = focused,
+          onFocusChange: (final bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
       );
@@ -1392,7 +1392,7 @@ void main() {
       await tester.pumpWidget(
         Focus(
           canRequestFocus: false,
-          onFocusChange: (bool focused) => gotFocus = focused,
+          onFocusChange: (final bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
       );
@@ -1407,7 +1407,7 @@ void main() {
       expect(node.hasFocus, isFalse);
     });
 
-    testWidgets('Child of unfocusable Focus can get focus.', (WidgetTester tester) async {
+    testWidgets('Child of unfocusable Focus can get focus.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final FocusNode focusNode = FocusNode();
@@ -1415,7 +1415,7 @@ void main() {
       await tester.pumpWidget(
         Focus(
           canRequestFocus: false,
-          onFocusChange: (bool focused) => gotFocus = focused,
+          onFocusChange: (final bool focused) => gotFocus = focused,
           child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
         ),
       );
@@ -1439,13 +1439,13 @@ void main() {
       expect(unfocusableNode.hasFocus, isTrue);
     });
 
-    testWidgets('Nodes are removed when all Focuses are removed.', (WidgetTester tester) async {
+    testWidgets('Nodes are removed when all Focuses are removed.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       late bool gotFocus;
       await tester.pumpWidget(
         FocusScope(
           child: Focus(
-            onFocusChange: (bool focused) => gotFocus = focused,
+            onFocusChange: (final bool focused) => gotFocus = focused,
             child: Container(key: key1),
           ),
         ),
@@ -1465,7 +1465,7 @@ void main() {
       expect(FocusManager.instance.rootScope.descendants, isEmpty);
     });
 
-    testWidgets('Focus widgets set Semantics information about focus', (WidgetTester tester) async {
+    testWidgets('Focus widgets set Semantics information about focus', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
       await tester.pumpWidget(
@@ -1494,7 +1494,7 @@ void main() {
       expect(semantics.hasFlag(SemanticsFlag.isFocusable), isFalse);
     });
 
-    testWidgets('Setting canRequestFocus on focus node causes update.', (WidgetTester tester) async {
+    testWidgets('Setting canRequestFocus on focus node causes update.', (final WidgetTester tester) async {
       final GlobalKey<TestFocusState> key = GlobalKey();
 
       final TestFocus testFocus = TestFocus(key: key);
@@ -1511,17 +1511,17 @@ void main() {
       expect(key.currentState!.focusNode.canRequestFocus, isFalse);
     });
 
-    testWidgets('canRequestFocus causes descendants of scope to be skipped.', (WidgetTester tester) async {
+    testWidgets('canRequestFocus causes descendants of scope to be skipped.', (final WidgetTester tester) async {
       final GlobalKey scope1 = GlobalKey(debugLabel: 'scope1');
       final GlobalKey scope2 = GlobalKey(debugLabel: 'scope2');
       final GlobalKey focus1 = GlobalKey(debugLabel: 'focus1');
       final GlobalKey focus2 = GlobalKey(debugLabel: 'focus2');
       final GlobalKey container1 = GlobalKey(debugLabel: 'container');
       Future<void> pumpTest({
-        bool allowScope1 = true,
-        bool allowScope2 = true,
-        bool allowFocus1 = true,
-        bool allowFocus2 = true,
+        final bool allowScope1 = true,
+        final bool allowScope2 = true,
+        final bool allowFocus1 = true,
+        final bool allowFocus2 = true,
       }) async {
         await tester.pumpWidget(
           FocusScope(
@@ -1620,17 +1620,17 @@ void main() {
       expect(Focus.of(container1.currentContext!).hasFocus, isTrue);
     });
 
-    testWidgets('skipTraversal works as expected.', (WidgetTester tester) async {
+    testWidgets('skipTraversal works as expected.', (final WidgetTester tester) async {
       final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1');
       final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
       final FocusNode focus1 = FocusNode(debugLabel: 'focus1');
       final FocusNode focus2 = FocusNode(debugLabel: 'focus2');
 
       Future<void> pumpTest({
-        bool traverseScope1 = false,
-        bool traverseScope2 = false,
-        bool traverseFocus1 = false,
-        bool traverseFocus2 = false,
+        final bool traverseScope1 = false,
+        final bool traverseScope2 = false,
+        final bool traverseFocus1 = false,
+        final bool traverseFocus2 = false,
       }) async {
         await tester.pumpWidget(
           FocusScope(
@@ -1674,7 +1674,7 @@ void main() {
       expect(scope1.traversalDescendants, equals(<FocusNode>[focus2, focus1, scope2]));
     });
 
-    testWidgets('descendantsAreFocusable works as expected.', (WidgetTester tester) async {
+    testWidgets('descendantsAreFocusable works as expected.', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final FocusNode focusNode = FocusNode();
@@ -1683,7 +1683,7 @@ void main() {
         Focus(
           descendantsAreFocusable: false,
           child: Focus(
-            onFocusChange: (bool focused) => gotFocus = focused,
+            onFocusChange: (final bool focused) => gotFocus = focused,
             child: Focus(
               key: key1,
               focusNode: focusNode,
@@ -1713,7 +1713,7 @@ void main() {
       expect(unfocusableNode.hasFocus, isFalse);
     });
 
-    testWidgets('descendantsAreTraversable works as expected.', (WidgetTester tester) async {
+    testWidgets('descendantsAreTraversable works as expected.', (final WidgetTester tester) async {
       final FocusScopeNode scopeNode = FocusScopeNode(debugLabel: 'scope');
       final FocusNode node1 = FocusNode(debugLabel: 'node 1');
       final FocusNode node2 = FocusNode(debugLabel: 'node 2');
@@ -1746,7 +1746,7 @@ void main() {
       expect(node2.traversalDescendants, equals(<FocusNode>[]));
     });
 
-    testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (WidgetTester tester) async {
+    testWidgets("Focus doesn't introduce a Semantics node when includeSemantics is false", (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(Focus(includeSemantics: false, child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
@@ -1754,15 +1754,15 @@ void main() {
       semantics.dispose();
     });
 
-    testWidgets('Focus updates the onKey handler when the widget updates', (WidgetTester tester) async {
+    testWidgets('Focus updates the onKey handler when the widget updates', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(final FocusNode node, final RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
       }
-      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreCallback(final FocusNode node, final RawKeyEvent event) => KeyEventResult.ignored;
       Focus focusWidget = Focus(
         onKey: ignoreCallback, // This one does nothing.
         focusNode: focusNode,
@@ -1803,15 +1803,15 @@ void main() {
       expect(keyEventHandled, isTrue);
     });
 
-    testWidgets('Focus updates the onKeyEvent handler when the widget updates', (WidgetTester tester) async {
+    testWidgets('Focus updates the onKeyEvent handler when the widget updates', (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
+      KeyEventResult handleEventCallback(final FocusNode node, final KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
       }
-      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreEventCallback(final FocusNode node, final KeyEvent event) => KeyEventResult.ignored;
       Focus focusWidget = Focus(
         onKeyEvent: ignoreEventCallback, // This one does nothing.
         focusNode: focusNode,
@@ -1852,20 +1852,20 @@ void main() {
       expect(keyEventHandled, isTrue);
     });
 
-    testWidgets("Focus doesn't update the focusNode attributes when the widget updates if withExternalFocusNode is used", (WidgetTester tester) async {
+    testWidgets("Focus doesn't update the focusNode attributes when the widget updates if withExternalFocusNode is used", (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final FocusNode focusNode = FocusNode();
       bool? keyEventHandled;
-      KeyEventResult handleCallback(FocusNode node, RawKeyEvent event) {
+      KeyEventResult handleCallback(final FocusNode node, final RawKeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
       }
-      KeyEventResult handleEventCallback(FocusNode node, KeyEvent event) {
+      KeyEventResult handleEventCallback(final FocusNode node, final KeyEvent event) {
         keyEventHandled = true;
         return KeyEventResult.handled;
       }
-      KeyEventResult ignoreCallback(FocusNode node, RawKeyEvent event) => KeyEventResult.ignored;
-      KeyEventResult ignoreEventCallback(FocusNode node, KeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreCallback(final FocusNode node, final RawKeyEvent event) => KeyEventResult.ignored;
+      KeyEventResult ignoreEventCallback(final FocusNode node, final KeyEvent event) => KeyEventResult.ignored;
       focusNode.onKey = ignoreCallback;
       focusNode.onKeyEvent = ignoreEventCallback;
       focusNode.descendantsAreFocusable = false;
@@ -1921,7 +1921,7 @@ void main() {
       expect(keyEventHandled, isTrue);
     });
 
-    testWidgets('Focus passes changes in attribute values to its focus node', (WidgetTester tester) async {
+    testWidgets('Focus passes changes in attribute values to its focus node', (final WidgetTester tester) async {
       await tester.pumpWidget(
         Focus(
           child: Container(),
@@ -1931,7 +1931,7 @@ void main() {
   });
 
   group('ExcludeFocus', () {
-    testWidgets("Descendants of ExcludeFocus aren't focusable.", (WidgetTester tester) async {
+    testWidgets("Descendants of ExcludeFocus aren't focusable.", (final WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final FocusNode focusNode = FocusNode();
@@ -1939,7 +1939,7 @@ void main() {
       await tester.pumpWidget(
         ExcludeFocus(
           child: Focus(
-            onFocusChange: (bool focused) => gotFocus = focused,
+            onFocusChange: (final bool focused) => gotFocus = focused,
             child: Focus(
               key: key1,
               focusNode: focusNode,
@@ -1970,7 +1970,7 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/61700
-    testWidgets("ExcludeFocus doesn't transfer focus to another descendant.", (WidgetTester tester) async {
+    testWidgets("ExcludeFocus doesn't transfer focus to another descendant.", (final WidgetTester tester) async {
       final FocusNode parentFocusNode = FocusNode(debugLabel: 'group');
       final FocusNode focusNode1 = FocusNode(debugLabel: 'node 1');
       final FocusNode focusNode2 = FocusNode(debugLabel: 'node 2');
@@ -2039,7 +2039,7 @@ void main() {
       expect(parentFocusNode.enclosingScope!.hasPrimaryFocus, isTrue);
     });
 
-    testWidgets("ExcludeFocus doesn't introduce a Semantics node", (WidgetTester tester) async {
+    testWidgets("ExcludeFocus doesn't introduce a Semantics node", (final WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       await tester.pumpWidget(ExcludeFocus(child: Container()));
       final TestSemantics expectedSemantics = TestSemantics.root();
@@ -2048,10 +2048,10 @@ void main() {
     });
 
     // Regression test for https://github.com/flutter/flutter/issues/92693
-    testWidgets('Setting parent FocusScope.canRequestFocus to false, does not set descendant Focus._internalNode._canRequestFocus to false', (WidgetTester tester) async {
+    testWidgets('Setting parent FocusScope.canRequestFocus to false, does not set descendant Focus._internalNode._canRequestFocus to false', (final WidgetTester tester) async {
       final FocusNode childFocusNode = FocusNode(debugLabel: 'node 1');
 
-      Widget buildFocusTree({required bool parentCanRequestFocus}) {
+      Widget buildFocusTree({required final bool parentCanRequestFocus}) {
         return FocusScope(
           canRequestFocus: parentCanRequestFocus,
           child: Column(
@@ -2127,7 +2127,7 @@ class TestFocusState extends State<TestFocus> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     built = true;
     return GestureDetector(
       onTap: () {

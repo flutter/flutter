@@ -7,7 +7,7 @@ import 'package:flutter_api_samples/cupertino/radio/cupertino_radio.0.dart' as e
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Has 2 CupertinoRadio widgets', (WidgetTester tester) async {
+  testWidgets('Has 2 CupertinoRadio widgets', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.CupertinoRadioApp(),
     );

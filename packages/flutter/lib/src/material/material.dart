@@ -81,7 +81,7 @@ abstract class MaterialInkController {
   /// Add an [InkFeature], such as an [InkSplash] or an [InkHighlight].
   ///
   /// The ink feature will paint as part of this controller.
-  void addInkFeature(InkFeature feature);
+  void addInkFeature(final InkFeature feature);
 
   /// Notifies the controller that one of its ink features needs to repaint.
   void markNeedsPaint();
@@ -359,7 +359,7 @@ class Material extends StatefulWidget {
   ///
   /// * [Material.of], which is similar to this method, but asserts if
   ///   no [Material] ancestor is found.
-  static MaterialInkController? maybeOf(BuildContext context) {
+  static MaterialInkController? maybeOf(final BuildContext context) {
     return LookupBoundary.findAncestorRenderObjectOfType<_RenderInkFeatures>(context);
   }
 
@@ -381,7 +381,7 @@ class Material extends StatefulWidget {
   ///
   /// * [Material.maybeOf], which is similar to this method, but returns null if
   ///   no [Material] ancestor is found.
-  static MaterialInkController of(BuildContext context) {
+  static MaterialInkController of(final BuildContext context) {
     final MaterialInkController? controller = maybeOf(context);
     assert(() {
       if (controller == null) {
@@ -413,7 +413,7 @@ class Material extends StatefulWidget {
   State<Material> createState() => _MaterialState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<MaterialType>('type', type));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
@@ -433,7 +433,7 @@ class Material extends StatefulWidget {
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
-  Color? _getBackgroundColor(BuildContext context) {
+  Color? _getBackgroundColor(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     Color? color = widget.color;
     if (color == null) {
@@ -452,7 +452,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color? backgroundColor = _getBackgroundColor(context);
     final Color modelShadowColor = widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
@@ -474,7 +474,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       );
     }
     contents = NotificationListener<LayoutChangedNotification>(
-      onNotification: (LayoutChangedNotification notification) {
+      onNotification: (final LayoutChangedNotification notification) {
         final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext!.findRenderObject()! as _RenderInkFeatures;
         renderer._didChangeLayout();
         return false;
@@ -541,10 +541,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   }
 
   static Widget _transparentInterior({
-    required BuildContext context,
-    required ShapeBorder shape,
-    required Clip clipBehavior,
-    required Widget contents,
+    required final BuildContext context,
+    required final ShapeBorder shape,
+    required final Clip clipBehavior,
+    required final Widget contents,
   }) {
     final _ShapeBorderPaint child = _ShapeBorderPaint(
       shape: shape,
@@ -593,7 +593,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
 class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
   _RenderInkFeatures({
-    RenderBox? child,
+    final RenderBox? child,
     required this.vsync,
     required this.absorbHitTest,
     this.color,
@@ -623,7 +623,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   List<InkFeature>? _inkFeatures;
 
   @override
-  void addInkFeature(InkFeature feature) {
+  void addInkFeature(final InkFeature feature) {
     assert(!feature._debugDisposed);
     assert(feature._controller == this);
     _inkFeatures ??= <InkFeature>[];
@@ -632,7 +632,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
     markNeedsPaint();
   }
 
-  void _removeFeature(InkFeature feature) {
+  void _removeFeature(final InkFeature feature) {
     assert(_inkFeatures != null);
     _inkFeatures!.remove(feature);
     markNeedsPaint();
@@ -645,10 +645,10 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   @override
-  bool hitTestSelf(Offset position) => absorbHitTest;
+  bool hitTestSelf(final Offset position) => absorbHitTest;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     final List<InkFeature>? inkFeatures = _inkFeatures;
     if (inkFeatures != null && inkFeatures.isNotEmpty) {
       final Canvas canvas = context.canvas;
@@ -684,7 +684,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
   final bool absorbHitTest;
 
   @override
-  _RenderInkFeatures createRenderObject(BuildContext context) {
+  _RenderInkFeatures createRenderObject(final BuildContext context) {
     return _RenderInkFeatures(
       color: color,
       absorbHitTest: absorbHitTest,
@@ -693,7 +693,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderInkFeatures renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderInkFeatures renderObject) {
     renderObject..color = color
                 ..absorbHitTest = absorbHitTest;
     assert(vsync == renderObject.vsync);
@@ -708,7 +708,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
 abstract class InkFeature {
   /// Initializes fields for subclasses.
   InkFeature({
-    required MaterialInkController controller,
+    required final MaterialInkController controller,
     required this.referenceBox,
     this.onRemoved,
   }) : _controller = controller as _RenderInkFeatures;
@@ -747,8 +747,8 @@ abstract class InkFeature {
   // same render tree, or either of them is in an offscreen subtree (see
   // RenderObject.paintsChild).
   static Matrix4? _getPaintTransform(
-    RenderObject fromRenderObject,
-    RenderObject toRenderObject,
+    final RenderObject fromRenderObject,
+    final RenderObject toRenderObject,
   ) {
     // The paths to fromRenderObject and toRenderObject's common ancestor.
     final List<RenderObject> fromPath = <RenderObject>[fromRenderObject];
@@ -797,7 +797,7 @@ abstract class InkFeature {
     return det != 0 ? (inverseTransform..multiply(transform)) : null;
   }
 
-  void _paint(Canvas canvas) {
+  void _paint(final Canvas canvas) {
     assert(referenceBox.attached);
     assert(!_debugDisposed);
     // determine the transform that gets our coordinate system to be like theirs
@@ -812,7 +812,7 @@ abstract class InkFeature {
   /// The transform argument gives the coordinate conversion from the coordinate
   /// system of the canvas to the coordinate system of the [referenceBox].
   @protected
-  void paintFeature(Canvas canvas, Matrix4 transform);
+  void paintFeature(final Canvas canvas, final Matrix4 transform);
 
   @override
   String toString() => describeIdentity(this);
@@ -830,7 +830,7 @@ class ShapeBorderTween extends Tween<ShapeBorder?> {
 
   /// Returns the value this tween has at the given animation clock value.
   @override
-  ShapeBorder? lerp(double t) {
+  ShapeBorder? lerp(final double t) {
     return ShapeBorder.lerp(begin, end, t);
   }
 }
@@ -898,7 +898,7 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   _MaterialInteriorState createState() => _MaterialInteriorState();
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
     description.add(DoubleProperty('elevation', elevation));
@@ -914,35 +914,35 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   ShapeBorderTween? _border;
 
   @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
+  void forEachTween(final TweenVisitor<dynamic> visitor) {
     _elevation = visitor(
       _elevation,
       widget.elevation,
-      (dynamic value) => Tween<double>(begin: value as double),
+      (final dynamic value) => Tween<double>(begin: value as double),
     ) as Tween<double>?;
     _shadowColor =  widget.shadowColor != null
       ? visitor(
           _shadowColor,
           widget.shadowColor,
-          (dynamic value) => ColorTween(begin: value as Color),
+          (final dynamic value) => ColorTween(begin: value as Color),
         ) as ColorTween?
       : null;
     _surfaceTintColor = widget.surfaceTintColor != null
       ? visitor(
           _surfaceTintColor,
           widget.surfaceTintColor,
-              (dynamic value) => ColorTween(begin: value as Color),
+              (final dynamic value) => ColorTween(begin: value as Color),
         ) as ColorTween?
       : null;
     _border = visitor(
       _border,
       widget.shape,
-      (dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
+      (final dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
     ) as ShapeBorderTween?;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ShapeBorder shape = _border!.evaluate(animation)!;
     final double elevation = _elevation!.evaluate(animation);
     final Color color = Theme.of(context).useMaterial3
@@ -981,7 +981,7 @@ class _ShapeBorderPaint extends StatelessWidget {
   final bool borderOnForeground;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomPaint(
       painter: borderOnForeground ? null : _ShapeBorderPainter(shape, Directionality.maybeOf(context)),
       foregroundPainter: borderOnForeground ? _ShapeBorderPainter(shape, Directionality.maybeOf(context)) : null,
@@ -996,12 +996,12 @@ class _ShapeBorderPainter extends CustomPainter {
   final TextDirection? textDirection;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     border.paint(canvas, Offset.zero & size, textDirection: textDirection);
   }
 
   @override
-  bool shouldRepaint(_ShapeBorderPainter oldDelegate) {
+  bool shouldRepaint(final _ShapeBorderPainter oldDelegate) {
     return oldDelegate.border != border;
   }
 }

@@ -43,7 +43,7 @@ void main() {
     });
 
     CommandRunner<void> createRunner({
-      required Checkouts checkouts,
+      required final Checkouts checkouts,
     }) {
       final NextCommand command = NextCommand(
         checkouts: checkouts,
@@ -1217,7 +1217,7 @@ void main() {
       expect(
         () => nextContext.pushWorkingBranch(testRepository, testPbRepository),
         throwsA(isA<ConductorException>().having(
-          (ConductorException exception) => exception.message,
+          (final ConductorException exception) => exception.message,
           'has correct message',
           contains('Re-run this command with --force to overwrite the remote branch'),
         )),
@@ -1239,26 +1239,26 @@ class _UnimplementedStdio implements Stdio {
   List<String> get logs => _throw();
 
   @override
-  void printError(String message) => _throw();
+  void printError(final String message) => _throw();
 
   @override
-  void printWarning(String message) => _throw();
+  void printWarning(final String message) => _throw();
 
   @override
-  void printStatus(String message) => _throw();
+  void printStatus(final String message) => _throw();
 
   @override
-  void printTrace(String message) => _throw();
+  void printTrace(final String message) => _throw();
 
   @override
-  void write(String message) => _throw();
+  void write(final String message) => _throw();
 
   @override
   String readLineSync() => _throw();
 }
 
 class _TestRepository extends Repository {
-  _TestRepository.fromCheckouts(Checkouts checkouts, [String name = 'test-repo']) : super(
+  _TestRepository.fromCheckouts(final Checkouts checkouts, [final String name = 'test-repo']) : super(
     fileSystem: checkouts.fileSystem,
     parentDirectory: checkouts.directory.childDirectory(name),
     platform: checkouts.platform,
@@ -1270,7 +1270,7 @@ class _TestRepository extends Repository {
   );
 
   @override
-  Future<_TestRepository> cloneRepository(String? cloneName) async {
+  Future<_TestRepository> cloneRepository(final String? cloneName) async {
     throw Exception('Unimplemented!');
   }
 }
@@ -1282,14 +1282,14 @@ class _TestNextContext extends NextContext {
   }) : super(autoAccept: false, force: false);
 
   @override
-  Future<bool> prompt(String message) {
+  Future<bool> prompt(final String message) {
     // always say yes
     return Future<bool>.value(true);
   }
 }
 
 void _initializeCiYamlFile(
-  File file, {
+  final File file, {
   List<String>? enabledBranches,
 }) {
   enabledBranches ??= <String>['master', 'beta', 'stable'];

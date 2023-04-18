@@ -56,7 +56,7 @@ void main() {
   });
 
   test('Live handling of Stack Overflows', () {
-    void overflow(int seed) {
+    void overflow(final int seed) {
       overflow(seed + 1);
     }
     bool overflowed = false;

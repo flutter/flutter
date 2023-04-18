@@ -48,7 +48,7 @@ void main() {
       final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
         clientDaemonConnection,
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
+        createSocketServer: (final Logger logger, final int? hostPort, final bool? ipv6) async =>
             fakeServerSocket,
       );
       final int result = await portForwarder.forward(100);
@@ -100,7 +100,7 @@ void main() {
           },
         ),
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
+        createSocketServer: (final Logger logger, final int? hostPort, final bool? ipv6) async =>
             fakeServerSocket,
       );
       final int result = await portForwarder.forward(100);
@@ -119,7 +119,7 @@ void main() {
         clientDaemonConnection,
         deviceId: 'device_id',
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
+        createSocketServer: (final Logger logger, final int? hostPort, final bool? ipv6) async =>
             fakeServerSocket,
       );
 
@@ -173,7 +173,7 @@ void main() {
           clientDaemonConnection,
           deviceId: 'device_id',
           logger: bufferLogger,
-          createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
+          createSocketServer: (final Logger logger, final int? hostPort, final bool? ipv6) async =>
               fakeServerSocket,
         );
 
@@ -232,7 +232,7 @@ void main() {
       final ProxiedPortForwarder portForwarder = ProxiedPortForwarder(
         clientDaemonConnection,
         logger: bufferLogger,
-        createSocketServer: (Logger logger, int? hostPort, bool? ipv6) async =>
+        createSocketServer: (final Logger logger, final int? hostPort, final bool? ipv6) async =>
             fakeServerSocket,
       );
       final int result = await portForwarder.forward(100);
@@ -507,7 +507,7 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [List<int>? binary]) {
+  void send(final Map<String, dynamic> message, [final List<int>? binary]) {
     outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
@@ -530,10 +530,10 @@ class FakeServerSocket extends Fake implements ServerSocket {
 
   @override
   StreamSubscription<Socket> listen(
-    void Function(Socket event)? onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
+    final void Function(Socket event)? onData, {
+    final Function? onError,
+    final void Function()? onDone,
+    final bool? cancelOnError,
   }) {
     return controller.stream.listen(onData,
         onError: onError, onDone: onDone, cancelOnError: cancelOnError);
@@ -554,17 +554,17 @@ class FakeSocket extends Fake implements Socket {
 
   @override
   StreamSubscription<Uint8List> listen(
-    void Function(Uint8List event)? onData, {
-    Function? onError,
-    void Function()? onDone,
-    bool? cancelOnError,
+    final void Function(Uint8List event)? onData, {
+    final Function? onError,
+    final void Function()? onDone,
+    final bool? cancelOnError,
   }) {
     return controller.stream.listen(onData,
         onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
-  void add(List<int> data) {
+  void add(final List<int> data) {
     addedData.add(data);
   }
 
@@ -593,7 +593,7 @@ class FakeDaemonConnection extends Fake implements DaemonConnection {
   final Map<String, List<DaemonEventData>> daemonEventStreams;
 
   @override
-  Stream<DaemonEventData> listenToEvent(String eventToListen) {
+  Stream<DaemonEventData> listenToEvent(final String eventToListen) {
     final List<DaemonEventData>? iterable = daemonEventStreams[eventToListen];
     if (iterable != null) {
       return Stream<DaemonEventData>.fromIterable(iterable);
@@ -602,7 +602,7 @@ class FakeDaemonConnection extends Fake implements DaemonConnection {
   }
 
   @override
-  Future<Object?> sendRequest(String method, [Object? params, List<int>? binary]) async {
+  Future<Object?> sendRequest(final String method, [final Object? params, final List<int>? binary]) async {
     final Object? response = handledRequests[method];
     if (response != null) {
       return response;
@@ -616,7 +616,7 @@ class FakeDeviceDiscoveryFilter extends Fake implements DeviceDiscoveryFilter {
   List<Device>? devices;
 
   @override
-  Future<List<Device>> filterDevices(List<Device> devices) async {
+  Future<List<Device>> filterDevices(final List<Device> devices) async {
     this.devices = devices;
     return filteredDevices!;
   }
@@ -632,13 +632,13 @@ class FakeProxiedPortForwarder extends Fake implements ProxiedPortForwarder {
   bool? forwardedIpv6;
 
   @override
-  int? originalRemotePort(int localForwardedPort) {
+  int? originalRemotePort(final int localForwardedPort) {
     receivedLocalForwardedPort = localForwardedPort;
     return originalRemotePortReturnValue;
   }
 
   @override
-  Future<int> forward(int devicePort, {int? hostPort, bool? ipv6}) async {
+  Future<int> forward(final int devicePort, {final int? hostPort, final bool? ipv6}) async {
     forwardedDevicePort = devicePort;
     forwardedHostPort = hostPort;
     forwardedIpv6 = ipv6;
@@ -661,12 +661,12 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
-    bool? disableServiceAuthCodes,
-    bool cacheStartupProfile = false,
+    final Uri vmServiceUri, {
+    required final Logger logger,
+    final int? hostPort,
+    final bool? ipv6,
+    final bool? disableServiceAuthCodes,
+    final bool cacheStartupProfile = false,
   }) async {
     startCalled = true;
     startUri = vmServiceUri;

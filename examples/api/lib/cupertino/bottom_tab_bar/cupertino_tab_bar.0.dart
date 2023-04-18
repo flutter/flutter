@@ -12,7 +12,7 @@ class CupertinoTabBarApp extends StatelessWidget {
   const CupertinoTabBarApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoTabBarExample(),
@@ -24,7 +24,7 @@ class CupertinoTabBarExample extends StatelessWidget {
   const CupertinoTabBarExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoTabScaffold(
       tabBar: CupertinoTabBar(
         items: const <BottomNavigationBarItem>[
@@ -46,9 +46,9 @@ class CupertinoTabBarExample extends StatelessWidget {
           ),
         ],
       ),
-      tabBuilder: (BuildContext context, int index) {
+      tabBuilder: (final BuildContext context, final int index) {
         return CupertinoTabView(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return Center(
               child: Text('Content of tab $index'),
             );

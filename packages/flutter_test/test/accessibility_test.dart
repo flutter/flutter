@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('text contrast guideline', () {
     testWidgets('black text on white background - Text Widget - direct style',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -23,7 +23,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Multiple text with same label', (WidgetTester tester) async {
+    testWidgets('Multiple text with same label', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -48,7 +48,7 @@ void main() {
     testWidgets(
       'Multiple text with same label but Nodes excluded from '
       'semantic tree have failing contrast should pass a11y guideline ',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(
           _boilerplate(
@@ -79,7 +79,7 @@ void main() {
     });
 
     testWidgets('white text on black background - Text Widget - direct style',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -99,7 +99,7 @@ void main() {
     });
 
     testWidgets('White text on white background fails contrast test',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       _boilerplate(
@@ -148,12 +148,12 @@ void main() {
       TextStyle(color: blue29, backgroundColor: surface, fontSize: 18),
     ];
 
-    Widget appWithTextWidget(TextStyle style) => _boilerplate(
+    Widget appWithTextWidget(final TextStyle style) => _boilerplate(
       Text('this is text', style: style.copyWith(height: 30.0)),
     );
 
     for (final TextStyle style in textStylesMeetingGuideline) {
-      testWidgets('text with style $style', (WidgetTester tester) async {
+      testWidgets('text with style $style', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(appWithTextWidget(style));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -162,7 +162,7 @@ void main() {
     }
 
     for (final TextStyle style in textStylesDoesNotMeetingGuideline) {
-      testWidgets('text with $style', (WidgetTester tester) async {
+      testWidgets('text with $style', (final WidgetTester tester) async {
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(appWithTextWidget(style));
         await expectLater(tester, doesNotMeetGuideline(textContrastGuideline));
@@ -171,7 +171,7 @@ void main() {
     }
 
     testWidgets('black text on white background - Text Widget - direct style',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -186,7 +186,7 @@ void main() {
     });
 
     testWidgets('white text on black background - Text Widget - direct style',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -206,7 +206,7 @@ void main() {
     });
 
     testWidgets('Material text field - amber on amber',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -225,7 +225,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Correctly identify failures in complex transforms', (WidgetTester tester) async {
+    testWidgets('Correctly identify failures in complex transforms', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -257,7 +257,7 @@ void main() {
     });
 
     testWidgets('Material text field - default style',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -275,7 +275,7 @@ void main() {
     });
 
     testWidgets('yellow text on yellow background fails with correct message',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -306,7 +306,7 @@ void main() {
     });
 
     testWidgets('label without corresponding text is skipped',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -327,7 +327,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('offscreen text is skipped', (WidgetTester tester) async {
+    testWidgets('offscreen text is skipped', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
         _boilerplate(
@@ -356,7 +356,7 @@ void main() {
     });
 
     testWidgets('Disabled button is excluded from text contrast guideline',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       // Regression test https://github.com/flutter/flutter/issues/94428
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(
@@ -382,9 +382,9 @@ void main() {
 
   group('custom minimum contrast guideline', () {
     Widget iconWidget({
-      IconData icon = Icons.search,
-      required Color color,
-      required Color background,
+      final IconData icon = Icons.search,
+      required final Color color,
+      required final Color background,
     }) {
       return Container(
         padding: const EdgeInsets.all(8.0),
@@ -394,9 +394,9 @@ void main() {
     }
 
     Widget textWidget({
-      String text = 'Text',
-      required Color color,
-      required Color background,
+      final String text = 'Text',
+      required final Color color,
+      required final Color background,
     }) {
       return Container(
         padding: const EdgeInsets.all(8.0),
@@ -405,13 +405,13 @@ void main() {
       );
     }
 
-    Widget rowWidget(List<Widget> widgets) => _boilerplate(Row(children: widgets));
+    Widget rowWidget(final List<Widget> widgets) => _boilerplate(Row(children: widgets));
 
-    final Finder findIcons = find.byWidgetPredicate((Widget widget) => widget is Icon);
-    final Finder findTexts = find.byWidgetPredicate((Widget widget) => widget is Text);
-    final Finder findIconsAndTexts = find.byWidgetPredicate((Widget widget) => widget is Icon || widget is Text);
+    final Finder findIcons = find.byWidgetPredicate((final Widget widget) => widget is Icon);
+    final Finder findTexts = find.byWidgetPredicate((final Widget widget) => widget is Text);
+    final Finder findIconsAndTexts = find.byWidgetPredicate((final Widget widget) => widget is Icon || widget is Text);
 
-    testWidgets('Black icons on white background', (WidgetTester tester) async {
+    testWidgets('Black icons on white background', (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.black, background: Colors.white),
         iconWidget(color: Colors.black, background: Colors.white),
@@ -423,7 +423,7 @@ void main() {
       );
     });
 
-    testWidgets('Black icons on black background', (WidgetTester tester) async {
+    testWidgets('Black icons on black background', (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.black, background: Colors.black),
         iconWidget(color: Colors.black, background: Colors.black),
@@ -436,7 +436,7 @@ void main() {
     });
 
     testWidgets('White icons on black background ("dark mode")',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.white, background: Colors.black),
         iconWidget(color: Colors.white, background: Colors.black),
@@ -448,7 +448,7 @@ void main() {
       );
     });
 
-    testWidgets('Using different icons', (WidgetTester tester) async {
+    testWidgets('Using different icons', (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.black, background: Colors.white, icon: Icons.more_horiz),
         iconWidget(color: Colors.black, background: Colors.white, icon: Icons.description),
@@ -463,7 +463,7 @@ void main() {
     });
 
     testWidgets('One invalid instance fails entire test',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.black, background: Colors.white),
         iconWidget(color: Colors.black, background: Colors.black),
@@ -476,7 +476,7 @@ void main() {
     });
 
     testWidgets('White on different colors, passing',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.white, background: Colors.red[800]!, icon: Icons.more_horiz),
         iconWidget(color: Colors.white, background: Colors.green[800]!, icon: Icons.description),
@@ -489,7 +489,7 @@ void main() {
     });
 
     testWidgets('White on different colors, failing',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.white, background: Colors.red[200]!, icon: Icons.more_horiz),
         iconWidget(color: Colors.white, background: Colors.green[400]!, icon: Icons.description),
@@ -503,7 +503,7 @@ void main() {
       );
     });
 
-    testWidgets('Absence of icons, passing', (WidgetTester tester) async {
+    testWidgets('Absence of icons, passing', (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[]));
 
       await expectLater(
@@ -513,7 +513,7 @@ void main() {
     });
 
     testWidgets('Absence of icons, passing - 2nd test',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         textWidget(color: Colors.black, background: Colors.white),
         textWidget(color: Colors.black, background: Colors.black),
@@ -526,7 +526,7 @@ void main() {
     });
 
     testWidgets('Guideline ignores widgets of other types',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.black, background: Colors.white),
         iconWidget(color: Colors.black, background: Colors.white),
@@ -548,7 +548,7 @@ void main() {
       );
     });
 
-    testWidgets('Custom minimum ratio - Icons', (WidgetTester tester) async {
+    testWidgets('Custom minimum ratio - Icons', (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.blue, background: Colors.white),
         iconWidget(color: Colors.black, background: Colors.white),
@@ -564,7 +564,7 @@ void main() {
       );
     });
 
-    testWidgets('Custom minimum ratio - Texts', (WidgetTester tester) async {
+    testWidgets('Custom minimum ratio - Texts', (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         textWidget(color: Colors.blue, background: Colors.white),
         textWidget(color: Colors.black, background: Colors.white),
@@ -582,7 +582,7 @@ void main() {
 
     testWidgets(
         'Custom minimum ratio - Different standards for icons and texts',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(rowWidget(<Widget>[
         iconWidget(color: Colors.blue, background: Colors.white),
         iconWidget(color: Colors.black, background: Colors.white),
@@ -602,7 +602,7 @@ void main() {
   });
 
   group('tap target size guideline', () {
-    testWidgets('Tappable box at 48 by 48', (WidgetTester tester) async {
+    testWidgets('Tappable box at 48 by 48', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         SizedBox(
@@ -615,7 +615,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Tappable box at 47 by 48', (WidgetTester tester) async {
+    testWidgets('Tappable box at 47 by 48', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         SizedBox(
@@ -631,7 +631,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Tappable box at 48 by 47', (WidgetTester tester) async {
+    testWidgets('Tappable box at 48 by 47', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         SizedBox(
@@ -648,7 +648,7 @@ void main() {
     });
 
     testWidgets('Tappable box at 48 by 48 shrunk by transform',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Transform.scale(
@@ -668,7 +668,7 @@ void main() {
     });
 
     testWidgets('Too small tap target fails with the correct message',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         SizedBox(
@@ -691,7 +691,7 @@ void main() {
     });
 
     testWidgets('Box that overlaps edge of window is skipped',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       final Widget smallBox = SizedBox(
         width: 48.0,
@@ -767,7 +767,7 @@ void main() {
     });
 
     testWidgets('Does not fail on mergedIntoParent child',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(MergeSemantics(
         child: Semantics(
@@ -791,10 +791,10 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Does not fail on links', (WidgetTester tester) async {
+    testWidgets('Does not fail on links', (final WidgetTester tester) async {
       Widget textWithLink() {
         return Builder(
-          builder: (BuildContext context) {
+          builder: (final BuildContext context) {
             return RichText(
               text: TextSpan(
                 children: <InlineSpan>[
@@ -819,7 +819,7 @@ void main() {
   });
 
   group('Labeled tappable node guideline', () {
-    testWidgets('Passes when node is labeled', (WidgetTester tester) async {
+    testWidgets('Passes when node is labeled', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
@@ -832,7 +832,7 @@ void main() {
       handle.dispose();
     });
     testWidgets('Fails if long-press has no label',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
@@ -845,7 +845,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Fails if tap has no label', (WidgetTester tester) async {
+    testWidgets('Fails if tap has no label', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
@@ -859,7 +859,7 @@ void main() {
     });
 
     testWidgets('Passes if tap is merged into labeled node',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(Semantics(
         container: true,
@@ -875,7 +875,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Passes if text field does not have label', (WidgetTester tester) async {
+    testWidgets('Passes if text field does not have label', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(const TextField()));
       final Evaluation result = await labeledTapTargetGuideline.evaluate(tester);
@@ -885,7 +885,7 @@ void main() {
   });
 
   testWidgets('regression test for material widget',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.light(),
@@ -906,5 +906,5 @@ void main() {
   });
 }
 
-Widget _boilerplate(Widget child) =>
+Widget _boilerplate(final Widget child) =>
   MaterialApp(home: Scaffold(body: Center(child: child)));

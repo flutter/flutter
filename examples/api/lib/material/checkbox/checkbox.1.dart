@@ -12,7 +12,7 @@ class CheckboxExampleApp extends StatelessWidget {
   const CheckboxExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4)),
       title: 'Checkbox Sample',
@@ -37,14 +37,14 @@ class _CheckboxExampleState extends State<CheckboxExample> {
   bool? isChecked = true;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Checkbox(
           tristate: true,
           value: isChecked,
-          onChanged: (bool? value) {
+          onChanged: (final bool? value) {
             setState(() {
               isChecked = value;
             });
@@ -54,7 +54,7 @@ class _CheckboxExampleState extends State<CheckboxExample> {
           isError: true,
           tristate: true,
           value: isChecked,
-          onChanged: (bool? value) {
+          onChanged: (final bool? value) {
             setState(() {
               isChecked = value;
             });

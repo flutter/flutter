@@ -12,7 +12,7 @@ class AnimatedSlideApp extends StatelessWidget {
   const AnimatedSlideApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: AnimatedSlideExample(),
     );
@@ -30,7 +30,7 @@ class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
   Offset offset = Offset.zero;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
@@ -65,7 +65,7 @@ class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
                             min: -5.0,
                             max: 5.0,
                             value: offset.dy,
-                            onChanged: (double value) {
+                            onChanged: (final double value) {
                               setState(() {
                                 offset = Offset(offset.dx, value);
                               });
@@ -87,7 +87,7 @@ class _AnimatedSlideExampleState extends State<AnimatedSlideExample> {
                     min: -5.0,
                     max: 5.0,
                     value: offset.dx,
-                    onChanged: (double value) {
+                    onChanged: (final double value) {
                       setState(() {
                         offset = Offset(value, offset.dy);
                       });

@@ -8,7 +8,7 @@ import 'package:flutter_api_samples/material/floating_action_button/floating_act
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('FloatingActionButton', (WidgetTester tester) async {
+  testWidgets('FloatingActionButton', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const example.FloatingActionButtonExampleApp(),
     );

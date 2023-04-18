@@ -302,14 +302,14 @@ class SystemUiOverlayStyle {
 
   /// Creates a copy of this theme with the given fields replaced with new values.
   SystemUiOverlayStyle copyWith({
-    Color? systemNavigationBarColor,
-    Color? systemNavigationBarDividerColor,
-    bool? systemNavigationBarContrastEnforced,
-    Color? statusBarColor,
-    Brightness? statusBarBrightness,
-    Brightness? statusBarIconBrightness,
-    bool? systemStatusBarContrastEnforced,
-    Brightness? systemNavigationBarIconBrightness,
+    final Color? systemNavigationBarColor,
+    final Color? systemNavigationBarDividerColor,
+    final bool? systemNavigationBarContrastEnforced,
+    final Color? statusBarColor,
+    final Brightness? statusBarBrightness,
+    final Brightness? statusBarIconBrightness,
+    final bool? systemStatusBarContrastEnforced,
+    final Brightness? systemNavigationBarIconBrightness,
   }) {
     return SystemUiOverlayStyle(
       systemNavigationBarColor: systemNavigationBarColor ?? this.systemNavigationBarColor,
@@ -336,7 +336,7 @@ class SystemUiOverlayStyle {
   );
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -352,7 +352,7 @@ class SystemUiOverlayStyle {
   }
 }
 
-List<String> _stringify(List<dynamic> list) => <String>[
+List<String> _stringify(final List<dynamic> list) => <String>[
   for (final dynamic item in list) item.toString(),
 ];
 
@@ -376,7 +376,7 @@ abstract final class SystemChrome {
   ///
   /// Should you decide to opt out of multitasking you can do this by
   /// setting "Requires full screen" to true in the Xcode Deployment Info.
-  static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
+  static Future<void> setPreferredOrientations(final List<DeviceOrientation> orientations) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',
       _stringify(orientations),
@@ -388,7 +388,7 @@ abstract final class SystemChrome {
   ///
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
-  static Future<void> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
+  static Future<void> setApplicationSwitcherDescription(final ApplicationSwitcherDescription description) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setApplicationSwitcherDescription',
       <String, dynamic>{
@@ -430,7 +430,7 @@ abstract final class SystemChrome {
   /// is true, the application is not fullscreen. See
   /// [SystemChrome.setSystemUIChangeCallback] to respond to these changes in a
   /// fullscreen application.
-  static Future<void> setEnabledSystemUIMode(SystemUiMode mode, { List<SystemUiOverlay>? overlays }) async {
+  static Future<void> setEnabledSystemUIMode(final SystemUiMode mode, { final List<SystemUiOverlay>? overlays }) async {
     if (mode != SystemUiMode.manual) {
       await SystemChannels.platform.invokeMethod<void>(
         'SystemChrome.setEnabledSystemUIMode',
@@ -465,7 +465,7 @@ abstract final class SystemChrome {
   /// overlays have been disabled. This results in the same behavior as
   /// [SystemUiMode.leanBack].
   ///
-  static Future<void> setSystemUIChangeCallback(SystemUiChangeCallback? callback) async {
+  static Future<void> setSystemUIChangeCallback(final SystemUiChangeCallback? callback) async {
     ServicesBinding.instance.setSystemUiChangeCallback(callback);
     // Skip setting up the listener if there is no callback.
     if (callback != null) {
@@ -544,7 +544,7 @@ abstract final class SystemChrome {
   ///    the style of the system overlays.
   ///  * [AnnotatedRegion], the widget used to place a `SystemUiOverlayStyle` into
   ///    the layer tree.
-  static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
+  static void setSystemUIOverlayStyle(final SystemUiOverlayStyle style) {
     if (_pendingStyle != null) {
       // The microtask has already been queued; just update the pending value.
       _pendingStyle = style;

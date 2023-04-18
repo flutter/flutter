@@ -22,19 +22,19 @@ void main() {
     testUsingContext('rasterizer and skia screenshots do not require a device', () async {
       // Throw a specific exception when attempting to make a VM Service connection to
       // verify that we've made it past the initial validation.
-      openChannelForTesting = (String url, {CompressionOptions? compression, Logger? logger}) async {
+      openChannelForTesting = (final String url, {final CompressionOptions? compression, final Logger? logger}) async {
         expect(url, 'ws://localhost:8181/ws');
         throw Exception('dummy');
       };
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
         .run(<String>['screenshot', '--type=skia', '--vm-service-url=http://localhost:8181']),
-        throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
+        throwsA(isException.having((final Exception exception) => exception.toString(), 'message', contains('dummy'))),
       );
 
       await expectLater(() => createTestCommandRunner(ScreenshotCommand(fs: MemoryFileSystem.test()))
         .run(<String>['screenshot', '--type=rasterizer', '--vm-service-url=http://localhost:8181']),
-        throwsA(isException.having((Exception exception) => exception.toString(), 'message', contains('dummy'))),
+        throwsA(isException.having((final Exception exception) => exception.toString(), 'message', contains('dummy'))),
       );
     });
 

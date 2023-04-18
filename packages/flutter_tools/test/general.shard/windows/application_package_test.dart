@@ -63,7 +63,7 @@ void main() {
 
     testUsingContext('Bad zipped app, two .exe files', () {
       fileSystem.file('app.zip').createSync();
-      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+      os.unzipOverride = (final File zipFile, final Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
           return;
         }
@@ -81,7 +81,7 @@ void main() {
     testUsingContext('Success with zipped app', () {
       fileSystem.file('app.zip').createSync();
       String? exePath;
-      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+      os.unzipOverride = (final File zipFile, final Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
           return;
         }
@@ -111,7 +111,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   void Function(File, Directory)? unzipOverride;
 
   @override
-  void unzip(File file, Directory targetDirectory) {
+  void unzip(final File file, final Directory targetDirectory) {
     unzipOverride?.call(file, targetDirectory);
   }
 }

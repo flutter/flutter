@@ -63,7 +63,7 @@ class Chrome {
   Chrome._(this._chromeProcess, this._onError, this._debugConnection) {
     // If the Chrome process quits before it was asked to quit, notify the
     // error listener.
-    _chromeProcess.exitCode.then((int exitCode) {
+    _chromeProcess.exitCode.then((final int exitCode) {
       if (!_isStopped) {
         _onError('Chrome process exited prematurely with exit code $exitCode');
       }
@@ -75,7 +75,7 @@ class Chrome {
   /// The [onError] callback is called with an error message when the Chrome
   /// process encounters an error. In particular, [onError] is called when the
   /// Chrome process exits prematurely, i.e. before [stop] is called.
-  static Future<Chrome> launch(ChromeOptions options, { String? workingDirectory, required ChromeErrorCallback onError }) async {
+  static Future<Chrome> launch(final ChromeOptions options, { final String? workingDirectory, required final ChromeErrorCallback onError }) async {
     if (!io.Platform.isWindows) {
       final io.ProcessResult versionResult = io.Process.runSync(_findSystemChromeExecutable(), const <String>['--version']);
       print('Launching ${versionResult.stdout}');
@@ -135,7 +135,7 @@ class Chrome {
   /// [endRecordingPerformance] before starting a new tracing session.
   ///
   /// The [label] is for debugging convenience.
-  Future<void> beginRecordingPerformance(String label) async {
+  Future<void> beginRecordingPerformance(final String label) async {
     if (_tracingCompleter != null) {
       throw StateError(
         'Cannot start a new performance trace. A tracing session labeled '
@@ -147,7 +147,7 @@ class Chrome {
 
     // Subscribe to tracing events prior to calling "Tracing.start". Otherwise,
     // we'll miss tracing data.
-    _tracingSubscription = _debugConnection?.onNotification.listen((WipEvent event) {
+    _tracingSubscription = _debugConnection?.onNotification.listen((final WipEvent event) {
       // We receive data as a sequence of "Tracing.dataCollected" followed by
       // "Tracing.tracingComplete" at the end. Until "Tracing.tracingComplete"
       // is received, the data may be incomplete.
@@ -195,7 +195,7 @@ class Chrome {
     return data;
   }
 
-  Future<void> reloadPage({bool ignoreCache = false}) async {
+  Future<void> reloadPage({final bool ignoreCache = false}) async {
     await _debugConnection?.page.reload(ignoreCache: ignoreCache);
   }
 
@@ -234,7 +234,7 @@ String _findSystemChromeExecutable() {
       io.Platform.environment['PROGRAMFILES'],
       io.Platform.environment['PROGRAMFILES(X86)'],
     ].whereType<String>().toList();
-    final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((final String prefix) {
       final String expectedPath = path.join(prefix, kWindowsExecutable);
       return io.File(expectedPath).existsSync();
     }, orElse: () => '.');
@@ -245,11 +245,11 @@ String _findSystemChromeExecutable() {
 }
 
 /// Waits for Chrome to print DevTools URI and connects to it.
-Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int port) async {
+Future<WipConnection> _connectToChromeDebugPort(final io.Process chromeProcess, final int port) async {
   final Uri devtoolsUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
   print('Connecting to DevTools: $devtoolsUri');
   final ChromeConnection chromeConnection = ChromeConnection('localhost', port);
-  final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((ChromeTab tab) {
+  final Iterable<ChromeTab> tabs = (await chromeConnection.getTabs()).where((final ChromeTab tab) {
     return tab.url.startsWith('http://localhost');
   });
   final ChromeTab tab = tabs.single;
@@ -259,7 +259,7 @@ Future<WipConnection> _connectToChromeDebugPort(io.Process chromeProcess, int po
 }
 
 /// Gets the Chrome debugger URL for the web page being benchmarked.
-Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
+Future<Uri> _getRemoteDebuggerUrl(final Uri base) async {
   final io.HttpClient client = io.HttpClient();
   final io.HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
   final io.HttpClientResponse response = await request.close();
@@ -277,13 +277,13 @@ class BlinkTraceSummary {
     required this.averageUpdateLifecyclePhasesTime,
   }) : averageTotalUIFrameTime = averageBeginFrameTime + averageUpdateLifecyclePhasesTime;
 
-  static BlinkTraceSummary? fromJson(List<Map<String, dynamic>> traceJson) {
+  static BlinkTraceSummary? fromJson(final List<Map<String, dynamic>> traceJson) {
     try {
       // Convert raw JSON data to BlinkTraceEvent objects sorted by timestamp.
       List<BlinkTraceEvent> events = traceJson
         .map<BlinkTraceEvent>(BlinkTraceEvent.fromJson)
         .toList()
-        ..sort((BlinkTraceEvent a, BlinkTraceEvent b) => a.ts! - b.ts!);
+        ..sort((final BlinkTraceEvent a, final BlinkTraceEvent b) => a.ts! - b.ts!);
 
       Exception noMeasuredFramesFound() => Exception(
         'No measured frames found in benchmark tracing data. This likely '
@@ -300,14 +300,14 @@ class BlinkTraceSummary {
       // reasons unknown, Chrome in the devicelab refuses to emit this event
       // sometimes, causing to flakes.
       final BlinkTraceEvent firstMeasuredFrameEvent = events.firstWhere(
-        (BlinkTraceEvent event) => event.isBeginMeasuredFrame,
+        (final BlinkTraceEvent event) => event.isBeginMeasuredFrame,
         orElse: () => throw noMeasuredFramesFound(),
       );
 
       final int tabPid = firstMeasuredFrameEvent.pid!;
 
       // Filter out data from unrelated processes
-      events = events.where((BlinkTraceEvent element) => element.pid == tabPid).toList();
+      events = events.where((final BlinkTraceEvent element) => element.pid == tabPid).toList();
 
       // Extract frame data.
       final List<BlinkFrame> frames = <BlinkFrame>[];
@@ -340,8 +340,8 @@ class BlinkTraceSummary {
 
       // Compute averages and summarize.
       return BlinkTraceSummary._(
-        averageBeginFrameTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.beginFrame).whereType<BlinkTraceEvent>().toList()),
-        averageUpdateLifecyclePhasesTime: _computeAverageDuration(frames.map((BlinkFrame frame) => frame.updateAllLifecyclePhases).whereType<BlinkTraceEvent>().toList()),
+        averageBeginFrameTime: _computeAverageDuration(frames.map((final BlinkFrame frame) => frame.beginFrame).whereType<BlinkTraceEvent>().toList()),
+        averageUpdateLifecyclePhasesTime: _computeAverageDuration(frames.map((final BlinkFrame frame) => frame.updateAllLifecyclePhases).whereType<BlinkTraceEvent>().toList()),
       );
     } catch (_) {
       final io.File traceFile = io.File('./chrome-trace.json');
@@ -394,11 +394,11 @@ class BlinkFrame {
 
 /// Takes a list of events that have non-null [BlinkTraceEvent.tdur] computes
 /// their average as a [Duration] value.
-Duration _computeAverageDuration(List<BlinkTraceEvent> events) {
+Duration _computeAverageDuration(final List<BlinkTraceEvent> events) {
   // Compute the sum of "tdur" fields of the last _kMeasuredSampleCount events.
   final double sum = events
     .skip(math.max(events.length - _kMeasuredSampleCount, 0))
-    .fold(0.0, (double previousValue, BlinkTraceEvent event) {
+    .fold(0.0, (final double previousValue, final BlinkTraceEvent event) {
       if (event.tdur == null) {
         throw FormatException('Trace event lacks "tdur" field: $event');
       }
@@ -449,7 +449,7 @@ class BlinkTraceEvent {
   /// For detailed documentation of the format see:
   ///
   /// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-  static BlinkTraceEvent fromJson(Map<String, dynamic> json) {
+  static BlinkTraceEvent fromJson(final Map<String, dynamic> json) {
     return BlinkTraceEvent._(
       args: json['args'] as Map<String, dynamic>,
       cat: json['cat'] as String,
@@ -561,7 +561,7 @@ class BlinkTraceEvent {
 /// validation and conversion is needed.
 ///
 /// Returns null if the value is null.
-int? _readInt(Map<String, dynamic> json, String key) {
+int? _readInt(final Map<String, dynamic> json, final String key) {
   final num? jsonValue = json[key] as num?;
 
   if (jsonValue == null) {
@@ -583,7 +583,7 @@ int? _readInt(Map<String, dynamic> json, String key) {
 ///     Inconsistency detected by ld.so: ../elf/dl-tls.c: 493: _dl_allocate_tls_init: Assertion `listp->slotinfo[cnt].gen <= GL(dl_tls_generation)' failed!
 const String _kGlibcError = 'Inconsistency detected by ld.so';
 
-Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, { String? workingDirectory }) async {
+Future<io.Process> _spawnChromiumProcess(final String executable, final List<String> args, { final String? workingDirectory }) async {
   // Keep attempting to launch the browser until one of:
   // - Chrome launched successfully, in which case we just return from the loop.
   // - The tool detected an unretryable Chrome error, in which case we throw ToolExit.
@@ -593,7 +593,7 @@ Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, {
     process.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter())
-      .listen((String line) {
+      .listen((final String line) {
         print('[CHROME STDOUT]: $line');
       });
 
@@ -603,14 +603,14 @@ Future<io.Process> _spawnChromiumProcess(String executable, List<String> args, {
     await process.stderr
       .transform(utf8.decoder)
       .transform(const LineSplitter())
-      .map((String line) {
+      .map((final String line) {
         print('[CHROME STDERR]:$line');
         if (line.contains(_kGlibcError)) {
           hitGlibcBug = true;
         }
         return line;
       })
-      .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+      .firstWhere((final String line) => line.startsWith('DevTools listening'), orElse: () {
         if (hitGlibcBug) {
           print(
             'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '

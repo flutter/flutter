@@ -19,7 +19,7 @@ class _ColorsAndStops {
 }
 
 /// Calculate the color at position [t] of the gradient defined by [colors] and [stops].
-Color _sample(List<Color> colors, List<double> stops, double t) {
+Color _sample(final List<Color> colors, final List<double> stops, final double t) {
   assert(colors.isNotEmpty);
   assert(stops.isNotEmpty);
   if (t <= stops.first) {
@@ -28,7 +28,7 @@ Color _sample(List<Color> colors, List<double> stops, double t) {
   if (t >= stops.last) {
     return colors.last;
   }
-  final int index = stops.lastIndexWhere((double s) => s <= t);
+  final int index = stops.lastIndexWhere((final double s) => s <= t);
   assert(index != -1);
   return Color.lerp(
       colors[index], colors[index + 1],
@@ -37,11 +37,11 @@ Color _sample(List<Color> colors, List<double> stops, double t) {
 }
 
 _ColorsAndStops _interpolateColorsAndStops(
-  List<Color> aColors,
-  List<double> aStops,
-  List<Color> bColors,
-  List<double> bStops,
-  double t,
+  final List<Color> aColors,
+  final List<double> aStops,
+  final List<Color> bColors,
+  final List<double> bStops,
+  final double t,
 ) {
   assert(aColors.length >= 2);
   assert(bColors.length >= 2);
@@ -52,7 +52,7 @@ _ColorsAndStops _interpolateColorsAndStops(
     ..addAll(bStops);
   final List<double> interpolatedStops = stops.toList(growable: false);
   final List<Color> interpolatedColors = interpolatedStops.map<Color>(
-          (double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)!,
+          (final double stop) => Color.lerp(_sample(aColors, aStops, stop), _sample(bColors, bStops, stop), t)!,
   ).toList(growable: false);
   return _ColorsAndStops(interpolatedColors, interpolatedStops);
 }
@@ -75,7 +75,7 @@ abstract class GradientTransform {
   ///
   /// Implementers may return null from this method, which achieves the same
   /// final effect as returning [Matrix4.identity].
-  Matrix4? transform(Rect bounds, {TextDirection? textDirection});
+  Matrix4? transform(final Rect bounds, {final TextDirection? textDirection});
 }
 
 /// A [GradientTransform] that rotates the gradient around the center-point of
@@ -103,7 +103,7 @@ class GradientRotation extends GradientTransform {
   final double radians;
 
   @override
-  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) {
+  Matrix4 transform(final Rect bounds, {final TextDirection? textDirection}) {
     final double sinRadians = math.sin(radians);
     final double oneMinusCosRadians = 1 - math.cos(radians);
     final Offset center = bounds.center;
@@ -116,7 +116,7 @@ class GradientRotation extends GradientTransform {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -208,7 +208,7 @@ abstract class Gradient {
     final double separation = 1.0 / (colors.length - 1);
     return List<double>.generate(
       colors.length,
-      (int index) => index * separation,
+      (final int index) => index * separation,
       growable: false,
     );
   }
@@ -222,7 +222,7 @@ abstract class Gradient {
   /// The shader's transform will be resolved from the [transform] of this
   /// gradient.
   @factory
-  Shader createShader(Rect rect, { TextDirection? textDirection });
+  Shader createShader(final Rect rect, { final TextDirection? textDirection });
 
   /// Returns a new gradient with its properties scaled by the given factor.
   ///
@@ -233,7 +233,7 @@ abstract class Gradient {
   /// gradient to smoothly disappear.
   ///
   /// Typically this is the same as interpolating from null (with [lerp]).
-  Gradient scale(double factor);
+  Gradient scale(final double factor);
 
   /// Linearly interpolates from another [Gradient] to `this`.
   ///
@@ -259,7 +259,7 @@ abstract class Gradient {
   ///
   /// Instead of calling this directly, use [Gradient.lerp].
   @protected
-  Gradient? lerpFrom(Gradient? a, double t) {
+  Gradient? lerpFrom(final Gradient? a, final double t) {
     if (a == null) {
       return scale(t);
     }
@@ -291,7 +291,7 @@ abstract class Gradient {
   ///
   /// Instead of calling this directly, use [Gradient.lerp].
   @protected
-  Gradient? lerpTo(Gradient? b, double t) {
+  Gradient? lerpTo(final Gradient? b, final double t) {
     if (b == null) {
       return scale(1.0 - t);
     }
@@ -306,7 +306,7 @@ abstract class Gradient {
   /// and `b` after `t == 0.5`.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static Gradient? lerp(Gradient? a, Gradient? b, double t) {
+  static Gradient? lerp(final Gradient? a, final Gradient? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -324,7 +324,7 @@ abstract class Gradient {
     return t < 0.5 ? a!.scale(1.0 - (t * 2.0)) : b!.scale((t - 0.5) * 2.0);
   }
 
-  Float64List? _resolveTransform(Rect bounds, TextDirection? textDirection) {
+  Float64List? _resolveTransform(final Rect bounds, final TextDirection? textDirection) {
     return transform?.transform(bounds, textDirection: textDirection)?.storage;
   }
 }
@@ -427,7 +427,7 @@ class LinearGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection? textDirection }) {
+  Shader createShader(final Rect rect, { final TextDirection? textDirection }) {
     return ui.Gradient.linear(
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
@@ -440,18 +440,18 @@ class LinearGradient extends Gradient {
   /// Since the alpha component of the Color is what is scaled, a factor
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
-  LinearGradient scale(double factor) {
+  LinearGradient scale(final double factor) {
     return LinearGradient(
       begin: begin,
       end: end,
-      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      colors: colors.map<Color>((final Color color) => Color.lerp(null, color, factor)!).toList(),
       stops: stops,
       tileMode: tileMode,
     );
   }
 
   @override
-  Gradient? lerpFrom(Gradient? a, double t) {
+  Gradient? lerpFrom(final Gradient? a, final double t) {
     if (a == null || (a is LinearGradient)) {
       return LinearGradient.lerp(a as LinearGradient?, this, t);
     }
@@ -459,7 +459,7 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  Gradient? lerpTo(Gradient? b, double t) {
+  Gradient? lerpTo(final Gradient? b, final double t) {
     if (b == null || (b is LinearGradient)) {
       return LinearGradient.lerp(this, b as LinearGradient?, t);
     }
@@ -485,7 +485,7 @@ class LinearGradient extends Gradient {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static LinearGradient? lerp(LinearGradient? a, LinearGradient? b, double t) {
+  static LinearGradient? lerp(final LinearGradient? a, final LinearGradient? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -512,7 +512,7 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -701,7 +701,7 @@ class RadialGradient extends Gradient {
   final double focalRadius;
 
   @override
-  Shader createShader(Rect rect, { TextDirection? textDirection }) {
+  Shader createShader(final Rect rect, { final TextDirection? textDirection }) {
     return ui.Gradient.radial(
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
@@ -717,11 +717,11 @@ class RadialGradient extends Gradient {
   /// Since the alpha component of the Color is what is scaled, a factor
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
-  RadialGradient scale(double factor) {
+  RadialGradient scale(final double factor) {
     return RadialGradient(
       center: center,
       radius: radius,
-      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      colors: colors.map<Color>((final Color color) => Color.lerp(null, color, factor)!).toList(),
       stops: stops,
       tileMode: tileMode,
       focal: focal,
@@ -730,7 +730,7 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  Gradient? lerpFrom(Gradient? a, double t) {
+  Gradient? lerpFrom(final Gradient? a, final double t) {
     if (a == null || (a is RadialGradient)) {
       return RadialGradient.lerp(a as RadialGradient?, this, t);
     }
@@ -738,7 +738,7 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  Gradient? lerpTo(Gradient? b, double t) {
+  Gradient? lerpTo(final Gradient? b, final double t) {
     if (b == null || (b is RadialGradient)) {
       return RadialGradient.lerp(this, b as RadialGradient?, t);
     }
@@ -764,7 +764,7 @@ class RadialGradient extends Gradient {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static RadialGradient? lerp(RadialGradient? a, RadialGradient? b, double t) {
+  static RadialGradient? lerp(final RadialGradient? a, final RadialGradient? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -793,7 +793,7 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -971,7 +971,7 @@ class SweepGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection? textDirection }) {
+  Shader createShader(final Rect rect, { final TextDirection? textDirection }) {
     return ui.Gradient.sweep(
       center.resolve(textDirection).withinRect(rect),
       colors, _impliedStops(), tileMode,
@@ -986,19 +986,19 @@ class SweepGradient extends Gradient {
   /// Since the alpha component of the Color is what is scaled, a factor
   /// of 0.0 or less results in a gradient that is fully transparent.
   @override
-  SweepGradient scale(double factor) {
+  SweepGradient scale(final double factor) {
     return SweepGradient(
       center: center,
       startAngle: startAngle,
       endAngle: endAngle,
-      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)!).toList(),
+      colors: colors.map<Color>((final Color color) => Color.lerp(null, color, factor)!).toList(),
       stops: stops,
       tileMode: tileMode,
     );
   }
 
   @override
-  Gradient? lerpFrom(Gradient? a, double t) {
+  Gradient? lerpFrom(final Gradient? a, final double t) {
     if (a == null || (a is SweepGradient)) {
       return SweepGradient.lerp(a as SweepGradient?, this, t);
     }
@@ -1006,7 +1006,7 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  Gradient? lerpTo(Gradient? b, double t) {
+  Gradient? lerpTo(final Gradient? b, final double t) {
     if (b == null || (b is SweepGradient)) {
       return SweepGradient.lerp(this, b as SweepGradient?, t);
     }
@@ -1031,7 +1031,7 @@ class SweepGradient extends Gradient {
   ///
   /// Values for `t` are usually obtained from an [Animation<double>], such as
   /// an [AnimationController].
-  static SweepGradient? lerp(SweepGradient? a, SweepGradient? b, double t) {
+  static SweepGradient? lerp(final SweepGradient? a, final SweepGradient? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -1059,7 +1059,7 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

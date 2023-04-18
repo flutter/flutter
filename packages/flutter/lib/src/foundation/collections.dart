@@ -19,7 +19,7 @@
 ///
 ///  * [listEquals], which does something similar for lists.
 ///  * [mapEquals], which does something similar for maps.
-bool setEquals<T>(Set<T>? a, Set<T>? b) {
+bool setEquals<T>(final Set<T>? a, final Set<T>? b) {
   if (a == null) {
     return b == null;
   }
@@ -52,7 +52,7 @@ bool setEquals<T>(Set<T>? a, Set<T>? b) {
 ///
 ///  * [setEquals], which does something similar for sets.
 ///  * [mapEquals], which does something similar for maps.
-bool listEquals<T>(List<T>? a, List<T>? b) {
+bool listEquals<T>(final List<T>? a, final List<T>? b) {
   if (a == null) {
     return b == null;
   }
@@ -85,7 +85,7 @@ bool listEquals<T>(List<T>? a, List<T>? b) {
 ///
 ///  * [setEquals], which does something similar for sets.
 ///  * [listEquals], which does something similar for lists.
-bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
+bool mapEquals<T, U>(final Map<T, U>? a, final Map<T, U>? b) {
   if (a == null) {
     return b == null;
   }
@@ -108,7 +108,7 @@ bool mapEquals<T, U>(Map<T, U>? a, Map<T, U>? b) {
 ///
 /// Returns `-1` if the `value` is not in the list. Requires the list items
 /// to implement [Comparable] and the `sortedList` to already be ordered.
-int binarySearch<T extends Comparable<Object>>(List<T> sortedList, T value) {
+int binarySearch<T extends Comparable<Object>>(final List<T> sortedList, final T value) {
   int min = 0;
   int max = sortedList.length;
   while (min < max) {
@@ -152,8 +152,8 @@ const int _kMergeSortLimit = 32;
 /// insertion sort instead, as that is more efficient for small lists. The
 /// insertion sort is also stable.
 void mergeSort<T>(
-  List<T> list, {
-  int start = 0,
+  final List<T> list, {
+  final int start = 0,
   int? end,
   int Function(T, T)? compare,
 }) {
@@ -189,7 +189,7 @@ Comparator<T> _defaultCompare<T>() {
   // If we specify Comparable<T> here, it fails if the type is an int, because
   // int isn't a subtype of comparable. Leaving out the type implicitly converts
   // it to a num, which is a comparable.
-  return (T value1, T value2) => (value1 as Comparable<dynamic>).compareTo(value2);
+  return (final T value1, final T value2) => (value1 as Comparable<dynamic>).compareTo(value2);
 }
 
 /// Sort a list between `start` (inclusive) and `end` (exclusive) using
@@ -210,9 +210,9 @@ Comparator<T> _defaultCompare<T>() {
 /// This insertion sort is stable: Equal elements end up in the same order as
 /// they started in.
 void _insertionSort<T>(
-  List<T> list, {
+  final List<T> list, {
   int Function(T, T)? compare,
-  int start = 0,
+  final int start = 0,
   int? end,
 }) {
   // If the same method could have both positional and named optional
@@ -243,12 +243,12 @@ void _insertionSort<T>(
 ///
 /// It will work in-place as well.
 void _movingInsertionSort<T>(
-  List<T> list,
-  int Function(T, T) compare,
-  int start,
-  int end,
-  List<T> target,
-  int targetOffset,
+  final List<T> list,
+  final int Function(T, T) compare,
+  final int start,
+  final int end,
+  final List<T> target,
+  final int targetOffset,
 ) {
   final int length = end - start;
   if (length == 0) {
@@ -280,12 +280,12 @@ void _movingInsertionSort<T>(
 /// Allows target to be the same list as `list`, as long as it's not overlapping
 /// the `start..end` range.
 void _mergeSort<T>(
-  List<T> list,
-  int Function(T, T) compare,
-  int start,
-  int end,
-  List<T> target,
-  int targetOffset,
+  final List<T> list,
+  final int Function(T, T) compare,
+  final int start,
+  final int end,
+  final List<T> target,
+  final int targetOffset,
 ) {
   final int length = end - start;
   if (length < _kMergeSortLimit) {
@@ -323,14 +323,14 @@ void _mergeSort<T>(
 /// allows the merge to be stable if the first list contains elements that
 /// started out earlier than the ones in `secondList`.
 void _merge<T>(
-  int Function(T, T) compare,
-  List<T> firstList,
-  int firstStart,
-  int firstEnd,
-  List<T> secondList,
-  int secondStart,
-  int secondEnd,
-  List<T> target,
+  final int Function(T, T) compare,
+  final List<T> firstList,
+  final int firstStart,
+  final int firstEnd,
+  final List<T> secondList,
+  final int secondStart,
+  final int secondEnd,
+  final List<T> target,
   int targetOffset,
 ) {
   // No empty lists reaches here.

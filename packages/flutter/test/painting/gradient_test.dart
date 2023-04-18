@@ -856,7 +856,7 @@ void main() {
       SweepGradient: 'sweep_gradient',
     };
 
-    Future<void> runTest(WidgetTester tester, Gradient gradient, double degrees) async {
+    Future<void> runTest(final WidgetTester tester, final Gradient gradient, final double degrees) async {
       final String goldenName = '${gradientSnakeCase[gradient.runtimeType]}_$degrees.png';
       final Shader shader = gradient.createShader(
         rect,
@@ -881,7 +881,7 @@ void main() {
 
     group('Gradients - 45 degrees', () {
       for (final Gradient gradient in gradients45) {
-        testWidgets('$gradient', (WidgetTester tester) async {
+        testWidgets('$gradient', (final WidgetTester tester) async {
           await runTest(tester, gradient, 45);
         });
       }
@@ -889,7 +889,7 @@ void main() {
 
     group('Gradients - 90 degrees', () {
       for (final Gradient gradient in gradients90) {
-        testWidgets('$gradient', (WidgetTester tester) async {
+        testWidgets('$gradient', (final WidgetTester tester) async {
           await runTest(tester, gradient, 90);
         });
       }
@@ -904,11 +904,11 @@ class GradientPainter extends CustomPainter {
   final Rect rect;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     canvas.drawRect(rect, Paint()..shader = shader);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
+  bool shouldRepaint(final CustomPainter oldDelegate) => true;
 
 }

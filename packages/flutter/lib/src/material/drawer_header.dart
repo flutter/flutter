@@ -72,7 +72,7 @@ class DrawerHeader extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);

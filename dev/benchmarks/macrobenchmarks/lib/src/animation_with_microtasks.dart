@@ -27,7 +27,7 @@ class _AnimationWithMicrotasksState extends State<AnimationWithMicrotasks> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Scaffold(
       backgroundColor: Colors.grey,
       body: Center(
@@ -66,7 +66,7 @@ class _ChunkedWork {
     }
   }
 
-  void _syncComputationFor(Duration duration) {
+  void _syncComputationFor(final Duration duration) {
     final Stopwatch sw = Stopwatch()..start();
     while (!_canceled && sw.elapsed < duration) {}
   }

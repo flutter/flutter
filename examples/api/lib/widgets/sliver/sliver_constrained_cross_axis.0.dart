@@ -10,7 +10,7 @@ class SliverConstrainedCrossAxisExampleApp extends StatelessWidget {
   const SliverConstrainedCrossAxisExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SliverConstrainedCrossAxis Sample')),
@@ -24,13 +24,13 @@ class SliverConstrainedCrossAxisExample extends StatelessWidget {
   const SliverConstrainedCrossAxisExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomScrollView(
       slivers: <Widget>[
         SliverConstrainedCrossAxis(
           maxExtent: 200,
           sliver: SliverList.builder(
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               return Container(
                 color: index.isEven ? Colors.amber[300] : Colors.blue[300],
                 height: 100.0,

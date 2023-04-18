@@ -17,7 +17,7 @@ class TextStyleItem extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle nameStyle = theme.textTheme.bodySmall!.copyWith(color: theme.textTheme.bodySmall!.color);
     return Padding(
@@ -44,7 +44,7 @@ class TypographyDemo extends StatelessWidget {
   static const String routeName = '/typography';
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final List<Widget> styleItems = <Widget>[
       TextStyleItem(name: 'Display Large', style: textTheme.displayLarge!, text: 'Regular 57/64 +0'),

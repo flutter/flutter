@@ -43,10 +43,10 @@ class CircleBorder extends OutlinedBorder {
   final double eccentricity;
 
   @override
-  ShapeBorder scale(double t) => CircleBorder(side: side.scale(t), eccentricity: eccentricity);
+  ShapeBorder scale(final double t) => CircleBorder(side: side.scale(t), eccentricity: eccentricity);
 
   @override
-  ShapeBorder? lerpFrom(ShapeBorder? a, double t) {
+  ShapeBorder? lerpFrom(final ShapeBorder? a, final double t) {
     if (a is CircleBorder) {
       return CircleBorder(
         side: BorderSide.lerp(a.side, side, t),
@@ -57,7 +57,7 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  ShapeBorder? lerpTo(ShapeBorder? b, double t) {
+  ShapeBorder? lerpTo(final ShapeBorder? b, final double t) {
     if (b is CircleBorder) {
       return CircleBorder(
         side: BorderSide.lerp(side, b.side, t),
@@ -68,17 +68,17 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  Path getInnerPath(Rect rect, { TextDirection? textDirection }) {
+  Path getInnerPath(final Rect rect, { final TextDirection? textDirection }) {
     return Path()..addOval(_adjustRect(rect).deflate(side.strokeInset));
   }
 
   @override
-  Path getOuterPath(Rect rect, { TextDirection? textDirection }) {
+  Path getOuterPath(final Rect rect, { final TextDirection? textDirection }) {
     return Path()..addOval(_adjustRect(rect));
   }
 
   @override
-  void paintInterior(Canvas canvas, Rect rect, Paint paint, { TextDirection? textDirection }) {
+  void paintInterior(final Canvas canvas, final Rect rect, final Paint paint, { final TextDirection? textDirection }) {
     if (eccentricity == 0.0) {
       canvas.drawCircle(rect.center, rect.shortestSide / 2.0, paint);
     } else {
@@ -90,12 +90,12 @@ class CircleBorder extends OutlinedBorder {
   bool get preferPaintInterior => true;
 
   @override
-  CircleBorder copyWith({ BorderSide? side, double? eccentricity }) {
+  CircleBorder copyWith({ final BorderSide? side, final double? eccentricity }) {
     return CircleBorder(side: side ?? this.side, eccentricity: eccentricity ?? this.eccentricity);
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection? textDirection }) {
+  void paint(final Canvas canvas, final Rect rect, { final TextDirection? textDirection }) {
     switch (side.style) {
       case BorderStyle.none:
         break;
@@ -109,7 +109,7 @@ class CircleBorder extends OutlinedBorder {
     }
   }
 
-  Rect _adjustRect(Rect rect) {
+  Rect _adjustRect(final Rect rect) {
     if (eccentricity == 0.0 || rect.width == rect.height) {
       return Rect.fromCircle(center: rect.center, radius: rect.shortestSide / 2.0);
     }
@@ -133,7 +133,7 @@ class CircleBorder extends OutlinedBorder {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

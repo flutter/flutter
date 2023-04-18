@@ -21,13 +21,13 @@ class TestWidget extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => child;
+  Widget build(final BuildContext context) => child;
 }
 
 class TestOrientedBox extends SingleChildRenderObjectWidget {
   const TestOrientedBox({ super.key, super.child });
 
-  Decoration _getDecoration(BuildContext context) {
+  Decoration _getDecoration(final BuildContext context) {
     final Orientation orientation = MediaQuery.orientationOf(context);
     switch (orientation) {
       case Orientation.landscape:
@@ -38,10 +38,10 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  RenderDecoratedBox createRenderObject(BuildContext context) => RenderDecoratedBox(decoration: _getDecoration(context));
+  RenderDecoratedBox createRenderObject(final BuildContext context) => RenderDecoratedBox(decoration: _getDecoration(context));
 
   @override
-  void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
+  void updateRenderObject(final BuildContext context, final RenderDecoratedBox renderObject) {
     renderObject.decoration = _getDecoration(context);
   }
 }
@@ -50,12 +50,12 @@ class TestNonVisitingWidget extends SingleChildRenderObjectWidget {
   const TestNonVisitingWidget({ super.key, required Widget super.child });
 
   @override
-  RenderObject createRenderObject(BuildContext context) => TestNonVisitingRenderObject();
+  RenderObject createRenderObject(final BuildContext context) => TestNonVisitingRenderObject();
 }
 
 class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return child!.getDryLayout(constraints);
   }
 
@@ -66,18 +66,18 @@ class TestNonVisitingRenderObject extends RenderBox with RenderObjectWithChildMi
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     context.paintChild(child!, offset);
   }
 
   @override
-  void visitChildren(RenderObjectVisitor visitor) {
+  void visitChildren(final RenderObjectVisitor visitor) {
     // oops!
   }
 }
 
 void main() {
-  testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) async {
+  testWidgets('RenderObjectWidget smoke test', (final WidgetTester tester) async {
     await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationA));
     SingleChildRenderObjectElement element =
         tester.element(find.byElementType(SingleChildRenderObjectElement));
@@ -96,7 +96,7 @@ void main() {
     expect(renderObject.position, equals(DecorationPosition.background));
   });
 
-  testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
+  testWidgets('RenderObjectWidget can add and remove children', (final WidgetTester tester) async {
 
     void checkFullTree() {
       final SingleChildRenderObjectElement element =
@@ -180,7 +180,7 @@ void main() {
     childBareTree();
   });
 
-  testWidgets('Detached render tree is intact', (WidgetTester tester) async {
+  testWidgets('Detached render tree is intact', (final WidgetTester tester) async {
 
     await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
@@ -222,7 +222,7 @@ void main() {
     expect(grandChild.child, isNull);
   });
 
-  testWidgets('Can watch inherited widgets', (WidgetTester tester) async {
+  testWidgets('Can watch inherited widgets', (final WidgetTester tester) async {
     final Key boxKey = UniqueKey();
     final TestOrientedBox box = TestOrientedBox(key: boxKey);
 
@@ -244,7 +244,7 @@ void main() {
     expect(decoration.color, equals(const Color(0xFF0000FF)));
   });
 
-  testWidgets('RenderObject not visiting children provides helpful error message', (WidgetTester tester) async {
+  testWidgets('RenderObject not visiting children provides helpful error message', (final WidgetTester tester) async {
     await tester.pumpWidget(
       TestNonVisitingWidget(
         child: Container(color: const Color(0xFFED1D7F)),

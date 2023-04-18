@@ -13,7 +13,7 @@ Future<void> main() async {
     deviceOperatingSystem = DeviceOperatingSystem.ios;
     String? simulatorDeviceId;
     try {
-      await testWithNewIOSSimulator('TestHotReloadSim', (String deviceId) async {
+      await testWithNewIOSSimulator('TestHotReloadSim', (final String deviceId) async {
         simulatorDeviceId = deviceId;
         // This isn't actually a benchmark test, so do not use the returned `benchmarkScoreKeys` result.
         await createHotModeTest(deviceIdOverride: deviceId, checkAppRunningOnLocalDevice: true)();

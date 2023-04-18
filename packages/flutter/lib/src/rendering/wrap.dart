@@ -111,16 +111,16 @@ class RenderWrap extends RenderBox
   /// By default, the wrap layout is horizontal and both the children and the
   /// runs are aligned to the start.
   RenderWrap({
-    List<RenderBox>? children,
-    Axis direction = Axis.horizontal,
-    WrapAlignment alignment = WrapAlignment.start,
-    double spacing = 0.0,
-    WrapAlignment runAlignment = WrapAlignment.start,
-    double runSpacing = 0.0,
-    WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
-    TextDirection? textDirection,
-    VerticalDirection verticalDirection = VerticalDirection.down,
-    Clip clipBehavior = Clip.none,
+    final List<RenderBox>? children,
+    final Axis direction = Axis.horizontal,
+    final WrapAlignment alignment = WrapAlignment.start,
+    final double spacing = 0.0,
+    final WrapAlignment runAlignment = WrapAlignment.start,
+    final double runSpacing = 0.0,
+    final WrapCrossAlignment crossAxisAlignment = WrapCrossAlignment.start,
+    final TextDirection? textDirection,
+    final VerticalDirection verticalDirection = VerticalDirection.down,
+    final Clip clipBehavior = Clip.none,
   }) : _direction = direction,
        _alignment = alignment,
        _spacing = spacing,
@@ -141,7 +141,7 @@ class RenderWrap extends RenderBox
   /// children are placed in a new run vertically adjacent to the previous run.
   Axis get direction => _direction;
   Axis _direction;
-  set direction (Axis value) {
+  set direction (final Axis value) {
     if (_direction == value) {
       return;
     }
@@ -164,7 +164,7 @@ class RenderWrap extends RenderBox
   ///    are placed relative to each other in the cross axis.
   WrapAlignment get alignment => _alignment;
   WrapAlignment _alignment;
-  set alignment (WrapAlignment value) {
+  set alignment (final WrapAlignment value) {
     if (_alignment == value) {
       return;
     }
@@ -185,7 +185,7 @@ class RenderWrap extends RenderBox
   /// Defaults to 0.0.
   double get spacing => _spacing;
   double _spacing;
-  set spacing (double value) {
+  set spacing (final double value) {
     if (_spacing == value) {
       return;
     }
@@ -209,7 +209,7 @@ class RenderWrap extends RenderBox
   ///    are placed relative to each other in the cross axis.
   WrapAlignment get runAlignment => _runAlignment;
   WrapAlignment _runAlignment;
-  set runAlignment (WrapAlignment value) {
+  set runAlignment (final WrapAlignment value) {
     if (_runAlignment == value) {
       return;
     }
@@ -229,7 +229,7 @@ class RenderWrap extends RenderBox
   /// Defaults to 0.0.
   double get runSpacing => _runSpacing;
   double _runSpacing;
-  set runSpacing (double value) {
+  set runSpacing (final double value) {
     if (_runSpacing == value) {
       return;
     }
@@ -254,7 +254,7 @@ class RenderWrap extends RenderBox
   ///    other in the cross axis.
   WrapCrossAlignment get crossAxisAlignment => _crossAxisAlignment;
   WrapCrossAlignment _crossAxisAlignment;
-  set crossAxisAlignment (WrapCrossAlignment value) {
+  set crossAxisAlignment (final WrapCrossAlignment value) {
     if (_crossAxisAlignment == value) {
       return;
     }
@@ -287,7 +287,7 @@ class RenderWrap extends RenderBox
   /// [textDirection] must not be null.
   TextDirection? get textDirection => _textDirection;
   TextDirection? _textDirection;
-  set textDirection(TextDirection? value) {
+  set textDirection(final TextDirection? value) {
     if (_textDirection != value) {
       _textDirection = value;
       markNeedsLayout();
@@ -318,7 +318,7 @@ class RenderWrap extends RenderBox
   /// [verticalDirection] must not be null.
   VerticalDirection get verticalDirection => _verticalDirection;
   VerticalDirection _verticalDirection;
-  set verticalDirection(VerticalDirection value) {
+  set verticalDirection(final VerticalDirection value) {
     if (_verticalDirection != value) {
       _verticalDirection = value;
       markNeedsLayout();
@@ -330,7 +330,7 @@ class RenderWrap extends RenderBox
   /// Defaults to [Clip.none], and must not be null.
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.none;
-  set clipBehavior(Clip value) {
+  set clipBehavior(final Clip value) {
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -376,14 +376,14 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! WrapParentData) {
       child.parentData = WrapParentData();
     }
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) {
+  double computeMinIntrinsicWidth(final double height) {
     switch (direction) {
       case Axis.horizontal:
         double width = 0.0;
@@ -399,7 +399,7 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicWidth(double height) {
+  double computeMaxIntrinsicWidth(final double height) {
     switch (direction) {
       case Axis.horizontal:
         double width = 0.0;
@@ -415,7 +415,7 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  double computeMinIntrinsicHeight(double width) {
+  double computeMinIntrinsicHeight(final double width) {
     switch (direction) {
       case Axis.horizontal:
         return computeDryLayout(BoxConstraints(maxWidth: width)).height;
@@ -431,7 +431,7 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  double computeMaxIntrinsicHeight(double width) {
+  double computeMaxIntrinsicHeight(final double width) {
     switch (direction) {
       case Axis.horizontal:
         return computeDryLayout(BoxConstraints(maxWidth: width)).height;
@@ -447,11 +447,11 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  double? computeDistanceToActualBaseline(TextBaseline baseline) {
+  double? computeDistanceToActualBaseline(final TextBaseline baseline) {
     return defaultComputeDistanceToHighestActualBaseline(baseline);
   }
 
-  double _getMainAxisExtent(Size childSize) {
+  double _getMainAxisExtent(final Size childSize) {
     switch (direction) {
       case Axis.horizontal:
         return childSize.width;
@@ -460,7 +460,7 @@ class RenderWrap extends RenderBox
     }
   }
 
-  double _getCrossAxisExtent(Size childSize) {
+  double _getCrossAxisExtent(final Size childSize) {
     switch (direction) {
       case Axis.horizontal:
         return childSize.height;
@@ -469,7 +469,7 @@ class RenderWrap extends RenderBox
     }
   }
 
-  Offset _getOffset(double mainAxisOffset, double crossAxisOffset) {
+  Offset _getOffset(final double mainAxisOffset, final double crossAxisOffset) {
     switch (direction) {
       case Axis.horizontal:
         return Offset(mainAxisOffset, crossAxisOffset);
@@ -478,7 +478,7 @@ class RenderWrap extends RenderBox
     }
   }
 
-  double _getChildCrossAxisOffset(bool flipCrossAxis, double runCrossAxisExtent, double childCrossAxisExtent) {
+  double _getChildCrossAxisOffset(final bool flipCrossAxis, final double runCrossAxisExtent, final double childCrossAxisExtent) {
     final double freeSpace = runCrossAxisExtent - childCrossAxisExtent;
     switch (crossAxisAlignment) {
       case WrapCrossAlignment.start:
@@ -493,11 +493,11 @@ class RenderWrap extends RenderBox
   bool _hasVisualOverflow = false;
 
   @override
-  Size computeDryLayout(BoxConstraints constraints) {
+  Size computeDryLayout(final BoxConstraints constraints) {
     return _computeDryLayout(constraints);
   }
 
-  Size _computeDryLayout(BoxConstraints constraints, [ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
+  Size _computeDryLayout(final BoxConstraints constraints, [final ChildLayouter layoutChild = ChildLayoutHelper.dryLayoutChild]) {
     final BoxConstraints childConstraints;
     double mainAxisLimit = 0.0;
     switch (direction) {
@@ -728,12 +728,12 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
     if (_hasVisualOverflow && clipBehavior != Clip.none) {
@@ -760,7 +760,7 @@ class RenderWrap extends RenderBox
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<Axis>('direction', direction));
     properties.add(EnumProperty<WrapAlignment>('alignment', alignment));

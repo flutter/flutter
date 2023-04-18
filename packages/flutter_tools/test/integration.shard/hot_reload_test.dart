@@ -40,7 +40,7 @@ void main() {
     final StreamSubscription<void> subscription = flutter.stdout
         .map(parseFlutterResponse)
         .where(_isHotReloadCompletionEvent)
-        .listen((_) => numReloads++);
+        .listen((final _) => numReloads++);
 
     // To reduce tests flaking, override the debounce timer to something higher than
     // the default to ensure the hot reloads that are supposed to arrive within the
@@ -48,7 +48,7 @@ void main() {
     const int hotReloadDebounceOverrideMs = 250;
     const Duration delay = Duration(milliseconds: hotReloadDebounceOverrideMs * 2);
 
-    Future<void> doReload([void _]) =>
+    Future<void> doReload([final void _]) =>
         flutter.hotReload(debounce: true, debounceDurationOverrideMs: hotReloadDebounceOverrideMs);
 
     try {
@@ -90,7 +90,7 @@ void main() {
     final Completer<void> sawTick1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen(
-      (String line) {
+      (final String line) {
         if (line.contains('((((TICK 1))))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
@@ -128,7 +128,7 @@ void main() {
       project.buildBreakpointLine,
     );
     bool reloaded = false;
-    final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
+    final Future<void> reloadFuture = flutter.hotReload().then((final void value) { reloaded = true; });
     printOnFailure('waiting for pause...');
     isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
@@ -150,7 +150,7 @@ void main() {
     final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = flutter.stdout.listen(
-      (String line) {
+      (final String line) {
         printOnFailure('[LOG]:"$line"');
         if (line.contains('(((TICK 1)))')) {
           expect(sawTick1.isCompleted, isFalse);
@@ -175,7 +175,7 @@ void main() {
     );
     bool reloaded = false;
     await Future<void>.delayed(const Duration(seconds: 1));
-    final Future<void> reloadFuture = flutter.hotReload().then((void value) { reloaded = true; });
+    final Future<void> reloadFuture = flutter.hotReload().then((final void value) { reloaded = true; });
     final Isolate isolate = await flutter.waitForPause();
     expect(isolate.pauseEvent?.kind, equals(EventKind.kPauseBreakpoint));
     expect(reloaded, isFalse);
@@ -189,7 +189,7 @@ void main() {
   });
 }
 
-bool _isHotReloadCompletionEvent(Map<String, Object?>? event) {
+bool _isHotReloadCompletionEvent(final Map<String, Object?>? event) {
   return event != null &&
       event['event'] == 'app.progress' &&
       event['params'] != null &&

@@ -128,7 +128,7 @@ class MemoryAllocations {
   /// Listeners can be removed with [removeListener].
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
-  void addListener(ObjectEventListener listener){
+  void addListener(final ObjectEventListener listener){
     if (!kFlutterMemoryAllocationsEnabled) {
       return;
     }
@@ -154,7 +154,7 @@ class MemoryAllocations {
   /// Listeners can be added with [addListener].
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
-  void removeListener(ObjectEventListener listener){
+  void removeListener(final ObjectEventListener listener){
     if (!kFlutterMemoryAllocationsEnabled) {
       return;
     }
@@ -174,7 +174,7 @@ class MemoryAllocations {
         }
       }
     } else {
-      listeners.removeWhere((ObjectEventListener? l) => l == listener);
+      listeners.removeWhere((final ObjectEventListener? l) => l == listener);
       _checkListenersForEmptiness();
     }
   }
@@ -183,7 +183,7 @@ class MemoryAllocations {
     if (_activeDispatchLoops > 0 || !_listenersContainNulls) {
       return;
     }
-    _listeners?.removeWhere((ObjectEventListener? e) => e == null);
+    _listeners?.removeWhere((final ObjectEventListener? e) => e == null);
     _listenersContainNulls = false;
     _checkListenersForEmptiness();
   }
@@ -205,7 +205,7 @@ class MemoryAllocations {
       return false;
     }
     if (_listenersContainNulls) {
-      return _listeners?.firstWhere((ObjectEventListener? l) => l != null) != null;
+      return _listeners?.firstWhere((final ObjectEventListener? l) => l != null) != null;
     }
     return _listeners?.isNotEmpty ?? false;
   }
@@ -222,7 +222,7 @@ class MemoryAllocations {
   /// after the removal.
   ///
   /// Only call this when [kFlutterMemoryAllocationsEnabled] is true.
-  void dispatchObjectEvent(ObjectEvent event) {
+  void dispatchObjectEvent(final ObjectEvent event) {
     if (!kFlutterMemoryAllocationsEnabled) {
       return;
     }
@@ -262,9 +262,9 @@ class MemoryAllocations {
   ///
   /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
   void dispatchObjectCreated({
-    required String library,
-    required String className,
-    required Object object,
+    required final String library,
+    required final String className,
+    required final Object object,
   }) {
     if (!hasListeners) {
       return;
@@ -279,7 +279,7 @@ class MemoryAllocations {
   /// Create [ObjectDisposed] and invoke [dispatchObjectEvent] if there are listeners.
   ///
   /// This method is more efficient than [dispatchObjectEvent] if the event object is not created yet.
-  void dispatchObjectDisposed({required Object object}) {
+  void dispatchObjectDisposed({required final Object object}) {
     if (!hasListeners) {
       return;
     }
@@ -308,7 +308,7 @@ class MemoryAllocations {
     ui.Picture.onDispose = null;
   }
 
-  void _imageOnCreate(ui.Image image) {
+  void _imageOnCreate(final ui.Image image) {
     dispatchObjectEvent(ObjectCreated(
       library: _dartUiLibrary,
       className: '${ui.Image}',
@@ -316,7 +316,7 @@ class MemoryAllocations {
     ));
   }
 
-  void _pictureOnCreate(ui.Picture picture) {
+  void _pictureOnCreate(final ui.Picture picture) {
     dispatchObjectEvent(ObjectCreated(
       library: _dartUiLibrary,
       className: '${ui.Picture}',
@@ -324,13 +324,13 @@ class MemoryAllocations {
     ));
   }
 
-  void _imageOnDispose(ui.Image image) {
+  void _imageOnDispose(final ui.Image image) {
     dispatchObjectEvent(ObjectDisposed(
       object: image,
     ));
   }
 
-  void _pictureOnDispose(ui.Picture picture) {
+  void _pictureOnDispose(final ui.Picture picture) {
     dispatchObjectEvent(ObjectDisposed(
       object: picture,
     ));

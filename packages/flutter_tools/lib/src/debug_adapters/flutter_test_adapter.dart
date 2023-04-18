@@ -86,14 +86,14 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
 
   /// Handles the Flutter process exiting, terminating the debug session if it has not already begun terminating.
   @override
-  void handleExitCode(int code) {
+  void handleExitCode(final int code) {
     final String codeSuffix = code == 0 ? '' : ' ($code)';
     logger?.call('Process exited ($code)');
     handleSessionTerminate(codeSuffix);
   }
 
   /// Handles incoming JSON events from `flutter test --machine`.
-  bool _handleJsonEvent(String event, Map<String, Object?>? params) {
+  bool _handleJsonEvent(final String event, Map<String, Object?>? params) {
     params ??= <String, Object?>{};
     switch (event) {
       case 'test.startedProcess':
@@ -105,14 +105,14 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   }
 
   @override
-  void handleStderr(List<int> data) {
+  void handleStderr(final List<int> data) {
     logger?.call('stderr: $data');
     sendOutput('stderr', utf8.decode(data));
   }
 
   /// Handles stdout from the `flutter test --machine` process, decoding the JSON and calling the appropriate handlers.
   @override
-  void handleStdout(String data) {
+  void handleStdout(final String data) {
     // Output to stdout from `flutter test --machine` is either:
     //   1. JSON output from flutter_tools (eg. "test.startedProcess") which is
     //      wrapped in [] brackets and has an event/params.
@@ -152,7 +152,7 @@ class FlutterTestDebugAdapter extends FlutterBaseDebugAdapter with TestAdapter {
   }
 
   /// Handles the test.processStarted event from Flutter that provides the VM Service URL.
-  void _handleTestStartedProcess(Map<String, Object?> params) {
+  void _handleTestStartedProcess(final Map<String, Object?> params) {
     final String? vmServiceUriString = params['vmServiceUri'] as String?;
     // For no-debug mode, this event may be still sent so ignore it if we know
     // we're not debugging, or its URI is null.

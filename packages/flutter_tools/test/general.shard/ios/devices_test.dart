@@ -253,8 +253,8 @@ void main() {
       late IProxy iproxy;
 
       IOSDevicePortForwarder createPortForwarder(
-          ForwardedPort forwardedPort,
-          IOSDevice device) {
+          final ForwardedPort forwardedPort,
+          final IOSDevice device) {
         iproxy = IProxy.test(logger: logger, processManager: FakeProcessManager.any());
         final IOSDevicePortForwarder portForwarder = IOSDevicePortForwarder(
           id: device.id,
@@ -272,9 +272,9 @@ void main() {
       }
 
       IOSDeviceLogReader createLogReader(
-          IOSDevice device,
-          IOSApp appPackage,
-          Process process) {
+          final IOSDevice device,
+          final IOSApp appPackage,
+          final Process process) {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader.create(
           device: device,
           app: appPackage,
@@ -426,7 +426,7 @@ void main() {
 
       int addedCount = 0;
       final Completer<void> added = Completer<void>();
-      iosDevices.onAdded.listen((Device device) {
+      iosDevices.onAdded.listen((final Device device) {
         addedCount++;
         // 2 devices will be added.
         // Will throw over-completion if called more than twice.
@@ -436,7 +436,7 @@ void main() {
       });
 
       final Completer<void> removed = Completer<void>();
-      iosDevices.onRemoved.listen((Device device) {
+      iosDevices.onRemoved.listen((final Device device) {
         // Will throw over-completion if called more than once.
         removed.complete();
       });
@@ -777,7 +777,7 @@ class TestIOSDevices extends IOSDevices {
   }
 
   @override
-  Future<void> onDeviceEvent(XCDeviceEventNotification event) async {
+  Future<void> onDeviceEvent(final XCDeviceEventNotification event) async {
     await super.onDeviceEvent(event);
     if (!receivedEvent.isCompleted) {
       receivedEvent.complete();
@@ -811,12 +811,12 @@ class FakeXcdevice extends Fake implements XCDevice {
   }
 
   @override
-  Future<List<IOSDevice>> getAvailableIOSDevices({Duration? timeout}) async {
+  Future<List<IOSDevice>> getAvailableIOSDevices({final Duration? timeout}) async {
     return devices[getAvailableIOSDevicesCount++];
   }
 
   @override
-  Future<XCDeviceEventNotification?> waitForDeviceToConnect(String deviceId) async {
+  Future<XCDeviceEventNotification?> waitForDeviceToConnect(final String deviceId) async {
     final XCDeviceEventNotification? waitEvent = waitForDeviceEvent;
     if (waitEvent != null) {
       return XCDeviceEventNotification(waitEvent.eventType, waitEvent.eventInterface, waitEvent.deviceIdentifier);
@@ -830,7 +830,7 @@ class FakeProcess extends Fake implements Process {
   bool killed = false;
 
   @override
-  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool kill([final io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     killed = true;
     return true;
   }

@@ -10,9 +10,9 @@ import '../rendering/mock_canvas.dart';
 const Color _kAndroidThumbIdleColor = Color(0xffbcbcbc);
 
 Widget _buildSingleChildScrollViewWithScrollbar({
-  TextDirection textDirection = TextDirection.ltr,
-  EdgeInsets padding = EdgeInsets.zero,
-  Widget? child,
+  final TextDirection textDirection = TextDirection.ltr,
+  final EdgeInsets padding = EdgeInsets.zero,
+  final Widget? child,
 }) {
   return Directionality(
     textDirection: textDirection,
@@ -26,7 +26,7 @@ Widget _buildSingleChildScrollViewWithScrollbar({
 }
 
 void main() {
-  testWidgets('Viewport basic test (LTR)', (WidgetTester tester) async {
+  testWidgets('Viewport basic test (LTR)', (final WidgetTester tester) async {
     await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
       child: const SizedBox(width: 4000.0, height: 4000.0),
     ));
@@ -52,7 +52,7 @@ void main() {
     );
   });
 
-  testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
+  testWidgets('Viewport basic test (RTL)', (final WidgetTester tester) async {
     await tester.pumpWidget(_buildSingleChildScrollViewWithScrollbar(
       textDirection: TextDirection.rtl,
       child: const SizedBox(width: 4000.0, height: 4000.0),
@@ -79,7 +79,7 @@ void main() {
     );
   });
 
-  testWidgets('works with MaterialApp and Scaffold', (WidgetTester tester) async {
+  testWidgets('works with MaterialApp and Scaffold', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(
@@ -123,7 +123,7 @@ void main() {
     );
   });
 
-  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+  testWidgets("should not paint when there isn't enough space", (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(
         data: const MediaQueryData(

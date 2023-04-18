@@ -10,9 +10,9 @@ import 'package:js/js_util.dart' as js_util;
 
 /// Defines a new property on an Object.
 @JS('Object.defineProperty')
-external JSVoid objectDefineProperty(JSAny o, JSString symbol, JSAny desc);
+external JSVoid objectDefineProperty(final JSAny o, final JSString symbol, final JSAny desc);
 
-void createGetter(JSAny mock, String key, JSAny? Function() get) {
+void createGetter(final JSAny mock, final String key, final JSAny? Function() get) {
   objectDefineProperty(
       mock,
       key.toJS,
@@ -28,13 +28,13 @@ void createGetter(JSAny mock, String key, JSAny? Function() get) {
 @anonymous
 class DomXMLHttpRequestMock {
   external factory DomXMLHttpRequestMock({
-    JSFunction? open,
-    JSString responseType,
-    JSNumber timeout,
-    JSBoolean withCredentials,
-    JSFunction? send,
-    JSFunction? setRequestHeader,
-    JSFunction addEventListener,
+    final JSFunction? open,
+    final JSString responseType,
+    final JSNumber timeout,
+    final JSBoolean withCredentials,
+    final JSFunction? send,
+    final JSFunction? setRequestHeader,
+    final JSFunction addEventListener,
   });
 }
 
@@ -60,13 +60,13 @@ class TestHttpRequest {
   Object? response;
 
   Map<String, String> get responseHeaders => headers;
-  JSVoid open(JSString method, JSString url, JSBoolean async) {}
+  JSVoid open(final JSString method, final JSString url, final JSBoolean async) {}
   JSVoid send() {}
-  JSVoid setRequestHeader(JSString name, JSString value) {
+  JSVoid setRequestHeader(final JSString name, final JSString value) {
     headers[name.toDart] = value.toDart;
   }
 
-  JSVoid addEventListener(JSString type, DomEventListener listener) {
+  JSVoid addEventListener(final JSString type, final DomEventListener listener) {
     if (type.toDart == mockEvent?.type) {
       (listener.toDart as DartDomEventListener)(mockEvent!.event);
     }

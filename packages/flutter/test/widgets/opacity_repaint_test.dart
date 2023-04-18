@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('RenderOpacity avoids repainting and does not drop layer at fully opaque', (WidgetTester tester) async {
+  testWidgets('RenderOpacity avoids repainting and does not drop layer at fully opaque', (final WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
     await tester.pumpWidget(
       const ColoredBox(
@@ -46,7 +46,7 @@ void main() {
     expect(RenderTestObject.paintCount, 1);
   });
 
-  testWidgets('RenderOpacity allows opacity layer to be dropped at 0 opacity', (WidgetTester tester) async {
+  testWidgets('RenderOpacity allows opacity layer to be dropped at 0 opacity', (final WidgetTester tester) async {
     RenderTestObject.paintCount = 0;
 
     await tester.pumpWidget(
@@ -80,7 +80,7 @@ class TestWidget extends SingleChildRenderObjectWidget {
   const TestWidget({super.key, super.child});
 
   @override
-  RenderObject createRenderObject(BuildContext context) {
+  RenderObject createRenderObject(final BuildContext context) {
     return RenderTestObject();
   }
 }
@@ -89,7 +89,7 @@ class RenderTestObject extends RenderProxyBox {
   static int paintCount = 0;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     paintCount += 1;
     super.paint(context, offset);
   }

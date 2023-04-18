@@ -15,12 +15,12 @@ void main() {
     title: 'Text tester',
     home: const Home(),
     routes: <String, WidgetBuilder>{
-      'underlines': (BuildContext context) => const Underlines(),
-      'fallback': (BuildContext context) => const Fallback(),
-      'bidi': (BuildContext context) => const Bidi(),
-      'fuzzer': (BuildContext context) => Fuzzer(seed: seed),
-      'zalgo': (BuildContext context) => Zalgo(seed: seed),
-      'painting': (BuildContext context) => Painting(seed: seed),
+      'underlines': (final BuildContext context) => const Underlines(),
+      'fallback': (final BuildContext context) => const Fallback(),
+      'bidi': (final BuildContext context) => const Bidi(),
+      'fuzzer': (final BuildContext context) => Fuzzer(seed: seed),
+      'zalgo': (final BuildContext context) => Zalgo(seed: seed),
+      'painting': (final BuildContext context) => Painting(seed: seed),
     },
   ));
 }
@@ -34,7 +34,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Material(
       child: Column(
         children: <Widget>[
@@ -100,7 +100,7 @@ class _HomeState extends State<Home> {
               value: seed.toDouble(),
               label: '$seed',
               divisions: 1025,
-              onChanged: (double value) {
+              onChanged: (final double value) {
                 setState(() {
                   seed = value.round();
                 });
@@ -143,21 +143,21 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _updateTextSpan(Duration? duration) {
+  void _updateTextSpan(final Duration? duration) {
     setState(() {
       _textSpan = _fiddleWith(_textSpan);
     });
   }
 
-  TextSpan _fiddleWith(TextSpan node) {
+  TextSpan _fiddleWith(final TextSpan node) {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan)).toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((final InlineSpan child) => _fiddleWith(child as TextSpan)).toList() ?? <TextSpan>[]),
     );
   }
 
-  String? _fiddleWithText(String? text) {
+  String? _fiddleWithText(final String? text) {
     if (_random.nextInt(10) > 0) {
       return text;
     }
@@ -194,7 +194,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     );
   }
 
-  Color? _fiddleWithColor(Color? value) {
+  Color? _fiddleWithColor(final Color? value) {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null) {
@@ -216,7 +216,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  TextDecoration? _fiddleWithDecoration(TextDecoration? value) {
+  TextDecoration? _fiddleWithDecoration(final TextDecoration? value) {
     if (_random.nextInt(10) > 0) {
       return value;
     }
@@ -245,7 +245,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return null;
   }
 
-  TextDecorationStyle? _fiddleWithDecorationStyle(TextDecorationStyle? value) {
+  TextDecorationStyle? _fiddleWithDecorationStyle(final TextDecorationStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -255,7 +255,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontWeight? _fiddleWithFontWeight(FontWeight? value) {
+  FontWeight? _fiddleWithFontWeight(final FontWeight? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -265,7 +265,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  FontStyle? _fiddleWithFontStyle(FontStyle? value) {
+  FontStyle? _fiddleWithFontStyle(final FontStyle? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -275,7 +275,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  String? _fiddleWithFontFamily(String? value) {
+  String? _fiddleWithFontFamily(final String? value) {
     switch (_random.nextInt(10)) {
       case 0:
         return null;
@@ -299,7 +299,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return value;
   }
 
-  double? _fiddleWithDouble(double? value, double defaultValue, double max) {
+  double? _fiddleWithDouble(final double? value, final double defaultValue, final double max) {
     switch (_random.nextInt(10)) {
       case 0:
         if (value == null) {
@@ -340,7 +340,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return children;
   }
 
-  int depthOf(TextSpan node) {
+  int depthOf(final TextSpan node) {
     if (node.children == null || (node.children?.isEmpty ?? false)) {
       return 0;
     }
@@ -502,7 +502,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.black,
       child: Column(
@@ -521,7 +521,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
             child: SwitchListTile(
               title: const Text('Enable Fuzzer'),
               value: _ticker.isActive,
-              onChanged: (bool value) {
+              onChanged: (final bool value) {
                 setState(() {
                   if (value) {
                     _ticker.start();
@@ -558,7 +558,7 @@ class _UnderlinesState extends State<Underlines> {
     decorationColor: Colors.yellow.shade500,
   );
 
-  Widget _wrap(TextDecorationStyle? style) {
+  Widget _wrap(final TextDecorationStyle? style) {
     return Align(
       alignment: Alignment.centerLeft,
       heightFactor: 1.0,
@@ -570,7 +570,7 @@ class _UnderlinesState extends State<Underlines> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return ColoredBox(
       color: Colors.black,
@@ -673,7 +673,7 @@ class _FallbackState extends State<Fallback> {
   double _fontSize = 3.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return ColoredBox(
       color: Colors.black,
@@ -722,7 +722,7 @@ class _FallbackState extends State<Fallback> {
                       max: 5.0,
                       value: _fontSize,
                       label: '${math.exp(_fontSize).round()}',
-                      onChanged: (double value) {
+                      onChanged: (final double value) {
                         setState(() {
                           _fontSize = value;
                         });
@@ -748,7 +748,7 @@ class Bidi extends StatefulWidget {
 
 class _BidiState extends State<Bidi> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.black,
       child: ListView(
@@ -844,7 +844,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   bool _allowSpacing = false;
   bool _varyBase = false;
 
-  void _update(Duration? duration) {
+  void _update(final Duration? duration) {
     setState(() {
       _text = zalgo(
         _random,
@@ -856,7 +856,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.black,
       child: Column(
@@ -881,7 +881,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                 SwitchListTile(
                   title: const Text('Enable Fuzzer'),
                   value: _ticker.isActive,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       if (value) {
                         _ticker.start();
@@ -894,7 +894,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                 SwitchListTile(
                   title: const Text('Allow spacing combining marks'),
                   value: _allowSpacing,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       _allowSpacing = value;
                       _random = math.Random(widget.seed); // reset for reproducibility
@@ -904,7 +904,7 @@ class _ZalgoState extends State<Zalgo> with SingleTickerProviderStateMixin {
                 SwitchListTile(
                   title: const Text('Vary base character'),
                   value: _varyBase,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       _varyBase = value;
                       _random = math.Random(widget.seed); // reset for reproducibility
@@ -952,7 +952,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
 
   bool _ellipsize = false;
 
-  void _update(Duration? duration) {
+  void _update(final Duration? duration) {
     setState(() {
       final StringBuffer buffer = StringBuffer();
       final int targetLength = _random.nextInt(20) + (_ellipsize ? MediaQuery.of(context).size.width.round() : 1);
@@ -965,11 +965,11 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
       }
       _text = buffer.toString();
     });
-    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+    SchedulerBinding.instance.addPostFrameCallback((final Duration duration) {
       if (mounted && intrinsicKey.currentContext?.size?.height != controlKey.currentContext?.size?.height) {
         debugPrint('Found some text that unexpectedly renders at different heights.');
         debugPrint('Text: $_text');
-        debugPrint(_text?.runes.map<String>((int index) {
+        debugPrint(_text?.runes.map<String>((final int index) {
           final String hexa = index.toRadixString(16).padLeft(4, '0');
           return 'U+$hexa';
         }).join(' '));
@@ -981,7 +981,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return ColoredBox(
       color: Colors.black,
@@ -1046,7 +1046,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                 SwitchListTile(
                   title: const Text('Enable Fuzzer'),
                   value: _ticker.isActive,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       if (value) {
                         _ticker.start();
@@ -1059,7 +1059,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                 SwitchListTile(
                   title: const Text('Enable Ellipses'),
                   value: _ellipsize,
-                  onChanged: (bool value) {
+                  onChanged: (final bool value) {
                     setState(() {
                       _ellipsize = value;
                       _random = math.Random(widget.seed); // reset for reproducibility
@@ -1086,7 +1086,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
                       TextButton(
                         onPressed: _ticker.isActive ? null : () {
                           print('The currently visible text is: $_text');
-                          print(_text?.runes.map<String>((int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
+                          print(_text?.runes.map<String>((final int value) => 'U+${value.toRadixString(16).padLeft(4, '0').toUpperCase()}').join(' '));
                         },
                         child: const Text('DUMP TEXT TO LOGS'),
                       ),
@@ -1102,7 +1102,7 @@ class _PaintingState extends State<Painting> with SingleTickerProviderStateMixin
   }
 }
 
-String zalgo(math.Random random, int targetLength, { bool includeSpacingCombiningMarks = false, String? base }) {
+String zalgo(final math.Random random, final int targetLength, { final bool includeSpacingCombiningMarks = false, String? base }) {
   // The following three tables are derived from UnicodeData.txt:
   //   http://unicode.org/Public/UNIDATA/UnicodeData.txt
   // There are three groups, character classes Mc, Me, and Mn.
@@ -1448,7 +1448,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
   return base + String.fromCharCodes(characters);
 }
 
-T pickFromList<T>(math.Random random, List<T> list) {
+T pickFromList<T>(final math.Random random, final List<T> list) {
   return list[random.nextInt(list.length)];
 }
 
@@ -1458,7 +1458,7 @@ class Range {
   final int end;
 }
 
-int randomCharacter(math.Random random) {
+int randomCharacter(final math.Random random) {
   // all ranges of non-control, non-combining characters
   const List<Range> characterRanges = <Range>[
     Range(0x00020, 0x0007e),

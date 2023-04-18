@@ -15,13 +15,13 @@ export 'drag_details.dart' show DragEndDetails, DragUpdateDetails;
 /// scrollable.
 abstract class Drag {
   /// The pointer has moved.
-  void update(DragUpdateDetails details) { }
+  void update(final DragUpdateDetails details) { }
 
   /// The pointer is no longer in contact with the screen.
   ///
   /// The velocity at which the pointer was moving when it stopped contacting
   /// the screen is available in the `details`.
-  void end(DragEndDetails details) { }
+  void end(final DragEndDetails details) { }
 
   /// The input from the pointer is no longer directed towards this receiver.
   ///

@@ -55,7 +55,7 @@ void main() {
       final List<int?> records = <int?>[];
       await consolidateHttpClientResponseBytes(
         response,
-        onBytesReceived: (int cumulative, int? total) {
+        onBytesReceived: (final int cumulative, final int? total) {
           records.addAll(<int?>[cumulative, total]);
         },
       );
@@ -79,7 +79,7 @@ void main() {
       response.contentLength = -1;
       final Future<List<int>> result = consolidateHttpClientResponseBytes(
         response,
-        onBytesReceived: (int cumulative, int? total) {
+        onBytesReceived: (final int cumulative, final int? total) {
           throw 'misbehaving callback';
         },
       );
@@ -114,7 +114,7 @@ void main() {
         final List<int?> records = <int?>[];
         await consolidateHttpClientResponseBytes(
           response,
-          onBytesReceived: (int cumulative, int? total) {
+          onBytesReceived: (final int cumulative, final int? total) {
             records.addAll(<int?>[cumulative, total]);
           },
         );
@@ -134,7 +134,7 @@ void main() {
         final List<int?> records = <int?>[];
         await consolidateHttpClientResponseBytes(
           response,
-          onBytesReceived: (int cumulative, int? total) {
+          onBytesReceived: (final int cumulative, final int? total) {
             records.addAll(<int?>[cumulative, total]);
           },
         );
@@ -164,7 +164,7 @@ class MockHttpClientResponse extends Fake implements HttpClientResponse {
   HttpClientResponseCompressionState compressionState = HttpClientResponseCompressionState.notCompressed;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event)? onData, {Function? onError, void Function()? onDone, bool? cancelOnError}) {
+  StreamSubscription<List<int>> listen(final void Function(List<int> event)? onData, {final Function? onError, final void Function()? onDone, final bool? cancelOnError}) {
     if (error != null) {
       return Stream<List<int>>.fromFuture(Future<List<int>>.error(error as Object)).listen(
           onData,

@@ -50,7 +50,7 @@ class TestSemantics {
     this.children = const <TestSemantics>[],
     this.scrollIndex,
     this.scrollChildren,
-    Iterable<SemanticsTag>? tags,
+    final Iterable<SemanticsTag>? tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        tags = tags?.toSet() ?? <SemanticsTag>{};
@@ -72,7 +72,7 @@ class TestSemantics {
     this.children = const <TestSemantics>[],
     this.scrollIndex,
     this.scrollChildren,
-    Iterable<SemanticsTag>? tags,
+    final Iterable<SemanticsTag>? tags,
   }) : id = 0,
        assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
@@ -103,14 +103,14 @@ class TestSemantics {
     this.decreasedValue = '',
     this.textDirection,
     this.rect,
-    Matrix4? transform,
+    final Matrix4? transform,
     this.elevation,
     this.thickness,
     this.textSelection,
     this.children = const <TestSemantics>[],
     this.scrollIndex,
     this.scrollChildren,
-    Iterable<SemanticsTag>? tags,
+    final Iterable<SemanticsTag>? tags,
   }) : assert(flags is int || flags is List<SemanticsFlag>),
        assert(actions is int || actions is List<SemanticsAction>),
        transform = _applyRootChildScale(transform),
@@ -223,7 +223,7 @@ class TestSemantics {
 
   final TextSelection? textSelection;
 
-  static Matrix4 _applyRootChildScale(Matrix4? transform) {
+  static Matrix4 _applyRootChildScale(final Matrix4? transform) {
     final Matrix4 result = Matrix4.diagonal3Values(3.0, 3.0, 1.0);
     if (transform != null) {
       result.multiply(transform);
@@ -238,14 +238,14 @@ class TestSemantics {
   final Set<SemanticsTag> tags;
 
   bool _matches(
-    SemanticsNode? node,
-    Map<dynamic, dynamic> matchState, {
-    bool ignoreRect = false,
-    bool ignoreTransform = false,
-    bool ignoreId = false,
-    DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
+    final SemanticsNode? node,
+    final Map<dynamic, dynamic> matchState, {
+    final bool ignoreRect = false,
+    final bool ignoreTransform = false,
+    final bool ignoreId = false,
+    final DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.inverseHitTest,
   }) {
-    bool fail(String message) {
+    bool fail(final String message) {
       matchState[TestSemantics] = message;
       return false;
     }
@@ -261,14 +261,14 @@ class TestSemantics {
 
     final int flagsBitmask = flags is int
       ? flags as int
-      : (flags as List<SemanticsFlag>).fold<int>(0, (int bitmask, SemanticsFlag flag) => bitmask | flag.index);
+      : (flags as List<SemanticsFlag>).fold<int>(0, (final int bitmask, final SemanticsFlag flag) => bitmask | flag.index);
     if (flagsBitmask != nodeData.flags) {
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
     }
 
     final int actionsBitmask = actions is int
         ? actions as int
-        : (actions as List<SemanticsAction>).fold<int>(0, (int bitmask, SemanticsAction action) => bitmask | action.index);
+        : (actions as List<SemanticsAction>).fold<int>(0, (final int bitmask, final SemanticsAction action) => bitmask | action.index);
     if (actionsBitmask != nodeData.actions) {
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
     }
@@ -350,7 +350,7 @@ class TestSemantics {
   }
 
   @override
-  String toString([ int indentAmount = 0 ]) {
+  String toString([ final int indentAmount = 0 ]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = StringBuffer();
     buf.writeln('$indent${objectRuntimeType(this, 'TestSemantics')}(');
@@ -394,7 +394,7 @@ class TestSemantics {
       buf.writeln('$indent  rect: $rect,');
     }
     if (transform != null) {
-      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map<String>((String line) => '$indent    $line').join('\n')},');
+      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map<String>((final String line) => '$indent    $line').join('\n')},');
     }
     if (elevation != null) {
       buf.writeln('$indent  elevation: $elevation,');
@@ -450,7 +450,7 @@ class SemanticsTester {
   @override
   String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode}';
 
-  bool _stringAttributesEqual(List<StringAttribute> first, List<StringAttribute> second) {
+  bool _stringAttributesEqual(final List<StringAttribute> first, final List<StringAttribute> second) {
     if (first.length != second.length) {
       return false;
     }
@@ -478,24 +478,24 @@ class SemanticsTester {
   ///
   /// If `ancestor` is not null, only the descendants of it are returned.
   Iterable<SemanticsNode> nodesWith({
-    AttributedString? attributedLabel,
-    AttributedString? attributedValue,
-    AttributedString? attributedHint,
-    String? label,
-    String? value,
-    String? hint,
-    TextDirection? textDirection,
-    List<SemanticsAction>? actions,
-    List<SemanticsFlag>? flags,
-    Set<SemanticsTag>? tags,
-    double? scrollPosition,
-    double? scrollExtentMax,
-    double? scrollExtentMin,
-    int? currentValueLength,
-    int? maxValueLength,
-    SemanticsNode? ancestor,
+    final AttributedString? attributedLabel,
+    final AttributedString? attributedValue,
+    final AttributedString? attributedHint,
+    final String? label,
+    final String? value,
+    final String? hint,
+    final TextDirection? textDirection,
+    final List<SemanticsAction>? actions,
+    final List<SemanticsFlag>? flags,
+    final Set<SemanticsTag>? tags,
+    final double? scrollPosition,
+    final double? scrollExtentMax,
+    final double? scrollExtentMin,
+    final int? currentValueLength,
+    final int? maxValueLength,
+    final SemanticsNode? ancestor,
   }) {
-    bool checkNode(SemanticsNode node) {
+    bool checkNode(final SemanticsNode node) {
       if (label != null && node.label != label) {
         return false;
       }
@@ -524,14 +524,14 @@ class SemanticsTester {
         return false;
       }
       if (actions != null) {
-        final int expectedActions = actions.fold<int>(0, (int value, SemanticsAction action) => value | action.index);
+        final int expectedActions = actions.fold<int>(0, (final int value, final SemanticsAction action) => value | action.index);
         final int actualActions = node.getSemanticsData().actions;
         if (expectedActions != actualActions) {
           return false;
         }
       }
       if (flags != null) {
-        final int expectedFlags = flags.fold<int>(0, (int value, SemanticsFlag flag) => value | flag.index);
+        final int expectedFlags = flags.fold<int>(0, (final int value, final SemanticsFlag flag) => value | flag.index);
         final int actualFlags = node.getSemanticsData().flags;
         if (expectedFlags != actualFlags) {
           return false;
@@ -562,7 +562,7 @@ class SemanticsTester {
     }
 
     final List<SemanticsNode> result = <SemanticsNode>[];
-    bool visit(SemanticsNode node) {
+    bool visit(final SemanticsNode node) {
       if (checkNode(node)) {
         result.add(node);
       }
@@ -625,31 +625,31 @@ class SemanticsTester {
   /// every time and ignore potential regressions. Make sure you do not
   /// over-test. Prefer breaking your widgets into smaller widgets and test them
   /// individually.
-  String generateTestSemanticsExpressionForCurrentSemanticsTree(DebugSemanticsDumpOrder childOrder) {
+  String generateTestSemanticsExpressionForCurrentSemanticsTree(final DebugSemanticsDumpOrder childOrder) {
     final SemanticsNode? node = tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode;
     return _generateSemanticsTestForNode(node, 0, childOrder);
   }
 
-  static String _flagsToSemanticsFlagExpression(dynamic flags) {
+  static String _flagsToSemanticsFlagExpression(final dynamic flags) {
     Iterable<SemanticsFlag> list;
     if (flags is int) {
       list = SemanticsFlag.values
-          .where((SemanticsFlag flag) => (flag.index & flags) != 0);
+          .where((final SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
       list = flags as List<SemanticsFlag>;
     }
     return '<SemanticsFlag>[${list.join(', ')}]';
   }
 
-  static String _tagsToSemanticsTagExpression(Set<SemanticsTag> tags) {
-    return '<SemanticsTag>[${tags.map<String>((SemanticsTag tag) => "const SemanticsTag('${tag.name}')").join(', ')}]';
+  static String _tagsToSemanticsTagExpression(final Set<SemanticsTag> tags) {
+    return '<SemanticsTag>[${tags.map<String>((final SemanticsTag tag) => "const SemanticsTag('${tag.name}')").join(', ')}]';
   }
 
-  static String _actionsToSemanticsActionExpression(dynamic actions) {
+  static String _actionsToSemanticsActionExpression(final dynamic actions) {
     Iterable<SemanticsAction> list;
     if (actions is int) {
       list = SemanticsAction.values
-          .where((SemanticsAction action) => (action.index & actions) != 0);
+          .where((final SemanticsAction action) => (action.index & actions) != 0);
     } else {
       list = actions as List<SemanticsAction>;
     }
@@ -658,7 +658,7 @@ class SemanticsTester {
 
   /// Recursively generates [TestSemantics] code for [node] and its children,
   /// indenting the expression by `indentAmount`.
-  static String _generateSemanticsTestForNode(SemanticsNode? node, int indentAmount, DebugSemanticsDumpOrder childOrder) {
+  static String _generateSemanticsTestForNode(final SemanticsNode? node, final int indentAmount, final DebugSemanticsDumpOrder childOrder) {
     if (node == null) {
       return 'null';
     }
@@ -710,7 +710,7 @@ class SemanticsTester {
     }
 
     buf.write(')');
-    return buf.toString().split('\n').map<String>((String l) => '$indent$l').join('\n');
+    return buf.toString().split('\n').map<String>((final String l) => '$indent$l').join('\n');
   }
 }
 
@@ -730,7 +730,7 @@ class _HasSemantics extends Matcher {
   final DebugSemanticsDumpOrder childOrder;
 
   @override
-  bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final SemanticsTester item, final Map<dynamic, dynamic> matchState) {
     final bool doesMatch = _semantics._matches(
       item.tester.binding.pipelineOwner.semanticsOwner?.rootSemanticsNode,
       matchState,
@@ -749,16 +749,16 @@ class _HasSemantics extends Matcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add('semantics node matching:\n$_semantics');
   }
 
-  String _indent(String? text) {
-    return text.toString().trimRight().split('\n').map<String>((String line) => '  $line').join('\n');
+  String _indent(final String? text) {
+    return text.toString().trimRight().split('\n').map<String>((final String line) => '  $line').join('\n');
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(final dynamic item, final Description mismatchDescription, final Map<dynamic, dynamic> matchState, final bool verbose) {
     Description result = mismatchDescription
       .add('${matchState[TestSemantics]}\n')
       .add('Current SemanticsNode tree:\n')
@@ -777,11 +777,11 @@ class _HasSemantics extends Matcher {
 
 /// Asserts that a [SemanticsTester] has a semantics tree that exactly matches the given semantics.
 Matcher hasSemantics(
-  TestSemantics semantics, {
-  bool ignoreRect = false,
-  bool ignoreTransform = false,
-  bool ignoreId = false,
-  DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
+  final TestSemantics semantics, {
+  final bool ignoreRect = false,
+  final bool ignoreTransform = false,
+  final bool ignoreId = false,
+  final DebugSemanticsDumpOrder childOrder = DebugSemanticsDumpOrder.traversalOrder,
 }) {
   return _HasSemantics(
     semantics,
@@ -838,7 +838,7 @@ class _IncludesNodeWith extends Matcher {
   final int? maxValueLength;
 
   @override
-  bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final SemanticsTester item, final Map<dynamic, dynamic> matchState) {
     return item.nodesWith(
       attributedLabel: attributedLabel,
       attributedValue: attributedValue,
@@ -859,12 +859,12 @@ class _IncludesNodeWith extends Matcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add('includes node with $_configAsString');
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(final dynamic item, final Description mismatchDescription, final Map<dynamic, dynamic> matchState, final bool verbose) {
     return mismatchDescription.add('could not find node with $_configAsString.\n$_matcherHelp');
   }
 
@@ -892,21 +892,21 @@ class _IncludesNodeWith extends Matcher {
 ///
 /// If null is provided for an argument, it will match against any value.
 Matcher includesNodeWith({
-  String? label,
-  AttributedString? attributedLabel,
-  String? value,
-  AttributedString? attributedValue,
-  String? hint,
-  AttributedString? attributedHint,
-  TextDirection? textDirection,
-  List<SemanticsAction>? actions,
-  List<SemanticsFlag>? flags,
-  Set<SemanticsTag>? tags,
-  double? scrollPosition,
-  double? scrollExtentMax,
-  double? scrollExtentMin,
-  int? maxValueLength,
-  int? currentValueLength,
+  final String? label,
+  final AttributedString? attributedLabel,
+  final String? value,
+  final AttributedString? attributedValue,
+  final String? hint,
+  final AttributedString? attributedHint,
+  final TextDirection? textDirection,
+  final List<SemanticsAction>? actions,
+  final List<SemanticsFlag>? flags,
+  final Set<SemanticsTag>? tags,
+  final double? scrollPosition,
+  final double? scrollExtentMax,
+  final double? scrollExtentMin,
+  final int? maxValueLength,
+  final int? currentValueLength,
 }) {
   return _IncludesNodeWith(
     label: label,

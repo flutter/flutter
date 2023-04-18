@@ -12,7 +12,7 @@ class PreferredSizeExampleApp extends StatelessWidget {
   const PreferredSizeExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: PreferredSizeExample(),
     );
@@ -23,7 +23,7 @@ class AppBarContent extends StatelessWidget {
   const AppBarContent({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
@@ -64,7 +64,7 @@ class PreferredSizeExample extends StatelessWidget {
   const PreferredSizeExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(80.0),

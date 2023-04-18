@@ -15,12 +15,12 @@ class ComplexLayoutApp extends StatefulWidget {
   @override
   ComplexLayoutAppState createState() => ComplexLayoutAppState();
 
-  static ComplexLayoutAppState? of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutAppState>();
+  static ComplexLayoutAppState? of(final BuildContext context) => context.findAncestorStateOfType<ComplexLayoutAppState>();
 }
 
 class ComplexLayoutAppState extends State<ComplexLayoutApp> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       theme: lightTheme ? ThemeData.light() : ThemeData.dark(),
       title: 'Advanced Layout',
@@ -29,7 +29,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
 
   bool _lightTheme = true;
   bool get lightTheme => _lightTheme;
-  set lightTheme(bool value) {
+  set lightTheme(final bool value) {
     setState(() {
       _lightTheme = value;
     });
@@ -37,7 +37,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
 
   ScrollMode _scrollMode = ScrollMode.complex;
   ScrollMode get scrollMode => _scrollMode;
-  set scrollMode(ScrollMode mode) {
+  set scrollMode(final ScrollMode mode) {
     setState(() {
       _scrollMode = mode;
     });
@@ -54,13 +54,13 @@ class TileScrollLayout extends StatelessWidget {
   const TileScrollLayout({ super.key });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Tile Scrolling Layout')),
       body: ListView.builder(
         key: const Key('tiles-scroll'),
         itemCount: 200,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Padding(
             padding: const EdgeInsets.all(5.0),
             child: Material(
@@ -84,18 +84,18 @@ class ComplexLayout extends StatefulWidget {
   @override
   ComplexLayoutState createState() => ComplexLayoutState();
 
-  static ComplexLayoutState? of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutState>();
+  static ComplexLayoutState? of(final BuildContext context) => context.findAncestorStateOfType<ComplexLayoutState>();
 }
 
 class ComplexLayoutState extends State<ComplexLayout> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     Widget body = ListView.builder(
       key: const Key('complex-scroll'), // this key is used by the driver test
       controller: ScrollController(),  // So that the scroll offset can be tracked
       itemCount: widget.badScroll ? 500 : null,
       shrinkWrap: widget.badScroll,
-      itemBuilder: (BuildContext context, int index) {
+      itemBuilder: (final BuildContext context, final int index) {
         if (index.isEven) {
           return FancyImageItem(index, key: PageStorageKey<int>(index));
         } else {
@@ -139,10 +139,10 @@ class TopBarMenu extends StatelessWidget {
   const TopBarMenu({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return PopupMenuButton<String>(
-      onSelected: (String value) { print('Selected: $value'); },
-      itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
+      onSelected: (final String value) { print('Selected: $value'); },
+      itemBuilder: (final BuildContext context) => <PopupMenuItem<String>>[
         const PopupMenuItem<String>(
           value: 'Friends',
           child: MenuItemWithIcon(Icons.people, 'Friends', '5 new'),
@@ -196,7 +196,7 @@ class MenuItemWithIcon extends StatelessWidget {
   final String subtitle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       children: <Widget>[
         Icon(icon),
@@ -216,7 +216,7 @@ class FancyImageItem extends StatelessWidget {
   final int index;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListBody(
       children: <Widget>[
         UserHeader('Ali Connors $index'),
@@ -239,7 +239,7 @@ class FancyGalleryItem extends StatelessWidget {
 
   final int index;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ListBody(
       children: <Widget>[
         const UserHeader('Ali Connors'),
@@ -260,7 +260,7 @@ class InfoBar extends StatelessWidget {
   const InfoBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -278,7 +278,7 @@ class IconBar extends StatelessWidget {
   const IconBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Padding(
       padding: EdgeInsets.only(left: 16.0, right: 16.0),
       child: Row(
@@ -300,7 +300,7 @@ class IconWithText extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -321,7 +321,7 @@ class MiniIconWithText extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -347,7 +347,7 @@ class FatDivider extends StatelessWidget {
   const FatDivider({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       height: 8.0,
       color: Theme.of(context).dividerColor,
@@ -361,7 +361,7 @@ class UserHeader extends StatelessWidget {
   final String userName;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -407,7 +407,7 @@ class ItemDescription extends StatelessWidget {
   const ItemDescription({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const Padding(
       padding: EdgeInsets.all(8.0),
       child: Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.'),
@@ -419,7 +419,7 @@ class ItemImageBox extends StatelessWidget {
   const ItemImageBox({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Card(
@@ -502,7 +502,7 @@ class ItemGalleryBox extends StatelessWidget {
   final int index;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<String> tabNames = <String>[
       'A', 'B', 'C', 'D',
     ];
@@ -515,7 +515,7 @@ class ItemGalleryBox extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: TabBarView(
-                children: tabNames.map<Widget>((String tabName) {
+                children: tabNames.map<Widget>((final String tabName) {
                   return Container(
                     key: PageStorageKey<String>(tabName),
                     child: Padding(
@@ -569,7 +569,7 @@ class BottomBar extends StatelessWidget {
   const BottomBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -599,7 +599,7 @@ class BottomBarButton extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -618,16 +618,16 @@ class BottomBarButton extends StatelessWidget {
 class GalleryDrawer extends StatelessWidget {
   const GalleryDrawer({ super.key });
 
-  void _changeTheme(BuildContext context, bool value) {
+  void _changeTheme(final BuildContext context, final bool value) {
     ComplexLayoutApp.of(context)?.lightTheme = value;
   }
 
-  void _changeScrollMode(BuildContext context, ScrollMode mode) {
+  void _changeScrollMode(final BuildContext context, final ScrollMode mode) {
     ComplexLayoutApp.of(context)?.scrollMode = mode;
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ScrollMode currentMode = ComplexLayoutApp.of(context)!.scrollMode;
     return Drawer(
       // For real apps, see the Gallery material Drawer demo. More
@@ -655,7 +655,7 @@ class GalleryDrawer extends StatelessWidget {
             trailing: Radio<bool>(
               value: true,
               groupValue: ComplexLayoutApp.of(context)!.lightTheme,
-              onChanged: (bool? value) { _changeTheme(context, value!); },
+              onChanged: (final bool? value) { _changeTheme(context, value!); },
             ),
           ),
           ListTile(
@@ -666,7 +666,7 @@ class GalleryDrawer extends StatelessWidget {
             trailing: Radio<bool>(
               value: false,
               groupValue: ComplexLayoutApp.of(context)!.lightTheme,
-              onChanged: (bool? value) { _changeTheme(context, value!); },
+              onChanged: (final bool? value) { _changeTheme(context, value!); },
             ),
           ),
           const Divider(),
@@ -677,7 +677,7 @@ class GalleryDrawer extends StatelessWidget {
             onTap: () { ComplexLayoutApp.of(context)!.toggleAnimationSpeed(); },
             trailing: Checkbox(
               value: timeDilation != 1.0,
-              onChanged: (bool? value) { ComplexLayoutApp.of(context)!.toggleAnimationSpeed(); },
+              onChanged: (final bool? value) { ComplexLayoutApp.of(context)!.toggleAnimationSpeed(); },
             ),
           ),
         ],
@@ -690,7 +690,7 @@ class FancyDrawerHeader extends StatelessWidget {
   const FancyDrawerHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       color: Colors.purple,
       height: 200.0,

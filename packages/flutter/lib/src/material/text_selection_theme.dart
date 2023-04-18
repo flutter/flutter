@@ -56,9 +56,9 @@ class TextSelectionThemeData with Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// specified values.
   TextSelectionThemeData copyWith({
-    Color? cursorColor,
-    Color? selectionColor,
-    Color? selectionHandleColor,
+    final Color? cursorColor,
+    final Color? selectionColor,
+    final Color? selectionHandleColor,
   }) {
     return TextSelectionThemeData(
       cursorColor: cursorColor ?? this.cursorColor,
@@ -72,7 +72,7 @@ class TextSelectionThemeData with Diagnosticable {
   /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
-  static TextSelectionThemeData? lerp(TextSelectionThemeData? a, TextSelectionThemeData? b, double t) {
+  static TextSelectionThemeData? lerp(final TextSelectionThemeData? a, final TextSelectionThemeData? b, final double t) {
     if (identical(a, b)) {
       return a;
     }
@@ -91,7 +91,7 @@ class TextSelectionThemeData with Diagnosticable {
   );
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -105,7 +105,7 @@ class TextSelectionThemeData with Diagnosticable {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  void debugFillProperties(final DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(ColorProperty('selectionColor', selectionColor, defaultValue: null));
@@ -145,7 +145,7 @@ class TextSelectionTheme extends InheritedTheme {
   const TextSelectionTheme({
     super.key,
     required this.data,
-    required Widget child,
+    required final Widget child,
   }) : _child = child,
        // See `get child` override below.
        super(child: const _NullWidget());
@@ -176,18 +176,18 @@ class TextSelectionTheme extends InheritedTheme {
   /// ```dart
   /// TextSelectionThemeData theme = TextSelectionTheme.of(context);
   /// ```
-  static TextSelectionThemeData of(BuildContext context) {
+  static TextSelectionThemeData of(final BuildContext context) {
     final TextSelectionTheme? selectionTheme = context.dependOnInheritedWidgetOfExactType<TextSelectionTheme>();
     return selectionTheme?.data ?? Theme.of(context).textSelectionTheme;
   }
 
   @override
-  Widget wrap(BuildContext context, Widget child) {
+  Widget wrap(final BuildContext context, final Widget child) {
     return TextSelectionTheme(data: data, child: child);
   }
 
   @override
-  bool updateShouldNotify(TextSelectionTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(final TextSelectionTheme oldWidget) => data != oldWidget.data;
 }
 
 class _NullWidget extends Widget {

@@ -11,7 +11,7 @@ import 'globals.dart' as globals;
 /// Extracts the `BINARY_NAME` from a project's CMake file.
 ///
 /// Returns `null` if it cannot be found.
-String? getCmakeExecutableName(CmakeBasedProject project) {
+String? getCmakeExecutableName(final CmakeBasedProject project) {
   if (!project.cmakeFile.existsSync()) {
     return null;
   }
@@ -25,11 +25,11 @@ String? getCmakeExecutableName(CmakeBasedProject project) {
   return null;
 }
 
-String _escapeBackslashes(String s) {
+String _escapeBackslashes(final String s) {
   return s.replaceAll(r'\', r'\\');
 }
 
-String _determineVersionString(CmakeBasedProject project, BuildInfo buildInfo) {
+String _determineVersionString(final CmakeBasedProject project, final BuildInfo buildInfo) {
   // Prefer the build arguments for version information.
   final String buildName = buildInfo.buildName ?? project.parent.manifest.buildName ?? '1.0.0';
   final String? buildNumber = buildInfo.buildName != null
@@ -41,7 +41,7 @@ String _determineVersionString(CmakeBasedProject project, BuildInfo buildInfo) {
     : buildName;
 }
 
-Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
+Version _determineVersion(final CmakeBasedProject project, final BuildInfo buildInfo) {
   final String version = _determineVersionString(project, buildInfo);
   try {
     return Version.parse(version);
@@ -54,7 +54,7 @@ Version _determineVersion(CmakeBasedProject project, BuildInfo buildInfo) {
 
 /// Attempts to map a Dart version's build identifier (the part after a +) into
 /// a single integer. Returns null for complex build identifiers like `foo` or `1.2`.
-int? _tryDetermineBuildVersion(Version version) {
+int? _tryDetermineBuildVersion(final Version version) {
   if (version.build.isEmpty) {
     return 0;
   }
@@ -71,10 +71,10 @@ int? _tryDetermineBuildVersion(Version version) {
 /// variables expected by the build template and an environment variable list
 /// for calling back into Flutter.
 void writeGeneratedCmakeConfig(
-  String flutterRoot,
-  CmakeBasedProject project,
-  BuildInfo buildInfo,
-  Map<String, String> environment) {
+  final String flutterRoot,
+  final CmakeBasedProject project,
+  final BuildInfo buildInfo,
+  final Map<String, String> environment) {
   // Only a limited set of variables are needed by the CMake files themselves,
   // the rest are put into a list to pass to the re-entrant build step.
   final String escapedFlutterRoot = _escapeBackslashes(flutterRoot);
@@ -111,7 +111,7 @@ list(APPEND FLUTTER_TOOL_ENVIRONMENT
   "FLUTTER_ROOT=$escapedFlutterRoot"
   "PROJECT_DIR=$escapedProjectDir"
 ''');
-  environment.forEach((String key, String value) {
+  environment.forEach((final String key, final String value) {
     final String configValue = _escapeBackslashes(value);
     buffer.writeln('  "$key=$configValue"');
   });

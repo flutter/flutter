@@ -12,7 +12,7 @@ class ShowDialogExampleApp extends StatelessWidget {
   const ShowDialogExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: DialogExample(),
     );
@@ -23,7 +23,7 @@ class DialogExample extends StatelessWidget {
   const DialogExample({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('showDialog Sample')),
       body: Center(
@@ -35,10 +35,10 @@ class DialogExample extends StatelessWidget {
     );
   }
 
-  Future<void> _dialogBuilder(BuildContext context) {
+  Future<void> _dialogBuilder(final BuildContext context) {
     return showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         return AlertDialog(
           title: const Text('Basic dialog title'),
           content: const Text(

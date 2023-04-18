@@ -57,7 +57,7 @@ void main() {
       },
       zoneSpecification: ZoneSpecification(
         // Intercept printing from the task.
-        print: (Zone self, ZoneDelegate parent, Zone zone, String line) async {
+        print: (final Zone self, final ZoneDelegate parent, final Zone zone, final String line) async {
           capturedPrintLines.writeln(line);
         },
       ),

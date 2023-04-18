@@ -12,7 +12,7 @@ class AnimatedSwitcherExampleApp extends StatelessWidget {
   const AnimatedSwitcherExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: AnimatedSwitcherExample(),
     );
@@ -30,7 +30,7 @@ class _AnimatedSwitcherExampleState extends State<AnimatedSwitcherExample> {
   int _count = 0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ColoredBox(
       color: Colors.white,
       child: Column(
@@ -38,7 +38,7 @@ class _AnimatedSwitcherExampleState extends State<AnimatedSwitcherExample> {
         children: <Widget>[
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
-            transitionBuilder: (Widget child, Animation<double> animation) {
+            transitionBuilder: (final Widget child, final Animation<double> animation) {
               return ScaleTransition(scale: animation, child: child);
             },
             child: Text(

@@ -33,7 +33,7 @@ const String kPlatformIntegrationPackageName = 'platform_integration';
 /// in your path. It requires that 'flutter' has been run previously. It uses
 /// the version of Dart downloaded by the 'flutter' tool in this repository and
 /// will crash if that is absent.
-Future<void> main(List<String> arguments) async {
+Future<void> main(final List<String> arguments) async {
   final ArgParser argParser = _createArgsParser();
   final ArgResults args = argParser.parse(arguments);
   if (args['help'] as bool) {
@@ -218,7 +218,7 @@ Future<void> main(List<String> arguments) async {
     '--auto-include-dependencies',
   ];
 
-  String quote(String arg) => arg.contains(' ') ? "'$arg'" : arg;
+  String quote(final String arg) => arg.contains(' ') ? "'$arg'" : arg;
   print('Executing: (cd $kDocsRoot ; $dartExecutable ${dartdocArgs.map<String>(quote).join(' ')})');
 
   process = ProcessWrapper(await runPubProcess(
@@ -275,9 +275,9 @@ final RegExp gitBranchRegexp = RegExp(r'^## (.*)');
 /// variable "LUCI_BRANCH"; if it is not set, fall back to calling git.
 String getBranchName({
   @visibleForTesting
-  Platform platform = const LocalPlatform(),
+  final Platform platform = const LocalPlatform(),
   @visibleForTesting
-  ProcessManager processManager = const LocalProcessManager(),
+  final ProcessManager processManager = const LocalProcessManager(),
 }) {
   final String? luciBranch = platform.environment['LUCI_BRANCH'];
   if (luciBranch != null && luciBranch.trim().isNotEmpty) {
@@ -304,7 +304,7 @@ String gitRevision() {
   return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 }
 
-void createFooter(String footerPath, String version) {
+void createFooter(final String footerPath, final String version) {
   final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = getBranchName();
   final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
@@ -329,7 +329,7 @@ void createFooter(String footerPath, String version) {
 /// search for Flutter API docs to the browser. Unfortunately, it has to know
 /// the URL to which site to search, so we customize it here based upon the
 /// branch name.
-void createSearchMetadata(String templatePath, String metadataPath) {
+void createSearchMetadata(final String templatePath, final String metadataPath) {
   final String template = File(templatePath).readAsStringSync();
   final String branch = getBranchName();
   final String metadata = template.replaceAll(
@@ -344,7 +344,7 @@ void createSearchMetadata(String templatePath, String metadataPath) {
 /// specified, for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir, [void Function(File srcFile, File destFile)? onFileCopied]) {
+void copyDirectorySync(final Directory srcDir, final Directory destDir, [final void Function(File srcFile, File destFile)? onFileCopied]) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
   }
@@ -375,7 +375,7 @@ void copyAssets() {
   copyDirectorySync(
       Directory(path.join(kDocsRoot, 'assets')),
       Directory(path.join(kPublishRoot, 'assets')),
-          (File src, File dest) => print('Copied ${src.path} to ${dest.path}'));
+          (final File src, final File dest) => print('Copied ${src.path} to ${dest.path}'));
 }
 
 /// Clean out any existing snippets so that we don't publish old files from
@@ -389,7 +389,7 @@ void cleanOutSnippets() {
   }
 }
 
-void _sanityCheckExample(String fileString, String regExpString) {
+void _sanityCheckExample(final String fileString, final String regExpString) {
   final File file = File(fileString);
   if (file.existsSync()) {
     final RegExp regExp = RegExp(regExpString, dotAll: true);
@@ -404,7 +404,7 @@ void _sanityCheckExample(String fileString, String regExpString) {
 }
 
 /// Runs a sanity check by running a test.
-void sanityCheckDocs([Platform platform = const LocalPlatform()]) {
+void sanityCheckDocs([final Platform platform = const LocalPlatform()]) {
   final List<String> canaries = <String>[
     '$kPublishRoot/assets/overrides.css',
     '$kPublishRoot/api/dart-io/File-class.html',
@@ -532,9 +532,9 @@ void writeSnippetsIndexFile() {
     final Iterable<File> files = snippetsDir
         .listSync()
         .whereType<File>()
-        .where((File file) => path.extension(file.path) == '.json');
+        .where((final File file) => path.extension(file.path) == '.json');
         // Combine all the metadata into a single JSON array.
-    final Iterable<String> fileContents = files.map((File file) => file.readAsStringSync());
+    final Iterable<String> fileContents = files.map((final File file) => file.readAsStringSync());
     final List<dynamic> metadataObjects = fileContents.map<dynamic>(json.decode).toList();
     final String jsonArray = jsonEncoder.convert(metadataObjects);
     File('$kPublishRoot/snippets/index.json').writeAsStringSync(jsonArray);
@@ -542,14 +542,14 @@ void writeSnippetsIndexFile() {
 }
 
 List<String> findPackageNames() {
-  return findPackages().map<String>((FileSystemEntity file) => path.basename(file.path)).toList();
+  return findPackages().map<String>((final FileSystemEntity file) => path.basename(file.path)).toList();
 }
 
 /// Finds all packages in the Flutter SDK
 List<Directory> findPackages() {
   return Directory('packages')
     .listSync()
-    .where((FileSystemEntity entity) {
+    .where((final FileSystemEntity entity) {
       if (entity is! Directory) {
         return false;
       }
@@ -581,24 +581,24 @@ Iterable<String> libraryRefs() sync* {
   yield '$kPlatformIntegrationPackageName/ios.dart';
 }
 
-void printStream(Stream<List<int>> stream, { String prefix = '', List<Pattern> filter = const <Pattern>[] }) {
+void printStream(final Stream<List<int>> stream, { final String prefix = '', final List<Pattern> filter = const <Pattern>[] }) {
   stream
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .listen((String line) {
-      if (!filter.any((Pattern pattern) => line.contains(pattern))) {
+    .listen((final String line) {
+      if (!filter.any((final Pattern pattern) => line.contains(pattern))) {
         print('$prefix$line'.trim());
       }
     });
 }
 
 Future<Process> runPubProcess({
-  required String dartBinaryPath,
-  required List<String> arguments,
-  String? workingDirectory,
-  Map<String, String>? environment,
+  required final String dartBinaryPath,
+  required final List<String> arguments,
+  final String? workingDirectory,
+  final Map<String, String>? environment,
   @visibleForTesting
-  ProcessManager processManager = const LocalProcessManager(),
+  final ProcessManager processManager = const LocalProcessManager(),
 }) {
   return processManager.start(
     <Object>[dartBinaryPath, 'pub', ...arguments],

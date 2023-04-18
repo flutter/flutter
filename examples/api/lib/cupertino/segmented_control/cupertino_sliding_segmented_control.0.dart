@@ -20,7 +20,7 @@ class SegmentedControlApp extends StatelessWidget {
   const SegmentedControlApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const CupertinoApp(
       theme: CupertinoThemeData(brightness: Brightness.light),
       home: SegmentedControlExample(),
@@ -39,7 +39,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
   Sky _selectedSegment = Sky.midnight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CupertinoPageScaffold(
       backgroundColor: skyColors[_selectedSegment],
       navigationBar: CupertinoNavigationBar(
@@ -50,7 +50,7 @@ class _SegmentedControlExampleState extends State<SegmentedControlExample> {
           // This represents the currently selected segmented control.
           groupValue: _selectedSegment,
           // Callback that sets the selected segmented control.
-          onValueChanged: (Sky? value) {
+          onValueChanged: (final Sky? value) {
             if (value != null) {
               setState(() {
                 _selectedSegment = value;

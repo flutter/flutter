@@ -14,7 +14,7 @@ import 'language_subtag_registry.dart';
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
 
-int sortFilesByPath (File a, File b) {
+int sortFilesByPath (final File a, final File b) {
   return a.path.compareTo(b.path);
 }
 
@@ -37,7 +37,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   ///
   /// When `deriveScriptCode` is true, if [scriptCode] was unspecified, it will
   /// be derived from the [languageCode] and [countryCode] if possible.
-  factory LocaleInfo.fromString(String locale, { bool deriveScriptCode = false }) {
+  factory LocaleInfo.fromString(final String locale, { final bool deriveScriptCode = false }) {
     final List<String> codes = locale.split('_'); // [language, script, country]
     assert(codes.isNotEmpty && codes.length < 4);
     final String languageCode = codes[0];
@@ -118,12 +118,12 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   String camelCase() {
     return originalString
       .split('_')
-      .map<String>((String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
+      .map<String>((final String part) => part.substring(0, 1).toUpperCase() + part.substring(1).toLowerCase())
       .join();
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is LocaleInfo
         && other.originalString == originalString;
   }
@@ -137,13 +137,13 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   }
 
   @override
-  int compareTo(LocaleInfo other) {
+  int compareTo(final LocaleInfo other) {
     return originalString.compareTo(other.originalString);
   }
 }
 
 // See also //master/tools/gen_locale.dart in the engine repo.
-Map<String, List<String>> _parseSection(String section) {
+Map<String, List<String>> _parseSection(final String section) {
   final Map<String, List<String>> result = <String, List<String>>{};
   late List<String> lastHeading;
   for (final String line in section.split('\n')) {
@@ -209,7 +209,7 @@ void precacheLanguageAndRegionTags() {
   }
 }
 
-String describeLocale(String tag) {
+String describeLocale(final String tag) {
   final List<String> subtags = tag.split('_');
   assert(subtags.isNotEmpty);
   final String languageCode = subtags[0];
@@ -295,14 +295,14 @@ String generateString(String value) {
 /// them into one expression to be returned.
 ///
 /// If `isSingleStringVar` is passed, then we want to convert "'$expr'" to "expr".
-String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
+String generateReturnExpr(final List<String> expressions, { final bool isSingleStringVar = false }) {
   if (expressions.isEmpty) {
     return "''";
   } else if (isSingleStringVar) {
     // If our expression is "$varName" where varName is a String, this is equivalent to just varName.
     return expressions[0].substring(1);
   } else {
-    final String string = expressions.reversed.fold<String>('', (String string, String expression) {
+    final String string = expressions.reversed.fold<String>('', (final String string, final String expression) {
       if (expression[0] != r'$') {
         return generateString(expression) + string;
       }
@@ -425,8 +425,8 @@ class LocalizationOptions {
 /// [LocalizationOptions] with all fields as `null` if the config file exists
 /// but is empty.
 LocalizationOptions parseLocalizationsOptions({
-  required File file,
-  required Logger logger,
+  required final File file,
+  required final Logger logger,
 }) {
   final String contents = file.readAsStringSync();
   if (contents.trim().isEmpty) {
@@ -463,7 +463,7 @@ LocalizationOptions parseLocalizationsOptions({
 }
 
 // Try to read a `bool` value or null from `yamlMap`, otherwise throw.
-bool? _tryReadBool(YamlMap yamlMap, String key, Logger logger) {
+bool? _tryReadBool(final YamlMap yamlMap, final String key, final Logger logger) {
   final Object? value = yamlMap[key];
   if (value == null) {
     return null;
@@ -476,7 +476,7 @@ bool? _tryReadBool(YamlMap yamlMap, String key, Logger logger) {
 }
 
 // Try to read a `String` value or null from `yamlMap`, otherwise throw.
-String? _tryReadString(YamlMap yamlMap, String key, Logger logger) {
+String? _tryReadString(final YamlMap yamlMap, final String key, final Logger logger) {
   final Object? value = yamlMap[key];
   if (value == null) {
     return null;
@@ -488,7 +488,7 @@ String? _tryReadString(YamlMap yamlMap, String key, Logger logger) {
   return value;
 }
 
-List<String>? _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
+List<String>? _tryReadStringList(final YamlMap yamlMap, final String key, final Logger logger) {
   final Object? value = yamlMap[key];
   if (value == null) {
     return null;
@@ -497,14 +497,14 @@ List<String>? _tryReadStringList(YamlMap yamlMap, String key, Logger logger) {
     return <String>[value];
   }
   if (value is Iterable) {
-    return value.map((dynamic e) => e.toString()).toList();
+    return value.map((final dynamic e) => e.toString()).toList();
   }
   logger.printError('"$value" must be String or List.');
   throw Exception();
 }
 
 // Try to read a valid `Uri` or null from `yamlMap`, otherwise throw.
-Uri? _tryReadUri(YamlMap yamlMap, String key, Logger logger) {
+Uri? _tryReadUri(final YamlMap yamlMap, final String key, final Logger logger) {
   final String? value = _tryReadString(yamlMap, key, logger);
   if (value == null) {
     return null;

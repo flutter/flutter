@@ -20,8 +20,8 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  void testTraversal(String description, TraversalTestFunction testFunction) {
-    testWidgets(description, (WidgetTester tester) async {
+  void testTraversal(final String description, final TraversalTestFunction testFunction) {
+    testWidgets(description, (final WidgetTester tester) async {
       final TraversalTester traversalTester = TraversalTester(tester);
       await testFunction(traversalTester);
       traversalTester.dispose();
@@ -31,7 +31,7 @@ void main() {
   // ┌───┐ ┌───┐
   // │ A │>│ B │
   // └───┘ └───┘
-  testTraversal('Semantics traverses horizontally left-to-right', (TraversalTester tester) async {
+  testTraversal('Semantics traverses horizontally left-to-right', (final TraversalTester tester) async {
     await tester.test(
       textDirection: TextDirection.ltr,
       children: <String, Rect>{
@@ -45,7 +45,7 @@ void main() {
   // ┌───┐ ┌───┐
   // │ A │<│ B │
   // └───┘ └───┘
-  testTraversal('Semantics traverses horizontally right-to-left', (TraversalTester tester) async {
+  testTraversal('Semantics traverses horizontally right-to-left', (final TraversalTester tester) async {
     await tester.test(
       textDirection: TextDirection.rtl,
       children: <String, Rect>{
@@ -63,7 +63,7 @@ void main() {
   // ┌───┐
   // │ B │
   // └───┘
-  testTraversal('Semantics traverses vertically top-to-bottom', (TraversalTester tester) async {
+  testTraversal('Semantics traverses vertically top-to-bottom', (final TraversalTester tester) async {
     for (final TextDirection textDirection in TextDirection.values) {
       await tester.test(
         textDirection: textDirection,
@@ -84,7 +84,7 @@ void main() {
   // ┌───┐ ┌───┐
   // │ C │>│ D │
   // └───┘ └───┘
-  testTraversal('Semantics traverses a grid left-to-right', (TraversalTester tester) async {
+  testTraversal('Semantics traverses a grid left-to-right', (final TraversalTester tester) async {
     await tester.test(
       textDirection: TextDirection.ltr,
       children: <String, Rect>{
@@ -105,7 +105,7 @@ void main() {
   // ┌───┐ ┌───┐
   // │ C │<│ D │
   // └───┘ └───┘
-  testTraversal('Semantics traverses a grid right-to-left', (TraversalTester tester) async {
+  testTraversal('Semantics traverses a grid right-to-left', (final TraversalTester tester) async {
     await tester.test(
       textDirection: TextDirection.rtl,
       children: <String, Rect>{
@@ -123,7 +123,7 @@ void main() {
   // └───┘<->┌───┐<->└───┘
   //         │ B │
   //         └───┘
-  testTraversal('Semantics traverses vertically overlapping nodes horizontally', (TraversalTester tester) async {
+  testTraversal('Semantics traverses vertically overlapping nodes horizontally', (final TraversalTester tester) async {
     final Map<String, Rect> children = <String, Rect>{
       'A': Offset.zero & tenByTen,
       'B': const Offset(20.0, 5.0) & tenByTen,
@@ -180,7 +180,7 @@ void main() {
   // ┌───┐ ┌───┐ ┌───┐ ┌───┐
   // │ J │<│ K │<│ L │<│ M │
   // └───┘ └───┘ └───┘ └───┘
-  testTraversal('Semantics traverses vertical groups, then horizontal groups, then knots', (TraversalTester tester) async {
+  testTraversal('Semantics traverses vertical groups, then horizontal groups, then knots', (final TraversalTester tester) async {
     final Map<String, Rect> children = <String, Rect>{
       'A': Offset.zero & tenByTen,
       'B': const Offset(20.0, 0.0) & tenByTen,
@@ -244,7 +244,7 @@ void main() {
   //
   // For RTL, angles falling into octants 5, 6, 7, and 0, produce A -> B, all
   // others produce B -> A.
-  testTraversal('Semantics sorts knots', (TraversalTester tester) async {
+  testTraversal('Semantics sorts knots', (final TraversalTester tester) async {
     const double start = -math.pi + math.pi / 8.0;
 
     for (int i = 0; i < 8; i += 1) {
@@ -289,9 +289,9 @@ class TraversalTester {
   final SemanticsTester semantics;
 
   Future<void> test({
-    required TextDirection textDirection,
-    required Map<String, Rect> children,
-    required String expectedTraversal,
+    required final TextDirection textDirection,
+    required final Map<String, Rect> children,
+    required final String expectedTraversal,
   }) async {
     assert(children is LinkedHashMap);
     await tester.pumpWidget(
@@ -301,7 +301,7 @@ class TraversalTester {
             textDirection: textDirection,
             child: CustomMultiChildLayout(
               delegate: TestLayoutDelegate(children),
-              children: children.keys.map<Widget>((String label) {
+              children: children.keys.map<Widget>((final String label) {
                 return LayoutId(
                   id: label,
                   child: Semantics(
@@ -325,7 +325,7 @@ class TraversalTester {
         children: <TestSemantics>[
           TestSemantics.rootChild(
             textDirection: textDirection,
-            children: expectedTraversal.split(' ').map<TestSemantics>((String label) {
+            children: expectedTraversal.split(' ').map<TestSemantics>((final String label) {
               return TestSemantics(
                 label: label,
               );
@@ -351,13 +351,13 @@ class TestLayoutDelegate extends MultiChildLayoutDelegate {
   final Map<String, Rect> children;
 
   @override
-  void performLayout(Size size) {
-    children.forEach((String label, Rect rect) {
+  void performLayout(final Size size) {
+    children.forEach((final String label, final Rect rect) {
       layoutChild(label, BoxConstraints.loose(size));
       positionChild(label, rect.topLeft);
     });
   }
 
   @override
-  bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => oldDelegate == this;
+  bool shouldRelayout(final MultiChildLayoutDelegate oldDelegate) => oldDelegate == this;
 }

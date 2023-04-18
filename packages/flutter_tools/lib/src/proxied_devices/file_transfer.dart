@@ -46,7 +46,7 @@ class BlockHashes {
     'fileMd5': fileMd5,
   };
 
-  static BlockHashes fromJson(Map<String, Object?> obj) {
+  static BlockHashes fromJson(final Map<String, Object?> obj) {
     return BlockHashes(
       blockSize: obj['blockSize']! as int,
       totalSize: obj['totalSize']! as int,
@@ -59,10 +59,10 @@ class BlockHashes {
 
 /// Converts a stream of bytes, into a stream of bytes of fixed chunk size.
 @visibleForTesting
-Stream<Uint8List> convertToChunks(Stream<Uint8List> source, int chunkSize) {
+Stream<Uint8List> convertToChunks(final Stream<Uint8List> source, final int chunkSize) {
   final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
   final StreamController<Uint8List> controller = StreamController<Uint8List>();
-  final StreamSubscription<Uint8List> subscription = source.listen((Uint8List chunk) {
+  final StreamSubscription<Uint8List> subscription = source.listen((final Uint8List chunk) {
     int start = 0;
     while (start < chunk.length) {
       final int sizeToTake = min(chunkSize - bytesBuilder.length, chunk.length - start);
@@ -89,7 +89,7 @@ Stream<Uint8List> convertToChunks(Stream<Uint8List> source, int chunkSize) {
       }
       controller.close();
     }
-  }, onError: (Object error, StackTrace stackTrace) {
+  }, onError: (final Object error, final StackTrace stackTrace) {
     controller.addError(error, stackTrace);
   });
 
@@ -104,7 +104,7 @@ const int _adler32Prime = 65521;
 
 /// Helper function to calculate Adler32 hash of a binary.
 @visibleForTesting
-int adler32Hash(List<int> binary) {
+int adler32Hash(final List<int> binary) {
   // The maximum integer that can be stored in the `int` data type.
   const int maxInt = 0x1fffffffffffff;
   // maxChunkSize is the maximum number of bytes we can sum without
@@ -150,7 +150,7 @@ class RollingAdler32 {
 
   /// Push a new character into the rolling chunk window, and returns the
   /// current hash value.
-  int push(int char) {
+  int push(final int char) {
     processedBytes++;
 
     if (processedBytes > blockSize) {
@@ -221,11 +221,11 @@ class RollingAdler32 {
 /// given instructions.
 class FileTransfer {
   /// Calculate hashes of blocks in the file.
-  Future<BlockHashes> calculateBlockHashesOfFile(File file, { int? blockSize }) async {
+  Future<BlockHashes> calculateBlockHashesOfFile(final File file, { int? blockSize }) async {
     final int totalSize = await file.length();
     blockSize ??= max(sqrt(totalSize).ceil(), 2560);
 
-    final Stream<Uint8List> fileContentStream = file.openRead().map((List<int> chunk) => Uint8List.fromList(chunk));
+    final Stream<Uint8List> fileContentStream = file.openRead().map((final List<int> chunk) => Uint8List.fromList(chunk));
 
     final List<int> adler32Results = <int>[];
     final List<String> md5Results = <String>[];
@@ -251,7 +251,7 @@ class FileTransfer {
   ///
   /// Returns an empty list if the destination file is exactly the same as the
   /// source file.
-  Future<List<FileDeltaBlock>> computeDelta(File file, BlockHashes hashes) async {
+  Future<List<FileDeltaBlock>> computeDelta(final File file, final BlockHashes hashes) async {
     // Skip computing delta if the destination file matches the source file.
     if (await file.length() == hashes.totalSize && await _md5OfFile(file) == hashes.fileMd5) {
       return <FileDeltaBlock>[];
@@ -338,10 +338,10 @@ class FileTransfer {
 
   /// Generates the binary blocks that need to be transferred to the remote
   /// end to regenerate the file.
-  Future<Uint8List> binaryForRebuilding(File file, List<FileDeltaBlock> delta) async {
+  Future<Uint8List> binaryForRebuilding(final File file, final List<FileDeltaBlock> delta) async {
     final RandomAccessFile binaryView = await file.open();
-    final Iterable<FileDeltaBlock> toTransfer = delta.where((FileDeltaBlock block) => !block.copyFromDestination);
-    final int totalSize = toTransfer.map((FileDeltaBlock i) => i.size).reduce((int a, int b) => a + b);
+    final Iterable<FileDeltaBlock> toTransfer = delta.where((final FileDeltaBlock block) => !block.copyFromDestination);
+    final int totalSize = toTransfer.map((final FileDeltaBlock i) => i.size).reduce((final int a, final int b) => a + b);
     final Uint8List buffer = Uint8List(totalSize);
     int start = 0;
     for (final FileDeltaBlock current in toTransfer) {
@@ -357,7 +357,7 @@ class FileTransfer {
 
   /// Generate the new destination file from the source file, with the
   /// [blocks] and [binary] stream given.
-  Future<bool> rebuildFile(File file, List<FileDeltaBlock> delta, Stream<List<int>> binary) async {
+  Future<bool> rebuildFile(final File file, final List<FileDeltaBlock> delta, final Stream<List<int>> binary) async {
     final RandomAccessFile fileView = await file.open();
 
     // Buffer used to hold the file content in memory.
@@ -399,9 +399,9 @@ class FileTransfer {
     return true;
   }
 
-  Future<String> _md5OfFile(File file) async {
+  Future<String> _md5OfFile(final File file) async {
     final Md5Hash fileMd5Hash = Md5Hash();
-    await file.openRead().forEach((List<int> chunk) => fileMd5Hash.addChunk(Uint8List.fromList(chunk)));
+    await file.openRead().forEach((final List<int> chunk) => fileMd5Hash.addChunk(Uint8List.fromList(chunk)));
     return base64.encode(fileMd5Hash.finalize().buffer.asUint8List());
   }
 }
@@ -427,8 +427,8 @@ class FileDeltaBlock {
     'size': size,
   };
 
-  static List<FileDeltaBlock> fromJsonList(List<Map<String, Object?>> jsonList) {
-    return jsonList.map((Map<String, Object?> json) {
+  static List<FileDeltaBlock> fromJsonList(final List<Map<String, Object?>> jsonList) {
+    return jsonList.map((final Map<String, Object?> json) {
       if (json.containsKey('start')) {
         return FileDeltaBlock.fromDestination(start: json['start']! as int, size: json['size']! as int);
       } else {
@@ -439,7 +439,7 @@ class FileDeltaBlock {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other is! FileDeltaBlock) {
       return false;
     }

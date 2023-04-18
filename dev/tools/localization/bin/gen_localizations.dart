@@ -60,19 +60,19 @@ import 'encode_kn_arb_files.dart';
 
 /// This is the core of this script; it generates the code used for translations.
 String generateArbBasedLocalizationSubclasses({
-  required Map<LocaleInfo, Map<String, String>> localeToResources,
-  required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
-  required String generatedClassPrefix,
-  required String baseClass,
-  required HeaderGenerator generateHeader,
-  required ConstructorGenerator generateConstructor,
+  required final Map<LocaleInfo, Map<String, String>> localeToResources,
+  required final Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
+  required final String generatedClassPrefix,
+  required final String baseClass,
+  required final HeaderGenerator generateHeader,
+  required final ConstructorGenerator generateConstructor,
   ConstructorGenerator? generateConstructorForCountrySubClass,
-  required String factoryName,
-  required String factoryDeclaration,
-  required bool callsFactoryWithConst,
-  required String factoryArguments,
-  required String supportedLanguagesConstant,
-  required String supportedLanguagesDocMacro,
+  required final String factoryName,
+  required final String factoryDeclaration,
+  required final bool callsFactoryWithConst,
+  required final String factoryArguments,
+  required final String supportedLanguagesConstant,
+  required final String supportedLanguagesDocMacro,
 }) {
   assert(generatedClassPrefix.isNotEmpty);
   assert(baseClass.isNotEmpty);
@@ -257,7 +257,7 @@ String generateArbBasedLocalizationSubclasses({
 ///
 ///  * [$factoryName], whose documentation describes these values.
 final Set<String> $supportedLanguagesConstant = HashSet<String>.from(const <String>[
-${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
+${languageCodes.map<String>((final String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
 
 /// Creates a [$baseClass] instance for the given `locale`.
@@ -399,7 +399,7 @@ $factoryDeclaration
 /// Typically "String", but some (e.g. "timeOfDayFormat") return enums.
 ///
 /// Used by [generateGetter] below.
-String generateType(Map<String, dynamic>? attributes) {
+String generateType(final Map<String, dynamic>? attributes) {
   bool optional = false;
   String type = 'String';
   if (attributes != null) {
@@ -421,7 +421,7 @@ String generateType(Map<String, dynamic>? attributes) {
 /// those we have to therefore provide an alternate name.
 ///
 /// Used by [generateGetter] below.
-String generateKey(String key, Map<String, dynamic>? attributes) {
+String generateKey(final String key, final Map<String, dynamic>? attributes) {
   if (attributes != null) {
     if (attributes.containsKey('parameters')) {
       return '${key}Raw';
@@ -465,7 +465,7 @@ const Map<String, String> _scriptCategoryToEnum = <String, String>{
 /// it.
 ///
 /// Used by [generateGetter] below.
-String? generateValue(String? value, Map<String, dynamic>? attributes, LocaleInfo locale) {
+String? generateValue(final String? value, final Map<String, dynamic>? attributes, final LocaleInfo locale) {
   if (value == null) {
     return null;
   }
@@ -498,7 +498,7 @@ String? generateValue(String? value, Map<String, dynamic>? attributes, LocaleInf
 /// Combines [generateType], [generateKey], and [generateValue] to return
 /// the source of getters for the GlobalMaterialLocalizations subclass.
 /// The locale is the locale for which the getter is being generated.
-String generateGetter(String key, String? value, Map<String, dynamic>? attributes, LocaleInfo locale) {
+String generateGetter(String key, final String? value, final Map<String, dynamic>? attributes, final LocaleInfo locale) {
   final String type = generateType(attributes);
   key = generateKey(key, attributes);
   final String? generatedValue = generateValue(value, attributes, locale);
@@ -508,7 +508,7 @@ String generateGetter(String key, String? value, Map<String, dynamic>? attribute
   $type get $key => $generatedValue;''';
 }
 
-void main(List<String> rawArgs) {
+void main(final List<String> rawArgs) {
   checkCwdIsRepoRoot('gen_localizations');
   final GeneratorOptions options = parseArgs(rawArgs);
 

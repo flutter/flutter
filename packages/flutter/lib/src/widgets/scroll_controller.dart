@@ -46,7 +46,7 @@ class ScrollController extends ChangeNotifier {
   ///
   /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
-    double initialScrollOffset = 0.0,
+    final double initialScrollOffset = 0.0,
     this.keepScrollOffset = true,
     this.debugLabel,
   }) : _initialScrollOffset = initialScrollOffset;
@@ -142,9 +142,9 @@ class ScrollController extends ChangeNotifier {
   /// [Future] may cause the test to hang and timeout. Instead, use
   /// [WidgetTester.pumpAndSettle].
   Future<void> animateTo(
-    double offset, {
-    required Duration duration,
-    required Curve curve,
+    final double offset, {
+    required final Duration duration,
+    required final Curve curve,
   }) async {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     await Future.wait<void>(<Future<void>>[
@@ -164,7 +164,7 @@ class ScrollController extends ChangeNotifier {
   ///
   /// Immediately after the jump, a ballistic activity is started, in case the
   /// value was out of range.
-  void jumpTo(double value) {
+  void jumpTo(final double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     for (final ScrollPosition position in List<ScrollPosition>.of(_positions)) {
       position.jumpTo(value);
@@ -175,7 +175,7 @@ class ScrollController extends ChangeNotifier {
   ///
   /// After this function returns, the [animateTo] and [jumpTo] methods on this
   /// controller will manipulate the given position.
-  void attach(ScrollPosition position) {
+  void attach(final ScrollPosition position) {
     assert(!_positions.contains(position));
     _positions.add(position);
     position.addListener(notifyListeners);
@@ -185,7 +185,7 @@ class ScrollController extends ChangeNotifier {
   ///
   /// After this function returns, the [animateTo] and [jumpTo] methods on this
   /// controller will not manipulate the given position.
-  void detach(ScrollPosition position) {
+  void detach(final ScrollPosition position) {
     assert(_positions.contains(position));
     position.removeListener(notifyListeners);
     _positions.remove(position);
@@ -226,9 +226,9 @@ class ScrollController extends ChangeNotifier {
   ///    needs to recreate the [ScrollPosition] object. It is null the first
   ///    time the [ScrollPosition] is created.
   ScrollPosition createScrollPosition(
-    ScrollPhysics physics,
-    ScrollContext context,
-    ScrollPosition? oldPosition,
+    final ScrollPhysics physics,
+    final ScrollContext context,
+    final ScrollPosition? oldPosition,
   ) {
     return ScrollPositionWithSingleContext(
       physics: physics,
@@ -257,7 +257,7 @@ class ScrollController extends ChangeNotifier {
   /// Implementations of this method should start with a call to the inherited
   /// method, as in `super.debugFillDescription(description)`.
   @mustCallSuper
-  void debugFillDescription(List<String> description) {
+  void debugFillDescription(final List<String> description) {
     if (debugLabel != null) {
       description.add(debugLabel!);
     }
@@ -343,7 +343,7 @@ class TrackingScrollController extends ScrollController {
   double get initialScrollOffset => _lastUpdatedOffset ?? super.initialScrollOffset;
 
   @override
-  void attach(ScrollPosition position) {
+  void attach(final ScrollPosition position) {
     super.attach(position);
     assert(!_positionToListener.containsKey(position));
     _positionToListener[position] = () {
@@ -354,7 +354,7 @@ class TrackingScrollController extends ScrollController {
   }
 
   @override
-  void detach(ScrollPosition position) {
+  void detach(final ScrollPosition position) {
     super.detach(position);
     assert(_positionToListener.containsKey(position));
     position.removeListener(_positionToListener[position]!);

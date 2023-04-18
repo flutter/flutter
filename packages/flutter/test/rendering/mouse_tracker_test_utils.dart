@@ -17,7 +17,7 @@ class _TestHitTester extends RenderBox {
   final BoxHitTest hitTestOverride;
 
   @override
-  bool hitTest(BoxHitTestResult result, {required ui.Offset position}) {
+  bool hitTest(final BoxHitTestResult result, {required final ui.Offset position}) {
     return hitTestOverride(result, position);
   }
 }
@@ -32,7 +32,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
     postFrameCallbacks = <void Function(Duration)>[];
   }
 
-  void setHitTest(BoxHitTest hitTest) {
+  void setHitTest(final BoxHitTest hitTest) {
     renderView.child = _TestHitTester(hitTest);
   }
 
@@ -47,7 +47,7 @@ class TestMouseTrackerFlutterBinding extends BindingBase
   void scheduleMouseTrackerPostFrameCheck() {
     final SchedulerPhase? lastPhase = _overridePhase;
     _overridePhase = SchedulerPhase.persistentCallbacks;
-    addPostFrameCallback((_) {
+    addPostFrameCallback((final _) {
       mouseTracker.updateAllDevices(renderView.hitTestMouseTrackers);
     });
     _overridePhase = lastPhase;
@@ -57,11 +57,11 @@ class TestMouseTrackerFlutterBinding extends BindingBase
 
   // Proxy post-frame callbacks.
   @override
-  void addPostFrameCallback(void Function(Duration) callback) {
+  void addPostFrameCallback(final void Function(Duration) callback) {
     postFrameCallbacks.add(callback);
   }
 
-  void flushPostFrameCallbacks(Duration duration) {
+  void flushPostFrameCallbacks(final Duration duration) {
     for (final void Function(Duration) callback in postFrameCallbacks) {
       callback(duration);
     }
@@ -88,7 +88,7 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
   final bool validForMouseTracker;
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
+  void handleEvent(final PointerEvent event, final HitTestEntry entry) {
     if (event is PointerHoverEvent) {
       onHover?.call(event);
     }
@@ -98,7 +98,7 @@ class TestAnnotationTarget with Diagnosticable implements MouseTrackerAnnotation
 // A hit test entry that can be assigned with a [TestAnnotationTarget] and an
 // optional transform matrix.
 class TestAnnotationEntry extends HitTestEntry<TestAnnotationTarget> {
-  TestAnnotationEntry(super.target, [Matrix4? transform])
+  TestAnnotationEntry(super.target, [final Matrix4? transform])
     : transform = transform ?? Matrix4.identity();
 
   @override

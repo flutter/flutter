@@ -48,7 +48,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
   final WidgetBuilder builder;
 
   @override
-  Widget buildContent(BuildContext context) => builder(context);
+  Widget buildContent(final BuildContext context) => builder(context);
 
   @override
   final bool maintainState;
@@ -82,7 +82,7 @@ class MaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixi
 mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   /// Builds the primary contents of the route.
   @protected
-  Widget buildContent(BuildContext context);
+  Widget buildContent(final BuildContext context);
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
@@ -94,7 +94,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   String? get barrierLabel => null;
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+  bool canTransitionTo(final TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return (nextRoute is MaterialRouteTransitionMixin && !nextRoute.fullscreenDialog)
       || (nextRoute is CupertinoRouteTransitionMixin && !nextRoute.fullscreenDialog);
@@ -102,9 +102,9 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
 
   @override
   Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
+    final BuildContext context,
+    final Animation<double> animation,
+    final Animation<double> secondaryAnimation,
   ) {
     final Widget result = buildContent(context);
     return Semantics(
@@ -115,7 +115,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(final BuildContext context, final Animation<double> animation, final Animation<double> secondaryAnimation, final Widget child) {
     final PageTransitionsTheme theme = Theme.of(context).pageTransitionsTheme;
     return theme.buildTransitions<T>(this, context, animation, secondaryAnimation, child);
   }
@@ -167,7 +167,7 @@ class MaterialPage<T> extends Page<T> {
   final bool allowSnapshotting;
 
   @override
-  Route<T> createRoute(BuildContext context) {
+  Route<T> createRoute(final BuildContext context) {
     return _PageBasedMaterialPageRoute<T>(page: this, allowSnapshotting: allowSnapshotting);
   }
 }
@@ -178,7 +178,7 @@ class MaterialPage<T> extends Page<T> {
 // the content is up to date after page updates.
 class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTransitionMixin<T> {
   _PageBasedMaterialPageRoute({
-    required MaterialPage<T> page,
+    required final MaterialPage<T> page,
     super.allowSnapshotting,
   }) : super(settings: page) {
     assert(opaque);
@@ -187,7 +187,7 @@ class _PageBasedMaterialPageRoute<T> extends PageRoute<T> with MaterialRouteTran
   MaterialPage<T> get _page => settings as MaterialPage<T>;
 
   @override
-  Widget buildContent(BuildContext context) {
+  Widget buildContent(final BuildContext context) {
     return _page.child;
   }
 

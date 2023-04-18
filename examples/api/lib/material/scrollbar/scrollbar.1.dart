@@ -12,7 +12,7 @@ class ScrollbarExampleApp extends StatelessWidget {
   const ScrollbarExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('Scrollbar Sample')),
@@ -33,7 +33,7 @@ class _ScrollbarExampleState extends State<ScrollbarExample> {
   final ScrollController _controllerOne = ScrollController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Scrollbar(
       controller: _controllerOne,
       thumbVisibility: true,
@@ -41,7 +41,7 @@ class _ScrollbarExampleState extends State<ScrollbarExample> {
         controller: _controllerOne,
         itemCount: 120,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return Center(
             child: Text('item $index'),
           );

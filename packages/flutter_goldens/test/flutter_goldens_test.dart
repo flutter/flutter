@@ -525,7 +525,7 @@ void main() {
       expect(
           skiaClient.imgtestAdd('golden_file_test', goldenFile),
         throwsA(
-          isA<SkiaException>().having((SkiaException error) => error.message,
+          isA<SkiaException>().having((final SkiaException error) => error.message,
             'message',
             contains('result-state.json'),
           ),
@@ -569,7 +569,7 @@ void main() {
       expect(
         skiaClient.tryjobAdd('golden_file_test', goldenFile),
         throwsA(
-          isA<SkiaException>().having((SkiaException error) => error.message,
+          isA<SkiaException>().having((final SkiaException error) => error.message,
             'message',
             contains('result-state.json'),
           ),
@@ -680,7 +680,7 @@ void main() {
             );
           },
           throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
+            isA<AssertionError>().having((final AssertionError error) => error.toString(),
               'description',
               contains(
                 'Golden files in the Flutter framework must end with the file '
@@ -798,7 +798,7 @@ void main() {
             );
           },
           throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
+            isA<AssertionError>().having((final AssertionError error) => error.toString(),
               'description',
               contains(
                 'Golden files in the Flutter framework must end with the file '
@@ -984,7 +984,7 @@ void main() {
             );
           },
           throwsA(
-            isA<AssertionError>().having((AssertionError error) => error.toString(),
+            isA<AssertionError>().having((final AssertionError error) => error.toString(),
               'description',
               contains(
                 'Golden files in the Flutter framework must end with the file '
@@ -1044,7 +1044,7 @@ class RunInvocation {
   @override
   int get hashCode => Object.hash(Object.hashAll(command), workingDirectory);
 
-  bool _commandEquals(List<String> other) {
+  bool _commandEquals(final List<String> other) {
     if (other == command) {
       return true;
     }
@@ -1060,7 +1060,7 @@ class RunInvocation {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -1083,13 +1083,13 @@ class FakeProcessManager extends Fake implements ProcessManager {
 
   @override
   Future<ProcessResult> run(
-    List<Object> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding? stdoutEncoding = systemEncoding,
-    Encoding? stderrEncoding = systemEncoding,
+    final List<Object> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true,
+    final bool runInShell = false,
+    final Encoding? stdoutEncoding = systemEncoding,
+    final Encoding? stderrEncoding = systemEncoding,
   }) async {
     workingDirectories.add(workingDirectory);
     final ProcessResult? result = processResults[RunInvocation(command.cast<String>(), workingDirectory)];
@@ -1106,7 +1106,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   Map<String, String> expectationForTestValues = <String, String>{};
   Exception? getExpectationForTestThrowable;
   @override
-  Future<String> getExpectationForTest(String testName) async {
+  Future<String> getExpectationForTest(final String testName) async {
     if (getExpectationForTestThrowable != null) {
       throw getExpectationForTestThrowable!;
     }
@@ -1122,7 +1122,7 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   @override
   Future<void> imgtestInit() async => initCalls += 1;
   @override
-  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+  Future<bool> imgtestAdd(final String testName, final File goldenFile) async {
     testNames.add(testName);
     return true;
   }
@@ -1131,15 +1131,15 @@ class FakeSkiaGoldClient extends Fake implements SkiaGoldClient {
   @override
   Future<void> tryjobInit() async => tryInitCalls += 1;
   @override
-  Future<bool> tryjobAdd(String testName, File goldenFile) async => true;
+  Future<bool> tryjobAdd(final String testName, final File goldenFile) async => true;
 
   Map<String, List<int>> imageBytesValues = <String, List<int>>{};
   @override
-  Future<List<int>> getImageBytes(String imageHash) async => imageBytesValues[imageHash]!;
+  Future<List<int>> getImageBytes(final String imageHash) async => imageBytesValues[imageHash]!;
 
   Map<String, String> cleanTestNameValues = <String, String>{};
   @override
-  String cleanTestName(String fileName) => cleanTestNameValues[fileName] ?? '';
+  String cleanTestName(final String fileName) => cleanTestNameValues[fileName] ?? '';
 }
 
 class FakeLocalFileComparator extends Fake implements LocalFileComparator {
@@ -1161,7 +1161,7 @@ class FakeHttpClient extends Fake implements HttpClient {
   late FakeHttpClientRequest request;
 
   @override
-  Future<HttpClientRequest> getUrl(Uri url) async {
+  Future<HttpClientRequest> getUrl(final Uri url) async {
     lastUri = url;
     return request;
   }
@@ -1182,7 +1182,7 @@ class FakeHttpImageResponse extends Fake implements HttpClientResponse {
   final List<List<int>> response;
 
   @override
-  Future<void> forEach(void Function(List<int> element) action) async {
+  Future<void> forEach(final void Function(List<int> element) action) async {
     response.forEach(action);
   }
 }

@@ -23,13 +23,13 @@ class _LongCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupertin
   const _LongCupertinoLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => locale.languageCode == 'en';
+  bool isSupported(final Locale locale) => locale.languageCode == 'en';
 
   @override
-  Future<_LongCupertinoLocalizations> load(Locale locale) => _LongCupertinoLocalizations.load(locale);
+  Future<_LongCupertinoLocalizations> load(final Locale locale) => _LongCupertinoLocalizations.load(locale);
 
   @override
-  bool shouldReload(_LongCupertinoLocalizationsDelegate old) => false;
+  bool shouldReload(final _LongCupertinoLocalizationsDelegate old) => false;
 
   @override
   String toString() => '_LongCupertinoLocalizations.delegate(en_US)';
@@ -47,7 +47,7 @@ class _LongCupertinoLocalizations extends DefaultCupertinoLocalizations {
   @override
   String get selectAllButtonLabel => 'Select Allllllllllllllllllllllllllllllll';
 
-  static Future<_LongCupertinoLocalizations> load(Locale locale) {
+  static Future<_LongCupertinoLocalizations> load(final Locale locale) {
     return SynchronousFuture<_LongCupertinoLocalizations>(const _LongCupertinoLocalizations());
   }
 
@@ -61,7 +61,7 @@ void main() {
   final MockClipboard mockClipboard = MockClipboard();
 
   // Returns true iff the button is visually enabled.
-  bool appearsEnabled(WidgetTester tester, String text) {
+  bool appearsEnabled(final WidgetTester tester, final String text) {
     final CupertinoButton button = tester.widget<CupertinoButton>(
       find.ancestor(
         of: find.text(text),
@@ -72,8 +72,8 @@ void main() {
     return button.pressedOpacity! < 1.0;
   }
 
-  List<TextSelectionPoint> globalize(Iterable<TextSelectionPoint> points, RenderBox box) {
-    return points.map<TextSelectionPoint>((TextSelectionPoint point) {
+  List<TextSelectionPoint> globalize(final Iterable<TextSelectionPoint> points, final RenderBox box) {
+    return points.map<TextSelectionPoint>((final TextSelectionPoint point) {
       return TextSelectionPoint(
         box.localToGlobal(point.point),
         point.direction,
@@ -100,9 +100,9 @@ void main() {
 
   group('canSelectAll', () {
     Widget createEditableText({
-      Key? key,
-      String? text,
-      TextSelection? selection,
+      final Key? key,
+      final String? text,
+      final TextSelection? selection,
     }) {
       final TextEditingController controller = TextEditingController(text: text)
         ..selection = selection ?? const TextSelection.collapsed(offset: -1);
@@ -118,13 +118,13 @@ void main() {
       );
     }
 
-    testWidgets('should return false when there is no text', (WidgetTester tester) async {
+    testWidgets('should return false when there is no text', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(key: key));
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
-    testWidgets('should return true when there is text and collapsed selection', (WidgetTester tester) async {
+    testWidgets('should return true when there is text and collapsed selection', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -133,7 +133,7 @@ void main() {
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), true);
     });
 
-    testWidgets('should return false when there is text and partial uncollapsed selection', (WidgetTester tester) async {
+    testWidgets('should return false when there is text and partial uncollapsed selection', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -143,7 +143,7 @@ void main() {
       expect(cupertinoTextSelectionControls.canSelectAll(key.currentState!), false);
     });
 
-    testWidgets('should return false when there is text and full selection', (WidgetTester tester) async {
+    testWidgets('should return false when there is text and full selection', (final WidgetTester tester) async {
       final GlobalKey<EditableTextState> key = GlobalKey();
       await tester.pumpWidget(createEditableText(
         key: key,
@@ -155,14 +155,14 @@ void main() {
   });
 
   group('cupertino handles', () {
-    testWidgets('draws transparent handle correctly', (WidgetTester tester) async {
+    testWidgets('draws transparent handle correctly', (final WidgetTester tester) async {
       await tester.pumpWidget(RepaintBoundary(
         child: CupertinoTheme(
           data: const CupertinoThemeData(
             primaryColor: Color(0x550000AA),
           ),
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return Container(
                 color: CupertinoColors.white,
                 height: 800,
@@ -191,7 +191,7 @@ void main() {
   });
 
   group('Text selection menu overflow (iOS)', () {
-    testWidgets('All menu items show when they fit.', (WidgetTester tester) async {
+    testWidgets('All menu items show when they fit.', (final WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
         home: Directionality(
@@ -248,7 +248,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgets("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
+    testWidgets("When a menu item doesn't fit, a second page is used.", (final WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
       tester.view.physicalSize = const Size(800, 800);
       addTearDown(tester.view.reset);
@@ -319,7 +319,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
+    testWidgets('A smaller menu puts each button on its own page.', (final WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
       // the same page.
       tester.view.physicalSize = const Size(640, 800);
@@ -421,7 +421,7 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     );
 
-    testWidgets('Handles very long locale strings', (WidgetTester tester) async {
+    testWidgets('Handles very long locale strings', (final WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
         locale: const Locale('en', 'us'),
@@ -545,7 +545,7 @@ void main() {
 
     testWidgets(
       'When selecting multiple lines over max lines',
-      (WidgetTester tester) async {
+      (final WidgetTester tester) async {
         final TextEditingController controller = TextEditingController(text: 'abc\ndef\nghi\njkl\nmno\npqr');
         await tester.pumpWidget(CupertinoApp(
           home: Directionality(
@@ -611,7 +611,7 @@ void main() {
     );
   });
 
-  testWidgets('iOS selection handles scale with rich text (selection style 1)', (WidgetTester tester) async {
+  testWidgets('iOS selection handles scale with rich text (selection style 1)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -691,7 +691,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('iOS selection handles scale with rich text (selection style 2)', (WidgetTester tester) async {
+  testWidgets('iOS selection handles scale with rich text (selection style 2)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -775,7 +775,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('iOS selection handles scale with rich text (grapheme clusters)', (WidgetTester tester) async {
+  testWidgets('iOS selection handles scale with rich text (grapheme clusters)', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(
@@ -856,7 +856,7 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
-  testWidgets('iOS selection handles scaling falls back to preferredLineHeight when the current frame does not match the previous', (WidgetTester tester) async {
+  testWidgets('iOS selection handles scaling falls back to preferredLineHeight when the current frame does not match the previous', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: Center(

@@ -8,18 +8,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 
 class _ConsistentTextRangeImplementationMatcher extends Matcher {
-  _ConsistentTextRangeImplementationMatcher(int length)
+  _ConsistentTextRangeImplementationMatcher(final int length)
     : range = TextRange(start: -1, end: length + 1),
       assert(length >= 0);
 
   final TextRange range;
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add('The implementation of TextBoundary.getTextBoundaryAt is consistent with its other methods.');
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(final dynamic item, final Description mismatchDescription, final Map<dynamic, dynamic> matchState, final bool verbose) {
     final TextBoundary boundary = matchState['textBoundary'] as TextBoundary;
     final int position = matchState['position'] as int;
     final int leading = boundary.getLeadingTextBoundaryAt(position) ?? -1;
@@ -31,7 +31,7 @@ class _ConsistentTextRangeImplementationMatcher extends Matcher {
   }
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     for (int i = range.start; i <= range.end; i++) {
       final int? leading = (item as TextBoundary).getLeadingTextBoundaryAt(i);
       final int? trailing = item.getTrailingTextBoundaryAt(i);
@@ -47,7 +47,7 @@ class _ConsistentTextRangeImplementationMatcher extends Matcher {
   }
 }
 
-Matcher _hasConsistentTextRangeImplementationWithinRange(int length) => _ConsistentTextRangeImplementationMatcher(length);
+Matcher _hasConsistentTextRangeImplementationWithinRange(final int length) => _ConsistentTextRangeImplementationMatcher(length);
 
 void main() {
   test('Character boundary works', () {
@@ -280,7 +280,7 @@ class TestTextLayoutMetrics extends TextLayoutMetrics {
   static const TextRange wordBoundaryAt3 = TextRange(start: 4, end: 7);
 
   @override
-  TextSelection getLineAtOffset(TextPosition position) {
+  TextSelection getLineAtOffset(final TextPosition position) {
     if (position.offset == 3) {
       return lineAt3;
     }
@@ -288,17 +288,17 @@ class TestTextLayoutMetrics extends TextLayoutMetrics {
   }
 
   @override
-  TextPosition getTextPositionAbove(TextPosition position) {
+  TextPosition getTextPositionAbove(final TextPosition position) {
     throw UnimplementedError();
   }
 
   @override
-  TextPosition getTextPositionBelow(TextPosition position) {
+  TextPosition getTextPositionBelow(final TextPosition position) {
     throw UnimplementedError();
   }
 
   @override
-  TextRange getWordBoundary(TextPosition position) {
+  TextRange getWordBoundary(final TextPosition position) {
     if (position.offset == 3) {
       return wordBoundaryAt3;
     }

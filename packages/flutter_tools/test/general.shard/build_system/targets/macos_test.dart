@@ -111,7 +111,7 @@ void main() {
     await expectLater(
       const DebugUnpackMacOS().build(environment),
       throwsA(isException.having(
-        (Exception exception) => exception.toString(),
+        (final Exception exception) => exception.toString(),
         'description',
         contains('FlutterMacOS.framework/Versions/A/FlutterMacOS does not exist, cannot thin'),
       )),
@@ -139,7 +139,7 @@ void main() {
     await expectLater(
       const DebugUnpackMacOS().build(environment),
       throwsA(isException.having(
-        (Exception exception) => exception.toString(),
+        (final Exception exception) => exception.toString(),
         'description',
         contains('does not contain arm64 x86_64. Running lipo -info:\nArchitectures in the fat file:'),
       )),

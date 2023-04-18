@@ -32,8 +32,8 @@ typedef ProcessRunSync = ProcessResult Function(
 /// To retrieve these results, the test runner needs to send results back so the database can be updated.
 class Cocoon {
   Cocoon({
-    String? serviceAccountTokenPath,
-    @visibleForTesting Client? httpClient,
+    final String? serviceAccountTokenPath,
+    @visibleForTesting final Client? httpClient,
     @visibleForTesting this.fs = const LocalFileSystem(),
     @visibleForTesting this.processRunSync = Process.runSync,
     @visibleForTesting this.requestRetryLimit = 5,
@@ -85,12 +85,12 @@ class Cocoon {
   /// The `resultsPath` is not available for all tests. When it doesn't show up, we
   /// need to append `CommitBranch`, `CommitSha`, and `BuilderName`.
   Future<void> sendTaskStatus({
-    String? resultsPath,
-    bool? isTestFlaky,
-    String? gitBranch,
-    String? builderName,
-    String? testStatus,
-    String? builderBucket,
+    final String? resultsPath,
+    final bool? isTestFlaky,
+    final String? gitBranch,
+    final String? builderName,
+    final String? testStatus,
+    final String? builderBucket,
   }) async {
     Map<String, dynamic> resultsJson = <String, dynamic>{};
     if (resultsPath != null) {
@@ -106,24 +106,24 @@ class Cocoon {
     if (_shouldUpdateCocoon(resultsJson, builderBucket ?? 'prod')) {
       await retry(
         () async => _sendUpdateTaskRequest(resultsJson).timeout(Duration(seconds: requestTimeoutLimit)),
-        retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
+        retryIf: (final Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
         maxAttempts: requestRetryLimit,
       );
     }
   }
 
   /// Only post-submit tests on `master` are allowed to update in cocoon.
-  bool _shouldUpdateCocoon(Map<String, dynamic> resultJson, String builderBucket) {
+  bool _shouldUpdateCocoon(final Map<String, dynamic> resultJson, final String builderBucket) {
     const List<String> supportedBranches = <String>['master'];
     return supportedBranches.contains(resultJson['CommitBranch']) && builderBucket == 'prod';
   }
 
   /// Write the given parameters into an update task request and store the JSON in [resultsPath].
   Future<void> writeTaskResultToFile({
-    String? builderName,
-    String? gitBranch,
-    required TaskResult result,
-    required String resultsPath,
+    final String? builderName,
+    final String? gitBranch,
+    required final TaskResult result,
+    required final String resultsPath,
   }) async {
     final Map<String, dynamic> updateRequest = _constructUpdateRequest(
       gitBranch: gitBranch,
@@ -140,9 +140,9 @@ class Cocoon {
   }
 
   Map<String, dynamic> _constructUpdateRequest({
-    String? builderName,
-    required TaskResult result,
-    String? gitBranch,
+    final String? builderName,
+    required final TaskResult result,
+    final String? gitBranch,
   }) {
     final Map<String, dynamic> updateRequest = <String, dynamic>{
       'CommitBranch': gitBranch,
@@ -172,7 +172,7 @@ class Cocoon {
     return updateRequest;
   }
 
-  Future<void> _sendUpdateTaskRequest(Map<String, dynamic> postBody) async {
+  Future<void> _sendUpdateTaskRequest(final Map<String, dynamic> postBody) async {
     logger.info('Attempting to send update task request to Cocoon.');
     final Map<String, dynamic> response = await _sendCocoonRequest('update-task-status', postBody);
     if (response['Name'] != null) {
@@ -184,14 +184,14 @@ class Cocoon {
   }
 
   /// Make an API request to Cocoon.
-  Future<Map<String, dynamic>> _sendCocoonRequest(String apiPath, [dynamic jsonData]) async {
+  Future<Map<String, dynamic>> _sendCocoonRequest(final String apiPath, [final dynamic jsonData]) async {
     final Uri url = Uri.parse('$baseCocoonApiUrl/$apiPath');
 
     /// Retry requests to Cocoon as sometimes there are issues with the servers, such
     /// as version changes to the backend, datastore issues, or latency issues.
     final Response response = await retry(
       () => _httpClient.post(url, body: json.encode(jsonData)),
-      retryIf: (Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
+      retryIf: (final Exception e) => e is SocketException || e is TimeoutException || e is ClientException,
       maxAttempts: requestRetryLimit,
     );
     return json.decode(response.body) as Map<String, dynamic>;
@@ -202,8 +202,8 @@ class Cocoon {
 class AuthenticatedCocoonClient extends BaseClient {
   AuthenticatedCocoonClient(
     this._serviceAccountTokenPath, {
-    @visibleForTesting Client? httpClient,
-    @visibleForTesting FileSystem? filesystem,
+    @visibleForTesting final Client? httpClient,
+    @visibleForTesting final FileSystem? filesystem,
   })  : _delegate = httpClient ?? Client(),
         _fs = filesystem ?? const LocalFileSystem();
 
@@ -228,7 +228,7 @@ class AuthenticatedCocoonClient extends BaseClient {
   }
 
   @override
-  Future<StreamedResponse> send(BaseRequest request) async {
+  Future<StreamedResponse> send(final BaseRequest request) async {
     request.headers['Service-Account-Token'] = serviceAccountToken;
     final StreamedResponse response = await _delegate.send(request);
 

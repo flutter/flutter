@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('can press', (WidgetTester tester) async {
+  testWidgets('can press', (final WidgetTester tester) async {
     bool pressed = false;
     await tester.pumpWidget(
       MaterialApp(

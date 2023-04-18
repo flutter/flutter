@@ -17,9 +17,9 @@ void main() {
 
   testWidgets(
     '$MemoryAllocations is noop when kFlutterMemoryAllocationsEnabled is false.',
-    (WidgetTester tester) async {
+    (final WidgetTester tester) async {
       ObjectEvent? receivedEvent;
-      ObjectEvent listener(ObjectEvent event) => receivedEvent = event;
+      ObjectEvent listener(final ObjectEvent event) => receivedEvent = event;
 
       ma.addListener(listener);
       expect(ma.hasListeners, isFalse);
@@ -52,11 +52,11 @@ class _TestRenderObject extends RenderObject {
 
 class _TestLayer extends Layer{
   @override
-  void addToScene(SceneBuilder builder) {}
+  void addToScene(final SceneBuilder builder) {}
 }
 
 /// Create and dispose Flutter objects to fire memory allocation events.
-Future<void> _activateFlutterObjects(WidgetTester tester) async {
+Future<void> _activateFlutterObjects(final WidgetTester tester) async {
   final RenderObject renderObject = _TestRenderObject();
   final Layer layer = _TestLayer();
 

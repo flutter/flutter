@@ -24,7 +24,7 @@ import '../widgets/semantics_tester.dart';
 void main() {
   final ThemeData theme = ThemeData();
 
-  testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
+  testWidgets('Switch can toggle on tap', (final WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
 
@@ -32,7 +32,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return MaterialApp(
               theme: theme,
               home: Material(
@@ -41,7 +41,7 @@ void main() {
                     dragStartBehavior: DragStartBehavior.down,
                     key: switchKey,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -60,7 +60,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Switch size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
+  testWidgets('Switch size is configurable by ThemeData.materialTapTargetSize', (final WidgetTester tester) async {
     final bool material3 = theme.useMaterial3;
     await tester.pumpWidget(
       Theme(
@@ -72,7 +72,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) { },
+                onChanged: (final bool newValue) { },
               ),
             ),
           ),
@@ -95,7 +95,7 @@ void main() {
               child: Switch(
                 dragStartBehavior: DragStartBehavior.down,
                 value: true,
-                onChanged: (bool newValue) { },
+                onChanged: (final bool newValue) { },
               ),
             ),
           ),
@@ -106,13 +106,13 @@ void main() {
     expect(tester.getSize(find.byType(Switch)), material3 ? const Size(60.0, 40.0) : const Size(59.0, 40.0));
   });
 
-  testWidgets('Switch does not get distorted upon changing constraints with parent - M2', (WidgetTester tester) async {
+  testWidgets('Switch does not get distorted upon changing constraints with parent - M2', (final WidgetTester tester) async {
     const double maxWidth = 300;
     const double maxHeight = 100;
 
     const ValueKey<String> boundaryKey = ValueKey<String>('switch container');
 
-    Widget buildSwitch({required double width, required double height}) {
+    Widget buildSwitch({required final double width, required final double height}) {
       return MaterialApp(
         home: Scaffold(
           body: Directionality(
@@ -128,7 +128,7 @@ void main() {
                   child: Switch(
                     dragStartBehavior: DragStartBehavior.down,
                     value: true,
-                    onChanged: (_) {},
+                    onChanged: (final _) {},
                   ),
                 ),
               ),
@@ -157,7 +157,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
+  testWidgets('Switch can drag (LTR)', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
@@ -166,13 +166,13 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Switch(
                     dragStartBehavior: DragStartBehavior.down,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -207,7 +207,7 @@ void main() {
     expect(value, isFalse);
   });
 
-  testWidgets('Switch can drag with dragStartBehavior', (WidgetTester tester) async {
+  testWidgets('Switch can drag with dragStartBehavior', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
@@ -216,13 +216,13 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Switch(
                     dragStartBehavior: DragStartBehavior.down,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -253,12 +253,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Material(
               child: Center(
                 child: Switch(
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -299,7 +299,7 @@ void main() {
     expect(value, isFalse);
   });
 
-  testWidgets('Switch can drag (RTL)', (WidgetTester tester) async {
+  testWidgets('Switch can drag (RTL)', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
@@ -308,13 +308,13 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Switch(
                     dragStartBehavior: DragStartBehavior.down,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -347,19 +347,19 @@ void main() {
     expect(value, isFalse);
   });
 
-  testWidgets('Switch has default colors when enabled', (WidgetTester tester) async {
+  testWidgets('Switch has default colors when enabled', (final WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Material(
               child: Center(
                 child: Switch(
                   dragStartBehavior: DragStartBehavior.down,
                   value: value,
-                  onChanged: (bool newValue) {
+                  onChanged: (final bool newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -403,7 +403,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch has default colors when disabled', (WidgetTester tester) async {
+  testWidgets('Switch has default colors when disabled', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.rtl,
@@ -461,19 +461,19 @@ void main() {
     );
   });
 
-  testWidgets('Switch can be set color', (WidgetTester tester) async {
+  testWidgets('Switch can be set color', (final WidgetTester tester) async {
     bool value = false;
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Material(
               child: Center(
                 child: Switch(
                   dragStartBehavior: DragStartBehavior.down,
                   value: value,
-                  onChanged: (bool newValue) {
+                  onChanged: (final bool newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -519,7 +519,7 @@ void main() {
     );
   });
 
-  testWidgets('Drag ends after animation completes', (WidgetTester tester) async {
+  testWidgets('Drag ends after animation completes', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17773
 
     bool value = false;
@@ -529,13 +529,13 @@ void main() {
         home: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Switch(
                     dragStartBehavior: DragStartBehavior.down,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -564,7 +564,7 @@ void main() {
     expect(tester.hasRunningAnimations, false);
   });
 
-  testWidgets('can veto switch dragging result', (WidgetTester tester) async {
+  testWidgets('can veto switch dragging result', (final WidgetTester tester) async {
     bool value = false;
 
     await tester.pumpWidget(
@@ -573,13 +573,13 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Switch(
                     dragStartBehavior: DragStartBehavior.down,
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = value || newValue;
                       });
@@ -606,7 +606,7 @@ void main() {
       find.descendant(
         of: find.byType(Switch),
         matching: find.byWidgetPredicate(
-          (Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch',
+          (final Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch',
         ),
       ),
     );
@@ -645,10 +645,10 @@ void main() {
     expect(state.position.value, 1.0);
   });
 
-  testWidgets('switch has semantic events', (WidgetTester tester) async {
+  testWidgets('switch has semantic events', (final WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (final dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -659,12 +659,12 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Center(
                   child: Switch(
                     value: value,
-                    onChanged: (bool newValue) {
+                    onChanged: (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -692,10 +692,10 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('switch sends semantic events from parent if fully merged', (WidgetTester tester) async {
+  testWidgets('switch sends semantic events from parent if fully merged', (final WidgetTester tester) async {
     dynamic semanticEvent;
     bool value = false;
-    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (dynamic message) async {
+    tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, (final dynamic message) async {
       semanticEvent = message;
     });
     final SemanticsTester semanticsTester = SemanticsTester(tester);
@@ -704,8 +704,8 @@ void main() {
       MaterialApp(
         theme: theme,
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            void onChanged(bool newValue) {
+          builder: (final BuildContext context, final StateSetter setState) {
+            void onChanged(final bool newValue) {
               setState(() {
                 value = newValue;
               });
@@ -743,21 +743,21 @@ void main() {
     tester.binding.defaultBinaryMessenger.setMockDecodedMessageHandler<dynamic>(SystemChannels.accessibility, null);
   });
 
-  testWidgets('Switch.adaptive', (WidgetTester tester) async {
+  testWidgets('Switch.adaptive', (final WidgetTester tester) async {
     bool value = false;
     const Color inactiveTrackColor = Colors.pink;
 
-    Widget buildFrame(TargetPlatform platform) {
+    Widget buildFrame(final TargetPlatform platform) {
       return MaterialApp(
         theme: ThemeData(platform: platform),
         home: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return Material(
               child: Center(
                 child: Switch.adaptive(
                   value: value,
                   inactiveTrackColor: inactiveTrackColor,
-                  onChanged: (bool newValue) {
+                  onChanged: (final bool newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -794,18 +794,18 @@ void main() {
     }
   });
 
-  testWidgets('Switch is focusable and has correct focus color', (WidgetTester tester) async {
+  testWidgets('Switch is focusable and has correct focus color', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Switch(
                 value: value,
-                onChanged: enabled ? (bool newValue) {
+                onChanged: enabled ? (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -875,7 +875,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch with splash radius set', (WidgetTester tester) async {
+  testWidgets('Switch with splash radius set', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const double splashRadius = 30;
     Widget buildApp() {
@@ -885,7 +885,7 @@ void main() {
           child: Center(
             child: Switch(
               value: true,
-              onChanged: (bool newValue) {},
+              onChanged: (final bool newValue) {},
               focusColor: Colors.orange[500],
               autofocus: true,
               splashRadius: splashRadius,
@@ -902,17 +902,17 @@ void main() {
     );
   });
 
-  testWidgets('Switch can be hovered and has correct hover color', (WidgetTester tester) async {
+  testWidgets('Switch can be hovered and has correct hover color', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Switch(
                 value: value,
-                onChanged: enabled ? (bool newValue) {
+                onChanged: enabled ? (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -977,18 +977,18 @@ void main() {
     );
   });
 
-  testWidgets('Switch can be toggled by keyboard shortcuts', (WidgetTester tester) async {
+  testWidgets('Switch can be toggled by keyboard shortcuts', (final WidgetTester tester) async {
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     bool value = true;
-    Widget buildApp({bool enabled = true}) {
+    Widget buildApp({final bool enabled = true}) {
       return MaterialApp(
         theme: theme,
         home: Material(
           child: Center(
-            child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+            child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
               return Switch(
                 value: value,
-                onChanged: enabled ? (bool newValue) {
+                onChanged: enabled ? (final bool newValue) {
                   setState(() {
                     value = newValue;
                   });
@@ -1018,7 +1018,7 @@ void main() {
     expect(value, isTrue);
   });
 
-  testWidgets('Switch changes mouse cursor when hovered', (WidgetTester tester) async {
+  testWidgets('Switch changes mouse cursor when hovered', (final WidgetTester tester) async {
     // Test Switch.adaptive() constructor
     await tester.pumpWidget(
       MaterialApp(
@@ -1032,7 +1032,7 @@ void main() {
                 child: Switch.adaptive(
                   mouseCursor: SystemMouseCursors.text,
                   value: true,
-                  onChanged: (_) {},
+                  onChanged: (final _) {},
                 ),
               ),
             ),
@@ -1061,7 +1061,7 @@ void main() {
                 child: Switch(
                   mouseCursor: SystemMouseCursors.text,
                   value: true,
-                  onChanged: (_) {},
+                  onChanged: (final _) {},
                 ),
               ),
             ),
@@ -1085,7 +1085,7 @@ void main() {
                 cursor: SystemMouseCursors.forbidden,
                 child: Switch(
                   value: true,
-                  onChanged: (_) {},
+                  onChanged: (final _) {},
                 ),
               ),
             ),
@@ -1122,7 +1122,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Material switch should not recreate its render object when disabled', (WidgetTester tester) async {
+  testWidgets('Material switch should not recreate its render object when disabled', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/61247.
     bool value = true;
     bool enabled = true;
@@ -1133,13 +1133,13 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               stateSetter = setState;
               return Material(
                 child: Center(
                   child: Switch(
                     value: value,
-                    onChanged: !enabled ? null : (bool newValue) {
+                    onChanged: !enabled ? null : (final bool newValue) {
                       setState(() {
                         value = newValue;
                       });
@@ -1153,7 +1153,7 @@ void main() {
       ),
     );
 
-    final ToggleableStateMixin oldSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
+    final ToggleableStateMixin oldSwitchState = tester.state(find.byWidgetPredicate((final Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
     stateSetter(() { value = false; });
     await tester.pump();
@@ -1161,7 +1161,7 @@ void main() {
     stateSetter(() { enabled = false; });
     await tester.pump();
 
-    final ToggleableStateMixin updatedSwitchState = tester.state(find.byWidgetPredicate((Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
+    final ToggleableStateMixin updatedSwitchState = tester.state(find.byWidgetPredicate((final Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch'));
 
     expect(updatedSwitchState.isInteractive, false);
     expect(updatedSwitchState, oldSwitchState);
@@ -1169,13 +1169,13 @@ void main() {
     expect(updatedSwitchState.position.isDismissed, false);
   });
 
-  testWidgets('Switch thumb color resolves in active/enabled states', (WidgetTester tester) async {
+  testWidgets('Switch thumb color resolves in active/enabled states', (final WidgetTester tester) async {
     const Color activeEnabledThumbColor = Color(0xFF000001);
     const Color activeDisabledThumbColor = Color(0xFF000002);
     const Color inactiveEnabledThumbColor = Color(0xFF000003);
     const Color inactiveDisabledThumbColor = Color(0xFF000004);
 
-    Color getThumbColor(Set<MaterialState> states) {
+    Color getThumbColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return activeDisabledThumbColor;
@@ -1191,7 +1191,7 @@ void main() {
     final MaterialStateProperty<Color> thumbColor =
       MaterialStateColor.resolveWith(getThumbColor);
 
-    Widget buildSwitch({required bool enabled, required bool active}) {
+    Widget buildSwitch({required final bool enabled, required final bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: Material(
@@ -1199,7 +1199,7 @@ void main() {
             child: Switch(
               thumbColor: thumbColor,
               value: active,
-              onChanged: enabled ? (_) { } : null,
+              onChanged: enabled ? (final _) { } : null,
             ),
           ),
         ),
@@ -1274,13 +1274,13 @@ void main() {
     );
   });
 
-  testWidgets('Switch thumb color resolves in hovered/focused states', (WidgetTester tester) async {
+  testWidgets('Switch thumb color resolves in hovered/focused states', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredThumbColor = Color(0xFF000001);
     const Color focusedThumbColor = Color(0xFF000002);
 
-    Color getThumbColor(Set<MaterialState> states) {
+    Color getThumbColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return hoveredThumbColor;
       }
@@ -1303,7 +1303,7 @@ void main() {
               autofocus: true,
               value: true,
               thumbColor: thumbColor,
-              onChanged: (_) { },
+              onChanged: (final _) { },
             ),
           ),
         ),
@@ -1350,13 +1350,13 @@ void main() {
     );
   });
 
-  testWidgets('Track color resolves in active/enabled states', (WidgetTester tester) async {
+  testWidgets('Track color resolves in active/enabled states', (final WidgetTester tester) async {
     const Color activeEnabledTrackColor = Color(0xFF000001);
     const Color activeDisabledTrackColor = Color(0xFF000002);
     const Color inactiveEnabledTrackColor = Color(0xFF000003);
     const Color inactiveDisabledTrackColor = Color(0xFF000004);
 
-    Color getTrackColor(Set<MaterialState> states) {
+    Color getTrackColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         if (states.contains(MaterialState.selected)) {
           return activeDisabledTrackColor;
@@ -1372,7 +1372,7 @@ void main() {
     final MaterialStateProperty<Color> trackColor =
       MaterialStateColor.resolveWith(getTrackColor);
 
-    Widget buildSwitch({required bool enabled, required bool active}) {
+    Widget buildSwitch({required final bool enabled, required final bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: Material(
@@ -1380,7 +1380,7 @@ void main() {
             child: Switch(
               trackColor: trackColor,
               value: active,
-              onChanged: enabled ? (_) { } : null,
+              onChanged: enabled ? (final _) { } : null,
             ),
           ),
         ),
@@ -1439,13 +1439,13 @@ void main() {
     );
   });
 
-  testWidgets('Switch track color resolves in hovered/focused states', (WidgetTester tester) async {
+  testWidgets('Switch track color resolves in hovered/focused states', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
     const Color hoveredTrackColor = Color(0xFF000001);
     const Color focusedTrackColor = Color(0xFF000002);
 
-    Color getTrackColor(Set<MaterialState> states) {
+    Color getTrackColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.hovered)) {
         return hoveredTrackColor;
       }
@@ -1468,7 +1468,7 @@ void main() {
               autofocus: true,
               value: true,
               trackColor: trackColor,
-              onChanged: (_) { },
+              onChanged: (final _) { },
             ),
           ),
         ),
@@ -1505,11 +1505,11 @@ void main() {
     );
   });
 
-  testWidgets('Switch thumb color is blended against surface color', (WidgetTester tester) async {
+  testWidgets('Switch thumb color is blended against surface color', (final WidgetTester tester) async {
     final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
     final ThemeData theme = ThemeData.light();
 
-    Color getThumbColor(Set<MaterialState> states) {
+    Color getThumbColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
         return activeDisabledThumbColor;
       }
@@ -1519,7 +1519,7 @@ void main() {
     final MaterialStateProperty<Color> thumbColor =
       MaterialStateColor.resolveWith(getThumbColor);
 
-    Widget buildSwitch({required bool enabled, required bool active}) {
+    Widget buildSwitch({required final bool enabled, required final bool active}) {
       return Directionality(
         textDirection: TextDirection.rtl,
         child: Theme(
@@ -1529,7 +1529,7 @@ void main() {
               child: Switch(
                 thumbColor: thumbColor,
                 value: active,
-                onChanged: enabled ? (_) { } : null,
+                onChanged: enabled ? (final _) { } : null,
               ),
             ),
           ),
@@ -1556,7 +1556,7 @@ void main() {
     );
   });
 
-  testWidgets('Switch overlay color resolves in active/pressed/focused/hovered states', (WidgetTester tester) async {
+  testWidgets('Switch overlay color resolves in active/pressed/focused/hovered states', (final WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
     tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
 
@@ -1569,7 +1569,7 @@ void main() {
     const Color hoverColor = Color(0xFF000005);
     const Color focusColor = Color(0xFF000006);
 
-    Color? getOverlayColor(Set<MaterialState> states) {
+    Color? getOverlayColor(final Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
         if (states.contains(MaterialState.selected)) {
           return activePressedOverlayColor;
@@ -1586,7 +1586,7 @@ void main() {
     }
     const double splashRadius = 24.0;
 
-    Widget buildSwitch({bool active = false, bool focused = false, bool useOverlay = true}) {
+    Widget buildSwitch({final bool active = false, final bool focused = false, final bool useOverlay = true}) {
       return MaterialApp(
         theme: theme,
         home: Scaffold(
@@ -1594,8 +1594,8 @@ void main() {
             focusNode: focusNode,
             autofocus: focused,
             value: active,
-            onChanged: (_) { },
-            thumbColor: MaterialStateProperty.resolveWith<Color>((Set<MaterialState> states) {
+            onChanged: (final _) { },
+            thumbColor: MaterialStateProperty.resolveWith<Color>((final Set<MaterialState> states) {
               if (states.contains(MaterialState.selected)) {
                 return activeThumbColor;
               }
@@ -1707,13 +1707,13 @@ void main() {
     );
   });
 
-  testWidgets('Do not crash when widget disappears while pointer is down', (WidgetTester tester) async {
-    Widget buildSwitch(bool show) {
+  testWidgets('Do not crash when widget disappears while pointer is down', (final WidgetTester tester) async {
+    Widget buildSwitch(final bool show) {
       return MaterialApp(
         theme: theme,
         home: Material(
           child: Center(
-            child: show ? Switch(value: true, onChanged: (_) { }) : Container(),
+            child: show ? Switch(value: true, onChanged: (final _) { }) : Container(),
           ),
         ),
       );
@@ -1731,7 +1731,7 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('disabled switch shows tooltip', (WidgetTester tester) async {
+  testWidgets('disabled switch shows tooltip', (final WidgetTester tester) async {
     const String longPressTooltip = 'long press tooltip';
     const String tapTooltip = 'tap tooltip';
     await tester.pumpWidget(
@@ -1795,7 +1795,7 @@ void main() {
       image = await createTestImage(width: 100, height: 100);
     });
 
-    testWidgets('thumb image shows up', (WidgetTester tester) async {
+    testWidgets('thumb image shows up', (final WidgetTester tester) async {
       imageCache.clear();
       final _TestImageProvider provider1 = _TestImageProvider();
       final _TestImageProvider provider2 = _TestImageProvider();
@@ -1808,13 +1808,13 @@ void main() {
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.android),
           home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               return Material(
                 child: Switch(
                   activeThumbImage: provider1,
                   inactiveThumbImage: provider2,
                   value: value1,
-                  onChanged: (bool val) {
+                  onChanged: (final bool val) {
                     setState(() {
                       value1 = val;
                     });
@@ -1836,7 +1836,7 @@ void main() {
       expect(imageCache.liveImageCount, 2);
     });
 
-    testWidgets('do not crash when imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+    testWidgets('do not crash when imageProvider completes after Switch is disposed', (final WidgetTester tester) async {
       final DelayedImageProvider imageProvider = DelayedImageProvider(image);
 
       await tester.pumpWidget(
@@ -1864,11 +1864,11 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('do not crash when previous imageProvider completes after Switch is disposed', (WidgetTester tester) async {
+    testWidgets('do not crash when previous imageProvider completes after Switch is disposed', (final WidgetTester tester) async {
       final DelayedImageProvider imageProvider1 = DelayedImageProvider(image);
       final DelayedImageProvider imageProvider2 = DelayedImageProvider(image);
 
-      Future<void> buildSwitch(ImageProvider imageProvider) {
+      Future<void> buildSwitch(final ImageProvider imageProvider) {
         return tester.pumpWidget(
           MaterialApp(
             theme: theme,
@@ -1905,7 +1905,7 @@ void main() {
   });
 
   group('Switch M3 tests', () {
-    testWidgets('M3 Switch has a 300-millisecond animation in total', (WidgetTester tester) async {
+    testWidgets('M3 Switch has a 300-millisecond animation in total', (final WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       bool value = false;
       await tester.pumpWidget(
@@ -1914,12 +1914,12 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Material(
                   child: Center(
                     child: Switch(
                       value: value,
-                      onChanged: (bool newValue) {
+                      onChanged: (final bool newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -1945,7 +1945,7 @@ void main() {
       expect(tester.hasRunningAnimations, false);
     });
 
-    testWidgets('M3 Switch has a stadium shape in the middle of the track', (WidgetTester tester) async {
+    testWidgets('M3 Switch has a stadium shape in the middle of the track', (final WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true, colorSchemeSeed: Colors.deepPurple);
       bool value = false;
       await tester.pumpWidget(
@@ -1954,12 +1954,12 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Material(
                   child: Center(
                     child: Switch(
                       value: value,
-                      onChanged: (bool newValue) {
+                      onChanged: (final bool newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -1990,7 +1990,7 @@ void main() {
       );
     });
 
-    testWidgets('M3 Switch thumb bounces in the end of the animation', (WidgetTester tester) async {
+    testWidgets('M3 Switch thumb bounces in the end of the animation', (final WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true);
       bool value = false;
       await tester.pumpWidget(
@@ -1999,12 +1999,12 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.ltr,
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Material(
                   child: Center(
                     child: Switch(
                       value: value,
-                      onChanged: (bool newValue) {
+                      onChanged: (final bool newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -2031,7 +2031,7 @@ void main() {
         find.descendant(
           of: find.byType(Switch),
           matching: find.byWidgetPredicate(
-                (Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch',
+                (final Widget widget) => widget.runtimeType.toString() == '_MaterialSwitch',
           ),
         ),
       );
@@ -2039,7 +2039,7 @@ void main() {
       expect(state.position.value, greaterThan(1));
     });
 
-    testWidgets('Switch has default colors when enabled - M3', (WidgetTester tester) async {
+    testWidgets('Switch has default colors when enabled - M3', (final WidgetTester tester) async {
       final ThemeData theme = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = theme.colorScheme;
       bool value = false;
@@ -2049,13 +2049,13 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Material(
                   child: Center(
                     child: Switch(
                       dragStartBehavior: DragStartBehavior.down,
                       value: value,
-                      onChanged: (bool newValue) {
+                      onChanged: (final bool newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -2104,7 +2104,7 @@ void main() {
       );
     });
 
-    testWidgets('Inactive Switch has default colors when disabled - M3', (WidgetTester tester) async {
+    testWidgets('Inactive Switch has default colors when disabled - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;
 
@@ -2142,7 +2142,7 @@ void main() {
       );
     });
 
-    testWidgets('Active Switch has default colors when disabled - M3', (WidgetTester tester) async {
+    testWidgets('Active Switch has default colors when disabled - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true,
           colorSchemeSeed: const Color(0xff6750a4),
           brightness: Brightness.light);
@@ -2177,7 +2177,7 @@ void main() {
       );
     });
 
-    testWidgets('Switch can be set color - M3', (WidgetTester tester) async {
+    testWidgets('Switch can be set color - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;
 
@@ -2188,13 +2188,13 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+              builder: (final BuildContext context, final StateSetter setState) {
                 return Material(
                   child: Center(
                     child: Switch(
                       dragStartBehavior: DragStartBehavior.down,
                       value: value,
-                      onChanged: (bool newValue) {
+                      onChanged: (final bool newValue) {
                         setState(() {
                           value = newValue;
                         });
@@ -2242,21 +2242,21 @@ void main() {
       );
     });
 
-    testWidgets('Switch is focusable and has correct focus color - M3', (WidgetTester tester) async {
+    testWidgets('Switch is focusable and has correct focus color - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;
       final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       bool value = true;
-      Widget buildApp({bool enabled = true}) {
+      Widget buildApp({final bool enabled = true}) {
         return MaterialApp(
           theme: themeData,
           home: Material(
             child: Center(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged: enabled ? (bool newValue) {
+                  onChanged: enabled ? (final bool newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -2329,20 +2329,20 @@ void main() {
       );
     });
 
-    testWidgets('Switch can be hovered and has correct hover color - M3', (WidgetTester tester) async {
+    testWidgets('Switch can be hovered and has correct hover color - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       bool value = true;
-      Widget buildApp({bool enabled = true}) {
+      Widget buildApp({final bool enabled = true}) {
         return MaterialApp(
           theme: themeData,
           home: Material(
             child: Center(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged: enabled ? (bool newValue) {
+                  onChanged: enabled ? (final bool newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -2401,18 +2401,18 @@ void main() {
       );
     });
 
-    testWidgets('Switch thumb shows correct pressed color - M3', (WidgetTester tester) async {
+    testWidgets('Switch thumb shows correct pressed color - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true);
       final ColorScheme colors = themeData.colorScheme;
-      Widget buildApp({bool enabled = true, bool value = true}) {
+      Widget buildApp({final bool enabled = true, bool value = true}) {
         return MaterialApp(
           theme: themeData,
           home: Material(
             child: Center(
-              child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+              child: StatefulBuilder(builder: (final BuildContext context, final StateSetter setState) {
                 return Switch(
                   value: value,
-                  onChanged: enabled ? (bool newValue) {
+                  onChanged: enabled ? (final bool newValue) {
                     setState(() {
                       value = newValue;
                     });
@@ -2484,7 +2484,7 @@ void main() {
       );
     }, variant: TargetPlatformVariant.mobile());
 
-    testWidgets('Switch thumb color resolves in active/enabled states - M3', (WidgetTester tester) async {
+    testWidgets('Switch thumb color resolves in active/enabled states - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;
       const Color activeEnabledThumbColor = Color(0xFF000001);
@@ -2492,7 +2492,7 @@ void main() {
       const Color inactiveEnabledThumbColor = Color(0xFF000003);
       const Color inactiveDisabledThumbColor = Color(0xFF000004);
 
-      Color getThumbColor(Set<MaterialState> states) {
+      Color getThumbColor(final Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           if (states.contains(MaterialState.selected)) {
             return activeDisabledThumbColor;
@@ -2507,7 +2507,7 @@ void main() {
 
       final MaterialStateProperty<Color> thumbColor = MaterialStateColor.resolveWith(getThumbColor);
 
-      Widget buildSwitch({required bool enabled, required bool active}) {
+      Widget buildSwitch({required final bool enabled, required final bool active}) {
         return Theme(
           data: themeData,
           child: Directionality(
@@ -2517,7 +2517,7 @@ void main() {
                 child: Switch(
                   thumbColor: thumbColor,
                   value: active,
-                  onChanged: enabled ? (_) { } : null,
+                  onChanged: enabled ? (final _) { } : null,
                 ),
               ),
             ),
@@ -2593,7 +2593,7 @@ void main() {
       );
     });
 
-    testWidgets('Switch thumb color resolves in hovered/focused states - M3', (WidgetTester tester) async {
+    testWidgets('Switch thumb color resolves in hovered/focused states - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final ColorScheme colors = themeData.colorScheme;
       final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
@@ -2601,7 +2601,7 @@ void main() {
       const Color hoveredThumbColor = Color(0xFF000001);
       const Color focusedThumbColor = Color(0xFF000002);
 
-      Color getThumbColor(Set<MaterialState> states) {
+      Color getThumbColor(final Set<MaterialState> states) {
         if (states.contains(MaterialState.hovered)) {
           return hoveredThumbColor;
         }
@@ -2625,7 +2625,7 @@ void main() {
                   autofocus: true,
                   value: true,
                   thumbColor: thumbColor,
-                  onChanged: (_) { },
+                  onChanged: (final _) { },
                 ),
               ),
             ),
@@ -2669,14 +2669,14 @@ void main() {
       );
     });
 
-    testWidgets('Track color resolves in active/enabled states - M3', (WidgetTester tester) async {
+    testWidgets('Track color resolves in active/enabled states - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       const Color activeEnabledTrackColor = Color(0xFF000001);
       const Color activeDisabledTrackColor = Color(0xFF000002);
       const Color inactiveEnabledTrackColor = Color(0xFF000003);
       const Color inactiveDisabledTrackColor = Color(0xFF000004);
 
-      Color getTrackColor(Set<MaterialState> states) {
+      Color getTrackColor(final Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           if (states.contains(MaterialState.selected)) {
             return activeDisabledTrackColor;
@@ -2692,7 +2692,7 @@ void main() {
       final MaterialStateProperty<Color> trackColor =
       MaterialStateColor.resolveWith(getTrackColor);
 
-      Widget buildSwitch({required bool enabled, required bool active}) {
+      Widget buildSwitch({required final bool enabled, required final bool active}) {
         return Theme(
           data: themeData,
           child: Directionality(
@@ -2702,7 +2702,7 @@ void main() {
                 child: Switch(
                   trackColor: trackColor,
                   value: active,
-                  onChanged: enabled ? (_) { } : null,
+                  onChanged: enabled ? (final _) { } : null,
                 ),
               ),
             ),
@@ -2762,14 +2762,14 @@ void main() {
       );
     });
 
-    testWidgets('Switch track color resolves in hovered/focused states', (WidgetTester tester) async {
+    testWidgets('Switch track color resolves in hovered/focused states', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xff6750a4), brightness: Brightness.light);
       final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       const Color hoveredTrackColor = Color(0xFF000001);
       const Color focusedTrackColor = Color(0xFF000002);
 
-      Color getTrackColor(Set<MaterialState> states) {
+      Color getTrackColor(final Set<MaterialState> states) {
         if (states.contains(MaterialState.hovered)) {
           return hoveredTrackColor;
         }
@@ -2794,7 +2794,7 @@ void main() {
                   autofocus: true,
                   value: true,
                   trackColor: trackColor,
-                  onChanged: (_) { },
+                  onChanged: (final _) { },
                 ),
               ),
             ),
@@ -2832,13 +2832,13 @@ void main() {
       );
     });
 
-    testWidgets('Track outline color resolves in active/enabled states', (WidgetTester tester) async {
+    testWidgets('Track outline color resolves in active/enabled states', (final WidgetTester tester) async {
       const Color activeEnabledTrackOutlineColor = Color(0xFF000001);
       const Color activeDisabledTrackOutlineColor = Color(0xFF000002);
       const Color inactiveEnabledTrackOutlineColor = Color(0xFF000003);
       const Color inactiveDisabledTrackOutlineColor = Color(0xFF000004);
 
-      Color getTrackOutlineColor(Set<MaterialState> states) {
+      Color getTrackOutlineColor(final Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           if (states.contains(MaterialState.selected)) {
             return activeDisabledTrackOutlineColor;
@@ -2853,7 +2853,7 @@ void main() {
 
       final MaterialStateProperty<Color> trackOutlineColor = MaterialStateColor.resolveWith(getTrackOutlineColor);
 
-      Widget buildSwitch({required bool enabled, required bool active}) {
+      Widget buildSwitch({required final bool enabled, required final bool active}) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Material(
@@ -2861,7 +2861,7 @@ void main() {
               child: Switch(
                 trackOutlineColor: trackOutlineColor,
                 value: active,
-                onChanged: enabled ? (_) { } : null,
+                onChanged: enabled ? (final _) { } : null,
               ),
             ),
           ),
@@ -2908,13 +2908,13 @@ void main() {
       );
     });
 
-    testWidgets('Switch track outline color resolves in hovered/focused states', (WidgetTester tester) async {
+    testWidgets('Switch track outline color resolves in hovered/focused states', (final WidgetTester tester) async {
       final FocusNode focusNode = FocusNode(debugLabel: 'Switch');
       tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
       const Color hoveredTrackOutlineColor = Color(0xFF000001);
       const Color focusedTrackOutlineColor = Color(0xFF000002);
 
-      Color getTrackOutlineColor(Set<MaterialState> states) {
+      Color getTrackOutlineColor(final Set<MaterialState> states) {
         if (states.contains(MaterialState.hovered)) {
           return hoveredTrackOutlineColor;
         }
@@ -2936,7 +2936,7 @@ void main() {
                 autofocus: true,
                 value: true,
                 trackOutlineColor: trackOutlineColor,
-                onChanged: (_) { },
+                onChanged: (final _) { },
               ),
             ),
           ),
@@ -2967,12 +2967,12 @@ void main() {
       );
     });
 
-    testWidgets('Switch thumb color is blended against surface color - M3', (WidgetTester tester) async {
+    testWidgets('Switch thumb color is blended against surface color - M3', (final WidgetTester tester) async {
       final Color activeDisabledThumbColor = Colors.blue.withOpacity(.60);
       final ThemeData theme = ThemeData.light(useMaterial3: true);
       final ColorScheme colors = theme.colorScheme;
 
-      Color getThumbColor(Set<MaterialState> states) {
+      Color getThumbColor(final Set<MaterialState> states) {
         if (states.contains(MaterialState.disabled)) {
           return activeDisabledThumbColor;
         }
@@ -2982,7 +2982,7 @@ void main() {
       final MaterialStateProperty<Color> thumbColor =
       MaterialStateColor.resolveWith(getThumbColor);
 
-      Widget buildSwitch({required bool enabled, required bool active}) {
+      Widget buildSwitch({required final bool enabled, required final bool active}) {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: Theme(
@@ -2992,7 +2992,7 @@ void main() {
                 child: Switch(
                   thumbColor: thumbColor,
                   value: active,
-                  onChanged: enabled ? (_) { } : null,
+                  onChanged: enabled ? (final _) { } : null,
                 ),
               ),
             ),
@@ -3017,21 +3017,21 @@ void main() {
       );
     });
 
-    testWidgets('Switch can set icon - M3', (WidgetTester tester) async {
+    testWidgets('Switch can set icon - M3', (final WidgetTester tester) async {
       final ThemeData themeData = ThemeData(
         useMaterial3: true,
         colorSchemeSeed: const Color(0xff6750a4),
         brightness: Brightness.light);
 
-      MaterialStateProperty<Icon?> thumbIcon(Icon? activeIcon, Icon? inactiveIcon) {
-        return MaterialStateProperty.resolveWith<Icon?>((Set<MaterialState> states) {
+      MaterialStateProperty<Icon?> thumbIcon(final Icon? activeIcon, final Icon? inactiveIcon) {
+        return MaterialStateProperty.resolveWith<Icon?>((final Set<MaterialState> states) {
           if (states.contains(MaterialState.selected)) {
             return activeIcon;
           }
           return inactiveIcon;
         });
       }
-      Widget buildSwitch({required bool enabled, required bool active, Icon? activeIcon, Icon? inactiveIcon}) {
+      Widget buildSwitch({required final bool enabled, required final bool active, final Icon? activeIcon, final Icon? inactiveIcon}) {
         return Theme(
           data: themeData,
           child: Directionality(
@@ -3041,7 +3041,7 @@ void main() {
                 child: Switch(
                   thumbIcon: thumbIcon(activeIcon, inactiveIcon),
                   value: active,
-                  onChanged: enabled ? (_) {} : null,
+                  onChanged: enabled ? (final _) {} : null,
                 ),
               ),
             ),
@@ -3107,12 +3107,12 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   final Completer<ImageInfo> _completer = Completer<ImageInfo>();
 
   @override
-  Future<DelayedImageProvider> obtainKey(ImageConfiguration configuration) {
+  Future<DelayedImageProvider> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<DelayedImageProvider>(this);
   }
 
   @override
-  ImageStreamCompleter load(DelayedImageProvider key, DecoderCallback decode) {
+  ImageStreamCompleter load(final DelayedImageProvider key, final DecoderCallback decode) {
     return OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -3125,7 +3125,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
 }
 
 class _TestImageProvider extends ImageProvider<Object> {
-  _TestImageProvider({ImageStreamCompleter? streamCompleter}) {
+  _TestImageProvider({final ImageStreamCompleter? streamCompleter}) {
     _streamCompleter = streamCompleter
         ?? OneFrameImageStreamCompleter(_completer.future);
   }
@@ -3138,26 +3138,26 @@ class _TestImageProvider extends ImageProvider<Object> {
   int _loadCallCount = 0;
 
   @override
-  Future<Object> obtainKey(ImageConfiguration configuration) {
+  Future<Object> obtainKey(final ImageConfiguration configuration) {
     return SynchronousFuture<_TestImageProvider>(this);
   }
 
   @override
-  void resolveStreamForKey(ImageConfiguration configuration, ImageStream stream, Object key, ImageErrorListener handleError) {
+  void resolveStreamForKey(final ImageConfiguration configuration, final ImageStream stream, final Object key, final ImageErrorListener handleError) {
     super.resolveStreamForKey(configuration, stream, key, handleError);
   }
 
   @override
-  ImageStreamCompleter load(Object key, DecoderCallback decode) {
+  ImageStreamCompleter load(final Object key, final DecoderCallback decode) {
     _loadCallCount += 1;
     return _streamCompleter;
   }
 
-  void complete(ui.Image image) {
+  void complete(final ui.Image image) {
     _completer.complete(ImageInfo(image: image));
   }
 
-  void fail(Object exception, StackTrace? stackTrace) {
+  void fail(final Object exception, final StackTrace? stackTrace) {
     _completer.completeError(exception, stackTrace);
   }
 

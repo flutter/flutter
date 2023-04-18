@@ -56,7 +56,7 @@ typedef CupertinoToolbarBuilder = Widget Function(
 
 class _CupertinoToolbarButtonDivider extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
   }
 }
@@ -118,7 +118,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   static const double kToolbarScreenPadding = 8.0;
 
   // Add the visual vertical line spacer between children buttons.
-  static List<Widget> _addChildrenSpacers(List<Widget> children) {
+  static List<Widget> _addChildrenSpacers(final List<Widget> children) {
     final List<Widget> nextChildren = <Widget>[];
     for (int i = 0; i < children.length; i++) {
       final Widget child = children[i];
@@ -132,7 +132,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 
   // Builds a toolbar just like the default iOS toolbar, with the right color
   // background and a rounded cutout with an arrow.
-  static Widget _defaultToolbarBuilder(BuildContext context, Offset anchor, bool isAbove, Widget child) {
+  static Widget _defaultToolbarBuilder(final BuildContext context, final Offset anchor, final bool isAbove, final Widget child) {
     final Widget outputChild = _CupertinoTextSelectionToolbarShape(
       anchor: anchor,
       isAbove: isAbove,
@@ -168,7 +168,7 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     final EdgeInsets mediaQueryPadding = MediaQuery.paddingOf(context);
 
@@ -222,8 +222,8 @@ class CupertinoTextSelectionToolbar extends StatelessWidget {
 // The anchor should be in global coordinates.
 class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget {
   const _CupertinoTextSelectionToolbarShape({
-    required Offset anchor,
-    required bool isAbove,
+    required final Offset anchor,
+    required final bool isAbove,
     super.child,
   }) : _anchor = anchor,
        _isAbove = isAbove;
@@ -235,14 +235,14 @@ class _CupertinoTextSelectionToolbarShape extends SingleChildRenderObjectWidget 
   final bool _isAbove;
 
   @override
-  _RenderCupertinoTextSelectionToolbarShape createRenderObject(BuildContext context) => _RenderCupertinoTextSelectionToolbarShape(
+  _RenderCupertinoTextSelectionToolbarShape createRenderObject(final BuildContext context) => _RenderCupertinoTextSelectionToolbarShape(
     _anchor,
     _isAbove,
     null,
   );
 
   @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoTextSelectionToolbarShape renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderCupertinoTextSelectionToolbarShape renderObject) {
     renderObject
       ..anchor = _anchor
       ..isAbove = _isAbove;
@@ -269,7 +269,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
   Offset get anchor => _anchor;
   Offset _anchor;
-  set anchor(Offset value) {
+  set anchor(final Offset value) {
     if (value == _anchor) {
       return;
     }
@@ -279,7 +279,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
 
   bool get isAbove => _isAbove;
   bool _isAbove;
-  set isAbove(bool value) {
+  set isAbove(final bool value) {
     if (_isAbove == value) {
       return;
     }
@@ -356,7 +356,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
+  void paint(final PaintingContext context, final Offset offset) {
     if (child == null) {
       return;
     }
@@ -367,7 +367,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
       offset + childParentData.offset,
       Offset.zero & child!.size,
       _clipPath(),
-      (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
+      (final PaintingContext innerContext, final Offset innerOffset) => innerContext.paintChild(child!, innerOffset),
       oldLayer: _clipPathLayer.layer,
     );
   }
@@ -382,7 +382,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   }
 
   @override
-  void debugPaintSize(PaintingContext context, Offset offset) {
+  void debugPaintSize(final PaintingContext context, final Offset offset) {
     assert(() {
       if (child == null) {
         return true;
@@ -406,7 +406,7 @@ class _RenderCupertinoTextSelectionToolbarShape extends RenderShiftedBox {
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     // Positions outside of the clipped area of the child are not counted as
     // hits.
     final BoxParentData childParentData = child!.parentData! as BoxParentData;
@@ -464,7 +464,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
     _nextPage = _page - 1;
   }
 
-  void _statusListener(AnimationStatus status) {
+  void _statusListener(final AnimationStatus status) {
     if (status != AnimationStatus.dismissed) {
       return;
     }
@@ -489,7 +489,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 
   @override
-  void didUpdateWidget(_CupertinoTextSelectionToolbarContent oldWidget) {
+  void didUpdateWidget(final _CupertinoTextSelectionToolbarContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     // If the children are changing, the current page should be reset.
     if (widget.children != oldWidget.children) {
@@ -507,7 +507,7 @@ class _CupertinoTextSelectionToolbarContentState extends State<_CupertinoTextSel
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return widget.toolbarBuilder(context, widget.anchor, widget.isAbove, FadeTransition(
       opacity: _controller,
       child: _CupertinoTextSelectionToolbarItems(
@@ -551,7 +551,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   final int page;
 
   @override
-  _RenderCupertinoTextSelectionToolbarItems createRenderObject(BuildContext context) {
+  _RenderCupertinoTextSelectionToolbarItems createRenderObject(final BuildContext context) {
     return _RenderCupertinoTextSelectionToolbarItems(
       dividerWidth: dividerWidth,
       page: page,
@@ -559,7 +559,7 @@ class _CupertinoTextSelectionToolbarItems extends RenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _RenderCupertinoTextSelectionToolbarItems renderObject) {
+  void updateRenderObject(final BuildContext context, final _RenderCupertinoTextSelectionToolbarItems renderObject) {
     renderObject
       ..page = page
       ..dividerWidth = dividerWidth;
@@ -585,7 +585,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   @override
   _RenderCupertinoTextSelectionToolbarItems get renderObject => super.renderObject as _RenderCupertinoTextSelectionToolbarItems;
 
-  void _updateRenderObject(RenderBox? child, _CupertinoTextSelectionToolbarItemsSlot slot) {
+  void _updateRenderObject(final RenderBox? child, final _CupertinoTextSelectionToolbarItemsSlot slot) {
     switch (slot) {
       case _CupertinoTextSelectionToolbarItemsSlot.backButton:
         renderObject.backButton = child;
@@ -597,7 +597,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void insertRenderObjectChild(RenderObject child, Object? slot) {
+  void insertRenderObjectChild(final RenderObject child, final Object? slot) {
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
       _updateRenderObject(child as RenderBox, slot);
@@ -614,17 +614,17 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 
   // This is not reachable for children that don't have an IndexedSlot.
   @override
-  void moveRenderObjectChild(RenderObject child, IndexedSlot<Element> oldSlot, IndexedSlot<Element> newSlot) {
+  void moveRenderObjectChild(final RenderObject child, final IndexedSlot<Element> oldSlot, final IndexedSlot<Element> newSlot) {
     assert(child.parent == renderObject);
     renderObject.move(child as RenderBox, after: newSlot.value.renderObject as RenderBox?);
   }
 
-  static bool _shouldPaint(Element child) {
+  static bool _shouldPaint(final Element child) {
     return (child.renderObject!.parentData! as ToolbarItemsParentData).shouldPaint;
   }
 
   @override
-  void removeRenderObjectChild(RenderObject child, Object? slot) {
+  void removeRenderObjectChild(final RenderObject child, final Object? slot) {
     // Check if the child is in a slot.
     if (slot is _CupertinoTextSelectionToolbarItemsSlot) {
       assert(child is RenderBox);
@@ -641,7 +641,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void visitChildren(ElementVisitor visitor) {
+  void visitChildren(final ElementVisitor visitor) {
     slotToChild.values.forEach(visitor);
     for (final Element child in _children) {
       if (!_forgottenChildren.contains(child)) {
@@ -651,7 +651,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void forgetChild(Element child) {
+  void forgetChild(final Element child) {
     assert(slotToChild.containsValue(child) || _children.contains(child));
     assert(!_forgottenChildren.contains(child));
     // Handle forgetting a child in children or in a slot.
@@ -665,7 +665,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   // Mount or update slotted child.
-  void _mountChild(Widget widget, _CupertinoTextSelectionToolbarItemsSlot slot) {
+  void _mountChild(final Widget widget, final _CupertinoTextSelectionToolbarItemsSlot slot) {
     final Element? oldChild = slotToChild[slot];
     final Element? newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
@@ -677,7 +677,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void mount(Element? parent, Object? newSlot) {
+  void mount(final Element? parent, final Object? newSlot) {
     super.mount(parent, newSlot);
     // Mount slotted children.
     final _CupertinoTextSelectionToolbarItems toolbarItems = widget as _CupertinoTextSelectionToolbarItems;
@@ -696,7 +696,7 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
   }
 
   @override
-  void debugVisitOnstageChildren(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(final ElementVisitor visitor) {
     // Visit slot children.
     for (final Element child in slotToChild.values) {
       if (_shouldPaint(child) && !_forgottenChildren.contains(child)) {
@@ -705,12 +705,12 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
     }
     // Visit list children.
     _children
-        .where((Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child))
+        .where((final Element child) => !_forgottenChildren.contains(child) && _shouldPaint(child))
         .forEach(visitor);
   }
 
   @override
-  void update(_CupertinoTextSelectionToolbarItems newWidget) {
+  void update(final _CupertinoTextSelectionToolbarItems newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
 
@@ -729,15 +729,15 @@ class _CupertinoTextSelectionToolbarItemsElement extends RenderObjectElement {
 // The custom RenderBox that helps paginate the menu items.
 class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with ContainerRenderObjectMixin<RenderBox, ToolbarItemsParentData>, RenderBoxContainerDefaultsMixin<RenderBox, ToolbarItemsParentData> {
   _RenderCupertinoTextSelectionToolbarItems({
-    required double dividerWidth,
-    required int page,
+    required final double dividerWidth,
+    required final int page,
   }) : _dividerWidth = dividerWidth,
        _page = page,
        super();
 
   final Map<_CupertinoTextSelectionToolbarItemsSlot, RenderBox> slottedChildren = <_CupertinoTextSelectionToolbarItemsSlot, RenderBox>{};
 
-  RenderBox? _updateChild(RenderBox? oldChild, RenderBox? newChild, _CupertinoTextSelectionToolbarItemsSlot slot) {
+  RenderBox? _updateChild(final RenderBox? oldChild, final RenderBox? newChild, final _CupertinoTextSelectionToolbarItemsSlot slot) {
     if (oldChild != null) {
       dropChild(oldChild);
       slottedChildren.remove(slot);
@@ -749,13 +749,13 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     return newChild;
   }
 
-  bool _isSlottedChild(RenderBox child) {
+  bool _isSlottedChild(final RenderBox child) {
     return child == _backButton || child == _nextButton || child == _nextButtonDisabled;
   }
 
   int _page;
   int get page => _page;
-  set page(int value) {
+  set page(final int value) {
     if (value == _page) {
       return;
     }
@@ -765,7 +765,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
 
   double _dividerWidth;
   double get dividerWidth => _dividerWidth;
-  set dividerWidth(double value) {
+  set dividerWidth(final double value) {
     if (value == _dividerWidth) {
       return;
     }
@@ -775,19 +775,19 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
 
   RenderBox? _backButton;
   RenderBox? get backButton => _backButton;
-  set backButton(RenderBox? value) {
+  set backButton(final RenderBox? value) {
     _backButton = _updateChild(_backButton, value, _CupertinoTextSelectionToolbarItemsSlot.backButton);
   }
 
   RenderBox? _nextButton;
   RenderBox? get nextButton => _nextButton;
-  set nextButton(RenderBox? value) {
+  set nextButton(final RenderBox? value) {
     _nextButton = _updateChild(_nextButton, value, _CupertinoTextSelectionToolbarItemsSlot.nextButton);
   }
 
   RenderBox? _nextButtonDisabled;
   RenderBox? get nextButtonDisabled => _nextButtonDisabled;
-  set nextButtonDisabled(RenderBox? value) {
+  set nextButtonDisabled(final RenderBox? value) {
     _nextButtonDisabled = _updateChild(_nextButtonDisabled, value, _CupertinoTextSelectionToolbarItemsSlot.nextButtonDisabled);
   }
 
@@ -811,7 +811,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     late double firstPageWidth;
     int currentPage = 0;
     int i = -1;
-    visitChildren((RenderObject renderObjectChild) {
+    visitChildren((final RenderObject renderObjectChild) {
       i++;
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData =
@@ -912,8 +912,8 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   }
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    visitChildren((RenderObject renderObjectChild) {
+  void paint(final PaintingContext context, final Offset offset) {
+    visitChildren((final RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
 
@@ -925,14 +925,14 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   }
 
   @override
-  void setupParentData(RenderBox child) {
+  void setupParentData(final RenderBox child) {
     if (child.parentData is! ToolbarItemsParentData) {
       child.parentData = ToolbarItemsParentData();
     }
   }
 
   // Returns true if the single child is hit by the given position.
-  static bool hitTestChild(RenderBox? child, BoxHitTestResult result, { required Offset position }) {
+  static bool hitTestChild(final RenderBox? child, final BoxHitTestResult result, { required final Offset position }) {
     if (child == null) {
       return false;
     }
@@ -944,7 +944,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
     return result.addWithPaintOffset(
       offset: childParentData.offset,
       position: position,
-      hitTest: (BoxHitTestResult result, Offset transformed) {
+      hitTest: (final BoxHitTestResult result, final Offset transformed) {
         assert(transformed == position - childParentData.offset);
         return child.hitTest(result, position: transformed);
       },
@@ -952,7 +952,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   }
 
   @override
-  bool hitTestChildren(BoxHitTestResult result, { required Offset position }) {
+  bool hitTestChildren(final BoxHitTestResult result, { required final Offset position }) {
     // Hit test list children.
     RenderBox? child = lastChild;
     while (child != null) {
@@ -985,7 +985,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   }
 
   @override
-  void attach(PipelineOwner owner) {
+  void attach(final PipelineOwner owner) {
     // Attach list children.
     super.attach(owner);
 
@@ -1008,14 +1008,14 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
 
   @override
   void redepthChildren() {
-    visitChildren((RenderObject renderObjectChild) {
+    visitChildren((final RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       redepthChild(child);
     });
   }
 
   @override
-  void visitChildren(RenderObjectVisitor visitor) {
+  void visitChildren(final RenderObjectVisitor visitor) {
     // Visit the slotted children.
     if (_backButton != null) {
       visitor(_backButton!);
@@ -1032,8 +1032,8 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
 
   // Visit only the children that should be painted.
   @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    visitChildren((RenderObject renderObjectChild) {
+  void visitChildrenForSemantics(final RenderObjectVisitor visitor) {
+    visitChildren((final RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       final ToolbarItemsParentData childParentData = child.parentData! as ToolbarItemsParentData;
       if (childParentData.shouldPaint) {
@@ -1045,7 +1045,7 @@ class _RenderCupertinoTextSelectionToolbarItems extends RenderBox with Container
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
     final List<DiagnosticsNode> value = <DiagnosticsNode>[];
-    visitChildren((RenderObject renderObjectChild) {
+    visitChildren((final RenderObject renderObjectChild) {
       final RenderBox child = renderObjectChild as RenderBox;
       if (child == backButton) {
         value.add(child.toDiagnosticsNode(name: 'back button'));

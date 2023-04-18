@@ -27,19 +27,19 @@ void main() {
     expect(theme.selectionHandleColor, null);
   });
 
-  testWidgets('Default TextSelectionThemeData debugFillProperties', (WidgetTester tester) async {
+  testWidgets('Default TextSelectionThemeData debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
   });
 
-  testWidgets('TextSelectionThemeData implements debugFillProperties', (WidgetTester tester) async {
+  testWidgets('TextSelectionThemeData implements debugFillProperties', (final WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TextSelectionThemeData(
       cursorColor: Color(0xffeeffaa),
@@ -48,8 +48,8 @@ void main() {
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
+        .where((final DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((final DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[
@@ -59,7 +59,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Empty textSelectionTheme will use defaults', (WidgetTester tester) async {
+  testWidgets('Empty textSelectionTheme will use defaults', (final WidgetTester tester) async {
     const Color defaultCursorColor = Color(0xff2196f3);
     const Color defaultSelectionColor = Color(0x662196f3);
     const Color defaultSelectionHandleColor = Color(0xff2196f3);
@@ -89,7 +89,7 @@ void main() {
       MaterialApp(
         home: Material(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return materialTextSelectionControls.buildHandle(
                 context,
                 TextSelectionHandleType.left,
@@ -105,7 +105,7 @@ void main() {
     expect(handle, paints..path(color: defaultSelectionHandleColor));
   });
 
-  testWidgets('ThemeData.textSelectionTheme will be used if provided', (WidgetTester tester) async {
+  testWidgets('ThemeData.textSelectionTheme will be used if provided', (final WidgetTester tester) async {
     const TextSelectionThemeData textSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
@@ -142,7 +142,7 @@ void main() {
         theme: theme,
         home: Material(
           child: Builder(
-            builder: (BuildContext context) {
+            builder: (final BuildContext context) {
               return materialTextSelectionControls.buildHandle(
                 context,
                 TextSelectionHandleType.left,
@@ -158,7 +158,7 @@ void main() {
     expect(handle, paints..path(color: textSelectionTheme.selectionHandleColor));
   });
 
-  testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (WidgetTester tester) async {
+  testWidgets('TextSelectionTheme widget will override ThemeData.textSelectionTheme', (final WidgetTester tester) async {
     const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionColor: Color(0x88888888),
@@ -203,7 +203,7 @@ void main() {
           child: TextSelectionTheme(
             data: widgetTextSelectionTheme,
             child: Builder(
-              builder: (BuildContext context) {
+              builder: (final BuildContext context) {
                 return materialTextSelectionControls.buildHandle(
                   context,
                   TextSelectionHandleType.left,
@@ -220,7 +220,7 @@ void main() {
     expect(handle, paints..path(color: widgetTextSelectionTheme.selectionHandleColor));
   });
 
-  testWidgets('TextField parameters will override theme settings', (WidgetTester tester) async {
+  testWidgets('TextField parameters will override theme settings', (final WidgetTester tester) async {
     const TextSelectionThemeData defaultTextSelectionTheme = TextSelectionThemeData(
       cursorColor: Color(0xffaabbcc),
       selectionHandleColor: Color(0x00ccbbaa),
@@ -269,7 +269,7 @@ void main() {
     expect(renderSelectable.cursorColor, cursorColor.withAlpha(0));
   });
 
-  testWidgets('TextSelectionThem overrides DefaultSelectionStyle', (WidgetTester tester) async {
+  testWidgets('TextSelectionThem overrides DefaultSelectionStyle', (final WidgetTester tester) async {
     const Color themeSelectionColor = Color(0xffaabbcc);
     const Color themeCursorColor = Color(0x00ccbbaa);
     const Color defaultSelectionColor = Color(0xffaa1111);

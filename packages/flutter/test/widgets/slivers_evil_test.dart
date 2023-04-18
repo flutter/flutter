@@ -18,7 +18,7 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
   double get minExtent => 16.0;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(final BuildContext context, final double shrinkOffset, final bool overlapsContent) {
     return Column(
       children: <Widget>[
         Container(height: minExtent),
@@ -28,14 +28,14 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
   }
 
   @override
-  bool shouldRebuild(TestSliverPersistentHeaderDelegate oldDelegate) => false;
+  bool shouldRebuild(final TestSliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
 class TestBehavior extends ScrollBehavior {
   const TestBehavior();
 
   @override
-  Widget buildOverscrollIndicator(BuildContext context, Widget child, ScrollableDetails details) {
+  Widget buildOverscrollIndicator(final BuildContext context, final Widget child, final ScrollableDetails details) {
     return GlowingOverscrollIndicator(
       axisDirection: details.direction,
       color: const Color(0xFFFFFFFF),
@@ -48,16 +48,16 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   const TestScrollPhysics({ super.parent });
 
   @override
-  TestScrollPhysics applyTo(ScrollPhysics? ancestor) {
+  TestScrollPhysics applyTo(final ScrollPhysics? ancestor) {
     return TestScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
   }
 
   @override
-  Tolerance toleranceFor(ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
+  Tolerance toleranceFor(final ScrollMetrics metrics) => const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
 void main() {
-  testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
+  testWidgets('Evil test of sliver features - 1', (final WidgetTester tester) async {
     final GlobalKey centerKey = GlobalKey();
     await tester.pumpWidget(
       MediaQuery(
@@ -69,7 +69,7 @@ void main() {
             child: Scrollbar(
               child: Scrollable(
                 physics: const TestScrollPhysics(),
-                viewportBuilder: (BuildContext context, ViewportOffset offset) {
+                viewportBuilder: (final BuildContext context, final ViewportOffset offset) {
                   return Viewport(
                     anchor: 0.25,
                     offset: offset,
@@ -184,7 +184,7 @@ void main() {
 
   });
 
-  testWidgets('Removing offscreen items above and rescrolling does not crash', (WidgetTester tester) async {
+  testWidgets('Removing offscreen items above and rescrolling does not crash', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: CustomScrollView(
         cacheExtent: 0.0,
@@ -192,7 +192,7 @@ void main() {
           SliverFixedExtentList(
             itemExtent: 100.0,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (final BuildContext context, final int index) {
                 return ColoredBox(
                   color: Colors.blue,
                   child: Text(index.toString()),
@@ -220,7 +220,7 @@ void main() {
           SliverFixedExtentList(
             itemExtent: 100.0,
             delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
+              (final BuildContext context, final int index) {
                 if (index > 3) {
                   return ColoredBox(
                     color: Colors.blue,

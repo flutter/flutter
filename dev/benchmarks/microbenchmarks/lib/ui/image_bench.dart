@@ -82,7 +82,7 @@ Future<void> main() async {
   assert(false, "Don't run benchmarks in debug mode! Use 'flutter run --release'.");
 
   final Stopwatch watch = Stopwatch();
-  await benchmarkWidgets((WidgetTester tester) async {
+  await benchmarkWidgets((final WidgetTester tester) async {
     watch.start();
     for (int i = 0; i < 10; i += 1) {
       await Future.wait(<Future<ui.ImmutableBuffer>>[

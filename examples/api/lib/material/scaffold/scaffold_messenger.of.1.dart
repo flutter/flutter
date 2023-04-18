@@ -31,7 +31,7 @@ class _OfExampleAppState extends State<OfExampleApp> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: _scaffoldMessengerKey,
       home: Scaffold(

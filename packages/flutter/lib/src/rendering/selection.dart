@@ -79,7 +79,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   /// end. Typically, the visual locations should be the same as
   /// [SelectionGeometry.startSelectionPoint] and
   /// [SelectionGeometry.endSelectionPoint].
-  void pushHandleLayers(LayerLink? startHandle, LayerLink? endHandle);
+  void pushHandleLayers(final LayerLink? startHandle, final LayerLink? endHandle);
 
   /// Gets the selected content in this object.
   ///
@@ -97,7 +97,7 @@ abstract class SelectionHandler implements ValueListenable<SelectionGeometry> {
   ///
   /// See also:
   ///  * [SelectionEventType], which contains all of the possible types.
-  SelectionResult dispatchSelectionEvent(SelectionEvent event);
+  SelectionResult dispatchSelectionEvent(final SelectionEvent event);
 }
 
 /// The selected content in a [Selectable] or [SelectionHandler].
@@ -137,7 +137,7 @@ class SelectedContent {
 ///  * [SelectionArea], which provides an overview of selection system.
 mixin Selectable implements SelectionHandler {
   /// {@macro flutter.rendering.RenderObject.getTransformTo}
-  Matrix4 getTransformTo(RenderObject? ancestor);
+  Matrix4 getTransformTo(final RenderObject? ancestor);
 
   /// The size of this [Selectable].
   Size get size;
@@ -160,7 +160,7 @@ mixin SelectionRegistrant on Selectable {
   /// [SelectionGeometry.hasContent] returned by the [Selectable] is true.
   SelectionRegistrar? get registrar => _registrar;
   SelectionRegistrar? _registrar;
-  set registrar(SelectionRegistrar? value) {
+  set registrar(final SelectionRegistrar? value) {
     if (value == _registrar) {
       return;
     }
@@ -214,7 +214,7 @@ abstract final class SelectionUtils {
   /// considered to be lower than `targetRect` in screen order. Returns
   /// [SelectionResult.next] if the point is considered to be higher than
   /// `targetRect` in screen order.
-  static SelectionResult getResultBasedOnRect(Rect targetRect, Offset point) {
+  static SelectionResult getResultBasedOnRect(final Rect targetRect, final Offset point) {
     if (targetRect.contains(point)) {
       return SelectionResult.end;
     }
@@ -250,7 +250,7 @@ abstract final class SelectionUtils {
   /// For points in Area 2:
   ///   Move them to bottom-right of the rect if text direction is ltr, or
   ///   bottom-left if rtl.
-  static Offset adjustDragOffset(Rect targetRect, Offset point, {TextDirection direction = TextDirection.ltr}) {
+  static Offset adjustDragOffset(final Rect targetRect, final Offset point, {final TextDirection direction = TextDirection.ltr}) {
     if (targetRect.contains(point)) {
       return point;
     }
@@ -506,9 +506,9 @@ class DirectionallyExtendSelectionEvent extends SelectionEvent {
   /// Makes a copy of this object with its property replaced with the new
   /// values.
   DirectionallyExtendSelectionEvent copyWith({
-    double? dx,
-    bool? isEnd,
-    SelectionExtendDirection? direction,
+    final double? dx,
+    final bool? isEnd,
+    final SelectionExtendDirection? direction,
   }) {
     return DirectionallyExtendSelectionEvent(
       dx: dx ?? this.dx,
@@ -539,13 +539,13 @@ abstract class SelectionRegistrar {
   ///
   /// A [Selectable] must register with the [SelectionRegistrar] in order to
   /// receive selection events.
-  void add(Selectable selectable);
+  void add(final Selectable selectable);
 
   /// Removes the [selectable] from the registrar.
   ///
   /// A [Selectable] must unregister itself if it is removed from the rendering
   /// tree.
-  void remove(Selectable selectable);
+  void remove(final Selectable selectable);
 }
 
 /// The status that indicates whether there is a selection and whether the
@@ -636,10 +636,10 @@ class SelectionGeometry {
 
   /// Makes a copy of this object with the given values updated.
   SelectionGeometry copyWith({
-    SelectionPoint? startSelectionPoint,
-    SelectionPoint? endSelectionPoint,
-    SelectionStatus? status,
-    bool? hasContent,
+    final SelectionPoint? startSelectionPoint,
+    final SelectionPoint? endSelectionPoint,
+    final SelectionStatus? status,
+    final bool? hasContent,
   }) {
     return SelectionGeometry(
       startSelectionPoint: startSelectionPoint ?? this.startSelectionPoint,
@@ -650,7 +650,7 @@ class SelectionGeometry {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -700,7 +700,7 @@ class SelectionPoint {
   final TextSelectionHandleType handleType;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }

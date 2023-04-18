@@ -17,9 +17,9 @@ class Data {
   final int value;
 }
 
-List<Data> test(int length) {
+List<Data> test(final int length) {
   return List<Data>.generate(length,
-      (int index) => Data(index * index));
+      (final int index) => Data(index * index));
 }
 
 Future<void> main() async {

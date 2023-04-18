@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics 2', (WidgetTester tester) async {
+  testWidgets('Semantics 2', (final WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // this test is the same as the test in Semantics 1, but

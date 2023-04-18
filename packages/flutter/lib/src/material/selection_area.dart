@@ -92,7 +92,7 @@ class SelectionArea extends StatefulWidget {
   /// {@macro flutter.widgets.ProxyWidget.child}
   final Widget child;
 
-  static Widget _defaultContextMenuBuilder(BuildContext context, SelectableRegionState selectableRegionState) {
+  static Widget _defaultContextMenuBuilder(final BuildContext context, final SelectableRegionState selectableRegionState) {
     return AdaptiveTextSelectionToolbar.selectableRegion(
       selectableRegionState: selectableRegionState,
     );
@@ -119,7 +119,7 @@ class _SelectionAreaState extends State<SelectionArea> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     TextSelectionControls? controls = widget.selectionControls;
     switch (Theme.of(context).platform) {

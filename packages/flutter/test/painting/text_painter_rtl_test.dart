@@ -693,5 +693,5 @@ void main() {
   });
 }
 
-String lro(String s) => '${Unicode.LRO}L${s}L${Unicode.PDF}';
-String rlo(String s) => '${Unicode.RLO}R${s}R${Unicode.PDF}';
+String lro(final String s) => '${Unicode.LRO}L${s}L${Unicode.PDF}';
+String rlo(final String s) => '${Unicode.RLO}R${s}R${Unicode.PDF}';

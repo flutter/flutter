@@ -86,7 +86,7 @@ void main() {
     });
   });
 
-  testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
+  testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -96,7 +96,7 @@ void main() {
           physics: const NeverScrollableScrollPhysics(),
           slivers: List<Widget>.generate(
             20,
-            (int index) {
+            (final int index) {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
@@ -152,7 +152,7 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -161,7 +161,7 @@ void main() {
           controller: controller,
           slivers: List<Widget>.generate(
             20,
-            (int index) {
+            (final int index) {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
@@ -223,7 +223,7 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -233,7 +233,7 @@ void main() {
           scrollDirection: Axis.horizontal,
           slivers: List<Widget>.generate(
             20,
-            (int index) {
+            (final int index) {
               return SliverToBoxAdapter(
                 child: Focus(
                   autofocus: index == 0,
@@ -283,7 +283,7 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
+  testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       MaterialApp(
@@ -295,7 +295,7 @@ void main() {
             scrollDirection: Axis.horizontal,
             slivers: List<Widget>.generate(
               20,
-                  (int index) {
+                  (final int index) {
                 return SliverToBoxAdapter(
                   child: Focus(
                     autofocus: index == 0,
@@ -346,7 +346,7 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgets('Reversed vertical scrollables are scrolled when activated via keyboard.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
@@ -357,7 +357,7 @@ void main() {
           reverse: true,
           slivers: List<Widget>.generate(
             20,
-            (int index) {
+            (final int index) {
               return SliverToBoxAdapter(
                 child: Focus(
                   focusNode: focusNode,
@@ -420,7 +420,7 @@ void main() {
     );
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgets('Reversed horizontal scrollables are scrolled when activated via keyboard.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
@@ -432,7 +432,7 @@ void main() {
           reverse: true,
           slivers: List<Widget>.generate(
             20,
-            (int index) {
+            (final int index) {
               return SliverToBoxAdapter(
                 child: Focus(
                   focusNode: focusNode,
@@ -479,9 +479,9 @@ void main() {
     await tester.pumpAndSettle();
   }, variant: KeySimulatorTransitModeVariant.all());
 
-  testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (final WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
+    final List<String> items = List<String>.generate(20, (final int index) => 'Item $index');
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.fuchsia),
@@ -489,7 +489,7 @@ void main() {
           controller: controller,
           center: const ValueKey<String>('Center'),
           slivers: items.map<Widget>(
-            (String item) {
+            (final String item) {
               return SliverToBoxAdapter(
                 key: item == 'Item 10' ? const ValueKey<String>('Center') : null,
                 child: Focus(

@@ -19,7 +19,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
   final SearchController controller = SearchController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData themeData = ThemeData(useMaterial3: true);
 
     return MaterialApp(
@@ -30,7 +30,7 @@ class _SearchBarAppState extends State<SearchBarApp> {
           children: <Widget>[
             SearchAnchor(
                 searchController: controller,
-                builder: (BuildContext context, SearchController controller) {
+                builder: (final BuildContext context, final SearchController controller) {
                   return IconButton(
                     icon: const Icon(Icons.search),
                     onPressed: () {
@@ -38,8 +38,8 @@ class _SearchBarAppState extends State<SearchBarApp> {
                     },
                   );
                 },
-                suggestionsBuilder: (BuildContext context, SearchController controller) {
-                  return List<ListTile>.generate(5, (int index) {
+                suggestionsBuilder: (final BuildContext context, final SearchController controller) {
+                  return List<ListTile>.generate(5, (final int index) {
                     final String item = 'item $index';
                     return ListTile(
                       title: Text(item),

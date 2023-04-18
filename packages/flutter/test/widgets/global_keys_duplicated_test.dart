@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 // There's also some duplicate GlobalKey tests in the framework_test.dart file.
 
 void main() {
-  testWidgets('GlobalKey children of one node', (WidgetTester tester) async {
+  testWidgets('GlobalKey children of one node', (final WidgetTester tester) async {
     // This is actually a test of the regular duplicate key logic, which
     // happens before the duplicate GlobalKey logic.
     await tester.pumpWidget(const Stack(children: <Widget>[
@@ -23,7 +23,7 @@ void main() {
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
   });
 
-  testWidgets('GlobalKey children of two nodes - A', (WidgetTester tester) async {
+  testWidgets('GlobalKey children of two nodes - A', (final WidgetTester tester) async {
     await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -43,7 +43,7 @@ void main() {
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
   });
 
-  testWidgets('GlobalKey children of two different nodes - B', (WidgetTester tester) async {
+  testWidgets('GlobalKey children of two different nodes - B', (final WidgetTester tester) async {
     await tester.pumpWidget(const Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
@@ -61,7 +61,7 @@ void main() {
     expect(error.toString(), endsWith('\nA GlobalKey can only be specified on one widget at a time in the widget tree.'));
   });
 
-  testWidgets('GlobalKey children of two nodes - C', (WidgetTester tester) async {
+  testWidgets('GlobalKey children of two nodes - C', (final WidgetTester tester) async {
     late StateSetter nestedSetState;
     bool flag = false;
     await tester.pumpWidget(Stack(
@@ -70,7 +70,7 @@ void main() {
         const DummyWidget(child: DummyWidget(key: GlobalObjectKey(0))),
         DummyWidget(
           child: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
+            builder: (final BuildContext context, final StateSetter setState) {
               nestedSetState = setState;
               if (flag) {
                 return const DummyWidget(key: GlobalObjectKey(0));
@@ -102,7 +102,7 @@ class DummyWidget extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return child ?? LimitedBox(
       maxWidth: 0.0,
       maxHeight: 0.0,

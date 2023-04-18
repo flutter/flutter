@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: MyHomePage(),
     );
@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SafeArea(
       child: Scaffold(
         key: scaffoldKey,
@@ -128,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
 class OptionModel extends ChangeNotifier {
   double get pointRounding => _pointRounding;
   double _pointRounding = 0.0;
-  set pointRounding(double value) {
+  set pointRounding(final double value) {
     if (value != _pointRounding) {
       _pointRounding = value;
       if (_valleyRounding + _pointRounding > 1) {
@@ -140,7 +140,7 @@ class OptionModel extends ChangeNotifier {
 
   double get valleyRounding => _valleyRounding;
   double _valleyRounding = 0.0;
-  set valleyRounding(double value) {
+  set valleyRounding(final double value) {
     if (value != _valleyRounding) {
       _valleyRounding = value;
       if (_valleyRounding + _pointRounding > 1) {
@@ -152,7 +152,7 @@ class OptionModel extends ChangeNotifier {
 
   double get squash => _squash;
   double _squash = 0.0;
-  set squash(double value) {
+  set squash(final double value) {
     if (value != _squash) {
       _squash = value;
       notifyListeners();
@@ -161,7 +161,7 @@ class OptionModel extends ChangeNotifier {
 
   double get rotation => _rotation;
   double _rotation = 0.0;
-  set rotation(double value) {
+  set rotation(final double value) {
     if (value != _rotation) {
       _rotation = value;
       notifyListeners();
@@ -170,7 +170,7 @@ class OptionModel extends ChangeNotifier {
 
   double get innerRadiusRatio => _innerRadiusRatio;
   double _innerRadiusRatio = 0.4;
-  set innerRadiusRatio(double value) {
+  set innerRadiusRatio(final double value) {
     if (value != _innerRadiusRatio) {
       _innerRadiusRatio = clampDouble(value, 0.0001, double.infinity);
       notifyListeners();
@@ -179,7 +179,7 @@ class OptionModel extends ChangeNotifier {
 
   double get points => _points;
   double _points = 5;
-  set points(double value) {
+  set points(final double value) {
     if (value != _points) {
       _points = value;
       notifyListeners();
@@ -188,7 +188,7 @@ class OptionModel extends ChangeNotifier {
 
   double get lerpAmount => _lerpAmount;
   double _lerpAmount = 0.0;
-  set lerpAmount(double value) {
+  set lerpAmount(final double value) {
     if (value != _lerpAmount) {
       _lerpAmount = value;
       notifyListeners();
@@ -197,7 +197,7 @@ class OptionModel extends ChangeNotifier {
 
   bool get lerpTo => _lerpTo;
   bool _lerpTo = true;
-  set lerpTo(bool value) {
+  set lerpTo(final bool value) {
     if (_lerpTo != value) {
       _lerpTo = value;
       notifyListeners();
@@ -206,7 +206,7 @@ class OptionModel extends ChangeNotifier {
 
   LerpTarget get lerpTarget => _lerpTarget;
   LerpTarget _lerpTarget = LerpTarget.circle;
-  set lerpTarget(LerpTarget value) {
+  set lerpTarget(final LerpTarget value) {
     if (value != _lerpTarget) {
       _lerpTarget = value;
       notifyListeners();
@@ -245,7 +245,7 @@ class _OptionsState extends State<Options> {
   }
 
   @override
-  void didUpdateWidget(Options oldWidget) {
+  void didUpdateWidget(final Options oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.model != oldWidget.model) {
       oldWidget.model.removeListener(_modelChanged);
@@ -266,7 +266,7 @@ class _OptionsState extends State<Options> {
   double sliderValue = 0.0;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 10.0),
       child: Column(
@@ -278,7 +278,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Point Rounding',
                   value: widget.model.pointRounding,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.pointRounding = value;
                   },
                 ),
@@ -287,7 +287,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Valley Rounding',
                   value: widget.model.valleyRounding,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.valleyRounding = value;
                   },
                 ),
@@ -300,7 +300,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Squash',
                   value: widget.model.squash,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.squash = value;
                   },
                 ),
@@ -310,7 +310,7 @@ class _OptionsState extends State<Options> {
                   label: 'Rotation',
                   value: widget.model.rotation,
                   max: 360,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.rotation = value;
                   },
                 ),
@@ -328,7 +328,7 @@ class _OptionsState extends State<Options> {
                         value: widget.model.points,
                         min: 2,
                         max: 20,
-                        onChanged: (double value) {
+                        onChanged: (final double value) {
                           widget.model.points = value;
                         },
                       ),
@@ -345,7 +345,7 @@ class _OptionsState extends State<Options> {
                 child: ControlSlider(
                   label: 'Inner Radius',
                   value: widget.model.innerRadiusRatio,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     widget.model.innerRadiusRatio = value;
                   },
                 ),
@@ -361,7 +361,7 @@ class _OptionsState extends State<Options> {
                   child: ControlSlider(
                     label: 'Lerp',
                     value: widget.model.lerpAmount,
-                    onChanged: (double value) {
+                    onChanged: (final double value) {
                       widget.model.lerpAmount = value;
                     },
                   ),
@@ -376,7 +376,7 @@ class _OptionsState extends State<Options> {
                       Radio<bool>(
                           value: true,
                           groupValue: widget.model.lerpTo,
-                          onChanged: (bool? value) {
+                          onChanged: (final bool? value) {
                             widget.model.lerpTo = value!;
                           }),
                       const Text('To'),
@@ -385,7 +385,7 @@ class _OptionsState extends State<Options> {
                       Radio<bool>(
                           value: false,
                           groupValue: widget.model.lerpTo,
-                          onChanged: (bool? value) {
+                          onChanged: (final bool? value) {
                             widget.model.lerpTo = value!;
                           }),
                       const Text('From'),
@@ -398,11 +398,11 @@ class _OptionsState extends State<Options> {
                   children: <Widget>[
                     Expanded(
                       child: DropdownButton<LerpTarget>(
-                        items: LerpTarget.values.map<DropdownMenuItem<LerpTarget>>((LerpTarget target) {
+                        items: LerpTarget.values.map<DropdownMenuItem<LerpTarget>>((final LerpTarget target) {
                           return DropdownMenuItem<LerpTarget>(value: target, child: Text(target.name));
                         }).toList(),
                         value: widget.model.lerpTarget,
-                        onChanged: (LerpTarget? value) {
+                        onChanged: (final LerpTarget? value) {
                           if (value == null) {
                             return;
                           }
@@ -445,7 +445,7 @@ class ControlSlider extends StatelessWidget {
   final double max;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: Row(
@@ -473,7 +473,7 @@ class ControlSlider extends StatelessWidget {
 const Color lerpToColor = Colors.red;
 const BorderSide lerpToBorder = BorderSide(width: 5, color: lerpToColor);
 
-ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to = true}) {
+ShapeBorder? lerpBorder(final StarBorder border, final LerpTarget target, final double t, {final bool to = true}) {
   switch (target) {
     case LerpTarget.circle:
       if (to) {

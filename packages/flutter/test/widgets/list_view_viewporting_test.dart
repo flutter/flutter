@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 import 'test_widgets.dart';
 
 void main() {
-  testWidgets('ListView mount/dismount smoke test', (WidgetTester tester) async {
+  testWidgets('ListView mount/dismount smoke test', (final WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
@@ -21,7 +21,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
+            itemBuilder: (final BuildContext context, final int index) {
               callbackTracker.add(index);
               return SizedBox(
                 key: ValueKey<int>(index),
@@ -60,14 +60,14 @@ void main() {
     ]));
   });
 
-  testWidgets('ListView vertical', (WidgetTester tester) async {
+  testWidgets('ListView vertical', (final WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
     // so if our widget is 200 pixels tall, it should fit exactly 3 times.
     // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
 
-    Widget itemBuilder(BuildContext context, int index) {
+    Widget itemBuilder(final BuildContext context, final int index) {
       callbackTracker.add(index);
       return SizedBox(
         key: ValueKey<int>(index),
@@ -123,14 +123,14 @@ void main() {
     callbackTracker.clear();
   });
 
-  testWidgets('ListView horizontal', (WidgetTester tester) async {
+  testWidgets('ListView horizontal', (final WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
     // so if our widget is 200 pixels wide, it should fit exactly 4 times.
     // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
 
-    Widget itemBuilder(BuildContext context, int index) {
+    Widget itemBuilder(final BuildContext context, final int index) {
       callbackTracker.add(index);
       return SizedBox(
         key: ValueKey<int>(index),
@@ -177,11 +177,11 @@ void main() {
     callbackTracker.clear();
   });
 
-  testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
+  testWidgets('ListView reinvoke builders', (final WidgetTester tester) async {
     final List<int> callbackTracker = <int>[];
     final List<String?> text = <String?>[];
 
-    Widget itemBuilder(BuildContext context, int index) {
+    Widget itemBuilder(final BuildContext context, final int index) {
       callbackTracker.add(index);
       return SizedBox(
         key: ValueKey<int>(index),
@@ -191,7 +191,7 @@ void main() {
       );
     }
 
-    void collectText(Widget widget) {
+    void collectText(final Widget widget) {
       if (widget is Text) {
         text.add(widget.data);
       }
@@ -229,11 +229,11 @@ void main() {
     text.clear();
   });
 
-  testWidgets('ListView reinvoke builders', (WidgetTester tester) async {
+  testWidgets('ListView reinvoke builders', (final WidgetTester tester) async {
     late StateSetter setState;
     ThemeData themeData = ThemeData.light();
 
-    Widget itemBuilder(BuildContext context, int index) {
+    Widget itemBuilder(final BuildContext context, final int index) {
       return Container(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
@@ -251,7 +251,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
+          builder: (final BuildContext context, final StateSetter setter) {
             setState = setter;
             return Theme(data: themeData, child: viewport);
           },
@@ -272,8 +272,8 @@ void main() {
     expect(widget.color, equals(Colors.green));
   });
 
-  testWidgets('ListView padding', (WidgetTester tester) async {
-    Widget itemBuilder(BuildContext context, int index) {
+  testWidgets('ListView padding', (final WidgetTester tester) async {
+    Widget itemBuilder(final BuildContext context, final int index) {
       return Container(
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
@@ -299,7 +299,7 @@ void main() {
     expect(firstBox.size.width, equals(800.0 - 12.0));
   });
 
-  testWidgets('ListView underflow extents', (WidgetTester tester) async {
+  testWidgets('ListView underflow extents', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
@@ -434,7 +434,7 @@ void main() {
     expect(position.minScrollExtent, equals(0.0));
   });
 
-  testWidgets('ListView should not paint hidden children', (WidgetTester tester) async {
+  testWidgets('ListView should not paint hidden children', (final WidgetTester tester) async {
     const Text text = Text('test');
     await tester.pumpWidget(
         Directionality(
@@ -463,7 +463,7 @@ void main() {
     expect(list, paintsExactlyCountTimes(#drawParagraph, 2));
   });
 
-  testWidgets('ListView should paint with offset', (WidgetTester tester) async {
+  testWidgets('ListView should paint with offset', (final WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -479,7 +479,7 @@ void main() {
                   delegate: ListView.builder(
                     itemExtent: 100.0,
                     itemCount: 100,
-                    itemBuilder: (_, __) => const SizedBox(
+                    itemBuilder: (final _, final __) => const SizedBox(
                       height: 40.0,
                       child: Text('hey'),
                     ),
@@ -496,7 +496,7 @@ void main() {
     expect(renderObject, paintsExactlyCountTimes(#drawParagraph, 10));
   });
 
-  testWidgets('ListView should paint with rtl', (WidgetTester tester) async {
+  testWidgets('ListView should paint with rtl', (final WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.rtl,
@@ -507,7 +507,7 @@ void main() {
             scrollDirection: Axis.horizontal,
             itemExtent: 200.0,
             itemCount: 10,
-            itemBuilder: (_, int i) => Container(
+            itemBuilder: (final _, final int i) => Container(
               height: 200.0,
               width: 200.0,
               color: i.isEven ? Colors.black : Colors.red,

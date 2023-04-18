@@ -16,13 +16,13 @@ class RenderFixedSize extends RenderBox {
   }
 
   @override
-  double computeMinIntrinsicWidth(double height) => dimension;
+  double computeMinIntrinsicWidth(final double height) => dimension;
   @override
-  double computeMaxIntrinsicWidth(double height) => dimension;
+  double computeMaxIntrinsicWidth(final double height) => dimension;
   @override
-  double computeMinIntrinsicHeight(double width) => dimension;
+  double computeMinIntrinsicHeight(final double width) => dimension;
   @override
-  double computeMaxIntrinsicHeight(double width) => dimension;
+  double computeMaxIntrinsicHeight(final double width) => dimension;
 
   @override
   void performLayout() {
@@ -31,7 +31,7 @@ class RenderFixedSize extends RenderBox {
 }
 
 class RenderParentSize extends RenderProxyBox {
-  RenderParentSize({ required RenderBox child }) : super(child);
+  RenderParentSize({ required final RenderBox child }) : super(child);
 
   @override
   bool get sizedByParent => true;
@@ -48,7 +48,7 @@ class RenderParentSize extends RenderProxyBox {
 }
 
 class RenderIntrinsicSize extends RenderProxyBox {
-  RenderIntrinsicSize({ required RenderBox child }) : super(child);
+  RenderIntrinsicSize({ required final RenderBox child }) : super(child);
 
   @override
   void performLayout() {
@@ -64,15 +64,15 @@ class RenderInvalidIntrinsics extends RenderBox {
   @override
   bool get sizedByParent => true;
   @override
-  double computeMinIntrinsicWidth(double height) => -1;
+  double computeMinIntrinsicWidth(final double height) => -1;
   @override
-  double computeMaxIntrinsicWidth(double height) => -1;
+  double computeMaxIntrinsicWidth(final double height) => -1;
   @override
-  double computeMinIntrinsicHeight(double width) => -1;
+  double computeMinIntrinsicHeight(final double width) => -1;
   @override
-  double computeMaxIntrinsicHeight(double width) => -1;
+  double computeMaxIntrinsicHeight(final double width) => -1;
   @override
-  Size computeDryLayout(BoxConstraints constraints) => Size.zero;
+  Size computeDryLayout(final BoxConstraints constraints) => Size.zero;
 }
 
 void main() {
@@ -138,7 +138,7 @@ void main() {
 
     expect(errorDetails, isNotEmpty);
     expect(
-      errorDetails.map((FlutterErrorDetails details) => details.toString()),
+      errorDetails.map((final FlutterErrorDetails details) => details.toString()),
       everyElement(contains('violate the intrinsic protocol')),
     );
   });
@@ -146,7 +146,7 @@ void main() {
 
 /// Asserts that all unbounded intrinsic dimensions for [object] match
 /// [dimension].
-void _expectIntrinsicDimensions(RenderBox object, double dimension) {
+void _expectIntrinsicDimensions(final RenderBox object, final double dimension) {
   expect(object.getMinIntrinsicWidth(double.infinity), equals(dimension));
   expect(object.getMaxIntrinsicWidth(double.infinity), equals(dimension));
   expect(object.getMinIntrinsicHeight(double.infinity), equals(dimension));

@@ -29,7 +29,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   final Color color;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     const double halfStrokeWidth = 1.0;
     final Paint paint = Paint()..color = color;
     final Rect circle = Rect.fromCircle(
@@ -51,7 +51,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
+  bool shouldRepaint(final _TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
 /// iOS Cupertino styled text selection handle controls.
@@ -72,7 +72,7 @@ class CupertinoTextSelectionHandleControls extends CupertinoTextSelectionControl
 class CupertinoTextSelectionControls extends TextSelectionControls {
   /// Returns the size of the Cupertino handle.
   @override
-  Size getHandleSize(double textLineHeight) {
+  Size getHandleSize(final double textLineHeight) {
     return Size(
       _kSelectionHandleRadius * 2,
       textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap,
@@ -86,14 +86,14 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   )
   @override
   Widget buildToolbar(
-    BuildContext context,
-    Rect globalEditableRegion,
-    double textLineHeight,
-    Offset selectionMidpoint,
-    List<TextSelectionPoint> endpoints,
-    TextSelectionDelegate delegate,
-    ValueNotifier<ClipboardStatus>? clipboardStatus,
-    Offset? lastSecondaryTapDownPosition,
+    final BuildContext context,
+    final Rect globalEditableRegion,
+    final double textLineHeight,
+    final Offset selectionMidpoint,
+    final List<TextSelectionPoint> endpoints,
+    final TextSelectionDelegate delegate,
+    final ValueNotifier<ClipboardStatus>? clipboardStatus,
+    final Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
       clipboardStatus: clipboardStatus,
@@ -110,7 +110,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight, [VoidCallback? onTap]) {
+  Widget buildHandle(final BuildContext context, final TextSelectionHandleType type, final double textLineHeight, [final VoidCallback? onTap]) {
     // iOS selection handles do not respond to taps.
     final Size desiredSize;
     final Widget handle;
@@ -153,7 +153,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
   ///
   /// See [TextSelectionControls.getHandleAnchor].
   @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+  Offset getHandleAnchor(final TextSelectionHandleType type, final double textLineHeight) {
     final Size handleSize;
 
     switch (type) {
@@ -237,7 +237,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
   }
 
   @override
-  void didUpdateWidget(_CupertinoTextSelectionControlsToolbar oldWidget) {
+  void didUpdateWidget(final _CupertinoTextSelectionControlsToolbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.clipboardStatus != widget.clipboardStatus) {
       oldWidget.clipboardStatus?.removeListener(_onChangedClipboardStatus);
@@ -252,7 +252,7 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     // Don't render the menu until the state of the clipboard is known.
     if (widget.handlePaste != null && widget.clipboardStatus?.value == ClipboardStatus.unknown) {
       return const SizedBox.shrink();
@@ -291,8 +291,8 @@ class _CupertinoTextSelectionControlsToolbarState extends State<_CupertinoTextSe
         SizedBox(width: 1.0 / MediaQuery.devicePixelRatioOf(context));
 
     void addToolbarButton(
-      String text,
-      VoidCallback onPressed,
+      final String text,
+      final VoidCallback onPressed,
     ) {
       if (items.isNotEmpty) {
         items.add(onePhysicalPixelVerticalDivider);

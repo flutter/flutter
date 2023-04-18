@@ -70,9 +70,9 @@ void main() {
   }
 
   // Returns the command matching the build_linux call to cmake.
-  FakeCommand cmakeCommand(String buildMode, {
-    String target = 'x64',
-    void Function()? onRun,
+  FakeCommand cmakeCommand(final String buildMode, {
+    final String target = 'x64',
+    final void Function()? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -89,11 +89,11 @@ void main() {
   }
 
   // Returns the command matching the build_linux call to ninja.
-  FakeCommand ninjaCommand(String buildMode, {
-    Map<String, String>? environment,
-    String target = 'x64',
-    void Function()? onRun,
-    String stdout = '',
+  FakeCommand ninjaCommand(final String buildMode, {
+    final Map<String, String>? environment,
+    final String target = 'x64',
+    final void Function()? onRun,
+    final String stdout = '',
   }) {
     return FakeCommand(
       command: <String>[
@@ -714,7 +714,7 @@ set(BINARY_NAME "fizz_bar")
 
 class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   CustomFakeOperatingSystemUtils({
-    HostPlatform hostPlatform = HostPlatform.linux_x64
+    final HostPlatform hostPlatform = HostPlatform.linux_x64
   })  : _hostPlatform = hostPlatform;
 
   final HostPlatform _hostPlatform;
@@ -726,5 +726,5 @@ class CustomFakeOperatingSystemUtils extends Fake implements OperatingSystemUtil
   HostPlatform get hostPlatform => _hostPlatform;
 
   @override
-  List<File> whichAll(String execName) => <File>[];
+  List<File> whichAll(final String execName) => <File>[];
 }

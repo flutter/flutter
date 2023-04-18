@@ -40,7 +40,7 @@ Future<bool> isSystemDarkModeEnabled() async {
 }
 
 /// Test conversion of a UTF16 string to UTF8 using the app template utils.
-Future<String> testStringConversion(Int32List twoByteCodes) async {
+Future<String> testStringConversion(final Int32List twoByteCodes) async {
   final String? converted = await _kMethodChannel.invokeMethod<String?>('convertString', twoByteCodes);
   if (converted == null) {
     throw 'Method channel unavailable.';

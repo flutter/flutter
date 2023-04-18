@@ -259,9 +259,9 @@ late Stream<String> mockStdInStream;
 
 class TestTerminal extends AnsiTerminal {
   TestTerminal({
-    Stdio? stdio,
+    final Stdio? stdio,
     super.platform = const LocalPlatform(),
-    DateTime? now,
+    final DateTime? now,
   }) : super(stdio: stdio ?? Stdio(), now: now ?? DateTime(2018));
 
   @override

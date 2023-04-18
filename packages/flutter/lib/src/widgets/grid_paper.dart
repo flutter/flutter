@@ -19,7 +19,7 @@ class _GridPaperPainter extends CustomPainter {
   final int subdivisions;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Paint linePaint = Paint()
       ..color = color;
     final double allDivisions = (divisions * subdivisions).toDouble();
@@ -34,7 +34,7 @@ class _GridPaperPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_GridPaperPainter oldPainter) {
+  bool shouldRepaint(final _GridPaperPainter oldPainter) {
     return oldPainter.color != color
         || oldPainter.interval != interval
         || oldPainter.divisions != divisions
@@ -42,7 +42,7 @@ class _GridPaperPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Offset position) => false;
+  bool hitTest(final Offset position) => false;
 }
 
 /// A widget that draws a rectilinear grid of lines one pixel wide.
@@ -103,7 +103,7 @@ class GridPaper extends StatelessWidget {
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return CustomPaint(
       foregroundPainter: _GridPaperPainter(
         color: color,

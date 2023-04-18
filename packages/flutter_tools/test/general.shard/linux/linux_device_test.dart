@@ -160,7 +160,7 @@ void main() {
   });
 }
 
-FlutterProject setUpFlutterProject(Directory directory) {
+FlutterProject setUpFlutterProject(final Directory directory) {
   final FlutterProjectFactory flutterProjectFactory = FlutterProjectFactory(
     fileSystem: directory.fileSystem,
     logger: BufferLogger.test(),
@@ -170,7 +170,7 @@ FlutterProject setUpFlutterProject(Directory directory) {
 
 class FakeLinuxApp extends Fake implements LinuxApp {
   @override
-  String executable(BuildMode buildMode) => switch (buildMode) {
+  String executable(final BuildMode buildMode) => switch (buildMode) {
         BuildMode.debug => 'debug/executable',
         BuildMode.profile => 'profile/executable',
         BuildMode.release => 'release/executable',
@@ -179,7 +179,7 @@ class FakeLinuxApp extends Fake implements LinuxApp {
 }
 class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   FakeOperatingSystemUtils({
-    HostPlatform hostPlatform = HostPlatform.linux_x64
+    final HostPlatform hostPlatform = HostPlatform.linux_x64
   })  : _hostPlatform = hostPlatform;
 
   final HostPlatform _hostPlatform;

@@ -22,7 +22,7 @@ class ToggleButtonsExampleApp extends StatelessWidget {
   const ToggleButtonsExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return const MaterialApp(
       home: ToggleButtonsSample(title: 'ToggleButtons Sample'),
     );
@@ -45,7 +45,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
   bool vertical = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
@@ -61,7 +61,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
-                onPressed: (int index) {
+                onPressed: (final int index) {
                   setState(() {
                     // The button that is tapped is set to true, and the others to false.
                     for (int i = 0; i < _selectedFruits.length; i++) {
@@ -87,7 +87,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
-                onPressed: (int index) {
+                onPressed: (final int index) {
                   // All buttons are selectable.
                   setState(() {
                     _selectedVegetables[index] = !_selectedVegetables[index];
@@ -111,7 +111,7 @@ class _ToggleButtonsSampleState extends State<ToggleButtonsSample> {
               const SizedBox(height: 5),
               ToggleButtons(
                 direction: vertical ? Axis.vertical : Axis.horizontal,
-                onPressed: (int index) {
+                onPressed: (final int index) {
                   setState(() {
                     // The button that is tapped is set to true, and the others to false.
                     for (int i = 0; i < _selectedWeather.length; i++) {

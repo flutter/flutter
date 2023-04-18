@@ -12,7 +12,7 @@ class SlideTransitionExampleApp extends StatelessWidget {
   const SlideTransitionExampleApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: const Text('SlideTransition Sample')),
@@ -51,7 +51,7 @@ class _SlideTransitionExampleState extends State<SlideTransitionExample> with Si
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SlideTransition(
       position: _offsetAnimation,
       child: const Padding(
