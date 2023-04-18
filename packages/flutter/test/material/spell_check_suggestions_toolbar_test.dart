@@ -109,21 +109,7 @@ void main() {
     skip: kIsWeb, // [intended]
   );
 
-  testWidgets('buildSuggestionButtons only considers the first three suggestions', (WidgetTester tester) async {
-    late final BuildContext builderContext;
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: Builder(
-            builder: (BuildContext context) {
-              builderContext = context;
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
-      ),
-    );
-
+  test('buildSuggestionButtons only considers the first three suggestions', () {
     final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       suggestions: <String>[
         'hello',
@@ -133,10 +119,7 @@ void main() {
       ],
     );
     final List<ContextMenuButtonItem>? buttonItems =
-        SpellCheckSuggestionsToolbar.buildButtonItems(
-          builderContext,
-          editableTextState,
-        );
+        SpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
     expect(buttonItems, isNotNull);
     final Iterable<String?> labels = buttonItems!.map((ContextMenuButtonItem buttonItem) {
       return buttonItem.label;
@@ -147,6 +130,15 @@ void main() {
     expect(labels, contains('yell'));
     expect(labels, contains(null)); // For the delete button.
     expect(labels, isNot(contains('yeller')));
+  });
+
+  test('buildButtonItems builds only a delete button when no suggestions', () {
+    final _FakeEditableTextState editableTextState = _FakeEditableTextState();
+    final List<ContextMenuButtonItem>? buttonItems =
+        SpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
+
+    expect(buttonItems, hasLength(1));
+    expect(buttonItems!.first.type, ContextMenuButtonType.delete);
   });
 }
 

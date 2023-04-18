@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -34,23 +35,11 @@ void main() {
     expect(() async {
       await pumpToolbar(<String>['hello', 'yellow', 'yell', 'yeller']);
     }, throwsAssertionError);
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 
-  testWidgets('buildSuggestionButtons only considers the first three suggestions', (WidgetTester tester) async {
-    late final BuildContext builderContext;
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: Builder(
-            builder: (BuildContext context) {
-              builderContext = context;
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
-      ),
-    );
-
+  test('buildSuggestionButtons only considers the first three suggestions', () {
     final _FakeEditableTextState editableTextState = _FakeEditableTextState(
       suggestions: <String>[
         'hello',
@@ -60,10 +49,7 @@ void main() {
       ],
     );
     final List<ContextMenuButtonItem>? buttonItems =
-        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(
-          builderContext,
-          editableTextState,
-        );
+        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
     expect(buttonItems, isNotNull);
     final Iterable<String?> labels = buttonItems!.map((ContextMenuButtonItem buttonItem) {
       return buttonItem.label;
@@ -74,6 +60,35 @@ void main() {
     expect(labels, contains('yell'));
     expect(labels, isNot(contains('yeller')));
   });
+
+  testWidgets('buildButtonItems builds a "No Replacements Found" button when no suggestions', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: _FakeEditableText(),
+      ),
+    );
+    final _FakeEditableTextState editableTextState =
+        tester.state(find.byType(_FakeEditableText));
+    final List<ContextMenuButtonItem>? buttonItems =
+        CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
+
+    expect(buttonItems, isNotNull);
+    expect(buttonItems!.length, 1);
+    expect(buttonItems.first.label, 'No Replacements Found');
+  });
+}
+
+class _FakeEditableText extends EditableText {
+  _FakeEditableText() : super(
+    controller: TextEditingController(),
+    focusNode: FocusNode(),
+    backgroundCursorColor: CupertinoColors.white,
+    cursorColor: CupertinoColors.white,
+    style: const TextStyle(),
+  );
+
+  @override
+  _FakeEditableTextState createState() => _FakeEditableTextState();
 }
 
 class _FakeEditableTextState extends EditableTextState {
@@ -82,7 +97,6 @@ class _FakeEditableTextState extends EditableTextState {
   });
 
   final List<String>? suggestions;
-
   @override
   TextEditingValue get currentTextEditingValue => TextEditingValue.empty;
 

@@ -49,7 +49,6 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-    BuildContext context,
     EditableTextState editableTextState,
   ) {
     // Determine if composing region is misspelled.
@@ -62,8 +61,9 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       return null;
     }
     if (spanAtCursorIndex.suggestions.isEmpty) {
-      assert(debugCheckHasCupertinoLocalizations(context));
-      final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+      assert(debugCheckHasCupertinoLocalizations(editableTextState.context));
+      final CupertinoLocalizations localizations =
+          CupertinoLocalizations.of(editableTextState.context);
       return <ContextMenuButtonItem>[
         ContextMenuButtonItem(
           onPressed: () {},
@@ -97,10 +97,16 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
     // Replacement cannot be performed if the text is read only or obscured.
     assert(!editableTextState.widget.readOnly && !editableTextState.widget.obscureText);
 
-    final TextEditingValue newValue = editableTextState.textEditingValue.replaced(
-      replacementRange,
-      text,
-    );
+    final TextEditingValue newValue = editableTextState.textEditingValue
+        .replaced(
+          replacementRange,
+          text,
+        )
+        .copyWith(
+          selection: TextSelection.collapsed(
+            offset: replacementRange.start + text.length,
+          ),
+        );
     editableTextState.userUpdateTextEditingValue(newValue,SelectionChangedCause.toolbar);
 
     // Schedule a call to bringIntoView() after renderEditable updates.
@@ -110,7 +116,6 @@ class CupertinoSpellCheckSuggestionsToolbar extends StatelessWidget {
       }
     });
     editableTextState.hideToolbar();
-    editableTextState.renderEditable.selectWordEdge(cause: SelectionChangedCause.toolbar);
   }
 
   /// Builds the toolbar buttons based on the [buttonItems].
