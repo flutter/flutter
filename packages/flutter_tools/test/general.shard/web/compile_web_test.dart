@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -39,12 +40,14 @@ void main() {
         TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
       final WebServiceWorker webServiceWorker = target as WebServiceWorker;
       expect(webServiceWorker.isWasm, isTrue, reason: 'should be wasm');
-      expect(webServiceWorker.webRenderer, WebRendererMode.autoDetect);
+      expect(webServiceWorker.webRenderer, WebRendererMode.auto);
 
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
-        'ServiceWorkerStrategy': 'serviceWorkerStrategy',
+        'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
+        'WasmOmitTypeChecks': 'false',
+        'RunWasmOpt': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -57,6 +60,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
@@ -66,8 +70,11 @@ void main() {
       flutterProject,
       'target',
       BuildInfo.debug,
-      'serviceWorkerStrategy',
-      compilerConfig: const WasmCompilerConfig(),
+      ServiceWorkerStrategy.offlineFirst,
+      compilerConfig: const WasmCompilerConfig(
+        omitTypeChecks: false,
+        runWasmOpt: false
+      ),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
@@ -78,7 +85,7 @@ void main() {
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;
     expect(timingEvent.category, 'build');
-    expect(timingEvent.variableName, 'dart2js');
+    expect(timingEvent.variableName, 'dart2wasm');
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
@@ -95,6 +102,7 @@ void main() {
 
     final WebBuilder webBuilder = WebBuilder(
       logger: logger,
+      processManager: FakeProcessManager.any(),
       buildSystem: buildSystem,
       usage: testUsage,
       flutterVersion: flutterVersion,
@@ -105,7 +113,7 @@ void main() {
               flutterProject,
               'target',
               BuildInfo.debug,
-              'serviceWorkerStrategy',
+              ServiceWorkerStrategy.offlineFirst,
               compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));

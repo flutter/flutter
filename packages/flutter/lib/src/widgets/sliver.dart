@@ -1178,9 +1178,7 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 /// child as usual. It just cannot be the target of located events, because it
 /// returns false from [RenderSliver.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools). If
-/// [ignoringSemantics] is null, it uses the value of [ignoring].
+/// {@macro flutter.widgets.IgnorePointer.Semantics}
 ///
 /// See also:
 ///
@@ -1188,11 +1186,14 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
 class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a sliver widget that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
-  /// this render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null.
   const SliverIgnorePointer({
     super.key,
     this.ignoring = true,
+    @Deprecated(
+      'Create a custom sliver ignore pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
     Widget? sliver,
   }) : super(child: sliver);
@@ -1201,14 +1202,18 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
   ///
   /// Regardless of whether this sliver is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
+  ///
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
   final bool ignoring;
 
   /// Whether the semantics of this sliver is ignored when compiling the
   /// semantics tree.
   ///
-  /// If null, defaults to value of [ignoring].
-  ///
-  /// See [SemanticsNode] for additional information about the semantics tree.
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  @Deprecated(
+    'Create a custom sliver ignore pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override
@@ -1358,5 +1363,49 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
+  }
+}
+
+/// A sliver that constrains the cross axis extent of its sliver child.
+///
+/// The [SliverConstrainedCrossAxis] takes a [maxExtent] parameter and uses it as
+/// the cross axis extent of the [SliverConstraints] passed to the sliver child.
+/// The widget ensures that the [maxExtent] is a nonnegative value.
+///
+/// This is useful when you want to apply a custom cross-axis extent constraint
+/// to a sliver child, as slivers typically consume the full cross axis extent.
+///
+/// {@tool dartpad}
+/// In this sample the [SliverConstrainedCrossAxis] sizes its [child] so that the
+/// cross axis extent takes up less space than the actual viewport.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_constrained_cross_axis.0.dart **
+/// {@end-tool}
+
+class SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that constrains the cross axis extent of its sliver child.
+  ///
+  /// The [maxExtent] parameter is required and must be nonnegative.
+  const SliverConstrainedCrossAxis({
+    super.key,
+    required this.maxExtent,
+    required Widget sliver,
+  }) : assert(maxExtent >= 0.0),
+       super(child: sliver);
+
+  /// The cross axis extent to apply to the sliver child.
+  ///
+  /// This value must be nonnegative.
+  final double maxExtent;
+
+  @override
+  RenderSliverConstrainedCrossAxis createRenderObject(BuildContext context) {
+    return RenderSliverConstrainedCrossAxis(maxExtent: maxExtent);
+  }
+
+  @override
+  void updateRenderObject(
+      BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
+    renderObject.maxExtent = maxExtent;
   }
 }

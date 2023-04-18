@@ -8,6 +8,10 @@ import 'package:flutter/foundation.dart';
 ///
 /// See [Icons] for a number of predefined icons available for material
 /// design applications.
+///
+/// In release builds, the Flutter tool will tree shake out of bundled fonts
+/// the code points (or instances of [IconData]) which are not referenced from
+/// Dart app code. See the [staticIconProvider] annotation for more details.
 @immutable
 class IconData {
   /// Creates icon data.
@@ -17,6 +21,11 @@ class IconData {
   ///
   /// The [fontPackage] argument must be non-null when using a font family that
   /// is included in a package. This is used when selecting the font.
+  ///
+  /// Instantiating non-const instances of this class in your app will
+  /// mean the app cannot be built in release mode with icon tree-shaking (it
+  /// need to be explicitly opted out at build time). See [staticIconProvider]
+  /// for more context.
   const IconData(
     this.codePoint, {
     this.fontFamily,
@@ -99,6 +108,20 @@ class _StaticIconProvider {
 /// Annotation for classes that only provide static const [IconData] instances.
 ///
 /// This is a hint to the font tree shaker to ignore the constant instances
-/// of [IconData] appearing in the class when tracking which code points
-/// should be retained in the bundled font.
+/// of [IconData] appearing in the declaration of this class when tree-shaking
+/// unused code points from the bundled font.
+///
+/// Classes with this annotation must have only "static const" members. The
+/// presence of any non-const [IconData] instances will preclude apps
+/// importing the declaration into their application from being able to use
+/// icon tree-shaking during release builds, resulting in larger font assets.
+///
+/// ```dart
+/// @staticIconProvider
+/// abstract final class MyCustomIcons {
+///   static const String fontFamily = 'MyCustomIcons';
+///   static const IconData happyFace = IconData(1, fontFamily: fontFamily);
+///   static const IconData sadFace = IconData(2, fontFamily: fontFamily);
+/// }
+/// ```
 const Object staticIconProvider = _StaticIconProvider();
