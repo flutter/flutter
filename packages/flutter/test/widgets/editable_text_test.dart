@@ -5398,6 +5398,80 @@ void main() {
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
 
+  testWidgets('selection rects sent even when character corners are outside of paintBounds', (WidgetTester tester) async {
+    final List<List<SelectionRect>> log = <List<SelectionRect>>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) {
+      if (methodCall.method == 'TextInput.setSelectionRects') {
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final List<SelectionRect> selectionRects = <SelectionRect>[];
+        for (final dynamic rect in args) {
+          selectionRects.add(SelectionRect(
+            position: (rect as List<dynamic>)[4] as int,
+            bounds: Rect.fromLTWH(rect[0] as double, rect[1] as double, rect[2] as double, rect[3] as double),
+          ));
+        }
+        log.add(selectionRects);
+      }
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController();
+    final ScrollController scrollController = ScrollController();
+    controller.text = 'Text1';
+
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
+
+    Future<void> pumpEditableText({ double? width, double? height, TextAlign textAlign = TextAlign.start }) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: EditableText(
+                  controller: controller,
+                  textAlign: textAlign,
+                  scrollController: scrollController,
+                  maxLines: null,
+                  focusNode: focusNode,
+                  cursorWidth: 0,
+                  key: editableTextKey,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Set height to 1 pixel less than full height.
+    await pumpEditableText(height: 13);
+    expect(log, isEmpty);
+
+    // Scroll so that the top of each character is above the top of the renderEditable
+    // and the bottom of each character is below the bottom of the renderEditable.
+    editableTextKey.currentState!.renderEditable.offset = ViewportOffset.fixed(0.5);
+
+    await tester.showKeyboard(find.byType(EditableText));
+    // We should get all the rects.
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, -0.5, 14.0, 13.5)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(14.0, -0.5, 28.0, 13.5)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(28.0, -0.5, 42.0, 13.5)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(42.0, -0.5, 56.0, 13.5)),
+      SelectionRect(position: 4, bounds: Rect.fromLTRB(56.0, -0.5, 70.0, 13.5))
+    ]);
+    log.clear();
+
+    // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) async {
