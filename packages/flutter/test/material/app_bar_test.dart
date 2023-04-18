@@ -4649,6 +4649,180 @@ void main() {
     expect(appBarHeight(tester), collapsedAppBarHeight + bottomHeight);
   });
 
+  testWidgets('SliverAppBar.medium expanded title has upper limit on text scaling', (WidgetTester tester) async {
+    const String title = 'Medium AppBar';
+    Widget buildAppBar({double textScaleFactor = 1.0}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: MediaQuery(
+          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          child: Material(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar.medium(
+                  title: Text(title),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200,
+                    color: Colors.orange[400],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAppBar());
+
+    final Finder expandedTitle = find.text(title).first;
+    expect(tester.getRect(expandedTitle).height, closeTo(31.9, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
+    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
+    expect(tester.getRect(expandedTitle).height, closeTo(43.0, 0.1));
+  });
+
+  testWidgets('SliverAppBar.large expanded title has upper limit on text scaling', (WidgetTester tester) async {
+    const String title = 'Large AppBar';
+    Widget buildAppBar({double textScaleFactor = 1.0}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: MediaQuery(
+          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          child: Material(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar.large(
+                  title: Text(title),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200,
+                    color: Colors.orange[400],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAppBar());
+
+    final Finder expandedTitle = find.text(title).first;
+    expect(tester.getRect(expandedTitle).height, closeTo(36.0, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
+    expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
+    expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
+  });
+
+  testWidgets('SliverAppBar.medium expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
+    const String title = 'Medium AppBar';
+    Widget buildAppBar({double textScaleFactor = 1.0}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: MediaQuery(
+          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          child: Material(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar.medium(
+                  title: Text(title),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200,
+                    color: Colors.orange[400],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAppBar());
+
+    final Finder expandedTitle = find.text(title).first;
+    Offset titleTop = tester.getTopLeft(expandedTitle);
+    expect(titleTop.dy, 64.0);
+    Offset titleBottom = tester.getBottomLeft(expandedTitle);
+    expect(titleBottom.dy, closeTo(96.0, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
+
+    titleTop = tester.getTopLeft(expandedTitle);
+    expect(titleTop.dy, closeTo(57.0, 0.1));
+    titleBottom = tester.getBottomLeft(expandedTitle);
+    expect(titleBottom.dy, closeTo(100.0, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
+
+    titleTop = tester.getTopLeft(expandedTitle);
+    expect(titleTop.dy, closeTo(57.0, 0.1));
+    titleBottom = tester.getBottomLeft(expandedTitle);
+    expect(titleBottom.dy, closeTo(100.0, 0.1));
+  });
+
+  testWidgets('SliverAppBar.large expanded title position is adjusted with textScaleFactor', (WidgetTester tester) async {
+    const String title = 'Large AppBar';
+    Widget buildAppBar({double textScaleFactor = 1.0}) {
+      return MaterialApp(
+        theme: ThemeData(useMaterial3: true),
+        home: MediaQuery(
+          data: MediaQueryData(textScaleFactor: textScaleFactor),
+          child: Material(
+            child: CustomScrollView(
+              slivers: <Widget>[
+                const SliverAppBar.large(
+                  title: Text(title),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    height: 1200,
+                    color: Colors.orange[400],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildAppBar());
+
+    final Finder expandedTitle = find.text(title).first;
+    Offset titleTop = tester.getTopLeft(expandedTitle);
+    expect(titleTop.dy, closeTo(92.0, 0.1));
+    Offset titleBottom = tester.getBottomLeft(expandedTitle);
+    expect(titleBottom.dy, closeTo(128.0, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
+
+    titleTop = tester.getTopLeft(expandedTitle);
+    expect(titleTop.dy, closeTo(86.1, 0.1));
+    titleBottom = tester.getBottomLeft(expandedTitle);
+    expect(titleBottom.dy, closeTo(134.1, 0.1));
+
+    await tester.pumpWidget(buildAppBar(textScaleFactor: 3.0));
+
+    titleTop = tester.getTopLeft(expandedTitle);
+    expect(titleTop.dy, closeTo(86.1, 0.1));
+    titleBottom = tester.getBottomLeft(expandedTitle);
+    expect(titleBottom.dy, closeTo(134.1, 0.1));
+  });
+
   group('AppBar.forceMaterialTransparency', () {
     Material getAppBarMaterial(WidgetTester tester) {
       return tester.widget<Material>(find
