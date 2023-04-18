@@ -75,12 +75,6 @@ Future<void> _withFlutterLeakTracking(
   WidgetTester tester,
   LeakTrackingTestConfig config,
 ) async {
-  // The method is copied (with improvements) from
-  // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
-
-  // The method is not combined with [testWidgets], because the combining will
-  // impact VSCode's ability to recognize tests.
-
   // Leak tracker does not work for web platform.
   if (kIsWeb) {
     if (!_webWarningPrinted) {
