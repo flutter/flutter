@@ -330,7 +330,7 @@ void main() {
       labelPadding: EdgeInsets.all(25),
       labelStyle: TextStyle(fontSize: 32),
       shape: RoundedRectangleBorder(),
-      iconTheme: shadowedClipThemeIconTheme,
+      iconTheme: shadowedChipThemeIconTheme,
     );
 
     const IconThemeData shadowedCustomIconTheme = IconThemeData(color: Color(0xff332211));
