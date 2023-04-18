@@ -42,10 +42,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ///  * [CupertinoSpellCheckSuggestionsToolbar.editableText], which is similar
   ///    but builds an iOS-style toolbar.
   SpellCheckSuggestionsToolbar.editableText({
+    super.key,
     required EditableTextState editableTextState,
-    // TODO(justinmc): Waiting for my PR that removes the context parameter.
-    // https://github.com/flutter/flutter/pull/124254
-  }) : buttonItems = buildButtonItems(editableTextState) ?? <ContextMenuButtonItems>[],
+  }) : buttonItems = buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
        anchor = getToolbarAnchor(editableTextState.contextMenuAnchors);
 
   /// {@template flutter.material.SpellCheckSuggestionsToolbar.anchor}
@@ -80,7 +79,6 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-    BuildContext context,
     EditableTextState editableTextState,
   ) {
     // Determine if composing region is misspelled.
