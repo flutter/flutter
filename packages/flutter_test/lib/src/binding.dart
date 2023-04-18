@@ -505,6 +505,17 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// then flushes microtasks.
   ///
   /// Set to null to use the default surface size.
+  ///
+  /// To avoid affecting other tests by leaking state, a test that
+  /// uses this method should always reset the surface size to the default.
+  /// For example, using `addTearDown`:
+  /// ```dart
+  ///   await binding.setSurfaceSize(someSize);
+  ///   addTearDown(() => binding.setSurfaceSize(null));
+  /// ```
+  ///
+  /// See also [TestFlutterView.physicalSize], which has a similar effect.
+  // TODO(pdblasi-google): Deprecate this. https://github.com/flutter/flutter/issues/123881
   Future<void> setSurfaceSize(Size? size) {
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
@@ -748,6 +759,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
+    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
+    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   });
 
@@ -1419,6 +1432,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
+    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
+    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   }) {
     assert(!inTest);
@@ -1764,7 +1779,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     renderView = _LiveTestRenderView(
       configuration: createViewConfiguration(),
       onNeedPaint: _handleViewNeedsPaint,
-      window: platformDispatcher.implicitView!,
+      view: platformDispatcher.implicitView!,
     );
     renderView.prepareInitialFrame();
   }
@@ -1916,6 +1931,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       'This parameter has no effect. Use the `timeout` parameter on `testWidgets` instead. '
       'This feature was deprecated after v2.6.0-1.0.pre.'
     )
+    // TODO(pdblasi-google): Do not remove until https://github.com/flutter/flutter/issues/124346
+    // is complete, as this removal will cascade into `integration_test`
     Duration? timeout,
   }) {
     assert(!inTest);
@@ -2063,7 +2080,7 @@ class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
     required super.configuration,
     required this.onNeedPaint,
-    required super.window,
+    required super.view,
   });
 
   @override

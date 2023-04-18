@@ -52,6 +52,7 @@ class ScreenshotCommand extends FlutterCommand {
       defaultsTo: _kDeviceType,
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   final FileSystem fs;

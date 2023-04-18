@@ -177,6 +177,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
@@ -497,6 +498,7 @@ class RunCommand extends RunCommandBase {
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
       commandRunEnableImpeller: enableImpeller.asBool,
       commandRunIOSInterfaceType: iOSInterfaceType,
+      commandRunIsTest: targetFile.endsWith('_test.dart'),
     );
   }
 
@@ -772,7 +774,7 @@ class RunCommand extends RunCommandBase {
       ExitStatus.success,
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
-        getModeName(getBuildMode()),
+        getBuildMode().cliName,
         if (devices!.length == 1)
           getNameForTargetPlatform(await devices![0].targetPlatform)
         else
