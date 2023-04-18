@@ -1036,6 +1036,8 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   Object? _lastException;
   StackTrace? _lastStack;
   ImageStreamCompleterHandle? _completerHandle;
+  /// Whether it is obscured by another route
+  bool _obscured = false;
 
   @override
   void initState() {
@@ -1061,9 +1063,10 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     _resolveImage();
 
     if (TickerMode.of(context)) {
-      _listenToStream();
+      _listenToStream(obscured: _obscured);
+      _obscured = false;
     } else {
-      _stopListeningToStream(keepStreamAlive: true);
+      _obscured = true;
     }
 
     super.didChangeDependencies();
@@ -1138,6 +1141,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
                 }());
               }
             : null,
+        isObscured: () => _obscured,
       );
     }
     return _imageStreamListener!;
@@ -1197,16 +1201,18 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     }
   }
 
-  void _listenToStream() {
-    if (_isListeningToStream) {
-      return;
+  void _listenToStream({bool obscured = false}) {
+    if (!_isListeningToStream) {
+      _imageStream!.addListener(_getListener());
+      _completerHandle?.dispose();
+      _completerHandle = null;
+
+      _isListeningToStream = true;
+    } else {
+      if (obscured && _imageStream?.completer != null) {
+        _imageStream!.completer!.onListenerChanged(_getListener());
+      }
     }
-
-    _imageStream!.addListener(_getListener());
-    _completerHandle?.dispose();
-    _completerHandle = null;
-
-    _isListeningToStream = true;
   }
 
   /// Stops listening to the image stream, if this state object has attached a

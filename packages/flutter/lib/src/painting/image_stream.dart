@@ -165,6 +165,7 @@ class ImageStreamListener {
     this.onImage, {
     this.onChunk,
     this.onError,
+    this.isObscured,
   });
 
   /// Callback for getting notified that an image is available.
@@ -211,8 +212,11 @@ class ImageStreamListener {
   /// to true.
   final ImageErrorListener? onError;
 
+  /// Whether it is obscured by another route
+  final bool Function()? isObscured;
+
   @override
-  int get hashCode => Object.hash(onImage, onChunk, onError);
+  int get hashCode => Object.hash(onImage, onChunk, onError, isObscured);
 
   @override
   bool operator ==(Object other) {
@@ -222,7 +226,8 @@ class ImageStreamListener {
     return other is ImageStreamListener
         && other.onImage == onImage
         && other.onChunk == onChunk
-        && other.onError == onError;
+        && other.onError == onError
+        && other.isObscured == isObscured;
   }
 }
 
@@ -492,6 +497,14 @@ abstract class ImageStreamCompleter with Diagnosticable {
   @protected
   @visibleForTesting
   bool get hasListeners => _listeners.isNotEmpty;
+
+  /// Whether any listeners are unobscured.
+  @protected
+  bool get hasUnobscuredListeners => _listeners.where((ImageStreamListener listener) => listener.isObscured == null || !listener.isObscured!()).isNotEmpty;
+
+  /// Notify [ImageStreamCompleter] that the state of this listener has changed.
+  void onListenerChanged(ImageStreamListener listener) {
+  }
 
   /// We must avoid disposing a completer if it has never had a listener, even
   /// if all [keepAlive] handles get disposed.
@@ -901,14 +914,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     _codec = codec;
     assert(_codec != null);
 
-    if (hasListeners) {
+    if (hasUnobscuredListeners) {
       _decodeNextFrameAndSchedule();
     }
   }
 
   void _handleAppFrame(Duration timestamp) {
     _frameCallbackScheduled = false;
-    if (!hasListeners) {
+    if (!hasUnobscuredListeners) {
       return;
     }
     assert(_nextFrame != null);
@@ -963,7 +976,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       // ImageStreamCompleter listeners removed while waiting for next frame to
       // be decoded.
       // There's no reason to emit the frame without active listeners.
-      if (!hasListeners) {
+      if (!hasUnobscuredListeners) {
         return;
       }
       // This is not an animated image, just return it and don't schedule more
@@ -1008,6 +1021,12 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _timer?.cancel();
       _timer = null;
     }
+  }
+
+  @override
+  void onListenerChanged(ImageStreamListener listener) {
+    super.onListenerChanged(listener);
+    _decodeNextFrameAndSchedule();
   }
 
   @override

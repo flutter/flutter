@@ -881,7 +881,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('TickerMode controls stream registration', (WidgetTester tester) async {
+  testWidgets('Keep image stream listeners when TickerMode is disabled', (WidgetTester tester) async {
     final _TestImageStreamCompleter imageStreamCompleter = _TestImageStreamCompleter();
     final Image image = Image(
       excludeFromSemantics: true,
@@ -900,7 +900,7 @@ void main() {
         child: image,
       ),
     );
-    expect(imageStreamCompleter.listeners.length, 1);
+    expect(imageStreamCompleter.listeners.length, 2);
   });
 
   testWidgets('Verify Image shows correct RenderImage when changing to an already completed provider', (WidgetTester tester) async {
@@ -1199,8 +1199,8 @@ void main() {
     streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
     streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
     await tester.pump();
-    expect(lastFrame, 0);
-    expect(buildCount, 3);
+    expect(lastFrame, 2);
+    expect(buildCount, 4);
 
     await tester.pumpWidget(
       TickerMode(
@@ -1213,8 +1213,8 @@ void main() {
     );
 
     expect(tester.state(find.byType(Image)), same(state));
-    expect(lastFrame, 1); // missed a frame because we weren't animating at the time
-    expect(buildCount, 4);
+    expect(lastFrame, 2);
+    expect(buildCount, 5);
   });
 
   testWidgets('Image invokes loadingBuilder on chunk event notification', (WidgetTester tester) async {
