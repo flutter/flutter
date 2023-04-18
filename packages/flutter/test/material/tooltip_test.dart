@@ -26,7 +26,7 @@ Finder _findTooltipContainer(String tooltipText) {
 }
 
 void main() {
-  testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
@@ -80,7 +80,7 @@ void main() {
     expect(tipInGlobal.dy, 20.0);
   });
 
-  testWidgets('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - center with padding outside overlay', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
@@ -139,7 +139,7 @@ void main() {
     expect(tipInGlobal.dy, 40.0);
   });
 
-  testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
+  testWidgetsWithLeakTracking('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
     final GlobalKey<TooltipState> tooltipKey = GlobalKey<TooltipState>();
     await tester.pumpWidget(
       Directionality(
