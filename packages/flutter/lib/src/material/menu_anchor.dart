@@ -1847,7 +1847,16 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       alignmentOffset: menuPaddingOffset,
       clipBehavior: widget.clipBehavior,
       onClose: widget.onClose,
-      onOpen: widget.onOpen,
+      onOpen: () {
+        if (!_waitingToFocusMenu) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            _menuController._anchor?._focusButton();
+            _waitingToFocusMenu = false;
+          });
+          _waitingToFocusMenu = true;
+        }
+        widget.onOpen?.call();
+      },
       style: widget.menuStyle,
       builder: (BuildContext context, MenuController controller, Widget? child) {
         // Since we don't want to use the theme style or default style from the
@@ -1868,16 +1877,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller.close();
           } else {
             controller.open();
-            if (!_waitingToFocusMenu) {
-              // Only schedule this if it's not already scheduled.
-              SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-                // This has to happen in the next frame because the menu bar is
-                // not focusable until the first menu is open.
-                controller._anchor?._focusButton();
-                _waitingToFocusMenu = false;
-              });
-              _waitingToFocusMenu = true;
-            }
           }
         }
 
