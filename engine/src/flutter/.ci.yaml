@@ -324,6 +324,7 @@ targets:
       - flutter_frontend_server/**
 
   - name: Mac Android AOT Engine
+    bringup: true
     recipe: engine/engine
     properties:
       android_sdk_license: \n24333f8a63b6825ea9c5514f83c2829b004d1fee

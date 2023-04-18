@@ -8,7 +8,8 @@
                     "include_paths": [
                         "out/android_profile/zip_archives/android-arm-profile/darwin-x64.zip"
                     ],
-                    "name": "android_profile"
+                    "name": "android_profile",
+		    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -42,7 +43,8 @@
                     "include_paths": [
                         "out/android_profile_arm64/zip_archives/android-arm64-profile/darwin-x64.zip"
                     ],
-                    "name": "android_profile_arm64"
+                    "name": "android_profile_arm64",
+		    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -77,7 +79,8 @@
                     "include_paths": [
                         "out/android_profile_x64/zip_archives/android-x64-profile/darwin-x64.zip"
                     ],
-                    "name": "android_profile_x64"
+                    "name": "android_profile_x64",
+		    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -112,7 +115,8 @@
                     "include_paths": [
                         "out/android_release/zip_archives/android-arm-release/darwin-x64.zip"
                     ],
-                    "name": "android_release"
+                    "name": "android_release",
+		    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -146,7 +150,8 @@
                     "include_paths": [
                         "out/android_release_arm64/zip_archives/android-arm64-release/darwin-x64.zip"
                     ],
-                    "name": "android_release_arm64"
+                    "name": "android_release_arm64",
+		    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -181,7 +186,8 @@
                     "include_paths": [
                         "out/android_release_x64/zip_archives/android-x64-release/darwin-x64.zip"
                     ],
-                    "name": "android_release_x64"
+                    "name": "android_release_x64",
+		    "realm": "production"
                 }
             ],
             "drone_dimensions": [
