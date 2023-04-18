@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart' show CupertinoTextSelectionToolbar;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -104,7 +105,9 @@ void main() {
     expect(() async {
       await pumpToolbar(<String>['hello', 'yellow', 'yell', 'yeller']);
     }, throwsAssertionError);
-  });
+  },
+    skip: kIsWeb, // [intended]
+  );
 
   testWidgets('buildSuggestionButtons only considers the first three suggestions', (WidgetTester tester) async {
     late final BuildContext builderContext;
