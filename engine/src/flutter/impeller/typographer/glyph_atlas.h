@@ -121,17 +121,6 @@ class GlyphAtlas {
   ///
   std::optional<Rect> FindFontGlyphBounds(const FontGlyphPair& pair) const;
 
-  //----------------------------------------------------------------------------
-  /// @brief      whether this atlas contains all of the same font-glyph pairs
-  ///             as the vector.
-  ///
-  /// @param[in]  new_glyphs  The full set of new glyphs
-  ///
-  /// @return     A vector containing the glyphs from new_glyphs that are not
-  ///             present in the existing atlas. May be empty of there are none.
-  ///
-  FontGlyphPair::Vector HasSamePairs(const FontGlyphPair::Vector& new_glyphs);
-
  private:
   const Type type_;
   std::shared_ptr<Texture> texture_;

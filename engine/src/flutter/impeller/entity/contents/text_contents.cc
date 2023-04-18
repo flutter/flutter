@@ -157,7 +157,7 @@ static bool CommonRender(
   Vector2 screen_offset = (entity.GetTransformation() * offset).Round();
 
   for (const auto& run : frame.GetRuns()) {
-    auto font = run.GetFont();
+    const Font& font = run.GetFont();
 
     for (const auto& glyph_position : run.GetGlyphPositions()) {
       FontGlyphPair font_glyph_pair{font, glyph_position.glyph};
