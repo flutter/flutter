@@ -589,7 +589,7 @@ void main() {
         })!.toJson(),
       ),
       const FakeVmServiceRequest(
-        method: 'reloadSources',
+        method: kReloadSourcesServiceName,
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
@@ -649,7 +649,7 @@ void main() {
         })!.toJson(),
       ),
       const FakeVmServiceRequest(
-        method: 'reloadSources',
+        method: kReloadSourcesServiceName,
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
@@ -713,7 +713,7 @@ void main() {
         })!.toJson(),
       ),
       const FakeVmServiceRequest(
-        method: 'reloadSources',
+        method: kReloadSourcesServiceName,
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
@@ -776,7 +776,7 @@ void main() {
         jsonResponse: fakeVM.toJson(),
       ),
       const FakeVmServiceRequest(
-        method: 'reloadSources',
+        method: kReloadSourcesServiceName,
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,
@@ -866,7 +866,7 @@ void main() {
         jsonResponse: fakeVM.toJson(),
       ),
       const FakeVmServiceRequest(
-        method: 'reloadSources',
+        method: kReloadSourcesServiceName,
         args: <String, Object>{
           'isolateId': '1',
           'pause': false,

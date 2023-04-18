@@ -787,6 +787,68 @@ android {
       expect(androidApk?.id, 'com.example.foo');
     });
 
+    testUsingContext('can call custom gradle task getBuildOptions and parse the result', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stdout: '''
+BuildVariant: freeDebug
+BuildVariant: paidDebug
+BuildVariant: freeRelease
+BuildVariant: paidRelease
+BuildVariant: freeProfile
+BuildVariant: paidProfile
+        ''',
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, <String>['freeDebug', 'paidDebug', 'freeRelease', 'paidRelease', 'freeProfile', 'paidProfile']);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
+    testUsingContext('getBuildOptions returns empty list if gradle returns error', () async {
+      final AndroidGradleBuilder builder = AndroidGradleBuilder(
+        logger: logger,
+        processManager: processManager,
+        fileSystem: fileSystem,
+        artifacts: Artifacts.test(),
+        usage: testUsage,
+        gradleUtils: FakeGradleUtils(),
+        platform: FakePlatform(),
+      );
+      processManager.addCommand(const FakeCommand(
+        command: <String>[
+          'gradlew',
+          '-q',
+          'printBuildVariants',
+        ],
+        stderr: '''
+Gradle Crashed
+        ''',
+        exitCode: 1,
+      ));
+      final List<String> actual = await builder.getBuildVariants(
+        project: FlutterProject.fromDirectoryTest(fileSystem.currentDirectory),
+      );
+      expect(actual, const <String>[]);
+    }, overrides: <Type, Generator>{
+      AndroidStudio: () => FakeAndroidStudio(),
+    });
+
     testUsingContext("doesn't indicate how to consume an AAR when printHowToConsumeAar is false", () async {
       final AndroidGradleBuilder builder = AndroidGradleBuilder(
         logger: logger,
