@@ -5,8 +5,35 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
+import 'package:meta/meta.dart';
 
-typedef LeaksObtainer = void Function(Leaks foundLeaks);
+// The test_api package is not for general use... it's literally for our use.
+// ignore: deprecated_member_use
+import 'package:test_api/test_api.dart' as test_package;
+
+@isTest
+void testWidgetsWithLeakTracking(
+  String description,
+  WidgetTesterCallback callback, {
+  bool? skip,
+  test_package.Timeout? timeout,
+  @Deprecated(
+    'This parameter has no effect. Use `timeout` instead. '
+    'This feature was deprecated after v2.6.0-1.0.pre.'
+  )
+  Duration? initialTimeout,
+  bool semanticsEnabled = true,
+  TestVariant<Object?> variant = const DefaultTestVariant(),
+  dynamic tags,
+}) {
+  testWidgets(description, callback,
+      skip: skip,
+      timeout: timeout,
+      initialTimeout: initialTimeout,
+      semanticsEnabled: semanticsEnabled,
+      variant: variant,
+      tags: tags);
+}
 
 /// Wrapper for [withLeakTracking] with Flutter specific functionality.
 ///
@@ -30,7 +57,7 @@ Future<void> withFlutterLeakTracking(
   StackTraceCollectionConfig stackTraceCollectionConfig =
       const StackTraceCollectionConfig(),
   Duration? timeoutForFinalGarbageCollection,
-  LeaksObtainer? leaksObtainer,
+  LeaksCallback? leaksObtainer,
 }) async {
   // The method is copied (with improvements) from
   // `package:leak_tracker/test/test_infra/flutter_helpers.dart`.
