@@ -280,7 +280,7 @@ abstract class FlutterVersion {
   ///
   /// Throws [VersionCheckError] if a git command fails, for example, when the
   /// remote git repository is not reachable due to a network issue.
-  Future<String> fetchRemoteFrameworkCommitDate() async {
+  static Future<String> fetchRemoteFrameworkCommitDate() async {
     try {
       // Fetch upstream branch's commit and tags
       await _run(<String>['git', 'fetch', '--tags']);
@@ -418,9 +418,9 @@ class _FlutterVersionFromFile extends FlutterVersion {
         gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String),
         workingDirectory: workingDirectory,
       );
+      // ignore: avoid_catches_without_on_clauses
     } catch (err) {
       globals.printTrace('Failed to parse ${jsonFile.path} with $err');
-      rethrow;
       // Returning null means fallback to git implementation.
       return null;
     }
@@ -491,17 +491,6 @@ class _FlutterVersionGit extends FlutterVersion {
     return _repositoryUrl;
   }
 
-  String? _frameworkAge;
-
-  @override
-  String get frameworkAge {
-    return _frameworkAge ??= _runGit(
-      FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
-      globals.processUtils,
-      _workingDirectory,
-    );
-  }
-
   @override
   String get devToolsVersion => globals.cache.devToolsVersion;
 
@@ -511,7 +500,7 @@ class _FlutterVersionGit extends FlutterVersion {
   @override
   String get engineRevision => globals.cache.engineRevision;
 
-  // TODO this is late since fetching tags can overwrite it.
+  // this is late since fetching tags can overwrite it.
   late String _frameworkVersion;
   @override
   String get frameworkVersion => _frameworkVersion;
