@@ -327,8 +327,9 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// {@endtemplate}
   final double? minHeight;
 
-  /// The border radius of the widget.
+  /// The border radius of the background shape.
   ///
+  /// This covers the entire widget, including the indicator.
   /// By default it is [BorderRadius.zero], which produces a rectangular shape.
   final BorderRadiusGeometry outerBorderRadius;
 
