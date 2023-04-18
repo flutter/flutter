@@ -1,4 +1,4 @@
-Signature: 975267d3db8b34ce059b689518c274b0
+Signature: 7ce25f76f56161f234260188050242e2
 
 ====================================================================================================
 LIBRARY: etc1
@@ -2342,6 +2342,7 @@ ORIGIN: ../../../third_party/skia/include/effects/SkLumaColorFilter.h + ../../..
 ORIGIN: ../../../third_party/skia/include/effects/SkPerlinNoiseShader.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/gpu/gl/GrGLExtensions.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/ports/SkFontConfigInterface.h + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/private/SkJpegMetadataDecoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkOnce.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkTFitsIn.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/private/base/SkTLogic.h + ../../../third_party/skia/LICENSE
@@ -2483,6 +2484,7 @@ FILE: ../../../third_party/skia/include/effects/SkLumaColorFilter.h
 FILE: ../../../third_party/skia/include/effects/SkPerlinNoiseShader.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLExtensions.h
 FILE: ../../../third_party/skia/include/ports/SkFontConfigInterface.h
+FILE: ../../../third_party/skia/include/private/SkJpegMetadataDecoder.h
 FILE: ../../../third_party/skia/include/private/base/SkOnce.h
 FILE: ../../../third_party/skia/include/private/base/SkTFitsIn.h
 FILE: ../../../third_party/skia/include/private/base/SkTLogic.h
