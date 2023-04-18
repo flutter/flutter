@@ -10,6 +10,8 @@ import 'dart:ui_web' as ui_web;
 import '../navigation_common/platform_location.dart';
 import 'utils.dart';
 
+export 'dart:ui_web' show UrlStrategy;
+
 /// Saves the current [UrlStrategy] to be accessed by [urlStrategy] or
 /// [setUrlStrategy].
 ///
