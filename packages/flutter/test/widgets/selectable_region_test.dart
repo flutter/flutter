@@ -616,6 +616,97 @@ void main() {
       await gesture.up();
     });
 
+    testWidgets('mouse can select multiple widgets on double click drag', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?'),
+                Text('Good, and you?'),
+                Text('Fine, thank you.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph1, 2));
+      await tester.pumpAndSettle();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 3));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph1, 4));
+      await tester.pump();
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 7));
+
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+      // Should select the rest of paragraph 1.
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 6));
+
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 6));
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 0, extentOffset: 12));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
+
+      await gesture.up();
+    });
+
+    testWidgets('mouse can reverse selection across multiple widgets on double click drag', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: const Column(
+              children: <Widget>[
+                Text('How are you?'),
+                Text('Good, and you?'),
+                Text('Fine, thank you.'),
+              ],
+            ),
+          ),
+        ),
+      );
+      final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 10), kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(paragraph3, 10));
+      await tester.pumpAndSettle();
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 6, extentOffset: 11));
+
+      await gesture.moveTo(textOffsetToPosition(paragraph3, 4));
+      await tester.pump();
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 4, extentOffset: 11));
+
+      final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph2, 5));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 5, extentOffset: 14));
+
+      final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
+      await gesture.moveTo(textOffsetToPosition(paragraph1, 6));
+      expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
+      expect(paragraph2.selections[0], const TextSelection(baseOffset: 0, extentOffset: 14));
+      expect(paragraph1.selections[0], const TextSelection(baseOffset: 4, extentOffset: 12));
+
+      await gesture.up();
+    });
+
     testWidgets('mouse can select multiple widgets', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(

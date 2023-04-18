@@ -493,6 +493,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleMouseDragStart(TapDragStartDetails details) {
+    debugPrint('mouse drag start');
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         _selectStartTo(offset: details.globalPosition);
@@ -507,7 +508,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     final bool isDraggingForwardFromOrigin = details.localOffsetFromOrigin.dx > 0;
     final bool isPositionAboveStartingBaseline = details.localPosition.dy < _initialDragStartSelectionPoint!.localPosition.dy;
     final bool isPositionClampedToStartingLine = isPositionAboveStartingBaseline && details.localPosition.dy >= _initialDragStartSelectionPoint!.localPosition.dy - startGlyphHeight;
-    final bool isPositionBelowStartingBaseline = details.localPosition.dy > _initialDragStartSelectionPoint!.localPosition.dy;
+    final bool isPositionAtOrBelowStartingBaseline = details.localPosition.dy >= _initialDragStartSelectionPoint!.localPosition.dy;
     // print(isDraggingForwardFromOrigin);
     // print(isPositionAboveStartingBaseLine);
     // print(isPositionBelowStartingBaseLine);
@@ -516,19 +517,24 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
     print(_initialDragStartSelectionPoint);
 
     if (isDraggingForwardFromOrigin && isPositionClampedToStartingLine) {
+      debugPrint('dragging forward and clamped to line');
       return true;
     } else if (!isDraggingForwardFromOrigin && isPositionClampedToStartingLine) {
+      debugPrint('dragging backward and clamped to line');
       return false;
     }
 
-    if (isPositionBelowStartingBaseline) {
+    if (isPositionAtOrBelowStartingBaseline) {
+      debugPrint('below line');
       return true;
     } else {
+      debugPrint('above line');
       return false;
     }
   }
 
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
+    debugPrint('mouse drag update');
     switch (_getEffectiveConsecutiveTapCount(details.consecutiveTapCount)) {
       case 1:
         _selectEndTo(offset: details.globalPosition, continuous: true);
@@ -548,6 +554,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   void _handleMouseDragEnd(TapDragEndDetails details) {
+    debugPrint('mouse drag end');
     _finalizeSelection();
     _updateSelectedContentIfNeeded();
     _initialDragStartSelectionPoint = null;
