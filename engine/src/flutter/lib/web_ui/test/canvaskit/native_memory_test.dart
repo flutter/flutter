@@ -81,6 +81,45 @@ void testMain() {
       // there must not be anything else calling into this object for anything
       // useful.
     });
+
+    test('dispose instrumentation', () {
+      Instrumentation.enabled = true;
+      Instrumentation.instance.debugCounters.clear();
+
+      final Object owner = Object();
+      final TestSkDeletable nativeObject = TestSkDeletable();
+
+      expect(Instrumentation.instance.debugCounters, <String, int>{});
+      final UniqueRef<TestSkDeletable> ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
+      expect(Instrumentation.instance.debugCounters, <String, int>{
+        'TestSkDeletable Created': 1,
+      });
+      ref.dispose();
+      expect(Instrumentation.instance.debugCounters, <String, int>{
+        'TestSkDeletable Created': 1,
+        'TestSkDeletable Deleted': 1,
+      });
+    });
+
+    test('collect instrumentation', () {
+      Instrumentation.enabled = true;
+      Instrumentation.instance.debugCounters.clear();
+
+      final Object owner = Object();
+      final TestSkDeletable nativeObject = TestSkDeletable();
+
+      expect(Instrumentation.instance.debugCounters, <String, int>{});
+      final UniqueRef<TestSkDeletable> ref = UniqueRef<TestSkDeletable>(owner, nativeObject, 'TestSkDeletable');
+      expect(Instrumentation.instance.debugCounters, <String, int>{
+        'TestSkDeletable Created': 1,
+      });
+      ref.collect();
+      expect(Instrumentation.instance.debugCounters, <String, int>{
+        'TestSkDeletable Created': 1,
+        'TestSkDeletable Leaked': 1,
+        'TestSkDeletable Deleted': 1,
+      });
+    });
   });
 
   group(CountedRef, () {
