@@ -2,12 +2,12 @@
 
 These tests are not hermetic, and use the actual Flutter SDK. While
 they don't require actual devices, they run `flutter_tester` to test
-Dart web debug services (dwds)  and Flutter integration.
+Dart web debug services (dwds) and Flutter integration.
 
 Use this command to run (from the `flutter_tools` directory):
 
 ```shell
-../../bin/cache/dart-sdk/bin/pub run test test/web.shard
+../../bin/cache/dart-sdk/bin/dart run test test/web.shard
 ```
 
 These tests are expensive to run and do not give meaningful coverage

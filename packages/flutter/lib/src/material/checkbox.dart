@@ -90,6 +90,7 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
+    this.semanticLabel,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null);
 
@@ -129,6 +130,7 @@ class Checkbox extends StatefulWidget {
     this.shape,
     this.side,
     this.isError = false,
+    this.semanticLabel,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null);
 
@@ -386,6 +388,15 @@ class Checkbox extends StatefulWidget {
   /// Must not be null. Defaults to false.
   final bool isError;
 
+  /// {@template flutter.material.checkbox.semanticLabel}
+  /// The semantic label for the checkobox that will be announced by screen readers.
+  ///
+  /// This is announced in accessibility modes (e.g TalkBack/VoiceOver).
+  ///
+  /// This label does not show in the UI.
+  /// {@endtemplate}
+  final String? semanticLabel;
+
   /// The width of a checkbox widget.
   static const double width = 18.0;
 
@@ -568,6 +579,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
       ?? defaults.splashRadius!;
 
     return Semantics(
+      label: widget.semanticLabel,
       checked: widget.value ?? false,
       mixed: widget.tristate ? widget.value == null : null,
       child: buildToggleable(
