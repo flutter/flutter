@@ -10,8 +10,6 @@ import 'dart:ui_web' as ui_web;
 import '../navigation_common/platform_location.dart';
 import 'utils.dart';
 
-export 'dart:ui_web' show urlStrategy, UrlStrategy;
-
 /// Saves the current [UrlStrategy] to be accessed by [urlStrategy] or
 /// [setUrlStrategy].
 ///
@@ -35,6 +33,7 @@ ui_web.UrlStrategy? get urlStrategy => _urlStrategy;
 /// Setting this to null disables all integration with the browser history.
 void setUrlStrategy(ui_web.UrlStrategy? strategy) {
   _urlStrategy = strategy;
+  ui_web.urlStrategy = strategy;
 }
 
 /// Use the [PathUrlStrategy] to handle the browser URL.

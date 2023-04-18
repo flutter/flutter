@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:ui' as ui;
-
+/// Function type that handles pop state events.
 typedef EventListener = dynamic Function(Object event);
 
 /// Encapsulates all calls to DOM apis, which allows the [UrlStrategy] classes

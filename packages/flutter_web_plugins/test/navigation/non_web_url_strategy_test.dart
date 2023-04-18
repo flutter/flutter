@@ -19,13 +19,23 @@ void main() {
     });
 
     test('Can create and set a $HashUrlStrategy', () {
-      final HashUrlStrategy strategy = HashUrlStrategy(location);
-      setUrlStrategy(strategy);
+      expect(() {
+        final HashUrlStrategy strategy = HashUrlStrategy(location);
+        setUrlStrategy(strategy);
+      }, returnsNormally);
     });
 
     test('Can create and set a $PathUrlStrategy', () {
-      final PathUrlStrategy strategy = PathUrlStrategy(location);
-      setUrlStrategy(strategy);
+      expect(() {
+        final PathUrlStrategy strategy = PathUrlStrategy(location);
+        setUrlStrategy(strategy);
+      }, returnsNormally);
+    });
+
+    test('Can usePathUrlStrategy', () {
+      expect(() {
+        usePathUrlStrategy();
+      }, returnsNormally);
     });
   });
 }
