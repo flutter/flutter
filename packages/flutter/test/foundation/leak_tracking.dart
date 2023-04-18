@@ -13,7 +13,7 @@ import 'package:test_api/test_api.dart' as test_package;
 
 /// Wrapper for [testWidgets] with leak tracking.
 ///
-/// This method is temporarty with the plan:
+/// This method is temporal with the plan:
 ///
 /// 1. For each occurence of [testWidgets] in flutter framework, do one of three:
 /// * replace [testWidgets] with [testWidgetsWithLeakTracking]
