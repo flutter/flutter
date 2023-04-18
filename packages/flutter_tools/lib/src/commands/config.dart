@@ -19,7 +19,7 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
-    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory. If unset, flutter will search for valid installs at well-known locations.');
     argParser.addOption('build-dir', help: 'The relative path to override a projects build directory.',
         valueHelp: 'out/');
     argParser.addFlag('machine',
