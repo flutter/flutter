@@ -34,7 +34,7 @@ typedef PaintValueIndicator = void Function(PaintingContext context, Offset offs
 
 enum _SliderType { material, adaptive }
 
-/// Possible ways a user can interact with a [Slider].
+/// Possible ways for a user to interact with a [Slider].
 enum SliderInteraction {
   /// Allows the user to interact with a [Slider] by tapping or sliding anywhere
   /// on the track.
@@ -45,19 +45,19 @@ enum SliderInteraction {
   /// to slide anywhere other than the thumb, the thumb will move to the first
   /// point of contact.
   tapAndSlide,
-  
+
   /// Allows the user to interact with a [Slider] by only tapping anywhere on
   /// the track.
   ///
   /// Sliding interaction is ignored.
   tapOnly,
-  
+
   /// Allows the user to interact with a [Slider] only by sliding anywhere on
   /// the track.
   ///
   /// Tapping interaction is ignored.
   slideOnly,
-  
+
   /// Allows the user to interact with a [Slider] only by sliding the thumb.
   ///
   /// Taping and sliding interactions on the track are ignored.
@@ -534,7 +534,11 @@ class Slider extends StatefulWidget {
   /// {@macro flutter.widgets.Focus.autofocus}
   final bool autofocus;
 
-  /// How can the user interact with the [Slider].
+  /// Allowed way for the user to interact with the [Slider].
+  ///
+  /// For example, if this is set to [SliderInteraction.tapOnly], the user can
+  /// interact with the slider only by tapping anywhere on the track. Sliding
+  /// will have no effect.
   ///
   /// Defaults to [SliderInteraction.tapAndSlide].
   final SliderInteraction? allowedInteraction;

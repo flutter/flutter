@@ -578,7 +578,7 @@ class SliderThemeData with Diagnosticable {
   /// If specified, overrides the default value of [Slider.mouseCursor].
   final MaterialStateProperty<MouseCursor?>? mouseCursor;
 
-  /// How can the user interact with the [Slider].
+  /// Allowed way for the user to interact with the [Slider].
   ///
   /// If specified, overrides the default value of [Slider.allowedInteraction].
   final SliderInteraction? allowedInteraction;
