@@ -96,6 +96,7 @@ void main() {
     expect(const TabBarTheme().overlayColor, null);
     expect(const TabBarTheme().splashFactory, null);
     expect(const TabBarTheme().mouseCursor, null);
+    expect(const TabBarTheme().tabAlignment, null);
   });
 
   test('TabBarTheme lerp special cases', () {
@@ -138,7 +139,7 @@ void main() {
     // Verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo.
     expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
 
-    // Verify divider color and indicator color.
+    // Test default indicator color and divider color.
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(
       tabBarBox,
@@ -189,7 +190,7 @@ void main() {
     // Verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo.
     expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
 
-    // Verify divider color and indicator color.
+    // Test default indicator color and divider color.
     final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
     expect(
       tabBarBox,
@@ -468,10 +469,11 @@ void main() {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
 
-    testWidgets('Tab bar defaults', (WidgetTester tester) async {
-      // tests for the default label color and label styles when tabBarTheme and tabBar do not provide any
+    testWidgets('Tab bar defaults (primary)', (WidgetTester tester) async {
+    // Test default label color and label styles.
       await tester.pumpWidget(buildTabBar());
 
+      final ThemeData theme = ThemeData(useMaterial3: false);
       final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
       expect(selectedLabel.text.style!.fontFamily, equals('Roboto'));
       expect(selectedLabel.text.style!.fontSize, equals(14.0));
@@ -481,7 +483,7 @@ void main() {
       expect(unselectedLabel.text.style!.fontSize, equals(14.0));
       expect(unselectedLabel.text.style!.color, equals(Colors.white.withAlpha(0xB2)));
 
-      // tests for the default value of labelPadding when tabBarTheme and tabBar do not provide one
+      // Test default labelPadding.
       await tester.pumpWidget(buildTabBar(tabs: _sizedTabs, isScrollable: true));
 
       const double indicatorWeight = 2.0;
@@ -489,21 +491,62 @@ void main() {
       final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key!));
       final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
 
-      // verify coordinates of tabOne
+      // Verify tabOne coordinates.
       expect(tabOneRect.left, equals(kTabLabelPadding.left));
       expect(tabOneRect.top, equals(kTabLabelPadding.top));
       expect(tabOneRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
-      // verify coordinates of tabTwo
+      // Verify tabTwo coordinates.
       expect(tabTwoRect.right, equals(tabBar.width - kTabLabelPadding.right));
       expect(tabTwoRect.top, equals(kTabLabelPadding.top));
       expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
 
-      // verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo
+      // Verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo.
       expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
 
+      // Test default indicator color.
       final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
-      expect(tabBarBox, paints..line(color: const Color(0xff2196f3)));
+      expect(tabBarBox, paints..line(color: theme.indicatorColor));
+    });
+
+    testWidgets('Tab bar defaults (secondary)', (WidgetTester tester) async {
+      // Test default label color and label styles.
+      await tester.pumpWidget(buildTabBar(secondaryTabBar: true));
+
+      final ThemeData theme = ThemeData(useMaterial3: false);
+      final RenderParagraph selectedLabel = _getText(tester, _tab1Text);
+      expect(selectedLabel.text.style!.fontFamily, equals('Roboto'));
+      expect(selectedLabel.text.style!.fontSize, equals(14.0));
+      expect(selectedLabel.text.style!.color, equals(Colors.white));
+      final RenderParagraph unselectedLabel = _getText(tester, _tab2Text);
+      expect(unselectedLabel.text.style!.fontFamily, equals('Roboto'));
+      expect(unselectedLabel.text.style!.fontSize, equals(14.0));
+      expect(unselectedLabel.text.style!.color, equals(Colors.white.withAlpha(0xB2)));
+
+      // Test default labelPadding.
+      await tester.pumpWidget(buildTabBar(tabs: _sizedTabs, isScrollable: true));
+
+      const double indicatorWeight = 2.0;
+      final Rect tabBar = tester.getRect(find.byType(TabBar));
+      final Rect tabOneRect = tester.getRect(find.byKey(_sizedTabs[0].key!));
+      final Rect tabTwoRect = tester.getRect(find.byKey(_sizedTabs[1].key!));
+
+      // Verify tabOne coordinates.
+      expect(tabOneRect.left, equals(kTabLabelPadding.left));
+      expect(tabOneRect.top, equals(kTabLabelPadding.top));
+      expect(tabOneRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
+
+      // Verify tabTwo coordinates.
+      expect(tabTwoRect.right, equals(tabBar.width - kTabLabelPadding.right));
+      expect(tabTwoRect.top, equals(kTabLabelPadding.top));
+      expect(tabTwoRect.bottom, equals(tabBar.bottom - kTabLabelPadding.bottom - indicatorWeight));
+
+      // Verify tabOne and tabTwo is separated by right padding of tabOne and left padding of tabTwo.
+      expect(tabOneRect.right, equals(tabTwoRect.left - kTabLabelPadding.left - kTabLabelPadding.right));
+
+      // Test default indicator color.
+      final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+      expect(tabBarBox, paints..line(color: theme.indicatorColor));
     });
 
     testWidgets('Tab bar default tab indicator size', (WidgetTester tester) async {
