@@ -802,11 +802,13 @@ void main() {
   group('installation detection on Linux', () {
     const String homeLinux = '/home/me';
 
+    late Config config;
     late FileSystem fileSystem;
     late FileSystemUtils fsUtils;
     late Platform platform;
 
     setUp(() {
+      config = Config.test();
       platform = FakePlatform(
         environment: <String, String>{'HOME': homeLinux},
       );
@@ -981,7 +983,7 @@ void main() {
 
     testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
       const String configuredStudioInstallPath = '$homeLinux/AndroidStudio';
-      globals.config.setValue('android-studio-dir', configuredStudioInstallPath);
+      config.setValue('android-studio-dir', configuredStudioInstallPath);
 
       fileSystem.directory(configuredStudioInstallPath).createSync(recursive: true);
 
@@ -995,7 +997,7 @@ void main() {
       expect(studio.version, null);
       expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
     }, overrides: <Type, Generator>{
-      Config: () => Config.test(),
+      Config: () => config,
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       Platform: () => platform,
@@ -1004,10 +1006,12 @@ void main() {
   });
 
   group('latestValid', () {
+    late Config config;
     late Platform platform;
     late FileSystem fileSystem;
 
     setUp(() {
+      config = Config.test();
       platform = FakePlatform(
         operatingSystem: 'windows',
         environment: <String, String>{
@@ -1123,7 +1127,7 @@ void main() {
 
     testUsingContext('always chooses the install configured by --android-studio-dir, even if the install is invalid', () {
       const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
-      globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
+      config.setValue('android-studio-dir', configuredAndroidStudioDir);
 
       // The directory exists, but nothing is inside.
       fileSystem.directory(configuredAndroidStudioDir).createSync(recursive: true);
@@ -1165,7 +1169,7 @@ void main() {
       expect(chosenInstall.directory, configuredAndroidStudioDir);
       expect(chosenInstall.isValid, false);
     }, overrides: <Type, Generator>{
-      Config: () => Config.test(),
+      Config: () => config,
       FileSystem: () => fileSystem,
       Platform: () => platform,
       ProcessManager: () => FakeProcessManager.empty(),
@@ -1173,7 +1177,7 @@ void main() {
 
     testUsingContext('throws a ToolExit if --android-studio-dir is configured but the directory does not exist', () async {
       const String configuredAndroidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
-      globals.config.setValue('android-studio-dir', configuredAndroidStudioDir);
+      config.setValue('android-studio-dir', configuredAndroidStudioDir);
 
       expect(fileSystem.directory(configuredAndroidStudioDir).existsSync(), false);
       expect(() => AndroidStudio.latestValid(), throwsA(
@@ -1182,7 +1186,7 @@ void main() {
         )
       );
     }, overrides: <Type, Generator>{
-      Config: () => Config.test(),
+      Config: () => config,
       FileSystem: () => fileSystem,
       Platform: () => platform,
       ProcessManager: () => FakeProcessManager.any(),
