@@ -7,3 +7,4 @@ export 'navigation/utils.dart';
 export 'navigation_common/platform_location.dart';
 export 'plugin_event_channel.dart';
 export 'plugin_registry.dart';
+export 'web_plugin_handler.dart';
