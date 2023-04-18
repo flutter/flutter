@@ -30,7 +30,7 @@ class Scene;
 /// @brief An enum for defining the different kinds of accessibility features
 ///        that can be enabled by the platform.
 ///
-///         Must match the `AccessibilityFeatureFlag` enum in framework.
+///         Must match the `AccessibilityFeatures` class in framework.
 enum class AccessibilityFeatureFlag : int32_t {
   kAccessibleNavigation = 1 << 0,
   kInvertColors = 1 << 1,
@@ -538,7 +538,7 @@ class PlatformConfigurationNativeApi {
   static void RegisterBackgroundIsolate(int64_t root_isolate_token);
 
  private:
-  static Dart_PerformanceMode current_performace_mode_;
+  static Dart_PerformanceMode current_performance_mode_;
 };
 
 }  // namespace flutter

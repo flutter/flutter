@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
- * @return `NO` if this vetoes application launch.
+ * @return `NO` if this vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
@@ -36,7 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Called if this has been registered for `UIApplicationDelegate` callbacks.
  *
- * @return `NO` if this vetoes application launch.
+ * @return `NO` if this vetos application launch.
  */
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;

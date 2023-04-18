@@ -379,17 +379,17 @@ void PlatformConfigurationNativeApi::SetIsolateDebugName(
   UIDartState::Current()->SetDebugName(name);
 }
 
-Dart_PerformanceMode PlatformConfigurationNativeApi::current_performace_mode_ =
+Dart_PerformanceMode PlatformConfigurationNativeApi::current_performance_mode_ =
     Dart_PerformanceMode_Default;
 
 Dart_PerformanceMode PlatformConfigurationNativeApi::GetDartPerformanceMode() {
-  return current_performace_mode_;
+  return current_performance_mode_;
 }
 
 int PlatformConfigurationNativeApi::RequestDartPerformanceMode(int mode) {
   UIDartState::ThrowIfUIOperationsProhibited();
-  current_performace_mode_ = static_cast<Dart_PerformanceMode>(mode);
-  return Dart_SetPerformanceMode(current_performace_mode_);
+  current_performance_mode_ = static_cast<Dart_PerformanceMode>(mode);
+  return Dart_SetPerformanceMode(current_performance_mode_);
 }
 
 Dart_Handle PlatformConfigurationNativeApi::GetPersistentIsolateData() {
