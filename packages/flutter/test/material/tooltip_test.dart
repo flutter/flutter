@@ -1024,7 +1024,7 @@ void main() {
 
   testWidgets('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
     // Using [testWidgets] instead of [testWidgetsWithLeakTracking] because
-    // [tooltipState] is hold after disposal by the test itself
+    // [tooltipState] is hold after disposal by the test
     // and thus is not garbage collected.
 
     // Regression test for https://github.com/flutter/flutter/issues/95851
