@@ -162,6 +162,9 @@ class AndroidStudio {
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
 
+  /// The path of the JDK bundled with Android Studio.
+  ///
+  /// This will be null if the bundled JDK could not be found or run.
   String? get javaPath => _javaPath;
 
   bool get isValid => _isValid;
