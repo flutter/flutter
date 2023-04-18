@@ -67,10 +67,10 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 /// If [builder] returns an Icon, or any un-tappable widgets, we don't have
 /// to explicitly call [SearchController.openView].
 ///
-/// The search view will be closed if the window size is changed while the search
-/// view route is not in full-screen mode. However, if the full-screen search view
-/// route is open, changing the window size, such as rotating a mobile device
-/// from portrait to landscape mode, will not close the search view.
+/// The search view route will be closed if the window size is changed and the
+/// search view route is not in full-screen mode. However, if the search view route
+/// is in full-screen mode, changing the window size, such as rotating a mobile
+/// device from portrait mode to landscape mode, will not close the search view.
 ///
 /// {@tool dartpad}
 /// This example shows how to use an IconButton to open a search view in a [SearchAnchor].
