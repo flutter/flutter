@@ -17,7 +17,7 @@ version = "1.0.0"
 
 gradlePlugin {
     plugins {
-        // The "flutterPlugin" name isn't used anywhere
+        // The "flutterPlugin" name isn't used anywhere.
         create("flutterPlugin") {
             id = "dev.flutter.flutter-gradle-plugin"
             implementationClass = "FlutterPlugin"
