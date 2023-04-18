@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [AlertDialog].
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(const MyApp());
+/// Flutter code sample for [AlertDialog].
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() => runApp(const AdaptiveAlertDialogApp());
+
+class AdaptiveAlertDialogApp extends StatelessWidget {
+  const AdaptiveAlertDialogApp({super.key});
 
   @override
   Widget build(BuildContext context) {
