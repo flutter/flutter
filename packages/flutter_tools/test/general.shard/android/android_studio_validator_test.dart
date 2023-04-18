@@ -43,9 +43,11 @@ void main() {
   });
 
   testUsingContext('AndroidStudioValidator gives doctor error on java crash', () async {
+    const String javaBinPath = '/opt/android-studio-with-cheese-5.0/jre/bin/java';
+    globals.fs.file(javaBinPath).createSync(recursive: true);
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[
-        '/opt/android-studio-with-cheese-5.0/jre/bin/java',
+        javaBinPath,
         '-version',
       ],
       exception: ProcessException('java', <String>['-version']),

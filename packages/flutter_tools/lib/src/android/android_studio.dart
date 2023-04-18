@@ -483,42 +483,60 @@ the configured path by running this command: flutter config --android-studio-dir
       return;
     }
 
-    final String javaPath;
-    if (globals.platform.isMacOS) {
-      if (version != null && version!.major < 2020) {
-        javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-      } else if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
-      } else {
-        javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
-      }
-    } else {
-      if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr');
-      } else {
-        javaPath = globals.fs.path.join(directory, 'jre');
-      }
+    final String? javaPath = _findWorkingJava(directory);
+    if (javaPath != null) {
+      _javaPath = javaPath;
+      _isValid = true;
     }
-    final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
-    if (!globals.processManager.canRun(javaExecutable)) {
+  }
+
+  String? _findWorkingJava(String directory) {
+    final String macOsPre2020 = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
+    final String macOs2022 = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
+    final String macOsDefault = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
+    final String linuxWinDefault = globals.fs.path.join(directory, 'jre');
+    final String linuxWin2022 = globals.fs.path.join(directory, 'jbr');
+
+    final List<String> candidateJavaHomePaths = <String>[
+      if (globals.platform.isMacOS)
+        ...<String>[macOsPre2020, macOs2022, macOsDefault]
+      else
+        ...<String>[linuxWin2022, linuxWinDefault],
+    ];
+
+    final List<String> foundJavaPaths = candidateJavaHomePaths
+      .where((String path) => globals.fs.directory(path).existsSync())
+      .toList();
+
+    String? workingJavaPath;
+    if (foundJavaPaths.isEmpty) {
       _validationMessages.add('Unable to find bundled Java version.');
     } else {
-      RunResult? result;
-      try {
-        result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
-      } on ProcessException catch (e) {
-        _validationMessages.add('Failed to run Java: $e');
-      }
-      if (result != null && result.exitCode == 0) {
-        final List<String> versionLines = result.stderr.split('\n');
-        final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-        _validationMessages.add('Java version $javaVersion');
-        _javaPath = javaPath;
-        _isValid = true;
-      } else {
-        _validationMessages.add('Unable to determine bundled Java version.');
+      for (final String candidateJavaPath in foundJavaPaths) {
+        final String javaExecutable = globals.fs.path.join(candidateJavaPath, 'bin', 'java');
+        if (!globals.processManager.canRun(javaExecutable)) {
+          _validationMessages.add('Unable to run java binary found at $candidateJavaPath');
+          continue;
+        }
+
+        RunResult? javaVersionResult;
+        try {
+          javaVersionResult = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
+        } on ProcessException catch (e) {
+          _validationMessages.add('Failed to run Java: $e');
+        }
+        if (javaVersionResult != null && javaVersionResult.exitCode == 0) {
+          final List<String> versionLines = javaVersionResult.stderr.split('\n');
+          final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+          workingJavaPath = globals.fs.file(candidateJavaPath).path;
+          _validationMessages.add('Java version $javaVersion');
+          break;
+        } else {
+          _validationMessages.add('Unable to determine bundled Java version for binary found at $candidateJavaPath');
+        }
       }
     }
+    return workingJavaPath;
   }
 
   @override

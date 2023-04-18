@@ -115,11 +115,14 @@ void main() {
       );
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
+      final String javaBinaryPath =  globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
+      globals.fs.file(javaBinaryPath).createSync(recursive: true);
+
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
       processManager.addCommand(FakeCommand(
           command: <String>[
-            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'),
+            javaBinaryPath,
             '-version',
           ],
           stderr: '123',
@@ -157,11 +160,14 @@ void main() {
       );
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
+      final String javaBinaryPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
+      globals.fs.file(javaBinaryPath).createSync(recursive: true);
+
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
       processManager.addCommand(FakeCommand(
           command: <String>[
-            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
+            javaBinaryPath,
             '-version',
           ],
           stderr: '123',
@@ -199,11 +205,14 @@ void main() {
       );
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
+      final String javaBinaryPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
+      globals.fs.file(javaBinaryPath).createSync(recursive: true);
+
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist3_3;
       processManager.addCommand(FakeCommand(
           command: <String>[
-            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'),
+            javaBinaryPath,
             '-version',
           ],
           stderr: '123',
@@ -240,11 +249,14 @@ void main() {
       );
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
+      final String javaBinPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java');
+      globals.fs.file(javaBinPath).createSync(recursive: true);
+
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEAP;
       processManager.addCommand(FakeCommand(
           command: <String>[
-            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
+            javaBinPath,
             '-version',
           ],
           stderr: '123',
@@ -324,6 +336,12 @@ void main() {
       final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist4_1;
 
+      final String studioInApplicationJavaBinary = fileSystem.path.join(
+        studioInApplication,
+        'Contents', 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java',
+      );
+      fileSystem.file(studioInApplicationJavaBinary).createSync(recursive: true);
+
       // Two in random location only Spotlight knows about.
       final String randomLocation1 = fileSystem.path.join(
         '/',
@@ -338,6 +356,12 @@ void main() {
       final String randomLocation1PlistPath = fileSystem.path.join(randomLocation1PlistFolder, 'Info.plist');
       plistUtils.fileContents[randomLocation1PlistPath] = macStudioInfoPlist4_1;
 
+      final String randomLocation1JavaBinary = fileSystem.path.join(
+        randomLocation1,
+        'Contents', 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java',
+      );
+      fileSystem.file(randomLocation1JavaBinary).createSync(recursive: true);
+
       final String randomLocation2 = fileSystem.path.join(
         '/',
         'random',
@@ -350,7 +374,12 @@ void main() {
       fileSystem.directory(randomLocation2PlistFolder).createSync(recursive: true);
       final String randomLocation2PlistPath = fileSystem.path.join(randomLocation2PlistFolder, 'Info.plist');
       plistUtils.fileContents[randomLocation2PlistPath] = macStudioInfoPlist4_1;
-      final String javaBin = fileSystem.path.join('jre', 'jdk', 'Contents', 'Home', 'bin', 'java');
+
+      final String randomLocation2JavaBinary = fileSystem.path.join(
+        randomLocation2,
+        'Contents', 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java',
+      );
+      fileSystem.file(randomLocation2JavaBinary).createSync(recursive: true);
 
       // Spotlight finds the one known and two random installations.
       processManager.addCommands(<FakeCommand>[
@@ -363,19 +392,19 @@ void main() {
         ),
         FakeCommand(
           command: <String>[
-            fileSystem.path.join(randomLocation1, 'Contents', javaBin),
+            randomLocation1JavaBinary,
             '-version',
           ],
         ),
         FakeCommand(
           command: <String>[
-            fileSystem.path.join(randomLocation2, 'Contents', javaBin),
+           randomLocation2JavaBinary,
             '-version',
           ],
         ),
         FakeCommand(
           command: <String>[
-            fileSystem.path.join(studioInApplicationPlistFolder, javaBin),
+            studioInApplicationJavaBinary,
             '-version',
           ],
         ),
@@ -406,6 +435,9 @@ void main() {
       final String applicationsPlistFilePath = globals.fs.path.join(applicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[applicationsPlistFilePath] = macStudioInfoPlist3_3;
 
+     fileSystem.file(fileSystem.path.join(applicationPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'))
+      .createSync(recursive: true);
+
       final String homeDirectoryPlistFolder = globals.fs.path.join(
         globals.fsUtils.homeDirPath!,
         'Applications',
@@ -416,6 +448,9 @@ void main() {
 
       final String homeDirectoryPlistFilePath = globals.fs.path.join(homeDirectoryPlistFolder, 'Info.plist');
       plistUtils.fileContents[homeDirectoryPlistFilePath] = macStudioInfoPlist4_1;
+
+      fileSystem.file(fileSystem.path.join(homeDirectoryPlistFolder, 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java'))
+        .createSync(recursive: true);
 
       expect(AndroidStudio.allInstalled().length, 2);
       expect(AndroidStudio.latestValid()!.version, Version(4, 1, 0));
@@ -467,11 +502,14 @@ void main() {
       );
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
+      final String javaBinPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java');
+      globals.fs.file(javaBinPath).createSync(recursive: true);
+
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2020_3;
       processManager.addCommand(FakeCommand(
         command: <String>[
-          globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
+          javaBinPath,
           '-version',
         ],
         stderr: '123',
@@ -506,11 +544,14 @@ void main() {
       );
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
+      final String javaBinPath = globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
+      globals.fs.file(javaBinPath).createSync(recursive: true);
+
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
       processManager.addCommand(FakeCommand(
         command: <String>[
-          globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java'),
+          javaBinPath,
           '-version',
         ],
         stderr: '123',
@@ -520,6 +561,52 @@ void main() {
         globals.fs.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
+      expect(studio.javaPath, equals(globals.fs.path.join(
+        studioInApplicationPlistFolder,
+        'jbr',
+        'Contents',
+        'Home',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
+      plistWithoutVersion['CFBundleShortVersionString'] = '';
+      plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
+
+      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinaryPath).createSync(recursive: true);
+
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          javaBinaryPath,
+          '-version',
+        ],
+        stderr: '123',
+      )
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+      )!;
+
+      expect(studio.version, null);
       expect(studio.javaPath, equals(globals.fs.path.join(
         studioInApplicationPlistFolder,
         'jbr',
@@ -658,7 +745,11 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
       fileSystem.directory(r'C:\Program Files\AndroidStudio')
-          .createSync(recursive: true);
+        .createSync(recursive: true);
+
+      fileSystem.file(r'C:\Program Files\AndroidStudio\jre\bin\java')
+        .createSync(recursive: true);
+
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -674,10 +765,32 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
       fileSystem.directory(r'C:\Program Files\AndroidStudio')
-          .createSync(recursive: true);
+        .createSync(recursive: true);
+
+      fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java')
+        .createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
+      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
+    }, overrides: <Type, Generator>{
+      Platform: () => platform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio')
+          .createSync(recursive: true);
+
+      fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, null);
       expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
     }, overrides: <Type, Generator>{
       Platform: () => platform,
@@ -709,11 +822,14 @@ void main() {
           '$homeLinux/.AndroidStudio4.0/system/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
 
-      globals.fs.file(studioHomeFilePath)
+      fileSystem.file(studioHomeFilePath)
         ..createSync(recursive: true)
         ..writeAsStringSync(studioInstallPath);
 
-      globals.fs.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
+
+      fileSystem.file(fileSystem.path.join(studioInstallPath, 'jre', 'bin', 'java'))
+        .createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -735,11 +851,14 @@ void main() {
           '$homeLinux/.cache/Google/AndroidStudio4.1/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
 
-      globals.fs.file(studioHomeFilePath)
+      fileSystem.file(studioHomeFilePath)
         ..createSync(recursive: true)
         ..writeAsStringSync(studioInstallPath);
 
-      globals.fs.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
+
+      fileSystem.file(fileSystem.path.join(studioInstallPath, 'jre', 'bin', 'java'))
+        .createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -763,12 +882,15 @@ void main() {
           '$homeLinux/.local/share/JetBrains/Toolbox/apps/AndroidStudio/ch-0/201.7042882';
       const String pluginsInstallPath = '$studioInstallPath.plugins';
 
-      globals.fs.file(studioHomeFilePath)
+      fileSystem.file(studioHomeFilePath)
         ..createSync(recursive: true)
         ..writeAsStringSync(studioInstallPath);
 
-      globals.fs.directory(studioInstallPath).createSync(recursive: true);
-      globals.fs.directory(pluginsInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync(recursive: true);
+      fileSystem.directory(pluginsInstallPath).createSync();
+
+      fileSystem.file(fileSystem.path.join(studioInstallPath, 'jre', 'bin', 'java'))
+        .createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -789,11 +911,14 @@ void main() {
       const String studioHomeFilePath = '$homeLinux/.cache/Google/AndroidStudio2020.3/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
 
-      globals.fs.file(studioHomeFilePath)
+      fileSystem.file(studioHomeFilePath)
         ..createSync(recursive: true)
         ..writeAsStringSync(studioInstallPath);
 
-      globals.fs.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
+
+      fileSystem.file(fileSystem.path.join(studioInstallPath, 'jre', 'bin', 'java')).createSync(recursive: true);
+
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -810,11 +935,14 @@ void main() {
           '$homeLinux/.cache/Google/AndroidStudio2022.1/.home';
       const String studioInstallPath = '$homeLinux/AndroidStudio';
 
-      globals.fs.file(studioHomeFilePath)
+      fileSystem.file(studioHomeFilePath)
         ..createSync(recursive: true)
         ..writeAsStringSync(studioInstallPath);
 
-      globals.fs.directory(studioInstallPath).createSync();
+      fileSystem.directory(studioInstallPath).createSync();
+
+      fileSystem.file(fileSystem.path.join(studioInstallPath, 'jbr', 'bin', 'java'))
+        .createSync(recursive: true);
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
@@ -830,12 +958,12 @@ void main() {
       const String installPath = '/opt/android-studio-with-cheese-5.0';
       const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
       const String homeFile = '$studioHome/system/.home';
-      globals.fs.directory(installPath).createSync(recursive: true);
-      globals.fs.file(homeFile).createSync(recursive: true);
-      globals.fs.file(homeFile).writeAsStringSync(installPath);
+      fileSystem.directory(installPath).createSync(recursive: true);
+      fileSystem.file(homeFile).createSync(recursive: true);
+      fileSystem.file(homeFile).writeAsStringSync(installPath);
 
       final AndroidStudio studio =
-        AndroidStudio.fromHomeDot(globals.fs.directory(studioHome))!;
+        AndroidStudio.fromHomeDot(fileSystem.directory(studioHome))!;
       expect(studio, isNotNull);
       expect(studio.pluginsPath,
           equals('/home/me/.AndroidStudioWithCheese5.0/config/plugins'));
@@ -849,6 +977,29 @@ void main() {
         fileSystem: fileSystem,
         platform: platform,
       ),
+    });
+
+    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
+      const String configuredStudioInstallPath = '$homeLinux/AndroidStudio';
+      globals.config.setValue('android-studio-dir', configuredStudioInstallPath);
+
+      fileSystem.directory(configuredStudioInstallPath).createSync(recursive: true);
+
+      fileSystem.directory(configuredStudioInstallPath).createSync();
+
+      fileSystem.file(fileSystem.path.join(configuredStudioInstallPath, 'jbr', 'bin', 'java'))
+        .createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, null);
+      expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
+    }, overrides: <Type, Generator>{
+      Config: () => Config.test(),
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -879,6 +1030,12 @@ void main() {
           ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
         fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
           .createSync(recursive: true);
+
+        final String javaBinaryPath = version.startsWith('2022') ?
+          'C:\\Program Files\\AndroidStudio$version\\jbr\\bin\\java' :
+          'C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java';
+
+        fileSystem.file(javaBinaryPath).createSync(recursive: true);
       }
 
       expect(AndroidStudio.allInstalled().length, 3);
@@ -900,6 +1057,8 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
         fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
+          .createSync(recursive: true);
+        fileSystem.file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
           .createSync(recursive: true);
       }
 
@@ -924,6 +1083,9 @@ void main() {
           ..writeAsStringSync('C:\\Program Files\\AndroidStudio$version');
         fileSystem.directory('C:\\Program Files\\AndroidStudio$version')
           .createSync(recursive: true);
+
+        fileSystem.file('C:\\Program Files\\AndroidStudio$version\\jre\\bin\\java')
+          .createSync(recursive: true);
       }
 
       expect(AndroidStudio.allInstalled().length, 3);
@@ -940,11 +1102,15 @@ void main() {
         ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
       fileSystem.directory(r'C:\Program Files\AndroidStudioPreview4.0')
         .createSync(recursive: true);
+      fileSystem.file(r'C:\Program Files\AndroidStudioPreview4.0\jre\bin\java')
+        .createSync(recursive: true);
 
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio4.0\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio4.0');
       fileSystem.directory(r'C:\Program Files\AndroidStudio4.0')
+        .createSync(recursive: true);
+      fileSystem.file(r'C:\Program Files\AndroidStudio4.0\jre\bin\java')
         .createSync(recursive: true);
 
       expect(AndroidStudio.allInstalled().length, 2);
@@ -988,7 +1154,7 @@ void main() {
       for (final String javaPath in validJavaPaths) {
         (globals.processManager as FakeProcessManager).addCommand(FakeCommand(
           command: <String>[
-            globals.fs.path.join(javaPath),
+            fileSystem.path.join(javaPath),
             '-version',
           ],
         ));
