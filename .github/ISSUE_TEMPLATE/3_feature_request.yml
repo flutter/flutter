@@ -15,12 +15,12 @@ body:
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
-      description: Please search to see if an issue already exists for the bug you encountered.
+      description: Please search to see if an issue already exists for this feature request or proposal.
       options:
-      - label: I have searched the [existing issues](https://github.com/flutter/flutter/issues)
-        required: true
-      - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
-        required: true
+        - label: I have searched the [existing issues](https://github.com/flutter/flutter/issues)
+          required: true
+        - label: I have read the [guide to filing a bug](https://flutter.dev/docs/resources/bug-reports)
+          required: true
   - type: textarea
     attributes:
       label: Use case
@@ -48,6 +48,6 @@ body:
 
         Does this have to be provided by Flutter directly, or can it be provided
         by a package on pub.dev/flutter? If so, maybe consider implementing and
-        publishing such a package rather than filing a bug.
+        publishing such a package rather than filing an issue.
     validations:
       required: true
