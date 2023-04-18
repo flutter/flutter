@@ -22,6 +22,9 @@
 
 namespace impeller {
 
+using FontGlyphPairRefVector =
+    std::vector<std::reference_wrapper<const FontGlyphPair>>;
+
 std::unique_ptr<TextRenderContext> TextRenderContext::Create(
     std::shared_ptr<Context> context) {
   // There is only one backend today.
@@ -38,17 +41,19 @@ TextRenderContextSkia::TextRenderContextSkia(std::shared_ptr<Context> context)
 
 TextRenderContextSkia::~TextRenderContextSkia() = default;
 
-static FontGlyphPair::Set CollectUniqueFontGlyphPairsSet(
+static FontGlyphPair::Set CollectUniqueFontGlyphPairs(
     GlyphAtlas::Type type,
     const TextRenderContext::FrameIterator& frame_iterator) {
+  TRACE_EVENT0("impeller", __FUNCTION__);
   FontGlyphPair::Set set;
-  while (auto frame = frame_iterator()) {
-    for (const auto& run : frame->GetRuns()) {
-      auto font = run.GetFont();
+  while (const TextFrame* frame = frame_iterator()) {
+    for (const TextRun& run : frame->GetRuns()) {
+      const Font& font = run.GetFont();
       // TODO(dnfield): If we're doing SDF here, we should be using a consistent
       // point size.
       // https://github.com/flutter/flutter/issues/112016
-      for (const auto& glyph_position : run.GetGlyphPositions()) {
+      for (const TextRun::GlyphPosition& glyph_position :
+           run.GetGlyphPositions()) {
         set.insert({font, glyph_position.glyph});
       }
     }
@@ -56,21 +61,8 @@ static FontGlyphPair::Set CollectUniqueFontGlyphPairsSet(
   return set;
 }
 
-static FontGlyphPair::Vector CollectUniqueFontGlyphPairs(
-    GlyphAtlas::Type type,
-    const TextRenderContext::FrameIterator& frame_iterator) {
-  TRACE_EVENT0("impeller", __FUNCTION__);
-  FontGlyphPair::Vector vector;
-  auto set = CollectUniqueFontGlyphPairsSet(type, frame_iterator);
-  vector.reserve(set.size());
-  for (const auto& item : set) {
-    vector.emplace_back(item);
-  }
-  return vector;
-}
-
 static size_t PairsFitInAtlasOfSize(
-    const FontGlyphPair::Vector& pairs,
+    const FontGlyphPair::Set& pairs,
     const ISize& atlas_size,
     std::vector<Rect>& glyph_positions,
     const std::shared_ptr<GrRectanizer>& rect_packer) {
@@ -81,8 +73,9 @@ static size_t PairsFitInAtlasOfSize(
   glyph_positions.clear();
   glyph_positions.reserve(pairs.size());
 
-  for (size_t i = 0; i < pairs.size(); i++) {
-    const auto& pair = pairs[i];
+  size_t i = 0;
+  for (auto it = pairs.begin(); it != pairs.end(); ++i, ++it) {
+    const auto& pair = *it;
 
     const auto glyph_size =
         ISize::Ceil((pair.glyph.bounds * pair.font.GetMetrics().scale).size);
@@ -105,7 +98,7 @@ static size_t PairsFitInAtlasOfSize(
 
 static bool CanAppendToExistingAtlas(
     const std::shared_ptr<GlyphAtlas>& atlas,
-    const FontGlyphPair::Vector& extra_pairs,
+    const FontGlyphPairRefVector& extra_pairs,
     std::vector<Rect>& glyph_positions,
     ISize atlas_size,
     const std::shared_ptr<GrRectanizer>& rect_packer) {
@@ -120,7 +113,7 @@ static bool CanAppendToExistingAtlas(
   FML_DCHECK(glyph_positions.size() == 0);
   glyph_positions.reserve(extra_pairs.size());
   for (size_t i = 0; i < extra_pairs.size(); i++) {
-    const auto& pair = extra_pairs[i];
+    const FontGlyphPair& pair = extra_pairs[i];
 
     const auto glyph_size =
         ISize::Ceil((pair.glyph.bounds * pair.font.GetMetrics().scale).size);
@@ -141,8 +134,9 @@ static bool CanAppendToExistingAtlas(
   return true;
 }
 
-static ISize OptimumAtlasSizeForFontGlyphPairs(
-    const FontGlyphPair::Vector& pairs,
+namespace {
+ISize OptimumAtlasSizeForFontGlyphPairs(
+    const FontGlyphPair::Set& pairs,
     std::vector<Rect>& glyph_positions,
     const std::shared_ptr<GlyphAtlasContext>& atlas_context) {
   static constexpr auto kMinAtlasSize = 8u;
@@ -175,6 +169,7 @@ static ISize OptimumAtlasSizeForFontGlyphPairs(
            current_size.height <= kMaxAtlasSize);
   return ISize{0, 0};
 }
+}  // namespace
 
 /// Compute signed-distance field for an 8-bpp grayscale image (values greater
 /// than 127 are considered "on") For details of this algorithm, see "The 'dead
@@ -326,7 +321,7 @@ static void DrawGlyph(SkCanvas* canvas,
 
 static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
                               const std::shared_ptr<SkBitmap>& bitmap,
-                              const FontGlyphPair::Vector& new_pairs) {
+                              const FontGlyphPairRefVector& new_pairs) {
   TRACE_EVENT0("impeller", __FUNCTION__);
   FML_DCHECK(bitmap != nullptr);
 
@@ -341,7 +336,7 @@ static bool UpdateAtlasBitmap(const GlyphAtlas& atlas,
 
   bool has_color = atlas.GetType() == GlyphAtlas::Type::kColorBitmap;
 
-  for (const auto& pair : new_pairs) {
+  for (const FontGlyphPair& pair : new_pairs) {
     auto pos = atlas.FindFontGlyphBounds(pair);
     if (!pos.has_value()) {
       continue;
@@ -457,13 +452,14 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   if (!IsValid()) {
     return nullptr;
   }
-  auto last_atlas = atlas_context->GetGlyphAtlas();
+  std::shared_ptr<GlyphAtlas> last_atlas = atlas_context->GetGlyphAtlas();
 
   // ---------------------------------------------------------------------------
   // Step 1: Collect unique font-glyph pairs in the frame.
   // ---------------------------------------------------------------------------
 
-  auto font_glyph_pairs = CollectUniqueFontGlyphPairs(type, frame_iterator);
+  FontGlyphPair::Set font_glyph_pairs =
+      CollectUniqueFontGlyphPairs(type, frame_iterator);
   if (font_glyph_pairs.empty()) {
     return last_atlas;
   }
@@ -472,7 +468,12 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   // Step 2: Determine if the atlas type and font glyph pairs are compatible
   //         with the current atlas and reuse if possible.
   // ---------------------------------------------------------------------------
-  auto new_glyphs = last_atlas->HasSamePairs(font_glyph_pairs);
+  FontGlyphPairRefVector new_glyphs;
+  for (const FontGlyphPair& pair : font_glyph_pairs) {
+    if (!last_atlas->FindFontGlyphBounds(pair).has_value()) {
+      new_glyphs.push_back(pair);
+    }
+  }
   if (last_atlas->GetType() == type && new_glyphs.size() == 0) {
     return last_atlas;
   }
@@ -540,9 +541,12 @@ std::shared_ptr<GlyphAtlas> TextRenderContextSkia::CreateGlyphAtlas(
   // ---------------------------------------------------------------------------
   // Step 6: Record the positions in the glyph atlas.
   // ---------------------------------------------------------------------------
-  for (size_t i = 0, count = glyph_positions.size(); i < count; i++) {
-    glyph_atlas->AddTypefaceGlyphPosition(font_glyph_pairs[i],
-                                          glyph_positions[i]);
+  {
+    size_t i = 0;
+    for (auto it = font_glyph_pairs.begin(); it != font_glyph_pairs.end();
+         ++i, ++it) {
+      glyph_atlas->AddTypefaceGlyphPosition(*it, glyph_positions[i]);
+    }
   }
 
   // ---------------------------------------------------------------------------
