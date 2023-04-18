@@ -802,7 +802,7 @@ class CupertinoTextField extends StatefulWidget {
     EditableTextState editableTextState,
   ) {
     final List<ContextMenuButtonItem>? buttonItems =
-      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
     if (buttonItems == null || buttonItems.isEmpty){
       return const SizedBox.shrink();
