@@ -217,7 +217,7 @@ class BuildInfo {
   String get modeName => mode.cliName;
   String get friendlyModeName => getFriendlyModeName(mode);
 
-  /// the flavor name in the output apk files is lower-cased (see flutter.gradle),
+  /// the flavor name in the output apk files is lower-cased (see Flutter Gradle Plugin),
   /// so the lower cased flavor name is used to compute the output file name
   String? get lowerCasedFlavor => flavor?.toLowerCase();
 

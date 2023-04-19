@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -33,7 +32,7 @@ const String templateAndroidGradlePluginVersion = '7.3.0';
 const String templateDefaultGradleVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
-// These versions should match the values in flutter.gradle (FlutterExtension).
+// These versions should match the values in Flutter Gradle Plugin (FlutterExtension).
 // The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
 // using (include_flutter.groovy).
 // The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory
