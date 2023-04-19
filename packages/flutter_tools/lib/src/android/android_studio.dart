@@ -462,9 +462,22 @@ the configured path by running this command: flutter config --android-studio-dir
     }
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudioDir != null && !alreadyFoundStudioAt(configuredStudioDir)) {
-      studios.add(AndroidStudio(configuredStudioDir,
+    if (configuredStudioDir != null) {
+      final List<AndroidStudio> matchingFoundInstalls = studios
+        .where((AndroidStudio other) =>
+          globals.fs.directory(configuredStudioDir).path == globals.fs.directory(other.directory).path)
+        .toList();
+      if (matchingFoundInstalls.isNotEmpty) {
+        final AndroidStudio matchingFoundInstall = matchingFoundInstalls.first;
+        studios.remove(matchingFoundInstall);
+        studios.add(AndroidStudio(configuredStudioDir,
+          configuredPath: configuredStudioDir,
+          version: matchingFoundInstall.version));
+        studios.remove(matchingFoundInstall);
+      } else {
+        studios.add(AndroidStudio(configuredStudioDir,
           configuredPath: configuredStudioDir));
+      }
     }
 
     if (globals.platform.isLinux) {

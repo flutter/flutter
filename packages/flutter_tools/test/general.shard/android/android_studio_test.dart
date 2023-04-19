@@ -578,7 +578,7 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
-    testUsingContext('discovers version of explicitly configured Android Studio', () {
+    testUsingContext('discovers explicitly configured Android Studio', () {
       final String extractedDownloadZip = fileSystem.path.join(
         '/',
         'Users',
@@ -634,10 +634,12 @@ void main() {
   });
 
   group('installation detection on Windows', () {
+    late Config config;
     late Platform platform;
     late FileSystem fileSystem;
 
     setUp(() {
+      config = Config.test();
       platform = FakePlatform(
         operatingSystem: 'windows',
         environment: <String, String>{
@@ -788,17 +790,42 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('discovers explicitly configured Android Studio', () {
+      const String androidStudioDir = r'C:\Users\Dash\Desktop\android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio2022.1\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(androidStudioDir);
+      fileSystem.directory(androidStudioDir)
+        .createSync(recursive: true);
 
+      final String javaBinPath = fileSystem.path.join(androidStudioDir, 'jbr', 'bin', 'java');
+      final File javaBinFile = fileSystem.file(javaBinPath)
+        ..createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, equals(Version(2022, 1, null)));
+      expect(studio.configuredPath, androidStudioDir);
+      expect(studio.javaPath, javaBinFile.parent.parent.path);
+    }, overrides: <Type, Generator>{
+      Config: () => config,
+      Platform: () => platform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   group('installation detection on Linux', () {
     const String homeLinux = '/home/me';
 
+    late Config config;
     late FileSystem fileSystem;
     late FileSystemUtils fsUtils;
     late Platform platform;
 
     setUp(() {
+      config = Config.test();
       platform = FakePlatform(
         environment: <String, String>{'HOME': homeLinux},
       );
@@ -970,7 +997,33 @@ void main() {
         platform: platform,
       ),
     });
-  });
+
+    testUsingContext('discovers explicitly configured Android Studio', () {
+      const String androidStudioDir = '/Users/Dash/Desktop/android-studio';
+      config.setValue('android-studio-dir', androidStudioDir);
+      const String studioHome = '$homeLinux/.cache/Google/AndroidStudio2022.3/.home';
+      fileSystem.file(studioHome)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(androidStudioDir);
+      fileSystem.directory(androidStudioDir)
+        .createSync(recursive: true);
+
+      final String javaBinPath = fileSystem.path.join(androidStudioDir, 'jbr', 'bin', 'java');
+      final File javaBinFile = fileSystem.file(javaBinPath)
+        ..createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, equals(Version(2022, 3, null)));
+      expect(studio.configuredPath, androidStudioDir);
+      expect(studio.javaPath, javaBinFile.parent.parent.path);
+    }, overrides: <Type, Generator>{
+      Config: () => config,
+      Platform: () => platform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+});
 
   group('latestValid', () {
     late Config config;
