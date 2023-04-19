@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "flutter/fml/macros.h"
+#include "impeller/aiks/color_source.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
@@ -37,17 +38,6 @@ struct Paint {
     kStroke,
   };
 
-  enum class ColorSourceType {
-    kColor,
-    kImage,
-    kLinearGradient,
-    kRadialGradient,
-    kConicalGradient,
-    kSweepGradient,
-    kRuntimeEffect,
-    kScene,
-  };
-
   struct MaskBlurDescriptor {
     FilterContents::BlurStyle style;
     Sigma sigma;
@@ -59,8 +49,7 @@ struct Paint {
   };
 
   Color color = Color::Black();
-  std::optional<ColorSourceProc> color_source;
-  ColorSourceType color_source_type = ColorSourceType::kColor;
+  ColorSource color_source;
 
   Scalar stroke_width = 0.0;
   Cap stroke_cap = Cap::kButt;

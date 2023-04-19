@@ -65,16 +65,11 @@ class GoldenTests : public ::testing::Test {
 TEST_F(GoldenTests, ConicalGradient) {
   Canvas canvas;
   Paint paint;
-  paint.color_source_type = Paint::ColorSourceType::kConicalGradient;
-  paint.color_source = []() {
-    auto result = std::make_shared<ConicalGradientContents>();
-    result->SetCenterAndRadius(Point(125, 125), 125);
-    result->SetColors({Color(1.0, 0.0, 0.0, 1.0), Color(0.0, 0.0, 1.0, 1.0)});
-    result->SetStops({0, 1});
-    result->SetFocus(Point(180, 180), 0);
-    result->SetTileMode(Entity::TileMode::kClamp);
-    return result;
-  };
+
+  paint.color_source = ColorSource::MakeConicalGradient(
+      {125, 125}, 125, {Color(1.0, 0.0, 0.0, 1.0), Color(0.0, 0.0, 1.0, 1.0)},
+      {0, 1}, {180, 180}, 0, Entity::TileMode::kClamp, {});
+
   paint.stroke_width = 0.0;
   paint.style = Paint::Style::kFill;
   canvas.DrawRect(Rect(10, 10, 250, 250), paint);
