@@ -970,9 +970,13 @@ class SearchController extends TextEditingController {
 
 /// A Material Design search bar.
 ///
-/// Search bars include a [leading] Search icon, a text input field and optional
-/// [trailing] icons. A search bar is typically used to open a search view.
-/// It is the default trigger for a search view.
+/// A [SearchBar] looks like a [TextField]. Tapping a SearchBar typically shows a
+/// "search view" route: a route with the search bar at the top and a list of
+/// suggested completions for the search bar's text below. [SearchBar]s are
+/// usually created by a [SearchAnchor.builder]. The builder provides a
+/// [SearchController] that's used by the search bar's [SearchBar.onTap] or
+/// [SearchBar.onChanged] callbacks to show the search view and to hide it
+/// when the user selects a suggestion.
 ///
 /// For [TextDirection.ltr], the [leading] widget is on the left side of the bar.
 /// It should contain either a navigational action (such as a menu or up-arrow)
@@ -982,6 +986,21 @@ class SearchController extends TextEditingController {
 /// the search bar. Typically only one or two action icons are included.
 /// These actions can represent additional modes of searching (like voice search),
 /// a separate high-level action (such as current location) or an overflow menu.
+///
+/// {@tool dartpad}
+/// This example demonstrates how to use a [SearchBar] as the return value of the
+/// [SearchAnchor.builder] property. The [SearchBar] also includes a leading search
+/// icon and a trailing action to toggle the brightness.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_bar.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [SearchAnchor], a widget that typically uses an [IconButton] or a [SearchBar]
+/// to manage a "search view" route.
+/// * [SearchBarTheme], a widget that overrides the default configuration of a search bar.
+/// * [SearchViewTheme], a widget that overrides the default configuration of a search view.
 class SearchBar extends StatefulWidget {
   /// Creates a Material Design search bar.
   const SearchBar({
