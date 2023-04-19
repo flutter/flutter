@@ -5,12 +5,13 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('has blur and saturation boost', (WidgetTester tester) async {
+  testWidgets('has correct backdrop filters', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
         home: Center(
@@ -40,8 +41,15 @@ void main() {
       // for blur and saturation, but checking if it's a _ComposeImageFilter
       // should be enough. outer and inner parameters don't matter, we just need
       // a new _ComposeImageFilter to get its runtimeType.
-      ImageFilter.compose(outer: ImageFilter.blur(), inner: ImageFilter.blur())
-          .runtimeType,
+      //
+      // As web doesn't support ImageFilter.compose, we use just blur when
+      // kIsWeb.
+      kIsWeb
+          ? ImageFilter.blur().runtimeType
+          : ImageFilter.compose(
+              outer: ImageFilter.blur(),
+              inner: ImageFilter.blur(),
+            ).runtimeType,
     );
   });
 
