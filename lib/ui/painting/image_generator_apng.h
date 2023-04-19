@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_APNG_H_
+#define FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_APNG_H_
+
 #include "image_generator.h"
 
 #include "flutter/fml/endianness.h"
@@ -214,3 +217,5 @@ class APNGImageGenerator : public ImageGenerator {
 };
 
 }  // namespace flutter
+
+#endif  // FLUTTER_LIB_UI_PAINTING_IMAGE_GENERATOR_APNG_H_

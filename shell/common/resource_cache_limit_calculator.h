@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_SHELL_COMMON_RESOURCE_CACHE_LIMIT_CALCULATOR_
-#define FLUTTER_SHELL_COMMON_RESOURCE_CACHE_LIMIT_CALCULATOR_
+#ifndef FLUTTER_SHELL_COMMON_RESOURCE_CACHE_LIMIT_CALCULATOR_H_
+#define FLUTTER_SHELL_COMMON_RESOURCE_CACHE_LIMIT_CALCULATOR_H_
 
 #include <cstdint>
 #include <unordered_map>
@@ -45,4 +45,4 @@ class ResourceCacheLimitCalculator {
 };
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_COMMON_RESOURCE_CACHE_LIMIT_CALCULATOR_
+#endif  // FLUTTER_SHELL_COMMON_RESOURCE_CACHE_LIMIT_CALCULATOR_H_
