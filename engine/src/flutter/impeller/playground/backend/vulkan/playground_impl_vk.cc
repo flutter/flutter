@@ -53,8 +53,15 @@ PlaygroundImplVK::PlaygroundImplVK(PlaygroundSwitches switches)
       concurrent_loop_(fml::ConcurrentMessageLoop::Create()),
       handle_(nullptr, &DestroyWindowHandle) {
   if (!::glfwVulkanSupported()) {
+#ifdef TARGET_OS_MAC
+    VALIDATION_LOG << "Attempted to initialize a Vulkan playground on macOS "
+                      "where Vulkan cannot be found. It can be installed via "
+                      "MoltenVK and make sure to install it globally so "
+                      "dlopen can find it.";
+#else
     VALIDATION_LOG << "Attempted to initialize a Vulkan playground on a system "
                       "that does not support Vulkan.";
+#endif
     return;
   }
 
