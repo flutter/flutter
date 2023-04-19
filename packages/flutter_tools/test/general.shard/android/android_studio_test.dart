@@ -18,7 +18,6 @@ import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 
 void main() {
-
   group('installation detection on MacOS', () {
     const String homeMac = '/Users/me';
 
@@ -162,7 +161,7 @@ void main() {
       );
       fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
-      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
+      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java');
       fileSystem.file(javaBinaryPath).createSync(recursive: true);
 
       final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
@@ -598,7 +597,7 @@ void main() {
 
       final String studioInApplicationJavaBinary = fileSystem.path.join(
         extractedDownloadZip,
-        'Contents', 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java',
+        'Contents', 'jbr', 'Contents', 'Home', 'bin', 'java',
       );
       fileSystem.file(studioInApplicationJavaBinary).createSync(recursive: true);
 
@@ -624,51 +623,6 @@ void main() {
       expect(processManager, hasNoRemainingExpectations);
     }, overrides: <Type, Generator>{
       Config:() => config,
-      FileSystem: () => fileSystem,
-      FileSystemUtils: () => fsUtils,
-      ProcessManager: () => processManager,
-      // Custom home paths are not supported on macOS nor Windows yet,
-      // so we force the platform to fake Linux here.
-      Platform: () => platform,
-      PlistParser: () => plistUtils,
-    });
-    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
-      final String studioInApplicationPlistFolder = fileSystem.path.join(
-        '/',
-        'Application',
-        'Android Studio.app',
-        'Contents',
-      );
-      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
-
-      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
-      plistWithoutVersion['CFBundleShortVersionString'] = '';
-      plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
-
-      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
-      fileSystem.file(javaBinaryPath).createSync(recursive: true);
-
-      processManager.addCommand(FakeCommand(
-        command: <String>[
-          javaBinaryPath,
-          '-version',
-        ],
-        stderr: '123',
-      )
-      );
-      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
-      )!;
-
-      expect(studio.version, null);
-      expect(studio.javaPath, equals(fileSystem.path.join(
-        studioInApplicationPlistFolder,
-        'jbr',
-        'Contents',
-        'Home',
-      )));
-    }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       ProcessManager: () => processManager,
@@ -834,36 +788,17 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
-      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio\.home')
-        ..createSync(recursive: true)
-        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
-      fileSystem.directory(r'C:\Program Files\AndroidStudio')
-          .createSync(recursive: true);
 
-      fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
-
-      final AndroidStudio studio = AndroidStudio.allInstalled().single;
-
-      expect(studio.version, null);
-      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
-    }, overrides: <Type, Generator>{
-      Platform: () => platform,
-      FileSystem: () => fileSystem,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
   });
 
   group('installation detection on Linux', () {
     const String homeLinux = '/home/me';
 
-    late Config config;
     late FileSystem fileSystem;
     late FileSystemUtils fsUtils;
     late Platform platform;
 
     setUp(() {
-      config = Config.test();
       platform = FakePlatform(
         environment: <String, String>{'HOME': homeLinux},
       );
@@ -1035,29 +970,6 @@ void main() {
         platform: platform,
       ),
     });
-
-    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
-      const String configuredStudioInstallPath = '$homeLinux/AndroidStudio';
-      config.setValue('android-studio-dir', configuredStudioInstallPath);
-
-      fileSystem.directory(configuredStudioInstallPath).createSync(recursive: true);
-
-      fileSystem.directory(configuredStudioInstallPath).createSync();
-
-      fileSystem.file(fileSystem.path.join(configuredStudioInstallPath, 'jbr', 'bin', 'java'))
-        .createSync(recursive: true);
-
-      final AndroidStudio studio = AndroidStudio.allInstalled().single;
-
-      expect(studio.version, null);
-      expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
-    }, overrides: <Type, Generator>{
-      Config: () => config,
-      FileSystem: () => fileSystem,
-      FileSystemUtils: () => fsUtils,
-      Platform: () => platform,
-      ProcessManager: () => FakeProcessManager.any(),
-    });
   });
 
   group('latestValid', () {
@@ -1129,7 +1041,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('choses install with lexicographically greatest directory if no installs have known versions', () {
+    testUsingContext('chooses install with lexicographically greatest directory if no installs have known versions', () {
       const List<String> versions = <String> [
         'Apple',
         'Zucchini',
@@ -1155,7 +1067,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('choses install with lexicographically greatest directory if all installs have the same version', () {
+    testUsingContext('chooses install with lexicographically greatest directory if all installs have the same version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudioPreview4.0\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudioPreview4.0');
@@ -1213,13 +1125,23 @@ void main() {
       for (final String javaPath in validJavaPaths) {
         (globals.processManager as FakeProcessManager).addCommand(FakeCommand(
           command: <String>[
-            fileSystem.path.join(javaPath),
+            javaPath,
             '-version',
           ],
         ));
       }
 
       expect(AndroidStudio.allInstalled().length, 4);
+
+      for (final String javaPath in validJavaPaths) {
+        (globals.processManager as FakeProcessManager).addCommand(FakeCommand(
+          command: <String>[
+            javaPath,
+            '-version',
+          ],
+        ));
+      }
+
       final AndroidStudio chosenInstall = AndroidStudio.latestValid()!;
       expect(chosenInstall.directory, configuredAndroidStudioDir);
       expect(chosenInstall.isValid, false);
@@ -1244,7 +1166,7 @@ void main() {
       Config: () => config,
       FileSystem: () => fileSystem,
       Platform: () => platform,
-      ProcessManager: () => FakeProcessManager.any(),
+      ProcessManager: () => FakeProcessManager.empty(),
     });
   });
 }
