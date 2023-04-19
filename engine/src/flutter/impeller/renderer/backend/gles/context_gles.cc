@@ -65,6 +65,7 @@ ContextGLES::ContextGLES(std::unique_ptr<ProcTableGLES> gl,
             .SetHasThreadingRestrictions(true)
             .SetSupportsOffscreenMSAA(false)
             .SetSupportsSSBO(false)
+            .SetSupportsBufferToTextureBlits(false)
             .SetSupportsTextureToTextureBlits(
                 reactor_->GetProcTable().BlitFramebuffer.IsAvailable())
             .SetSupportsFramebufferFetch(false)

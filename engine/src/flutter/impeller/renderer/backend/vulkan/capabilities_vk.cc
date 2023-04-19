@@ -314,6 +314,11 @@ bool CapabilitiesVK::SupportsSSBO() const {
 }
 
 // |Capabilities|
+bool CapabilitiesVK::SupportsBufferToTextureBlits() const {
+  return false;
+}
+
+// |Capabilities|
 bool CapabilitiesVK::SupportsTextureToTextureBlits() const {
   return true;
 }
