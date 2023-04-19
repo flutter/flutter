@@ -65,7 +65,8 @@ TiledTextureContents::CreateFilterTexture(
     const ContentContext& renderer) const {
   const ColorFilterProc& filter = color_filter_.value();
   auto color_filter_contents = filter(FilterInput::Make(texture_));
-  auto snapshot = color_filter_contents->RenderToSnapshot(renderer, Entity());
+  auto snapshot = color_filter_contents->RenderToSnapshot(
+      renderer, Entity(), std::nullopt, true, "TiledTextureContents Snapshot");
   if (snapshot.has_value()) {
     return snapshot.value().texture;
   }

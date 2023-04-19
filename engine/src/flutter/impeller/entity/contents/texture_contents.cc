@@ -77,7 +77,8 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled) const {
+    bool msaa_enabled,
+    const std::string& label) const {
   // Passthrough textures that have simple rectangle paths and complete source
   // rects.
   auto bounds = rect_;
@@ -94,7 +95,8 @@ std::optional<Snapshot> TextureContents::RenderToSnapshot(
         .opacity = opacity};
   }
   return Contents::RenderToSnapshot(
-      renderer, entity, sampler_descriptor.value_or(sampler_descriptor_));
+      renderer, entity, sampler_descriptor.value_or(sampler_descriptor_), true,
+      label);
 }
 
 static TextureFillVertexShader::PerVertexData ComputeVertexData(

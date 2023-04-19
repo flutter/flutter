@@ -65,7 +65,8 @@ std::optional<Entity> BorderMaskBlurFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
+  auto input_snapshot =
+      inputs[0]->GetSnapshot("BorderMaskBlur", renderer, entity);
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }

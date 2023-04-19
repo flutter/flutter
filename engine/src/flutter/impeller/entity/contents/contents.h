@@ -72,7 +72,8 @@ class Contents {
       const ContentContext& renderer,
       const Entity& entity,
       const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
-      bool msaa_enabled = true) const;
+      bool msaa_enabled = true,
+      const std::string& label = "Snapshot") const;
 
   virtual bool ShouldRender(const Entity& entity,
                             const std::optional<Rect>& stencil_coverage) const;

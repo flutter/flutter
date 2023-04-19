@@ -31,7 +31,8 @@ sk_sp<DlImageImpeller> DlImageImpeller::MakeFromYUVTextures(
   impeller::Entity entity;
   entity.SetBlendMode(impeller::BlendMode::kSource);
   auto snapshot = yuv_to_rgb_filter_contents->RenderToSnapshot(
-      aiks_context->GetContentContext(), entity);
+      aiks_context->GetContentContext(), entity, std::nullopt, true,
+      "MakeYUVToRGBFilter Snapshot");
   return impeller::DlImageImpeller::Make(snapshot->texture);
 }
 

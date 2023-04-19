@@ -41,7 +41,9 @@ bool FramebufferBlendContents::Render(const ContentContext& renderer,
 
   auto& host_buffer = pass.GetTransientsBuffer();
 
-  auto src_snapshot = child_contents_->RenderToSnapshot(renderer, entity);
+  auto src_snapshot =
+      child_contents_->RenderToSnapshot(renderer, entity, std::nullopt, true,
+                                        "FramebufferBlendContents Snapshot");
   if (!src_snapshot.has_value()) {
     return true;
   }

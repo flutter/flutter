@@ -107,7 +107,8 @@ bool VerticesUVContents::Render(const ContentContext& renderer,
 
   auto src_contents = parent_.GetSourceContents();
 
-  auto snapshot = src_contents->RenderToSnapshot(renderer, entity);
+  auto snapshot = src_contents->RenderToSnapshot(
+      renderer, entity, std::nullopt, true, "VerticesUVContents Snapshot");
   if (!snapshot.has_value()) {
     return false;
   }

@@ -31,7 +31,8 @@ std::optional<Entity> LinearToSrgbFilterContents::RenderFilter(
   using VS = LinearToSrgbFilterPipeline::VertexShader;
   using FS = LinearToSrgbFilterPipeline::FragmentShader;
 
-  auto input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
+  auto input_snapshot =
+      inputs[0]->GetSnapshot("LinearToSrgb", renderer, entity);
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }
