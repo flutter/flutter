@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef UI_ACCESSIBILITY_AX_CONSTANTS_H_
+#define UI_ACCESSIBILITY_AX_CONSTANTS_H_
+
 #include <cstdint>
 
 namespace ax {
@@ -19,3 +22,5 @@ const int32_t kUnknownAriaColumnOrRowCount = -1;
 }  // namespace mojom
 
 }  // namespace ax
+
+#endif  // UI_ACCESSIBILITY_AX_CONSTANTS_H_

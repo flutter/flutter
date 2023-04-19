@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+#ifndef LIB_TXT_TESTS_TXT_TEST_UTILS_H_
+#define LIB_TXT_TESTS_TXT_TEST_UTILS_H_
+
 #include <string>
 
 namespace txt {
@@ -23,3 +26,5 @@ const std::string& GetFontDir();
 void SetFontDir(const std::string& dir);
 
 }  // namespace txt
+
+#endif  // LIB_TXT_TESTS_TXT_TEST_UTILS_H_
