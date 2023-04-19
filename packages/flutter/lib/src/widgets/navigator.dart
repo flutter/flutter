@@ -5039,7 +5039,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     }());
     if (wasCurrent) {
       _afterNavigation(
-        _history.lastWhere(_RouteEntry.isPresentPredicate)?.route,
+        _history.lastWhereOrNull(_RouteEntry.isPresentPredicate)?.route,
       );
     }
   }
