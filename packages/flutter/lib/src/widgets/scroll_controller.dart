@@ -10,6 +10,9 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 
+// Examples can assume:
+// TrackingScrollController _trackingScrollController = TrackingScrollController();
+
 /// Signature for when a [ScrollController] has added or removed a
 /// [ScrollPosition].
 ///
