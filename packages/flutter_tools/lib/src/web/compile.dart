@@ -135,8 +135,8 @@ class WebBuilder {
 
     _flutterUsage.sendTiming(
       'build',
-      'compile',
-      Duration(milliseconds: sw.elapsedMilliseconds)
+      compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
+      Duration(milliseconds: sw.elapsedMilliseconds),
     );
   }
 }
