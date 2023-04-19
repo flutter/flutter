@@ -107,6 +107,7 @@ void main() {
       expect(result.messages.where((ValidationMessage message) =>
         message.message.contains('Try running Android Studio and then run flutter again.')
       ).isNotEmpty, true);
+      expect(result.statusInfo, 'version unknown');
     }
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{

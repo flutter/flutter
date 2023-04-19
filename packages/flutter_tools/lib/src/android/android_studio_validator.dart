@@ -45,8 +45,8 @@ class AndroidStudioValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
 
-    final String? studioVersionText = _studio.version == null
-      ? null
+    final String studioVersionText = _studio.version == null
+      ? userMessages.androidStudioVersion('unknown')
       : userMessages.androidStudioVersion(_studio.version.toString());
     messages.add(ValidationMessage(
       userMessages.androidStudioLocation(_studio.directory),
