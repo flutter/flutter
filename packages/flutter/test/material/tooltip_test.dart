@@ -1021,7 +1021,6 @@ void main() {
     gesture = null;
   });
 
-
   testWidgets('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
     // Using [testWidgets] instead of [testWidgetsWithLeakTracking] because
     // [tooltipState] is hold after disposal by the test
