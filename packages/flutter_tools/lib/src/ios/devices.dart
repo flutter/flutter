@@ -496,7 +496,7 @@ class IOSDevice extends Device {
             deviceLogReader.debuggerStream = iosDeployDebugger;
           }
         }
-        // Don't port foward if debugging with a network device.
+        // Don't port foward if debugging with a wireless device.
         vmServiceDiscovery = ProtocolDiscovery.vmService(
           deviceLogReader,
           portForwarder: isWirelesslyConnected ? null : portForwarder,
@@ -576,7 +576,7 @@ class IOSDevice extends Device {
           this,
           usesIpv6: ipv6,
           deviceVmservicePort: serviceURL.port,
-          isNetworkDevice: true,
+          useDeviceIPAsHost: true,
         );
 
         mDNSLookupTimer.cancel();
