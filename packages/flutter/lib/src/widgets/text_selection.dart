@@ -2573,6 +2573,10 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
 
+    final bool shouldHideHandles = defaultTargetPlatform == TargetPlatform.android;
+    // The toolbar should be hidden while dragging.
+    editableText.hideToolbar(shouldHideHandles);
+
     if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) > 1) {
       // Do not set the selection on a consecutive tap and drag.
       return;
@@ -2849,6 +2853,11 @@ class TextSelectionGestureDetectorBuilder {
   void onDragSelectionEnd(TapDragEndDetails details) {
     final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
     _dragBeganOnPreviousSelection = null;
+
+    if (_shouldShowSelectionToolbar && _TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 2) {
+      final bool shouldShowHandles = defaultTargetPlatform == TargetPlatform.android;
+      editableText.showToolbar(shouldShowHandles);
+    }
 
     if (isShiftPressed) {
       _dragStartSelection = null;
