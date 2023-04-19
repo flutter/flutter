@@ -346,6 +346,34 @@ void main() {
         ProcessManager: () => FakeProcessManager.any(),
       },
     );
+
+    testUsingContext(
+      'legacy analytics disabled will disable new analytics',
+      () async {
+
+        io.setExitFunctionForTests((int exitCode) {});
+
+        await runner.run(
+          <String>[],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
+
+        expect(globals.flutterUsage.enabled, false);
+        expect(globals.analytics.telemetryEnabled, false);
+        expect(testLogger.statusText.contains(
+          'Please note that analytics '
+          'reporting was already disabled'), true);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => FakeAnalytics(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+        Usage: () => legacyAnalytics,
+      },
+    );
   });
 }
 
