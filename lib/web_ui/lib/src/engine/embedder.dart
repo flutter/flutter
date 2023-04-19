@@ -4,13 +4,14 @@
 
 import 'dart:async';
 
+import 'package:ui/src/engine/safe_browser_api.dart';
 import 'package:ui/ui.dart' as ui;
 
 import '../engine.dart' show buildMode, renderer, window;
 import 'browser_detection.dart';
 import 'configuration.dart';
 import 'dom.dart';
-import 'host_node.dart';
+import 'global_styles.dart';
 import 'keyboard_binding.dart';
 import 'platform_dispatcher.dart';
 import 'pointer_binding.dart';
@@ -127,9 +128,9 @@ class FlutterViewEmbedder {
   DomElement get glassPaneElement => _glassPaneElement;
   late DomElement _glassPaneElement;
 
-  /// The [HostNode] of the [glassPaneElement], which contains the whole Flutter app.
-  HostNode get glassPaneShadow => _glassPaneShadow;
-  late HostNode _glassPaneShadow;
+  /// The shadow root of the [glassPaneElement], which contains the whole Flutter app.
+  DomShadowRoot get glassPaneShadow => _glassPaneShadow;
+  late DomShadowRoot _glassPaneShadow;
 
   DomElement get textEditingHostNode => _textEditingHostNode;
   late DomElement _textEditingHostNode;
@@ -171,15 +172,29 @@ class FlutterViewEmbedder {
     _embeddingStrategy.attachGlassPane(flutterViewElement);
     flutterViewElement.appendChild(glassPaneElement);
 
+    if (getJsProperty<Object?>(glassPaneElement, 'attachShadow') == null) {
+      throw UnsupportedError('ShadowDOM is not supported in this browser.');
+    }
+
     // Create a [HostNode] under the glass pane element, and attach everything
     // there, instead of directly underneath the glass panel.
-    //
-    // TODO(dit): clean HostNode, https://github.com/flutter/flutter/issues/116204
-    final HostNode glassPaneElementHostNode = HostNode.create(
-      glassPaneElement,
-      defaultCssFont,
+    final DomShadowRoot shadowRoot = glassPaneElement.attachShadow(<String, dynamic>{
+      'mode': 'open',
+      // This needs to stay false to prevent issues like this:
+      // - https://github.com/flutter/flutter/issues/85759
+      'delegatesFocus': false,
+    });
+    _glassPaneShadow = shadowRoot;
+
+    final DomHTMLStyleElement shadowRootStyleElement = createDomHTMLStyleElement();
+    shadowRootStyleElement.id = 'flt-internals-stylesheet';
+    // The shadowRootStyleElement must be appended to the DOM, or its `sheet` will be null later.
+    shadowRoot.appendChild(shadowRootStyleElement);
+    applyGlobalCssRulesToSheet(
+      shadowRootStyleElement,
+      hasAutofillOverlay: browserHasAutofillOverlay(),
+      defaultCssFont: defaultCssFont,
     );
-    _glassPaneShadow = glassPaneElementHostNode;
 
     _textEditingHostNode =
         createTextEditingHostNode(flutterViewElement, defaultCssFont);
@@ -202,10 +217,8 @@ class FlutterViewEmbedder {
         .instance.semanticsHelper
         .prepareAccessibilityPlaceholder();
 
-    glassPaneElementHostNode.appendAll(<DomNode>[
-      accessibilityPlaceholder,
-      _sceneHostElement!,
-    ]);
+    shadowRoot.append(accessibilityPlaceholder);
+    shadowRoot.append(_sceneHostElement!);
 
     // The semantic host goes last because hit-test order-wise it must be
     // first. If semantics goes under the scene host, platform views will
@@ -354,8 +367,7 @@ class FlutterViewEmbedder {
         _embeddingStrategy.attachResourcesHost(resourcesHost,
             nextTo: flutterViewElement);
       } else {
-        glassPaneShadow.node
-            .insertBefore(resourcesHost, glassPaneShadow.node.firstChild);
+        glassPaneShadow.insertBefore(resourcesHost, glassPaneShadow.firstChild);
       }
       _resourcesHost = resourcesHost;
     }
@@ -420,7 +432,7 @@ DomElement createTextEditingHostNode(DomElement root, String defaultFont) {
   styleElement.id = 'flt-text-editing-stylesheet';
   root.appendChild(styleElement);
   applyGlobalCssRulesToSheet(
-    styleElement.sheet! as DomCSSStyleSheet,
+    styleElement,
     hasAutofillOverlay: browserHasAutofillOverlay(),
     cssSelectorPrefix: FlutterViewEmbedder.flutterViewTagName,
     defaultCssFont: defaultFont,
