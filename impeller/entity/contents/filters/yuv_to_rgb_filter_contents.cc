@@ -50,8 +50,10 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
   using VS = YUVToRGBFilterPipeline::VertexShader;
   using FS = YUVToRGBFilterPipeline::FragmentShader;
 
-  auto y_input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
-  auto uv_input_snapshot = inputs[1]->GetSnapshot(renderer, entity);
+  auto y_input_snapshot =
+      inputs[0]->GetSnapshot("YUVToRGB(Y)", renderer, entity);
+  auto uv_input_snapshot =
+      inputs[1]->GetSnapshot("YUVToRGB(UV)", renderer, entity);
   if (!y_input_snapshot.has_value() || !uv_input_snapshot.has_value()) {
     return std::nullopt;
   }

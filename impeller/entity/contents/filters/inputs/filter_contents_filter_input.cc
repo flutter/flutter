@@ -6,6 +6,7 @@
 
 #include <utility>
 
+#include "impeller/base/strings.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 
 namespace impeller {
@@ -21,10 +22,13 @@ FilterInput::Variant FilterContentsFilterInput::GetInput() const {
 }
 
 std::optional<Snapshot> FilterContentsFilterInput::GetSnapshot(
+    const std::string& label,
     const ContentContext& renderer,
     const Entity& entity) const {
   if (!snapshot_.has_value()) {
-    snapshot_ = filter_->RenderToSnapshot(renderer, entity);
+    snapshot_ = filter_->RenderToSnapshot(
+        renderer, entity, std::nullopt, true,
+        SPrintF("Filter to %s Filter Snapshot", label.c_str()));
   }
   return snapshot_;
 }

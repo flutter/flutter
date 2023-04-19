@@ -126,7 +126,8 @@ class FilterContents : public Contents {
       const ContentContext& renderer,
       const Entity& entity,
       const std::optional<SamplerDescriptor>& sampler_descriptor = std::nullopt,
-      bool msaa_enabled = true) const override;
+      bool msaa_enabled = true,
+      const std::string& label = "Filter Snapshot") const override;
 
   virtual Matrix GetLocalTransform(const Matrix& parent_transform) const;
 
