@@ -235,7 +235,7 @@ void main() {
         ),
       });
 
-      testUsingContext('succeeds with iOS device with mDNS network device', () async {
+      testUsingContext('succeeds with iOS device with mDNS wireless device', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           logReader: fakeLogReader,
           portForwarder: portForwarder,
@@ -307,7 +307,7 @@ void main() {
         ),
       });
 
-      testUsingContext('succeeds with iOS device with mDNS network device with debug-port', () async {
+      testUsingContext('succeeds with iOS device with mDNS wireless device with debug-port', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           logReader: fakeLogReader,
           portForwarder: portForwarder,
@@ -383,7 +383,7 @@ void main() {
         ),
       });
 
-      testUsingContext('succeeds with iOS device with mDNS network device with debug-url', () async {
+      testUsingContext('succeeds with iOS device with mDNS wireless device with debug-url', () async {
         final FakeIOSDevice device = FakeIOSDevice(
           logReader: fakeLogReader,
           portForwarder: portForwarder,
