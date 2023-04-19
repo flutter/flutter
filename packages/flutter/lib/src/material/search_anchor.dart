@@ -692,7 +692,6 @@ class _ViewContentState extends State<_ViewContent> {
 
     if (_screenSize != updatedScreenSize && widget.showFullScreenView) {
       _screenSize = updatedScreenSize;
-      assert(_screenSize != null);
       _viewRect = Offset.zero & _screenSize!;
     }
   }
