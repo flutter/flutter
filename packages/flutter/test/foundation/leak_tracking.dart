@@ -9,7 +9,7 @@ import 'package:meta/meta.dart';
 
 // The test_api package is not for general use... it's literally for our use.
 // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:test_api/test_api.dart' as test_package show Timeout;
 
 /// Wrapper for [testWidgets] with leak tracking.
 ///
@@ -79,7 +79,8 @@ Future<void> _withFlutterLeakTracking(
   if (kIsWeb) {
     if (!_webWarningPrinted) {
       _webWarningPrinted = true;
-      debugPrint('Leak tracking is not supported on web platform.');
+      // TODO(polina-c): uncomment this once the flag is supported.
+      // debugPrint('Leak tracking is not supported on web platform. To turn off this message, set `LeakTrackingTestConfig.warnForNonSupportedPlatforms` to false.');
     }
     await callback();
     return;
