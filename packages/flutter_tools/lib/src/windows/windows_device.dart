@@ -61,8 +61,8 @@ class WindowsDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(covariant WindowsApp package, BuildMode buildMode) {
-    return package.executable(buildMode);
+  String executablePathForDevice(covariant WindowsApp package, BuildInfo buildInfo) {
+    return package.executable(buildInfo.mode);
   }
 }
 

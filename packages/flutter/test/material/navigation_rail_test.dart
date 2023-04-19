@@ -577,9 +577,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -671,9 +669,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=selected, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -765,9 +761,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -858,9 +852,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=3.0', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -952,9 +944,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct - [labelType]=all, [textScaleFactor]=0.75', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -1046,9 +1036,7 @@ void main() {
         ),
       ),
     );
-  },
-  skip: isBrowser, // https://github.com/flutter/flutter/issues/99786
-  );
+  });
 
   testWidgets('Destination spacing is correct for a compact rail - [preferredWidth]=56, [textScaleFactor]=1.0 (default)', (WidgetTester tester) async {
     // Padding at the top of the rail.
@@ -2652,10 +2640,10 @@ void main() {
       navigationRail: NavigationRail(
         labelType: NavigationRailLabelType.none,
         selectedIndex: 0,
-        destinations:  <NavigationRailDestination>[
+        destinations:  const <NavigationRailDestination>[
           NavigationRailDestination(
             icon: Stack(
-              children: const <Widget>[
+              children: <Widget>[
                 Icon(Icons.umbrella),
                 Positioned(
                   top: 0,
@@ -2667,13 +2655,13 @@ void main() {
                 ),
               ],
             ),
-            label: const Text('Abc'),
+            label: Text('Abc'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.umbrella),
             label: Text('Def'),
           ),
-          const NavigationRailDestination(
+          NavigationRailDestination(
             icon: Icon(Icons.bookmark_border),
             label: Text('Ghi'),
           ),
@@ -4867,10 +4855,10 @@ void main() {
         navigationRail: NavigationRail(
           labelType: NavigationRailLabelType.none,
           selectedIndex: 0,
-          destinations:  <NavigationRailDestination>[
+          destinations:  const <NavigationRailDestination>[
             NavigationRailDestination(
               icon: Stack(
-                children: const <Widget>[
+                children: <Widget>[
                   Icon(Icons.umbrella),
                   Positioned(
                     top: 0,
@@ -4882,13 +4870,13 @@ void main() {
                   ),
                 ],
               ),
-              label: const Text('Abc'),
+              label: Text('Abc'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.umbrella),
               label: Text('Def'),
             ),
-            const NavigationRailDestination(
+            NavigationRailDestination(
               icon: Icon(Icons.bookmark_border),
               label: Text('Ghi'),
             ),

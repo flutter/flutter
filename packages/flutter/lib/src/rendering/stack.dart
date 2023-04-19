@@ -25,8 +25,7 @@ class RelativeRect {
   /// Creates a RelativeRect with the given values.
   ///
   /// The arguments must not be null.
-  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom)
-    : assert(left != null && top != null && right != null && bottom != null);
+  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
 
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
   /// and the RelativeRect (the output) are in the coordinate space of the
@@ -77,11 +76,9 @@ class RelativeRect {
       case TextDirection.rtl:
         left = end;
         right = start;
-        break;
       case TextDirection.ltr:
         left = start;
         right = end;
-        break;
     }
 
     return RelativeRect.fromLTRB(left, top, right, bottom);
@@ -166,9 +163,8 @@ class RelativeRect {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static RelativeRect? lerp(RelativeRect? a, RelativeRect? b, double t) {
-    assert(t != null);
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a == null) {
       return RelativeRect.fromLTRB(b!.left * t, b.top * t, b.right * t, b.bottom * t);
@@ -354,10 +350,7 @@ class RenderStack extends RenderBox
     TextDirection? textDirection,
     StackFit fit = StackFit.loose,
     Clip clipBehavior = Clip.hardEdge,
-  }) : assert(alignment != null),
-       assert(fit != null),
-       assert(clipBehavior != null),
-       _alignment = alignment,
+  }) : _alignment = alignment,
        _textDirection = textDirection,
        _fit = fit,
        _clipBehavior = clipBehavior {
@@ -405,7 +398,6 @@ class RenderStack extends RenderBox
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
   set alignment(AlignmentGeometry value) {
-    assert(value != null);
     if (_alignment == value) {
       return;
     }
@@ -435,7 +427,6 @@ class RenderStack extends RenderBox
   StackFit get fit => _fit;
   StackFit _fit;
   set fit(StackFit value) {
-    assert(value != null);
     if (_fit != value) {
       _fit = value;
       markNeedsLayout();
@@ -448,7 +439,6 @@ class RenderStack extends RenderBox
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior = Clip.hardEdge;
   set clipBehavior(Clip value) {
-    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsPaint();
@@ -571,19 +561,14 @@ class RenderStack extends RenderBox
     double height = constraints.minHeight;
 
     final BoxConstraints nonPositionedConstraints;
-    assert(fit != null);
     switch (fit) {
       case StackFit.loose:
         nonPositionedConstraints = constraints.loosen();
-        break;
       case StackFit.expand:
         nonPositionedConstraints = BoxConstraints.tight(constraints.biggest);
-        break;
       case StackFit.passthrough:
         nonPositionedConstraints = constraints;
-        break;
     }
-    assert(nonPositionedConstraints != null);
 
     RenderBox? child = firstChild;
     while (child != null) {
@@ -755,7 +740,6 @@ class RenderIndexedStack extends RenderStack {
     if (firstChild == null || index == null) {
       return false;
     }
-    assert(position != null);
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData! as StackParentData;
     return result.addWithPaintOffset(

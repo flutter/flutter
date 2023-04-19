@@ -41,7 +41,7 @@ class ImageFiltered extends SingleChildRenderObjectWidget {
     required this.imageFilter,
     super.child,
     this.enabled = true,
-  }) : assert(imageFilter != null);
+  });
 
   /// The image filter to apply to the child of this widget.
   final ImageFilter imageFilter;
@@ -90,7 +90,6 @@ class _ImageFilterRenderObject extends RenderProxyBox {
   ImageFilter get imageFilter => _imageFilter;
   ImageFilter _imageFilter;
   set imageFilter(ImageFilter value) {
-    assert(value != null);
     if (value != _imageFilter) {
       _imageFilter = value;
       markNeedsCompositedLayerUpdate();

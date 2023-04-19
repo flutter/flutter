@@ -624,4 +624,19 @@ void main() {
     final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
     expect(textField.smartDashesType, SmartDashesType.disabled);
   });
+
+  testWidgets('enableIMEPersonalizedLearning is properly forwarded to the inner text field', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoSearchTextField(
+            enableIMEPersonalizedLearning: false,
+          ),
+        ),
+      ),
+    );
+
+    final CupertinoTextField textField = tester.widget(find.byType(CupertinoTextField));
+    expect(textField.enableIMEPersonalizedLearning, false);
+  });
 }

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -40,7 +41,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#744c9\n'
+        '_RenderTheater#744c9\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -113,7 +114,7 @@ void main() {
     expect(
       theater.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        '_RenderTheatre#385b3\n'
+        '_RenderTheater#385b3\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -1104,7 +1105,6 @@ void main() {
         switch(clip) {
           case Clip.none:
             expect(renderObject.describeApproximatePaintClip(child), null);
-            break;
           case Clip.hardEdge:
           case Clip.antiAlias:
           case Clip.antiAliasWithSaveLayer:
@@ -1112,11 +1112,32 @@ void main() {
               renderObject.describeApproximatePaintClip(child),
               const Rect.fromLTRB(0, 0, 800, 600),
             );
-            break;
         }
       });
       expect(visited, true);
     }
+  });
+
+  testWidgets('Overlay always applies clip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) => Positioned(left: 10, right: 10, child: Container()),
+            ),
+          ],
+        ),
+      ),
+    );
+    final RenderObject renderObject = tester.renderObject(find.byType(Overlay));
+    // ignore: avoid_dynamic_calls
+    expect((renderObject as dynamic).paint, paints
+      ..save()
+      ..clipRect(rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0))
+      ..restore(),
+    );
   });
 
   group('OverlayEntry listenable', () {

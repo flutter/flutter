@@ -53,7 +53,7 @@ BIN_DIR="$(cd "${PROG_NAME%/*}" ; pwd -P)"
 OS="$(uname -s)"
 
 # If we're on Windows, invoke the batch script instead to get proper locking.
-if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* ]]; then
+if [[ $OS =~ MINGW.* || $OS =~ CYGWIN.* || $OS =~ MSYS.* ]]; then
   exec "${BIN_DIR}/flutter.bat" "$@"
 fi
 

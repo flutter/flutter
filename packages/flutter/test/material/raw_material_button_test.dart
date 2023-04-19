@@ -240,12 +240,12 @@ void main() {
             RawMaterialButton(
               materialTapTargetSize: MaterialTapTargetSize.padded,
               onPressed: () { },
-              child: SizedBox(
+              child: const SizedBox(
                 width: 400.0,
                 height: 400.0,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  children: const <Widget>[
+                  children: <Widget>[
                     SizedBox(
                       height: 50.0,
                       width: 400.0,
@@ -369,28 +369,30 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets("Disabled RawMaterialButton can't be traversed to when disabled.", (WidgetTester tester) async {
+  testWidgets("Disabled RawMaterialButton can't be traversed to.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: '$RawMaterialButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: '$RawMaterialButton 2');
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Center(
-          child: Column(
-            children: <Widget>[
-              RawMaterialButton(
-                autofocus: true,
-                focusNode: focusNode1,
-                onPressed: () {},
-                child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
-              ),
-              RawMaterialButton(
-                autofocus: true,
-                focusNode: focusNode2,
-                onPressed: null,
-                child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
-              ),
-            ],
+        home: FocusScope(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                RawMaterialButton(
+                  autofocus: true,
+                  focusNode: focusNode1,
+                  onPressed: () {},
+                  child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+                ),
+                RawMaterialButton(
+                  autofocus: true,
+                  focusNode: focusNode2,
+                  onPressed: null,
+                  child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+                ),
+              ],
+            ),
           ),
         ),
       ),

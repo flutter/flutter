@@ -10,10 +10,11 @@ class DrawerTemplate extends TokenTemplate {
   @override
   String generate() => '''
 class _${blockName}DefaultsM3 extends DrawerThemeData {
-  const _${blockName}DefaultsM3(this.context)
+  _${blockName}DefaultsM3(this.context)
       : super(elevation: ${elevation("md.comp.navigation-drawer.modal.container")});
 
   final BuildContext context;
+  late final TextDirection direction = Directionality.of(context);
 
   @override
   Color? get backgroundColor => ${componentColor("md.comp.navigation-drawer.container")};
@@ -24,18 +25,22 @@ class _${blockName}DefaultsM3 extends DrawerThemeData {
   @override
   Color? get shadowColor => ${colorOrTransparent("md.comp.navigation-drawer.container.shadow-color")};
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get shape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(right: Radius.circular(16.0)),
+  ShapeBorder? get shape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      end: Radius.circular(16.0),
+    ).resolve(direction),
   );
 
-  // This don't appear to be tokens for this value, but it is
-  // shown in the spec.
+  // There isn't currently a token for this value, but it is shown in the spec,
+  // so hard coding here for now.
   @override
-  ShapeBorder? get endShape => const RoundedRectangleBorder(
-    borderRadius: BorderRadius.horizontal(left: Radius.circular(16.0)),
+  ShapeBorder? get endShape => RoundedRectangleBorder(
+    borderRadius: const BorderRadiusDirectional.horizontal(
+      start: Radius.circular(16.0),
+    ).resolve(direction),
   );
 }
 ''';

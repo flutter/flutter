@@ -78,6 +78,9 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
+    argParser.addFlag('disable-telemetry',
+        negatable: false,
+        help: 'Disable telemetry reporting when this command runs.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -185,6 +188,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, Object?> contextOverrides = <Type, Object?>{};
 
+    // If the disable-telemetry flag has been passed, return out
+    if (topLevelResults.wasParsed('disable-telemetry')) {
+      return;
+    }
+
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the
     // terminal size changes during a run.
@@ -274,9 +282,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           String status;
           if (machineFlag) {
             final Map<String, Object> jsonOut = globals.flutterVersion.toJson();
-            if (jsonOut != null) {
-              jsonOut['flutterRoot'] = Cache.flutterRoot!;
-            }
+            jsonOut['flutterRoot'] = Cache.flutterRoot!;
             status = const JsonEncoder.withIndent('  ').convert(jsonOut);
           } else {
             status = globals.flutterVersion.toString();
@@ -285,7 +291,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           return;
         }
         if (machineFlag && topLevelResults.command?.name != 'analyze') {
-          throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analzye --suggestions" command.', exitCode: 2);
+          throwToolExit('The "--machine" flag is only valid with the "--version" flag or the "analyze --suggestions" command.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
       },

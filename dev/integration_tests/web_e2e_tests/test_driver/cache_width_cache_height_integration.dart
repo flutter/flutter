@@ -9,15 +9,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-// This class allows loadBuffer, a protected method, to be called with a custom
-// DecoderBufferCallback function.
+// This class allows loadImage, a protected method, to be called with a custom
+// ImageDecoderCallback function.
 class LoadTestImageProvider extends ImageProvider<Object> {
   LoadTestImageProvider(this.provider);
 
   final ImageProvider provider;
 
-  ImageStreamCompleter testLoad(Object key, DecoderBufferCallback decode) {
-    return provider.loadBuffer(key, decode);
+  ImageStreamCompleter testLoad(Object key, ImageDecoderCallback decode) {
+    return provider.loadImage(key, decode);
   }
 
   @override
@@ -26,7 +26,7 @@ class LoadTestImageProvider extends ImageProvider<Object> {
   }
 
   @override
-  ImageStreamCompleter loadBuffer(Object key, DecoderBufferCallback decode) {
+  ImageStreamCompleter loadImage(Object key, ImageDecoderCallback decode) {
     throw UnimplementedError();
   }
 }
@@ -47,12 +47,15 @@ void main() {
 
     bool called = false;
 
-    Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {int? cacheWidth, int? cacheHeight, bool allowUpscaling = false}) {
-      expect(cacheHeight, expectedCacheHeight);
-      expect(cacheWidth, expectedCacheWidth);
-      expect(allowUpscaling, false);
-      called = true;
-      return PaintingBinding.instance.instantiateImageCodecFromBuffer(buffer, cacheWidth: cacheWidth, cacheHeight: cacheHeight, allowUpscaling: allowUpscaling);
+    Future<ui.Codec> decode(ui.ImmutableBuffer buffer, {ui.TargetImageSizeCallback? getTargetSize}) {
+      return PaintingBinding.instance.instantiateImageCodecWithSize(buffer, getTargetSize: (int intrinsicWidth, int intrinsicHeight) {
+        expect(getTargetSize, isNotNull);
+        final ui.TargetImageSize targetSize = getTargetSize!(intrinsicWidth, intrinsicHeight);
+        expect(targetSize.width, expectedCacheWidth);
+        expect(targetSize.height, expectedCacheHeight);
+        called = true;
+        return targetSize;
+      });
     }
 
     final ImageProvider resizeImage = image.image;

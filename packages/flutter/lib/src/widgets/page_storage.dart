@@ -27,8 +27,7 @@ class PageStorageKey<T> extends ValueKey<T> {
 
 @immutable
 class _StorageEntryIdentifier {
-  const _StorageEntryIdentifier(this.keys)
-    : assert(keys != null);
+  const _StorageEntryIdentifier(this.keys);
 
   final List<PageStorageKey<dynamic>> keys;
 
@@ -164,7 +163,7 @@ class PageStorage extends StatelessWidget {
     super.key,
     required this.bucket,
     required this.child,
-  }) : assert(bucket != null);
+  });
 
   /// The widget below this widget in the tree.
   ///

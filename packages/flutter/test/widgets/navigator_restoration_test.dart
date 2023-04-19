@@ -1015,6 +1015,7 @@ void main() {
   });
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
@@ -1025,6 +1026,7 @@ Route<void> _routeBuilder(BuildContext context, Object? arguments) {
   );
 }
 
+@pragma('vm:entry-point')
 Route<void> _routeFutureBuilder(BuildContext context, Object? arguments) {
   return MaterialPageRoute<void>(
     builder: (BuildContext context) {
@@ -1045,7 +1047,7 @@ class PagedTestWidget extends StatelessWidget {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          data: MediaQueryData.fromView(View.of(context)),
           child: const PagedTestNavigator(),
         ),
       ),
@@ -1171,7 +1173,7 @@ class TestWidget extends StatelessWidget {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+          data: MediaQueryData.fromView(View.of(context)),
           child: Navigator(
             initialRoute: 'home',
             restorationScopeId: 'app',

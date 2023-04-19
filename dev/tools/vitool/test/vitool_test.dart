@@ -614,7 +614,7 @@ class PathMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item == null || actual == null) {
+    if (item == null) {
       return item == actual;
     }
 
@@ -666,7 +666,7 @@ class PathAnimationMatcher extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    if (item == null || expected == null) {
+    if (item == null) {
       return item == expected;
     }
 

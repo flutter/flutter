@@ -45,8 +45,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
     super.key,
     this.onPressed,
     required Widget this.child,
-  }) : assert(child != null),
-       text = null,
+  }) : text = null,
        buttonItem = null;
 
   /// Create an instance of [CupertinoTextSelectionToolbarButton] whose child is
@@ -65,8 +64,7 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
   CupertinoTextSelectionToolbarButton.buttonItem({
     super.key,
     required ContextMenuButtonItem this.buttonItem,
-  }) : assert(buttonItem != null),
-       child = null,
+  }) : child = null,
        text = null,
        onPressed = buttonItem.onPressed;
 

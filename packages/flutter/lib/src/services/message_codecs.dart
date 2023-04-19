@@ -195,7 +195,6 @@ class JSONMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeErrorEnvelope({ required String code, String? message, Object? details}) {
-    assert(code != null);
     return const JSONMessageCodec().encodeMessage(<Object?>[code, message, details])!;
   }
 }

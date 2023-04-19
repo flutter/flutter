@@ -651,8 +651,7 @@ class AutofillConfiguration {
     this.autofillHints = const <String>[],
     this.hintText,
     required this.currentEditingValue,
-  }) : assert(uniqueIdentifier != null),
-       assert(autofillHints != null);
+  });
 
   /// An [AutofillConfiguration] that indicates the [AutofillClient] does not
   /// wish to be autofilled.
@@ -810,9 +809,7 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
   _AutofillScopeTextInputConfiguration({
     required this.allConfigurations,
     required TextInputConfiguration currentClientConfiguration,
-  }) : assert(allConfigurations != null),
-       assert(currentClientConfiguration != null),
-       super(inputType: currentClientConfiguration.inputType,
+  }) : super(inputType: currentClientConfiguration.inputType,
          obscureText: currentClientConfiguration.obscureText,
          autocorrect: currentClientConfiguration.autocorrect,
          smartDashesType: currentClientConfiguration.smartDashesType,
@@ -843,7 +840,6 @@ class _AutofillScopeTextInputConfiguration extends TextInputConfiguration {
 mixin AutofillScopeMixin implements AutofillScope {
   @override
   TextInputConnection attach(TextInputClient trigger, TextInputConfiguration configuration) {
-    assert(trigger != null);
     assert(
       !autofillClients.any((AutofillClient client) => !client.textInputConfiguration.autofillConfiguration.enabled),
       'Every client in AutofillScope.autofillClients must enable autofill',

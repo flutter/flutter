@@ -24,7 +24,7 @@ Future<void> main() async {
     await tester.idle();
     expect(imageCache.currentSize, 1);
     final ByteData message = const JSONMessageCodec().encodeMessage(<String, dynamic>{'type': 'memoryPressure'})!;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(imageCache.currentSize, 0);
   });
 
@@ -46,6 +46,9 @@ Future<void> main() async {
 class TestBindingBase implements BindingBase {
   @override
   void initInstances() {}
+
+  @override
+  bool debugCheckZone(String entryPoint) { return true; }
 
   @override
   void initServiceExtensions() {}
@@ -88,7 +91,7 @@ class TestBindingBase implements BindingBase {
   void unlocked() {}
 
   @override
-  ui.SingletonFlutterWindow get window => throw UnimplementedError();
+  ui.SingletonFlutterWindow get window => throw UnimplementedError(); // ignore: deprecated_member_use
 
   @override
   ui.PlatformDispatcher get platformDispatcher => throw UnimplementedError();
