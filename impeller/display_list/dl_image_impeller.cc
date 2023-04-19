@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/display_list/display_list_image_impeller.h"
+#include "impeller/display_list/dl_image_impeller.h"
 
 #include "impeller/aiks/aiks_context.h"
 #include "impeller/entity/contents/filters/filter_contents.h"

@@ -17,8 +17,8 @@
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/testing/testing.h"
-#include "impeller/display_list/display_list_image_impeller.h"
-#include "impeller/display_list/display_list_playground.h"
+#include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/display_list/dl_playground.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/point.h"
 #include "impeller/playground/widgets.h"
@@ -38,7 +38,7 @@ flutter::DlColor toColor(const float* components) {
       Color(components[0], components[1], components[2], components[3])));
 }
 
-using DisplayListTest = DisplayListPlayground;
+using DisplayListTest = DlPlayground;
 INSTANTIATE_PLAYGROUND_SUITE(DisplayListTest);
 
 TEST_P(DisplayListTest, CanDrawRect) {

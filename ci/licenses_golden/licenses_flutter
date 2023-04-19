@@ -1144,14 +1144,14 @@ ORIGIN: ../../../flutter/impeller/core/texture_descriptor.cc + ../../../flutter/
 ORIGIN: ../../../flutter/impeller/core/texture_descriptor.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/vertex_buffer.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/core/vertex_buffer.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_dispatcher.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_dispatcher.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_image_impeller.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_image_impeller.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_playground.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_playground.h + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_vertices_geometry.cc + ../../../flutter/LICENSE
-ORIGIN: ../../../flutter/impeller/display_list/display_list_vertices_geometry.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_dispatcher.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_dispatcher.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_image_impeller.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_image_impeller.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_playground.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_playground.h + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_vertices_geometry.cc + ../../../flutter/LICENSE
+ORIGIN: ../../../flutter/impeller/display_list/dl_vertices_geometry.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/display_list/nine_patch_converter.cc + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/display_list/nine_patch_converter.h + ../../../flutter/LICENSE
 ORIGIN: ../../../flutter/impeller/display_list/skia_conversions.cc + ../../../flutter/LICENSE
@@ -3739,14 +3739,14 @@ FILE: ../../../flutter/impeller/core/texture_descriptor.cc
 FILE: ../../../flutter/impeller/core/texture_descriptor.h
 FILE: ../../../flutter/impeller/core/vertex_buffer.cc
 FILE: ../../../flutter/impeller/core/vertex_buffer.h
-FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.cc
-FILE: ../../../flutter/impeller/display_list/display_list_dispatcher.h
-FILE: ../../../flutter/impeller/display_list/display_list_image_impeller.cc
-FILE: ../../../flutter/impeller/display_list/display_list_image_impeller.h
-FILE: ../../../flutter/impeller/display_list/display_list_playground.cc
-FILE: ../../../flutter/impeller/display_list/display_list_playground.h
-FILE: ../../../flutter/impeller/display_list/display_list_vertices_geometry.cc
-FILE: ../../../flutter/impeller/display_list/display_list_vertices_geometry.h
+FILE: ../../../flutter/impeller/display_list/dl_dispatcher.cc
+FILE: ../../../flutter/impeller/display_list/dl_dispatcher.h
+FILE: ../../../flutter/impeller/display_list/dl_image_impeller.cc
+FILE: ../../../flutter/impeller/display_list/dl_image_impeller.h
+FILE: ../../../flutter/impeller/display_list/dl_playground.cc
+FILE: ../../../flutter/impeller/display_list/dl_playground.h
+FILE: ../../../flutter/impeller/display_list/dl_vertices_geometry.cc
+FILE: ../../../flutter/impeller/display_list/dl_vertices_geometry.h
 FILE: ../../../flutter/impeller/display_list/nine_patch_converter.cc
 FILE: ../../../flutter/impeller/display_list/nine_patch_converter.h
 FILE: ../../../flutter/impeller/display_list/skia_conversions.cc

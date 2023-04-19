@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/display_list/display_list_dispatcher.h"
+#include "impeller/display_list/dl_dispatcher.h"
 
 #include <algorithm>
 #include <cstring>
@@ -15,8 +15,8 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/trace_event.h"
 #include "impeller/core/formats.h"
-#include "impeller/display_list/display_list_image_impeller.h"
-#include "impeller/display_list/display_list_vertices_geometry.h"
+#include "impeller/display_list/dl_image_impeller.h"
+#include "impeller/display_list/dl_vertices_geometry.h"
 #include "impeller/display_list/nine_patch_converter.h"
 #include "impeller/display_list/skia_conversions.h"
 #include "impeller/entity/contents/conical_gradient_contents.h"
@@ -41,9 +41,9 @@ namespace impeller {
 #define UNIMPLEMENTED \
   FML_DLOG(ERROR) << "Unimplemented detail in " << __FUNCTION__;
 
-DisplayListDispatcher::DisplayListDispatcher() = default;
+DlDispatcher::DlDispatcher() = default;
 
-DisplayListDispatcher::~DisplayListDispatcher() = default;
+DlDispatcher::~DlDispatcher() = default;
 
 static BlendMode ToBlendMode(flutter::DlBlendMode mode) {
   switch (mode) {
@@ -176,12 +176,12 @@ static Matrix ToMatrix(const SkMatrix& m) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setAntiAlias(bool aa) {
+void DlDispatcher::setAntiAlias(bool aa) {
   // Nothing to do because AA is implicit.
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setDither(bool dither) {}
+void DlDispatcher::setDither(bool dither) {}
 
 static Paint::Style ToStyle(flutter::DlDrawStyle style) {
   switch (style) {
@@ -197,12 +197,12 @@ static Paint::Style ToStyle(flutter::DlDrawStyle style) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setStyle(flutter::DlDrawStyle style) {
+void DlDispatcher::setStyle(flutter::DlDrawStyle style) {
   paint_.style = ToStyle(style);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setColor(flutter::DlColor color) {
+void DlDispatcher::setColor(flutter::DlColor color) {
   paint_.color = {
       color.getRedF(),
       color.getGreenF(),
@@ -212,17 +212,17 @@ void DisplayListDispatcher::setColor(flutter::DlColor color) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setStrokeWidth(SkScalar width) {
+void DlDispatcher::setStrokeWidth(SkScalar width) {
   paint_.stroke_width = width;
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setStrokeMiter(SkScalar limit) {
+void DlDispatcher::setStrokeMiter(SkScalar limit) {
   paint_.stroke_miter = limit;
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setStrokeCap(flutter::DlStrokeCap cap) {
+void DlDispatcher::setStrokeCap(flutter::DlStrokeCap cap) {
   switch (cap) {
     case flutter::DlStrokeCap::kButt:
       paint_.stroke_cap = Cap::kButt;
@@ -237,7 +237,7 @@ void DisplayListDispatcher::setStrokeCap(flutter::DlStrokeCap cap) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setStrokeJoin(flutter::DlStrokeJoin join) {
+void DlDispatcher::setStrokeJoin(flutter::DlStrokeJoin join) {
   switch (join) {
     case flutter::DlStrokeJoin::kMiter:
       paint_.stroke_join = Join::kMiter;
@@ -311,8 +311,7 @@ static std::optional<ColorSource::Type> ToColorSourceType(
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setColorSource(
-    const flutter::DlColorSource* source) {
+void DlDispatcher::setColorSource(const flutter::DlColorSource* source) {
   if (!source) {
     paint_.color_source = ColorSource::MakeColor();
     return;
@@ -508,24 +507,23 @@ static std::optional<Paint::ColorFilterProc> ToColorFilterProc(
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setColorFilter(
-    const flutter::DlColorFilter* filter) {
+void DlDispatcher::setColorFilter(const flutter::DlColorFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
   paint_.color_filter = ToColorFilterProc(filter);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setInvertColors(bool invert) {
+void DlDispatcher::setInvertColors(bool invert) {
   paint_.invert_colors = invert;
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setBlendMode(flutter::DlBlendMode dl_mode) {
+void DlDispatcher::setBlendMode(flutter::DlBlendMode dl_mode) {
   paint_.blend_mode = ToBlendMode(dl_mode);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setPathEffect(const flutter::DlPathEffect* effect) {
+void DlDispatcher::setPathEffect(const flutter::DlPathEffect* effect) {
   // Needs https://github.com/flutter/flutter/issues/95434
   UNIMPLEMENTED;
 }
@@ -544,7 +542,7 @@ static FilterContents::BlurStyle ToBlurStyle(flutter::DlBlurStyle blur_style) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
+void DlDispatcher::setMaskFilter(const flutter::DlMaskFilter* filter) {
   // Needs https://github.com/flutter/flutter/issues/95434
   if (filter == nullptr) {
     paint_.mask_blur_descriptor = std::nullopt;
@@ -698,57 +696,56 @@ static std::optional<Paint::ImageFilterProc> ToImageFilterProc(
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::setImageFilter(
-    const flutter::DlImageFilter* filter) {
+void DlDispatcher::setImageFilter(const flutter::DlImageFilter* filter) {
   paint_.image_filter = ToImageFilterProc(filter);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::save() {
+void DlDispatcher::save() {
   canvas_.Save();
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::saveLayer(const SkRect* bounds,
-                                      const flutter::SaveLayerOptions options,
-                                      const flutter::DlImageFilter* backdrop) {
+void DlDispatcher::saveLayer(const SkRect* bounds,
+                             const flutter::SaveLayerOptions options,
+                             const flutter::DlImageFilter* backdrop) {
   auto paint = options.renders_with_attributes() ? paint_ : Paint{};
   canvas_.SaveLayer(paint, skia_conversions::ToRect(bounds),
                     ToImageFilterProc(backdrop));
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::restore() {
+void DlDispatcher::restore() {
   canvas_.Restore();
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::translate(SkScalar tx, SkScalar ty) {
+void DlDispatcher::translate(SkScalar tx, SkScalar ty) {
   canvas_.Translate({tx, ty, 0.0});
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::scale(SkScalar sx, SkScalar sy) {
+void DlDispatcher::scale(SkScalar sx, SkScalar sy) {
   canvas_.Scale({sx, sy, 1.0});
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::rotate(SkScalar degrees) {
+void DlDispatcher::rotate(SkScalar degrees) {
   canvas_.Rotate(Degrees{degrees});
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::skew(SkScalar sx, SkScalar sy) {
+void DlDispatcher::skew(SkScalar sx, SkScalar sy) {
   canvas_.Skew(sx, sy);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::transform2DAffine(SkScalar mxx,
-                                              SkScalar mxy,
-                                              SkScalar mxt,
-                                              SkScalar myx,
-                                              SkScalar myy,
-                                              SkScalar myt) {
+void DlDispatcher::transform2DAffine(SkScalar mxx,
+                                     SkScalar mxy,
+                                     SkScalar mxt,
+                                     SkScalar myx,
+                                     SkScalar myy,
+                                     SkScalar myt) {
   // clang-format off
   transformFullPerspective(
     mxx, mxy,  0, mxt,
@@ -760,22 +757,22 @@ void DisplayListDispatcher::transform2DAffine(SkScalar mxx,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::transformFullPerspective(SkScalar mxx,
-                                                     SkScalar mxy,
-                                                     SkScalar mxz,
-                                                     SkScalar mxt,
-                                                     SkScalar myx,
-                                                     SkScalar myy,
-                                                     SkScalar myz,
-                                                     SkScalar myt,
-                                                     SkScalar mzx,
-                                                     SkScalar mzy,
-                                                     SkScalar mzz,
-                                                     SkScalar mzt,
-                                                     SkScalar mwx,
-                                                     SkScalar mwy,
-                                                     SkScalar mwz,
-                                                     SkScalar mwt) {
+void DlDispatcher::transformFullPerspective(SkScalar mxx,
+                                            SkScalar mxy,
+                                            SkScalar mxz,
+                                            SkScalar mxt,
+                                            SkScalar myx,
+                                            SkScalar myy,
+                                            SkScalar myz,
+                                            SkScalar myt,
+                                            SkScalar mzx,
+                                            SkScalar mzy,
+                                            SkScalar mzz,
+                                            SkScalar mzt,
+                                            SkScalar mwx,
+                                            SkScalar mwy,
+                                            SkScalar mwz,
+                                            SkScalar mwt) {
   // The order of arguments is row-major but Impeller matrices are
   // column-major.
   // clang-format off
@@ -790,7 +787,7 @@ void DisplayListDispatcher::transformFullPerspective(SkScalar mxx,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::transformReset() {
+void DlDispatcher::transformReset() {
   canvas_.ResetTransform();
   canvas_.Transform(initial_matrix_);
 }
@@ -806,16 +803,12 @@ static Entity::ClipOperation ToClipOperation(
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::clipRect(const SkRect& rect,
-                                     ClipOp clip_op,
-                                     bool is_aa) {
+void DlDispatcher::clipRect(const SkRect& rect, ClipOp clip_op, bool is_aa) {
   canvas_.ClipRect(skia_conversions::ToRect(rect), ToClipOperation(clip_op));
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
-                                      ClipOp clip_op,
-                                      bool is_aa) {
+void DlDispatcher::clipRRect(const SkRRect& rrect, ClipOp clip_op, bool is_aa) {
   if (rrect.isSimple()) {
     canvas_.ClipRRect(skia_conversions::ToRect(rrect.rect()),
                       rrect.getSimpleRadii().fX, ToClipOperation(clip_op));
@@ -825,15 +818,13 @@ void DisplayListDispatcher::clipRRect(const SkRRect& rrect,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::clipPath(const SkPath& path,
-                                     ClipOp clip_op,
-                                     bool is_aa) {
+void DlDispatcher::clipPath(const SkPath& path, ClipOp clip_op, bool is_aa) {
   canvas_.ClipPath(skia_conversions::ToPath(path), ToClipOperation(clip_op));
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawColor(flutter::DlColor color,
-                                      flutter::DlBlendMode dl_mode) {
+void DlDispatcher::drawColor(flutter::DlColor color,
+                             flutter::DlBlendMode dl_mode) {
   Paint paint;
   paint.color = skia_conversions::ToColor(color);
   paint.blend_mode = ToBlendMode(dl_mode);
@@ -841,12 +832,12 @@ void DisplayListDispatcher::drawColor(flutter::DlColor color,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawPaint() {
+void DlDispatcher::drawPaint() {
   canvas_.DrawPaint(paint_);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawLine(const SkPoint& p0, const SkPoint& p1) {
+void DlDispatcher::drawLine(const SkPoint& p0, const SkPoint& p1) {
   auto path =
       PathBuilder{}
           .AddLine(skia_conversions::ToPoint(p0), skia_conversions::ToPoint(p1))
@@ -857,12 +848,12 @@ void DisplayListDispatcher::drawLine(const SkPoint& p0, const SkPoint& p1) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawRect(const SkRect& rect) {
+void DlDispatcher::drawRect(const SkRect& rect) {
   canvas_.DrawRect(skia_conversions::ToRect(rect), paint_);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawOval(const SkRect& bounds) {
+void DlDispatcher::drawOval(const SkRect& bounds) {
   if (bounds.width() == bounds.height()) {
     canvas_.DrawCircle(skia_conversions::ToPoint(bounds.center()),
                        bounds.width() * 0.5, paint_);
@@ -874,12 +865,12 @@ void DisplayListDispatcher::drawOval(const SkRect& bounds) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawCircle(const SkPoint& center, SkScalar radius) {
+void DlDispatcher::drawCircle(const SkPoint& center, SkScalar radius) {
   canvas_.DrawCircle(skia_conversions::ToPoint(center), radius, paint_);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawRRect(const SkRRect& rrect) {
+void DlDispatcher::drawRRect(const SkRRect& rrect) {
   if (rrect.isSimple()) {
     canvas_.DrawRRect(skia_conversions::ToRect(rrect.rect()),
                       rrect.getSimpleRadii().fX, paint_);
@@ -889,8 +880,7 @@ void DisplayListDispatcher::drawRRect(const SkRRect& rrect) {
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawDRRect(const SkRRect& outer,
-                                       const SkRRect& inner) {
+void DlDispatcher::drawDRRect(const SkRRect& outer, const SkRRect& inner) {
   PathBuilder builder;
   builder.AddPath(skia_conversions::ToPath(outer));
   builder.AddPath(skia_conversions::ToPath(inner));
@@ -898,15 +888,15 @@ void DisplayListDispatcher::drawDRRect(const SkRRect& outer,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawPath(const SkPath& path) {
+void DlDispatcher::drawPath(const SkPath& path) {
   canvas_.DrawPath(skia_conversions::ToPath(path), paint_);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawArc(const SkRect& oval_bounds,
-                                    SkScalar start_degrees,
-                                    SkScalar sweep_degrees,
-                                    bool use_center) {
+void DlDispatcher::drawArc(const SkRect& oval_bounds,
+                           SkScalar start_degrees,
+                           SkScalar sweep_degrees,
+                           bool use_center) {
   PathBuilder builder;
   builder.AddArc(skia_conversions::ToRect(oval_bounds), Degrees(start_degrees),
                  Degrees(sweep_degrees), use_center);
@@ -914,9 +904,9 @@ void DisplayListDispatcher::drawArc(const SkRect& oval_bounds,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawPoints(PointMode mode,
-                                       uint32_t count,
-                                       const SkPoint points[]) {
+void DlDispatcher::drawPoints(PointMode mode,
+                              uint32_t count,
+                              const SkPoint points[]) {
   Paint paint = paint_;
   paint.style = Paint::Style::kStroke;
   switch (mode) {
@@ -953,17 +943,17 @@ void DisplayListDispatcher::drawPoints(PointMode mode,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawVertices(const flutter::DlVertices* vertices,
-                                         flutter::DlBlendMode dl_mode) {
-  canvas_.DrawVertices(DLVerticesGeometry::MakeVertices(vertices),
+void DlDispatcher::drawVertices(const flutter::DlVertices* vertices,
+                                flutter::DlBlendMode dl_mode) {
+  canvas_.DrawVertices(DlVerticesGeometry::MakeVertices(vertices),
                        ToBlendMode(dl_mode), paint_);
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawImage(const sk_sp<flutter::DlImage> image,
-                                      const SkPoint point,
-                                      flutter::DlImageSampling sampling,
-                                      bool render_with_attributes) {
+void DlDispatcher::drawImage(const sk_sp<flutter::DlImage> image,
+                             const SkPoint point,
+                             flutter::DlImageSampling sampling,
+                             bool render_with_attributes) {
   if (!image) {
     return;
   }
@@ -988,7 +978,7 @@ void DisplayListDispatcher::drawImage(const sk_sp<flutter::DlImage> image,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawImageRect(
+void DlDispatcher::drawImageRect(
     const sk_sp<flutter::DlImage> image,
     const SkRect& src,
     const SkRect& dst,
@@ -1005,11 +995,11 @@ void DisplayListDispatcher::drawImageRect(
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawImageNine(const sk_sp<flutter::DlImage> image,
-                                          const SkIRect& center,
-                                          const SkRect& dst,
-                                          flutter::DlFilterMode filter,
-                                          bool render_with_attributes) {
+void DlDispatcher::drawImageNine(const sk_sp<flutter::DlImage> image,
+                                 const SkIRect& center,
+                                 const SkRect& dst,
+                                 flutter::DlFilterMode filter,
+                                 bool render_with_attributes) {
   NinePatchConverter converter = {};
   converter.DrawNinePatch(
       std::make_shared<Image>(image->impeller_texture()),
@@ -1019,15 +1009,15 @@ void DisplayListDispatcher::drawImageNine(const sk_sp<flutter::DlImage> image,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
-                                      const SkRSXform xform[],
-                                      const SkRect tex[],
-                                      const flutter::DlColor colors[],
-                                      int count,
-                                      flutter::DlBlendMode mode,
-                                      flutter::DlImageSampling sampling,
-                                      const SkRect* cull_rect,
-                                      bool render_with_attributes) {
+void DlDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
+                             const SkRSXform xform[],
+                             const SkRect tex[],
+                             const flutter::DlColor colors[],
+                             int count,
+                             flutter::DlBlendMode mode,
+                             flutter::DlImageSampling sampling,
+                             const SkRect* cull_rect,
+                             bool render_with_attributes) {
   canvas_.DrawAtlas(std::make_shared<Image>(atlas->impeller_texture()),
                     skia_conversions::ToRSXForms(xform, count),
                     skia_conversions::ToRects(tex, count),
@@ -1037,7 +1027,7 @@ void DisplayListDispatcher::drawAtlas(const sk_sp<flutter::DlImage> atlas,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawDisplayList(
+void DlDispatcher::drawDisplayList(
     const sk_sp<flutter::DisplayList> display_list,
     SkScalar opacity) {
   // Save all values that must remain untouched after the operation.
@@ -1073,9 +1063,9 @@ void DisplayListDispatcher::drawDisplayList(
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
-                                         SkScalar x,
-                                         SkScalar y) {
+void DlDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
+                                SkScalar x,
+                                SkScalar y) {
   Scalar scale = canvas_.GetCurrentTransformation().GetMaxBasisLength();
   canvas_.DrawTextFrame(TextFrameFromTextBlob(blob, scale),  //
                         impeller::Point{x, y},               //
@@ -1084,11 +1074,11 @@ void DisplayListDispatcher::drawTextBlob(const sk_sp<SkTextBlob> blob,
 }
 
 // |flutter::DlOpReceiver|
-void DisplayListDispatcher::drawShadow(const SkPath& path,
-                                       const flutter::DlColor color,
-                                       const SkScalar elevation,
-                                       bool transparent_occluder,
-                                       SkScalar dpr) {
+void DlDispatcher::drawShadow(const SkPath& path,
+                              const flutter::DlColor color,
+                              const SkScalar elevation,
+                              bool transparent_occluder,
+                              SkScalar dpr) {
   Color spot_color = skia_conversions::ToColor(color);
   spot_color.alpha *= 0.25;
 
@@ -1155,7 +1145,7 @@ void DisplayListDispatcher::drawShadow(const SkPath& path,
   canvas_.Restore();
 }
 
-Picture DisplayListDispatcher::EndRecordingAsPicture() {
+Picture DlDispatcher::EndRecordingAsPicture() {
   TRACE_EVENT0("impeller", "DisplayListDispatcher::EndRecordingAsPicture");
   return canvas_.EndRecordingAsPicture();
 }

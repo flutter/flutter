@@ -8,8 +8,8 @@
 
 #include "flutter/flow/surface.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/impeller/display_list/display_list_dispatcher.h"
-#include "flutter/impeller/display_list/display_list_image_impeller.h"
+#include "flutter/impeller/display_list/dl_dispatcher.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/geometry/size.h"
 #include "flutter/shell/common/snapshot_controller.h"
 
@@ -34,7 +34,7 @@ sk_sp<DlImage> SnapshotControllerImpeller::DoMakeRasterSnapshot(
     const sk_sp<DisplayList>& display_list,
     SkISize size) {
   TRACE_EVENT0("flutter", __FUNCTION__);
-  impeller::DisplayListDispatcher dispatcher;
+  impeller::DlDispatcher dispatcher;
   display_list->Dispatch(dispatcher);
   impeller::Picture picture = dispatcher.EndRecordingAsPicture();
   auto context = GetDelegate().GetAiksContext();
