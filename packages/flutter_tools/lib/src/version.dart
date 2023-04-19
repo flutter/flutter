@@ -74,9 +74,10 @@ abstract class FlutterVersion {
     SystemClock clock = const SystemClock(),
     String? workingDirectory,
     String? frameworkRevision,
+    required FileSystem fs,
   }) {
     final Stopwatch stopwatch = Stopwatch()..start();
-    final File versionFile = getVersionFile(globals.fs);
+    final File versionFile = getVersionFile(fs);
     if (versionFile.existsSync()) {
       final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(versionFile, workingDirectory: workingDirectory);
       if (version != null) {
@@ -105,6 +106,7 @@ abstract class FlutterVersion {
       frameworkRevision: frameworkRevision,
       frameworkVersion: frameworkVersion,
       gitTagVersion: gitTagVersion,
+      fs: fs,
     );
   }
 
@@ -470,9 +472,12 @@ class _FlutterVersionGit extends FlutterVersion {
     required this.frameworkRevision,
     required String frameworkVersion,
     required GitTagVersion gitTagVersion,
+    required this.fs,
   }) : _frameworkVersion = frameworkVersion,
        _gitTagVersion = gitTagVersion,
        super._();
+
+  final FileSystem fs;
 
   late GitTagVersion _gitTagVersion;
 
@@ -543,10 +548,10 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   void ensureVersionFile() {
-    globals.fs.file(globals.fs.path.join(Cache.flutterRoot!, 'version'))
+    fs.file(fs.path.join(Cache.flutterRoot!, 'version'))
         .writeAsStringSync(_frameworkVersion);
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    final File versionFile = FlutterVersion.getVersionFile(globals.fs);
+    final File versionFile = FlutterVersion.getVersionFile(fs);
     if (!versionFile.existsSync()) {
       versionFile.writeAsStringSync(encoder.convert(toJson()));
     }
