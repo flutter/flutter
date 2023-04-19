@@ -22,23 +22,6 @@
 
 namespace impeller {
 
-static bool UseColorSourceContents(
-    const std::shared_ptr<VerticesGeometry>& vertices,
-    const Paint::ColorSourceType& type) {
-  // If there are no vertex color or texture coordinates. Or if there
-  // are vertex coordinates then only if the contents are an image or
-  // a solid color.
-  if (vertices->HasVertexColors()) {
-    return false;
-  }
-  if (vertices->HasTextureCoordinates() &&
-      (type == Paint::ColorSourceType::kImage ||
-       type == Paint::ColorSourceType::kColor)) {
-    return true;
-  }
-  return !vertices->HasTextureCoordinates();
-}
-
 Canvas::Canvas() {
   Initialize();
 }
@@ -191,8 +174,7 @@ void Canvas::DrawPaint(const Paint& paint) {
 bool Canvas::AttemptDrawBlurredRRect(const Rect& rect,
                                      Scalar corner_radius,
                                      const Paint& paint) {
-  if (paint.color_source == nullptr ||
-      paint.color_source_type != Paint::ColorSourceType::kColor ||
+  if (paint.color_source.GetType() != ColorSource::Type::kColor ||
       paint.style != Paint::Style::kFill) {
     return false;
   }
@@ -436,8 +418,7 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
   text_contents->SetTextFrame(text_frame);
   text_contents->SetGlyphAtlas(lazy_glyph_atlas_);
 
-  if (paint.color_source.has_value()) {
-    auto& source = paint.color_source.value();
+  if (paint.color_source.GetType() != ColorSource::Type::kColor) {
     auto color_text_contents = std::make_shared<ColorSourceTextContents>();
     entity.SetTransformation(GetCurrentTransformation());
 
@@ -447,7 +428,8 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
 
     text_contents->SetOffset(-cvg.origin);
     color_text_contents->SetTextContents(std::move(text_contents));
-    color_text_contents->SetColorSourceContents(source());
+    color_text_contents->SetColorSourceContents(
+        paint.color_source.GetContents(paint));
 
     entity.SetContents(
         paint.WithFilters(std::move(color_text_contents), false));
@@ -466,13 +448,30 @@ void Canvas::DrawTextFrame(const TextFrame& text_frame,
   GetCurrentPass().AddEntity(entity);
 }
 
+static bool UseColorSourceContents(
+    const std::shared_ptr<VerticesGeometry>& vertices,
+    const Paint& paint) {
+  // If there are no vertex color or texture coordinates. Or if there
+  // are vertex coordinates then only if the contents are an image or
+  // a solid color.
+  if (vertices->HasVertexColors()) {
+    return false;
+  }
+  if (vertices->HasTextureCoordinates() &&
+      (paint.color_source.GetType() == ColorSource::Type::kImage ||
+       paint.color_source.GetType() == ColorSource::Type::kColor)) {
+    return true;
+  }
+  return !vertices->HasTextureCoordinates();
+}
+
 void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
                           BlendMode blend_mode,
                           const Paint& paint) {
   // Override the blend mode with kDestination in order to match the behavior
   // of Skia's SK_LEGACY_IGNORE_DRAW_VERTICES_BLEND_WITH_NO_SHADER flag, which
   // is enabled when the Flutter engine builds Skia.
-  if (paint.color_source_type == Paint::ColorSourceType::kColor) {
+  if (paint.color_source.GetType() == ColorSource::Type::kColor) {
     blend_mode = BlendMode::kDestination;
   }
 
@@ -483,7 +482,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
 
   // If there are no vertex color or texture coordinates. Or if there
   // are vertex coordinates then only if the contents are an image.
-  if (UseColorSourceContents(vertices, paint.color_source_type)) {
+  if (UseColorSourceContents(vertices, paint)) {
     auto contents = paint.CreateContentsForGeometry(vertices);
     entity.SetContents(paint.WithFilters(std::move(contents)));
     GetCurrentPass().AddEntity(entity);
@@ -496,7 +495,7 @@ void Canvas::DrawVertices(const std::shared_ptr<VerticesGeometry>& vertices,
   std::shared_ptr<Contents> src_contents =
       src_paint.CreateContentsForGeometry(vertices);
   if (vertices->HasTextureCoordinates() &&
-      paint.color_source_type != Paint::ColorSourceType::kImage) {
+      paint.color_source.GetType() != ColorSource::Type::kImage) {
     // If the color source has an intrinsic size, then we use that to
     // create the src contents as a simplification. Otherwise we use
     // the extent of the texture coordinates to determine how large

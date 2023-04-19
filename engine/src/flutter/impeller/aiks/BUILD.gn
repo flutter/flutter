@@ -10,6 +10,8 @@ impeller_component("aiks") {
     "aiks_context.h",
     "canvas.cc",
     "canvas.h",
+    "color_source.cc",
+    "color_source.h",
     "image.cc",
     "image.h",
     "paint.cc",

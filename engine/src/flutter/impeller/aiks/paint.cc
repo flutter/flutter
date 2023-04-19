@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "impeller/aiks/paint.h"
+#include "impeller/entity/contents/color_source_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
 #include "impeller/entity/geometry.h"
 
@@ -27,38 +28,23 @@ std::shared_ptr<Contents> Paint::CreateContentsForEntity(const Path& path,
 
 std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
     std::unique_ptr<Geometry> geometry) const {
-  if (color_source.has_value()) {
-    auto& source = color_source.value();
-    auto contents = source();
-    contents->SetGeometry(std::move(geometry));
-    contents->SetOpacity(color.alpha);
-    return contents;
-  }
-  auto solid_color = std::make_shared<SolidColorContents>();
-  solid_color->SetGeometry(std::move(geometry));
-  solid_color->SetColor(color);
-  return solid_color;
+  auto contents = color_source.GetContents(*this);
+  contents->SetGeometry(std::move(geometry));
+  return contents;
 }
 
 std::shared_ptr<Contents> Paint::CreateContentsForGeometry(
     const std::shared_ptr<Geometry>& geometry) const {
-  if (color_source.has_value()) {
-    auto& source = color_source.value();
-    auto contents = source();
-    contents->SetGeometry(geometry);
-    contents->SetOpacity(color.alpha);
-    return contents;
-  }
-  auto solid_color = std::make_shared<SolidColorContents>();
-  solid_color->SetGeometry(geometry);
-  solid_color->SetColor(color);
-  return solid_color;
+  auto contents = color_source.GetContents(*this);
+  contents->SetGeometry(geometry);
+  return contents;
 }
 
 std::shared_ptr<Contents> Paint::WithFilters(
     std::shared_ptr<Contents> input,
     std::optional<bool> is_solid_color) const {
-  bool is_solid_color_val = is_solid_color.value_or(!color_source);
+  bool is_solid_color_val = is_solid_color.value_or(color_source.GetType() ==
+                                                    ColorSource::Type::kColor);
   input = WithColorFilter(input, /*absorb_opacity=*/true);
   input = WithInvertFilter(input);
   input = WithMaskBlur(input, is_solid_color_val, Matrix());
@@ -101,7 +87,7 @@ std::shared_ptr<Contents> Paint::WithColorFilter(
     bool absorb_opacity) const {
   // Image input types will directly set their color filter,
   // if any. See `TiledTextureContents.SetColorFilter`.
-  if (color_source_type == ColorSourceType::kImage) {
+  if (color_source.GetType() == ColorSource::Type::kImage) {
     return input;
   }
   if (color_filter.has_value()) {

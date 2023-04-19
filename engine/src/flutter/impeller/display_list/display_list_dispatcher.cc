@@ -286,26 +286,26 @@ static void ConvertStops(T* gradient,
   }
 }
 
-static std::optional<Paint::ColorSourceType> ToColorSourceType(
+static std::optional<ColorSource::Type> ToColorSourceType(
     flutter::DlColorSourceType type) {
   switch (type) {
     case flutter::DlColorSourceType::kColor:
-      return Paint::ColorSourceType::kColor;
+      return ColorSource::Type::kColor;
     case flutter::DlColorSourceType::kImage:
-      return Paint::ColorSourceType::kImage;
+      return ColorSource::Type::kImage;
     case flutter::DlColorSourceType::kLinearGradient:
-      return Paint::ColorSourceType::kLinearGradient;
+      return ColorSource::Type::kLinearGradient;
     case flutter::DlColorSourceType::kRadialGradient:
-      return Paint::ColorSourceType::kRadialGradient;
+      return ColorSource::Type::kRadialGradient;
     case flutter::DlColorSourceType::kConicalGradient:
-      return Paint::ColorSourceType::kConicalGradient;
+      return ColorSource::Type::kConicalGradient;
     case flutter::DlColorSourceType::kSweepGradient:
-      return Paint::ColorSourceType::kSweepGradient;
+      return ColorSource::Type::kSweepGradient;
     case flutter::DlColorSourceType::kRuntimeEffect:
-      return Paint::ColorSourceType::kRuntimeEffect;
+      return ColorSource::Type::kRuntimeEffect;
 #ifdef IMPELLER_ENABLE_3D
     case flutter::DlColorSourceType::kScene:
-      return Paint::ColorSourceType::kScene;
+      return ColorSource::Type::kScene;
 #endif  // IMPELLER_ENABLE_3D
   }
 }
@@ -314,32 +314,28 @@ static std::optional<Paint::ColorSourceType> ToColorSourceType(
 void DisplayListDispatcher::setColorSource(
     const flutter::DlColorSource* source) {
   if (!source) {
-    paint_.color_source = std::nullopt;
-    paint_.color_source_type = Paint::ColorSourceType::kColor;
+    paint_.color_source = ColorSource::MakeColor();
     return;
   }
 
-  std::optional<Paint::ColorSourceType> type =
-      ToColorSourceType(source->type());
+  std::optional<ColorSource::Type> type = ToColorSourceType(source->type());
 
   if (!type.has_value()) {
     FML_LOG(ERROR) << "Requested ColorSourceType::kUnknown";
-    paint_.color_source = std::nullopt;
-    paint_.color_source_type = Paint::ColorSourceType::kColor;
+    paint_.color_source = ColorSource::MakeColor();
     return;
   }
 
-  paint_.color_source_type = type.value();
-
   switch (type.value()) {
-    case Paint::ColorSourceType::kColor: {
+    case ColorSource::Type::kColor: {
       const flutter::DlColorColorSource* color = source->asColor();
-      paint_.color_source = std::nullopt;
+
+      paint_.color_source = ColorSource::MakeColor();
       setColor(color->color());
       FML_DCHECK(color);
       return;
     }
-    case Paint::ColorSourceType::kLinearGradient: {
+    case ColorSource::Type::kLinearGradient: {
       const flutter::DlLinearGradientColorSource* linear =
           source->asLinearGradient();
       FML_DCHECK(linear);
@@ -351,26 +347,13 @@ void DisplayListDispatcher::setColorSource(
 
       auto tile_mode = ToTileMode(linear->tile_mode());
       auto matrix = ToMatrix(linear->matrix());
-      paint_.color_source = [start_point, end_point, colors = std::move(colors),
-                             stops = std::move(stops), tile_mode, matrix]() {
-        auto contents = std::make_shared<LinearGradientContents>();
-        contents->SetColors(colors);
-        contents->SetStops(stops);
-        contents->SetEndPoints(start_point, end_point);
-        contents->SetTileMode(tile_mode);
-        contents->SetEffectTransform(matrix);
 
-        std::vector<Point> bounds{start_point, end_point};
-        auto intrinsic_size =
-            Rect::MakePointBounds(bounds.begin(), bounds.end());
-        if (intrinsic_size.has_value()) {
-          contents->SetColorSourceSize(intrinsic_size->size);
-        }
-        return contents;
-      };
+      paint_.color_source = ColorSource::MakeLinearGradient(
+          start_point, end_point, std::move(colors), std::move(stops),
+          tile_mode, matrix);
       return;
     }
-    case Paint::ColorSourceType::kConicalGradient: {
+    case ColorSource::Type::kConicalGradient: {
       const flutter::DlConicalGradientColorSource* conical_gradient =
           source->asConicalGradient();
       FML_DCHECK(conical_gradient);
@@ -385,30 +368,13 @@ void DisplayListDispatcher::setColorSource(
 
       auto tile_mode = ToTileMode(conical_gradient->tile_mode());
       auto matrix = ToMatrix(conical_gradient->matrix());
-      paint_.color_source = [center, radius, colors = std::move(colors),
-                             stops = std::move(stops), tile_mode, matrix,
-                             focus_center, focus_radius]() {
-        std::shared_ptr<ConicalGradientContents> contents =
-            std::make_shared<ConicalGradientContents>();
-        contents->SetColors(colors);
-        contents->SetStops(stops);
-        contents->SetCenterAndRadius(center, radius);
-        contents->SetTileMode(tile_mode);
-        contents->SetEffectTransform(matrix);
-        contents->SetFocus(focus_center, focus_radius);
 
-        auto radius_pt = Point(radius, radius);
-        std::vector<Point> bounds{center + radius_pt, center - radius_pt};
-        auto intrinsic_size =
-            Rect::MakePointBounds(bounds.begin(), bounds.end());
-        if (intrinsic_size.has_value()) {
-          contents->SetColorSourceSize(intrinsic_size->size);
-        }
-        return contents;
-      };
+      paint_.color_source = ColorSource::MakeConicalGradient(
+          center, radius, std::move(colors), std::move(stops), focus_center,
+          focus_radius, tile_mode, matrix);
       return;
     }
-    case Paint::ColorSourceType::kRadialGradient: {
+    case ColorSource::Type::kRadialGradient: {
       const flutter::DlRadialGradientColorSource* radialGradient =
           source->asRadialGradient();
       FML_DCHECK(radialGradient);
@@ -420,27 +386,12 @@ void DisplayListDispatcher::setColorSource(
 
       auto tile_mode = ToTileMode(radialGradient->tile_mode());
       auto matrix = ToMatrix(radialGradient->matrix());
-      paint_.color_source = [center, radius, colors = std::move(colors),
-                             stops = std::move(stops), tile_mode, matrix]() {
-        auto contents = std::make_shared<RadialGradientContents>();
-        contents->SetColors(colors);
-        contents->SetStops(stops);
-        contents->SetCenterAndRadius(center, radius);
-        contents->SetTileMode(tile_mode);
-        contents->SetEffectTransform(matrix);
-
-        auto radius_pt = Point(radius, radius);
-        std::vector<Point> bounds{center + radius_pt, center - radius_pt};
-        auto intrinsic_size =
-            Rect::MakePointBounds(bounds.begin(), bounds.end());
-        if (intrinsic_size.has_value()) {
-          contents->SetColorSourceSize(intrinsic_size->size);
-        }
-        return contents;
-      };
+      paint_.color_source =
+          ColorSource::MakeRadialGradient(center, radius, std::move(colors),
+                                          std::move(stops), tile_mode, matrix);
       return;
     }
-    case Paint::ColorSourceType::kSweepGradient: {
+    case ColorSource::Type::kSweepGradient: {
       const flutter::DlSweepGradientColorSource* sweepGradient =
           source->asSweepGradient();
       FML_DCHECK(sweepGradient);
@@ -454,21 +405,12 @@ void DisplayListDispatcher::setColorSource(
 
       auto tile_mode = ToTileMode(sweepGradient->tile_mode());
       auto matrix = ToMatrix(sweepGradient->matrix());
-      paint_.color_source = [center, start_angle, end_angle,
-                             colors = std::move(colors),
-                             stops = std::move(stops), tile_mode, matrix]() {
-        auto contents = std::make_shared<SweepGradientContents>();
-        contents->SetCenterAndAngles(center, start_angle, end_angle);
-        contents->SetColors(colors);
-        contents->SetStops(stops);
-        contents->SetTileMode(tile_mode);
-        contents->SetEffectTransform(matrix);
-
-        return contents;
-      };
+      paint_.color_source = ColorSource::MakeSweepGradient(
+          center, start_angle, end_angle, std::move(colors), std::move(stops),
+          tile_mode, matrix);
       return;
     }
-    case Paint::ColorSourceType::kImage: {
+    case ColorSource::Type::kImage: {
       const flutter::DlImageColorSource* image_color_source = source->asImage();
       FML_DCHECK(image_color_source &&
                  image_color_source->image()->impeller_texture());
@@ -477,20 +419,11 @@ void DisplayListDispatcher::setColorSource(
       auto y_tile_mode = ToTileMode(image_color_source->vertical_tile_mode());
       auto desc = ToSamplerDescriptor(image_color_source->sampling());
       auto matrix = ToMatrix(image_color_source->matrix());
-      paint_.color_source = [texture, x_tile_mode, y_tile_mode, desc, matrix,
-                             &paint = paint_]() {
-        auto contents = std::make_shared<TiledTextureContents>();
-        contents->SetTexture(texture);
-        contents->SetTileModes(x_tile_mode, y_tile_mode);
-        contents->SetSamplerDescriptor(desc);
-        contents->SetEffectTransform(matrix);
-        contents->SetColorFilter(paint.color_filter);
-        contents->SetColorSourceSize(Size::Ceil(texture->GetSize()));
-        return contents;
-      };
+      paint_.color_source = ColorSource::MakeImage(texture, x_tile_mode,
+                                                   y_tile_mode, desc, matrix);
       return;
     }
-    case Paint::ColorSourceType::kRuntimeEffect: {
+    case ColorSource::Type::kRuntimeEffect: {
       const flutter::DlRuntimeEffectColorSource* runtime_effect_color_source =
           source->asRuntimeEffect();
       auto runtime_stage =
@@ -516,28 +449,19 @@ void DisplayListDispatcher::setColorSource(
         });
       }
 
-      paint_.color_source = [runtime_stage, uniform_data, texture_inputs]() {
-        auto contents = std::make_shared<RuntimeEffectContents>();
-        contents->SetRuntimeStage(runtime_stage);
-        contents->SetUniformData(uniform_data);
-        contents->SetTextureInputs(texture_inputs);
-        return contents;
-      };
+      paint_.color_source = ColorSource::MakeRuntimeEffect(
+          runtime_stage, uniform_data, texture_inputs);
       return;
     }
-    case Paint::ColorSourceType::kScene: {
+    case ColorSource::Type::kScene: {
 #ifdef IMPELLER_ENABLE_3D
       const flutter::DlSceneColorSource* scene_color_source = source->asScene();
       std::shared_ptr<scene::Node> scene_node =
           scene_color_source->scene_node();
       Matrix camera_transform = scene_color_source->camera_matrix();
 
-      paint_.color_source = [scene_node, camera_transform]() {
-        auto contents = std::make_shared<SceneContents>();
-        contents->SetNode(scene_node);
-        contents->SetCameraTransform(camera_transform);
-        return contents;
-      };
+      paint_.color_source =
+          ColorSource::MakeScene(scene_node, camera_transform);
 #else   // IMPELLER_ENABLE_3D
       FML_LOG(ERROR) << "ColorSourceType::kScene can only be used if Impeller "
                         "Scene is enabled.";
