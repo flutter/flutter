@@ -73,7 +73,7 @@ const int _iOSHorizontalCursorOffsetPixels = -2;
 /// The color of the selection highlight when the spell check menu is visible.
 ///
 /// Eyeballed from a screenshot taken on an iPhone 11 running iOS 16.2.
-const Color _kSpellCheckSelectionColor = Color(0x62ff9699);
+const Color _kMisspelledSelectionColor = Color(0x62ff9699);
 
 /// Visibility of text field overlays based on the state of the current text entry.
 ///
@@ -1307,6 +1307,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? CupertinoTextField.cupertinoMisspelledTextStyle,
+            misspelledSelectionColor: widget.spellCheckConfiguration!.misspelledSelectionColor
+              ?? _kMisspelledSelectionColor,
             spellCheckSuggestionsToolbarBuilder:
               widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
                 ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
@@ -1347,8 +1349,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             magnifierConfiguration: widget.magnifierConfiguration ?? CupertinoTextField._iosMagnifierConfiguration,
             // Only show the selection highlight when the text field is focused.
             selectionColor: _effectiveFocusNode.hasFocus ? selectionColor : null,
-            // TODO(justinmc): Maybe this should go on SpellCheckConfiguration?
-            spellCheckSelectionColor: _effectiveFocusNode.hasFocus ? _kSpellCheckSelectionColor : null,
             selectionControls: widget.selectionEnabled
               ? textSelectionControls : null,
             onChanged: widget.onChanged,
