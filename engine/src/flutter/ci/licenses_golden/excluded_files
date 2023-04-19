@@ -1685,6 +1685,7 @@
 ../../../third_party/dart/runtime/vm/os_test.cc
 ../../../third_party/dart/runtime/vm/port_test.cc
 ../../../third_party/dart/runtime/vm/profiler_test.cc
+../../../third_party/dart/runtime/vm/protos/.gitignore
 ../../../third_party/dart/runtime/vm/regexp_test.cc
 ../../../third_party/dart/runtime/vm/ring_buffer_test.cc
 ../../../third_party/dart/runtime/vm/scopes_test.cc
@@ -1746,9 +1747,6 @@
 ../../../third_party/dart/third_party/mdn/browser-compat-data/README.google
 ../../../third_party/dart/third_party/pkg
 ../../../third_party/dart/third_party/requirejs
-../../../third_party/dart/third_party/tcmalloc/.gitignore
-../../../third_party/dart/third_party/tcmalloc/OWNERS
-../../../third_party/dart/third_party/tcmalloc/README.dart
 ../../../third_party/dart/tools
 ../../../third_party/dart/utils/OWNERS
 ../../../third_party/dart/utils/compiler/.gitignore
