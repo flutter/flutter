@@ -557,7 +557,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // currently disposing.
       _parent?._childChangedOpenState();
       widget.onClose?.call();
-      setState(() {}); // To update the status of the IconButton
+      setState(() {});
     }
   }
 
