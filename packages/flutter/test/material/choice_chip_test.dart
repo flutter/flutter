@@ -133,6 +133,22 @@ void main() {
     expect(rawChip.iconTheme, iconTheme);
   });
 
+  testWidgets('ChoiceChip passes showCheckmark from ChipTheme to RawChip', (WidgetTester tester) async {
+    const bool showCheckmark = false;
+    await tester.pumpWidget(wrapForChip(
+        child: const ChipTheme(
+          data: ChipThemeData(
+            showCheckmark: showCheckmark,
+          ),
+          child: ChoiceChip(
+            label: Text('Test'),
+            selected: true,
+          ),
+        )));
+    final RawChip rawChip = tester.widget(find.byType(RawChip));
+    expect(rawChip.showCheckmark, showCheckmark);
+  });
+
   testWidgets('ChoiceChip passes checkmark properties to RawChip', (WidgetTester tester) async {
     const bool showCheckmark = false;
     const Color checkmarkColor = Color(0xff0000ff);
