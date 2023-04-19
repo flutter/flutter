@@ -2308,6 +2308,8 @@
 ../../../third_party/libpng/aclocal.m4
 ../../../third_party/libpng/contrib
 ../../../third_party/libpng/libpng-manual.txt
+../../../third_party/libpng/libpng.3
+../../../third_party/libpng/libpngpf.3
 ../../../third_party/libpng/mips
 ../../../third_party/libpng/png.5
 ../../../third_party/libpng/powerpc
@@ -3043,11 +3045,13 @@
 ../../../third_party/wuffs/sync.txt
 ../../../third_party/yapf
 ../../../third_party/zlib/.git
+../../../third_party/zlib/CMakeLists.txt
 ../../../third_party/zlib/DIR_METADATA
 ../../../third_party/zlib/OWNERS
 ../../../third_party/zlib/README.chromium
 ../../../third_party/zlib/contrib/bench/OWNERS
 ../../../third_party/zlib/contrib/minizip/Makefile
+../../../third_party/zlib/contrib/minizip/README.chromium
 ../../../third_party/zlib/contrib/minizip/miniunz.c
 ../../../third_party/zlib/contrib/minizip/minizip.c
 ../../../third_party/zlib/contrib/minizip/minizip.md
@@ -3059,4 +3063,5 @@
 ../../../third_party/zlib/google/zip_reader_unittest.cc
 ../../../third_party/zlib/google/zip_unittest.cc
 ../../../third_party/zlib/patches/README
+../../../third_party/zlib/zlib.3
 ../../../tools
