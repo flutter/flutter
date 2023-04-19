@@ -5675,6 +5675,9 @@ class MaterialLocalizationCy extends GlobalMaterialLocalizations {
   String get saveButtonLabel => 'Cadw';
 
   @override
+  String get scanTextButtonLabel => 'Scan text';
+
+  @override
   String get scrimLabel => 'Scrim';
 
   @override
