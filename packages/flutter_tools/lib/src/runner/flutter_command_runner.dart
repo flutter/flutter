@@ -77,7 +77,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
-        help: 'Suppress analytics reporting when this command runs.');
+        help: 'Suppress analytics reporting for the current CLI invocation.');
     argParser.addFlag('disable-telemetry',
         negatable: false,
         help: 'Disable telemetry reporting when this command runs.');
