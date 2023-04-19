@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef FLUTTER_FML_MATH_H_
+#define FLUTTER_FML_MATH_H_
+
 namespace flutter {
 namespace math {
 
@@ -46,3 +49,5 @@ constexpr float k1OverSqrt2 = 0.70710678118654752440;
 
 }  // namespace math
 }  // namespace flutter
+
+#endif  // FLUTTER_FML_MATH_H_

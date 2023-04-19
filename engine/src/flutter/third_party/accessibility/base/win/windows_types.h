@@ -5,8 +5,8 @@
 // This file contains defines and typedefs that allow popular Windows types to
 // be used without the overhead of including windows.h.
 
-#ifndef BASE_WIN_WINDOWS_TYPES_H
-#define BASE_WIN_WINDOWS_TYPES_H
+#ifndef BASE_WIN_WINDOWS_TYPES_H_
+#define BASE_WIN_WINDOWS_TYPES_H_
 
 // Needed for function prototypes.
 #include <concurrencysal.h>
@@ -273,4 +273,4 @@ WINBASEAPI VOID WINAPI SetLastError(_In_ DWORD dwErrCode);
 #define StartService StartServiceW
 #define UpdateResource UpdateResourceW
 
-#endif  // BASE_WIN_WINDOWS_TYPES_H
+#endif  // BASE_WIN_WINDOWS_TYPES_H_
