@@ -1695,7 +1695,7 @@ class FakeEditableTextState extends EditableTextState {
   RenderEditable get renderEditable => _editableKey.currentContext!.findRenderObject()! as RenderEditable;
 
   @override
-  bool showToolbar() {
+  bool showToolbar([bool showHandles = false]) {
     showToolbarCalled = true;
     return true;
   }
