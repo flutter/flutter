@@ -542,7 +542,6 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
           controller: _controller,
           menuChildren: menu,
           crossAxisUnconstrained: false,
-          onClose: () { setState(() {}); }, // To update the status of the IconButton
           builder: (BuildContext context, MenuController controller, Widget? child) {
             assert(_initialMenu != null);
             final Widget trailingButton = Padding(
