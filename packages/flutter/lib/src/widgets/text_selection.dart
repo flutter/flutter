@@ -3366,7 +3366,6 @@ class LiveTextInputStatusNotifier extends ValueNotifier<LiveTextInputStatus> wit
     switch (state) {
       case AppLifecycleState.resumed:
         update();
-        break;
       case AppLifecycleState.detached:
       case AppLifecycleState.inactive:
       case AppLifecycleState.paused:

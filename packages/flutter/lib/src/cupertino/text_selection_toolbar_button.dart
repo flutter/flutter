@@ -132,7 +132,6 @@ class CupertinoTextSelectionToolbarButton extends StatelessWidget {
         // TODO(luckysmg): Use text.viewfinder from the latest SF Icons when it's available.
         // https://github.com/flutter/flutter/issues/60034
         iconData = CupertinoIcons.doc_text_viewfinder;
-        break;
     }
 
     return Icon(
