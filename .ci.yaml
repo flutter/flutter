@@ -3515,6 +3515,7 @@ targets:
       task_name: complex_layout_ios__compile
 
   - name: Mac_ios complex_layout_ios__start_up
+    bringup: true # Flaky https://github.com/flutter/flutter/issues/125110
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
