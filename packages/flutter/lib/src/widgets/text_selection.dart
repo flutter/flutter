@@ -2574,7 +2574,7 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartViewportOffset = renderEditable.offset.pixels;
 
     final bool shouldHideHandles = defaultTargetPlatform == TargetPlatform.android;
-    // The toolbar should be hidden while dragging.
+    // The toolbar should be hidden while dragging. The handles are hidden on Android.
     editableText.hideToolbar(shouldHideHandles);
 
     if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) > 1) {
@@ -2855,6 +2855,8 @@ class TextSelectionGestureDetectorBuilder {
     _dragBeganOnPreviousSelection = null;
 
     if (_shouldShowSelectionToolbar && _TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 2) {
+      // The handles are hidden on Android when the drag began, and they are shown
+      // again when the drag ends.
       final bool shouldShowHandles = defaultTargetPlatform == TargetPlatform.android;
       editableText.showToolbar(shouldShowHandles);
     }
