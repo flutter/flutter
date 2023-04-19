@@ -3941,6 +3941,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
+  ///
+  /// By default `showHandles`, is `false`, and the toolbar is shown without the handles
+  /// handles. If `showHandles` is set to `true`, then the toolbar and the handles
+  /// will be shown.
   @override
   bool showToolbar([bool showHandles = false]) {
     // Web is using native dom elements to enable clipboard functionality of the
