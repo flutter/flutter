@@ -81,7 +81,7 @@ abstract class FlutterVersion {
       final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(versionFile, workingDirectory: workingDirectory);
       if (version != null) {
         stopwatch.stop();
-        print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
+        //print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
         return version;
       }
     }
@@ -98,7 +98,7 @@ abstract class FlutterVersion {
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
     stopwatch.stop();
-    print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
+    //print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
     return _FlutterVersionGit._(
       clock: clock,
       workingDirectory: workingDirectory,
@@ -152,6 +152,7 @@ abstract class FlutterVersion {
 
   String? _frameworkAge;
 
+  // TODO
   String get frameworkAge {
     return _frameworkAge ??= _runGit(
       FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
