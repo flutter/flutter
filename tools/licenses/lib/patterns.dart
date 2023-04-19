@@ -49,8 +49,8 @@ final RegExp copyrightMentionOkPattern = RegExp(
      r'|// The copyright below was added in 2009, but I see no record'
      r'|This ICU code derived from:'
      r'|the contents of which are also included in zip.h' // seen in minizip's unzip.c, but the upshot of the crazy license situation there is that we don't have to do anything
-     r'|" inflate 1\.2\.12 Copyright 1995-2022 Mark Adler ";'
-     r'|" deflate 1\.2\.12 Copyright 1995-2022 Jean-loup Gailly and Mark Adler ";'
+     r'|" inflate 1\.2\.1\d Copyright 1995-2022 Mark Adler ";'
+     r'|" deflate 1\.2\.1\d Copyright 1995-2022 Jean-loup Gailly and Mark Adler ";'
      r'|const char zip_copyright\[\] =" zip 1\.01 Copyright 1998-2004 Gilles Vollant - http://www.winimage.com/zLibDll";'
      r'|#define JCOPYRIGHT_SHORT "Copyright \(C\) 1991-2016 The libjpeg-turbo Project and many others"'
      r"|r'[^']*©[^']*'" // e.g. flutter/third_party/web_locale_keymap/lib/web_locale_keymap/key_mappings.g.dart
@@ -330,7 +330,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
       // the comment decoration in the captured match, otherwise it won't be
       // stripped from the second line when generating output.
       r'((?: \* Copyright \(C\) 2017 ARM, Inc.\n)?'
-      r'Copyright .+(The .+ Authors)\. +All rights reserved\.)\n'
+      r'Copyright .+(The .+ Authors)(?:\. +All rights reserved\.)?)\n'
       r'Use of this source code is governed by a BSD-style license that can be\n'
       r'found in the Chromium source repository ([^ ]+) file.'.replaceAll(r'\n', _linebreakLoose),
       multiLine: true,
