@@ -499,7 +499,7 @@ the configured path by running this command: flutter config --android-studio-dir
   }
 
   void _initAndValidate() {
-    _isValid = false;
+    _isValid = true;
     _validationMessages.clear();
 
     if (configuredPath != null) {
@@ -509,6 +509,11 @@ the configured path by running this command: flutter config --android-studio-dir
     if (!globals.fs.isDirectorySync(directory)) {
       _validationMessages.add('Android Studio not found at $directory');
       return;
+    }
+
+    if (version == null) {
+      _isValid = false;
+      _validationMessages.add('Unable to determine version of Android Studio.');
     }
 
     final String javaPath;
@@ -542,8 +547,8 @@ the configured path by running this command: flutter config --android-studio-dir
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         _validationMessages.add('Java version $javaVersion');
         _javaPath = javaPath;
-        _isValid = true;
       } else {
+        _isValid = false;
         _validationMessages.add('Unable to determine bundled Java version.');
       }
     }

@@ -81,7 +81,12 @@ class AndroidStudioValidator extends DoctorValidator {
       messages.addAll(_studio.validationMessages.map<ValidationMessage>(
         (String m) => ValidationMessage.error(m),
       ));
+      if (_studio.version == null) {
+        messages.add(const ValidationMessage('Try running Android Studio and then run flutter again.'));
+      }
+
       messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
+
       if (_studio.configuredPath != null) {
         messages.add(ValidationMessage(userMessages.androidStudioResetDir));
       }
