@@ -142,6 +142,7 @@ void main() {
         'AndroidStudio4.1',
       )));
       expect(studio.validationMessages, <String>['Java version 123']);
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -187,6 +188,7 @@ void main() {
         'AndroidStudio2020.3',
       )));
       expect(studio.validationMessages, <String>['Java version 123']);
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -231,6 +233,7 @@ void main() {
         'AndroidStudio3.3',
       )));
       expect(studio.validationMessages, <String>['Java version 123']);
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -268,13 +271,18 @@ void main() {
       )!;
 
       expect(studio, isNotNull);
+      expect(studio.isValid, false);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
         'Library',
         'Application Support',
         'AndroidStudio2021.2',
       )));
-      expect(studio.validationMessages, <String>['Java version 123']);
+      expect(studio.validationMessages, containsAll(<String>[
+        'Java version 123',
+        'Unable to determine version of Android Studio.'
+      ]));
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -660,6 +668,7 @@ void main() {
 
       expect(studio.version, Version(4, 1, 0));
       expect(studio.studioAppName, 'Android Studio');
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       Platform: () => platform,
       FileSystem: () => fileSystem,
@@ -677,6 +686,7 @@ void main() {
 
       expect(studio.version, Version(4, 2, 0));
       expect(studio.studioAppName, 'Android Studio');
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       Platform: () => platform,
       FileSystem: () => fileSystem,
@@ -694,6 +704,7 @@ void main() {
 
       expect(studio.version, Version(2020, 3, 0));
       expect(studio.studioAppName, 'Android Studio');
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       Platform: () => platform,
       FileSystem: () => fileSystem,
@@ -858,6 +869,7 @@ void main() {
         studio.pluginsPath,
         '/home/me/.AndroidStudio4.0/config/plugins',
       );
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -887,6 +899,7 @@ void main() {
         studio.pluginsPath,
         '/home/me/.local/share/Google/AndroidStudio4.1',
       );
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -919,6 +932,7 @@ void main() {
         studio.pluginsPath,
         pluginsInstallPath,
       );
+      expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,

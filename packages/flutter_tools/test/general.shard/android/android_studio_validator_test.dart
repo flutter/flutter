@@ -25,12 +25,19 @@ final Platform linuxPlatform = FakePlatform(
 void main() {
   late Config config;
   late FileSystem fileSystem;
+  late FileSystemUtils fileSystemUtils;
   late FakeProcessManager fakeProcessManager;
+  late UserMessages userMessages;
 
   setUp(() {
     config = Config.test();
     fileSystem = MemoryFileSystem.test();
+    fileSystemUtils = FileSystemUtils(
+      fileSystem: fileSystem,
+      platform: linuxPlatform,
+    );
     fakeProcessManager = FakeProcessManager.empty();
+    userMessages = UserMessages();
   });
 
   testWithoutContext('NoAndroidStudioValidator shows Android Studio as "not available" when not available.', () async {
@@ -48,12 +55,12 @@ void main() {
     const String installPath = '/opt/android-studio-with-cheese-5.0';
     const String studioHome = '$home/.AndroidStudioWithCheese5.0';
     const String homeFile = '$studioHome/system/.home';
-    globals.fs.directory(installPath).createSync(recursive: true);
-    globals.fs.file(homeFile).createSync(recursive: true);
-    globals.fs.file(homeFile).writeAsStringSync(installPath);
+    fileSystem.directory(installPath).createSync(recursive: true);
+    fileSystem.file(homeFile).createSync(recursive: true);
+    fileSystem.file(homeFile).writeAsStringSync(installPath);
 
     const String javaBinPath = '/opt/android-studio-with-cheese-5.0/jre/bin/java';
-    globals.fs.file(javaBinPath).createSync(recursive: true);
+    fileSystem.file(javaBinPath).createSync(recursive: true);
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[
         javaBinPath,
@@ -65,7 +72,7 @@ void main() {
     // This checks that running the validator doesn't throw an unhandled
     // exception and that the ProcessException makes it into the error
     // message list.
-    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
+    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(config, linuxPlatform, fileSystem, globals.userMessages)) {
       final ValidationResult result = await validator.validate();
       expect(result.messages.where((ValidationMessage message) {
         return message.isError && message.message.contains('ProcessException');
@@ -73,21 +80,20 @@ void main() {
     }
     expect(fakeProcessManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
+    Config: () => config,
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => linuxPlatform,
-    FileSystemUtils: () => FileSystemUtils(
-      fileSystem: fileSystem,
-      platform: linuxPlatform,
-    ),
+    FileSystemUtils: () => fileSystemUtils,
+    UserMessages: () => userMessages,
   });
 
   testUsingContext('AndroidStudioValidator displays error if Android Studio version could not be detected', () async {
     const String installPath = '/opt/AndroidStudioNoVersion';
-    globals.fs.directory(installPath).createSync(recursive: true);
+    fileSystem.directory(installPath).createSync(recursive: true);
     config.setValue('android-studio-dir', installPath);
     const String javaBinPath = '$installPath/jre/bin/java';
-    globals.fs.file(javaBinPath).createSync(recursive: true);
+    fileSystem.file(javaBinPath).createSync(recursive: true);
     fakeProcessManager.addCommand(const FakeCommand(
       command: <String>[
         javaBinPath,
@@ -96,10 +102,7 @@ void main() {
       exception: ProcessException('java', <String>['-version']),
     ));
 
-    // This checks that running the validator doesn't throw an unhandled
-    // exception and that the ProcessException makes it into the error
-    // message list.
-    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
+    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, linuxPlatform, fileSystem, globals.userMessages)) {
       final ValidationResult result = await validator.validate();
       expect(result.messages.where((ValidationMessage message) {
         return message.isError && message.message.contains('Unable to determine version of Android Studio.');
@@ -115,9 +118,40 @@ void main() {
     FileSystem: () => fileSystem,
     ProcessManager: () => fakeProcessManager,
     Platform: () => linuxPlatform,
-    FileSystemUtils: () => FileSystemUtils(
-      fileSystem: fileSystem,
-      platform: linuxPlatform,
-    ),
+    FileSystemUtils: () => fileSystemUtils,
+  });
+
+  testUsingContext('AndroidStudioValidator displays error if Android Studio version could not be detected', () async {
+    const String installPath = '/opt/AndroidStudioNoVersion';
+    fileSystem.directory(installPath).createSync(recursive: true);
+    config.setValue('android-studio-dir', installPath);
+    const String javaBinPath = '$installPath/jre/bin/java';
+    fileSystem.file(javaBinPath).createSync(recursive: true);
+    fakeProcessManager.addCommand(const FakeCommand(
+      command: <String>[
+        javaBinPath,
+        '-version',
+      ],
+      exception: ProcessException('java', <String>['-version']),
+    ));
+
+    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, linuxPlatform, fileSystem, userMessages)) {
+      final ValidationResult result = await validator.validate();
+      expect(result.messages.where((ValidationMessage message) {
+        return message.isError && message.message.contains('Unable to determine version of Android Studio.');
+      }).isNotEmpty, true);
+      expect(result.messages.where((ValidationMessage message) =>
+        message.message.contains('Try running Android Studio and then run flutter again.')
+      ).isNotEmpty, true);
+      expect(result.statusInfo, 'version unknown');
+    }
+    expect(fakeProcessManager, hasNoRemainingExpectations);
+  }, overrides: <Type, Generator>{
+    Config: () => config,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => fakeProcessManager,
+    Platform: () => linuxPlatform,
+    FileSystemUtils: () => fileSystemUtils,
+    UserMessages: () => userMessages,
   });
 }

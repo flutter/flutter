@@ -365,7 +365,7 @@ the configured path by running this command: flutter config --android-studio-dir
         .map<AndroidStudio?>((FileSystemEntity e) =>
           AndroidStudio.fromMacOSBundle(
             e.path,
-            configuredPath: configuredStudioDirAsEntity?.path,
+            configuredPath: configuredStudioDirAsEntity?.path == e.path ? configuredStudioDir : null,
           )
         )
         .whereType<AndroidStudio>()
@@ -463,17 +463,17 @@ the configured path by running this command: flutter config --android-studio-dir
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
     if (configuredStudioDir != null) {
-      final List<AndroidStudio> matchingFoundInstalls = studios
+      final AndroidStudio? matchingFoundInstall = studios
         .where((AndroidStudio other) =>
           globals.fs.directory(configuredStudioDir).path == globals.fs.directory(other.directory).path)
-        .toList();
-      if (matchingFoundInstalls.isNotEmpty) {
-        final AndroidStudio matchingFoundInstall = matchingFoundInstalls.first;
+        .firstOrNull;
+      if (matchingFoundInstall != null) {
         studios.remove(matchingFoundInstall);
         studios.add(AndroidStudio(configuredStudioDir,
+          presetPluginsPath: matchingFoundInstall.presetPluginsPath,
+          studioAppName: matchingFoundInstall.studioAppName,
           configuredPath: configuredStudioDir,
           version: matchingFoundInstall.version));
-        studios.remove(matchingFoundInstall);
       } else {
         studios.add(AndroidStudio(configuredStudioDir,
           configuredPath: configuredStudioDir));
