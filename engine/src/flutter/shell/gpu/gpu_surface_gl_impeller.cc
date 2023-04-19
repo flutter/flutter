@@ -5,7 +5,7 @@
 #include "flutter/shell/gpu/gpu_surface_gl_impeller.h"
 
 #include "flutter/fml/make_copyable.h"
-#include "flutter/impeller/display_list/display_list_dispatcher.h"
+#include "flutter/impeller/display_list/dl_dispatcher.h"
 #include "flutter/impeller/renderer/backend/gles/surface_gles.h"
 #include "flutter/impeller/renderer/renderer.h"
 
@@ -103,7 +103,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGLImpeller::AcquireFrame(
           return false;
         }
 
-        impeller::DisplayListDispatcher impeller_dispatcher;
+        impeller::DlDispatcher impeller_dispatcher;
         display_list->Dispatch(impeller_dispatcher);
         auto picture = impeller_dispatcher.EndRecordingAsPicture();
 

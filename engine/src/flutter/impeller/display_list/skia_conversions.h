@@ -21,14 +21,23 @@ namespace impeller {
 namespace skia_conversions {
 
 Rect ToRect(const SkRect& rect);
+
 std::optional<Rect> ToRect(const SkRect* rect);
+
 std::vector<Rect> ToRects(const SkRect tex[], int count);
+
 Point ToPoint(const SkPoint& point);
+
 Color ToColor(const SkColor& color);
+
 std::vector<Matrix> ToRSXForms(const SkRSXform xform[], int count);
+
 PathBuilder::RoundingRadii ToRoundingRadii(const SkRRect& rrect);
+
 Path ToPath(const SkPath& path);
+
 Path ToPath(const SkRRect& rrect);
+
 std::optional<impeller::PixelFormat> ToPixelFormat(SkColorType type);
 
 }  // namespace skia_conversions

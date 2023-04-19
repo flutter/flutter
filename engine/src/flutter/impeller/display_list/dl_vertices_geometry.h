@@ -17,11 +17,11 @@
 namespace impeller {
 
 /// @brief A geometry that is created from a vertices object.
-class DLVerticesGeometry : public VerticesGeometry {
+class DlVerticesGeometry : public VerticesGeometry {
  public:
-  explicit DLVerticesGeometry(const flutter::DlVertices* vertices);
+  explicit DlVerticesGeometry(const flutter::DlVertices* vertices);
 
-  ~DLVerticesGeometry();
+  ~DlVerticesGeometry();
 
   static std::shared_ptr<VerticesGeometry> MakeVertices(
       const flutter::DlVertices* vertices);
@@ -64,7 +64,7 @@ class DLVerticesGeometry : public VerticesGeometry {
   const flutter::DlVertices* vertices_;
   std::vector<uint16_t> normalized_indices_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DLVerticesGeometry);
+  FML_DISALLOW_COPY_AND_ASSIGN(DlVerticesGeometry);
 };
 
 }  // namespace impeller
