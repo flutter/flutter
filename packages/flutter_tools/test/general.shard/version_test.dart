@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
@@ -123,7 +124,7 @@ void main() {
         expect(testLogger.statusText, isEmpty);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(clock: _testClock),
+        FlutterVersion: () => FlutterVersion(clock: _testClock, fs: MemoryFileSystem.test()),
         ProcessManager: () => processManager,
         Cache: () => cache,
       });
@@ -430,7 +431,7 @@ void main() {
     expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FlutterVersion(clock: _testClock),
+    FlutterVersion: () => FlutterVersion(clock: _testClock, fs: MemoryFileSystem.test()),
     ProcessManager: () => processManager,
     Cache: () => cache,
   });

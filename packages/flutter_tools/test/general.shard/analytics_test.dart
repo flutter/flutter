@@ -41,11 +41,13 @@ void main() {
   group('analytics', () {
     late Directory tempDir;
     late Config testConfig;
+    late FileSystem fs;
 
     setUp(() {
       Cache.flutterRoot = '../..';
       tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
       testConfig = Config.test();
+      fs = MemoryFileSystem.test();
     });
 
     tearDown(() {
@@ -77,7 +79,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(fs: fs),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -101,7 +103,7 @@ void main() {
 
       expect(count, 0);
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(fs: fs),
       Usage: () => Usage(
         configDirOverride: tempDir.path,
         logFile: tempDir.childFile('analytics.log').path,
@@ -118,12 +120,12 @@ void main() {
 
       expect(globals.fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(fs: fs),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -141,12 +143,12 @@ void main() {
         contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'),
       );
     }, overrides: <Type, Generator>{
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(fs: fs),
       Config: () => testConfig,
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
-      FileSystem: () => MemoryFileSystem.test(),
+      FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });

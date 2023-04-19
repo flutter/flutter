@@ -229,7 +229,7 @@ Future<T> runInContext<T>(
         config: globals.config,
         platform: globals.platform,
       ),
-      FlutterVersion: () => FlutterVersion(),
+      FlutterVersion: () => FlutterVersion(fs: globals.fs),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
       FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
