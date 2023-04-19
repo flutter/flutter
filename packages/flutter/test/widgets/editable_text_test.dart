@@ -15479,7 +15479,7 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
       );
       await tester.pumpWidget(
-        CupertinoApp(
+        MaterialApp(
           home: EditableText(
             backgroundCursorColor: Colors.grey,
             controller: controller,
@@ -15490,8 +15490,8 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
             showSelectionHandles: true,
             spellCheckConfiguration:
               const SpellCheckConfiguration(
-                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
-                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
               ),
           ),
         ),
