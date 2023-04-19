@@ -180,19 +180,15 @@ void main() {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
-        break;
       case TargetPlatform.fuchsia:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
-        break;
       case TargetPlatform.iOS:
         expect(find.byType(CupertinoTextSelectionToolbarButton), findsNWidgets(5));
         expect(find.byIcon(CupertinoIcons.doc_text_viewfinder), findsOneWidget);
-        break;
       case TargetPlatform.macOS:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         expect(find.byType(CupertinoDesktopTextSelectionToolbarButton), findsNWidgets(5));
-        break;
     }
   },
     skip: kIsWeb, // [intended] on web the browser handles the context menu.
