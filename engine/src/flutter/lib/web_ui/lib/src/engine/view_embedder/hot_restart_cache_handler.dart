@@ -15,7 +15,7 @@ import '../dom.dart';
 @JS('window.__flutterState')
 external JSArray? get _hotRestartStore;
 List<Object?>? get hotRestartStore =>
-    _hotRestartStore?.toObjectShallow as List<Object>?;
+    _hotRestartStore?.toObjectShallow as List<Object?>?;
 
 @JS('window.__flutterState')
 external set _hotRestartStore(JSArray? nodes);
