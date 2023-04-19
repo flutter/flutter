@@ -135,14 +135,17 @@ void main() {
 
   testWidgets('ChoiceChip passes showCheckMark property to RawChip', (WidgetTester tester) async {
     const bool showCheckmark = false;
+    const Color checkmarkColor = Color(0xff0000ff);
     await tester.pumpWidget(wrapForChip(
-        child: const ChoiceChip(
-          label: Text('Test'),
-          selected: true,
-          showCheckmark: showCheckmark,
-        )));
+      child: const ChoiceChip(
+        label: Text('Test'),
+        selected: true,
+        showCheckmark: showCheckmark,
+        checkmarkColor: checkmarkColor,
+    )));
     final RawChip rawChip = tester.widget(find.byType(RawChip));
     expect(rawChip.showCheckmark, showCheckmark);
+    expect(rawChip.checkmarkColor, checkmarkColor);
   });
 
   testWidgets('M3 width should not change with selection', (WidgetTester tester) async {
