@@ -166,6 +166,7 @@ class ChoiceChip extends StatelessWidget
       pressElevation: pressElevation,
       selected: selected,
       showCheckmark: showCheckmark ?? chipTheme.showCheckmark ?? Theme.of(context).useMaterial3,
+      checkmarkColor: checkmarkColor,
       tooltip: tooltip,
       side: side,
       shape: shape,
