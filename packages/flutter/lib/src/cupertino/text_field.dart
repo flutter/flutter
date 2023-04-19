@@ -802,7 +802,7 @@ class CupertinoTextField extends StatefulWidget {
     EditableTextState editableTextState,
   ) {
     final List<ContextMenuButtonItem>? buttonItems =
-      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
     if (buttonItems == null || buttonItems.isEmpty){
       return const SizedBox.shrink();
@@ -1317,7 +1317,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             key: editableTextKey,
             controller: controller,
             undoController: widget.undoController,
-            readOnly: widget.readOnly,
+            readOnly: widget.readOnly || !enabled,
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,

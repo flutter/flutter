@@ -17,10 +17,12 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/signals.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../drive/drive_service.dart';
+import '../drive/web_driver_service.dart' show Browser;
 import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../resident_runner.dart';
@@ -111,25 +113,12 @@ class DriveCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'Whether the driver browser is going to be launched in headless mode.',
       )
-      ..addOption('browser-name',
-        defaultsTo: 'chrome',
+      ..addOption(
+        'browser-name',
+        defaultsTo: Browser.chrome.cliName,
         help: 'Name of the browser where tests will be executed.',
-        allowed: <String>[
-          'android-chrome',
-          'chrome',
-          'edge',
-          'firefox',
-          'ios-safari',
-          'safari',
-        ],
-        allowedHelp: <String, String>{
-          'android-chrome': 'Chrome on Android (see also "--android-emulator").',
-          'chrome': 'Google Chrome on this computer (see also "--chrome-binary").',
-          'edge': 'Microsoft Edge on this computer (Windows only).',
-          'firefox': 'Mozilla Firefox on this computer.',
-          'ios-safari': 'Apple Safari on an iOS device.',
-          'safari': 'Apple Safari on this computer (macOS only).',
-        },
+        allowed: Browser.values.map((Browser e) => e.cliName),
+        allowedHelp: CliEnum.allowedHelp(Browser.values),
       )
       ..addOption('browser-dimension',
         defaultsTo: '1600,1024',

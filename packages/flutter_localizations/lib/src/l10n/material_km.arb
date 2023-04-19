@@ -42,6 +42,12 @@
   "dialogLabel": "ប្រអប់",
   "alertDialogLabel": "ជូនដំណឹង",
   "searchFieldLabel": "ស្វែងរក",
+  "reorderItemToStart": "ផ្លាស់ទីទៅ​ចំណុច​ចាប់ផ្ដើម",
+  "reorderItemToEnd": "ផ្លាស់ទីទៅ​ចំណុចបញ្ចប់",
+  "reorderItemUp": "ផ្លាស់ទី​ឡើង​លើ",
+  "reorderItemDown": "ផ្លាស់ទី​ចុះ​ក្រោម",
+  "reorderItemLeft": "ផ្លាស់ទី​ទៅ​ឆ្វេង",
+  "reorderItemRight": "ផ្លាស់ទីទៅ​ស្តាំ",
   "expandedIconTapHint": "បង្រួម",
   "collapsedIconTapHint": "ពង្រីក",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "ផ្ទាំងស្រអាប់",
   "bottomSheetLabel": "សន្លឹក​ខាងក្រោម",
   "scrimOnTapHint": "បិទ $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

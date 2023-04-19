@@ -49,6 +49,12 @@
   "dialogLabel": "Диалоговое окно",
   "alertDialogLabel": "Оповещение",
   "searchFieldLabel": "Поиск",
+  "reorderItemToStart": "Переместить в начало",
+  "reorderItemToEnd": "Переместить в конец",
+  "reorderItemUp": "Переместить вверх",
+  "reorderItemDown": "Переместить вниз",
+  "reorderItemLeft": "Переместить влево",
+  "reorderItemRight": "Переместить вправо",
   "expandedIconTapHint": "Свернуть",
   "collapsedIconTapHint": "Развернуть",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -135,5 +141,11 @@
   "scrimLabel": "Маска",
   "bottomSheetLabel": "Нижний экран",
   "scrimOnTapHint": "Закрыть $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

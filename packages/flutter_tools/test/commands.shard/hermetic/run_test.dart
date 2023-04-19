@@ -929,7 +929,7 @@ void main() {
     });
 
     test('auto web-renderer with no dart-defines', () {
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 
@@ -945,7 +945,7 @@ void main() {
 
     test('auto web-renderer with existing dart-defines', () {
       dartDefines = <String>['FLUTTER_WEB_USE_SKIA=false'];
-      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.autoDetect);
+      dartDefines = FlutterCommand.updateDartDefines(dartDefines, WebRendererMode.auto);
       expect(dartDefines, <String>['FLUTTER_WEB_AUTO_DETECT=true']);
     });
 

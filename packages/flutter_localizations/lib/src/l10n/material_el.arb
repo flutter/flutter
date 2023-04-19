@@ -42,6 +42,12 @@
   "dialogLabel": "Παράθυρο διαλόγου",
   "alertDialogLabel": "Ειδοποίηση",
   "searchFieldLabel": "Αναζήτηση",
+  "reorderItemToStart": "Μετακίνηση στην αρχή",
+  "reorderItemToEnd": "Μετακίνηση στο τέλος",
+  "reorderItemUp": "Μετακίνηση προς τα πάνω",
+  "reorderItemDown": "Μετακίνηση προς τα κάτω",
+  "reorderItemLeft": "Μετακίνηση αριστερά",
+  "reorderItemRight": "Μετακίνηση δεξιά",
   "expandedIconTapHint": "Σύμπτυξη",
   "collapsedIconTapHint": "Ανάπτυξη",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -128,5 +134,11 @@
   "scrimLabel": "Επικάλυψη",
   "bottomSheetLabel": "Φύλλο κάτω μέρους",
   "scrimOnTapHint": "Κλείσιμο $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

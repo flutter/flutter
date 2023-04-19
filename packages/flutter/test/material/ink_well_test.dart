@@ -2137,4 +2137,30 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
 
     expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-cancel']));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/124328.
+  testWidgets('InkWell secondary tap should not draw a splash when no secondary callbacks are defined', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTap: () {},
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getRect(find.byType(InkWell)).center,
+      buttons: kSecondaryButton,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // No splash should be painted.
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+
+    await gesture.up();
+  });
 }

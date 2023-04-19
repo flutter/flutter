@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "Pilih Semua",
   "tabSemanticsLabel": "Tab $tabIndex daripada $tabCount",
   "modalBarrierDismissLabel": "Tolak",
-  "searchTextFieldPlaceholderLabel": "Cari"
+  "searchTextFieldPlaceholderLabel": "Cari",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

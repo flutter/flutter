@@ -48,6 +48,12 @@
   "dialogLabel": "Дыялогавае акно",
   "alertDialogLabel": "Абвестка",
   "searchFieldLabel": "Пошук",
+  "reorderItemToStart": "Перамясціць у пачатак",
+  "reorderItemToEnd": "Перамясціць у канец",
+  "reorderItemUp": "Перамясціць уверх",
+  "reorderItemDown": "Перамясціць уніз",
+  "reorderItemLeft": "Перамясціць улева",
+  "reorderItemRight": "Перамясціць управа",
   "expandedIconTapHint": "Згарнуць",
   "collapsedIconTapHint": "Разгарнуць",
   "remainingTextFieldCharacterCountOne": "Застаўся 1 сімвал",
@@ -133,5 +139,11 @@
   "scrimLabel": "Палатно",
   "bottomSheetLabel": "Ніжні аркуш",
   "scrimOnTapHint": "Закрыць: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

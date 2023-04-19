@@ -39,9 +39,9 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 // The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory
 // `.android` is always regenerated after flutter pub get, so new versions are picked up after a
 // Flutter upgrade.
-const String compileSdkVersion = '31';
+const String compileSdkVersion = '33';
 const String minSdkVersion = '16';
-const String targetSdkVersion = '31';
+const String targetSdkVersion = '33';
 const String ndkVersion = '23.1.7779620';
 
 // Update this when new versions of Gradle come out including minor versions
@@ -96,9 +96,8 @@ class GradleUtils {
     final Directory androidDir = project.android.hostAppGradleRoot;
     injectGradleWrapperIfNeeded(androidDir);
 
-    final File gradle = androidDir.childFile(
-      _platform.isWindows ? 'gradlew.bat' : 'gradlew',
-    );
+    final File gradle = androidDir.childFile(getGradlewFileName(_platform));
+
     if (gradle.existsSync()) {
       _logger.printTrace('Using gradle from ${gradle.absolute.path}.');
       // If the Gradle executable doesn't have execute permission,
@@ -189,8 +188,9 @@ Future<String?> getGradleVersion(
     // Expected content format (with lines above and below).
     // Version can have 2 or 3 numbers.
     // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
+    // '^\s*' protects against commented out lines.
     final RegExp distributionUrlRegex =
-        RegExp(r'distributionUrl\s?=\s?.*\.zip');
+        RegExp(r'^\s*distributionUrl\s?=\s?.*\.zip', multiLine: true);
 
     final RegExpMatch? distributionUrl =
         distributionUrlRegex.firstMatch(wrapperFileContent);
@@ -703,4 +703,13 @@ class GradleForAgp {
   final String agpMin;
   final String agpMax;
   final String minRequiredGradle;
+}
+
+// Returns gradlew file name based on the platform.
+String getGradlewFileName(Platform platform) {
+  if (platform.isWindows) {
+    return 'gradlew.bat';
+  } else {
+    return 'gradlew';
+  }
 }

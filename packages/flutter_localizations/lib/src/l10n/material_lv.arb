@@ -43,6 +43,12 @@
   "dialogLabel": "Dialoglodziņš",
   "alertDialogLabel": "Brīdinājums",
   "searchFieldLabel": "Meklēt",
+  "reorderItemToStart": "Pārvietot uz sākumu",
+  "reorderItemToEnd": "Pārvietot uz beigām",
+  "reorderItemUp": "Pārvietot uz augšu",
+  "reorderItemDown": "Pārvietot uz leju",
+  "reorderItemLeft": "Pārvietot pa kreisi",
+  "reorderItemRight": "Pārvietot pa labi",
   "expandedIconTapHint": "Sakļaut",
   "collapsedIconTapHint": "Izvērst",
   "remainingTextFieldCharacterCountZero": "Nav atlikusi neviena rakstzīme.",
@@ -129,5 +135,11 @@
   "scrimLabel": "Pārklājums",
   "bottomSheetLabel": "Ekrāna apakšdaļas lapa",
   "scrimOnTapHint": "Aizvērt $modalRouteContentName",
-  "keyboardKeyShift": "Pārslēgšanas taustiņš"
+  "keyboardKeyShift": "Pārslēgšanas taustiņš",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

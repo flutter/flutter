@@ -48,6 +48,12 @@
   "dialogLabel": "Okno dialogowe",
   "alertDialogLabel": "Alert",
   "searchFieldLabel": "Szukaj",
+  "reorderItemToStart": "Przenieś na początek",
+  "reorderItemToEnd": "Przenieś na koniec",
+  "reorderItemUp": "Przenieś w górę",
+  "reorderItemDown": "Przenieś w dół",
+  "reorderItemLeft": "Przenieś w lewo",
+  "reorderItemRight": "Przenieś w prawo",
   "expandedIconTapHint": "Zwiń",
   "collapsedIconTapHint": "Rozwiń",
   "remainingTextFieldCharacterCountZero": "TBD",
@@ -134,5 +140,11 @@
   "scrimLabel": "Siatka",
   "bottomSheetLabel": "Plansza dolna",
   "scrimOnTapHint": "Zamknij: $modalRouteContentName",
-  "keyboardKeyShift": "Shift"
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }
