@@ -15770,6 +15770,87 @@ void main() {
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     });
 
+    testWidgets('Can drag to show, unshow, and update magnifier', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                dragStartBehavior: DragStartBehavior.down,
+                controller: controller,
+                magnifierConfiguration: TextMagnifierConfiguration(
+                  magnifierBuilder: (
+                      _,
+                      MagnifierController controller,
+                      ValueNotifier<MagnifierInfo> localMagnifierInfo
+                    ) {
+                      magnifierInfo = localMagnifierInfo;
+                      return fakeMagnifier;
+                    },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Tap at 'f|' to move the selection to position 7.
+      await tester.tapAt(textOffsetToPosition(tester, 7));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 7);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a drag gesture to move the selection to the dragged position, showing
+      // the magnifier.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 7));
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a double-tap select the word at the tapped position.
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 3);
+
+      // Start a drag gesture to extend the selection word-by-word, showing the
+      // magnifier.
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
+
     testWidgets('Can long press to show, unshow, and update magnifier', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
       final bool isTargetPlatformAndroid = defaultTargetPlatform == TargetPlatform.android;
