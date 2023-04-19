@@ -1548,6 +1548,7 @@ class SubmenuButton extends StatefulWidget {
     this.onFocusChange,
     this.onOpen,
     this.onClose,
+    this.controller,
     this.style,
     this.menuStyle,
     this.alignmentOffset,
@@ -1577,6 +1578,9 @@ class SubmenuButton extends StatefulWidget {
 
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
+
+  /// An optional [MenuController] for this submenu.
+  final MenuController? controller;
 
   /// Customizes this button's appearance.
   ///
@@ -1760,7 +1764,8 @@ class SubmenuButton extends StatefulWidget {
 class _SubmenuButtonState extends State<SubmenuButton> {
   FocusNode? _internalFocusNode;
   bool _waitingToFocusMenu = false;
-  final MenuController _menuController = MenuController();
+  MenuController? _internalMenuController;
+  MenuController get _menuController => widget.controller ?? _internalMenuController!;
   _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
   FocusNode get _buttonFocusNode => widget.focusNode ?? _internalFocusNode!;
   bool get _enabled => widget.menuChildren.isNotEmpty;
@@ -1777,12 +1782,15 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         return true;
       }());
     }
+    if (widget.controller == null) {
+      _internalMenuController = MenuController();
+    }
     _buttonFocusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
-    _internalFocusNode?.removeListener(_handleFocusChange);
+    _buttonFocusNode.removeListener(_handleFocusChange);
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -1810,6 +1818,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       }
       _buttonFocusNode.addListener(_handleFocusChange);
     }
+    if (widget.controller != oldWidget.controller) {
+      _internalMenuController = (oldWidget.controller == null) ? null : MenuController();
+    }
   }
 
   @override
@@ -1836,7 +1847,16 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       alignmentOffset: menuPaddingOffset,
       clipBehavior: widget.clipBehavior,
       onClose: widget.onClose,
-      onOpen: widget.onOpen,
+      onOpen: () {
+        if (!_waitingToFocusMenu) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            _menuController._anchor?._focusButton();
+            _waitingToFocusMenu = false;
+          });
+          _waitingToFocusMenu = true;
+        }
+        widget.onOpen?.call();
+      },
       style: widget.menuStyle,
       builder: (BuildContext context, MenuController controller, Widget? child) {
         // Since we don't want to use the theme style or default style from the
@@ -1857,16 +1877,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller.close();
           } else {
             controller.open();
-            if (!_waitingToFocusMenu) {
-              // Only schedule this if it's not already scheduled.
-              SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-                // This has to happen in the next frame because the menu bar is
-                // not focusable until the first menu is open.
-                controller._anchor?._focusButton();
-                _waitingToFocusMenu = false;
-              });
-              _waitingToFocusMenu = true;
-            }
           }
         }
 
