@@ -40,13 +40,13 @@ void main() {
     testWidgets('mouse selection sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              focusNode: FocusNode(),
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: SelectionSpy(key: spy),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
 
