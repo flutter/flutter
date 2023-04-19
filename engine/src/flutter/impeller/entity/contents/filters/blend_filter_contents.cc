@@ -54,7 +54,8 @@ static std::optional<Entity> AdvancedBlend(
     return std::nullopt;
   }
 
-  auto dst_snapshot = inputs[0]->GetSnapshot(renderer, entity);
+  auto dst_snapshot =
+      inputs[0]->GetSnapshot("AdvancedBlend(Dst)", renderer, entity);
   if (!dst_snapshot.has_value()) {
     return std::nullopt;
   }
@@ -67,7 +68,8 @@ static std::optional<Entity> AdvancedBlend(
   std::optional<Snapshot> src_snapshot;
   std::array<Point, 4> src_uvs;
   if (!foreground_color.has_value()) {
-    src_snapshot = inputs[1]->GetSnapshot(renderer, entity);
+    src_snapshot =
+        inputs[1]->GetSnapshot("AdvancedBlend(Src)", renderer, entity);
     if (!src_snapshot.has_value()) {
       if (!dst_snapshot.has_value()) {
         return std::nullopt;
@@ -188,7 +190,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     BlendMode blend_mode,
     std::optional<Scalar> alpha,
     bool absorb_opacity) const {
-  auto dst_snapshot = input->GetSnapshot(renderer, entity);
+  auto dst_snapshot =
+      input->GetSnapshot("ForegroundAdvancedBlend", renderer, entity);
   if (!dst_snapshot.has_value()) {
     return std::nullopt;
   }
@@ -353,7 +356,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
     BlendMode blend_mode,
     std::optional<Scalar> alpha,
     bool absorb_opacity) const {
-  auto dst_snapshot = input->GetSnapshot(renderer, entity);
+  auto dst_snapshot =
+      input->GetSnapshot("ForegroundPorterDuffBlend", renderer, entity);
   if (!dst_snapshot.has_value()) {
     return std::nullopt;
   }
@@ -477,7 +481,8 @@ static std::optional<Entity> PipelineBlend(
   using VS = BlendPipeline::VertexShader;
   using FS = BlendPipeline::FragmentShader;
 
-  auto dst_snapshot = inputs[0]->GetSnapshot(renderer, entity);
+  auto dst_snapshot =
+      inputs[0]->GetSnapshot("PipelineBlend(Dst)", renderer, entity);
 
   ContentContext::SubpassCallback callback = [&](const ContentContext& renderer,
                                                  RenderPass& pass) {
@@ -544,7 +549,8 @@ static std::optional<Entity> PipelineBlend(
 
       for (auto texture_i = inputs.begin() + 1; texture_i < inputs.end();
            texture_i++) {
-        auto src_input = texture_i->get()->GetSnapshot(renderer, entity);
+        auto src_input = texture_i->get()->GetSnapshot("PipelineBlend(Src)",
+                                                       renderer, entity);
         if (!add_blend_command(src_input)) {
           return true;
         }

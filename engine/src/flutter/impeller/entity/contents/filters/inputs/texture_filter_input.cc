@@ -21,6 +21,7 @@ FilterInput::Variant TextureFilterInput::GetInput() const {
 }
 
 std::optional<Snapshot> TextureFilterInput::GetSnapshot(
+    const std::string& label,
     const ContentContext& renderer,
     const Entity& entity) const {
   auto snapshot =

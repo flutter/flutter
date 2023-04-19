@@ -56,14 +56,15 @@ std::optional<Snapshot> Contents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled) const {
+    bool msaa_enabled,
+    const std::string& label) const {
   auto coverage = GetCoverage(entity);
   if (!coverage.has_value()) {
     return std::nullopt;
   }
 
   auto texture = renderer.MakeSubpass(
-      "Snapshot", ISize::Ceil(coverage->size),
+      label, ISize::Ceil(coverage->size),
       [&contents = *this, &entity, &coverage](const ContentContext& renderer,
                                               RenderPass& pass) -> bool {
         Entity sub_entity;

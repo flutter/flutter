@@ -100,7 +100,8 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
 
   // Input 0 snapshot.
 
-  auto input_snapshot = inputs[0]->GetSnapshot(renderer, entity);
+  auto input_snapshot =
+      inputs[0]->GetSnapshot("GaussianBlur", renderer, entity);
   if (!input_snapshot.has_value()) {
     return std::nullopt;
   }
@@ -148,7 +149,8 @@ std::optional<Entity> DirectionalGaussianBlurFilterContents::RenderFilter(
   // Source override snapshot.
 
   auto source = source_override_ ? source_override_ : inputs[0];
-  auto source_snapshot = source->GetSnapshot(renderer, entity);
+  auto source_snapshot =
+      source->GetSnapshot("GaussianBlur(Override)", renderer, entity);
   if (!source_snapshot.has_value()) {
     return std::nullopt;
   }

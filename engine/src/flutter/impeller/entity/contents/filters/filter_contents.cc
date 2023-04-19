@@ -242,12 +242,14 @@ std::optional<Snapshot> FilterContents::RenderToSnapshot(
     const ContentContext& renderer,
     const Entity& entity,
     const std::optional<SamplerDescriptor>& sampler_descriptor,
-    bool msaa_enabled) const {
+    bool msaa_enabled,
+    const std::string& label) const {
   // Resolve the render instruction (entity) from the filter and render it to a
   // snapshot.
   if (std::optional<Entity> result = GetEntity(renderer, entity);
       result.has_value()) {
-    return result->GetContents()->RenderToSnapshot(renderer, result.value());
+    return result->GetContents()->RenderToSnapshot(renderer, result.value(),
+                                                   std::nullopt, true, label);
   }
 
   return std::nullopt;

@@ -248,7 +248,8 @@ bool AtlasContents::Render(const ContentContext& renderer,
     auto contents = ColorFilterContents::MakeBlend(
         blend_mode_,
         {FilterInput::Make(dst_contents), FilterInput::Make(src_contents)});
-    auto snapshot = contents->RenderToSnapshot(renderer, entity);
+    auto snapshot = contents->RenderToSnapshot(renderer, entity, std::nullopt,
+                                               true, "AtlasContents Snapshot");
     if (!snapshot.has_value()) {
       return false;
     }
