@@ -56,12 +56,6 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto maybe_input_uvs = y_input_snapshot->GetCoverageUVs(coverage);
-  if (!maybe_input_uvs.has_value()) {
-    return std::nullopt;
-  }
-  auto input_uvs = maybe_input_uvs.value();
-
   if (y_input_snapshot->texture->GetTextureDescriptor().format !=
           PixelFormat::kR8UNormInt ||
       uv_input_snapshot->texture->GetTextureDescriptor().format !=
@@ -72,8 +66,8 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
   //----------------------------------------------------------------------------
   /// Create AnonymousContents for rendering.
   ///
-  RenderProc render_proc = [y_input_snapshot, uv_input_snapshot, coverage,
-                            yuv_color_space = yuv_color_space_, input_uvs](
+  RenderProc render_proc = [y_input_snapshot, uv_input_snapshot,
+                            yuv_color_space = yuv_color_space_](
                                const ContentContext& renderer,
                                const Entity& entity, RenderPass& pass) -> bool {
     Command cmd;
@@ -83,20 +77,16 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     auto options = OptionsFromPassAndEntity(pass, entity);
     cmd.pipeline = renderer.GetYUVToRGBFilterPipeline(options);
 
+    auto size = y_input_snapshot->texture->GetSize();
+
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({
-        {coverage.origin, input_uvs[0]},
-        {{coverage.origin.x + coverage.size.width, coverage.origin.y},
-         input_uvs[1]},
-        {{coverage.origin.x + coverage.size.width,
-          coverage.origin.y + coverage.size.height},
-         input_uvs[3]},
-        {coverage.origin, input_uvs[0]},
-        {{coverage.origin.x + coverage.size.width,
-          coverage.origin.y + coverage.size.height},
-         input_uvs[3]},
-        {{coverage.origin.x, coverage.origin.y + coverage.size.height},
-         input_uvs[2]},
+        {Point(0, 0)},
+        {Point(1, 0)},
+        {Point(1, 1)},
+        {Point(0, 0)},
+        {Point(1, 1)},
+        {Point(0, 1)},
     });
 
     auto& host_buffer = pass.GetTransientsBuffer();
@@ -104,7 +94,9 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
     cmd.BindVertices(vtx_buffer);
 
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                     entity.GetTransformation() * y_input_snapshot->transform *
+                     Matrix::MakeScale(Vector2(size));
     frame_info.texture_sampler_y_coord_scale =
         y_input_snapshot->texture->GetYCoordScale();
 
@@ -131,7 +123,7 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
 
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
-    return coverage;
+    return coverage.TransformBounds(entity.GetTransformation());
   };
 
   auto contents = AnonymousContents::Make(render_proc, coverage_proc);
@@ -139,7 +131,6 @@ std::optional<Entity> YUVToRGBFilterContents::RenderFilter(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetStencilDepth(entity.GetStencilDepth());
-  sub_entity.SetTransformation(entity.GetTransformation());
   sub_entity.SetBlendMode(entity.GetBlendMode());
   return sub_entity;
 }
