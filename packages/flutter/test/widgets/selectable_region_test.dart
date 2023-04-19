@@ -1754,7 +1754,7 @@ void main() {
     expect(buttonItems[0].type, ContextMenuButtonType.copy);
 
     // Press `Copy` item
-    buttonItems[0].onPressed.call();
+    buttonItems[0].onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
@@ -1808,7 +1808,7 @@ void main() {
     expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
 
     // Press `Select All` item
-    buttonItems[1].onPressed.call();
+    buttonItems[1].onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 

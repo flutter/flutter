@@ -14,10 +14,10 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoDesktopTextSelectionToolbarButton(
-            child: const Text('Tap me'),
             onPressed: () {
               pressed = true;
             },
+            child: const Text('Tap me'),
           ),
         ),
       ),
@@ -34,8 +34,8 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoDesktopTextSelectionToolbarButton(
-            child: const Text('Tap me'),
             onPressed: () { },
+            child: const Text('Tap me'),
           ),
         ),
       ),
@@ -70,5 +70,22 @@ void main() {
       matching: find.byType(FadeTransition),
     ));
     expect(opacity.opacity.value, 1.0);
+  });
+
+  testWidgets('passing null to onPressed disables the button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Center(
+          child: CupertinoDesktopTextSelectionToolbarButton(
+            onPressed: null,
+            child: Text('Tap me'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoButton), findsOneWidget);
+    final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
+    expect(button.enabled, isFalse);
   });
 }
