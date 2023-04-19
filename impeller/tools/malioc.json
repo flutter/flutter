@@ -6570,16 +6570,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": 100,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -6597,7 +6597,7 @@
             ],
             "shortest_path_cycles": [
               0.0625,
-              0.0,
+              0.015625,
               0.0625,
               0.0,
               3.0,
@@ -6607,9 +6607,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -6636,7 +6636,7 @@
             ],
             "longest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -6649,7 +6649,7 @@
             ],
             "shortest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
@@ -6657,7 +6657,7 @@
             ],
             "total_cycles": [
               3.0,
-              5.0,
+              4.0,
               0.0
             ]
           },
@@ -8421,16 +8421,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": 100,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -8448,7 +8448,7 @@
             ],
             "shortest_path_cycles": [
               0.0625,
-              0.0,
+              0.015625,
               0.0625,
               0.0,
               3.0,
@@ -8458,9 +8458,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -8487,7 +8487,7 @@
             ],
             "longest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -8500,7 +8500,7 @@
             ],
             "shortest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
@@ -8508,7 +8508,7 @@
             ],
             "total_cycles": [
               3.0,
-              5.0,
+              4.0,
               0.0
             ]
           },
@@ -10176,16 +10176,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": 100,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -10203,7 +10203,7 @@
             ],
             "shortest_path_cycles": [
               0.0625,
-              0.0,
+              0.015625,
               0.0625,
               0.0,
               3.0,
@@ -10213,9 +10213,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -10242,7 +10242,7 @@
             ],
             "longest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -10255,7 +10255,7 @@
             ],
             "shortest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
@@ -10263,7 +10263,7 @@
             ],
             "total_cycles": [
               3.0,
-              5.0,
+              4.0,
               0.0
             ]
           },
@@ -11239,16 +11239,16 @@
           "work_registers_used": 32
         },
         "Varying": {
-          "fp16_arithmetic": 0,
+          "fp16_arithmetic": 100,
           "has_stack_spilling": false,
           "performance": {
             "longest_path_bound_pipelines": [
               "load_store"
             ],
             "longest_path_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -11266,7 +11266,7 @@
             ],
             "shortest_path_cycles": [
               0.0625,
-              0.0,
+              0.015625,
               0.0625,
               0.0,
               3.0,
@@ -11276,9 +11276,9 @@
               "load_store"
             ],
             "total_cycles": [
-              0.078125,
+              0.0625,
               0.015625,
-              0.078125,
+              0.0625,
               0.0,
               3.0,
               0.0
@@ -11305,7 +11305,7 @@
             ],
             "longest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "pipelines": [
@@ -11318,7 +11318,7 @@
             ],
             "shortest_path_cycles": [
               2.9700000286102295,
-              5.0,
+              4.0,
               0.0
             ],
             "total_bound_pipelines": [
@@ -11326,7 +11326,7 @@
             ],
             "total_cycles": [
               3.0,
-              5.0,
+              4.0,
               0.0
             ]
           },

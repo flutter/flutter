@@ -36,16 +36,10 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
     return std::nullopt;
   }
 
-  auto maybe_input_uvs = input_snapshot->GetCoverageUVs(coverage);
-  if (!maybe_input_uvs.has_value()) {
-    return std::nullopt;
-  }
-  auto input_uvs = maybe_input_uvs.value();
-
   //----------------------------------------------------------------------------
   /// Create AnonymousContents for rendering.
   ///
-  RenderProc render_proc = [input_snapshot, coverage, input_uvs,
+  RenderProc render_proc = [input_snapshot,
                             absorb_opacity = GetAbsorbOpacity()](
                                const ContentContext& renderer,
                                const Entity& entity, RenderPass& pass) -> bool {
@@ -56,20 +50,16 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
     auto options = OptionsFromPassAndEntity(pass, entity);
     cmd.pipeline = renderer.GetSrgbToLinearFilterPipeline(options);
 
+    auto size = input_snapshot->texture->GetSize();
+
     VertexBufferBuilder<VS::PerVertexData> vtx_builder;
     vtx_builder.AddVertices({
-        {coverage.origin, input_uvs[0]},
-        {{coverage.origin.x + coverage.size.width, coverage.origin.y},
-         input_uvs[1]},
-        {{coverage.origin.x + coverage.size.width,
-          coverage.origin.y + coverage.size.height},
-         input_uvs[3]},
-        {coverage.origin, input_uvs[0]},
-        {{coverage.origin.x + coverage.size.width,
-          coverage.origin.y + coverage.size.height},
-         input_uvs[3]},
-        {{coverage.origin.x, coverage.origin.y + coverage.size.height},
-         input_uvs[2]},
+        {Point(0, 0)},
+        {Point(1, 0)},
+        {Point(1, 1)},
+        {Point(0, 0)},
+        {Point(1, 1)},
+        {Point(0, 1)},
     });
 
     auto& host_buffer = pass.GetTransientsBuffer();
@@ -77,7 +67,9 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
     cmd.BindVertices(vtx_buffer);
 
     VS::FrameInfo frame_info;
-    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                     entity.GetTransformation() * input_snapshot->transform *
+                     Matrix::MakeScale(Vector2(size));
     frame_info.texture_sampler_y_coord_scale =
         input_snapshot->texture->GetYCoordScale();
 
@@ -94,7 +86,7 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
 
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
-    return coverage;
+    return coverage.TransformBounds(entity.GetTransformation());
   };
 
   auto contents = AnonymousContents::Make(render_proc, coverage_proc);
@@ -102,7 +94,6 @@ std::optional<Entity> SrgbToLinearFilterContents::RenderFilter(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetStencilDepth(entity.GetStencilDepth());
-  sub_entity.SetTransformation(entity.GetTransformation());
   sub_entity.SetBlendMode(entity.GetBlendMode());
   return sub_entity;
 }
