@@ -15799,23 +15799,33 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      // Tap at 'f|' to move the selection to position 7.
-      await tester.tapAt(textOffsetToPosition(tester, 7));
+      // Tap at '|a' to move the selection to position 0.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pumpAndSettle(kDoubleTapTimeout);
       expect(controller.selection.isCollapsed, true);
-      expect(controller.selection.baseOffset, 7);
+      expect(controller.selection.baseOffset, 0);
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
 
       // Start a drag gesture to move the selection to the dragged position, showing
       // the magnifier.
-      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 7));
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 0));
       await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 5);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      Offset firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
 
       await gesture.moveTo(textOffsetToPosition(tester, 10));
       await tester.pump();
       expect(controller.selection.isCollapsed, true);
       expect(controller.selection.baseOffset, 10);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
 
       // The magnifier should hide when the drag ends.
       await gesture.up();
@@ -15837,11 +15847,21 @@ void main() {
 
       // Start a drag gesture to extend the selection word-by-word, showing the
       // magnifier.
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 7);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
+
       await gesture.moveTo(textOffsetToPosition(tester, 10));
       await tester.pump();
       expect(controller.selection.baseOffset, 0);
       expect(controller.selection.extentOffset, 11);
       expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
 
       // The magnifier should hide when the drag ends.
       await gesture.up();
