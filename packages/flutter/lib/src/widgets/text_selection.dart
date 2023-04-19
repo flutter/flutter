@@ -477,6 +477,7 @@ class TextSelectionOverlay {
         context: context,
         builder: spellCheckSuggestionsToolbarBuilder,
     );
+    hideHandles();
   }
 
   /// {@macro flutter.widgets.SelectionOverlay.showMagnifier}

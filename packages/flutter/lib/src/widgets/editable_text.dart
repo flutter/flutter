@@ -4597,7 +4597,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             minLines: widget.minLines,
                             expands: widget.expands,
                             strutStyle: widget.strutStyle,
-                            // TODO(justinmc): Also need to hide handles. See other PR?
                             selectionColor: _selectionOverlay?.spellCheckMenuIsVisible ?? false
                                 ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
                                 : widget.selectionColor,
