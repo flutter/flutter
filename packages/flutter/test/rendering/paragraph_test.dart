@@ -581,7 +581,7 @@ void main() {
 
     pumpFrame();
     renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr, textScaleFactor: 2.0),
     ];
     paragraph = RenderParagraph(
       const TextSpan(
@@ -625,7 +625,7 @@ void main() {
 
     pumpFrame();
     renderBoxes = <RenderBox>[
-      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+      RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr, textScaleFactor: 2.0),
     ];
     paragraph = RenderParagraph(
       const TextSpan(

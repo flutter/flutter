@@ -5055,7 +5055,6 @@ class _ScribblePlaceholder extends WidgetSpan {
       size.width,
       size.height,
       alignment,
-      scale: textScaleFactor,
     );
     if (hasStyle) {
       builder.pop();

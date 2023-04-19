@@ -552,9 +552,6 @@ class RenderParagraph extends RenderBox
     RenderBox? child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>.filled(childCount, PlaceholderDimensions.empty);
     int childIndex = 0;
-    // Takes textScaleFactor into account because the content of the placeholder
-    // span will be scaled up when it paints.
-    width = width / textScaleFactor;
     while (child != null) {
       final Size size = child.getDryLayout(BoxConstraints(maxWidth: width));
       placeholderDimensions[childIndex] = PlaceholderDimensions(
@@ -668,11 +665,7 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     // Only constrain the width to the maximum width of the paragraph.
     // Leave height unconstrained, which will overflow if expanded past.
-    BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
-    // The content will be enlarged by textScaleFactor during painting phase.
-    // We reduce constraints by textScaleFactor, so that the content will fit
-    // into the box once it is enlarged.
-    boxConstraints = boxConstraints / textScaleFactor;
+    final BoxConstraints boxConstraints = BoxConstraints(maxWidth: constraints.maxWidth);
     while (child != null) {
       double? baselineOffset;
       final Size childSize;

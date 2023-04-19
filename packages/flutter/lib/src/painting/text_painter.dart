@@ -124,7 +124,7 @@ class PlaceholderDimensions {
 
   @override
   String toString() {
-    return 'PlaceholderDimensions($size, $baseline)';
+    return 'PlaceholderDimensions($size, $alignment, $baseline${baselineOffset == null ? "" : ", $baselineOffset"})';
   }
 }
 

@@ -395,7 +395,7 @@ void main() {
       textSelectionDelegate: delegate,
       text: const TextSpan(
         text: '中文测试文本是否正确',
-        style: TextStyle(fontSize: 10.0, fontFamily: 'FlutterTest'),
+        style: TextStyle(fontSize: 10.0),
       ),
       startHandleLayerLink: LayerLink(),
       endHandleLayerLink: LayerLink(),
@@ -1546,7 +1546,7 @@ void main() {
             selection: TextSelection.collapsed(offset: 3),
           );
       final List<RenderBox> renderBoxes = <RenderBox>[
-        RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr),
+        RenderParagraph(const TextSpan(text: sentence), textDirection: TextDirection.ltr, textScaleFactor: 2.0),
       ];
       final ViewportOffset viewportOffset = ViewportOffset.zero();
       final RenderEditable editable = RenderEditable(
