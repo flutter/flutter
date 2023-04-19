@@ -763,6 +763,7 @@ class EditableText extends StatefulWidget {
     bool? showCursor,
     this.showSelectionHandles = false,
     this.selectionColor,
+    this.spellCheckSelectionColor,
     this.selectionControls,
     TextInputType? keyboardType,
     this.textInputAction,
@@ -1236,6 +1237,13 @@ class EditableText extends StatefulWidget {
   /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
   /// value is set to the ambient [TextSelectionThemeData.selectionColor].
   final Color? selectionColor;
+
+  /// The color to use when painting the selection while the spell check menu is
+  /// visible.
+  ///
+  /// For example, on iOS, the selection appears red while the spell check menu
+  /// is showing.
+  final Color? spellCheckSelectionColor;
 
   /// {@template flutter.widgets.editableText.selectionControls}
   /// Optional delegate for building the text selection handles and toolbar.
@@ -4597,7 +4605,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             minLines: widget.minLines,
                             expands: widget.expands,
                             strutStyle: widget.strutStyle,
-                            selectionColor: widget.selectionColor,
+                            // TODO(justinmc): Also need to hide handles. See other PR?
+                            selectionColor: _selectionOverlay?.spellCheckMenuIsVisible ?? false
+                                ? widget.spellCheckSelectionColor ?? widget.selectionColor
+                                : widget.selectionColor,
                             textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                             textAlign: widget.textAlign,
                             textDirection: _textDirection,
