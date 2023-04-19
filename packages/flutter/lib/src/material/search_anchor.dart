@@ -67,6 +67,11 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 /// If [builder] returns an Icon, or any un-tappable widgets, we don't have
 /// to explicitly call [SearchController.openView].
 ///
+/// The search view route will be popped if the window size is changed and the
+/// search view route is not in full-screen mode. However, if the search view route
+/// is in full-screen mode, changing the window size, such as rotating a mobile
+/// device from portrait mode to landscape mode, will not close the search view.
+///
 /// {@tool dartpad}
 /// This example shows how to use an IconButton to open a search view in a [SearchAnchor].
 /// It also shows how to use [SearchController] to open or close the search view route.
@@ -286,6 +291,7 @@ class SearchAnchor extends StatefulWidget {
 }
 
 class _SearchAnchorState extends State<SearchAnchor> {
+  Size? _screenSize;
   bool _anchorIsVisible = true;
   final GlobalKey _anchorKey = GlobalKey();
   bool get _viewIsOpen => !_anchorIsVisible;
@@ -299,6 +305,18 @@ class _SearchAnchorState extends State<SearchAnchor> {
       _internalSearchController = SearchController();
     }
     _searchController._attach(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Size updatedScreenSize = MediaQuery.of(context).size;
+    if (_screenSize != null && _screenSize != updatedScreenSize) {
+      if (_searchController.isOpen && !getShowFullScreenView()) {
+        _closeView(null);
+      }
+    }
+    _screenSize = updatedScreenSize;
   }
 
   @override
@@ -672,45 +690,9 @@ class _ViewContentState extends State<_ViewContent> {
     result = widget.suggestionsBuilder(context, _controller);
     final Size updatedScreenSize = MediaQuery.of(context).size;
 
-    if (_screenSize != updatedScreenSize) {
+    if (_screenSize != updatedScreenSize && widget.showFullScreenView) {
       _screenSize = updatedScreenSize;
-      setState(() {
-        final Rect anchorRect = widget.getRect() ?? _viewRect;
-        final BoxConstraints constraints = widget.viewConstraints ?? widget.viewTheme.constraints ?? widget.viewDefaults.constraints!;
-        final double viewWidth = clampDouble(anchorRect.width, constraints.minWidth, constraints.maxWidth);
-        final double viewHeight = clampDouble(_screenSize!.height * 2 / 3, constraints.minHeight, constraints.maxHeight);
-        final Size updatedViewSize = Size(viewWidth, viewHeight);
-
-        switch (Directionality.of(context)) {
-          case TextDirection.ltr:
-            final double viewLeftToScreenRight = _screenSize!.width - anchorRect.left;
-            final double viewTopToScreenBottom = _screenSize!.height - anchorRect.top;
-
-            // Make sure the search view doesn't go off the screen when the screen
-            // size is changed. If the search view doesn't fit, move the top-left
-            // corner of the view to fit the window. If the window is smaller than
-            // the view, then we resize the view to fit the window.
-            Offset topLeft = anchorRect.topLeft;
-            if (viewLeftToScreenRight < viewWidth) {
-              topLeft = Offset(_screenSize!.width - math.min(viewWidth, _screenSize!.width), anchorRect.top);
-            }
-            if (viewTopToScreenBottom < viewHeight) {
-              topLeft = Offset(topLeft.dx, _screenSize!.height - math.min(viewHeight, _screenSize!.height));
-            }
-            _viewRect = topLeft & updatedViewSize;
-            return;
-          case TextDirection.rtl:
-            final double viewTopToScreenBottom = _screenSize!.height - anchorRect.top;
-            Offset topLeft = Offset(
-              math.max(anchorRect.right - viewWidth, 0.0),
-              anchorRect.top,
-            );
-            if (viewTopToScreenBottom < viewHeight) {
-              topLeft = Offset(topLeft.dx, _screenSize!.height - math.min(viewHeight, _screenSize!.height));
-            }
-            _viewRect = topLeft & updatedViewSize;
-        }
-      });
+      _viewRect = Offset.zero & _screenSize!;
     }
   }
 
