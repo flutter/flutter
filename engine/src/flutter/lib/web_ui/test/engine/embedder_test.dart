@@ -52,28 +52,6 @@ void testMain() {
     );
   });
 
-  test('renders a shadowRoot by default', () {
-    final FlutterViewEmbedder embedder = FlutterViewEmbedder();
-    final HostNode hostNode = embedder.glassPaneShadow;
-    expect(domInstanceOfString(hostNode.node, 'ShadowRoot'), isTrue);
-  });
-
-  test('starts without shadowDom available too', () {
-    final dynamic oldAttachShadow = attachShadow;
-    expect(oldAttachShadow, isNotNull);
-
-    attachShadow = null; // Break ShadowDOM
-
-    final FlutterViewEmbedder embedder = FlutterViewEmbedder();
-    final HostNode hostNode = embedder.glassPaneShadow;
-    expect(domInstanceOfString(hostNode.node, 'Element'), isTrue);
-    expect(
-      (hostNode.node as DomElement).tagName,
-      equalsIgnoringCase('flt-element-host-node'),
-    );
-    attachShadow = oldAttachShadow; // Restore ShadowDOM
-  });
-
   test('should add/remove global resource', () {
     final FlutterViewEmbedder embedder = FlutterViewEmbedder();
     final DomHTMLDivElement resource = createDomHTMLDivElement();
@@ -110,6 +88,52 @@ void testMain() {
     expect(style, isNotNull);
     expect(style.opacity, '0');
   }, skip: browserEngine != BrowserEngine.firefox);
+
+  group('Shadow root', () {
+    late FlutterViewEmbedder embedder;
+
+    setUp(() {
+      embedder = FlutterViewEmbedder();
+    });
+
+    tearDown(() {
+      embedder.glassPaneElement.remove();
+    });
+
+    test('throws when shadowDom is not available', () {
+      final dynamic oldAttachShadow = attachShadow;
+      expect(oldAttachShadow, isNotNull);
+
+      attachShadow = null; // Break ShadowDOM
+
+      expect(() => FlutterViewEmbedder(), throwsUnsupportedError);
+      attachShadow = oldAttachShadow; // Restore ShadowDOM
+    });
+
+    test('Initializes and attaches a shadow root', () {
+      expect(domInstanceOfString(embedder.glassPaneShadow, 'ShadowRoot'), isTrue);
+      expect(embedder.glassPaneShadow.host, embedder.glassPaneElement);
+      expect(embedder.glassPaneShadow, embedder.glassPaneElement.shadowRoot);
+
+      // The shadow root should be initialized with correct parameters.
+      expect(embedder.glassPaneShadow.mode, 'open');
+      if (browserEngine != BrowserEngine.firefox &&
+          browserEngine != BrowserEngine.webkit) {
+        // Older versions of Safari and Firefox don't support this flag yet.
+        // See: https://caniuse.com/mdn-api_shadowroot_delegatesfocus
+        expect(embedder.glassPaneShadow.delegatesFocus, isFalse);
+      }
+    });
+
+    test('Attaches a stylesheet to the shadow root', () {
+      final DomElement? style =
+          embedder.glassPaneShadow.querySelector('#flt-internals-stylesheet');
+
+      expect(style, isNotNull);
+      expect(style!.tagName, equalsIgnoringCase('style'));
+      expect(style.parentNode, embedder.glassPaneShadow);
+    });
+  });
 }
 
 @JS('Element.prototype.attachShadow')

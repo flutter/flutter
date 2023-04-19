@@ -65,7 +65,7 @@ export 'engine/engine_canvas.dart';
 export 'engine/font_change_util.dart';
 export 'engine/fonts.dart';
 export 'engine/frame_reference.dart';
-export 'engine/host_node.dart';
+export 'engine/global_styles.dart';
 export 'engine/html/backdrop_filter.dart';
 export 'engine/html/bitmap_canvas.dart';
 export 'engine/html/canvas.dart';
