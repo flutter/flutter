@@ -1021,40 +1021,46 @@ void main() {
     gesture = null;
   });
 
-  testWidgets('Calling ensureTooltipVisible on an unmounted TooltipState returns false', (WidgetTester tester) async {
-    // Using [testWidgets] instead of [testWidgetsWithLeakTracking] because
-    // [tooltipState] is hold after disposal by the test
-    // and thus is not garbage collected.
-
-    // Regression test for https://github.com/flutter/flutter/issues/95851
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
-          child: Tooltip(
-            message: tooltipText,
-            child: SizedBox(
-              width: 100.0,
-              height: 100.0,
+  testWidgetsWithLeakTracking(
+    'Calling ensureTooltipVisible on an unmounted TooltipState returns false',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/95851
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: SizedBox(
+                width: 100.0,
+                height: 100.0,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    final TooltipState tooltipState = tester.state(find.byType(Tooltip));
-    expect(tooltipState.ensureTooltipVisible(), true);
+      final TooltipState tooltipState = tester.state(find.byType(Tooltip));
+      expect(tooltipState.ensureTooltipVisible(), true);
 
-    // Remove the tooltip.
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Center(
-          child: SizedBox.shrink(),
+      // Remove the tooltip.
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Center(
+            child: SizedBox.shrink(),
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(tooltipState.ensureTooltipVisible(), false);
-  });
+      expect(tooltipState.ensureTooltipVisible(), false);
+    },
+    leakTrackingConfig: LeakTrackingTestConfig(
+      notGcedAllowList: <String>{
+        // [tooltipState] is hold after disposal by the test
+        // and thus is not garbage collected.
+        '$TooltipState',
+      },
+    ),
+  );
 
   testWidgetsWithLeakTracking('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration.zero;

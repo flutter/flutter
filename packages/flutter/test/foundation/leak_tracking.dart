@@ -11,6 +11,51 @@ import 'package:meta/meta.dart';
 // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show Timeout;
 
+/// Configuration for leak tracking in unit tests.
+class LeakTrackingTestConfig {
+  /// Creates a new instance of [LeakTrackingFlutterTestConfig].
+  const LeakTrackingTestConfig({
+    this.stackTraceCollectionConfig = const StackTraceCollectionConfig(),
+    this.onLeaks,
+    this.failTestOnLeaks = true,
+    this.notGcedAllowList = const <String>{},
+    this.notDisposedAllowList = const <String>{},
+  });
+
+  /// If true, warning will be printed when leak tracking is
+  /// requested for a non-supported platform.
+  static bool warnForNonSupportedPlatforms = true;
+
+  /// When to collect stack trace information.
+  ///
+  /// Knowing call stack may help to troubleshoot memory leaks.
+  /// Customize this parameter to collect stack traces when needed.
+  final StackTraceCollectionConfig stackTraceCollectionConfig;
+  /// Handler to obtain details about collected leaks.
+  ///
+  /// Use the handler to process the collected leak
+  /// details programmatically.
+  final LeaksCallback? onLeaks;
+
+  /// If true, the test will fail if leaks are found.
+  ///
+  /// When to collect stack trace information.
+  /// If false, the test will not fail if leaks are
+  /// found to allow for analyzing leaks after the test completes.
+  final bool failTestOnLeaks;
+
+  /// List of classes that are allowed to be not GCed after disposal.
+  ///
+  /// As returned by `object.runtimeType.toString()`.
+  final Set<String> notGcedAllowList;
+
+  /// List of classes that are allowed to be GCed without disposal.
+  ///
+  /// As returned by `object.runtimeType.toString()`.
+  final Set<String> notDisposedAllowList;
+}
+
+
 /// Wrapper for [testWidgets] with leak tracking.
 ///
 /// This method is temporal with the plan:
@@ -94,12 +139,14 @@ Future<void> _withFlutterLeakTracking(
     Future<void> asyncCodeRunner(DartAsyncCallback action) async => tester.runAsync(action);
 
     try {
-      final Leaks leaks = await withLeakTracking(
+      Leaks leaks = await withLeakTracking(
         callback,
         asyncCodeRunner: asyncCodeRunner,
         stackTraceCollectionConfig: config.stackTraceCollectionConfig,
         shouldThrowOnLeaks: false,
       );
+
+      leaks = _cleanUpLeaks(leaks, config);
 
       if (leaks.total > 0) {
         config.onLeaks?.call(leaks);
@@ -111,4 +158,32 @@ Future<void> _withFlutterLeakTracking(
       MemoryAllocations.instance.removeListener(flutterEventToLeakTracker);
     }
   });
+}
+
+/// Removes leaks that are allowed by [config].
+Leaks _cleanUpLeaks(Leaks leaks, LeakTrackingTestConfig config) {
+  final Map<LeakType, List<LeakReport>> cleaned = <LeakType, List<LeakReport>>{
+    LeakType.notGCed: <LeakReport>[],
+    LeakType.notDisposed: <LeakReport>[],
+    LeakType.gcedLate: <LeakReport>[],
+  };
+
+  for (final LeakReport leak in leaks.notGCed) {
+    if (!config.notGcedAllowList.contains(leak.type)) {
+      cleaned[LeakType.notGCed]!.add(leak);
+    }
+  }
+
+  for (final LeakReport leak in leaks.gcedLate) {
+    if (!config.notGcedAllowList.contains(leak.type)) {
+      cleaned[LeakType.gcedLate]!.add(leak);
+    }
+  }
+
+  for (final LeakReport leak in leaks.notDisposed) {
+    if (!config.notGcedAllowList.contains(leak.type)) {
+      cleaned[LeakType.notDisposed]!.add(leak);
+    }
+  }
+  return Leaks(cleaned);
 }
