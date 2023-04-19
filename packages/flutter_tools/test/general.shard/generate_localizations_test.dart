@@ -1734,6 +1734,40 @@ import 'output-localization-file_en.dart' deferred as output-localization-file_e
         expect(localizationsFile, contains('String helloWorld(Object name) {'));
       });
 
+      testWithoutContext('should not automatically infer placeholders if an explicit list has been given', () {
+        const String messageWithoutDefinedPlaceholder = '''
+{
+  "helloWorld": "Hello {name}",
+  "@helloWorld": {
+    "placeholders": {}
+  }
+}''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(messageWithoutDefinedPlaceholder);
+        expect(
+          () {
+            LocalizationsGenerator(
+              fileSystem: fs,
+              inputPathString: defaultL10nPathString,
+              outputPathString: defaultL10nPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+              logger: logger,
+            )
+              ..loadResources()
+              ..writeOutputFiles();
+          },
+          throwsA(isA<L10nException>().having(
+            (L10nException e) => e.message,
+            'message',
+            contains('An explicit placeholder list was provided but could not find the following placeholders')
+          )),
+        );
+      });
+
       testWithoutContext('placeholder parameter list should be consistent between languages', () {
         const String messageEn = '''
 {

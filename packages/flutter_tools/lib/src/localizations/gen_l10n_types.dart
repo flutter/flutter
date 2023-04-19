@@ -323,7 +323,7 @@ class Placeholder {
 // "helloWorld": "Hello World",
 // "@helloWorld": {
 //   "description": "The conventional newborn programmer greeting"
-// }
+//
 //
 // The value of this Message is "Hello World". The Message's value is the
 // localized string to be shown for the template ARB file's locale.
@@ -341,6 +341,7 @@ class Message {
   ) : assert(resourceId.isNotEmpty),
       value = _value(templateBundle.resources, resourceId),
       description = _description(templateBundle.resources, resourceId, isResourceAttributeRequired),
+      hasExplicitPlaceholders = _hasExplicitPlaceholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
       placeholders = _placeholders(templateBundle.resources, resourceId, isResourceAttributeRequired),
       messages = <LocaleInfo, String?>{},
       parsedMessages = <LocaleInfo, Node?>{} {
@@ -378,6 +379,7 @@ class Message {
   final Map<String, Placeholder> placeholders;
   final bool useEscaping;
   final Logger? logger;
+  final bool hasExplicitPlaceholders;
   bool hadErrors = false;
 
   bool get placeholdersRequireFormatting => placeholders.values.any((Placeholder p) => p.requiresFormatting);
@@ -438,6 +440,15 @@ class Message {
       );
     }
     return value;
+  }
+
+  static bool _hasExplicitPlaceholders(
+    Map<String, Object?> bundle,
+    String resourceId,
+    bool isResourceAttributeRequired,
+  ) {
+    final Map<String, Object?>? resourceAttributes = _attributes(bundle, resourceId, isResourceAttributeRequired);
+    return resourceAttributes?['placeholders'] != null;
   }
 
   static Map<String, Placeholder> _placeholders(
@@ -504,11 +515,19 @@ class Message {
         traversalStack.addAll(node.children);
       }
     }
-    placeholders.addEntries(
-      undeclaredPlaceholders.entries
-        .toList()
-        ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
-    );
+
+    if (!hasExplicitPlaceholders) {
+      placeholders.addEntries(
+        undeclaredPlaceholders.entries
+          .toList()
+          ..sort((MapEntry<String, Placeholder> p1, MapEntry<String, Placeholder> p2) => p1.key.compareTo(p2.key))
+      );
+    } else if (undeclaredPlaceholders.isNotEmpty) {
+      throw L10nException(
+        'An explicit placeholder list was provided but could not find the following placeholders:\n'
+        '${undeclaredPlaceholders.keys.map((String key) => '* $key').join('\n')}'
+      );
+    }
 
     for (final Placeholder placeholder in placeholders.values) {
       if (placeholder.isPlural && placeholder.isSelect) {
