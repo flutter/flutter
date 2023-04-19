@@ -12,14 +12,14 @@
 
 namespace impeller {
 
-class DisplayListPlayground : public PlaygroundTest {
+class DlPlayground : public PlaygroundTest {
  public:
   using DisplayListPlaygroundCallback =
       std::function<sk_sp<flutter::DisplayList>()>;
 
-  DisplayListPlayground();
+  DlPlayground();
 
-  ~DisplayListPlayground();
+  ~DlPlayground();
 
   bool OpenPlaygroundHere(flutter::DisplayListBuilder& builder);
 
@@ -32,7 +32,7 @@ class DisplayListPlayground : public PlaygroundTest {
   SkFont CreateTestFont();
 
  private:
-  FML_DISALLOW_COPY_AND_ASSIGN(DisplayListPlayground);
+  FML_DISALLOW_COPY_AND_ASSIGN(DlPlayground);
 };
 
 }  // namespace impeller

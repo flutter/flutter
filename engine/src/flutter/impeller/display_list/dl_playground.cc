@@ -2,33 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/display_list/display_list_playground.h"
+#include "impeller/display_list/dl_playground.h"
 
 #include "flutter/testing/testing.h"
 #include "impeller/aiks/aiks_context.h"
-#include "impeller/display_list/display_list_dispatcher.h"
-
+#include "impeller/display_list/dl_dispatcher.h"
 #include "third_party/imgui/imgui.h"
 #include "third_party/skia/include/core/SkData.h"
 
 namespace impeller {
 
-DisplayListPlayground::DisplayListPlayground() = default;
+DlPlayground::DlPlayground() = default;
 
-DisplayListPlayground::~DisplayListPlayground() = default;
+DlPlayground::~DlPlayground() = default;
 
-bool DisplayListPlayground::OpenPlaygroundHere(
-    flutter::DisplayListBuilder& builder) {
+bool DlPlayground::OpenPlaygroundHere(flutter::DisplayListBuilder& builder) {
   return OpenPlaygroundHere(builder.Build());
 }
 
-bool DisplayListPlayground::OpenPlaygroundHere(
-    sk_sp<flutter::DisplayList> list) {
+bool DlPlayground::OpenPlaygroundHere(sk_sp<flutter::DisplayList> list) {
   return OpenPlaygroundHere([&list]() { return list; });
 }
 
-bool DisplayListPlayground::OpenPlaygroundHere(
-    DisplayListPlaygroundCallback callback) {
+bool DlPlayground::OpenPlaygroundHere(DisplayListPlaygroundCallback callback) {
   if (!switches_.enable_playground) {
     return true;
   }
@@ -47,7 +43,7 @@ bool DisplayListPlayground::OpenPlaygroundHere(
 
         auto list = callback();
 
-        DisplayListDispatcher dispatcher;
+        DlDispatcher dispatcher;
         list->Dispatch(dispatcher);
         auto picture = dispatcher.EndRecordingAsPicture();
 
@@ -70,14 +66,14 @@ static sk_sp<SkData> OpenFixtureAsSkData(const char* fixture_name) {
   return data;
 }
 
-SkFont DisplayListPlayground::CreateTestFontOfSize(SkScalar scalar) {
+SkFont DlPlayground::CreateTestFontOfSize(SkScalar scalar) {
   static constexpr const char* kTestFontFixture = "Roboto-Regular.ttf";
   auto mapping = OpenFixtureAsSkData(kTestFontFixture);
   FML_CHECK(mapping);
   return SkFont{SkTypeface::MakeFromData(mapping), scalar};
 }
 
-SkFont DisplayListPlayground::CreateTestFont() {
+SkFont DlPlayground::CreateTestFont() {
   return CreateTestFontOfSize(50);
 }
 

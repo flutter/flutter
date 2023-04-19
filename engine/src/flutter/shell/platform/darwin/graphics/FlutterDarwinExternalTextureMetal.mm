@@ -5,7 +5,7 @@
 #import "flutter/shell/platform/darwin/graphics/FlutterDarwinExternalTextureMetal.h"
 #include "flutter/display_list/image/dl_image.h"
 #include "impeller/base/validation.h"
-#include "impeller/display_list/display_list_image_impeller.h"
+#include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/renderer/backend/metal/texture_mtl.h"
 #include "third_party/skia/include/core/SkColorSpace.h"
 #include "third_party/skia/include/core/SkImage.h"

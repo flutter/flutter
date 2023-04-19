@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "impeller/display_list/display_list_vertices_geometry.h"
+#include "impeller/display_list/dl_vertices_geometry.h"
 
 #include "impeller/core/device_buffer.h"
 #include "impeller/entity/contents/content_context.h"
@@ -59,19 +59,19 @@ static std::vector<uint16_t> fromFanIndices(
 /////// Vertices Geometry ///////
 
 // static
-std::shared_ptr<VerticesGeometry> DLVerticesGeometry::MakeVertices(
+std::shared_ptr<VerticesGeometry> DlVerticesGeometry::MakeVertices(
     const flutter::DlVertices* vertices) {
-  return std::make_shared<DLVerticesGeometry>(vertices);
+  return std::make_shared<DlVerticesGeometry>(vertices);
 }
 
-DLVerticesGeometry::DLVerticesGeometry(const flutter::DlVertices* vertices)
+DlVerticesGeometry::DlVerticesGeometry(const flutter::DlVertices* vertices)
     : vertices_(vertices) {
   NormalizeIndices();
 }
 
-DLVerticesGeometry::~DLVerticesGeometry() = default;
+DlVerticesGeometry::~DlVerticesGeometry() = default;
 
-void DLVerticesGeometry::NormalizeIndices() {
+void DlVerticesGeometry::NormalizeIndices() {
   // Convert triangle fan if present.
   if (vertices_->mode() == flutter::DlVertexMode::kTriangleFan) {
     normalized_indices_ = fromFanIndices(vertices_);
@@ -101,7 +101,7 @@ static PrimitiveType GetPrimitiveType(const flutter::DlVertices* vertices) {
   }
 }
 
-std::optional<Rect> DLVerticesGeometry::GetTextureCoordinateCoverge() const {
+std::optional<Rect> DlVerticesGeometry::GetTextureCoordinateCoverge() const {
   if (!HasTextureCoordinates()) {
     return std::nullopt;
   }
@@ -125,15 +125,15 @@ std::optional<Rect> DLVerticesGeometry::GetTextureCoordinateCoverge() const {
   return Rect::MakeLTRB(left, top, right, bottom);
 }
 
-bool DLVerticesGeometry::HasVertexColors() const {
+bool DlVerticesGeometry::HasVertexColors() const {
   return vertices_->colors() != nullptr;
 }
 
-bool DLVerticesGeometry::HasTextureCoordinates() const {
+bool DlVerticesGeometry::HasTextureCoordinates() const {
   return vertices_->texture_coordinates() != nullptr;
 }
 
-GeometryResult DLVerticesGeometry::GetPositionBuffer(
+GeometryResult DlVerticesGeometry::GetPositionBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
@@ -184,7 +184,7 @@ GeometryResult DLVerticesGeometry::GetPositionBuffer(
   };
 }
 
-GeometryResult DLVerticesGeometry::GetPositionColorBuffer(
+GeometryResult DlVerticesGeometry::GetPositionColorBuffer(
     const ContentContext& renderer,
     const Entity& entity,
     RenderPass& pass) {
@@ -253,7 +253,7 @@ GeometryResult DLVerticesGeometry::GetPositionColorBuffer(
   };
 }
 
-GeometryResult DLVerticesGeometry::GetPositionUVBuffer(
+GeometryResult DlVerticesGeometry::GetPositionUVBuffer(
     Rect texture_coverage,
     Matrix effect_transform,
     const ContentContext& renderer,
@@ -330,7 +330,7 @@ GeometryResult DLVerticesGeometry::GetPositionUVBuffer(
   };
 }
 
-GeometryVertexType DLVerticesGeometry::GetVertexType() const {
+GeometryVertexType DlVerticesGeometry::GetVertexType() const {
   auto* dl_colors = vertices_->colors();
   if (dl_colors != nullptr) {
     return GeometryVertexType::kColor;
@@ -343,7 +343,7 @@ GeometryVertexType DLVerticesGeometry::GetVertexType() const {
   return GeometryVertexType::kPosition;
 }
 
-std::optional<Rect> DLVerticesGeometry::GetCoverage(
+std::optional<Rect> DlVerticesGeometry::GetCoverage(
     const Matrix& transform) const {
   return ToRect(vertices_->bounds()).TransformBounds(transform);
 }

@@ -11,7 +11,7 @@
 #include "flutter/fml/trace_event.h"
 #include "flutter/impeller/core/allocator.h"
 #include "flutter/impeller/core/texture.h"
-#include "flutter/impeller/display_list/display_list_image_impeller.h"
+#include "flutter/impeller/display_list/dl_image_impeller.h"
 #include "flutter/impeller/renderer/command_buffer.h"
 #include "flutter/impeller/renderer/context.h"
 #include "flutter/lib/ui/painting/image_decoder_skia.h"

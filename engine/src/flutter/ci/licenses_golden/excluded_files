@@ -127,7 +127,7 @@
 ../../../flutter/impeller/compiler/README.md
 ../../../flutter/impeller/compiler/compiler_unittests.cc
 ../../../flutter/impeller/compiler/switches_unittests.cc
-../../../flutter/impeller/display_list/display_list_unittests.cc
+../../../flutter/impeller/display_list/dl_unittests.cc
 ../../../flutter/impeller/docs
 ../../../flutter/impeller/entity/contents/filters/inputs/filter_input_unittests.cc
 ../../../flutter/impeller/entity/entity_unittests.cc

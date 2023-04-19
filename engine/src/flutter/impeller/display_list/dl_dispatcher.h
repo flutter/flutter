@@ -11,11 +11,11 @@
 
 namespace impeller {
 
-class DisplayListDispatcher final : public flutter::DlOpReceiver {
+class DlDispatcher final : public flutter::DlOpReceiver {
  public:
-  DisplayListDispatcher();
+  DlDispatcher();
 
-  ~DisplayListDispatcher();
+  ~DlDispatcher();
 
   Picture EndRecordingAsPicture();
 
@@ -220,7 +220,7 @@ class DisplayListDispatcher final : public flutter::DlOpReceiver {
   Canvas canvas_;
   Matrix initial_matrix_;
 
-  FML_DISALLOW_COPY_AND_ASSIGN(DisplayListDispatcher);
+  FML_DISALLOW_COPY_AND_ASSIGN(DlDispatcher);
 };
 
 }  // namespace impeller

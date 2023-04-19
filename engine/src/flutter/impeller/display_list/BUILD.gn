@@ -20,12 +20,12 @@ impeller_component("skia_conversions") {
 
 impeller_component("display_list") {
   sources = [
-    "display_list_dispatcher.cc",
-    "display_list_dispatcher.h",
-    "display_list_image_impeller.cc",
-    "display_list_image_impeller.h",
-    "display_list_vertices_geometry.cc",
-    "display_list_vertices_geometry.h",
+    "dl_dispatcher.cc",
+    "dl_dispatcher.h",
+    "dl_image_impeller.cc",
+    "dl_image_impeller.h",
+    "dl_vertices_geometry.cc",
+    "dl_vertices_geometry.h",
     "nine_patch_converter.cc",
     "nine_patch_converter.h",
   ]
@@ -50,9 +50,9 @@ impeller_component("display_list_unittests") {
   testonly = true
 
   sources = [
-    "display_list_playground.cc",
-    "display_list_playground.h",
-    "display_list_unittests.cc",
+    "dl_playground.cc",
+    "dl_playground.h",
+    "dl_unittests.cc",
   ]
 
   deps = [
