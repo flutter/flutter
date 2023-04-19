@@ -1477,7 +1477,7 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   Selectable? _endHandleLayerOwner;
 
   bool _isHandlingSelectionEvent = false;
-  bool _scheduledSelectableUpdate = false;
+  int? _scheduledSelectableUpdateCallbackId;
   bool _selectionInProgress = false;
   Set<Selectable> _additions = <Selectable>{};
 
@@ -1505,16 +1505,13 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   }
 
   void _scheduleSelectableUpdate() {
-    if (!_scheduledSelectableUpdate) {
-      _scheduledSelectableUpdate = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-        if (!_scheduledSelectableUpdate) {
-          return;
-        }
-        _scheduledSelectableUpdate = false;
-        _updateSelectables();
-      });
-    }
+    _scheduledSelectableUpdateCallbackId ??= SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
+      if (_scheduledSelectableUpdateCallbackId == null) {
+        return;
+      }
+      _scheduledSelectableUpdateCallbackId = null;
+      _updateSelectables();
+    });
   }
 
   void _updateSelectables() {
@@ -2045,7 +2042,9 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
       selectable.removeListener(_handleSelectableGeometryChange);
     }
     selectables = const <Selectable>[];
-    _scheduledSelectableUpdate = false;
+    if (_scheduledSelectableUpdateCallbackId != null) {
+      SchedulerBinding.instance.cancelFrameCallbackWithId(_scheduledSelectableUpdateCallbackId!);
+    }
     super.dispose();
   }
 
