@@ -336,6 +336,7 @@ class FakeFlutterVersion implements FlutterVersion {
     this.frameworkAge = '0 hours ago',
     this.frameworkCommitDate = '12/01/01',
     this.gitTagVersion = const GitTagVersion.unknown(),
+    this.flutterRoot = '/path/to/flutter',
   });
 
   bool get didFetchTagsAndUpdate => _didFetchTagsAndUpdate;
@@ -346,6 +347,9 @@ class FakeFlutterVersion implements FlutterVersion {
 
   @override
   final String channel;
+
+  @override
+  final String flutterRoot;
 
   @override
   final String devToolsVersion;

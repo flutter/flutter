@@ -72,48 +72,57 @@ abstract class FlutterVersion {
   /// available upstream.
   factory FlutterVersion({
     SystemClock clock = const SystemClock(),
-    String? workingDirectory,
-    String? frameworkRevision,
     required FileSystem fs,
+    required String flutterRoot,
   }) {
-    final Stopwatch stopwatch = Stopwatch()..start();
-    final File versionFile = getVersionFile(fs);
+    final File versionFile = getVersionFile(fs, flutterRoot);
     if (versionFile.existsSync()) {
-      final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(versionFile, workingDirectory: workingDirectory);
+      final _FlutterVersionFromFile? version = _FlutterVersionFromFile.tryParseFromFile(versionFile, flutterRoot: flutterRoot);
       if (version != null) {
-        stopwatch.stop();
-        //print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
         return version;
       }
     }
-    frameworkRevision ??= _runGit(
+    final String frameworkRevision = _runGit(
       gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '),
       globals.processUtils,
-      workingDirectory,
+      flutterRoot,
     );
+
+    return FlutterVersion.fromRevision(
+      clock: clock,
+      frameworkRevision: frameworkRevision,
+      fs: fs,
+      flutterRoot: flutterRoot,
+    );
+  }
+
+  FlutterVersion._({
+    required SystemClock clock,
+    required this.flutterRoot,
+  }) : _clock = clock;
+
+  factory FlutterVersion.fromRevision({
+    SystemClock clock = const SystemClock(),
+    required String flutterRoot,
+    required String frameworkRevision,
+    required FileSystem fs,
+  }) {
     final GitTagVersion gitTagVersion = GitTagVersion.determine(
       globals.processUtils,
       globals.platform,
       gitRef: frameworkRevision,
-      workingDirectory: workingDirectory,
+      workingDirectory: flutterRoot,
     );
     final String frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
-    stopwatch.stop();
-    //print('spent ${stopwatch.elapsedMilliseconds}ms in factory FlutterVersion()');
     return _FlutterVersionGit._(
       clock: clock,
-      workingDirectory: workingDirectory,
+      flutterRoot: flutterRoot,
       frameworkRevision: frameworkRevision,
       frameworkVersion: frameworkVersion,
       gitTagVersion: gitTagVersion,
       fs: fs,
     );
   }
-
-  FlutterVersion._({
-    required SystemClock clock,
-    required String? workingDirectory,
-  }) : _clock = clock, _workingDirectory = workingDirectory;
 
   final SystemClock _clock;
 
@@ -146,11 +155,11 @@ abstract class FlutterVersion {
   String get engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
-  static File getVersionFile(FileSystem fs) {
-    return fs.file(fs.path.join(Cache.flutterRoot!, '.version.json'));
+  static File getVersionFile(FileSystem fs, String flutterRoot) {
+    return fs.file(fs.path.join(flutterRoot, '.version.json'));
   }
 
-  final String? _workingDirectory;
+  final String flutterRoot;
 
   String? _frameworkAge;
 
@@ -159,7 +168,7 @@ abstract class FlutterVersion {
     return _frameworkAge ??= _runGit(
       FlutterVersion.gitLog(<String>['-n', '1', '--pretty=format:%ar']).join(' '),
       globals.processUtils,
-      _workingDirectory,
+      flutterRoot,
     );
   }
 
@@ -396,12 +405,12 @@ class _FlutterVersionFromFile extends FlutterVersion {
     required this.dartSdkVersion,
     required this.devToolsVersion,
     required this.gitTagVersion,
-    super.workingDirectory,
+    required super.flutterRoot,
   }) : super._();
 
   static _FlutterVersionFromFile? tryParseFromFile(
     File jsonFile, {
-    String? workingDirectory,
+    required String flutterRoot,
     SystemClock clock = const SystemClock(),
   }) {
     try {
@@ -419,7 +428,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
         dartSdkVersion: manifest['dartSdkVersion']! as String,
         devToolsVersion: manifest['devToolsVersion']! as String,
         gitTagVersion: GitTagVersion.parse(manifest['flutterVersion']! as String),
-        workingDirectory: workingDirectory,
+        flutterRoot: flutterRoot,
       );
       // ignore: avoid_catches_without_on_clauses
     } catch (err) {
@@ -468,7 +477,7 @@ class _FlutterVersionFromFile extends FlutterVersion {
 class _FlutterVersionGit extends FlutterVersion {
   _FlutterVersionGit._({
     required super.clock,
-    super.workingDirectory,
+    required super.flutterRoot,
     required this.frameworkRevision,
     required String frameworkVersion,
     required GitTagVersion gitTagVersion,
@@ -519,7 +528,7 @@ class _FlutterVersionGit extends FlutterVersion {
       final String gitChannel = _runGit(
         'git rev-parse --abbrev-ref --symbolic $kGitTrackingUpstream',
         globals.processUtils,
-        _workingDirectory,
+        flutterRoot,
       );
       final int slash = gitChannel.indexOf('/');
       if (slash != -1) {
@@ -527,7 +536,7 @@ class _FlutterVersionGit extends FlutterVersion {
         _repositoryUrl = _runGit(
           'git ls-remote --get-url $remote',
           globals.processUtils,
-          _workingDirectory,
+          flutterRoot,
         );
         channel = gitChannel.substring(slash + 1);
       } else if (gitChannel.isEmpty) {
@@ -542,16 +551,16 @@ class _FlutterVersionGit extends FlutterVersion {
 
   @override
   void fetchTagsAndUpdate() {
-    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: _workingDirectory, fetchTags: true);
+    _gitTagVersion = GitTagVersion.determine(globals.processUtils, globals.platform, workingDirectory: flutterRoot, fetchTags: true);
     _frameworkVersion = gitTagVersion.frameworkVersionFor(frameworkRevision);
   }
 
   @override
   void ensureVersionFile() {
-    fs.file(fs.path.join(Cache.flutterRoot!, 'version'))
+    fs.file(fs.path.join(flutterRoot, 'version'))
         .writeAsStringSync(_frameworkVersion);
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    final File versionFile = FlutterVersion.getVersionFile(fs);
+    final File versionFile = FlutterVersion.getVersionFile(fs, flutterRoot);
     if (!versionFile.existsSync()) {
       versionFile.writeAsStringSync(encoder.convert(toJson()));
     }

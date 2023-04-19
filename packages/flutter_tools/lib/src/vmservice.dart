@@ -12,6 +12,7 @@ import 'base/context.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/utils.dart';
+import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -239,7 +240,10 @@ Future<vm_service.VmService> setUpVmService({
   }
 
   vmService.registerServiceCallback(kFlutterVersionServiceName, (Map<String, Object?> params) async {
-    final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion(fs: globals.fs);
+    final FlutterVersion version = context.get<FlutterVersion>() ?? FlutterVersion(
+      fs: globals.fs,
+      flutterRoot: Cache.flutterRoot!,
+    );
     final Map<String, Object> versionJson = version.toJson();
     versionJson['frameworkRevisionShort'] = version.frameworkRevisionShort;
     versionJson['engineRevisionShort'] = version.engineRevisionShort;

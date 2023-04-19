@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 
+import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -49,7 +50,11 @@ void main() {
     }
 
     group('$FlutterVersion for $channel', () {
+      late FileSystem fs;
+      const String flutterRoot = '/path/to/flutter';
+
       setUpAll(() {
+        fs = MemoryFileSystem.test();
         Cache.disableLocking();
         VersionFreshnessValidator.timeToPauseToLetUserReadTheMessage = Duration.zero;
       });
@@ -124,7 +129,7 @@ void main() {
         expect(testLogger.statusText, isEmpty);
         expect(processManager, hasNoRemainingExpectations);
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => FlutterVersion(clock: _testClock, fs: MemoryFileSystem.test()),
+        FlutterVersion: () => FlutterVersion(clock: _testClock, fs: fs, flutterRoot: flutterRoot),
         ProcessManager: () => processManager,
         Cache: () => cache,
       });
@@ -431,7 +436,7 @@ void main() {
     expect(flutterVersion.getBranchName(redactUnknownBranches: true), '[user-branch]');
     expect(processManager, hasNoRemainingExpectations);
   }, overrides: <Type, Generator>{
-    FlutterVersion: () => FlutterVersion(clock: _testClock, fs: MemoryFileSystem.test()),
+    FlutterVersion: () => FlutterVersion(clock: _testClock, fs: MemoryFileSystem.test(), flutterRoot: '/path/to/flutter'),
     ProcessManager: () => processManager,
     Cache: () => cache,
   });
