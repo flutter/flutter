@@ -477,8 +477,7 @@ void main() {
               height: 4.0,
               child: LinearProgressIndicator(
                 value: 0.25,
-                outerBorderRadius: BorderRadius.all(Radius.circular(20)),
-                indicatorBorderRadius: BorderRadius.all(Radius.circular(10)),
+                borderRadius: BorderRadius.all(Radius.circular(10)),
               ),
             ),
           ),
@@ -489,12 +488,12 @@ void main() {
         find.byType(LinearProgressIndicator),
         paints
         ..rrect(
-          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(20.0)),
+          rrect: RRect.fromLTRBR(0.0, 0.0, 100.0, 4.0, const Radius.circular(10.0)),
         )
         ..rrect(
-          rrect: RRect.fromLTRBAndCorners(0.0, 0.0, 25.0, 4.0,
-            topRight: const Radius.circular(10.0),
-            bottomRight: const Radius.circular(10.0),
+          rrect: RRect.fromRectAndRadius(
+            const Rect.fromLTRB(0.0, 0.0, 25.0, 4.0),
+            const Radius.circular(10.0),
           ),
         ),
     );

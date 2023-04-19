@@ -201,22 +201,7 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
       final Rect rect = Offset(left, 0.0) & Size(width, size.height);
       if (indicatorBorderRadius != BorderRadius.zero) {
-        RRect rrect = indicatorBorderRadius.resolve(textDirection).toRRect(rect);
-        if (value != null) {
-          // When the indicator has a determinate value, we override the start
-          // border radius to be zero, so that the radius is only applied to the
-          // trailing edge of the indicator.
-          rrect = RRect.fromLTRBAndCorners(
-            rect.left,
-            rect.top,
-            rect.right,
-            rect.bottom,
-            bottomRight: (textDirection == TextDirection.ltr) ? rrect.brRadius : Radius.zero,
-            topRight: (textDirection == TextDirection.ltr) ? rrect.trRadius : Radius.zero,
-            bottomLeft: (textDirection == TextDirection.rtl) ? rrect.blRadius : Radius.zero,
-            topLeft: (textDirection == TextDirection.rtl) ? rrect.tlRadius : Radius.zero,
-          );
-        }
+        final RRect rrect = indicatorBorderRadius.resolve(textDirection).toRRect(rect);
         canvas.drawRRect(rrect, paint);
       } else {
         canvas.drawRect(rect, paint);
@@ -303,8 +288,7 @@ class LinearProgressIndicator extends ProgressIndicator {
     this.minHeight,
     super.semanticsLabel,
     super.semanticsValue,
-    this.outerBorderRadius = BorderRadius.zero,
-    this.indicatorBorderRadius = BorderRadius.zero,
+    this.borderRadius = BorderRadius.zero,
   }) : assert(minHeight == null || minHeight > 0);
 
   /// {@template flutter.material.LinearProgressIndicator.trackColor}
@@ -327,27 +311,11 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// {@endtemplate}
   final double? minHeight;
 
-  /// The border radius of the background shape.
+  /// The border radius of both the indicator and the track.
   ///
-  /// This covers the entire widget, including the indicator.
-  /// By default it is [BorderRadius.zero], which produces a rectangular shape.
-  final BorderRadiusGeometry outerBorderRadius;
-
-  /// The border radius of the indicator.
-  ///
-  /// When TextDirection is set to [TextDirection.ltr], [BorderRadius.topLeft]
-  /// and [BorderRadius.bottomLeft] are overriten to be [Radius.zero], so that
-  /// the indicator always fill the starting position. Therefore, setting
-  /// [indicatorBorderRadius] to BorderRadius.circular(10) will produce a
-  /// rounded indicator with radius 10 at the end with a sharp edge at the
-  /// start.
-  ///
-  /// When TextDirection is set to [TextDirection.rtl], [BorderRadius.topRight]
-  /// and [BorderRadius.bottomRight] are overriten to be [Radius.zero], as that becomes
-  /// the starting position.
-  ///
-  /// By default it is [BorderRadius.zero], which produces a rectangular indicator.
-  final BorderRadiusGeometry indicatorBorderRadius;
+  /// By default it is [BorderRadius.zero], which produces a rectangular shape
+  /// with a rectangular indicator.
+  final BorderRadiusGeometry borderRadius;
 
   @override
   State<LinearProgressIndicator> createState() => _LinearProgressIndicatorState();
@@ -400,12 +368,13 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     return widget._buildSemanticsWrapper(
       context: context,
       child: Container(
-        clipBehavior: (widget.outerBorderRadius != BorderRadius.zero)
+        // Clip is only needed with indeterminate progress indicators
+        clipBehavior: (widget.borderRadius != BorderRadius.zero && widget.value == null)
             ? Clip.antiAlias
             : Clip.none,
         decoration: ShapeDecoration(
           color: trackColor,
-          shape: RoundedRectangleBorder(borderRadius: widget.outerBorderRadius),
+          shape: RoundedRectangleBorder(borderRadius: widget.borderRadius),
         ),
         constraints: BoxConstraints(
           minWidth: double.infinity,
@@ -418,7 +387,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
             value: widget.value, // may be null
             animationValue: animationValue, // ignored if widget.value is not null
             textDirection: textDirection,
-            indicatorBorderRadius: widget.indicatorBorderRadius,
+            indicatorBorderRadius: widget.borderRadius,
           ),
         ),
       ),
