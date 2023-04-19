@@ -410,6 +410,7 @@ final Set<String> skippedCommonFiles = <String>{
 // Keep this list in lexical order.
 final Set<String> skippedCommonExtensions = <String>{
   r'.1',
+  r'.3',
   r'.5',
   r'.autopkg',
   r'.build',
