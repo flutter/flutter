@@ -85,7 +85,7 @@ void main() {
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;
     expect(timingEvent.category, 'build');
-    expect(timingEvent.variableName, 'dart2wasm');
+    expect(timingEvent.variableName, 'compile');
   });
 
   testUsingContext('WebBuilder throws tool exit on failure', () async {
