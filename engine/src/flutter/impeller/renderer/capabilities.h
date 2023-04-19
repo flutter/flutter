@@ -21,6 +21,8 @@ class Capabilities {
 
   virtual bool SupportsSSBO() const = 0;
 
+  virtual bool SupportsBufferToTextureBlits() const = 0;
+
   virtual bool SupportsTextureToTextureBlits() const = 0;
 
   virtual bool SupportsFramebufferFetch() const = 0;
@@ -57,6 +59,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsSSBO(bool value);
 
+  CapabilitiesBuilder& SetSupportsBufferToTextureBlits(bool value);
+
   CapabilitiesBuilder& SetSupportsTextureToTextureBlits(bool value);
 
   CapabilitiesBuilder& SetSupportsFramebufferFetch(bool value);
@@ -80,6 +84,7 @@ class CapabilitiesBuilder {
   bool has_threading_restrictions_ = false;
   bool supports_offscreen_msaa_ = false;
   bool supports_ssbo_ = false;
+  bool supports_buffer_to_texture_blits_ = false;
   bool supports_texture_to_texture_blits_ = false;
   bool supports_framebuffer_fetch_ = false;
   bool supports_compute_ = false;
