@@ -10,7 +10,6 @@ import '../features.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
 import '../project.dart';
-import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
@@ -127,14 +126,6 @@ class BuildWebCommand extends BuildSubCommand {
   @override
   final String description = 'Build a web application bundle.';
 
-  bool get _compileWasm => boolArg('wasm');
-
-  @override
-  Future<CustomDimensions> get usageValues async {
-    final String compiler = _compileWasm ? 'dart2wasm' : 'dart2js';
-    return CustomDimensions(buildEventSettings: 'compiler:$compiler');
-  }
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (!featureFlags.isWebEnabled) {
@@ -142,7 +133,7 @@ class BuildWebCommand extends BuildSubCommand {
     }
 
     final WebCompilerConfig compilerConfig;
-    if (_compileWasm) {
+    if (boolArg('wasm')) {
       if (!featureFlags.isFlutterWebWasmEnabled) {
         throwToolExit('Compiling to WebAssembly (wasm) is only available on the master channel.');
       }
