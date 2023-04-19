@@ -52,7 +52,9 @@ class AndroidStudio {
     _initAndValidate();
   }
 
-  static AndroidStudio? fromMacOSBundle(String bundlePath) {
+  static AndroidStudio? fromMacOSBundle(String bundlePath, {
+    String? configuredPath,
+  }) {
     final String studioPath = globals.fs.path.join(bundlePath, 'Contents');
     final String plistFile = globals.fs.path.join(studioPath, 'Info.plist');
     final Map<String, dynamic> plistValues = globals.plistParser.parseFile(plistFile);
@@ -99,7 +101,12 @@ class AndroidStudio {
         );
       }
     }
-    return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
+    return AndroidStudio(
+      studioPath,
+      version: version,
+      presetPluginsPath: presetPluginsPath,
+      configuredPath: configuredPath,
+    );
   }
 
   static AndroidStudio? fromHomeDot(Directory homeDotDir) {
@@ -323,14 +330,15 @@ the configured path by running this command: flutter config --android-studio-dir
     }
 
     final String? configuredStudioDir = globals.config.getValue('android-studio-dir') as String?;
+    FileSystemEntity? configuredStudioDirAsEntity;
     if (configuredStudioDir != null) {
-      FileSystemEntity configuredStudio = globals.fs.file(configuredStudioDir);
-      if (configuredStudio.basename == 'Contents') {
-        configuredStudio = configuredStudio.parent;
+      configuredStudioDirAsEntity = globals.fs.file(configuredStudioDir);
+      if (configuredStudioDirAsEntity.basename == 'Contents') {
+        configuredStudioDirAsEntity = configuredStudioDirAsEntity.parent;
       }
       if (!candidatePaths
-          .any((FileSystemEntity e) => e.path == configuredStudio.path)) {
-        candidatePaths.add(configuredStudio);
+          .any((FileSystemEntity e) => e.path == configuredStudioDirAsEntity!.path)) {
+        candidatePaths.add(configuredStudioDirAsEntity);
       }
     }
 
@@ -354,7 +362,12 @@ the configured path by running this command: flutter config --android-studio-dir
     }
 
     return candidatePaths
-        .map<AndroidStudio?>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio?>((FileSystemEntity e) =>
+          AndroidStudio.fromMacOSBundle(
+            e.path,
+            configuredPath: configuredStudioDirAsEntity?.path,
+          )
+        )
         .whereType<AndroidStudio>()
         .toList();
   }

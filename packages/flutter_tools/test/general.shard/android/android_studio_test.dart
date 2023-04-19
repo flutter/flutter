@@ -86,6 +86,7 @@ void main() {
       },
     };
 
+    late Config config;
     late FileSystem fileSystem;
     late FileSystemUtils fsUtils;
     late Platform platform;
@@ -93,6 +94,7 @@ void main() {
     late FakeProcessManager processManager;
 
     setUp(() {
+      config = Config.test();
       fileSystem = MemoryFileSystem.test();
       plistUtils = FakePlistUtils();
       platform = FakePlatform(
@@ -577,6 +579,59 @@ void main() {
       PlistParser: () => plistUtils,
     });
 
+    testUsingContext('discovers version of explicitly configured Android Studio', () {
+      final String extractedDownloadZip = fileSystem.path.join(
+        '/',
+        'Users',
+        'Dash',
+        'Desktop',
+        'android-studio'
+      );
+      config.setValue('android-studio-dir', extractedDownloadZip);
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        extractedDownloadZip,
+        'Contents',
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlist2022_1;
+
+      final String studioInApplicationJavaBinary = fileSystem.path.join(
+        extractedDownloadZip,
+        'Contents', 'jre', 'jdk', 'Contents', 'Home', 'bin', 'java',
+      );
+      fileSystem.file(studioInApplicationJavaBinary).createSync(recursive: true);
+
+      processManager.addCommands(<FakeCommand>[
+        FakeCommand(
+          command: const <String>[
+            'mdfind',
+            'kMDItemCFBundleIdentifier="com.google.android.studio*"',
+          ],
+          stdout: extractedDownloadZip,
+        ),
+        FakeCommand(
+          command: <String>[
+            studioInApplicationJavaBinary,
+            '-version',
+          ],
+        ),
+      ]);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.configuredPath, extractedDownloadZip);
+      expect(processManager, hasNoRemainingExpectations);
+    }, overrides: <Type, Generator>{
+      Config:() => config,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
+      // Custom home paths are not supported on macOS nor Windows yet,
+      // so we force the platform to fake Linux here.
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
     testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
       final String studioInApplicationPlistFolder = fileSystem.path.join(
         '/',
