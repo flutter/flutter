@@ -1955,7 +1955,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendColorFilterDrawsCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterAndDrawsCorrectly) {
+TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterDrawsCorrectly) {
   Canvas canvas;
 
   canvas.DrawRect(Rect::MakeXYWH(100, 100, 300, 300), {.color = Color::Blue()});
@@ -1976,7 +1976,7 @@ TEST_P(AiksTest, TranslucentSaveLayerWithBlendImageFilterAndDrawsCorrectly) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
-TEST_P(AiksTest, TranslucentSaveLayerWithColorImageFilterAndDrawsCorrectly) {
+TEST_P(AiksTest, TranslucentSaveLayerWithColorAndImageFilterDrawsCorrectly) {
   Canvas canvas;
 
   canvas.DrawRect(Rect::MakeXYWH(100, 100, 300, 300), {.color = Color::Blue()});
@@ -2052,6 +2052,38 @@ TEST_P(AiksTest, TranslucentSaveLayerWithColorMatrixImageFilterDrawsCorrectly) {
                                                              0, 0, 1, 0, 0,  //
                                                              0, 0, 0, 2, 0   //
                                                          }});
+          },
+  });
+  canvas.DrawImage(image, {100, 500}, {});
+  canvas.Restore();
+
+  ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
+}
+
+TEST_P(AiksTest,
+       TranslucentSaveLayerWithColorFilterAndImageFilterDrawsCorrectly) {
+  Canvas canvas;
+
+  auto image = std::make_shared<Image>(CreateTextureForFixture("airplane.jpg"));
+  canvas.DrawImage(image, {100, 100}, {});
+
+  canvas.SaveLayer({
+      .color = Color::Black().WithAlpha(0.5),
+      .image_filter =
+          [](FilterInput::Ref input, const Matrix& effect_transform,
+             bool is_subpass) {
+            return ColorFilterContents::MakeColorMatrix(
+                {std::move(input)}, {.array = {
+                                         1, 0,   0, 0,   0,  //
+                                         0, 1,   0, 0,   0,  //
+                                         0, 0.2, 1, 0,   0,  //
+                                         0, 0,   0, 0.5, 0   //
+                                     }});
+          },
+      .color_filter =
+          [](FilterInput::Ref input) {
+            return ColorFilterContents::MakeBlend(
+                BlendMode::kModulate, {std::move(input)}, Color::Green());
           },
   });
   canvas.DrawImage(image, {100, 500}, {});

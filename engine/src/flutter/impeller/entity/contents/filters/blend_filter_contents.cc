@@ -304,7 +304,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
     auto blend_uniform = host_buffer.EmplaceUniform(blend_info);
     FS::BindBlendInfo(cmd, blend_uniform);
 
-    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                     entity.GetTransformation();
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(cmd, uniform_view);
@@ -313,7 +314,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
   };
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
-    return coverage;
+    return coverage.TransformBounds(entity.GetTransformation());
   };
 
   auto contents = AnonymousContents::Make(render_proc, coverage_proc);
@@ -321,7 +322,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundAdvancedBlend(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetStencilDepth(entity.GetStencilDepth());
-  sub_entity.SetTransformation(entity.GetTransformation());
 
   return sub_entity;
 }
@@ -442,7 +442,8 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
     FS::BindFragInfo(cmd, host_buffer.EmplaceUniform(frag_info));
 
-    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize());
+    frame_info.mvp = Matrix::MakeOrthographic(pass.GetRenderTargetSize()) *
+                     entity.GetTransformation();
 
     auto uniform_view = host_buffer.EmplaceUniform(frame_info);
     VS::BindFrameInfo(cmd, uniform_view);
@@ -452,7 +453,7 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
 
   CoverageProc coverage_proc =
       [coverage](const Entity& entity) -> std::optional<Rect> {
-    return coverage;
+    return coverage.TransformBounds(entity.GetTransformation());
   };
 
   auto contents = AnonymousContents::Make(render_proc, coverage_proc);
@@ -460,7 +461,6 @@ std::optional<Entity> BlendFilterContents::CreateForegroundPorterDuffBlend(
   Entity sub_entity;
   sub_entity.SetContents(std::move(contents));
   sub_entity.SetStencilDepth(entity.GetStencilDepth());
-  sub_entity.SetTransformation(entity.GetTransformation());
 
   return sub_entity;
 }
