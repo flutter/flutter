@@ -133,5 +133,11 @@
   "scrimLabel": "I-Scrim",
   "bottomSheetLabel": "Ishidi Eliphansi",
   "scrimOnTapHint": "Vala i-$modalRouteContentName",
-  "keyboardKeyShift": "U-Shift"
+  "keyboardKeyShift": "U-Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

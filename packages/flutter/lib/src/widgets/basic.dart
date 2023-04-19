@@ -379,7 +379,10 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///       tileMode: TileMode.mirror,
 ///     ).createShader(bounds);
 ///   },
-///   child: const Text('I’m burning the memories'),
+///   child: const Text(
+///     'I’m burning the memories',
+///     style: TextStyle(color: Colors.white),
+///   ),
 /// )
 /// ```
 /// {@end-tool}

@@ -1437,6 +1437,57 @@ void main() {
     expect(tester.testTextInput.setClientArgs!['inputAction'], equals('TextInputAction.done'));
   });
 
+  // Test case for https://github.com/flutter/flutter/issues/123523.
+  testWidgets(
+      'The focus and callback behavior are correct when TextInputClient.onConnectionClosed message received',
+      (WidgetTester tester) async {
+    bool onSubmittedInvoked = false;
+    bool onEditingCompleteInvoked = false;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              autofocus: true,
+              cursorColor: cursorColor,
+              onSubmitted: (String text) {
+                onSubmittedInvoked = true;
+              },
+              onEditingComplete: () {
+                onEditingCompleteInvoked = true;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(focusNode.hasFocus, isTrue);
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    editableText.connectionClosed();
+    await tester.pump();
+
+    if (kIsWeb) {
+      expect(onSubmittedInvoked, isTrue);
+      expect(onEditingCompleteInvoked, isTrue);
+      // Because we add the onEditingComplete and we didn't unfocus there, so focus still exists.
+      expect(focusNode.hasFocus, isTrue);
+    } else {
+      // For mobile and other platforms, calling connectionClosed will only unfocus.
+      expect(focusNode.hasFocus, isFalse);
+      expect(onEditingCompleteInvoked, isFalse);
+      expect(onSubmittedInvoked, isFalse);
+    }
+  });
+
   testWidgets('connection is closed when TextInputClient.onConnectionClosed message received', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -15243,6 +15294,118 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
       }
     });
+
+    testWidgets('replacing puts cursor at the end of the word', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      controller.value = const TextEditingValue(
+        // All misspellings of "test". One the same length, one shorter, and one
+        // longer.
+        text: 'tset tst testt',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 0, end: 4), <String>['test']),
+          SuggestionSpan(TextRange(start: 5, end: 8), <String>['test']),
+          SuggestionSpan(TextRange(start: 9, end: 13), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+
+      // Replacing a word of the same length as the replacement puts the cursor
+      // at the end of the new word.
+      await tester.tap(find.text('test'));
+      await tester.pumpAndSettle();
+      expect(
+        controller.value,
+        equals(const TextEditingValue(
+          text: 'test tst testt',
+          selection: TextSelection.collapsed(
+            offset: 4,
+          ),
+        )),
+      );
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 5, end: 8), <String>['test']),
+          SuggestionSpan(TextRange(start: 9, end: 13), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+
+      // Replacing a word of less length as the replacement puts the cursor at
+      // the end of the new word.
+      await tester.tap(find.text('test'));
+      await tester.pumpAndSettle();
+      expect(
+        controller.value,
+        equals(const TextEditingValue(
+          text: 'test test testt',
+          selection: TextSelection.collapsed(
+            offset: 9,
+          ),
+        )),
+      );
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 10, end: 15), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 10));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+
+      // Replacing a word of greater length as the replacement puts the cursor
+      // at the end of the new word.
+      await tester.tap(find.text('test'));
+      await tester.pumpAndSettle();
+      expect(
+        controller.value,
+        equals(const TextEditingValue(
+          text: 'test test test',
+          selection: TextSelection.collapsed(
+            offset: 14,
+          ),
+        )),
+      );
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+      skip: kIsWeb, // [intended]
+    );
   });
 
   group('magnifier', () {
