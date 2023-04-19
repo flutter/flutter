@@ -9,6 +9,7 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
+import '../doctor_validator.dart';
 import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import 'android_studio_validator.dart';
@@ -166,15 +167,14 @@ class AndroidStudio {
   final String? presetPluginsPath;
 
   String? _javaPath;
-  bool _isValid = false;
-  final List<String> _validationMessages = <String>[];
+  final List<ValidationMessage> _validationMessages = <ValidationMessage>[];
 
   /// The path of the JDK bundled with Android Studio.
   ///
   /// This will be null if the bundled JDK could not be found or run.
   String? get javaPath => _javaPath;
 
-  bool get isValid => _isValid;
+  bool get isValid => !_validationMessages.any((ValidationMessage message) => message.isError);
 
   String? get pluginsPath {
     if (presetPluginsPath != null) {
@@ -236,7 +236,7 @@ class AndroidStudio {
     }
   }
 
-  List<String> get validationMessages => _validationMessages;
+  List<ValidationMessage> get validationMessages => _validationMessages;
 
   /// Locates the newest, valid version of Android Studio.
   ///
@@ -499,21 +499,19 @@ the configured path by running this command: flutter config --android-studio-dir
   }
 
   void _initAndValidate() {
-    _isValid = true;
     _validationMessages.clear();
 
     if (configuredPath != null) {
-      _validationMessages.add('android-studio-dir = $configuredPath');
+      _validationMessages.add(ValidationMessage('android-studio-dir = $configuredPath'));
     }
 
     if (!globals.fs.isDirectorySync(directory)) {
-      _validationMessages.add('Android Studio not found at $directory');
+      _validationMessages.add(ValidationMessage.error('Android Studio not found at $directory'));
       return;
     }
 
     if (version == null) {
-      _isValid = false;
-      _validationMessages.add('Unable to determine version of Android Studio.');
+      _validationMessages.add(const ValidationMessage.hint('Unable to determine version of Android Studio.'));
     }
 
     final String javaPath;
@@ -534,22 +532,21 @@ the configured path by running this command: flutter config --android-studio-dir
     }
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
     if (!globals.processManager.canRun(javaExecutable)) {
-      _validationMessages.add('Unable to find bundled Java version.');
+      _validationMessages.add(const ValidationMessage.error('Unable to find bundled Java version.'));
     } else {
       RunResult? result;
       try {
         result = globals.processUtils.runSync(<String>[javaExecutable, '-version']);
       } on ProcessException catch (e) {
-        _validationMessages.add('Failed to run Java: $e');
+        _validationMessages.add(ValidationMessage.error('Failed to run Java: $e'));
       }
       if (result != null && result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-        _validationMessages.add('Java version $javaVersion');
+        _validationMessages.add(ValidationMessage('Java version $javaVersion'));
         _javaPath = javaPath;
       } else {
-        _isValid = false;
-        _validationMessages.add('Unable to determine bundled Java version.');
+        _validationMessages.add(const ValidationMessage.error('Unable to determine bundled Java version.'));
       }
     }
   }

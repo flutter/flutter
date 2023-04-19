@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/version.dart';
+import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:test/fake.dart';
@@ -141,7 +142,7 @@ void main() {
         'Google',
         'AndroidStudio4.1',
       )));
-      expect(studio.validationMessages, <String>['Java version 123']);
+      expect(studio.validationMessages, const <ValidationMessage>[ValidationMessage('Java version 123')]);
       expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -187,7 +188,7 @@ void main() {
         'Google',
         'AndroidStudio2020.3',
       )));
-      expect(studio.validationMessages, <String>['Java version 123']);
+      expect(studio.validationMessages, const <ValidationMessage>[ValidationMessage('Java version 123')]);
       expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -232,7 +233,7 @@ void main() {
         'Application Support',
         'AndroidStudio3.3',
       )));
-      expect(studio.validationMessages, <String>['Java version 123']);
+      expect(studio.validationMessages, const <ValidationMessage>[ValidationMessage('Java version 123')]);
       expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -271,16 +272,16 @@ void main() {
       )!;
 
       expect(studio, isNotNull);
-      expect(studio.isValid, false);
+      expect(studio.isValid, true);
       expect(studio.pluginsPath, equals(fileSystem.path.join(
         homeMac,
         'Library',
         'Application Support',
         'AndroidStudio2021.2',
       )));
-      expect(studio.validationMessages, containsAll(<String>[
-        'Java version 123',
-        'Unable to determine version of Android Studio.'
+      expect(studio.validationMessages, containsAll(const <ValidationMessage>[
+        ValidationMessage('Java version 123'),
+        ValidationMessage.hint('Unable to determine version of Android Studio.')
       ]));
       expect(studio.configuredPath, isNull);
     }, overrides: <Type, Generator>{

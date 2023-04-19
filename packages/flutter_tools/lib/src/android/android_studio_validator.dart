@@ -43,7 +43,6 @@ class AndroidStudioValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    ValidationType type = ValidationType.missing;
 
     final String studioVersionText = _studio.version == null
       ? userMessages.androidStudioVersion('unknown')
@@ -69,35 +68,28 @@ class AndroidStudioValidator extends DoctorValidator {
       );
     }
 
-    if (_studio.isValid) {
-      type = _hasIssues(messages)
-        ? ValidationType.partial
-        : ValidationType.success;
-      messages.addAll(_studio.validationMessages.map<ValidationMessage>(
-        (String m) => ValidationMessage(m),
-      ));
-    } else {
-      type = ValidationType.partial;
-      messages.addAll(_studio.validationMessages.map<ValidationMessage>(
-        (String m) => ValidationMessage.error(m),
-      ));
-      if (_studio.version == null) {
-        messages.add(const ValidationMessage('Try running Android Studio and then run flutter again.'));
-      }
+    messages.addAll(_studio.validationMessages);
 
-      messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
-
-      if (_studio.configuredPath != null) {
-        messages.add(ValidationMessage(userMessages.androidStudioResetDir));
-      }
+    if (_studio.version == null) {
+      messages.add(const ValidationMessage.hint('Try running Android Studio and then run flutter again.'));
     }
 
-    return ValidationResult(type, messages, statusInfo: studioVersionText);
+    final ValidationType validationType = _hasIssues(messages) ? ValidationType.partial : ValidationType.success;
+    if (validationType != ValidationType.success) {
+      messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
+    }
+
+    if (_studio.configuredPath != null) {
+      messages.add(ValidationMessage.hint(userMessages.androidStudioResetDir));
+    }
+
+    return ValidationResult(validationType, messages, statusInfo: studioVersionText);
   }
 
   bool _hasIssues(List<ValidationMessage> messages) {
-    return messages.any((ValidationMessage message) => message.isError);
+    return messages.any((ValidationMessage message) => message.isError && message.isHint);
   }
+
 }
 
 class NoAndroidStudioValidator extends DoctorValidator {

@@ -104,12 +104,8 @@ void main() {
 
     for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, linuxPlatform, fileSystem, globals.userMessages)) {
       final ValidationResult result = await validator.validate();
-      expect(result.messages.where((ValidationMessage message) {
-        return message.isError && message.message.contains('Unable to determine version of Android Studio.');
-      }).isNotEmpty, true);
-      expect(result.messages.where((ValidationMessage message) =>
-        message.message.contains('Try running Android Studio and then run flutter again.')
-      ).isNotEmpty, true);
+      expect(result.messages, contains(const ValidationMessage.hint('Unable to determine version of Android Studio.')));
+      expect(result.messages, contains(const ValidationMessage.hint('Try running Android Studio and then run flutter again.')));
       expect(result.statusInfo, 'version unknown');
     }
     expect(fakeProcessManager, hasNoRemainingExpectations);
@@ -119,39 +115,5 @@ void main() {
     ProcessManager: () => fakeProcessManager,
     Platform: () => linuxPlatform,
     FileSystemUtils: () => fileSystemUtils,
-  });
-
-  testUsingContext('AndroidStudioValidator displays error if Android Studio version could not be detected', () async {
-    const String installPath = '/opt/AndroidStudioNoVersion';
-    fileSystem.directory(installPath).createSync(recursive: true);
-    config.setValue('android-studio-dir', installPath);
-    const String javaBinPath = '$installPath/jre/bin/java';
-    fileSystem.file(javaBinPath).createSync(recursive: true);
-    fakeProcessManager.addCommand(const FakeCommand(
-      command: <String>[
-        javaBinPath,
-        '-version',
-      ],
-      exception: ProcessException('java', <String>['-version']),
-    ));
-
-    for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, linuxPlatform, fileSystem, userMessages)) {
-      final ValidationResult result = await validator.validate();
-      expect(result.messages.where((ValidationMessage message) {
-        return message.isError && message.message.contains('Unable to determine version of Android Studio.');
-      }).isNotEmpty, true);
-      expect(result.messages.where((ValidationMessage message) =>
-        message.message.contains('Try running Android Studio and then run flutter again.')
-      ).isNotEmpty, true);
-      expect(result.statusInfo, 'version unknown');
-    }
-    expect(fakeProcessManager, hasNoRemainingExpectations);
-  }, overrides: <Type, Generator>{
-    Config: () => config,
-    FileSystem: () => fileSystem,
-    ProcessManager: () => fakeProcessManager,
-    Platform: () => linuxPlatform,
-    FileSystemUtils: () => fileSystemUtils,
-    UserMessages: () => userMessages,
   });
 }
