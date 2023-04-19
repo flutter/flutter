@@ -112,6 +112,33 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Can update within one frame', (WidgetTester tester) async {
+    final TestSelectionRegistrar registrar = TestSelectionRegistrar();
+    final TestContainerDelegate delegate = TestContainerDelegate();
+    final TestContainerDelegate childDelegate = TestContainerDelegate();
+    await pumpContainer(
+      tester,
+      SelectionContainer(
+          registrar: registrar,
+          delegate: delegate,
+          child: Builder(
+            builder: (BuildContext context) {
+              return SelectionContainer(
+                registrar: SelectionContainer.maybeOf(context),
+                delegate: childDelegate,
+                child: const Text('dummy'),
+              );
+            },
+          )
+      ),
+    );
+    await tester.pump();
+    // Should finish update after flushing the micro tasks.
+    await tester.idle();
+    expect(registrar.selectables.length, 1);
+    expect(delegate.value.hasContent, isTrue);
+  });
+
   testWidgets('selection container registers itself if there is a selectable child', (WidgetTester tester) async {
     final TestSelectionRegistrar registrar = TestSelectionRegistrar();
     final TestContainerDelegate delegate = TestContainerDelegate();
