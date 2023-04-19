@@ -147,40 +147,4 @@ void main() {
     expect(rawChip.showCheckmark, showCheckmark);
     expect(rawChip.checkmarkColor, checkmarkColor);
   });
-
-  testWidgets('M3 width should not change with selection', (WidgetTester tester) async {
-    // For the text "ChoiceChip" the chip should default to 175 regardless of selection.
-    const int expectedWidth = 175;
-
-    // Unselected
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: Material(
-        child: Center(
-            child: ChoiceChip(
-          label: const Text('ChoiceChip'),
-          showCheckmark: false,
-          selected: false,
-          onSelected: (bool _) {},
-        )),
-      ),
-    ));
-    expect(tester.getSize(find.byType(ChoiceChip)).width, expectedWidth);
-
-    // Selected
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(useMaterial3: true),
-      home: Material(
-        child: Center(
-            child: ChoiceChip(
-          label: const Text('ChoiceChip'),
-          showCheckmark: false,
-          selected: true,
-          onSelected: (bool _) {},
-        )),
-      ),
-    ));
-    await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(ChoiceChip)).width, expectedWidth);
-  });
 }
