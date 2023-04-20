@@ -487,16 +487,16 @@ the configured path by running this command: flutter config --android-studio-dir
     if (globals.platform.isMacOS) {
       if (version != null && version!.major < 2020) {
         javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-      } else if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
-      } else {
+      } else if (version != null && version!.major < 2022) {
         javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
       }
     } else {
-      if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr');
-      } else {
+      if (version != null && version!.major < 2022) {
         javaPath = globals.fs.path.join(directory, 'jre');
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jbr');
       }
     }
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');

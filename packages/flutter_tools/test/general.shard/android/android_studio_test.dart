@@ -73,14 +73,14 @@ void main() {
       },
     };
 
-    const Map<String, Object> macStudioInfoPlistEAP = <String, Object>{
-      'CFBundleGetInfoString': 'Android Studio EAP AI-212.5712.43.2112.8233820, build AI-212.5712.43.2112.8233820. Copyright JetBrains s.r.o., (c) 2000-2022',
-      'CFBundleShortVersionString': 'EAP AI-212.5712.43.2112.8233820',
-      'CFBundleVersion': 'AI-212.5712.43.2112.8233820',
+    const Map<String, Object> macStudioInfoPlistEap_2022_3_1_11 = <String, Object>{
+      'CFBundleGetInfoString': 'Android Studio EAP AI-223.8836.35.2231.9848316, build AI-223.8836.35.2231.9848316. Copyright JetBrains s.r.o., (c) 2000-2023',
+      'CFBundleShortVersionString': 'EAP AI-223.8836.35.2231.9848316',
+      'CFBundleVersion': 'AI-223.8836.35.2231.9848316',
       'JVMOptions': <String, Object>{
         'Properties': <String, Object>{
           'idea.vendor.name' : 'Google',
-          'idea.paths.selector': 'AndroidStudio2021.2',
+          'idea.paths.selector': 'AndroidStudioPreview2022.3',
           'idea.platform.prefix': 'AndroidStudio',
         },
       },
@@ -241,10 +241,10 @@ void main() {
       globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
-      plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEAP;
+      plistUtils.fileContents[plistFilePath] = macStudioInfoPlistEap_2022_3_1_11;
       processManager.addCommand(FakeCommand(
           command: <String>[
-            globals.fs.path.join(studioInApplicationPlistFolder, 'jre', 'Contents', 'Home', 'bin', 'java'),
+            globals.fs.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java'),
             '-version',
           ],
           stderr: '123',
@@ -259,7 +259,7 @@ void main() {
         homeMac,
         'Library',
         'Application Support',
-        'AndroidStudio2021.2',
+        'AndroidStudioPreview2022.3',
       )));
       expect(studio.validationMessages, <String>['Java version 123']);
     }, overrides: <Type, Generator>{
