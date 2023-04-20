@@ -193,6 +193,28 @@ void main() {
     expect(buttonSize.width, customSmallWidth);
   });
 
+  testWidgets('The width property update test', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/120567
+    final ThemeData themeData = ThemeData();
+    final List<DropdownMenuEntry<ShortMenu>> shortMenuItems = <DropdownMenuEntry<ShortMenu>>[];
+
+    for (final ShortMenu value in ShortMenu.values) {
+      final DropdownMenuEntry<ShortMenu> entry = DropdownMenuEntry<ShortMenu>(value: value, label: value.label);
+      shortMenuItems.add(entry);
+    }
+
+    double customWidth = 250.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    RenderBox box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
+
+    // Update width
+    customWidth = 400.0;
+    await tester.pumpWidget(buildTest(themeData, shortMenuItems, width: customWidth));
+    box = tester.firstRenderObject(find.byType(DropdownMenu<ShortMenu>));
+    expect(box.size.width, customWidth);
+  });
+
   testWidgets('The menuHeight property can be used to show a shorter scrollable menu list instead of the complete list',
     (WidgetTester tester) async {
     final ThemeData themeData = ThemeData();
@@ -403,6 +425,70 @@ void main() {
       matching: find.byType(Material),
     ).last;
     expect(menuMaterial, findsOneWidget);
+  });
+
+  testWidgets('Leading IconButton status test', (WidgetTester tester) async {
+    final ThemeData themeData = ThemeData(useMaterial3: true);
+    await tester.pumpWidget(buildTest(themeData, menuChildren, width: 100.0, menuHeight: 100.0));
+    await tester.pump();
+
+    Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up);
+    expect(iconButton, findsNothing);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+
+    await tester.tap(iconButton);
+    await tester.pump();
+
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up).first;
+    expect(iconButton, findsOneWidget);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down);
+    expect(iconButton, findsNothing);
+
+    // Tap outside
+    await tester.tapAt(const Offset(500.0, 500.0));
+    await tester.pump();
+
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_up);
+    expect(iconButton, findsNothing);
+    iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+  });
+
+  testWidgets('Do not crash when resize window during menu opening', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    final ThemeData themeData = ThemeData();
+    await tester.pumpWidget(MaterialApp(
+      theme: themeData,
+      home: Scaffold(
+        body: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState){
+            return DropdownMenu<TestMenu>(
+              width: MediaQuery.of(context).size.width,
+              dropdownMenuEntries: menuChildren,
+            );
+          },
+        ),
+      ),
+    ));
+
+    final Finder iconButton = find.widgetWithIcon(IconButton, Icons.arrow_drop_down).first;
+    expect(iconButton, findsOneWidget);
+
+    await tester.tap(iconButton);
+    await tester.pump();
+
+    final Finder menuMaterial = find.ancestor(
+      of: find.widgetWithText(MenuItemButton, TestMenu.mainMenu0.label),
+      matching: find.byType(Material),
+    ).last;
+    expect(menuMaterial, findsOneWidget);
+
+    // didChangeMetrics
+    tester.view.physicalSize = const Size(700.0, 700.0);
+    await tester.pump();
+
+    // Go without throw.
   });
 
   testWidgets('DropdownMenu can customize trailing icon button', (WidgetTester tester) async {
