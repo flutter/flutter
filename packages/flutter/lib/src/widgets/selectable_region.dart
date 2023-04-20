@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -1493,6 +1494,10 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   @override
   void remove(Selectable selectable) {
     if (_additions.remove(selectable)) {
+      // The same selectable was added in the same frame and is not yet
+      // incorporated into the selectables.
+      //
+      // Removing such selectable doesn't require selection geometry update.
       return;
     }
     _removeSelectable(selectable);
@@ -1507,13 +1512,23 @@ abstract class MultiSelectableSelectionContainerDelegate extends SelectionContai
   void _scheduleSelectableUpdate() {
     if (!_scheduledSelectableUpdate) {
       _scheduledSelectableUpdate = true;
-      SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
+      void runScheduledTask([Duration? duration]) {
         if (!_scheduledSelectableUpdate) {
           return;
         }
         _scheduledSelectableUpdate = false;
         _updateSelectables();
-      });
+      }
+
+      if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.postFrameCallbacks) {
+        // A new task can be scheduled as a result of running the scheduled task
+        // from another MultiSelectableSelectionContainerDelegate. This can
+        // happen if nesting two SelectionContainers. The selectable can be
+        // safely updated in the same frame in this case.
+        scheduleMicrotask(runScheduledTask);
+      } else {
+        SchedulerBinding.instance.addPostFrameCallback(runScheduledTask);
+      }
     }
   }
 

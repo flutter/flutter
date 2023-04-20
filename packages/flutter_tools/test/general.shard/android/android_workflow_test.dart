@@ -553,7 +553,7 @@ Review licenses that have not been accepted (y/N)?
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
@@ -576,7 +576,7 @@ Review licenses that have not been accepted (y/N)?
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
