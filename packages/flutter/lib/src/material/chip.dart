@@ -275,6 +275,8 @@ abstract interface class DeletableChipAttributes {
 ///  * [InputChip], a chip that represents a complex piece of information, such
 ///    as an entity (person, place, or thing) or conversational text, in a
 ///    compact form.
+///  * [ChoiceChip], allows a single selection from a set of options. Choice
+///    chips contain related descriptive text or categories.
 ///  * [FilterChip], uses tags or descriptive words as a way to filter content.
 ///  * <https://material.io/design/components/chips.html>
 abstract interface class CheckmarkableChipAttributes {
