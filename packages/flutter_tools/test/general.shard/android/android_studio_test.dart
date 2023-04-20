@@ -535,6 +535,51 @@ void main() {
       Platform: () => platform,
       PlistParser: () => plistUtils,
     });
+
+    testUsingContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
+      final String studioInApplicationPlistFolder = globals.fs.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
+        'Contents',
+      );
+      globals.fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = globals.fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
+      plistWithoutVersion['CFBundleShortVersionString'] = '';
+      plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
+
+      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
+      fileSystem.file(javaBinaryPath).createSync(recursive: true);
+
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          javaBinaryPath,
+          '-version',
+        ],
+        stderr: '123',
+      )
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        globals.fs.directory(studioInApplicationPlistFolder).parent.path,
+      )!;
+
+      expect(studio.version, null);
+      expect(studio.javaPath, equals(globals.fs.path.join(
+        studioInApplicationPlistFolder,
+        'jbr',
+        'Contents',
+        'Home',
+      )));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
   });
 
   group('installation detection on Windows', () {
@@ -684,6 +729,25 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio')
+          .createSync(recursive: true);
+
+      fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, null);
+      expect(studio.javaPath, equals(r'C:\Program Files\AndroidStudio\jbr'));
+    }, overrides: <Type, Generator>{
+      Platform: () => platform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 
   group('installation detection on Linux', () {
@@ -826,6 +890,28 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
+      const String configuredStudioInstallPath = '$homeLinux/AndroidStudio';
+      globals.config.setValue('android-studio-dir', configuredStudioInstallPath);
+
+      globals.fs.directory(configuredStudioInstallPath).createSync(recursive: true);
+
+      globals.fs.directory(configuredStudioInstallPath).createSync();
+
+      fileSystem.file(fileSystem.path.join(configuredStudioInstallPath, 'jbr', 'bin', 'java')).createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, null);
+      expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
+    }, overrides: <Type, Generator>{
+      Config: () => Config.test(),
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('pluginsPath extracts custom paths from home dir', () {
       const String installPath = '/opt/android-studio-with-cheese-5.0';
       const String studioHome = '$homeLinux/.AndroidStudioWithCheese5.0';
@@ -962,7 +1048,7 @@ void main() {
       // The directory exists, but nothing is inside.
       fileSystem.directory(configuredAndroidStudioDir).createSync(recursive: true);
       (globals.processManager as FakeProcessManager).excludedExecutables.add(
-        fileSystem.path.join(configuredAndroidStudioDir, 'jre', 'bin', 'java'),
+        fileSystem.path.join(configuredAndroidStudioDir, 'jbr', 'bin', 'java'),
       );
 
       const List<String> validVersions = <String> [
