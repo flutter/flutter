@@ -46,6 +46,11 @@ bool SolidColorContents::ShouldRender(
   return Contents::ShouldRender(entity, stencil_coverage);
 }
 
+bool SolidColorContents::ConvertToSrc(const Entity& entity) const {
+  return entity.GetBlendMode() == BlendMode::kSourceOver &&
+         GetColor().alpha >= 1.0;
+}
+
 bool SolidColorContents::Render(const ContentContext& renderer,
                                 const Entity& entity,
                                 RenderPass& pass) const {
@@ -60,6 +65,9 @@ bool SolidColorContents::Render(const ContentContext& renderer,
       GetGeometry()->GetPositionBuffer(renderer, entity, pass);
 
   auto options = OptionsFromPassAndEntity(pass, entity);
+  if (ConvertToSrc(entity)) {
+    options.blend_mode = BlendMode::kSource;
+  }
   if (geometry_result.prevent_overdraw) {
     options.stencil_compare = CompareFunction::kEqual;
     options.stencil_operation = StencilOperation::kIncrementClamp;
