@@ -679,16 +679,21 @@ void setClipPath(DomElement element, String? value) {
   }
 }
 
-void setThemeColor(ui.Color color) {
+void setThemeColor(ui.Color? color) {
   DomHTMLMetaElement? theme =
       domDocument.querySelector('#flutterweb-theme') as DomHTMLMetaElement?;
-  if (theme == null) {
-    theme = createDomHTMLMetaElement()
-      ..id = 'flutterweb-theme'
-      ..name = 'theme-color';
-    domDocument.head!.append(theme);
+
+  if (color != null) {
+    if (theme == null) {
+      theme = createDomHTMLMetaElement()
+        ..id = 'flutterweb-theme'
+        ..name = 'theme-color';
+      domDocument.head!.append(theme);
+    }
+    theme.content = colorToCssString(color)!;
+  } else {
+    theme?.remove();
   }
-  theme.content = colorToCssString(color)!;
 }
 
 bool? _ellipseFeatureDetected;
