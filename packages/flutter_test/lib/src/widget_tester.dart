@@ -9,6 +9,7 @@ import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:matcher/expect.dart' as matcher_expect;
 import 'package:meta/meta.dart';
 
 // The test_api package is not for general use... it's literally for our use.
@@ -28,7 +29,14 @@ import 'test_text_input.dart';
 
 // Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
-
+// We re-export the matcher package minus some features that we reimplement.
+//
+//  - expect is reimplemented below, to catch incorrect async usage.
+//
+//  - isInstanceOf is reimplemented in matchers.dart because we don't want to
+//    mark it as deprecated (ours is just a method, not a class).
+//
+export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // We re-export the test package minus some features that we reimplement.
 //
 // Specifically:
@@ -38,23 +46,14 @@ export 'package:flutter/rendering.dart' show SemanticsHandle;
 //    setting up a declarer when one is not defined, which can happen when a
 //    test is executed via `flutter run`.
 //
-//  - expect is reimplemented below, to catch incorrect async usage.
-//
-//  - isInstanceOf is reimplemented in matchers.dart because we don't want to
-//    mark it as deprecated (ours is just a method, not a class).
-//
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
+export 'package:test_api/hooks.dart' show TestFailure;
 // ignore: deprecated_member_use
-export 'package:test_api/test_api.dart' hide
-  expect,
-  group,
-  isInstanceOf,
-  setUp,
-  setUpAll,
-  tearDown,
-  tearDownAll,
-  test;
+export 'package:test_api/scaffolding.dart'
+    hide group, setUp, setUpAll, tearDown, tearDownAll, test;
+// ignore: implementation_imports
+export 'package:test_api/src/scaffolding/utils.dart' show registerException;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
@@ -442,7 +441,7 @@ Future<void> benchmarkWidgets(
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [test_package.expect] for details. This is a variant of that function
+/// See [matcher_expect.expect] for details. This is a variant of that function
 /// that additionally verifies that there are no asynchronous APIs
 /// that have not yet resolved.
 ///
@@ -456,12 +455,12 @@ void expect(
   dynamic skip, // true or a String
 }) {
   TestAsyncUtils.guardSync();
-  test_package.expect(actual, matcher, reason: reason, skip: skip);
+  matcher_expect.expect(actual, matcher, reason: reason, skip: skip);
 }
 
 /// Assert that `actual` matches `matcher`.
 ///
-/// See [test_package.expect] for details. This variant will _not_ check that
+/// See [matcher_expect.expect] for details. This variant will _not_ check that
 /// there are no outstanding asynchronous API requests. As such, it can be
 /// called from, e.g., callbacks that are run during build or layout, or in the
 /// completion handlers of futures that execute in response to user input.
@@ -473,13 +472,13 @@ void expectSync(
   dynamic matcher, {
   String? reason,
 }) {
-  test_package.expect(actual, matcher, reason: reason);
+  matcher_expect.expect(actual, matcher, reason: reason);
 }
 
 /// Just like [expect], but returns a [Future] that completes when the matcher
 /// has finished matching.
 ///
-/// See [test_package.expectLater] for details.
+/// See [matcher_expect.expectLater] for details.
 ///
 /// If the matcher fails asynchronously, that failure is piped to the returned
 /// future where it can be handled by user code. If it is not handled by user
@@ -493,7 +492,7 @@ Future<void> expectLater(
   // We can't wrap the delegate in a guard, or we'll hit async barriers in
   // [TestWidgetsFlutterBinding] while we're waiting for the matcher to complete
   TestAsyncUtils.guardSync();
-  return test_package.expectLater(actual, matcher, reason: reason, skip: skip)
+  return matcher_expect.expectLater(actual, matcher, reason: reason, skip: skip)
            .then<void>((dynamic value) => null);
 }
 
