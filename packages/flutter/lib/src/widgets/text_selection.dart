@@ -2019,6 +2019,13 @@ class TextSelectionGestureDetectorBuilder {
   bool get shouldShowSelectionToolbar => _shouldShowSelectionToolbar;
   bool _shouldShowSelectionToolbar = true;
 
+
+  /// The last consecutive tap count.
+  ///
+  /// This is set when [onTapDown] is called.
+  int get lastConsecutiveTapCount => _lastConsecutiveTapCount;
+  int _lastConsecutiveTapCount = 0;
+
   /// The [State] of the [EditableText] for which the builder will provide a
   /// [TextSelectionGestureDetector].
   @protected
@@ -2099,6 +2106,7 @@ class TextSelectionGestureDetectorBuilder {
     _shouldShowSelectionToolbar = kind == null
       || kind == PointerDeviceKind.touch
       || kind == PointerDeviceKind.stylus;
+    _lastConsecutiveTapCount = _TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount);
 
     // Handle shift + click selection if needed.
     final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
@@ -2588,10 +2596,6 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
     _dragBeganOnPreviousSelection = _positionOnSelection(details.globalPosition, _dragStartSelection);
-
-    final bool shouldHideHandles = defaultTargetPlatform == TargetPlatform.android;
-    // The toolbar should be hidden while dragging. The handles are hidden on Android.
-    editableText.hideToolbar(shouldHideHandles);
 
     if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) > 1) {
       // Do not set the selection on a consecutive tap and drag.
