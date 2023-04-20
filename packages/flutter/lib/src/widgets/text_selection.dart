@@ -2850,6 +2850,10 @@ class TextSelectionGestureDetectorBuilder {
     final bool isShiftPressed = _containsShift(details.keysPressedOnDown);
     _dragBeganOnPreviousSelection = null;
 
+    if (_shouldShowSelectionToolbar && _TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) == 2) {
+      editableText.showToolbar();
+    }
+
     if (isShiftPressed) {
       _dragStartSelection = null;
     }
