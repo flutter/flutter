@@ -10,7 +10,6 @@ import 'adaptive_text_selection_toolbar.dart';
 import 'colors.dart';
 import 'material.dart';
 import 'spell_check_suggestions_toolbar_layout_delegate.dart';
-import 'text_selection_toolbar.dart';
 import 'text_selection_toolbar_text_button.dart';
 
 // The default height of the SpellCheckSuggestionsToolbar, which
