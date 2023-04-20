@@ -800,32 +800,37 @@ class TextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.wavy,
   );
 
-  /// Default builder for the spell check suggestions toolbar in the Material
-  /// style.
+  /// Default builder for [TextField]'s spell check suggestions toolbar.
+  ///
+  /// On Apple platforms, builds an iOS-style toolbar. Everywhere else, builds
+  /// an Android-style toolbar.
   ///
   /// See also:
+  ///  * [spellCheckConfiguration], where this is typically specified for
+  ///    [TextField].
   ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
-  ///    builder configured to show a spell check suggestions toolbar.
-  ///  * [CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder], the builder
-  ///    configured to show the Material style spell check suggestions toolbar.
+  ///    parameter for which this is the default value for [TextField].
+  ///  * [CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder], which
+  ///    is like this but specifies the default for [CupertinoTextField].
   @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    final Offset anchor =
-      SpellCheckSuggestionsToolbar.getToolbarAnchor(editableTextState.contextMenuAnchors);
-    final List<ContextMenuButtonItem>? buttonItems =
-      SpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
-
-    if (buttonItems == null){
-      return const SizedBox.shrink();
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return CupertinoSpellCheckSuggestionsToolbar.editableText(
+          editableTextState: editableTextState,
+        );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return SpellCheckSuggestionsToolbar.editableText(
+          editableTextState: editableTextState,
+        );
     }
-
-    return SpellCheckSuggestionsToolbar(
-      anchor: anchor,
-      buttonItems: buttonItems,
-    );
   }
 
   @override
