@@ -2277,7 +2277,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 ///
 ///  * [DiagnosticsProperty] which documents named parameters common to all
 ///    [DiagnosticsProperty].
-class EnumProperty<T? extends Enum> extends DiagnosticsProperty<T> {
+class EnumProperty<T extends Enum?> extends DiagnosticsProperty<T> {
   /// Create a diagnostics property that displays an enum.
   ///
   /// The [level] argument must also not be null.
