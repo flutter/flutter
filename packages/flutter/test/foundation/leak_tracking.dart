@@ -110,7 +110,8 @@ bool _webWarningPrinted = false;
 /// 1. Listens to [MemoryAllocations] events.
 /// 2. Uses `tester.runAsync` for leak detection if [tester] is provided.
 ///
-/// Pass [config] to troubleshoot leaks. See [LeakTrackingTestConfig] for details.
+/// Pass [config] to troublceshoot or exempt leaks. See [LeakTrackingTestConfig]
+/// for details.
 Future<void> _withFlutterLeakTracking(
   DartAsyncCallback callback,
   WidgetTester tester,
