@@ -394,18 +394,15 @@ class _ButtonStyleState extends State<ButtonStyleButton> with TickerProviderStat
           highlightColor: Colors.transparent,
           customBorder: resolvedShape.copyWith(side: resolvedSide),
           statesController: statesController,
-          child: DefaultSelectionStyle.merge(
-            mouseCursor: mouseCursor,
-            child: IconTheme.merge(
-              data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
-              child: Padding(
-                padding: padding,
-                child: Align(
-                  alignment: resolvedAlignment!,
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: widget.child,
-                ),
+          child: IconTheme.merge(
+            data: IconThemeData(color: resolvedIconColor ?? resolvedForegroundColor, size: resolvedIconSize),
+            child: Padding(
+              padding: padding,
+              child: Align(
+                alignment: resolvedAlignment!,
+                widthFactor: 1.0,
+                heightFactor: 1.0,
+                child: widget.child,
               ),
             ),
           ),
