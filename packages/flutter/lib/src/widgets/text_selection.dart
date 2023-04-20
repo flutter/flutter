@@ -574,7 +574,7 @@ class TextSelectionOverlay {
   ///
   /// See also:
   ///
-  ///   * [spellCheckMenuIsVisible], which is only whether the spell check menu
+  ///   * [spellCheckToolbarIsVisible], which is only whether the spell check menu
   ///     specifically is visible.
   bool get toolbarIsVisible => _selectionOverlay._toolbarIsVisible;
 
@@ -586,7 +586,7 @@ class TextSelectionOverlay {
   /// See also:
   ///
   ///   * [toolbarIsVisible], which is whether any toolbar is visible.
-  bool get spellCheckMenuIsVisible => _selectionOverlay._spellCheckMenuController.isShown;
+  bool get spellCheckToolbarIsVisible => _selectionOverlay._spellCheckToolbarController.isShown;
 
   /// {@macro flutter.widgets.SelectionOverlay.hide}
   void hide() => _selectionOverlay.hide();
@@ -992,8 +992,8 @@ class SelectionOverlay {
 
   bool get _toolbarIsVisible {
     return selectionControls is TextSelectionHandleControls
-        ? _contextMenuController.isShown || _spellCheckMenuController.isShown
-        : _toolbar != null || _spellCheckMenuController.isShown;
+        ? _contextMenuController.isShown || _spellCheckToolbarController.isShown
+        : _toolbar != null || _spellCheckToolbarController.isShown;
   }
 
   /// {@template flutter.widgets.SelectionOverlay.showMagnifier}
@@ -1305,7 +1305,7 @@ class SelectionOverlay {
   // Manages the context menu. Not necessarily visible when non-null.
   final ContextMenuController _contextMenuController = ContextMenuController();
 
-  final ContextMenuController _spellCheckMenuController = ContextMenuController();
+  final ContextMenuController _spellCheckToolbarController = ContextMenuController();
 
   /// {@template flutter.widgets.SelectionOverlay.showHandles}
   /// Builds the handles by inserting them into the [context]'s overlay.
@@ -1377,7 +1377,7 @@ class SelectionOverlay {
     }
 
     final RenderBox renderBox = context.findRenderObject()! as RenderBox;
-    _spellCheckMenuController.show(
+    _spellCheckToolbarController.show(
       context: context,
       contextMenuBuilder: (BuildContext context) {
         return _SelectionToolbarWrapper(
@@ -1412,8 +1412,8 @@ class SelectionOverlay {
         _toolbar?.markNeedsBuild();
         if (_contextMenuController.isShown) {
           _contextMenuController.markNeedsBuild();
-        } else if (_spellCheckMenuController.isShown) {
-          _spellCheckMenuController.markNeedsBuild();
+        } else if (_spellCheckToolbarController.isShown) {
+          _spellCheckToolbarController.markNeedsBuild();
         }
       });
     } else {
@@ -1424,8 +1424,8 @@ class SelectionOverlay {
       _toolbar?.markNeedsBuild();
       if (_contextMenuController.isShown) {
         _contextMenuController.markNeedsBuild();
-      } else if (_spellCheckMenuController.isShown) {
-        _spellCheckMenuController.markNeedsBuild();
+      } else if (_spellCheckToolbarController.isShown) {
+        _spellCheckToolbarController.markNeedsBuild();
       }
     }
   }
@@ -1440,7 +1440,7 @@ class SelectionOverlay {
       _handles![1].remove();
       _handles = null;
     }
-    if (_toolbar != null || _contextMenuController.isShown || _spellCheckMenuController.isShown) {
+    if (_toolbar != null || _contextMenuController.isShown || _spellCheckToolbarController.isShown) {
       hideToolbar();
     }
   }
@@ -1452,7 +1452,7 @@ class SelectionOverlay {
   /// {@endtemplate}
   void hideToolbar() {
     _contextMenuController.remove();
-    _spellCheckMenuController.remove();
+    _spellCheckToolbarController.remove();
     if (_toolbar == null) {
       return;
     }
