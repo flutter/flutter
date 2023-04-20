@@ -800,7 +800,6 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
-
   });
 
   group('installation detection on Linux', () {
