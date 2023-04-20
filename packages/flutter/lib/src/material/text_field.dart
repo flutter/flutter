@@ -1095,7 +1095,7 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
       return false;
     }
 
-    if (cause == SelectionChangedCause.drag && Theme.of(context).platform == TargetPlatform.android) {
+    if (cause == SelectionChangedCause.drag && Theme.of(context).platform == TargetPlatform.android && _selectionGestureDetectorBuilder.lastConsecutiveTapCount > 1) {
       return false;
     }
 
