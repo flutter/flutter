@@ -734,7 +734,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
+    testUsingContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
       fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio\.home')
         ..createSync(recursive: true)
         ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
@@ -896,7 +896,7 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('finds bundled Java version despite Android Studio version being unknown', () {
+    testUsingContext('finds bundled Java version when Android Studio version is unknown by assuming the latest version', () {
       const String configuredStudioInstallPath = '$homeLinux/AndroidStudio';
       config.setValue('android-studio-dir', configuredStudioInstallPath);
 
