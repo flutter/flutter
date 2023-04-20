@@ -104,9 +104,9 @@ enum BottomNavigationBarLandscapeLayout {
 /// that's preferred for new applications and applications that are
 /// configured for Material 3 (see [ThemeData.useMaterial3]). The
 /// [NavigationBar] widget's visuals are a little bit different, see
-/// The Material 3 spec at
+/// the Material 3 spec at
 /// <https://m3.material.io/components/navigation-bar/overview> for
-/// more details. The API is is similar, destinations are defined with
+/// more details. The API is similar, destinations are defined with
 /// [NavigationDestination]s and [NavigationBar.onDestinationSelected]
 /// is called when a destination is tapped.
 ///
