@@ -49,11 +49,15 @@ class TestHttpRequest {
         setRequestHeader: setRequestHeader.toJS,
         addEventListener: addEventListener.toJS,
     );
-    createGetter(_mock, 'headers', () => js_util.jsify(headers) as JSAny);
-    createGetter(_mock,
+    // TODO(srujzs): This is needed for when we reify JS types. Right now, JSAny
+    // is a typedef for Object?, but when we reify, it'll be its own type.
+    // ignore: unnecessary_cast
+    final JSAny mock = _mock as JSAny;
+    createGetter(mock, 'headers', () => js_util.jsify(headers) as JSAny);
+    createGetter(mock,
         'responseHeaders', () => js_util.jsify(responseHeaders) as JSAny);
-    createGetter(_mock, 'status', () => status.toJS);
-    createGetter(_mock, 'response', () => js_util.jsify(response) as JSAny);
+    createGetter(mock, 'status', () => status.toJS);
+    createGetter(mock, 'response', () => js_util.jsify(response) as JSAny);
   }
 
   late DomXMLHttpRequestMock _mock;
@@ -71,7 +75,9 @@ class TestHttpRequest {
 
   JSVoid addEventListener(JSString type, DomEventListener listener) {
     if (type.toDart == mockEvent?.type) {
-      (listener.toDart as DartDomEventListener)(mockEvent!.event);
+      final DartDomEventListener dartListener =
+        (listener as JSFunction).toDart as DartDomEventListener;
+      dartListener(mockEvent!.event);
     }
   }
 
