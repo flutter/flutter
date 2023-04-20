@@ -77,7 +77,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
         help: 'Allow Flutter to check for updates when this command runs.');
     argParser.addFlag('suppress-analytics',
         negatable: false,
-        help: 'Suppress analytics reporting when this command runs.');
+        help: 'Suppress analytics reporting for the current CLI invocation.');
+    argParser.addFlag('disable-telemetry',
+        negatable: false,
+        help: 'Disable telemetry reporting when this command runs.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Path to your "package_config.json" file.');
@@ -184,6 +187,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
     final Map<Type, Object?> contextOverrides = <Type, Object?>{};
+
+    // If the disable-telemetry flag has been passed, return out
+    if (topLevelResults.wasParsed('disable-telemetry')) {
+      return;
+    }
 
     // Don't set wrapColumns unless the user said to: if it's set, then all
     // wrapping will occur at this width explicitly, and won't adapt if the

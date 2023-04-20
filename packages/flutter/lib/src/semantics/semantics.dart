@@ -68,6 +68,9 @@ typedef SemanticsUpdateCallback = void Function(ui.SemanticsUpdate update);
 /// value.
 typedef ChildSemanticsConfigurationsDelegate = ChildSemanticsConfigurationsResult Function(List<SemanticsConfiguration>);
 
+final int _kUnblockedUserActions = SemanticsAction.didGainAccessibilityFocus.index
+  | SemanticsAction.didLoseAccessibilityFocus.index;
+
 /// A tag for a [SemanticsNode].
 ///
 /// Tags can be interpreted by the parent of a [SemanticsNode]
@@ -669,9 +672,9 @@ class SemanticsData with Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     final List<String> actionSummary = <String>[
-      for (final SemanticsAction action in SemanticsAction.values.values)
+      for (final SemanticsAction action in SemanticsAction.values)
         if ((actions & action.index) != 0)
-          describeEnum(action),
+          action.name,
     ];
     final List<String?> customSemanticsActionSummary = customSemanticsActionIds!
       .map<String?>((int actionId) => CustomSemanticsAction.getAction(actionId)!.label)
@@ -680,9 +683,9 @@ class SemanticsData with Diagnosticable {
     properties.add(IterableProperty<String?>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[
-      for (final SemanticsFlag flag in SemanticsFlag.values.values)
+      for (final SemanticsFlag flag in SemanticsFlag.values)
         if ((flags & flag.index) != 0)
-          describeEnum(flag),
+          flag.name,
     ];
     properties.add(IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(AttributedStringProperty('label', attributedLabel));
@@ -1800,6 +1803,22 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _markDirty();
   }
 
+  /// Whether the user can interact with this node in assistive technologies.
+  ///
+  /// This node can still receive accessibility focus even if this is true.
+  /// Setting this to true prevents the user from activating pointer related
+  /// [SemanticsAction]s, such as [SemanticsAction.tap] or
+  /// [SemanticsAction.longPress].
+  bool get areUserActionsBlocked => _areUserActionsBlocked;
+  bool _areUserActionsBlocked = false;
+  set areUserActionsBlocked(bool value) {
+    if (_areUserActionsBlocked == value) {
+      return;
+    }
+    _areUserActionsBlocked = value;
+    _markDirty();
+  }
+
   /// Whether this node is taking part in a merge of semantic information.
   ///
   /// This returns true if the node is either merged into an ancestor node or if
@@ -2060,7 +2079,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         || platformViewId != config.platformViewId
         || _maxValueLength != config._maxValueLength
         || _currentValueLength != config._currentValueLength
-        || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
+        || _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants
+        || _areUserActionsBlocked != config.isBlockingUserActions;
   }
 
   // TAGS, LABELS, ACTIONS
@@ -2068,6 +2088,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   Map<SemanticsAction, SemanticsActionHandler> _actions = _kEmptyConfig._actions;
   Map<CustomSemanticsAction, VoidCallback> _customSemanticsActions = _kEmptyConfig._customSemanticsActions;
 
+  int get _effectiveActionsAsBits => _areUserActionsBlocked ? _actionsAsBits & _kUnblockedUserActions : _actionsAsBits;
   int _actionsAsBits = _kEmptyConfig._actionsAsBits;
 
   /// The [SemanticsTag]s this node is tagged with.
@@ -2413,6 +2434,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _platformViewId = config._platformViewId;
     _maxValueLength = config._maxValueLength;
     _currentValueLength = config._currentValueLength;
+    _areUserActionsBlocked = config.isBlockingUserActions;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
 
     assert(
@@ -2433,6 +2455,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returned data matches the data on this node.
   SemanticsData getSemanticsData() {
     int flags = _flags;
+    // Can't use _effectiveActionsAsBits here. The filtering of action bits
+    // must be done after the merging the its descendants.
     int actions = _actionsAsBits;
     AttributedString attributedLabel = _attributedLabel;
     AttributedString attributedValue = _attributedValue;
@@ -2478,7 +2502,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
         flags |= node._flags;
-        actions |= node._actionsAsBits;
+        actions |= node._effectiveActionsAsBits;
+
         textDirection ??= node._textDirection;
         textSelection ??= node._textSelection;
         scrollChildCount ??= node._scrollChildCount;
@@ -2545,7 +2570,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
     return SemanticsData(
       flags: flags,
-      actions: actions,
+      actions: _areUserActionsBlocked ? actions & _kUnblockedUserActions : actions,
       attributedLabel: attributedLabel,
       attributedValue: attributedValue,
       attributedIncreasedValue: attributedIncreasedValue,
@@ -2719,6 +2744,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     SystemChannels.accessibility.send(event.toMap(nodeId: id));
   }
 
+  bool _debugIsActionBlocked(SemanticsAction action) {
+    bool result = false;
+    assert((){
+      result = (_effectiveActionsAsBits & action.index) == 0;
+      return true;
+    }());
+    return result;
+  }
+
   @override
   String toStringShort() => '${objectRuntimeType(this, 'SemanticsNode')}#$id';
 
@@ -2749,13 +2783,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     properties.add(IterableProperty<String>('tags', tags?.map((SemanticsTag tag) => tag.name), defaultValue: null));
-    final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => describeEnum(action)).toList()..sort();
+    final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => '${action.name}${_debugIsActionBlocked(action) ? '🚫️' : ''}').toList()..sort();
     final List<String?> customSemanticsActions = _customSemanticsActions.keys
       .map<String?>((CustomSemanticsAction action) => action.label)
       .toList();
     properties.add(IterableProperty<String>('actions', actions, ifEmpty: null));
     properties.add(IterableProperty<String?>('customActions', customSemanticsActions, ifEmpty: null));
-    final List<String> flags = SemanticsFlag.values.values.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.toString().substring('SemanticsFlag.'.length)).toList();
+    final List<String> flags = SemanticsFlag.values.where((SemanticsFlag flag) => hasFlag(flag)).map((SemanticsFlag flag) => flag.name).toList();
     properties.add(IterableProperty<String>('flags', flags, ifEmpty: null));
     properties.add(FlagProperty('isInvisible', value: isInvisible, ifTrue: 'invisible'));
     properties.add(FlagProperty('isHidden', value: hasFlag(SemanticsFlag.isHidden), ifTrue: 'HIDDEN'));
@@ -3337,6 +3371,22 @@ class SemanticsConfiguration {
     _isSemanticBoundary = value;
   }
 
+  /// Whether to block pointer related user actions for the rendering subtree.
+  ///
+  /// Setting this to true will prevent users from interacting with the
+  /// rendering object produces this semantics configuration and its subtree
+  /// through pointer-related [SemanticsAction]s in assistive technologies.
+  ///
+  /// The [SemanticsNode] created from this semantics configuration is still
+  /// focusable by assistive technologies. Only pointer-related
+  /// [SemanticsAction]s, such as [SemanticsAction.tap] or its friends, are
+  /// blocked.
+  ///
+  /// If this semantics configuration is merged into a parent semantics node,
+  /// only the [SemanticsAction]s from this rendering object and the rendering
+  /// objects in the subtree are blocked.
+  bool isBlockingUserActions = false;
+
   /// Whether the configuration forces all children of the owning [RenderObject]
   /// that want to contribute semantic information to the semantics tree to do
   /// so in the form of explicit [SemanticsNode]s.
@@ -3388,6 +3438,7 @@ class SemanticsConfiguration {
   ///  * [addAction] to add an action.
   final Map<SemanticsAction, SemanticsActionHandler> _actions = <SemanticsAction, SemanticsActionHandler>{};
 
+  int get _effectiveActionsAsBits => isBlockingUserActions ? _actionsAsBits & _kUnblockedUserActions : _actionsAsBits;
   int _actionsAsBits = 0;
 
   /// Adds an `action` to the semantics tree.
@@ -4625,10 +4676,17 @@ class SemanticsConfiguration {
     if (!child.hasBeenAnnotated) {
       return;
     }
-
-    _actions.addAll(child._actions);
+    if (child.isBlockingUserActions) {
+      child._actions.forEach((SemanticsAction key, SemanticsActionHandler value) {
+        if (_kUnblockedUserActions & key.index > 0) {
+          _actions[key] = value;
+        }
+      });
+    } else {
+      _actions.addAll(child._actions);
+    }
+    _actionsAsBits |= child._effectiveActionsAsBits;
     _customSemanticsActions.addAll(child._customSemanticsActions);
-    _actionsAsBits |= child._actionsAsBits;
     _flags |= child._flags;
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
@@ -4707,7 +4765,8 @@ class SemanticsConfiguration {
       .._maxValueLength = _maxValueLength
       .._currentValueLength = _currentValueLength
       .._actions.addAll(_actions)
-      .._customSemanticsActions.addAll(_customSemanticsActions);
+      .._customSemanticsActions.addAll(_customSemanticsActions)
+      ..isBlockingUserActions = isBlockingUserActions;
   }
 }
 

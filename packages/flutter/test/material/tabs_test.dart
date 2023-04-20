@@ -5778,6 +5778,36 @@ void main() {
         labelColor.withAlpha(0xB2) // 70% alpha,
       );
     });
+
+    testWidgets('Material3 - TabBar inherits the dividerColor of TabBarTheme', (WidgetTester tester) async {
+      const Color dividerColor = Colors.yellow;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            useMaterial3: true,
+            tabBarTheme: const TabBarTheme(dividerColor: dividerColor),
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                controller: TabController(length: 3, vsync: const TestVSync()),
+                tabs: const <Widget>[
+                  Tab(text: 'Tab 1'),
+                  Tab(text: 'Tab 2'),
+                  Tab(text: 'Tab 3'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Test painter's divider color.
+      final CustomPaint paint = tester.widget<CustomPaint>(find.byType(CustomPaint).last);
+      // ignore: avoid_dynamic_calls
+      expect((paint.painter as dynamic).dividerColor, dividerColor);
+    });
   });
 }
 

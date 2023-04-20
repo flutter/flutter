@@ -1197,6 +1197,12 @@ class FakeDeviceManager extends Fake implements DeviceManager {
   }) async => devices;
 
   @override
+  Future<List<Device>> refreshAllDevices({
+    Duration? timeout,
+    DeviceDiscoveryFilter? filter,
+  }) async => devices;
+
+  @override
   Future<List<String>> getDeviceDiagnostics() async => diagnostics;
 }
 

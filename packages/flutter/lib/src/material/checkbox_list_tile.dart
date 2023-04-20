@@ -194,6 +194,7 @@ class CheckboxListTile extends StatelessWidget {
     this.selectedTileColor,
     this.onFocusChange,
     this.enableFeedback,
+    this.checkboxSemanticLabel,
   }) : _checkboxType = _CheckboxType.material,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -237,6 +238,7 @@ class CheckboxListTile extends StatelessWidget {
     this.selectedTileColor,
     this.onFocusChange,
     this.enableFeedback,
+    this.checkboxSemanticLabel,
   }) : _checkboxType = _CheckboxType.adaptive,
        assert(tristate || value != null),
        assert(!isThreeLine || subtitle != null);
@@ -321,7 +323,7 @@ class CheckboxListTile extends StatelessWidget {
   /// If null, then the value of [activeColor] with alpha [kRadialReactionAlpha]
   /// and [hoverColor] is used in the pressed and hovered state. If that is also null,
   /// the value of [CheckboxThemeData.overlayColor] is used. If that is also null,
-  /// then the the default value is used in the pressed and hovered state.
+  /// then the default value is used in the pressed and hovered state.
   final MaterialStateProperty<Color?>? overlayColor;
 
   /// {@macro flutter.material.checkbox.splashRadius}
@@ -452,6 +454,9 @@ class CheckboxListTile extends StatelessWidget {
   /// inoperative.
   final bool? enabled;
 
+  /// {@macro flutter.material.checkbox.semanticLabel}
+  final String? checkboxSemanticLabel;
+
   final _CheckboxType _checkboxType;
 
   void _handleValueChange() {
@@ -488,6 +493,7 @@ class CheckboxListTile extends StatelessWidget {
           shape: checkboxShape,
           side: side,
           isError: isError,
+          semanticLabel: checkboxSemanticLabel,
         );
       case _CheckboxType.adaptive:
         control = Checkbox.adaptive(
@@ -506,6 +512,7 @@ class CheckboxListTile extends StatelessWidget {
           shape: checkboxShape,
           side: side,
           isError: isError,
+          semanticLabel: checkboxSemanticLabel,
         );
     }
 

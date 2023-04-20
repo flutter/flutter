@@ -2,11 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+
+import 'basic.dart';
 import 'framework.dart';
 import 'navigator.dart';
 import 'restoration.dart';
 import 'restoration_properties.dart';
 import 'will_pop_scope.dart';
+
+// Duration for delay before announcement in IOS so that the announcement won't be interrupted.
+const Duration _kIOSAnnouncementDelayDuration = Duration(seconds: 1);
 
 // Examples can assume:
 // late BuildContext context;
@@ -235,8 +244,22 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
+    String errorMessage = '';
     for (final FormFieldState<dynamic> field in _fields) {
       hasError = !field.validate() || hasError;
+      errorMessage += field.errorText ?? '';
+    }
+
+    if(errorMessage.isNotEmpty) {
+      final TextDirection directionality = Directionality.of(context);
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        unawaited(Future<void>(() async {
+          await Future<void>.delayed(_kIOSAnnouncementDelayDuration);
+          SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+        }));
+      } else {
+        SemanticsService.announce(errorMessage, directionality, assertiveness: Assertiveness.assertive);
+      }
     }
     return !hasError;
   }

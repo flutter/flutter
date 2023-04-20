@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 import 'package:test_api/test_api.dart' as test_package;
 
 import 'binding.dart';
-import 'deprecated.dart';
 
 /// Ensure the appropriate test binding is initialized.
 TestWidgetsFlutterBinding ensureInitialized([@visibleForTesting Map<String, String>? environment]) {
@@ -40,9 +39,9 @@ void mockFlutterAssets() {
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
-  SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.navigation, (MethodCall methodCall) async { return null; });
 
-  ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData? message) {
     assert(message != null);
     String key = utf8.decode(message!.buffer.asUint8List());
     File asset = File(path.join(assetFolderPath, key));
@@ -206,9 +205,18 @@ class _MockHttpClient implements HttpClient {
 }
 
 /// A mocked [HttpClientRequest] which always returns a [_MockHttpClientResponse].
-class _MockHttpRequest extends HttpClientRequest {
+class _MockHttpRequest implements HttpClientRequest {
+  @override
+  bool bufferOutput = true;
+
+  @override
+  int contentLength = -1;
+
   @override
   late Encoding encoding;
+
+  @override
+  bool followRedirects = true;
 
   @override
   final HttpHeaders headers = _MockHttpHeaders();
@@ -247,7 +255,13 @@ class _MockHttpRequest extends HttpClientRequest {
   }
 
   @override
+  int maxRedirects = 5;
+
+  @override
   String get method => '';
+
+  @override
+  bool persistentConnection = true;
 
   @override
   Uri get uri => Uri();
@@ -514,7 +528,7 @@ class _MockHttpResponse implements HttpClientResponse {
 }
 
 /// A mocked [HttpHeaders] that ignores all writes.
-class _MockHttpHeaders extends HttpHeaders {
+class _MockHttpHeaders implements HttpHeaders {
   @override
   List<String>? operator [](String name) => <String>[];
 
@@ -522,13 +536,40 @@ class _MockHttpHeaders extends HttpHeaders {
   void add(String name, Object value, {bool preserveHeaderCase = false}) { }
 
   @override
+  late bool chunkedTransferEncoding;
+
+  @override
   void clear() { }
+
+  @override
+  int contentLength = -1;
+
+  @override
+  ContentType? contentType;
+
+  @override
+  DateTime? date;
+
+  @override
+  DateTime? expires;
 
   @override
   void forEach(void Function(String name, List<String> values) f) { }
 
   @override
+  String? host;
+
+  @override
+  DateTime? ifModifiedSince;
+
+  @override
   void noFolding(String name) { }
+
+  @override
+  late bool persistentConnection;
+
+  @override
+  int? port;
 
   @override
   void remove(String name, Object value) { }
