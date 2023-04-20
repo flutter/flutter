@@ -7327,7 +7327,7 @@ class MaterialLocalizationEn extends GlobalMaterialLocalizations {
   String get expansionTileCollapsedTapHint => 'Expand for more details';
 
   @override
-  String get expansionTileExpandedHint => "double tap to collapse'";
+  String get expansionTileExpandedHint => 'double tap to collapse';
 
   @override
   String get expansionTileExpandedTapHint => 'Collapse';
