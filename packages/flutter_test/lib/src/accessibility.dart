@@ -121,6 +121,13 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
   /// A link describing the tap target guidelines for a platform.
   final String link;
 
+  /// The gap between targets to their parent scrollables to be consider as valid
+  /// tap targets.
+  ///
+  /// This avoid cases where a tap target is partially scrolled off-screen that
+  /// result in a smaller tap area.
+  static const double _kMinimumGapToBoundary = 0.001;
+
   @override
   FutureOr<Evaluation> evaluate(WidgetTester tester) {
     Evaluation result = const Evaluation.pass();
@@ -149,27 +156,30 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
     }
     Rect paintBounds = node.rect;
     SemanticsNode? current = node;
+
     while (current != null) {
       final Matrix4? transform = current.transform;
       if (transform != null) {
         paintBounds = MatrixUtils.transformRect(transform, paintBounds);
       }
+      // skip node if it is touching the edge scrollable, since it might
+      // be partially scrolled offscreen.
+      if (current.hasFlag(SemanticsFlag.hasImplicitScrolling) &&
+          _isAtBoundary(paintBounds, current.rect)) {
+        return result;
+      }
       current = current.parent;
     }
-    // skip node if it is touching the edge of the screen, since it might
-    // be partially scrolled offscreen.
-    const double delta = 0.001;
-    final Size physicalSize = view.physicalSize;
-    if (paintBounds.left <= delta ||
-        paintBounds.top <= delta ||
-        (paintBounds.bottom - physicalSize.height).abs() <= delta ||
-        (paintBounds.right - physicalSize.width).abs() <= delta) {
+
+    final Rect viewRect = Offset.zero & view.physicalSize;
+    if (_isAtBoundary(paintBounds, viewRect)) {
       return result;
     }
+
     // shrink by device pixel ratio.
     final Size candidateSize = paintBounds.size / view.devicePixelRatio;
-    if (candidateSize.width < size.width - delta ||
-        candidateSize.height < size.height - delta) {
+    if (candidateSize.width < size.width - precisionErrorTolerance ||
+        candidateSize.height < size.height - precisionErrorTolerance) {
       result += Evaluation.fail(
         '$node: expected tap target size of at least $size, '
         'but found $candidateSize\n'
@@ -177,6 +187,16 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
       );
     }
     return result;
+  }
+
+  static bool _isAtBoundary(Rect child, Rect parent) {
+    if (child.left - parent.left > _kMinimumGapToBoundary &&
+        parent.right - child.right > _kMinimumGapToBoundary &&
+        child.top - parent.top > _kMinimumGapToBoundary &&
+        parent.bottom - child.bottom > _kMinimumGapToBoundary) {
+      return false;
+    }
+    return true;
   }
 
   /// Returns whether [SemanticsNode] should be skipped for minimum tap target

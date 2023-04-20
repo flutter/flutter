@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -815,6 +816,36 @@ void main() {
 
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
+    });
+
+    testWidgets('Tap size test can handle partially off-screen items', (WidgetTester tester) async {
+      final ScrollController controller = ScrollController();
+      await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(title: const Text('Foo')),
+              body: ListView(
+                  controller: controller,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: Semantics(container: true, onTap: () {}, child: const Text('hello'))),
+                    ),
+                    Container(
+                      height: 1000,
+                      color: Colors.red,
+                    ),
+                  ]
+              ),
+            ),
+          )
+      );
+      controller.jumpTo(90);
+      await tester.pump();
+      await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
     });
   });
 
