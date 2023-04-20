@@ -1000,10 +1000,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
       return false;
     }
 
-    if (cause == SelectionChangedCause.drag && defaultTargetPlatform == TargetPlatform.android && _selectionGestureDetectorBuilder.lastConsecutiveTapCount > 1) {
-      return false;
-    }
-
     if (cause == SelectionChangedCause.keyboard) {
       return false;
     }

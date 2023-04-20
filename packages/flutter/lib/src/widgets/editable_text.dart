@@ -3937,12 +3937,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// Returns `false` if a toolbar couldn't be shown, such as when the toolbar
   /// is already shown, or when no text selection currently exists.
-  ///
-  /// By default `showHandles`, is `false`, and the toolbar is shown without the handles
-  /// handles. If `showHandles` is set to `true`, then the toolbar and the handles
-  /// will be shown.
   @override
-  bool showToolbar([bool showHandles = false]) {
+  bool showToolbar() {
     // Web is using native dom elements to enable clipboard functionality of the
     // context menu: copy, paste, select, cut. It might also provide additional
     // functionality depending on the browser (such as translate). Due to this,
@@ -3957,10 +3953,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     clipboardStatus.update();
     _selectionOverlay!.showToolbar();
-    if (showHandles) {
-      _selectionOverlay!.handlesVisible = true;
-      _selectionOverlay!.showHandles();
-    }
     return true;
   }
 
