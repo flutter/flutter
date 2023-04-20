@@ -550,12 +550,11 @@ void main() {
       plistWithoutVersion['CFBundleShortVersionString'] = '';
       plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
 
-      final String javaBinaryPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home', 'bin', 'java');
-      fileSystem.file(javaBinaryPath).createSync(recursive: true);
+      final String jdkPath = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home');
 
       processManager.addCommand(FakeCommand(
         command: <String>[
-          javaBinaryPath,
+          fileSystem.path.join(jdkPath, 'bin', 'java'),
           '-version',
         ],
         stderr: '123',
@@ -566,12 +565,45 @@ void main() {
       )!;
 
       expect(studio.version, null);
-      expect(studio.javaPath, equals(fileSystem.path.join(
-        studioInApplicationPlistFolder,
-        'jbr',
+      expect(studio.javaPath, jdkPath);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      ProcessManager: () => processManager,
+      Platform: () => platform,
+      PlistParser: () => plistUtils,
+    });
+
+    testUsingContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+      final String studioInApplicationPlistFolder = fileSystem.path.join(
+        '/',
+        'Application',
+        'Android Studio.app',
         'Contents',
-        'Home',
-      )));
+      );
+      fileSystem.directory(studioInApplicationPlistFolder).createSync(recursive: true);
+
+      final String plistFilePath = fileSystem.path.join(studioInApplicationPlistFolder, 'Info.plist');
+      final Map<String, Object> plistWithoutVersion = Map<String, Object>.from(macStudioInfoPlist2022_1);
+      plistWithoutVersion['CFBundleShortVersionString'] = '99999.99.99';
+      plistUtils.fileContents[plistFilePath] = plistWithoutVersion;
+
+      final String jdkPathFor2022 = fileSystem.path.join(studioInApplicationPlistFolder, 'jbr', 'Contents', 'Home');
+
+      processManager.addCommand(FakeCommand(
+        command: <String>[
+          fileSystem.path.join(jdkPathFor2022, 'bin', 'java'),
+          '-version',
+        ],
+        stderr: '123',
+      )
+      );
+      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
+        fileSystem.directory(studioInApplicationPlistFolder).parent.path,
+      )!;
+
+      expect(studio.version, greaterThanOrEqualTo(Version(99999, null, null)));
+      expect(studio.javaPath, jdkPathFor2022);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
@@ -748,6 +780,27 @@ void main() {
       FileSystem: () => fileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
+
+    testUsingContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+      fileSystem.file(r'C:\Users\Dash\AppData\Local\Google\AndroidStudio99999.99.99\.home')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(r'C:\Program Files\AndroidStudio');
+      fileSystem.directory(r'C:\Program Files\AndroidStudio')
+          .createSync(recursive: true);
+
+      fileSystem.file(r'C:\Program Files\AndroidStudio\jbr\bin\java').createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      const String expectedJdkLocationFor2022 = r'C:\Program Files\AndroidStudio\jbr';
+      expect(studio.version, greaterThanOrEqualTo(Version(99999, null, null)));
+      expect(studio.javaPath, equals(expectedJdkLocationFor2022));
+    }, overrides: <Type, Generator>{
+      Platform: () => platform,
+      FileSystem: () => fileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
   });
 
   group('installation detection on Linux', () {
@@ -908,6 +961,31 @@ void main() {
       expect(studio.javaPath, equals('$configuredStudioInstallPath/jbr'));
     }, overrides: <Type, Generator>{
       Config: () => config,
+      FileSystem: () => fileSystem,
+      FileSystemUtils: () => fsUtils,
+      Platform: () => platform,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('when given an Android Studio newer than any known version, finds Java version by assuming latest known Android Studio version', () {
+      const String studioHomeFilePath =
+          '$homeLinux/.cache/Google/AndroidStudio99999.99.99/.home';
+      const String studioInstallPath = '$homeLinux/AndroidStudio';
+
+      fileSystem.file(studioHomeFilePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(studioInstallPath);
+
+      fileSystem.directory(studioInstallPath).createSync();
+
+      final String expectedJdkLocationFor2022 = fileSystem.path.join(studioInstallPath, 'jbr', 'bin', 'java');
+      fileSystem.file(expectedJdkLocationFor2022).createSync(recursive: true);
+
+      final AndroidStudio studio = AndroidStudio.allInstalled().single;
+
+      expect(studio.version, greaterThanOrEqualTo(Version(99999, null, null)));
+      expect(studio.javaPath, equals('$studioInstallPath/jbr'));
+    }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       Platform: () => platform,
