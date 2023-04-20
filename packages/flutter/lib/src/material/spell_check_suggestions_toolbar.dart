@@ -74,10 +74,6 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   ///    suggestions toolbar.
   final List<ContextMenuButtonItem> buttonItems;
 
-  /// Padding between the toolbar and the anchor. Eyeballed on Pixel 4 emulator
-  /// running Android API 31.
-  static const double kToolbarContentDistanceBelow = TextSelectionToolbar.kHandleSize - 3.0;
-
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
@@ -192,13 +188,15 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final double spellCheckSuggestionsToolbarHeight =
         _kDefaultToolbarHeight - (48.0 * (4 - buttonItems.length));
     // Incorporate the padding distance between the content and toolbar.
-    final Offset anchorPadded =
-        anchor + const Offset(0.0, kToolbarContentDistanceBelow);
     final MediaQueryData mediaQueryData = MediaQuery.of(context);
     final double softKeyboardViewInsetsBottom = mediaQueryData.viewInsets.bottom;
-    final double paddingAbove = mediaQueryData.padding.top + CupertinoTextSelectionToolbar.kToolbarScreenPadding;
+    final double paddingAbove = mediaQueryData.padding.top
+        + CupertinoTextSelectionToolbar.kToolbarScreenPadding;
     // Makes up for the Padding.
-    final Offset localAdjustment = Offset(CupertinoTextSelectionToolbar.kToolbarScreenPadding, paddingAbove);
+    final Offset localAdjustment = Offset(
+      CupertinoTextSelectionToolbar.kToolbarScreenPadding,
+      paddingAbove,
+    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -209,7 +207,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
       ),
       child: CustomSingleChildLayout(
         delegate: SpellCheckSuggestionsToolbarLayoutDelegate(
-          anchor: anchorPadded - localAdjustment,
+          anchor: anchor - localAdjustment,
         ),
         child: AnimatedSize(
           // This duration was eyeballed on a Pixel 2 emulator running Android

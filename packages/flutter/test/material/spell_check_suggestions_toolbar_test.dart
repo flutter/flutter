@@ -49,9 +49,6 @@ void main() {
 
   testWidgets('positions toolbar below anchor when it fits above bottom view padding', (WidgetTester tester) async {
     // We expect the toolbar to be positioned right below the anchor with padding accounted for.
-    const double expectedToolbarY = _kAnchor
-        + SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow;
-
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -64,14 +61,12 @@ void main() {
     );
 
     final double toolbarY = tester.getTopLeft(findSpellCheckSuggestionsToolbar()).dy;
-    expect(toolbarY, equals(expectedToolbarY));
+    expect(toolbarY, equals(_kAnchor));
   });
 
   testWidgets('re-positions toolbar higher below anchor when it does not fit above bottom view padding', (WidgetTester tester) async {
-    // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor with padding accounted for.
-    const double expectedToolbarY = _kAnchor
-        + SpellCheckSuggestionsToolbar.kToolbarContentDistanceBelow
-        - _kTestToolbarOverlap;
+    // We expect the toolbar to be positioned _kTestToolbarOverlap pixels above the anchor.
+    const double expectedToolbarY = _kAnchor - _kTestToolbarOverlap;
 
     await tester.pumpWidget(
       MaterialApp(
