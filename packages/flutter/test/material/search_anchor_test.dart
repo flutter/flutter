@@ -755,6 +755,7 @@ void main() {
     expect(material.elevation, 6.0);
     expect(material.color, colorScheme.surface);
     expect(material.surfaceTintColor, colorScheme.surfaceTint);
+    expect(material.clipBehavior, Clip.antiAlias);
 
     final Finder findDivider = find.byType(Divider);
     final Container dividerContainer = tester.widget<Container>(find.descendant(of: findDivider, matching: find.byType(Container)).first);

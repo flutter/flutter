@@ -777,6 +777,7 @@ class _ViewContentState extends State<_ViewContent> {
           width: _viewRect.width,
           height: _viewRect.height,
           child: Material(
+            clipBehavior: Clip.antiAlias,
             shape: effectiveShape,
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
