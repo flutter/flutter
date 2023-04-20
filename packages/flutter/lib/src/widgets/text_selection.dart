@@ -2588,7 +2588,7 @@ class TextSelectionGestureDetectorBuilder {
     _dragStartSelection = renderEditable.selection;
     _dragStartScrollOffset = _scrollPosition;
     _dragStartViewportOffset = renderEditable.offset.pixels;
-    _dragBeganOnPreviousSelection ??= _positionOnSelection(details.globalPosition, _dragStartSelection);
+    _dragBeganOnPreviousSelection = _positionOnSelection(details.globalPosition, _dragStartSelection);
 
     if (_TextSelectionGestureDetectorState._getEffectiveConsecutiveTapCount(details.consecutiveTapCount) > 1) {
       // Do not set the selection on a consecutive tap and drag.
