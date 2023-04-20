@@ -10,11 +10,8 @@
 
 namespace flutter {
 
-AccessibilityBridgeWindows::AccessibilityBridgeWindows(
-    FlutterWindowsEngine* engine,
-    FlutterWindowsView* view)
-    : engine_(engine), view_(view) {
-  FML_DCHECK(engine_);
+AccessibilityBridgeWindows::AccessibilityBridgeWindows(FlutterWindowsView* view)
+    : view_(view) {
   FML_DCHECK(view_);
 }
 
@@ -168,7 +165,7 @@ void AccessibilityBridgeWindows::DispatchAccessibilityAction(
     AccessibilityNodeId target,
     FlutterSemanticsAction action,
     fml::MallocMapping data) {
-  engine_->DispatchSemanticsAction(target, action, std::move(data));
+  view_->GetEngine()->DispatchSemanticsAction(target, action, std::move(data));
 }
 
 std::shared_ptr<FlutterPlatformNodeDelegate>
