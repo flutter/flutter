@@ -427,7 +427,7 @@ class RunCommand extends RunCommandBase {
     bool isEmulator;
     bool anyAndroidDevices = false;
     bool anyIOSDevices = false;
-    bool anyIOSNetworkDevices = false;
+    bool anyWirelessIOSDevices = false;
 
     if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
@@ -439,7 +439,7 @@ class RunCommand extends RunCommandBase {
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
       if (device is IOSDevice && device.isWirelesslyConnected) {
-        anyIOSNetworkDevices = true;
+        anyWirelessIOSDevices = true;
       }
       deviceType = getNameForTargetPlatform(platform);
       deviceOsVersion = await device.sdkNameAndVersion;
@@ -453,7 +453,7 @@ class RunCommand extends RunCommandBase {
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
         if (device is IOSDevice && device.isWirelesslyConnected) {
-          anyIOSNetworkDevices = true;
+          anyWirelessIOSDevices = true;
         }
         if (anyAndroidDevices && anyIOSDevices) {
           break;
@@ -463,7 +463,7 @@ class RunCommand extends RunCommandBase {
 
     String? iOSInterfaceType;
     if (anyIOSDevices) {
-      iOSInterfaceType = anyIOSNetworkDevices ? 'wireless' : 'usb';
+      iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
     }
 
     String? androidEmbeddingVersion;
@@ -774,7 +774,7 @@ class RunCommand extends RunCommandBase {
       ExitStatus.success,
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
-        getModeName(getBuildMode()),
+        getBuildMode().cliName,
         if (devices!.length == 1)
           getNameForTargetPlatform(await devices![0].targetPlatform)
         else
