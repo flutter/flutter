@@ -8,7 +8,20 @@ import 'package:leak_tracker/leak_tracker.dart' hide LeakTrackingTestConfig;
 
 import 'leak_tracking.dart';
 
+final String _leakTrackedClassName = '$_LeakTrackedClass';
+
 Future<void> main() async {
+  testWidgetsWithLeakTracking(
+    'Leak tracker respects allow lists',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(_StatelessLeakingWidget());
+    },
+    leakTrackingConfig: LeakTrackingTestConfig(
+      notDisposedAllowList: <String>{_leakTrackedClassName},
+      notGcedAllowList: <String>{_leakTrackedClassName},
+    ),
+  );
+
   group('Leak tracker catches that', () {
     // These tests cannot run inside other tests because test nesting is forbidden.
     // So, `expect` happens outside the tests, in `tearDown`.
@@ -45,11 +58,11 @@ Future<void> main() async {
         notDisposedLeak.trackedClass,
         contains(_LeakTrackedClass.library),
       );
-      expect(notDisposedLeak.trackedClass, contains('$_LeakTrackedClass'));
+      expect(notDisposedLeak.trackedClass, contains(_leakTrackedClassName));
 
       final LeakReport notGcedLeak = leaks.notDisposed.first;
       expect(notGcedLeak.trackedClass, contains(_LeakTrackedClass.library));
-      expect(notGcedLeak.trackedClass, contains('$_LeakTrackedClass'));
+      expect(notGcedLeak.trackedClass, contains(_leakTrackedClassName));
      });
   });
 }

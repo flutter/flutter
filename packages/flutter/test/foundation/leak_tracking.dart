@@ -7,10 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
-// The test_api package is not for general use... it's literally for our use.
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package show Timeout;
-
 /// Configuration for leak tracking in unit tests.
 class LeakTrackingTestConfig {
   /// Creates a new instance of [LeakTrackingFlutterTestConfig].
@@ -76,7 +72,7 @@ void testWidgetsWithLeakTracking(
   String description,
   WidgetTesterCallback callback, {
   bool? skip,
-  test_package.Timeout? timeout,
+  Timeout? timeout,
   bool semanticsEnabled = true,
   TestVariant<Object?> variant = const DefaultTestVariant(),
   dynamic tags,
