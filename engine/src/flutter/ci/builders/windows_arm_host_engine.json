@@ -13,8 +13,7 @@
                         "out/host_debug_arm64/zip_archives/windows-arm64-debug/windows-arm64-flutter.zip",
                         "out/host_debug_arm64/zip_archives/windows-arm64/flutter-cpp-client-wrapper.zip"
                     ],
-                    "name": "host_debug_arm64",
-                    "realm": "production"
+                    "name": "host_debug_arm64"
                 }
             ],
             "drone_dimensions": [
@@ -53,8 +52,7 @@
                     "include_paths": [
                         "out/host_profile_arm64/zip_archives/windows-arm64-profile/windows-arm64-flutter.zip"
                     ],
-                    "name": "host_profile_arm64",
-                    "realm": "production"
+                    "name": "host_profile_arm64"
                 }
             ],
             "drone_dimensions": [
@@ -90,8 +88,7 @@
                     "include_paths": [
                         "out/host_release_arm64/zip_archives/windows-arm64-release/windows-arm64-flutter.zip"
                     ],
-                    "name": "host_profile_arm64",
-                    "realm": "production"
+                    "name": "host_profile_arm64"
                 }
             ],
             "drone_dimensions": [
