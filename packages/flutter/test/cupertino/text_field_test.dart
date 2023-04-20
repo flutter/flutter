@@ -9392,8 +9392,8 @@ void main() {
   testWidgets('tapping on a misspelled word on iOS hides the handles and shows red selection', (WidgetTester tester) async {
     tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
       true;
+    // The default derived color for the iOS text selection highlight.
     const Color defaultSelectionColor = Color(0x33007aff);
-    const Color misspelledSelectionColor = Color(0x62ff9699);
     final TextEditingController controller = TextEditingController(
       text: 'test test testt',
     );
@@ -9453,7 +9453,10 @@ void main() {
       const TextSelection(baseOffset: 10, extentOffset: 15),
     );
     expect(state.selectionOverlay!.handlesAreVisible, isFalse);
-    expect(state.renderEditable.selectionColor, misspelledSelectionColor);
+    expect(
+      state.renderEditable.selectionColor,
+      CupertinoTextField.kMisspelledSelectionColor,
+    );
   },
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
     skip: kIsWeb, // [intended]

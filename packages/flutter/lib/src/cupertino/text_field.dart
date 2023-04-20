@@ -70,11 +70,6 @@ const CupertinoDynamicColor _kClearButtonColor = CupertinoDynamicColor.withBrigh
 // throughout the codebase.
 const int _iOSHorizontalCursorOffsetPixels = -2;
 
-/// The color of the selection highlight when the spell check menu is visible.
-///
-/// Eyeballed from a screenshot taken on an iPhone 11 running iOS 16.2.
-const Color _kMisspelledSelectionColor = Color(0x62ff9699);
-
 /// Visibility of text field overlays based on the state of the current text entry.
 ///
 /// Used to toggle the visibility behavior of the optional decorating widgets
@@ -794,6 +789,12 @@ class CupertinoTextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.dotted,
   );
 
+  /// The color of the selection highlight when the spell check menu is visible.
+  ///
+  /// Eyeballed from a screenshot taken on an iPhone 11 running iOS 16.2.
+  @visibleForTesting
+  static const Color kMisspelledSelectionColor = Color(0x62ff9699);
+
   /// Default builder for the spell check suggestions toolbar in the Cupertino
   /// style.
   ///
@@ -1303,7 +1304,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? CupertinoTextField.cupertinoMisspelledTextStyle,
             misspelledSelectionColor: widget.spellCheckConfiguration!.misspelledSelectionColor
-              ?? _kMisspelledSelectionColor,
+              ?? CupertinoTextField.kMisspelledSelectionColor,
             spellCheckSuggestionsToolbarBuilder:
               widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
                 ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
