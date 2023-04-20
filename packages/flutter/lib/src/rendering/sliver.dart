@@ -759,10 +759,10 @@ class SliverGeometry with Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [SliverConstrainedCrossAxis] for an example of a sliver which takes up
-  ///   a smaller cross axis extent than the provided constraint.
-  /// * [SliverCrossAxisGroup] for an example of a sliver which makes use of this
-  ///   [crossAxisExtent] to lay out their children.
+  ///   * [SliverConstrainedCrossAxis] for an example of a sliver which takes up
+  ///     a smaller cross axis extent than the provided constraint.
+  ///   * [SliverCrossAxisGroup] for an example of a sliver which makes use of this
+  ///     [crossAxisExtent] to lay out their children.
   final double? crossAxisExtent;
 
   /// Asserts that this geometry is internally consistent.
