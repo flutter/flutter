@@ -86,7 +86,6 @@ void main() {
       },
     };
 
-    late Config config;
     late FileSystem fileSystem;
     late FileSystemUtils fsUtils;
     late Platform platform;
@@ -94,7 +93,6 @@ void main() {
     late FakeProcessManager processManager;
 
     setUp(() {
-      config = Config.test();
       fileSystem = MemoryFileSystem.test();
       plistUtils = FakePlistUtils();
       platform = FakePlatform(
@@ -585,12 +583,10 @@ void main() {
   });
 
   group('installation detection on Windows', () {
-    late Config config;
     late Platform platform;
     late FileSystem fileSystem;
 
     setUp(() {
-      config = Config.test();
       platform = FakePlatform(
         operatingSystem: 'windows',
         environment: <String, String>{
