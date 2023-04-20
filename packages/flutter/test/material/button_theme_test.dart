@@ -170,4 +170,109 @@ void main() {
     expect(fooText, findsNWidgets(2));
     expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
   });
+
+  testWidgets('ButtonTheme alignedDropdown DropdownButtonFormField', (WidgetTester tester) async {
+    final Key dropdownKey = UniqueKey();
+
+    Widget buildFrame({ required bool alignedDropdown, required TextDirection textDirection }) {
+      return MaterialApp(
+        builder: (BuildContext context, Widget? child) {
+          return Directionality(
+            textDirection: textDirection,
+            child: child!,
+          );
+        },
+        home: ButtonTheme(
+          alignedDropdown: alignedDropdown,
+          child: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return Container(
+                  alignment: Alignment.center,
+                  child: DropdownButtonHideUnderline(
+                    child: SizedBox(
+                      width: 200.0,
+                      child: DropdownButtonFormField<String>(
+                        key: dropdownKey,
+                        onChanged: (String? value) { },
+                        value: 'foo',
+                        items: const <DropdownMenuItem<String>>[
+                          DropdownMenuItem<String>(
+                            value: 'foo',
+                            child: Text('foo'),
+                          ),
+                          DropdownMenuItem<String>(
+                            value: 'bar',
+                            child: Text('bar'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    final Finder button = find.byKey(dropdownKey);
+    final Finder menu = find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DropdownMenu<String>');
+
+    await tester.pumpWidget(
+      buildFrame(
+        alignedDropdown: false,
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    // 240 = 200.0 (button width) + _kUnalignedMenuMargin (20.0 left and right)
+    expect(tester.getSize(button).width, 200.0);
+    expect(tester.getSize(menu).width, 240.0);
+
+    // Dismiss the menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(menu, findsNothing);
+
+    await tester.pumpWidget(
+      buildFrame(
+        alignedDropdown: true,
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    // Aligneddropdown: true means the button and menu widths match
+    expect(tester.getSize(button).width, 200.0);
+    expect(tester.getSize(menu).width, 200.0);
+
+    // There are two 'foo' widgets: the selected menu item's label and the drop
+    // down button's label. The should both appear at the same location.
+    final Finder fooText = find.text('foo');
+    expect(fooText, findsNWidgets(2));
+    expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
+
+    // Dismiss the menu.
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+    expect(menu, findsNothing);
+
+    // Same test as above except RTL
+    await tester.pumpWidget(
+      buildFrame(
+        alignedDropdown: true,
+        textDirection: TextDirection.rtl,
+      ),
+    );
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+
+    expect(fooText, findsNWidgets(2));
+    expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
+  });
 }
