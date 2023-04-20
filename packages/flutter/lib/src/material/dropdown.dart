@@ -1411,7 +1411,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       ));
     }
 
-    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown
+    final EdgeInsetsGeometry padding = ButtonTheme.of(context).alignedDropdown && widget._inputDecoration == null
       ? _kAlignedButtonPadding
       : _kUnalignedButtonPadding;
 
