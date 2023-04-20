@@ -1457,8 +1457,7 @@ class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(
-      BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
+  void updateRenderObject(BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
     renderObject.maxExtent = maxExtent;
   }
 }
