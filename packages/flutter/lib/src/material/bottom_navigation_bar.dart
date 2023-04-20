@@ -63,7 +63,7 @@ enum BottomNavigationBarLandscapeLayout {
 /// A material widget that's displayed at the bottom of an app for selecting
 /// among a small number of views, typically between three and five.
 ///
-/// There is a newer version of this component, [NavigationBar], that's
+/// There is an updated version of this component, [NavigationBar], that's
 /// preferred for new applications and applications that are configured
 /// for Material 3 (see [ThemeData.useMaterial3]).
 ///
