@@ -602,7 +602,7 @@ void main() {
         fileSystem.directory(studioInApplicationPlistFolder).parent.path,
       )!;
 
-      expect(studio.version, greaterThanOrEqualTo(Version(99999, null, null)));
+      expect(studio.version, equals(Version(99999, 99, 99)));
       expect(studio.javaPath, jdkPathFor2022);
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -793,7 +793,7 @@ void main() {
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
       const String expectedJdkLocationFor2022 = r'C:\Program Files\AndroidStudio\jbr';
-      expect(studio.version, greaterThanOrEqualTo(Version(99999, null, null)));
+      expect(studio.version, equals(Version(99999, 99, 99)));
       expect(studio.javaPath, equals(expectedJdkLocationFor2022));
     }, overrides: <Type, Generator>{
       Platform: () => platform,
@@ -983,7 +983,7 @@ void main() {
 
       final AndroidStudio studio = AndroidStudio.allInstalled().single;
 
-      expect(studio.version, greaterThanOrEqualTo(Version(99999, null, null)));
+      expect(studio.version, equals(Version(99999, 99, 99)));
       expect(studio.javaPath, equals('$studioInstallPath/jbr'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
