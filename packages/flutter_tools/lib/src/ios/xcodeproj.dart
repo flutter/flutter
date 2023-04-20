@@ -488,12 +488,17 @@ class XcodeProjectInfo {
     // if theres no flavor, then regardless if the project
     // is renamed or the default 'Runner', it should match one of the schemes
     final String expectedScheme = sentenceCase(hostAppProjectName);
+    String? matchingScheme;
     if (schemes.contains(expectedScheme)) {
       return expectedScheme;
     }
-    return _uniqueMatch(schemes, (String candidate) {
+    matchingScheme = _uniqueMatch(schemes, (String candidate) {
       return candidate.toLowerCase() == expectedScheme.toLowerCase();
     });
+    if (matchingScheme == null && schemes.contains('Runner')) {
+      return 'Runner';
+    }
+    return matchingScheme;
   }
 
   Never reportFlavorNotFoundAndExit() {

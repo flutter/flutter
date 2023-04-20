@@ -32,7 +32,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
     for (final Directory entity in contents.whereType<Directory>()) {
       // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
       // Find the first non-hidden xcworkspace and return the directory.
-      if (fileSystem.path.extension(entity.path) == '.xcworkspace' &&
+      if (fileSystem.path.extension(entity.path) == '.xcodeproj' &&
           !fileSystem.path.basename(entity.path).startsWith('.')) {
         return fileSystem.path.basenameWithoutExtension(entity.path);
       }
