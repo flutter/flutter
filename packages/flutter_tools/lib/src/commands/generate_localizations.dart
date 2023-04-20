@@ -179,6 +179,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
     );
     argParser.addFlag(
       'nullable-getter',
+      defaultsTo: true,
       help: 'Whether or not the localizations class getter is nullable.\n'
             '\n'
             'By default, this value is set to true so that '

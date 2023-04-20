@@ -123,6 +123,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   @override
   void onDragSelectionEnd(TapDragEndDetails details) {
     _state._requestKeyboard();
+    super.onDragSelectionEnd(details);
   }
 }
 
@@ -802,7 +803,7 @@ class CupertinoTextField extends StatefulWidget {
     EditableTextState editableTextState,
   ) {
     final List<ContextMenuButtonItem>? buttonItems =
-      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
+      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(editableTextState);
 
     if (buttonItems == null || buttonItems.isEmpty){
       return const SizedBox.shrink();

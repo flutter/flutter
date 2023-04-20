@@ -47,6 +47,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -85,6 +86,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -118,6 +120,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -171,6 +174,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -210,6 +214,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     controller.jumpTo(4000);
     await tester.pumpAndSettle();
@@ -258,6 +263,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Item 0'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 2), kind: ui.PointerDeviceKind.mouse);
@@ -305,6 +311,7 @@ void main() {
         ),
       ),
     ));
+    await tester.pumpAndSettle();
 
     controller.jumpTo(2080);
     await tester.pumpAndSettle();
