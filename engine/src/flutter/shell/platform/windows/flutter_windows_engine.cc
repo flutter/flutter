@@ -342,19 +342,22 @@ bool FlutterWindowsEngine::Run(std::string_view entrypoint) {
   args.update_semantics_callback2 = [](const FlutterSemanticsUpdate2* update,
                                        void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
+    auto accessibility_bridge = host->accessibility_bridge().lock();
+    if (!accessibility_bridge) {
+      return;
+    }
 
     for (size_t i = 0; i < update->node_count; i++) {
       const FlutterSemanticsNode2* node = update->nodes[i];
-      host->accessibility_bridge_->AddFlutterSemanticsNodeUpdate(*node);
+      accessibility_bridge->AddFlutterSemanticsNodeUpdate(*node);
     }
 
     for (size_t i = 0; i < update->custom_action_count; i++) {
       const FlutterSemanticsCustomAction2* action = update->custom_actions[i];
-      host->accessibility_bridge_->AddFlutterSemanticsCustomActionUpdate(
-          *action);
+      accessibility_bridge->AddFlutterSemanticsCustomActionUpdate(*action);
     }
 
-    host->accessibility_bridge_->CommitUpdates();
+    accessibility_bridge->CommitUpdates();
   };
   args.root_isolate_create_callback = [](void* user_data) {
     auto host = static_cast<FlutterWindowsEngine*>(user_data);
@@ -667,19 +670,8 @@ void FlutterWindowsEngine::UpdateSemanticsEnabled(bool enabled) {
   if (engine_ && semantics_enabled_ != enabled) {
     semantics_enabled_ = enabled;
     embedder_api_.UpdateSemanticsEnabled(engine_, enabled);
-
-    if (!semantics_enabled_ && accessibility_bridge_) {
-      accessibility_bridge_.reset();
-    } else if (semantics_enabled_ && !accessibility_bridge_) {
-      accessibility_bridge_ = CreateAccessibilityBridge(this, view());
-    }
+    view_->UpdateSemanticsEnabled(enabled);
   }
-}
-
-std::shared_ptr<AccessibilityBridgeWindows>
-FlutterWindowsEngine::CreateAccessibilityBridge(FlutterWindowsEngine* engine,
-                                                FlutterWindowsView* view) {
-  return std::make_shared<AccessibilityBridgeWindows>(engine, view);
 }
 
 void FlutterWindowsEngine::OnPreEngineRestart() {
@@ -690,11 +682,12 @@ void FlutterWindowsEngine::OnPreEngineRestart() {
 }
 
 gfx::NativeViewAccessible FlutterWindowsEngine::GetNativeViewAccessible() {
-  if (!accessibility_bridge_) {
+  auto bridge = accessibility_bridge().lock();
+  if (!bridge) {
     return nullptr;
   }
 
-  return accessibility_bridge_->GetChildOfAXFragmentRoot();
+  return bridge->GetChildOfAXFragmentRoot();
 }
 
 std::string FlutterWindowsEngine::GetExecutableName() const {
@@ -774,6 +767,11 @@ void FlutterWindowsEngine::OnQuit(std::optional<HWND> hwnd,
                                   std::optional<LPARAM> lparam,
                                   UINT exit_code) {
   lifecycle_manager_->Quit(hwnd, wparam, lparam, exit_code);
+}
+
+std::weak_ptr<AccessibilityBridgeWindows>
+FlutterWindowsEngine::accessibility_bridge() {
+  return view_->accessibility_bridge();
 }
 
 }  // namespace flutter

@@ -644,4 +644,21 @@ ui::AXPlatformNodeWin* FlutterWindowsView::AlertNode() const {
   return binding_handler_->GetAlert();
 }
 
+std::shared_ptr<AccessibilityBridgeWindows>
+FlutterWindowsView::CreateAccessibilityBridge() {
+  return std::make_shared<AccessibilityBridgeWindows>(this);
+}
+
+void FlutterWindowsView::UpdateSemanticsEnabled(bool enabled) {
+  if (semantics_enabled_ != enabled) {
+    semantics_enabled_ = enabled;
+
+    if (!semantics_enabled_ && accessibility_bridge_) {
+      accessibility_bridge_.reset();
+    } else if (semantics_enabled_ && !accessibility_bridge_) {
+      accessibility_bridge_ = CreateAccessibilityBridge();
+    }
+  }
+}
+
 }  // namespace flutter

@@ -16,6 +16,7 @@
 #include "flutter/shell/platform/common/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/geometry.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/windows/accessibility_bridge_windows.h"
 #include "flutter/shell/platform/windows/angle_surface_manager.h"
 #include "flutter/shell/platform/windows/flutter_windows_engine.h"
 #include "flutter/shell/platform/windows/public/flutter_windows.h"
@@ -200,9 +201,20 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // |WindowBindingHandlerDelegate|
   virtual ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() override;
 
+  // Called to re/set the accessibility bridge pointer.
+  virtual void UpdateSemanticsEnabled(bool enabled);
+
+  std::weak_ptr<AccessibilityBridgeWindows> accessibility_bridge() {
+    return accessibility_bridge_;
+  }
+
  protected:
   virtual void NotifyWinEventWrapper(ui::AXPlatformNodeWin* node,
                                      ax::mojom::Event event);
+
+  // Create an AccessibilityBridgeWindows using this view.
+  virtual std::shared_ptr<AccessibilityBridgeWindows>
+  CreateAccessibilityBridge();
 
  private:
   // Struct holding the state of an individual pointer. The engine doesn't keep
@@ -373,6 +385,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
 
   // True when flutter's semantics tree is enabled.
   bool semantics_enabled_ = false;
+
+  // The accessibility bridge associated with this view.
+  std::shared_ptr<AccessibilityBridgeWindows> accessibility_bridge_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterWindowsView);
 };
