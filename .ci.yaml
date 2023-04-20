@@ -78,7 +78,7 @@ platform_properties:
         ]
       os: Mac-12
       device_type: none
-      xcode: 14c18 # xcode 14.0 beta 5
+      xcode: 14c18
   mac_arm64:
     properties:
       dependencies: >-
@@ -88,7 +88,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: arm64
-      xcode: 14c18 # xcode 14.0 beta 5
+      xcode: 14c18
   mac_benchmark:
     properties:
       dependencies: >-
@@ -100,7 +100,7 @@ platform_properties:
       os: Mac-12
       tags: >
         ["devicelab", "hostonly", "mac"]
-      xcode: 14c18 # xcode 14.0 beta 5
+      xcode: 14c18
   mac_x64:
     properties:
       dependencies: >-
@@ -110,7 +110,7 @@ platform_properties:
       os: Mac-12
       device_type: none
       cpu: x86
-      xcode: 14c18 # xcode 14.0 beta 5
+      xcode: 14c18
   mac_android:
     properties:
       dependencies: >-
@@ -143,7 +143,7 @@ platform_properties:
       os: Mac-12
       cpu: x86
       device_os: iOS-16
-      xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+      xcode: 14c18
   mac_arm64_ios:
     properties:
       dependencies: >-
@@ -155,7 +155,7 @@ platform_properties:
       os: Mac-12
       cpu: arm64
       device_os: iOS-16
-      xcode: 14c18 # Xcode 14.2 to support iOS 16.2 in devicelab.
+      xcode: 14c18
   windows:
     properties:
       dependencies: >-
