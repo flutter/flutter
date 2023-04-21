@@ -1103,7 +1103,7 @@ void DlDispatcher::drawShadow(const SkPath& path,
 
     Scalar color_scale = color_alpha * (1 - greyscale_alpha);
     Scalar tonal_alpha = color_scale + greyscale_alpha;
-    Scalar unpremul_scale = color_scale / tonal_alpha;
+    Scalar unpremul_scale = tonal_alpha != 0 ? color_scale / tonal_alpha : 0;
     spot_color = Color(unpremul_scale * spot_color.red,
                        unpremul_scale * spot_color.green,
                        unpremul_scale * spot_color.blue, tonal_alpha);

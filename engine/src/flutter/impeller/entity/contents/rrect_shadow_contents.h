@@ -30,6 +30,8 @@ class RRectShadowContents final : public Contents {
 
   void SetColor(Color color);
 
+  Color GetColor() const;
+
   // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
