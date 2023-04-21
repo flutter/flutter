@@ -14,10 +14,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path; // flutter_ignore: package_path_import
-import 'package:test_api/test_api.dart' as test_package show test; // ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide test; // ignore: deprecated_member_use
+import 'package:test/test.dart' as test_package show test;
+import 'package:test/test.dart' hide test;
 
-export 'package:test_api/test_api.dart' hide isInstanceOf, test; // ignore: deprecated_member_use
+export 'package:test/test.dart' hide isInstanceOf, test;
 
 void tryToDelete(FileSystemEntity fileEntity) {
   // This should not be necessary, but it turns out that

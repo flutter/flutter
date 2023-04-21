@@ -648,6 +648,11 @@ class _DropdownMenuBody extends MultiChildRenderObjectWidget {
       width: width,
     );
   }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderDropdownMenuBody renderObject) {
+    renderObject.width = width;
+  }
 }
 
 class _DropdownMenuBodyParentData extends ContainerBoxParentData<RenderBox> { }
@@ -657,10 +662,18 @@ class _RenderDropdownMenuBody extends RenderBox
         RenderBoxContainerDefaultsMixin<RenderBox, _DropdownMenuBodyParentData> {
 
   _RenderDropdownMenuBody({
-    this.width,
-  });
+    double? width,
+  }) : _width = width;
 
-  final double? width;
+  double? get width => _width;
+  double? _width;
+  set width(double? value) {
+    if (_width == value) {
+      return;
+    }
+    _width = value;
+    markNeedsLayout();
+  }
 
   @override
   void setupParentData(RenderBox child) {

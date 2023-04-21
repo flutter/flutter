@@ -2245,8 +2245,15 @@ void main() {
       await gesture.moveTo(hPos);
       await tester.pumpAndSettle();
 
+      // Toolbar should be hidden during a drag.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.baseOffset, testValue.indexOf('d'));
       expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
+
+      // Toolbar should re-appear after a drag.
+      await gesture.up();
+      await tester.pump();
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
   );
 
