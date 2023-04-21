@@ -308,6 +308,15 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createSlidersPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'sliders_perf',
+    testDriver: 'test_driver/sliders_perf_test.dart',
+  ).run;
+}
+
 TaskFunction createStackSizeTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
