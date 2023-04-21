@@ -15978,7 +15978,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return const SizedBox();
@@ -16007,10 +16007,8 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   int pasteCount = 0;
   int copyCount = 0;
 
-  // TODO(chunhtai): remove optional parameter once migration is done.
-  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+  void handleCopy(TextSelectionDelegate delegate) {
     copyCount += 1;
   }
 
@@ -16019,10 +16017,8 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     pasteCount += 1;
   }
 
-  // TODO(chunhtai): remove optional parameter once migration is done.
-  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+  void handleCut(TextSelectionDelegate delegate) {
     cutCount += 1;
   }
 
@@ -16062,7 +16058,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final Offset selectionMidpoint = position;
@@ -16120,7 +16116,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   @override
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     onCut?.call();
-    return super.handleCut(delegate, clipboardStatus);
+    return super.handleCut(delegate);
   }
 }
 

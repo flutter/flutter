@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'debug.dart';
@@ -52,7 +53,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _TextSelectionControlsToolbar(
@@ -163,7 +164,7 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   });
 
-  final ClipboardStatusNotifier? clipboardStatus;
+  final ValueListenable<ClipboardStatus>? clipboardStatus;
   final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;

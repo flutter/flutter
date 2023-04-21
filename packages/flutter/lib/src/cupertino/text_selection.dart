@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show clampDouble;
+import 'package:flutter/foundation.dart' show ValueListenable, clampDouble;
 import 'package:flutter/widgets.dart';
 
 import 'localizations.dart';
@@ -92,7 +92,7 @@ class CupertinoTextSelectionControls extends TextSelectionControls {
     Offset selectionMidpoint,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ValueNotifier<ClipboardStatus>? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return _CupertinoTextSelectionControlsToolbar(
@@ -209,7 +209,7 @@ class _CupertinoTextSelectionControlsToolbar extends StatefulWidget {
     required this.textLineHeight,
   });
 
-  final ValueNotifier<ClipboardStatus>? clipboardStatus;
+  final ValueListenable<ClipboardStatus>? clipboardStatus;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleCopy;
