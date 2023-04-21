@@ -23,6 +23,9 @@ static const std::vector<std::string> kSkipTests = {
     "impeller_Play_AiksTest_CoverageOriginShouldBeAccountedForInSubpasses_"
     "Metal",
     "impeller_Play_AiksTest_SceneColorSource_Metal",
+    // TextRotated is flakey and we can't seem to get it to stabilize on Skia
+    // Gold.
+    "impeller_Play_AiksTest_TextRotated_Metal",
 };
 
 namespace {
