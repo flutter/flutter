@@ -133,8 +133,8 @@ extension ProcessResultExtension on ProcessResult {
   /// See also:
   /// * [FileExtension.readStringLikeShell], for reading a file with the semantics of `$(cat …)`.
   /// * the Bash manual on command substitution: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
-  dynamic get shellOutput {
-    final dynamic stdout = this.stdout;
+  Object get shellOutput {
+    final Object? stdout = this.stdout;
     switch (stdout) {
       case String(): return _asShellOutput(stdout);
       case List<int>(): return _bytesAsShellOutput(stdout);
