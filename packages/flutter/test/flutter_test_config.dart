@@ -25,7 +25,6 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) {
 
   // Disable warning.
   LeakTrackingTestConfig.warnForNonSupportedPlatforms = false;
-  print('!!! testExecutable');
 
   // Enable golden file testing using Skia Gold.
   return flutter_goldens.testExecutable(testMain);

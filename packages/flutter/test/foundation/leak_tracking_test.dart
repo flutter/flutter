@@ -11,9 +11,6 @@ import 'leak_tracking.dart';
 final String _leakTrackedClassName = '$_LeakTrackedClass';
 
 Future<void> main() async {
-
-  print('!!! main: ${LeakTrackingTestConfig.warnForNonSupportedPlatforms}');
-
   testWidgetsWithLeakTracking(
     'Leak tracker respects allow lists',
     (WidgetTester tester) async {
