@@ -105,7 +105,7 @@ List<int> _bytesAsShellOutput(List<int> raw) {
 /// any run of newlines at the end of the string is removed.
 ///
 /// See also:
-/// * [ProcessResultExtension.shellOutput], for the semantics of `$(…)`
+/// * [processResultShellOutput], for the semantics of `$(…)`
 ///   on an arbitrary command.
 /// * the Bash manual on command substitution `$(…)`: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
 String? readStringLikeShell(File file, {Encoding encoding = utf8}) {
@@ -116,27 +116,26 @@ String? readStringLikeShell(File file, {Encoding encoding = utf8}) {
   }
 }
 
-extension ProcessResultExtension on ProcessResult {
-  /// The command's output, as shell command substitution `$(…)` would take it.
-  ///
-  /// Among commands following Unix CLI conventions, this is commonly the
-  /// intended semantics for consuming the output.
-  ///
-  /// This is defined as the result of removing from [stdout] any run of
-  /// newlines at the end of the string.  For example, if [stdout] is any of
-  /// 'a\nb', 'a\nb\n', or 'a\nb\n\n\n', then [shellOutput] will be 'a\nb'.
-  ///
-  /// This value has the same type as [stdout]: either `List<int>` or `String`.
-  ///
-  /// See also:
-  /// * [readStringLikeShell], for reading a file with the semantics of `$(cat …)`.
-  /// * the Bash manual on command substitution: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
-  Object get shellOutput {
-    final Object? stdout = this.stdout;
-    switch (stdout) {
-      case String(): return _asShellOutput(stdout);
-      case List<int>(): return _bytesAsShellOutput(stdout);
-      default: throw Error(); // forbidden by contract of [output]
-    }
+/// The command's output, as shell command substitution `$(…)` would take it.
+///
+/// Among commands following Unix CLI conventions, this is commonly the
+/// intended semantics for consuming the output.
+///
+/// This is defined as the result of removing from [ProcessResult.stdout] any run of
+/// newlines at the end of the string.  For example, if [ProcessResult.stdout] is any of
+/// 'a\nb', 'a\nb\n', or 'a\nb\n\n\n', then the return value of [processResultShellOutput]
+/// will be 'a\nb'.
+///
+/// This value has the same type as [ProcessResult.stdout]: either `List<int>` or `String`.
+///
+/// See also:
+/// * [readStringLikeShell], for reading a file with the semantics of `$(cat …)`.
+/// * the Bash manual on command substitution: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
+Object processResultShellOutput(ProcessResult result) {
+  final Object? stdout = result.stdout;
+  switch (stdout) {
+    case String(): return _asShellOutput(stdout);
+    case List<int>(): return _bytesAsShellOutput(stdout);
+    default: throw Error(); // forbidden by contract of [output]
   }
 }
