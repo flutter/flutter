@@ -162,6 +162,9 @@ class AndroidStudio {
   bool _isValid = false;
   final List<String> _validationMessages = <String>[];
 
+  /// The path of the JDK bundled with Android Studio.
+  ///
+  /// This will be null if the bundled JDK could not be found or run.
   String? get javaPath => _javaPath;
 
   bool get isValid => _isValid;
@@ -487,16 +490,17 @@ the configured path by running this command: flutter config --android-studio-dir
     if (globals.platform.isMacOS) {
       if (version != null && version!.major < 2020) {
         javaPath = globals.fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home');
-      } else if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
-      } else {
+      } else if (version != null && version!.major < 2022) {
         javaPath = globals.fs.path.join(directory, 'jre', 'Contents', 'Home');
+      // See https://github.com/flutter/flutter/issues/125246 for more context.
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jbr', 'Contents', 'Home');
       }
     } else {
-      if (version != null && version!.major == 2022) {
-        javaPath = globals.fs.path.join(directory, 'jbr');
-      } else {
+      if (version != null && version!.major < 2022) {
         javaPath = globals.fs.path.join(directory, 'jre');
+      } else {
+        javaPath = globals.fs.path.join(directory, 'jbr');
       }
     }
     final String javaExecutable = globals.fs.path.join(javaPath, 'bin', 'java');
