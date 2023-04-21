@@ -10,15 +10,6 @@
 
 namespace flutter {
 
-static impeller::PixelFormat InferOffscreenLayerPixelFormat(impeller::PixelFormat pixel_format) {
-  switch (pixel_format) {
-    case impeller::PixelFormat::kB10G10R10XR:
-      return impeller::PixelFormat::kB10G10R10A10XR;
-    default:
-      return pixel_format;
-  }
-}
-
 IOSSurfaceMetalImpeller::IOSSurfaceMetalImpeller(const fml::scoped_nsobject<CAMetalLayer>& layer,
                                                  const std::shared_ptr<IOSContext>& context)
     : IOSSurface(context),
@@ -47,7 +38,7 @@ void IOSSurfaceMetalImpeller::UpdateStorageSizeIfNecessary() {
 // |IOSSurface|
 std::unique_ptr<Surface> IOSSurfaceMetalImpeller::CreateGPUSurface(GrDirectContext*) {
   impeller_context_->UpdateOffscreenLayerPixelFormat(
-      InferOffscreenLayerPixelFormat(impeller::FromMTLPixelFormat(layer_.get().pixelFormat)));
+      impeller::FromMTLPixelFormat(layer_.get().pixelFormat));
   return std::make_unique<GPUSurfaceMetalImpeller>(this,              //
                                                    impeller_context_  //
   );

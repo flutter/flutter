@@ -96,11 +96,7 @@ static BOOL IsWideGamutSupported() {
       CGColorSpaceRef srgb = CGColorSpaceCreateWithName(kCGColorSpaceExtendedSRGB);
       layer.colorspace = srgb;
       CFRelease(srgb);
-      if (self.opaque) {
-        layer.pixelFormat = MTLPixelFormatBGR10_XR;
-      } else {
-        layer.pixelFormat = MTLPixelFormatBGRA10_XR;
-      }
+      layer.pixelFormat = MTLPixelFormatBGRA10_XR;
     }
   }
 
