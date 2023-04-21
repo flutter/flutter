@@ -70,7 +70,7 @@ Ci\_yaml file is the glue sticking all the components together. A new build will
     properties:
       config_name: mac_android_aot_engine
       $flutter/osx_sdk : >-
-        { "sdk_version": "14a5294e" }
+        { "sdk_version": "14c18" }
 
 ```
 
