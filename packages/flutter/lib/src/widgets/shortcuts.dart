@@ -1057,6 +1057,13 @@ class _ShortcutsState extends State<Shortcuts> {
 /// deletion intent may be to delete a character in a text input, or to delete
 /// a file in a file menu.
 ///
+/// {@tool dartpad}
+/// This example uses the [CallbackShortcuts] widget to add and subtract
+/// from a counter when the up or down arrow keys are pressed.
+///
+/// ** See code in examples/api/lib/widgets/shortcuts/callback_shortcuts.0.dart **
+/// {@end-tool}
+///
 /// [Shortcuts] and [CallbackShortcuts] can both be used in the same app. As
 /// with any key handling widget, if this widget handles a key event then
 /// widgets above it in the focus chain will not receive the event. This means

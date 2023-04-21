@@ -93,6 +93,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
     await _expectColors(
       tester,
       find.byType(Align),

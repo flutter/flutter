@@ -209,6 +209,12 @@ void main() {
         androidDirectory.childFile('gradlew').path,
       );
     });
+    testWithoutContext('getGradleFileName for notWindows', () {
+      expect(getGradlewFileName(notWindowsPlatform), 'gradlew');
+    });
+    testWithoutContext('getGradleFileName for windows', () {
+      expect(getGradlewFileName(windowsPlatform), 'gradlew.bat');
+    });
 
     testWithoutContext('returns the gradle properties file', () async {
       final Directory androidDirectory = fileSystem.directory('/android')
@@ -240,6 +246,33 @@ distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVersion-all.zip
+''');
+
+      expect(
+        await getGradleVersion(
+            androidDirectory, BufferLogger.test(), FakeProcessManager.empty()),
+        expectedVersion,
+      );
+    });
+
+        testWithoutContext('ignores gradle comments', () async {
+      const String expectedVersion = '7.4.2';
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      final Directory wrapperDirectory = androidDirectory
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+        ..createSync(recursive: true);
+      wrapperDirectory
+          .childFile('gradle-wrapper.properties')
+          .writeAsStringSync('''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+# distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0.2-all.zip
+distributionUrl=https\\://services.gradle.org/distributions/gradle-$expectedVersion-all.zip
+# distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0.2-all.zip
 ''');
 
       expect(
@@ -625,3 +658,17 @@ class JavaGradleTestData {
   final String? javaVersion;
   final bool validPair;
 }
+
+final Platform windowsPlatform = FakePlatform(
+  operatingSystem: 'windows',
+  environment: <String, String>{
+    'PROGRAMFILES(X86)':  r'C:\Program Files (x86)\',
+    'FLUTTER_ROOT': r'C:\flutter',
+    'USERPROFILE': '/',
+  }
+);
+final Platform notWindowsPlatform = FakePlatform(
+  environment: <String, String>{
+    'FLUTTER_ROOT': r'/users/someuser/flutter',
+  }
+);

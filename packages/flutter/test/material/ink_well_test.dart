@@ -1020,6 +1020,27 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.basic);
   });
 
+  testWidgets('InkResponse containing selectable text changes mouse cursor when hovered', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/104595.
+    await tester.pumpWidget(MaterialApp(
+      home: SelectionArea(
+        child: Material(
+          child: InkResponse(
+            onTap: () {},
+            child: const Text('button'),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse, pointer: 1);
+    await gesture.addPointer(location: tester.getCenter(find.byType(Text)));
+
+    await tester.pump();
+
+    expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.click);
+  });
+
   group('feedback', () {
     late FeedbackTester feedback;
 
@@ -2136,5 +2157,31 @@ testWidgets('InkResponse radius can be updated', (WidgetTester tester) async {
     await gesture.up();
 
     expect(log, equals(<String>['secondary-tap-down', 'secondary-tap-cancel']));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/124328.
+  testWidgets('InkWell secondary tap should not draw a splash when no secondary callbacks are defined', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Center(
+          child: InkWell(
+            onTap: () {},
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getRect(find.byType(InkWell)).center,
+      buttons: kSecondaryButton,
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // No splash should be painted.
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#drawCircle, 0));
+
+    await gesture.up();
   });
 }

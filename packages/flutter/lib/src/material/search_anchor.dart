@@ -67,6 +67,11 @@ typedef ViewBuilder = Widget Function(Iterable<Widget> suggestions);
 /// If [builder] returns an Icon, or any un-tappable widgets, we don't have
 /// to explicitly call [SearchController.openView].
 ///
+/// The search view route will be popped if the window size is changed and the
+/// search view route is not in full-screen mode. However, if the search view route
+/// is in full-screen mode, changing the window size, such as rotating a mobile
+/// device from portrait mode to landscape mode, will not close the search view.
+///
 /// {@tool dartpad}
 /// This example shows how to use an IconButton to open a search view in a [SearchAnchor].
 /// It also shows how to use [SearchController] to open or close the search view route.
@@ -148,6 +153,7 @@ class SearchAnchor extends StatefulWidget {
     TextStyle? viewHeaderHintStyle,
     Color? dividerColor,
     BoxConstraints? constraints,
+    BoxConstraints? viewConstraints,
     bool? isFullScreen,
     SearchController searchController,
     required SuggestionsBuilder suggestionsBuilder
@@ -254,6 +260,11 @@ class SearchAnchor extends StatefulWidget {
 
   /// Optional size constraints for the search view.
   ///
+  /// By default, the search view has the same width as the anchor and is 2/3
+  /// the height of the screen. If the width and height of the view are within
+  /// the [viewConstraints], the view will show its default size. Otherwise,
+  /// the size of the view will be constrained by this property.
+  ///
   /// If null, the value of [SearchViewThemeData.constraints] will be used. If
   /// this is also null, then the constraints defaults to:
   /// ```dart
@@ -280,6 +291,7 @@ class SearchAnchor extends StatefulWidget {
 }
 
 class _SearchAnchorState extends State<SearchAnchor> {
+  Size? _screenSize;
   bool _anchorIsVisible = true;
   final GlobalKey _anchorKey = GlobalKey();
   bool get _viewIsOpen => !_anchorIsVisible;
@@ -293,6 +305,18 @@ class _SearchAnchorState extends State<SearchAnchor> {
       _internalSearchController = SearchController();
     }
     _searchController._attach(this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final Size updatedScreenSize = MediaQuery.of(context).size;
+    if (_screenSize != null && _screenSize != updatedScreenSize) {
+      if (_searchController.isOpen && !getShowFullScreenView()) {
+        _closeView(null);
+      }
+    }
+    _screenSize = updatedScreenSize;
   }
 
   @override
@@ -477,24 +501,43 @@ class _SearchViewRoute extends PopupRoute<_SearchViewRoute> {
     final Size screenSize = MediaQuery.of(context).size;
     final Rect anchorRect = getRect() ?? Rect.zero;
 
-    // Check if the search view goes off the screen.
     final BoxConstraints effectiveConstraints = viewConstraints ?? viewTheme.constraints ?? viewDefaults.constraints!;
-    final double verticalDistanceToEdge = screenSize.height - anchorRect.top;
-    final double endHeight = math.max(effectiveConstraints.minHeight, math.min(screenSize.height * 2 / 3, verticalDistanceToEdge));
     _rectTween.begin = anchorRect;
+
+    final double viewWidth = clampDouble(anchorRect.width, effectiveConstraints.minWidth, effectiveConstraints.maxWidth);
+    final double viewHeight = clampDouble(screenSize.height * 2 / 3, effectiveConstraints.minHeight, effectiveConstraints.maxHeight);
 
     switch (textDirection ?? TextDirection.ltr) {
       case TextDirection.ltr:
-        final double viewEdgeToScreenEdge = screenSize.width - anchorRect.left;
-        final double endWidth = math.max(effectiveConstraints.minWidth, math.min(anchorRect.width, viewEdgeToScreenEdge));
-        final Size endSize = Size(endWidth, endHeight);
-        _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (anchorRect.topLeft & endSize);
+        final double viewLeftToScreenRight = screenSize.width - anchorRect.left;
+        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
+
+        // Make sure the search view doesn't go off the screen. If the search view
+        // doesn't fit, move the top-left corner of the view to fit the window.
+        // If the window is smaller than the view, then we resize the view to fit the window.
+        Offset topLeft = anchorRect.topLeft;
+        if (viewLeftToScreenRight < viewWidth) {
+          topLeft = Offset(screenSize.width - math.min(viewWidth, screenSize.width), topLeft.dy);
+        }
+        if (viewTopToScreenBottom < viewHeight) {
+          topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
+        }
+        final Size endSize = Size(viewWidth, viewHeight);
+        _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
         return;
       case TextDirection.rtl:
-        final double viewEdgeToScreenEdge = anchorRect.right;
-        final double endWidth = math.max(effectiveConstraints.minWidth, math.min(anchorRect.width, viewEdgeToScreenEdge));
-        final Offset topLeft = Offset(math.max(anchorRect.right - endWidth, 0.0), anchorRect.top);
-        final Size endSize = Size(endWidth, endHeight);
+        final double viewRightToScreenLeft = anchorRect.right;
+        final double viewTopToScreenBottom = screenSize.height - anchorRect.top;
+
+        // Make sure the search view doesn't go off the screen.
+        Offset topLeft = Offset(math.max(anchorRect.right - viewWidth, 0.0), anchorRect.top);
+        if (viewRightToScreenLeft < viewWidth) {
+          topLeft = Offset(0.0, topLeft.dy);
+        }
+        if (viewTopToScreenBottom < viewHeight) {
+          topLeft = Offset(topLeft.dx, screenSize.height - math.min(viewHeight, screenSize.height));
+        }
+        final Size endSize = Size(viewWidth, viewHeight);
         _rectTween.end = showFullScreenView ? Offset.zero & screenSize : (topLeft & endSize);
     }
   }
@@ -626,7 +669,6 @@ class _ViewContentState extends State<_ViewContent> {
     super.initState();
     _viewRect = widget.viewRect;
     _controller = widget.searchController;
-    result = widget.suggestionsBuilder(context, _controller);
     if (!_focusNode.hasFocus) {
       _focusNode.requestFocus();
     }
@@ -645,23 +687,12 @@ class _ViewContentState extends State<_ViewContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    result = widget.suggestionsBuilder(context, _controller);
     final Size updatedScreenSize = MediaQuery.of(context).size;
-    if (_screenSize != updatedScreenSize) {
+
+    if (_screenSize != updatedScreenSize && widget.showFullScreenView) {
       _screenSize = updatedScreenSize;
-      setState(() {
-        final Rect anchorRect = widget.getRect() ?? _viewRect;
-        final BoxConstraints constraints = widget.viewConstraints ?? widget.viewTheme.constraints ?? widget.viewDefaults.constraints!;
-        final Size updatedViewSize = Size(math.max(constraints.minWidth, anchorRect.width), _viewRect.height);
-        switch (Directionality.of(context)) {
-          case TextDirection.ltr:
-            final Offset updatedPosition = anchorRect.topLeft;
-            _viewRect = updatedPosition & updatedViewSize;
-            return;
-          case TextDirection.rtl:
-            final Offset topLeft = Offset(math.max(anchorRect.right - updatedViewSize.width, 0.0), anchorRect.top);
-            _viewRect = topLeft & updatedViewSize;
-        }
-      });
+      _viewRect = Offset.zero & _screenSize!;
     }
   }
 
@@ -746,6 +777,7 @@ class _ViewContentState extends State<_ViewContent> {
           width: _viewRect.width,
           height: _viewRect.height,
           child: Material(
+            clipBehavior: Clip.antiAlias,
             shape: effectiveShape,
             color: effectiveBackgroundColor,
             surfaceTintColor: effectiveSurfaceTint,
@@ -834,6 +866,7 @@ class _SearchAnchorWithSearchBar extends SearchAnchor {
     TextStyle? viewHeaderHintStyle,
     super.dividerColor,
     BoxConstraints? constraints,
+    super.viewConstraints,
     super.isFullScreen,
     super.searchController,
     required super.suggestionsBuilder
@@ -920,9 +953,13 @@ class SearchController extends TextEditingController {
 
 /// A Material Design search bar.
 ///
-/// Search bars include a [leading] Search icon, a text input field and optional
-/// [trailing] icons. A search bar is typically used to open a search view.
-/// It is the default trigger for a search view.
+/// A [SearchBar] looks like a [TextField]. Tapping a SearchBar typically shows a
+/// "search view" route: a route with the search bar at the top and a list of
+/// suggested completions for the search bar's text below. [SearchBar]s are
+/// usually created by a [SearchAnchor.builder]. The builder provides a
+/// [SearchController] that's used by the search bar's [SearchBar.onTap] or
+/// [SearchBar.onChanged] callbacks to show the search view and to hide it
+/// when the user selects a suggestion.
 ///
 /// For [TextDirection.ltr], the [leading] widget is on the left side of the bar.
 /// It should contain either a navigational action (such as a menu or up-arrow)
@@ -932,6 +969,21 @@ class SearchController extends TextEditingController {
 /// the search bar. Typically only one or two action icons are included.
 /// These actions can represent additional modes of searching (like voice search),
 /// a separate high-level action (such as current location) or an overflow menu.
+///
+/// {@tool dartpad}
+/// This example demonstrates how to use a [SearchBar] as the return value of the
+/// [SearchAnchor.builder] property. The [SearchBar] also includes a leading search
+/// icon and a trailing action to toggle the brightness.
+///
+/// ** See code in examples/api/lib/material/search_anchor/search_bar.0.dart **
+/// {@end-tool}
+///
+/// See also:
+///
+/// * [SearchAnchor], a widget that typically uses an [IconButton] or a [SearchBar]
+/// to manage a "search view" route.
+/// * [SearchBarTheme], a widget that overrides the default configuration of a search bar.
+/// * [SearchViewTheme], a widget that overrides the default configuration of a search view.
 class SearchBar extends StatefulWidget {
   /// Creates a Material Design search bar.
   const SearchBar({
