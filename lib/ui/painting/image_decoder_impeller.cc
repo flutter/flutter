@@ -362,6 +362,7 @@ sk_sp<DlImage> ImageDecoderImpeller::UploadTextureToShared(
       FML_DLOG(ERROR) << "Failed to submit blit pass command buffer.";
       return nullptr;
     }
+    command_buffer->WaitUntilScheduled();
   }
 
   return impeller::DlImageImpeller::Make(std::move(texture));

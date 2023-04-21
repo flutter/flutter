@@ -55,6 +55,8 @@ bool CommandBufferVK::OnSubmitCommands(CompletionCallback callback) {
   return submit;
 }
 
+void CommandBufferVK::OnWaitUntilScheduled() {}
+
 std::shared_ptr<RenderPass> CommandBufferVK::OnCreateRenderPass(
     RenderTarget target) {
   auto context = context_.lock();
