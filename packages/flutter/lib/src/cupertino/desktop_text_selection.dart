@@ -182,7 +182,6 @@ class _CupertinoDesktopTextSelectionControlsToolbarState extends State<_Cupertin
       }
 
       items.add(CupertinoDesktopTextSelectionToolbarButton.text(
-        context: context,
         onPressed: onPressed,
         text: text,
       ));
