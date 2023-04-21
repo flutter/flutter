@@ -126,6 +126,13 @@ class WebBuilder {
     } finally {
       status.stop();
     }
+    BuildEvent(
+      'web-compile',
+      type: 'web',
+      settings: 'wasm-compile: ${compilerConfig.isWasm}',
+      flutterUsage: _flutterUsage,
+    ).send();
+
     _flutterUsage.sendTiming(
       'build',
       compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',

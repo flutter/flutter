@@ -201,16 +201,16 @@ class DriveCommand extends RunCommandBase {
     );
   }
 
-  // Network devices need `publish-port` to be enabled because it requires mDNS.
-  // If the flag wasn't provided as an actual argument and it's a network device,
+  // Wireless iOS devices need `publish-port` to be enabled because it requires mDNS.
+  // If the flag wasn't provided as an actual argument and it's a wireless device,
   // change it to be enabled.
   @override
   Future<bool> get disablePortPublication async {
     final ArgResults? localArgResults = argResults;
     final Device? device = await targetedDevice;
-    final bool isNetworkDevice = device is IOSDevice && device.isWirelesslyConnected;
-    if (isNetworkDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
-      _logger.printTrace('Network device is being used. Changing `publish-port` to be enabled.');
+    final bool isWirelessIOSDevice = device is IOSDevice && device.isWirelesslyConnected;
+    if (isWirelessIOSDevice && localArgResults != null && !localArgResults.wasParsed('publish-port')) {
+      _logger.printTrace('A wireless iOS device is being used. Changing `publish-port` to be enabled.');
       return false;
     }
     return !boolArg('publish-port');
