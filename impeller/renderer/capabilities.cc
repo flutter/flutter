@@ -162,16 +162,20 @@ CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsFramebufferFetch(
   return *this;
 }
 
-CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsCompute(bool compute,
-                                                             bool subgroups) {
-  supports_compute_ = compute;
-  supports_compute_subgroups_ = subgroups;
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsCompute(bool value) {
+  supports_compute_ = value;
+  return *this;
+}
+
+CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsComputeSubgroups(
+    bool value) {
+  supports_compute_subgroups_ = value;
   return *this;
 }
 
 CapabilitiesBuilder& CapabilitiesBuilder::SetSupportsReadFromOnscreenTexture(
     bool read_from_onscreen_texture) {
-  supports_read_from_resolve_ = read_from_onscreen_texture;
+  supports_read_from_onscreen_texture_ = read_from_onscreen_texture;
   return *this;
 }
 
