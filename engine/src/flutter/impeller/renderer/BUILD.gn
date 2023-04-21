@@ -119,6 +119,7 @@ impeller_component("renderer_unittests") {
   testonly = true
 
   sources = [
+    "capabilities_unittests.cc",
     "device_buffer_unittests.cc",
     "host_buffer_unittests.cc",
     "pipeline_descriptor_unittests.cc",
