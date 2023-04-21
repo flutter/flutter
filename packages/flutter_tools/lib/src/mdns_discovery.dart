@@ -57,7 +57,7 @@ class MDnsVmServiceDiscovery {
   /// The [deviceVmservicePort] parameter may be used to specify which port
   /// to find.
   ///
-  /// The [isNetworkDevice] parameter flags whether to get the device IP
+  /// The [useDeviceIPAsHost] parameter flags whether to get the device IP
   /// and the [ipv6] parameter flags whether to get an iPv6 address
   /// (otherwise it will get iPv4).
   ///
@@ -80,7 +80,7 @@ class MDnsVmServiceDiscovery {
     String? applicationId,
     int? deviceVmservicePort,
     bool ipv6 = false,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
     // Poll for 5 seconds to see if there are already services running.
@@ -93,7 +93,7 @@ class MDnsVmServiceDiscovery {
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: ipv6,
-      isNetworkDevice: isNetworkDevice,
+      useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: const Duration(seconds: 5),
     );
     if (results.isEmpty) {
@@ -102,7 +102,7 @@ class MDnsVmServiceDiscovery {
         applicationId: applicationId,
         deviceVmservicePort: deviceVmservicePort,
         ipv6: ipv6,
-        isNetworkDevice: isNetworkDevice,
+        useDeviceIPAsHost: useDeviceIPAsHost,
         timeout: timeout,
       );
     } else if (results.length > 1) {
@@ -134,7 +134,7 @@ class MDnsVmServiceDiscovery {
   /// if multiple flutter apps are running on different devices, it will
   /// only match with the device running the desired app.
   ///
-  /// The [isNetworkDevice] parameter flags whether to get the device IP
+  /// The [useDeviceIPAsHost] parameter flags whether to get the device IP
   /// and the [ipv6] parameter flags whether to get an iPv6 address
   /// (otherwise it will get iPv4).
   ///
@@ -148,7 +148,7 @@ class MDnsVmServiceDiscovery {
     required String applicationId,
     required int deviceVmservicePort,
     bool ipv6 = false,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
     // Query for a specific application and device port.
@@ -157,7 +157,7 @@ class MDnsVmServiceDiscovery {
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: ipv6,
-      isNetworkDevice: isNetworkDevice,
+      useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
     );
   }
@@ -171,7 +171,7 @@ class MDnsVmServiceDiscovery {
     String? applicationId,
     int? deviceVmservicePort,
     bool ipv6 = false,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
     final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
@@ -179,7 +179,7 @@ class MDnsVmServiceDiscovery {
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: ipv6,
-      isNetworkDevice: isNetworkDevice,
+      useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
       quitOnFind: true,
     );
@@ -194,7 +194,7 @@ class MDnsVmServiceDiscovery {
     String? applicationId,
     int? deviceVmservicePort,
     bool ipv6 = false,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     required Duration timeout,
     bool quitOnFind = false,
   }) async {
@@ -263,9 +263,9 @@ class MDnsVmServiceDiscovery {
           continue;
         }
 
-        // Get the IP address of the service if using a network device.
+        // Get the IP address of the device if using the IP as the host.
         InternetAddress? ipAddress;
-        if (isNetworkDevice) {
+        if (useDeviceIPAsHost) {
           List<IPAddressResourceRecord> ipAddresses = await client
             .lookup<IPAddressResourceRecord>(
               ipv6
@@ -351,6 +351,9 @@ class MDnsVmServiceDiscovery {
   /// Gets Dart VM Service Uri for `flutter attach`.
   /// Executes an mDNS query and waits until a Dart VM Service is found.
   ///
+  /// When [useDeviceIPAsHost] is true, it will use the device's IP as the
+  /// host and will not forward the port.
+  ///
   /// Differs from `getVMServiceUriForLaunch` because it can search for any available Dart VM Service.
   /// Since [applicationId] and [deviceVmservicePort] are optional, it can either look for any service
   /// or a specific service matching [applicationId]/[deviceVmservicePort].
@@ -361,14 +364,14 @@ class MDnsVmServiceDiscovery {
     bool usesIpv6 = false,
     int? hostVmservicePort,
     int? deviceVmservicePort,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForAttach(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
-      isNetworkDevice: isNetworkDevice,
+      useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
     );
     return _handleResult(
@@ -378,12 +381,15 @@ class MDnsVmServiceDiscovery {
       deviceVmservicePort: deviceVmservicePort,
       hostVmservicePort: hostVmservicePort,
       usesIpv6: usesIpv6,
-      isNetworkDevice: isNetworkDevice
+      useDeviceIPAsHost: useDeviceIPAsHost
     );
   }
 
   /// Gets Dart VM Service Uri for `flutter run`.
   /// Executes an mDNS query and waits until the Dart VM Service service is found.
+  ///
+  /// When [useDeviceIPAsHost] is true, it will use the device's IP as the
+  /// host and will not forward the port.
   ///
   /// Differs from `getVMServiceUriForAttach` because it only searches for a specific service.
   /// This is enforced by [applicationId] and [deviceVmservicePort] being required.
@@ -393,14 +399,14 @@ class MDnsVmServiceDiscovery {
     bool usesIpv6 = false,
     int? hostVmservicePort,
     required int deviceVmservicePort,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
     Duration timeout = const Duration(minutes: 10),
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
       ipv6: usesIpv6,
-      isNetworkDevice: isNetworkDevice,
+      useDeviceIPAsHost: useDeviceIPAsHost,
       timeout: timeout,
     );
     return _handleResult(
@@ -410,7 +416,7 @@ class MDnsVmServiceDiscovery {
       deviceVmservicePort: deviceVmservicePort,
       hostVmservicePort: hostVmservicePort,
       usesIpv6: usesIpv6,
-      isNetworkDevice: isNetworkDevice
+      useDeviceIPAsHost: useDeviceIPAsHost
     );
   }
 
@@ -421,7 +427,7 @@ class MDnsVmServiceDiscovery {
     int? deviceVmservicePort,
     int? hostVmservicePort,
     bool usesIpv6 = false,
-    bool isNetworkDevice = false,
+    bool useDeviceIPAsHost = false,
   }) async {
     if (result == null) {
       await _checkForIPv4LinkLocal(device);
@@ -430,7 +436,7 @@ class MDnsVmServiceDiscovery {
     final String host;
 
     final InternetAddress? ipAddress = result.ipAddress;
-    if (isNetworkDevice && ipAddress != null) {
+    if (useDeviceIPAsHost && ipAddress != null) {
       host = ipAddress.address;
     } else {
       host = usesIpv6
@@ -443,7 +449,7 @@ class MDnsVmServiceDiscovery {
       result.port,
       hostVmservicePort,
       result.authCode,
-      isNetworkDevice,
+      useDeviceIPAsHost,
     );
   }
 
@@ -529,7 +535,7 @@ Future<Uri> buildVMServiceUri(
   int devicePort, [
   int? hostVmservicePort,
   String? authCode,
-  bool isNetworkDevice = false,
+  bool useDeviceIPAsHost = false,
 ]) async {
   String path = '/';
   if (authCode != null) {
@@ -543,8 +549,8 @@ Future<Uri> buildVMServiceUri(
   hostVmservicePort ??= 0;
 
   final int? actualHostPort;
-  if (isNetworkDevice) {
-    // When debugging with a network device, port forwarding is not required
+  if (useDeviceIPAsHost) {
+    // When using the device's IP as the host, port forwarding is not required
     // so just use the device's port.
     actualHostPort = devicePort;
   } else {
