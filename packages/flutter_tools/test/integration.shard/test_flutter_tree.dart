@@ -9,7 +9,8 @@ import 'package:file/file.dart';
 
 import '../src/common.dart';
 import '../src/flutter_tree.dart';
-import '../src/process.dart';
+import '../src/process.dart' hide runSyncSuccess;
+import '../src/process.dart' as proc show runSyncSuccess;
 import 'test_utils.dart';
 
 /// The Flutter source tree that this program is part of.
@@ -82,7 +83,7 @@ class FlutterTreeWithToolCache extends FlutterTree {
   /// Start a process at [root] and run it to completion, throwing an exception
   /// on failure.
   ///
-  /// This is a convenience wrapper for [ProcessManagerExtension.runSyncSuccess],
+  /// This is a convenience wrapper for [proc.runSyncSuccess],
   /// providing `workingDirectory`.
   ProcessResult runSyncSuccess(
     List<String> command, {
@@ -92,7 +93,8 @@ class FlutterTreeWithToolCache extends FlutterTree {
     Encoding? stdoutEncoding = systemEncoding,
     Encoding? stderrEncoding = systemEncoding,
   }) {
-    return processManager.runSyncSuccess(
+    return proc.runSyncSuccess(
+      processManager,
       command,
       workingDirectory: root.path,
       environment: environment,
@@ -115,7 +117,7 @@ class FlutterTreeWithToolCache extends FlutterTree {
 /// This is equivalent to the shell command
 /// `rsync -a --delete "${source}/" "${target}/"`.
 void _rsyncTreesSync(Directory source, Directory target) {
-  processManager.runSyncSuccess(<String>[
+  proc.runSyncSuccess(processManager, <String>[
     'rsync', '-a', '--delete',
     source.path + Platform.pathSeparator,
     target.path + Platform.pathSeparator,
@@ -218,7 +220,7 @@ class TestFlutterTree extends FlutterTreeWithToolCache {
   Directory? _warmTree;
 
   void _initialize() {
-    processManager.runSyncSuccess(<String>[
+    proc.runSyncSuccess(processManager, <String>[
       'git', 'clone',
       '--shared',
       '--origin', 'origin',
@@ -388,6 +390,6 @@ case "\$*" in
     log_command other
 esac
 ''');
-    processManager.runSyncSuccess(<String>['chmod', '+x', dartBinary.path]); // https://github.com/dart-lang/sdk/issues/15078
+    proc.runSyncSuccess(processManager, <String>['chmod', '+x', dartBinary.path]); // https://github.com/dart-lang/sdk/issues/15078
   }
 }

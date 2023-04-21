@@ -45,43 +45,42 @@ String shellEscapeCommand(List<String> command) {
   return command.map(shellEscapeString).join(' ');
 }
 
-extension ProcessManagerExtension on ProcessManager {
-  /// Start a process and run it to completion, throwing an exception on failure.
-  ///
-  /// Like [runSync], this blocks until the child process terminates.
-  ///
-  /// If the child process exits with failure (a nonzero [ProcessResult.exitCode]),
-  /// this method throws an exception with details of the command and its output.
-  ProcessResult runSyncSuccess(
-    List<String> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    // no runInShell; keep that always false
-    Encoding? stdoutEncoding = systemEncoding,
-    Encoding? stderrEncoding = systemEncoding,
-  }) {
-    final ProcessResult result = runSync(
-      command,
-      workingDirectory: workingDirectory,
-      environment: environment,
-      includeParentEnvironment: includeParentEnvironment,
-      stdoutEncoding: stdoutEncoding,
-      stderrEncoding: stderrEncoding,
+/// Start a process and run it to completion, throwing an exception on failure.
+///
+/// Like [ProcessManager.runSync], this blocks until the child process terminates.
+///
+/// If the child process exits with failure (a nonzero [ProcessResult.exitCode]),
+/// this method throws an exception with details of the command and its output.
+ProcessResult runSyncSuccess(
+  ProcessManager processManager,
+  List<String> command, {
+  String? workingDirectory,
+  Map<String, String>? environment,
+  bool includeParentEnvironment = true,
+  // no runInShell; keep that always false
+  Encoding? stdoutEncoding = systemEncoding,
+  Encoding? stderrEncoding = systemEncoding,
+}) {
+  final ProcessResult result = processManager.runSync(
+    command,
+    workingDirectory: workingDirectory,
+    environment: environment,
+    includeParentEnvironment: includeParentEnvironment,
+    stdoutEncoding: stdoutEncoding,
+    stderrEncoding: stderrEncoding,
+  );
+  if (result.exitCode != 0) {
+    throw Exception(
+      'child process exited with code ${result.exitCode}\n'
+      'command: ${shellEscapeCommand(command)}\n'
+      'stdout: ================================================================\n'
+      '${result.stdout}\n'
+      'stderr: ================================================================\n'
+      '${result.stderr}\n'
+      'end ====================================================================',
     );
-    if (result.exitCode != 0) {
-      throw Exception(
-        'child process exited with code ${result.exitCode}\n'
-        'command: ${shellEscapeCommand(command)}\n'
-        'stdout: ================================================================\n'
-        '${result.stdout}\n'
-        'stderr: ================================================================\n'
-        '${result.stderr}\n'
-        'end ====================================================================',
-      );
-    }
-    return result;
   }
+  return result;
 }
 
 final RegExp _trailingNewlineRegExp = RegExp(r'\n*$');
