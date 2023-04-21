@@ -122,19 +122,19 @@ Leaks _cleanUpLeaks(Leaks leaks, LeakTrackingTestConfig config) {
   };
 
   for (final LeakReport leak in leaks.notGCed) {
-    if (!config.notGcedAllowList.contains(leak.type)) {
+    if (!config.notGCedAllowList.contains(leak.type)) {
       cleaned[LeakType.notGCed]!.add(leak);
     }
   }
 
   for (final LeakReport leak in leaks.gcedLate) {
-    if (!config.notGcedAllowList.contains(leak.type)) {
+    if (!config.notGCedAllowList.contains(leak.type)) {
       cleaned[LeakType.gcedLate]!.add(leak);
     }
   }
 
   for (final LeakReport leak in leaks.notDisposed) {
-    if (!config.notGcedAllowList.contains(leak.type)) {
+    if (!config.notDisposedAllowList.contains(leak.type)) {
       cleaned[LeakType.notDisposed]!.add(leak);
     }
   }

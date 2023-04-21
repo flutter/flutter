@@ -1055,7 +1055,7 @@ void main() {
       expect(tooltipState.ensureTooltipVisible(), false);
     },
     leakTrackingConfig: LeakTrackingTestConfig(
-      notGcedAllowList: <String>{
+      notGCedAllowList: <String>{
         // [tooltipState] is hold after disposal by the test
         // and thus is not garbage collected.
         '$TooltipState',
