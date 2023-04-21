@@ -3409,13 +3409,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       // approach.
       //return;
 
-      // TODO(justinmc): I'm skeptical that this might be incorrect in complex
-      // situations. Maybe only updateNavigationStackStatus in notification handler.
-      if (_isRoot) {
-        SystemNavigator.updateNavigationStackStatus(canPop());
-        return;
-      }
-
       final NavigationNotification notification = NavigationNotification(
         canPop: canPop(),
       );
@@ -5386,6 +5379,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
+  // TODO(justinmc): This isn't necessary for the NavigationNotification approach,
+  // so remove it if that's the solution.
   bool get _isRoot => context.findAncestorStateOfType<NavigatorState>() == null;
 
   @override
@@ -5400,11 +5395,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
           print('justin notified! canPop? ${canPop()}/${notification.canPop}. isRoot? $_isRoot.');
-          if (_isRoot) {
-            // TODO(justinmc): Make this overridable for complex cases of mixed Navigator and GoRouter etc.?
-            SystemNavigator.updateNavigationStackStatus(notification.canPop || canPop());
-            return true;
-          }
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification.
           if (notification.canPop || !canPop()) {

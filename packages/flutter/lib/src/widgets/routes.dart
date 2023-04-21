@@ -1677,6 +1677,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void _updateSystemNavigator() {
     final bool popDisabled = popEnabled() == RoutePopDisposition.doNotPop;
 
+    // TODO(justinmc): These two calls to updateNavigationStackStatus are also
+    // not considering complex Navigator arrangements etc. I need to rethink how
+    // to consider CanPopScope with NotificationListener?
+
     // If pop is disabled here then it's disabled for the entire app, and the
     // SystemNavigator should be informed.
     if (popDisabled) {
