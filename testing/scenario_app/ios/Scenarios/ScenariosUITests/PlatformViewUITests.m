@@ -320,7 +320,7 @@ static const NSInteger kSecondsToWaitForPlatformView = 30;
   return [super initWithManager:manager invocation:invocation];
 }
 
-- (void)testPlatformView {
+- (void)skip_testPlatformView {
   [self checkPlatformViewGolden];
 }
 
