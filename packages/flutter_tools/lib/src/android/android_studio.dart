@@ -237,25 +237,15 @@ class AndroidStudio {
   /// Android Studio found at that location is always returned, even if it is
   /// invalid.
   static AndroidStudio? latestValid() {
-    final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
-    if (configuredStudioPath != null) {
-      String correctedConfiguredStudioPath = configuredStudioPath;
-      if (globals.platform.isMacOS && !correctedConfiguredStudioPath.endsWith('Contents')) {
-        correctedConfiguredStudioPath = globals.fs.path.join(correctedConfiguredStudioPath, 'Contents');
-      }
-
-      if (!globals.fs.directory(correctedConfiguredStudioPath).existsSync()) {
-        throwToolExit('''
+   final String? configuredStudioPath = globals.config.getValue('android-studio-dir') as String?;
+    if (configuredStudioPath != null && !globals.fs.directory(configuredStudioPath).existsSync()) {
+      throwToolExit('''
 Could not find the Android Studio installation at the manually configured path "$configuredStudioPath".
 Please verify that the path is correct and update it by running this command: flutter config --android-studio-dir '<path>'
 
 To have flutter search for Android Studio installations automatically, remove
 the configured path by running this command: flutter config --android-studio-dir ''
 ''');
-      }
-
-      return AndroidStudio(correctedConfiguredStudioPath,
-          configuredPath: configuredStudioPath);
     }
 
     // Find all available Studio installations.
@@ -263,6 +253,16 @@ the configured path by running this command: flutter config --android-studio-dir
     if (studios.isEmpty) {
       return null;
     }
+
+    final AndroidStudio? manuallyConfigured = studios
+      .where((AndroidStudio studio) => studio.configuredPath != null &&
+        studio.configuredPath == configuredStudioPath)
+      .firstOrNull;
+
+    if (manuallyConfigured != null) {
+      return manuallyConfigured;
+    }
+
     AndroidStudio? newest;
     for (final AndroidStudio studio in studios.where((AndroidStudio s) => s.isValid)) {
       if (newest == null) {
