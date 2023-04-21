@@ -15,7 +15,7 @@ import 'test_utils.dart';
 /// The Flutter source tree that this program is part of.
 ///
 /// The tree is the one located by [getFlutterRoot].
-final FlutterTree hostFlutterTree = FlutterTree(
+final FlutterTreeWithToolCache hostFlutterTree = FlutterTreeWithToolCache(
     fileSystem.directory(getFlutterRoot()).absolute);
 
 /// The value the entrypoint writes into `flutterToolsStampFile`.
@@ -26,9 +26,11 @@ String flutterToolsStampValue({required String revision, required String toolArg
   return '$revision:$toolArgs';
 }
 
-/// Additional members on [FlutterTree] which are helpful for [TestFlutterTree]
+/// A [FlutterTree] with additional members which are helpful for [TestFlutterTree]
 /// and its users.
-extension FlutterTreeExtension on FlutterTree {
+class FlutterTreeWithToolCache extends FlutterTree {
+  FlutterTreeWithToolCache(super.root);
+
   Directory get binCacheDir => root.childDirectory('bin').childDirectory('cache'); // bin/cache/
   File get snapshotFile => binCacheDir.childFile('flutter_tools.snapshot'); // bin/cache/flutter_tools.snapshot
   File get flutterToolsStampFile => binCacheDir.childFile('flutter_tools.stamp'); // bin/cache/flutter_tools.stamp
@@ -143,7 +145,7 @@ void _rsyncTreesSync(Directory source, Directory target) {
 /// See also:
 /// * [hostFlutterTree], the Flutter tree that the running program
 ///   is itself part of.
-class TestFlutterTree extends FlutterTree {
+class TestFlutterTree extends FlutterTreeWithToolCache {
   /// Take the shared global tree, resetting it to a pristine state.
   ///
   /// The tree will be on branch `main` at commit [baseRevision].
