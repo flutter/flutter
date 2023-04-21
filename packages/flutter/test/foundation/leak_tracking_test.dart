@@ -13,94 +13,89 @@ final String _leakTrackedClassName = '$_LeakTrackedClass';
 Future<void> main() async {
 
 
-  group('Leak tracking works for non-web',
-    () {
+  group('Leak tracking works for non-web', () {
+    testWidgetsWithLeakTracking(
+      'Leak tracker respects all allow lists',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(_StatelessLeakingWidget());
+      },
+      leakTrackingConfig: LeakTrackingTestConfig(
+        notDisposedAllowList: <String>{_leakTrackedClassName},
+        notGCedAllowList: <String>{_leakTrackedClassName},
+      ),
+    );
+
+    group('Leak tracker respects notGCed allow lists', () {
+      // These tests cannot run inside other tests because test nesting is forbidden.
+      // So, `expect` happens outside the tests, in `tearDown`.
+      late Leaks leaks;
+
       testWidgetsWithLeakTracking(
-        'Leak tracker respects all allow lists',
+        '$_StatelessLeakingWidget leaks',
         (WidgetTester tester) async {
           await tester.pumpWidget(_StatelessLeakingWidget());
         },
         leakTrackingConfig: LeakTrackingTestConfig(
-          notDisposedAllowList: <String>{_leakTrackedClassName},
+          onLeaks: (Leaks theLeaks) {
+            leaks = theLeaks;
+          },
+          failTestOnLeaks: false,
           notGCedAllowList: <String>{_leakTrackedClassName},
         ),
       );
 
-      group('Leak tracker respects notGCed allow lists', () {
-        // These tests cannot run inside other tests because test nesting is forbidden.
-        // So, `expect` happens outside the tests, in `tearDown`.
-        late Leaks leaks;
+      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
+    });
 
-        testWidgetsWithLeakTracking(
-          '$_StatelessLeakingWidget leaks',
-          (WidgetTester tester) async {
-            await tester.pumpWidget(_StatelessLeakingWidget());
+    group('Leak tracker respects notDisposed allow lists', () {
+      // These tests cannot run inside other tests because test nesting is forbidden.
+      // So, `expect` happens outside the tests, in `tearDown`.
+      late Leaks leaks;
+
+      testWidgetsWithLeakTracking(
+        '$_StatelessLeakingWidget leaks',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(_StatelessLeakingWidget());
+        },
+        leakTrackingConfig: LeakTrackingTestConfig(
+          onLeaks: (Leaks theLeaks) {
+            leaks = theLeaks;
           },
-          leakTrackingConfig: LeakTrackingTestConfig(
-            onLeaks: (Leaks theLeaks) {
-              leaks = theLeaks;
-            },
-            failTestOnLeaks: false,
-            notGCedAllowList: <String>{_leakTrackedClassName},
-          ),
-        );
+          failTestOnLeaks: false,
+          notDisposedAllowList: <String>{_leakTrackedClassName},
+        ),
+      );
 
-        tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1));
-      });
+      tearDown(() => _verifyLeaks(leaks, expectedNotGCed: 1));
+    });
 
-      group('Leak tracker respects notDisposed allow lists', () {
-        // These tests cannot run inside other tests because test nesting is forbidden.
-        // So, `expect` happens outside the tests, in `tearDown`.
-        late Leaks leaks;
+    group('Leak tracker catches that', () {
+      // These tests cannot run inside other tests because test nesting is forbidden.
+      // So, `expect` happens outside the tests, in `tearDown`.
+      late Leaks leaks;
 
-        testWidgetsWithLeakTracking(
-          '$_StatelessLeakingWidget leaks',
-          (WidgetTester tester) async {
-            await tester.pumpWidget(_StatelessLeakingWidget());
+      testWidgetsWithLeakTracking(
+        '$_StatelessLeakingWidget leaks',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(_StatelessLeakingWidget());
+        },
+        leakTrackingConfig: LeakTrackingTestConfig(
+          onLeaks: (Leaks theLeaks) {
+            leaks = theLeaks;
           },
-          leakTrackingConfig: LeakTrackingTestConfig(
-            onLeaks: (Leaks theLeaks) {
-              leaks = theLeaks;
-            },
-            failTestOnLeaks: false,
-            notDisposedAllowList: <String>{_leakTrackedClassName},
-          ),
-        );
+          failTestOnLeaks: false,
+        ),
+      );
 
-        tearDown(() => _verifyLeaks(leaks, expectedNotGCed: 1));
-      });
+      tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1, expectedNotGCed: 1));
+    });
+  },
+  skip: isBrowser); // [intended] Leak detection is off for web.
 
-      group('Leak tracker catches that', () {
-        // These tests cannot run inside other tests because test nesting is forbidden.
-        // So, `expect` happens outside the tests, in `tearDown`.
-        late Leaks leaks;
-
-        testWidgetsWithLeakTracking(
-          '$_StatelessLeakingWidget leaks',
-          (WidgetTester tester) async {
-            await tester.pumpWidget(_StatelessLeakingWidget());
-          },
-          leakTrackingConfig: LeakTrackingTestConfig(
-            onLeaks: (Leaks theLeaks) {
-              leaks = theLeaks;
-            },
-            failTestOnLeaks: false,
-          ),
-        );
-
-        tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1, expectedNotGCed: 1));
-      });
-    },
-    skip: isBrowser, // Leaks are not detected for web.
-  );
-
-  testWidgetsWithLeakTracking(
-    'Leak tracking is no-op for web',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(_StatelessLeakingWidget());
-    },
-    skip: !isBrowser, // Leaks are not detected for web.
-  );
+  testWidgetsWithLeakTracking('Leak tracking is no-op for web', (WidgetTester tester) async {
+    await tester.pumpWidget(_StatelessLeakingWidget());
+  },
+  skip: !isBrowser); // [intended] Leaks detection is off for web.
 }
 
 /// Verifies [leaks] contains expected number of leaks for [_LeakTrackedClass].
