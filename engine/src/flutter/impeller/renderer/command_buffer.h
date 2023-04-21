@@ -66,6 +66,11 @@ class CommandBuffer {
   [[nodiscard]] bool SubmitCommands();
 
   //----------------------------------------------------------------------------
+  /// @brief      Force execution of pending GPU commands.
+  ///
+  void WaitUntilScheduled();
+
+  //----------------------------------------------------------------------------
   /// @brief      Create a render pass to record render commands into.
   ///
   /// @param[in]  render_target  The description of the render target this pass
@@ -101,6 +106,8 @@ class CommandBuffer {
   virtual std::shared_ptr<BlitPass> OnCreateBlitPass() const = 0;
 
   [[nodiscard]] virtual bool OnSubmitCommands(CompletionCallback callback) = 0;
+
+  virtual void OnWaitUntilScheduled() = 0;
 
   virtual std::shared_ptr<ComputePass> OnCreateComputePass() const = 0;
 

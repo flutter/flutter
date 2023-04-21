@@ -32,6 +32,10 @@ bool CommandBuffer::SubmitCommands() {
   return SubmitCommands(nullptr);
 }
 
+void CommandBuffer::WaitUntilScheduled() {
+  return OnWaitUntilScheduled();
+}
+
 std::shared_ptr<RenderPass> CommandBuffer::CreateRenderPass(
     const RenderTarget& render_target) {
   auto pass = OnCreateRenderPass(render_target);

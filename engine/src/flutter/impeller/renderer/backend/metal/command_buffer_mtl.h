@@ -34,6 +34,9 @@ class CommandBufferMTL final : public CommandBuffer {
   bool OnSubmitCommands(CompletionCallback callback) override;
 
   // |CommandBuffer|
+  void OnWaitUntilScheduled() override;
+
+  // |CommandBuffer|
   std::shared_ptr<RenderPass> OnCreateRenderPass(RenderTarget target) override;
 
   // |CommandBuffer|
