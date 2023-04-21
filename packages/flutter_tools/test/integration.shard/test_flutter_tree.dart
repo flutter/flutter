@@ -358,6 +358,9 @@ function log_command() {
   echo "\$description: \$full_command" >>${shellEscapeString(fakeDartLog.path)}
 }
 
+snapshot_path=${shellEscapeString(snapshotFile.path)}
+snapshot_arg="--snapshot=\${snapshot_path}"
+
 case "\$*" in
   "pub upgrade "*)
     # This is a `dart pub upgrade` command, as in pub_upgrade_with_retry .
@@ -366,17 +369,16 @@ case "\$*" in
     log_command "pub upgrade"
     ;;
 
-  *" --disable-dart-dev "*" --snapshot-kind=app-jit "*)
+  *" \$snapshot_arg "* | "\$snapshot_arg "*)
     # This is the command to generate the snapshot,
     # in the upgrade_flutter function in bin/internal/shared.sh .
     # Fake generating the snapshot, by copying from the host tree.
     cp ${shellEscapeString(hostFlutterTree.snapshotFile.path)} \\
-      ${shellEscapeString(snapshotFile.path)}
+      "\$snapshot_path"
     log_command generate-snapshot
     ;;
 
-  *" --disable-dart-dev "*" "${shellEscapeString(snapshotFile.path)} \\
-  | *" --disable-dart-dev "*" "${shellEscapeString(snapshotFile.path)}" "*)
+  *" \$snapshot_path "* | *" \$snapshot_path" | "\$snapshot_path "* | "\$snapshot_path")
     # This looks like the "flutter" case at the end of shared::execute.
     # Do nothing.
     log_command flutter
