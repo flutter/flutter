@@ -88,7 +88,7 @@ void main() {
         'build',
         'web',
         label: 'web-compile',
-        parameters: CustomDimensions(buildEventSettings: 'wasm-compile: true')
+        parameters: CustomDimensions(buildEventSettings: 'wasm-compile: true; web-renderer: auto;')
       ),
     ]));
 

@@ -11,6 +11,10 @@ abstract class WebCompilerConfig {
   bool get isWasm;
 
   Map<String, String> toBuildSystemEnvironment();
+
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+        'wasm-compile': isWasm,
+      };
 }
 
 /// Configuration for the Dart-to-Javascript compiler (dart2js).
@@ -165,4 +169,14 @@ class WasmCompilerConfig extends WebCompilerConfig {
   List<String> toCommandOptions() => <String>[
     if (omitTypeChecks) '--omit-type-checks',
   ];
+
+  @override
+  Map<String, Object> get buildEventAnalyticsValues => <String, Object>{
+    ...super.buildEventAnalyticsValues,
+    for (MapEntry<String, String> entry in toBuildSystemEnvironment()
+        .entries
+        .where(
+            (MapEntry<String, String> element) => element.value == 'true'))
+      entry.key: entry.value,
+  };
 }
