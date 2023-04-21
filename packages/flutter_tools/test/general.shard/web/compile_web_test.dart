@@ -82,6 +82,16 @@ void main() {
     // Runs ScrubGeneratedPluginRegistrant migrator.
     expect(logger.traceText, contains('generated_plugin_registrant.dart not found. Skipping.'));
 
+    // Sends build config event
+    expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+      const TestUsageEvent(
+        'build',
+        'web',
+        label: 'web-compile',
+        parameters: CustomDimensions(buildEventSettings: 'wasm-compile: true')
+      ),
+    ]));
+
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;
     expect(timingEvent.category, 'build');
