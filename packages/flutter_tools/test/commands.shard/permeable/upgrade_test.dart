@@ -36,7 +36,8 @@ void main() {
 
     setUp(() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
-      realCommandRunner = UpgradeCommandRunner();
+      realCommandRunner = UpgradeCommandRunner()
+          ..workingDirectory = Cache.flutterRoot;
       processManager = FakeProcessManager.empty();
       fakeCommandRunner.willHaveUncommittedChanges = false;
       fakePlatform = FakePlatform()..environment = Map<String, String>.unmodifiable(<String, String>{
