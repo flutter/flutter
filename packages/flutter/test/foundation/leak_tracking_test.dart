@@ -11,8 +11,6 @@ import 'leak_tracking.dart';
 final String _leakTrackedClassName = '$_LeakTrackedClass';
 
 Future<void> main() async {
-
-
   group('Leak tracking works for non-web', () {
     testWidgetsWithLeakTracking(
       'Leak tracker respects all allow lists',
@@ -31,7 +29,7 @@ Future<void> main() async {
       late Leaks leaks;
 
       testWidgetsWithLeakTracking(
-        '$_StatelessLeakingWidget leaks',
+        'when $_StatelessLeakingWidget leaks',
         (WidgetTester tester) async {
           await tester.pumpWidget(_StatelessLeakingWidget());
         },
@@ -53,7 +51,7 @@ Future<void> main() async {
       late Leaks leaks;
 
       testWidgetsWithLeakTracking(
-        '$_StatelessLeakingWidget leaks',
+        'when $_StatelessLeakingWidget leaks',
         (WidgetTester tester) async {
           await tester.pumpWidget(_StatelessLeakingWidget());
         },
