@@ -251,11 +251,9 @@ void main() {
                   ? size.width - rect.right
                   : rect.left,
               );
-              break;
             case AxisDirection.left:
             case AxisDirection.right:
               expect(margin, size.height - rect.bottom);
-              break;
           }
         }
       }
@@ -298,25 +296,21 @@ void main() {
           expect(rect.top, 0);
           expect(rect.right, _kThickness);
           expect(rect.bottom, _kMinThumbExtent);
-          break;
         case ScrollbarOrientation.right:
           expect(rect.left, 600 - _kThickness);
           expect(rect.top, 0);
           expect(rect.right, 600);
           expect(rect.bottom, _kMinThumbExtent);
-          break;
         case ScrollbarOrientation.top:
           expect(rect.left, 0);
           expect(rect.top, 0);
           expect(rect.right, _kMinThumbExtent);
           expect(rect.bottom, _kThickness);
-          break;
         case ScrollbarOrientation.bottom:
           expect(rect.left, 0);
           expect(rect.top, 23 - _kThickness);
           expect(rect.right, _kMinThumbExtent);
           expect(rect.bottom, 23);
-          break;
       }
     }
   });

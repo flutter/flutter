@@ -16,6 +16,7 @@ import 'package:flutter_tools/src/doctor_validator.dart';
 import 'package:test/fake.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
@@ -425,7 +426,7 @@ Review licenses that have not been accepted (y/N)?
     expect(licenseMessage.message, UserMessages().androidSdkLicenseOnly(kAndroidHome));
   });
 
-  testWithoutContext('detects minimum required SDK and buildtools', () async {
+  testUsingContext('detects minimum required SDK and buildtools', () async {
     processManager.addCommand(const FakeCommand(
       command: <String>[
         'which',
@@ -523,7 +524,7 @@ Review licenses that have not been accepted (y/N)?
     expect(cmdlineMessage.message, errorMessage);
   });
 
-  testWithoutContext('detects minimum required java version', () async {
+  testUsingContext('detects minimum required java version', () async {
     // Test with older version of JDK
     const String javaVersionText = 'openjdk version "1.7.0_212"';
     processManager.addCommand(const FakeCommand(
@@ -552,7 +553,7 @@ Review licenses that have not been accepted (y/N)?
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();
@@ -575,7 +576,7 @@ Review licenses that have not been accepted (y/N)?
       androidStudio: null,
       fileSystem: fileSystem,
       logger: logger,
-      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', 'JAVA_HOME': 'home/java'},
+      platform: FakePlatform()..environment = <String, String>{'HOME': '/home/me', AndroidSdk.javaHomeEnvironmentVariable: 'home/java'},
       processManager: processManager,
       userMessages: UserMessages(),
     ).validate();

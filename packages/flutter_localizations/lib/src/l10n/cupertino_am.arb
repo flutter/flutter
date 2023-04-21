@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "ሁሉንም ምረጥ",
   "tabSemanticsLabel": "ትር $tabIndex ከ$tabCount",
   "modalBarrierDismissLabel": "አሰናብት",
-  "searchTextFieldPlaceholderLabel": "ፍለጋ"
+  "searchTextFieldPlaceholderLabel": "ፍለጋ",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

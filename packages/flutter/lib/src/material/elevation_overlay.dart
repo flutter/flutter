@@ -11,11 +11,7 @@ import 'theme.dart';
 
 /// A utility class for dealing with the overlay color needed
 /// to indicate elevation of surfaces.
-class ElevationOverlay {
-  // This class is not meant to be instantiated or extended; this constructor
-  // prevents instantiation and extension.
-  ElevationOverlay._();
-
+abstract final class ElevationOverlay {
   /// Applies a surface tint color to a given container color to indicate
   /// the level of its elevation.
   ///

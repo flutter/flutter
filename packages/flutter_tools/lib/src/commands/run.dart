@@ -38,6 +38,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesDartDefineOption();
     usesFlavorOption();
     usesWebRendererOption();
+    usesWebResourcesCdnFlag();
     addNativeNullAssertions(hide: !verboseHelp);
     addBundleSkSLPathOption(hide: !verboseHelp);
     usesApplicationBinaryOption();
@@ -176,12 +177,15 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     addNullSafetyModeOptions(hide: !verboseHelp);
     usesDeviceUserOption();
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
     addDdsOptions(verboseHelp: verboseHelp);
     addDevToolsOptions(verboseHelp: verboseHelp);
     addServeObservatoryOptions(verboseHelp: verboseHelp);
     addAndroidSpecificBuildOptions(hide: !verboseHelp);
     usesFatalWarningsOption(verboseHelp: verboseHelp);
     addEnableImpellerFlag(verboseHelp: verboseHelp);
+    addEnableVulkanValidationFlag(verboseHelp: verboseHelp);
+    addImpellerForceGLFlag(verboseHelp: verboseHelp);
     addEnableEmbedderApiFlag(verboseHelp: verboseHelp);
   }
 
@@ -194,9 +198,14 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get cacheStartupProfile => boolArg('cache-startup-profile');
   bool get runningWithPrebuiltApplication => argResults![FlutterOptions.kUseApplicationBinary] != null;
   bool get trackWidgetCreation => boolArg('track-widget-creation');
-  bool get enableImpeller => boolArg('enable-impeller');
+  ImpellerStatus get enableImpeller => ImpellerStatus.fromBool(argResults!['enable-impeller'] as bool?);
+  bool get enableVulkanValidation => boolArg('enable-vulkan-validation');
+  bool get impellerForceGL => boolArg('impeller-force-gl');
   bool get uninstallFirst => boolArg('uninstall-first');
   bool get enableEmbedderApi => boolArg('enable-embedder-api');
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   @override
   bool get reportNullSafety => true;
@@ -233,6 +242,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         webBrowserDebugPort: webBrowserDebugPort,
         webBrowserFlags: webBrowserFlags,
         enableImpeller: enableImpeller,
+        enableVulkanValidation: enableVulkanValidation,
+        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         enableDartProfiling: enableDartProfiling,
         enableEmbedderApi: enableEmbedderApi,
@@ -281,6 +292,8 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         nullAssertions: boolArg('null-assertions'),
         nativeNullAssertions: boolArg('native-null-assertions'),
         enableImpeller: enableImpeller,
+        enableVulkanValidation: enableVulkanValidation,
+        impellerForceGL: impellerForceGL,
         uninstallFirst: uninstallFirst,
         serveObservatory: boolArg('serve-observatory'),
         enableDartProfiling: enableDartProfiling,
@@ -414,7 +427,7 @@ class RunCommand extends RunCommandBase {
     bool isEmulator;
     bool anyAndroidDevices = false;
     bool anyIOSDevices = false;
-    bool anyIOSNetworkDevices = false;
+    bool anyWirelessIOSDevices = false;
 
     if (devices == null || devices!.isEmpty) {
       deviceType = 'none';
@@ -426,7 +439,7 @@ class RunCommand extends RunCommandBase {
       anyAndroidDevices = platform == TargetPlatform.android;
       anyIOSDevices = platform == TargetPlatform.ios;
       if (device is IOSDevice && device.isWirelesslyConnected) {
-        anyIOSNetworkDevices = true;
+        anyWirelessIOSDevices = true;
       }
       deviceType = getNameForTargetPlatform(platform);
       deviceOsVersion = await device.sdkNameAndVersion;
@@ -440,7 +453,7 @@ class RunCommand extends RunCommandBase {
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
         if (device is IOSDevice && device.isWirelesslyConnected) {
-          anyIOSNetworkDevices = true;
+          anyWirelessIOSDevices = true;
         }
         if (anyAndroidDevices && anyIOSDevices) {
           break;
@@ -450,7 +463,7 @@ class RunCommand extends RunCommandBase {
 
     String? iOSInterfaceType;
     if (anyIOSDevices) {
-      iOSInterfaceType = anyIOSNetworkDevices ? 'wireless' : 'usb';
+      iOSInterfaceType = anyWirelessIOSDevices ? 'wireless' : 'usb';
     }
 
     String? androidEmbeddingVersion;
@@ -483,8 +496,9 @@ class RunCommand extends RunCommandBase {
       commandRunProjectModule: FlutterProject.current().isModule,
       commandRunProjectHostLanguage: hostLanguage.join(','),
       commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
-      commandRunEnableImpeller: enableImpeller,
+      commandRunEnableImpeller: enableImpeller.asBool,
       commandRunIOSInterfaceType: iOSInterfaceType,
+      commandRunIsTest: targetFile.endsWith('_test.dart'),
     );
   }
 
@@ -760,7 +774,7 @@ class RunCommand extends RunCommandBase {
       ExitStatus.success,
       timingLabelParts: <String?>[
         if (hotMode) 'hot' else 'cold',
-        getModeName(getBuildMode()),
+        getBuildMode().cliName,
         if (devices!.length == 1)
           getNameForTargetPlatform(await devices![0].targetPlatform)
         else
