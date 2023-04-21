@@ -30,7 +30,7 @@ import '_platform_io.dart'
 /// See also:
 ///
 /// * [kIsWeb], a boolean which is true if the application is running on the
-///   web, where [defaultTargetPlatform] tells you what platform the browser is
+///   web, where [defaultTargetPlatform] returns which platform the browser is
 ///   running on.
 //
 // When adding support for a new platform (e.g. Windows Phone, Raspberry Pi),
