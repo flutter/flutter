@@ -95,26 +95,24 @@ List<int> _bytesAsShellOutput(List<int> raw) {
   return end == raw.length ? raw : raw.sublist(0, end);
 }
 
-extension FileExtension on File {
-  /// Reads the file contents as a string with the semantics of `$(cat …)`,
-  /// returning null if the operation fails.
-  ///
-  /// This is commonly the intended semantics when a file was meant to be
-  /// read or written by a shell script.
-  ///
-  /// The file's contents are read using the given [Encoding], and then
-  /// any run of newlines at the end of the string is removed.
-  ///
-  /// See also:
-  /// * [ProcessResultExtension.shellOutput], for the semantics of `$(…)`
-  ///   on an arbitrary command.
-  /// * the Bash manual on command substitution `$(…)`: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
-  String? readStringLikeShell({Encoding encoding = utf8}) {
-    try {
-      return _asShellOutput(readAsStringSync(encoding: encoding));
-    } on FileSystemException {
-      return null;
-    }
+/// Reads the file contents as a string with the semantics of `$(cat …)`,
+/// returning null if the operation fails.
+///
+/// This is commonly the intended semantics when a file was meant to be
+/// read or written by a shell script.
+///
+/// The file's contents are read using the given [Encoding], and then
+/// any run of newlines at the end of the string is removed.
+///
+/// See also:
+/// * [ProcessResultExtension.shellOutput], for the semantics of `$(…)`
+///   on an arbitrary command.
+/// * the Bash manual on command substitution `$(…)`: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
+String? readStringLikeShell(File file, {Encoding encoding = utf8}) {
+  try {
+    return _asShellOutput(file.readAsStringSync(encoding: encoding));
+  } on FileSystemException {
+    return null;
   }
 }
 
@@ -131,7 +129,7 @@ extension ProcessResultExtension on ProcessResult {
   /// This value has the same type as [stdout]: either `List<int>` or `String`.
   ///
   /// See also:
-  /// * [FileExtension.readStringLikeShell], for reading a file with the semantics of `$(cat …)`.
+  /// * [readStringLikeShell], for reading a file with the semantics of `$(cat …)`.
   /// * the Bash manual on command substitution: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
   Object get shellOutput {
     final Object? stdout = this.stdout;
