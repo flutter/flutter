@@ -7,51 +7,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/leak_tracker.dart';
 import 'package:meta/meta.dart';
 
-/// Configuration for leak tracking in unit tests.
-class LeakTrackingTestConfig {
-  /// Creates a new instance of [LeakTrackingFlutterTestConfig].
-  const LeakTrackingTestConfig({
-    this.stackTraceCollectionConfig = const StackTraceCollectionConfig(),
-    this.onLeaks,
-    this.failTestOnLeaks = true,
-    this.notGcedAllowList = const <String>{},
-    this.notDisposedAllowList = const <String>{},
-  });
-
-  /// If true, warning will be printed when leak tracking is
-  /// requested for a non-supported platform.
-  static bool warnForNonSupportedPlatforms = true;
-
-  /// When to collect stack trace information.
-  ///
-  /// Knowing call stack may help to troubleshoot memory leaks.
-  /// Customize this parameter to collect stack traces when needed.
-  final StackTraceCollectionConfig stackTraceCollectionConfig;
-  /// Handler to obtain details about collected leaks.
-  ///
-  /// Use the handler to process the collected leak
-  /// details programmatically.
-  final LeaksCallback? onLeaks;
-
-  /// If true, the test will fail if leaks are found.
-  ///
-  /// When to collect stack trace information.
-  /// If false, the test will not fail if leaks are
-  /// found to allow for analyzing leaks after the test completes.
-  final bool failTestOnLeaks;
-
-  /// List of classes that are allowed to be not GCed after disposal.
-  ///
-  /// As returned by `object.runtimeType.toString()`.
-  final Set<String> notGcedAllowList;
-
-  /// List of classes that are allowed to be GCed without disposal.
-  ///
-  /// As returned by `object.runtimeType.toString()`.
-  final Set<String> notDisposedAllowList;
-}
-
-
 /// Wrapper for [testWidgets] with leak tracking.
 ///
 /// This method is temporal with the plan:
