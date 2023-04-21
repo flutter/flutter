@@ -46,6 +46,9 @@ class DefaultSelectionStyle extends InheritedTheme {
 
   /// Creates a default selection style that overrides the selection styles in
   /// scope at this point in the widget tree.
+  ///
+  /// Any Arguments that are not null replace the corresponding properties on the
+  /// default selection style for the [BuildContext] where the widget is inserted.
   static Widget merge({
     Key? key,
     Color? cursorColor,
@@ -82,8 +85,7 @@ class DefaultSelectionStyle extends InheritedTheme {
   /// The background color of selected text.
   final Color? selectionColor;
 
-  /// The [MouseCursor] for mouse pointers that are hovering over selectable
-  /// Text widgets.
+  /// The [MouseCursor] for mouse pointers hovering over selectable Text widgets.
   ///
   /// If this property is null, [SystemMouseCursors.text] will be used.
   final MouseCursor? mouseCursor;
