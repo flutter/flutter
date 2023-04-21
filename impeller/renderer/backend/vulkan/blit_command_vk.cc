@@ -29,6 +29,10 @@ bool BlitCopyTextureToTextureCommandVK::Encode(
   const auto& src = TextureVK::Cast(*source);
   const auto& dst = TextureVK::Cast(*destination);
 
+  if (!encoder.Track(source) || !encoder.Track(destination)) {
+    return false;
+  }
+
   LayoutTransition src_tran;
   src_tran.cmd_buffer = cmd_buffer;
   src_tran.new_layout = vk::ImageLayout::eTransferSrcOptimal;
@@ -95,6 +99,10 @@ bool BlitCopyTextureToBufferCommandVK::Encode(CommandEncoderVK& encoder) const {
 
   // cast source and destination to TextureVK
   const auto& src = TextureVK::Cast(*source);
+
+  if (!encoder.Track(source)) {
+    return false;
+  }
 
   LayoutTransition transition;
   transition.cmd_buffer = cmd_buffer;
@@ -189,6 +197,10 @@ bool BlitGenerateMipmapCommandVK::Encode(CommandEncoderVK& encoder) const {
 
   const auto& image = src.GetImage();
   const auto& cmd = encoder.GetCommandBuffer();
+
+  if (!encoder.Track(texture)) {
+    return false;
+  }
 
   // Transition the base mip level to transfer-src layout so we can read from
   // it and transition the rest to dst-optimal since they are going to be
