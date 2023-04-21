@@ -3849,7 +3849,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           break;
         }
         // Include any rect with overlap with paintBounds.
-        if ((paintBounds.left <= box.right || paintBounds.right >= box.left) &&
+        if (paintBounds.left <= box.right &&
+            box.left <= paintBounds.right &&
             paintBounds.top <= box.bottom) {
           rects.add(SelectionRect(position: graphemeStart, bounds: box.toRect(), direction: box.direction));
         }
