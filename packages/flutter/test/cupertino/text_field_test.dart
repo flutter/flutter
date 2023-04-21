@@ -2245,8 +2245,15 @@ void main() {
       await gesture.moveTo(hPos);
       await tester.pumpAndSettle();
 
+      // Toolbar should be hidden during a drag.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.baseOffset, testValue.indexOf('d'));
       expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
+
+      // Toolbar should re-appear after a drag.
+      await gesture.up();
+      await tester.pump();
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
   );
 
@@ -9388,4 +9395,77 @@ void main() {
     expect(placeholderWidget.overflow, placeholderStyle.overflow);
     expect(placeholderWidget.style!.overflow, placeholderStyle.overflow);
   });
+
+  testWidgets('tapping on a misspelled word on iOS hides the handles and shows red selection', (WidgetTester tester) async {
+    tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+      true;
+    // The default derived color for the iOS text selection highlight.
+    const Color defaultSelectionColor = Color(0x33007aff);
+    final TextEditingController controller = TextEditingController(
+      text: 'test test testt',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+    state.spellCheckResults = SpellCheckResults(
+      controller.value.text,
+      const <SuggestionSpan>[
+        SuggestionSpan(TextRange(start: 10, end: 15), <String>['test']),
+      ]);
+
+    // Double tapping a non-misspelled word shows the normal blue selection and
+    // the selection handles.
+    expect(state.selectionOverlay, isNull);
+    await tester.tapAt(textOffsetToPosition(tester, 2));
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    await tester.tapAt(textOffsetToPosition(tester, 2));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 4),
+    );
+    expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+    expect(state.renderEditable.selectionColor, defaultSelectionColor);
+
+    // Single tapping a non-misspelled word shows a collpased cursor.
+    await tester.tapAt(textOffsetToPosition(tester, 7));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+    );
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    expect(state.renderEditable.selectionColor, defaultSelectionColor);
+
+    // Single tapping a misspelled word selects it in red with no handles.
+    await tester.tapAt(textOffsetToPosition(tester, 13));
+    await tester.pumpAndSettle();
+    expect(
+      controller.selection,
+      const TextSelection(baseOffset: 10, extentOffset: 15),
+    );
+    expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+    expect(
+      state.renderEditable.selectionColor,
+      CupertinoTextField.kMisspelledSelectionColor,
+    );
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+    skip: kIsWeb, // [intended]
+  );
 }
