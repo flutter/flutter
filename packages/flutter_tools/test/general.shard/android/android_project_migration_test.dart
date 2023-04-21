@@ -4,10 +4,14 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/android/migrations/gradle_java_version_conflict_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:test/fake.dart';
@@ -15,7 +19,15 @@ import 'package:test/fake.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 
-const String oldGradleVersionWrapper = r'''
+const String otherGradleVersionWrapper = r'''
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-6.6-all.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+''';
+
+const String gradleWrapperToMigrate = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip
@@ -23,21 +35,16 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
 
-const String recentGradleVersionWrapper = r'''
+const String gradleWrapperToMigrateTo = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-7.4-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
 
-const String unparsableGradleVersionWrapper = r'''
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-a.b.c-all.zip
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-''';
+final Version androidStudioDolphin = Version(2021, 3, 1);
+
 
 void main() {
   group('Android migration', () {
@@ -127,76 +134,107 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('skipped if files are missing', () {
         final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
-          project,
           bufferLogger,
-          FakeAndroidStudioDolphin(),
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
         migration.migrate();
         expect(gradleWrapperPropertiesFile.existsSync(), isFalse);
-        expect(bufferLogger.traceText, contains('gradle-wrapper.properties not found, skipping Gradle-Java version compatibility check.'));
+        expect(bufferLogger.traceText, contains(gradleWrapperNotFound));
       });
 
 
       testWithoutContext('skipped if android studio is null', () {
         final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
-          project,
           bufferLogger,
-          null,
+          project: project,
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
-        gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
-        expect(bufferLogger.traceText, contains('Android Studio version could not be detected, '
-            'skipping Gradle-Java version compatibility check.'));
+        expect(bufferLogger.traceText, contains(androidStudioNotFound));
+        expect(gradleWrapperPropertiesFile.readAsStringSync(),
+            gradleWrapperToMigrate);
       });
 
       testWithoutContext('skipped if android studio version is less than flamingo', () {
         final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
-          project,
           bufferLogger,
-          FakeAndroidStudioDolphin(),
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
-        gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
-        expect(gradleWrapperPropertiesFile.readAsStringSync(), oldGradleVersionWrapper);
-        expect(bufferLogger.traceText, contains('Version of Android Studio is less than impacted version, no migration necessary.'));
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
+        expect(bufferLogger.traceText, contains(androidStudioVersionNotFlamingo));
       });
 
-      testWithoutContext('nothing is changed if gradle version is high enough', () {
+      testWithoutContext('skipped if bundled java version is not than 17', () {
         final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
-          project,
           bufferLogger,
-          FakeAndroidStudioFlamingo(),
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '16'),
         );
-        gradleWrapperPropertiesFile.writeAsStringSync(recentGradleVersionWrapper);
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
-        expect(gradleWrapperPropertiesFile.readAsStringSync(), recentGradleVersionWrapper);
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
+        expect(bufferLogger.traceText, contains(javaVersionNot17));
+      });
+
+      testWithoutContext('nothing is changed if gradle version not one that was '
+          'used by flutter create', () {
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
+          bufferLogger,
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(otherGradleVersionWrapper);
+        migration.migrate();
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), otherGradleVersionWrapper);
         expect(bufferLogger.traceText, isEmpty);
       });
 
-      testWithoutContext('change is made with sub 7 gradle', () {
+      testWithoutContext('change is made with one of the specific gradle versions'
+          ' we migrate for', () {
         final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
-          project,
           bufferLogger,
-          FakeAndroidStudioFlamingo(),
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
         );
-        gradleWrapperPropertiesFile.writeAsStringSync(oldGradleVersionWrapper);
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
-        expect(gradleWrapperPropertiesFile.readAsStringSync(), recentGradleVersionWrapper);
-        expect(bufferLogger.statusText, contains('Conflict detected between versions of Android Studio '
-            'and Gradle, upgrading Gradle version from 6.7 to 7.4'));
-      });
-
-      testWithoutContext('nothing is changed if we cant parse gradle version', () {
-        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
-          project,
-          bufferLogger,
-          FakeAndroidStudioFlamingo(),
-        );
-        gradleWrapperPropertiesFile.writeAsStringSync(unparsableGradleVersionWrapper);
-        migration.migrate();
-        expect(gradleWrapperPropertiesFile.readAsStringSync(), unparsableGradleVersionWrapper);
-        expect(bufferLogger.traceText, contains('Failed to parse Gradle version from distribution url, '
-            'skipping Gradle-Java version compatibility check.'));
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrateTo);
+        expect(bufferLogger.statusText, contains('Conflict detected between Android Studio Java version and Gradle version, '
+            'upgrading Gradle version from 6.7 to 7.4.2.'));
       });
     });
   });
@@ -209,12 +247,37 @@ class FakeAndroidProject extends Fake implements AndroidProject {
   Directory hostAppGradleRoot;
 }
 
-class FakeAndroidStudioDolphin extends Fake implements AndroidStudio {
+class FakeAndroidStudio extends Fake implements AndroidStudio {
+  FakeAndroidStudio({required Version version}) {
+    _version = version;
+  }
+
+  late Version _version;
+
   @override
-  Version get version => Version(2021, 3, 1);
+  Version get version => _version;
 }
 
-class FakeAndroidStudioFlamingo extends Fake implements AndroidStudio {
+class FakeAndroidSdk extends Fake implements AndroidSdk {
+  FakeAndroidSdk({required String javaVersion}) {
+    _javaVersion = javaVersion;
+  }
+
+  late String _javaVersion;
+
   @override
-  Version get version => Version(2022, 2, 1);
+  String? getJavaVersion({
+    required AndroidStudio? androidStudio,
+    required FileSystem fileSystem,
+    required OperatingSystemUtils operatingSystemUtils,
+    required Platform platform,
+    required ProcessUtils processUtils,
+  }) {
+    return _javaVersion;
+  }
 }
+
+class FakeFileSystem extends Fake implements FileSystem {}
+class FakeProcessUtils extends Fake implements ProcessUtils {}
+class FakePlatform extends Fake implements Platform {}
+class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {}

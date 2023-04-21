@@ -210,6 +210,20 @@ void main() {
       );
     });
 
+    testWithoutContext('returns the gradle properties file', () async {
+      final Directory androidDirectory = fileSystem.directory('/android')
+        ..createSync();
+      final Directory wrapperDirectory = androidDirectory
+          .childDirectory(gradleDirectoryName)
+          .childDirectory(gradleWrapperDirectoryName)
+        ..createSync(recursive: true);
+      final File expectedFile = await wrapperDirectory
+          .childFile(gradleWrapperPropertiesFilename)
+          .create();
+      final File gradleWrapperFile = getGradleWrapperFile(androidDirectory);
+      expect(gradleWrapperFile.path, expectedFile.path);
+    });
+
     testWithoutContext('returns the gradle wrapper version', () async {
       const String expectedVersion = '7.4.2';
       final Directory androidDirectory = fileSystem.directory('/android')
