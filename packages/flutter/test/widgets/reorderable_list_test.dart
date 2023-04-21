@@ -117,7 +117,8 @@ void main() {
     final SemanticsNode node = tester.getSemantics(find.text('item 0'));
 
     // perform custom action 'move down'.
-    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.customAction, 0);
+    final int customActionId = CustomSemanticsAction.getIdentifier(const CustomSemanticsAction(label: 'Move down'));
+    tester.binding.pipelineOwner.semanticsOwner!.performAction(node.id, SemanticsAction.customAction, customActionId);
     await tester.pumpAndSettle();
 
     expect(onReorderCallCount, 1);
