@@ -91,7 +91,7 @@ Future<void> main() async {
         tearDown(() => _verifyLeaks(leaks, expectedNotDisposed: 1, expectedNotGCed: 1));
       });
     },
-    skip: isBrowser,
+    skip: isBrowser, // Leaks are not detected for web.
   );
 
   testWidgetsWithLeakTracking(
@@ -99,7 +99,7 @@ Future<void> main() async {
     (WidgetTester tester) async {
       await tester.pumpWidget(_StatelessLeakingWidget());
     },
-    skip: !isBrowser,
+    skip: !isBrowser, // Leaks are not detected for web.
   );
 }
 
