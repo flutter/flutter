@@ -804,6 +804,7 @@ android {
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
@@ -837,6 +838,7 @@ BuildVariant: paidProfile
         usage: testUsage,
         gradleUtils: FakeGradleUtils(),
         platform: FakePlatform(),
+        androidStudio: FakeAndroidStudio(),
       );
       processManager.addCommand(const FakeCommand(
         command: <String>[
