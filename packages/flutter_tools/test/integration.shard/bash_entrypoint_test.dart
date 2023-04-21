@@ -115,7 +115,11 @@ Future<void> main() async {
       expect(tree.ensureToolWithFakeDart(), isCacheHit);
     });
   },
-  skip: platform.isWindows); // [intended] Windows does not use the bash entrypoint
+  // These tests rely on copying directory trees around.  In general that's not
+  // as reliable an operation on macOS (or Windows) as one would like, so to
+  // reduce the risk of flakes we run these tests only on Linux.
+  // (The actual code under test is much less demanding than the tests.)
+  skip: !platform.isLinux); // [intended] Windows does not use the bash entrypoint; and avoid possible flakes on macOS
 
   test('verify terminating flutter/bin/dart terminates the underlying dart process', () async {
     // A test Dart app that will run until it receives SIGTERM
