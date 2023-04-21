@@ -4842,7 +4842,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: flutter_tool_startup__windows
+      task_name: flutter_tool_startup
 
   - name: Linux flutter_tool_startup__linux
     recipe: devicelab/devicelab_drone
@@ -4851,14 +4851,14 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: flutter_tool_startup__linux
+      task_name: flutter_tool_startup
 
   - name: Mac_benchmark flutter_tool_startup__macos
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      task_name: flutter_tool_startup__macos
+      task_name: flutter_tool_startup
 
   - name: Linux flutter_packaging
     recipe: packaging/packaging
