@@ -31,6 +31,7 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
 import 'android_sdk.dart';
+import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
 import 'migrations/gradle_java_version_conflict_migration.dart';

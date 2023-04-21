@@ -109,7 +109,7 @@ class GradleJavaVersionConflictMigration extends ProjectMigrator {
     if (_androidStudio == null) {
       logger.printTrace(androidStudioNotFound);
       return;
-    } else if (_androidStudio!.version.major != androidStudioFlamingo.major) {
+    } else if (_androidStudio!.version!.major != androidStudioFlamingo.major) {
       logger.printTrace(androidStudioVersionNotFlamingo);
       return;
     }
