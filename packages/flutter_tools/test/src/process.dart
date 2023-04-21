@@ -132,9 +132,9 @@ String? readStringLikeShell(File file, {Encoding encoding = utf8}) {
 /// * the Bash manual on command substitution: <https://www.gnu.org/software/bash/manual/bash.html#Command-Substitution>.
 Object processResultShellOutput(ProcessResult result) {
   final Object? stdout = result.stdout;
-  switch (stdout) {
-    case String(): return _asShellOutput(stdout);
-    case List<int>(): return _bytesAsShellOutput(stdout);
-    default: throw Error(); // forbidden by contract of [output]
-  }
+  return switch (stdout) {
+    String() => _asShellOutput(stdout),
+    List<int>() => _bytesAsShellOutput(stdout),
+    _ => throw StateError('ProcessResult.stdout has invalid type ${stdout.runtimeType}'),
+  };
 }
