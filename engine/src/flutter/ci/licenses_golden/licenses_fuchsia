@@ -1,4 +1,4 @@
-Signature: 126d55acfc247fc66286f0c1c20fba4e
+Signature: 7c30df7be2bbadb9ae4ac1574b42d407
 
 ====================================================================================================
 LIBRARY: fuchsia_sdk
@@ -3247,6 +3247,7 @@ ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/allocator.fidl + 
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/flatland.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/watcher.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/flatland_tokens.fidl + ../../../fuchsia/sdk/linux/LICENSE
+ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/history.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl + ../../../fuchsia/sdk/linux/LICENSE
 ORIGIN: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/rsn.fidl + ../../../fuchsia/sdk/linux/LICENSE
@@ -3382,6 +3383,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/allocator.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.composition/flatland.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.observation.geometry/watcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/flatland_tokens.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/history.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.ieee80211/rsn.fidl
