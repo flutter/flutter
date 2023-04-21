@@ -11,6 +11,9 @@ import '_goldens_io.dart'
   if (dart.library.html) '_goldens_web.dart' as flutter_goldens;
 import 'foundation/leak_tracking.dart';
 
+/// Test configuration for each test library in this directory.
+///
+/// See https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html.
 Future<void> testExecutable(FutureOr<void> Function() testMain) {
   // Enable checks because there are many implementations of [RenderBox] in this
   // package can benefit from the additional validations.
