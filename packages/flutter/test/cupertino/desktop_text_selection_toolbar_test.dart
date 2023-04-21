@@ -37,9 +37,9 @@ void main() {
 
     expect(
       toolbarFilter.filter.runtimeType,
-      // _ComposeImageFilter is internal so we can't test if it's filters are
+      // _ComposeImageFilter is internal so we can't test if its filters are
       // for blur and saturation, but checking if it's a _ComposeImageFilter
-      // should be enough. outer and inner parameters don't matter, we just need
+      // should be enough. Outer and inner parameters don't matter, we just need
       // a new _ComposeImageFilter to get its runtimeType.
       //
       // As web doesn't support ImageFilter.compose, we use just blur when
