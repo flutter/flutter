@@ -3203,8 +3203,14 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
     ClipboardStatus value = ClipboardStatus.unknown,
   }) : super(value);
 
+  bool _disposed = false;
+
   /// Check the [Clipboard] and update [value] if needed.
   Future<void> update() async {
+    if (_disposed) {
+      return;
+    }
+
     final bool hasStrings;
     try {
       hasStrings = await Clipboard.hasStrings();
@@ -3217,18 +3223,17 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
       ));
       // In the case of an error from the Clipboard API, set the value to
       // unknown so that it will try to update again later.
-      if (value == ClipboardStatus.unknown) {
+      if (_disposed || value == ClipboardStatus.unknown) {
         return;
       }
       value = ClipboardStatus.unknown;
       return;
     }
-
     final ClipboardStatus nextStatus = hasStrings
         ? ClipboardStatus.pasteable
         : ClipboardStatus.notPasteable;
 
-    if (nextStatus == value) {
+    if (_disposed || nextStatus == value) {
       return;
     }
     value = nextStatus;
@@ -3248,7 +3253,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void removeListener(VoidCallback listener) {
     super.removeListener(listener);
-    if (!hasListeners) {
+    if (!_disposed && !hasListeners) {
       WidgetsBinding.instance.removeObserver(this);
     }
   }
@@ -3274,6 +3279,7 @@ class ClipboardStatusNotifier extends ValueNotifier<ClipboardStatus> with Widget
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _disposed = true;
     super.dispose();
   }
 }
