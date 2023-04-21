@@ -35,7 +35,10 @@ class HashUrlStrategy extends ui_web.UrlStrategy {
 
   @override
   ui.VoidCallback addPopStateListener(ui_web.PopStateListener fn) {
-    final DomEventListener wrappedFn = createDomEventListener(fn);
+    final DomEventListener wrappedFn = createDomEventListener((DomEvent event) {
+      // `fn` expects `event.state`, not a `DomEvent`.
+      fn((event as DomPopStateEvent).state);
+    });
     _platformLocation.addPopStateListener(wrappedFn);
     return () => _platformLocation.removePopStateListener(wrappedFn);
   }
