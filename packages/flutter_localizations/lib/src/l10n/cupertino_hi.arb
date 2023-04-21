@@ -21,5 +21,6 @@
   "selectAllButtonLabel": "सभी चुनें",
   "tabSemanticsLabel": "$tabCount का टैब $tabIndex",
   "modalBarrierDismissLabel": "खारिज करें",
-  "searchTextFieldPlaceholderLabel": "खोजें"
+  "searchTextFieldPlaceholderLabel": "खोजें",
+  "noSpellCheckReplacementsLabel": "No Replacements Found"
 }

@@ -123,6 +123,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   @override
   void onDragSelectionEnd(TapDragEndDetails details) {
     _state._requestKeyboard();
+    super.onDragSelectionEnd(details);
   }
 }
 
@@ -792,25 +793,19 @@ class CupertinoTextField extends StatefulWidget {
   /// style.
   ///
   /// See also:
+  ///  * [spellCheckConfiguration], where this is typically specified for
+  ///    [CupertinoTextField].
   ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
-  ///     builder configured to show a spell check suggestions toolbar.
-  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], the builder
-  ///    configured to show the Material style spell check suggestions toolbar.
+  ///    parameter for which this is the default value for [CupertinoTextField].
+  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], which is like
+  ///    this but specifies the default for [CupertinoTextField].
   @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    final List<ContextMenuButtonItem>? buttonItems =
-      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
-
-    if (buttonItems == null || buttonItems.isEmpty){
-      return const SizedBox.shrink();
-    }
-
-    return CupertinoSpellCheckSuggestionsToolbar(
-      anchors: editableTextState.contextMenuAnchors,
-      buttonItems: buttonItems,
+    return CupertinoSpellCheckSuggestionsToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 
@@ -1317,7 +1312,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             key: editableTextKey,
             controller: controller,
             undoController: widget.undoController,
-            readOnly: widget.readOnly,
+            readOnly: widget.readOnly || !enabled,
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,

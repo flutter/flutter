@@ -2245,8 +2245,15 @@ void main() {
       await gesture.moveTo(hPos);
       await tester.pumpAndSettle();
 
+      // Toolbar should be hidden during a drag.
+      expect(find.byType(CupertinoButton), findsNothing);
       expect(controller.selection.baseOffset, testValue.indexOf('d'));
       expect(controller.selection.extentOffset, testValue.indexOf('i') + 1);
+
+      // Toolbar should re-appear after a drag.
+      await gesture.up();
+      await tester.pump();
+      expect(find.byType(CupertinoButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
     },
   );
 
@@ -5412,6 +5419,130 @@ void main() {
     variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
   );
 
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - multiline', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            maxLines: null,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and move to '|i'.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
+  testWidgets('Can move cursor when dragging, when tap is on collapsed selection (iOS) - ListView', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/122519
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoPageScaffold(
+          child: CupertinoTextField(
+            dragStartBehavior: DragStartBehavior.down,
+            controller: controller,
+            maxLines: null,
+          ),
+        ),
+      ),
+    );
+
+    const String testValue = 'abc\ndef\nghi';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    final Offset aPos = textOffsetToPosition(tester, testValue.indexOf('a'));
+    final Offset gPos = textOffsetToPosition(tester, testValue.indexOf('g'));
+    final Offset iPos = textOffsetToPosition(tester, testValue.indexOf('i'));
+
+    // Tap on text field to gain focus, and set selection to '|a'. On iOS
+    // the selection is set to the word edge closest to the tap position.
+    // We await for kDoubleTapTimeout after the up event, so our next down event
+    // does not register as a double tap.
+    final TestGesture gesture = await tester.startGesture(aPos);
+    await tester.pump();
+    await gesture.up();
+    await tester.pumpAndSettle(kDoubleTapTimeout);
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and attempt move
+    // to '|g'. The cursor will not move because the `VerticalDragGestureRecognizer`
+    // in the scrollable will beat the `TapAndHorizontalDragGestureRecognizer`
+    // in the TextField. This is because moving from `|a` to `|g` is a completely
+    // vertical movement.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(gPos);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, 0);
+
+    // Release the pointer.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // If the position we tap during a drag start is on the collapsed selection, then
+    // we can move the cursor with a drag.
+    // Here we tap on '|a', where our selection was previously, and move to '|i'.
+    // Unlike our previous attempt to drag to `|g`, this works because moving
+    // to `|i` includes a horizontal movement so the `TapAndHorizontalDragGestureRecognizer`
+    // in TextField can beat the `VerticalDragGestureRecognizer` in the scrollable.
+    await gesture.down(aPos);
+    await tester.pump();
+    await gesture.moveTo(iPos);
+    await tester.pumpAndSettle();
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('i'));
+  },
+    variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+  );
+
   testWidgets('Can move cursor when dragging (Android)', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -7320,6 +7451,8 @@ void main() {
       ),
       matchesSemantics(
         hasEnabledState: true,
+        isTextField: true,
+        isReadOnly: true,
       ),
     );
   });
@@ -8780,6 +8913,105 @@ void main() {
 
       expect(find.byKey(fakeMagnifier.key!), findsNothing);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets('Can drag to show, unshow, and update magnifier', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              dragStartBehavior: DragStartBehavior.down,
+              controller: controller,
+              magnifierConfiguration: TextMagnifierConfiguration(
+                magnifierBuilder: (
+                    _,
+                    MagnifierController controller,
+                    ValueNotifier<MagnifierInfo> localMagnifierInfo
+                  ) {
+                    magnifierInfo = localMagnifierInfo;
+                    return fakeMagnifier;
+                  },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      await tester.pumpAndSettle();
+
+      // Tap at '|a' to move the selection to position 0.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle(kDoubleTapTimeout);
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 0);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a drag gesture to move the selection to the dragged position, showing
+      // the magnifier.
+      final TestGesture gesture = await tester.startGesture(textOffsetToPosition(tester, 0));
+      await tester.pump();
+
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 5);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      Offset firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.isCollapsed, true);
+      expect(controller.selection.baseOffset, 10);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+
+      // Start a double-tap select the word at the tapped position.
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      await gesture.down(textOffsetToPosition(tester, 1));
+      await tester.pumpAndSettle();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 3);
+
+      // Start a drag gesture to extend the selection word-by-word, showing the
+      // magnifier.
+      await gesture.moveTo(textOffsetToPosition(tester, 5));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 7);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+
+      firstDragGesturePosition = magnifierInfo.value.globalGesturePosition;
+
+      await gesture.moveTo(textOffsetToPosition(tester, 10));
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsOneWidget);
+      // Expect the position the magnifier gets to have moved.
+      expect(firstDragGesturePosition, isNot(magnifierInfo.value.globalGesturePosition));
+
+      // The magnifier should hide when the drag ends.
+      await gesture.up();
+      await tester.pump();
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, 11);
+      expect(find.byKey(fakeMagnifier.key!), findsNothing);
+    }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android, TargetPlatform.iOS }));
 
     testWidgets('Can long press to show, unshow, and update magnifier on non-Apple platforms', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();

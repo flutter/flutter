@@ -56,7 +56,7 @@ class CopyFlutterBundle extends Target {
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     environment.outputDir.createSync(recursive: true);
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
@@ -167,7 +167,7 @@ class KernelSnapshot extends Target {
     if (targetPlatformEnvironment == null) {
       throw MissingDefineException(kTargetPlatform, 'kernel_snapshot');
     }
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final String targetFile = environment.defines[kTargetFile] ?? environment.fileSystem.path.join('lib', 'main.dart');
     final File packagesFile = environment.projectDir
       .childDirectory('.dart_tool')
@@ -272,7 +272,7 @@ abstract class AotElfBase extends Target {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
     final List<String> extraGenSnapshotOptions = decodeCommaSeparated(environment.defines, kExtraGenSnapshotOptions);
-    final BuildMode buildMode = getBuildModeForName(buildModeEnvironment);
+    final BuildMode buildMode = BuildMode.fromCliName(buildModeEnvironment);
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetPlatformEnvironment);
     final String? splitDebugInfo = environment.defines[kSplitDebugInfo];
     final bool dartObfuscation = environment.defines[kDartObfuscation] == 'true';

@@ -755,6 +755,7 @@ void main() {
     expect(material.elevation, 6.0);
     expect(material.color, colorScheme.surface);
     expect(material.surfaceTintColor, colorScheme.surfaceTint);
+    expect(material.clipBehavior, Clip.antiAlias);
 
     final Finder findDivider = find.byType(Divider);
     final Container dividerContainer = tester.widget<Container>(find.descendant(of: findDivider, matching: find.byType(Container)).first);
@@ -1422,6 +1423,221 @@ void main() {
     expect(controller.isOpen, false);
     controller.openView();
     expect(controller.isOpen, true);
+  });
+
+  testWidgets('Search view does not go off the screen - LTR', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Align(
+          // Put the search anchor on the bottom-right corner of the screen to test
+          // if the search view goes off the window.
+          alignment: Alignment.bottomRight,
+          child: SearchAnchor(
+            isFullScreen: false,
+            builder: (BuildContext context, SearchController controller) {
+              return IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              );
+            },
+            suggestionsBuilder: (BuildContext context, SearchController controller) {
+              return <Widget>[];
+            },
+          ),
+        ),
+      ),),
+    );
+
+    final Finder findIconButton = find.widgetWithIcon(IconButton, Icons.search);
+    final Rect iconButton = tester.getRect(findIconButton);
+    // Icon button has a size of (48.0, 48.0) and the screen size is (800.0, 600.0).
+    expect(iconButton, equals(const Rect.fromLTRB(752.0, 552.0, 800.0, 600.0)));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRect, equals(const Rect.fromLTRB(440.0, 200.0, 800.0, 600.0)));
+  });
+
+  testWidgets('Search view does not go off the screen - RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Directionality(
+        textDirection: TextDirection.rtl,
+        child: Material(
+          child: Align(
+            // Put the search anchor on the bottom-left corner of the screen to test
+            // if the search view goes off the window when the text direction is right-to-left.
+            alignment: Alignment.bottomLeft,
+            child: SearchAnchor(
+              isFullScreen: false,
+              builder: (BuildContext context, SearchController controller) {
+                return IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () {
+                    controller.openView();
+                  },
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),
+      ),),
+    );
+
+    final Finder findIconButton = find.widgetWithIcon(IconButton, Icons.search);
+    final Rect iconButton = tester.getRect(findIconButton);
+    expect(iconButton, equals(const Rect.fromLTRB(0.0, 552.0, 48.0, 600.0)));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 200.0, 360.0, 600.0)));
+  });
+
+  testWidgets('Search view becomes smaller if the window size is smaller than the view size', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(200.0, 200.0);
+    tester.view.devicePixelRatio = 1.0;
+
+    Widget buildSearchAnchor({TextDirection textDirection = TextDirection.ltr}) {
+      return MaterialApp(
+        home: Directionality(
+          textDirection: textDirection,
+          child: Material(
+            child: SearchAnchor(
+              isFullScreen: false,
+              builder: (BuildContext context, SearchController controller) {
+                return Align(
+                  alignment: Alignment.bottomRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      controller.openView();
+                    },
+                  ),
+                );
+              },
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                return <Widget>[];
+              },
+            ),
+          ),
+        ),);
+    }
+
+    // Test LTR text direction.
+    await tester.pumpWidget(buildSearchAnchor());
+
+    final Finder findIconButton = find.widgetWithIcon(IconButton, Icons.search);
+    final Rect iconButton = tester.getRect(findIconButton);
+    // The icon button size is (48.0, 48.0), and the screen size is (200.0, 200.0)
+    expect(iconButton, equals(const Rect.fromLTRB(152.0, 152.0, 200.0, 200.0)));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Rect searchViewRect = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRect, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
+
+    // Test RTL text direction.
+    await tester.pumpWidget(Container());
+    await tester.pumpWidget(buildSearchAnchor(textDirection: TextDirection.rtl));
+
+    final Finder findIconButtonRTL = find.widgetWithIcon(IconButton, Icons.search);
+    final Rect iconButtonRTL = tester.getRect(findIconButtonRTL);
+    // The icon button size is (48.0, 48.0), and the screen size is (200.0, 200.0)
+    expect(iconButtonRTL, equals(const Rect.fromLTRB(152.0, 152.0, 200.0, 200.0)));
+
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+
+    final Rect searchViewRectRTL = tester.getRect(find.descendant(of: findViewContent(), matching: find.byType(SizedBox)).first);
+    expect(searchViewRectRTL, equals(const Rect.fromLTRB(0.0, 0.0, 200.0, 200.0)));
+  });
+
+  testWidgets('Docked search view route is popped if the window size changes', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(500.0, 600.0);
+    tester.view.devicePixelRatio = 1.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: false,
+          builder: (BuildContext context, SearchController controller) {
+            return Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              ),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    // Open the search view
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+
+    // Change window size
+    tester.view.physicalSize = const Size(250.0, 200.0);
+    tester.view.devicePixelRatio = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsNothing);
+  });
+
+  testWidgets('Full-screen search view route should stay if the window size changes', (WidgetTester tester) async {
+    addTearDown(tester.view.reset);
+    tester.view.physicalSize = const Size(500.0, 600.0);
+    tester.view.devicePixelRatio = 1.0;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: SearchAnchor(
+          isFullScreen: true,
+          builder: (BuildContext context, SearchController controller) {
+            return Align(
+              alignment: Alignment.bottomRight,
+              child: IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  controller.openView();
+                },
+              ),
+            );
+          },
+          suggestionsBuilder: (BuildContext context, SearchController controller) {
+            return <Widget>[];
+          },
+        ),
+      ),
+    ));
+
+    // Open a full-screen search view
+    await tester.tap(find.byIcon(Icons.search));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+
+    // Change window size
+    tester.view.physicalSize = const Size(250.0, 200.0);
+    tester.view.devicePixelRatio = 1.0;
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.arrow_back), findsOneWidget);
   });
 }
 

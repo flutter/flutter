@@ -154,7 +154,7 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 22;
+    int widgetInspectorExtensionCount = 20;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
@@ -233,7 +233,7 @@ void main() {
         r'^'
         r'RenderView#[0-9a-f]{5}\n'
         r'   debug mode enabled - [a-zA-Z]+\n'
-        r'   window size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
+        r'   view size: Size\(2400\.0, 1800\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 3\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 3\.0x \(in logical pixels\)\n'
         r'$',
