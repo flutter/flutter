@@ -1449,11 +1449,10 @@ targets:
     recipe: devicelab/devicelab_drone
     presubmit: true
     timeout: 60
-    dimensions: {
-      kvm: "1",
-      cores: "8",
+    dimensions:
+      kvm: "1"
+      cores: "8"
       machine_type: "n1-standard-8"
-    }
     properties:
       device_type: "none"
       tags: >
