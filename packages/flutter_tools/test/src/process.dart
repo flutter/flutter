@@ -26,6 +26,18 @@ String shellEscapeString(String value) {
   if (_definitelyShellLiteralWordRegExp.hasMatch(value)) {
     return value;
   }
+
+  // Escape the string for shell syntax in the simplest possible way
+  // that always works: use single-quotes.  In a single-quoted string,
+  // the only character that has any special meaning at all is the next
+  // single-quote, which ends it:
+  //   https://www.gnu.org/software/bash/manual/bash.html#Single-Quotes
+  // Then if the original string has any single-quotes, we write those
+  // as backslash-escapes.
+  //
+  // For example, for `shellEscapeString(r"isn't")` we return `r"'isn'\''t'"`.
+  // The shell parses this as a single-quoted string `'isn'`, an escape `\'`,
+  // and a single-quoted string `'t'`, with values `isn`, `'`, `t`, making `isn't`.
   return "'${value.replaceAll("'", r"'\''")}'";
 }
 
