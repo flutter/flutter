@@ -84,6 +84,7 @@ final List<GradleHandledError> gradleErrors = <GradleHandledError>[
   sslExceptionHandler,
   zipExceptionHandler,
   incompatibleJavaAndGradleVersionsHandler,
+  remoteTerminatedHandshakeHandler,
 ];
 
 const String _boxTitle = 'Flutter Fix';
@@ -699,4 +700,23 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
     return GradleBuildStatus.exit;
   },
   eventLabel: 'incompatible-java-gradle-version',
+);
+
+@visibleForTesting
+final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
+  test: (String line) => line.contains('Remote host terminated the handshake'),
+  handler: ({
+    required String line,
+    required FlutterProject project,
+    required bool usesAndroidX,
+    required bool multidexEnabled,
+  }) async {
+    globals.printError(
+      '${globals.logger.terminal.warningMark} '
+      'Gradle threw an error while downloading artifacts from the network.'
+    );
+
+    return GradleBuildStatus.retry;
+  },
+  eventLabel: 'remote-terminated-handshake',
 );
