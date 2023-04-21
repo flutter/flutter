@@ -106,6 +106,10 @@ class WindowBindingHandler {
 
   // Retrieve the alert node.
   virtual ui::AXPlatformNodeWin* GetAlert() = 0;
+
+  // If true, rendering to the window should synchronize with the vsync
+  // to prevent screen tearing.
+  virtual bool NeedsVSync() = 0;
 };
 
 }  // namespace flutter

@@ -209,7 +209,8 @@ void AngleSurfaceManager::CleanUp() {
 
 bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
                                         EGLint width,
-                                        EGLint height) {
+                                        EGLint height,
+                                        bool vsync_enabled) {
   if (!render_target || !initialize_succeeded_) {
     return false;
   }
@@ -226,17 +227,21 @@ bool AngleSurfaceManager::CreateSurface(WindowsRenderTarget* render_target,
       surfaceAttributes);
   if (surface == EGL_NO_SURFACE) {
     LogEglError("Surface creation failed.");
+    return false;
   }
 
   surface_width_ = width;
   surface_height_ = height;
   render_surface_ = surface;
+
+  SetVSyncEnabled(vsync_enabled);
   return true;
 }
 
 void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
                                         EGLint width,
-                                        EGLint height) {
+                                        EGLint height,
+                                        bool vsync_enabled) {
   EGLint existing_width, existing_height;
   GetSurfaceDimensions(&existing_width, &existing_height);
   if (width != existing_width || height != existing_height) {
@@ -245,7 +250,7 @@ void AngleSurfaceManager::ResizeSurface(WindowsRenderTarget* render_target,
 
     ClearContext();
     DestroySurface();
-    if (!CreateSurface(render_target, width, height)) {
+    if (!CreateSurface(render_target, width, height, vsync_enabled)) {
       FML_LOG(ERROR)
           << "AngleSurfaceManager::ResizeSurface failed to create surface";
     }
@@ -298,6 +303,24 @@ EGLSurface AngleSurfaceManager::CreateSurfaceFromHandle(
     const EGLint* attributes) const {
   return eglCreatePbufferFromClientBuffer(egl_display_, handle_type, handle,
                                           egl_config_, attributes);
+}
+
+void AngleSurfaceManager::SetVSyncEnabled(bool enabled) {
+  if (eglMakeCurrent(egl_display_, render_surface_, render_surface_,
+                     egl_context_) != EGL_TRUE) {
+    LogEglError("Unable to make surface current to update the swap interval");
+    return;
+  }
+
+  // OpenGL swap intervals can be used to prevent screen tearing.
+  // If enabled, the raster thread blocks until the v-blank.
+  // This is unnecessary if DWM composition is enabled.
+  // See: https://www.khronos.org/opengl/wiki/Swap_Interval
+  // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw
+  if (eglSwapInterval(egl_display_, enabled ? 1 : 0) != EGL_TRUE) {
+    LogEglError("Unable to update the swap interval");
+    return;
+  }
 }
 
 bool AngleSurfaceManager::GetDevice(ID3D11Device** device) {

@@ -774,4 +774,8 @@ FlutterWindowsEngine::accessibility_bridge() {
   return view_->accessibility_bridge();
 }
 
+void FlutterWindowsEngine::OnDwmCompositionChanged() {
+  view_->OnDwmCompositionChanged();
+}
+
 }  // namespace flutter

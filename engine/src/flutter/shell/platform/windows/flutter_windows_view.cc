@@ -81,8 +81,8 @@ uint32_t FlutterWindowsView::GetFrameBufferId(size_t width, size_t height) {
   if (resize_target_width_ == width && resize_target_height_ == height) {
     // Platform thread is blocked for the entire duration until the
     // resize_status_ is set to kDone.
-    engine_->surface_manager()->ResizeSurface(GetRenderTarget(), width, height);
-    engine_->surface_manager()->MakeCurrent();
+    engine_->surface_manager()->ResizeSurface(GetRenderTarget(), width, height,
+                                              binding_handler_->NeedsVSync());
     resize_status_ = ResizeState::kFrameGenerated;
   }
 
@@ -586,8 +586,10 @@ bool FlutterWindowsView::PresentSoftwareBitmap(const void* allocation,
 void FlutterWindowsView::CreateRenderSurface() {
   if (engine_ && engine_->surface_manager()) {
     PhysicalWindowBounds bounds = binding_handler_->GetPhysicalWindowBounds();
+    bool enable_vsync = binding_handler_->NeedsVSync();
     engine_->surface_manager()->CreateSurface(GetRenderTarget(), bounds.width,
-                                              bounds.height);
+                                              bounds.height, enable_vsync);
+
     resize_target_width_ = bounds.width;
     resize_target_height_ = bounds.height;
   }
@@ -658,6 +660,12 @@ void FlutterWindowsView::UpdateSemanticsEnabled(bool enabled) {
     } else if (semantics_enabled_ && !accessibility_bridge_) {
       accessibility_bridge_ = CreateAccessibilityBridge();
     }
+  }
+}
+
+void FlutterWindowsView::OnDwmCompositionChanged() {
+  if (engine_->surface_manager()) {
+    engine_->surface_manager()->SetVSyncEnabled(binding_handler_->NeedsVSync());
   }
 }
 

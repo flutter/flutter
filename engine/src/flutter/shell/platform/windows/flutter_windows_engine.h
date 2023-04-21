@@ -266,6 +266,9 @@ class FlutterWindowsEngine {
                               LPARAM lparam,
                               AppExitType exit_type);
 
+  // Called when a WM_DWMCOMPOSITIONCHANGED message is received.
+  void OnDwmCompositionChanged();
+
  protected:
   // Creates the keyboard key handler.
   //

@@ -36,6 +36,7 @@ class MockWindowBindingHandler : public WindowBindingHandler {
   MOCK_METHOD0(SendInitialAccessibilityFeatures, void());
   MOCK_METHOD0(GetAlertDelegate, AlertPlatformNodeDelegate*());
   MOCK_METHOD0(GetAlert, ui::AXPlatformNodeWin*());
+  MOCK_METHOD0(NeedsVSync, bool());
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockWindowBindingHandler);

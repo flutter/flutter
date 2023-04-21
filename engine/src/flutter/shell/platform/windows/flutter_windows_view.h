@@ -195,6 +195,9 @@ class FlutterWindowsView : public WindowBindingHandlerDelegate,
   // |TextInputPluginDelegate|
   void OnResetImeComposing() override;
 
+  // Called when a WM_ONCOMPOSITIONCHANGED message is received.
+  void OnDwmCompositionChanged();
+
   // Get a pointer to the alert node for this view.
   ui::AXPlatformNodeWin* AlertNode() const;
 
