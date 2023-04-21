@@ -8,6 +8,8 @@
 
 include ':app'
 
+enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')
+
 def localPropertiesFile = new File(rootProject.projectDir, "local.properties")
 def properties = new Properties()
 
