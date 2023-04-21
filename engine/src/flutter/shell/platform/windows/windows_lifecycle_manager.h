@@ -18,7 +18,8 @@ class FlutterWindowsEngine;
 /// A manager for lifecycle events of the top-level window.
 ///
 /// Currently handles the following events:
-/// WM_CLOSE
+/// 1. WM_CLOSE
+/// 2. WM_DWMCOMPOSITIONCHANGED
 class WindowsLifecycleManager {
  public:
   WindowsLifecycleManager(FlutterWindowsEngine* engine);

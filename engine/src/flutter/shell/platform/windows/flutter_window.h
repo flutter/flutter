@@ -156,6 +156,9 @@ class FlutterWindow : public Window, public WindowBindingHandler {
   // |WindowBindingHandler|
   ui::AXPlatformNodeWin* GetAlert() override;
 
+  // |WindowBindingHandler|
+  bool NeedsVSync() override;
+
   // |Window|
   ui::AXFragmentRootDelegateWin* GetAxFragmentRootDelegate() override;
 

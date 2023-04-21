@@ -312,4 +312,16 @@ ui::AXPlatformNodeWin* FlutterWindow::GetAlert() {
   return alert_node_.get();
 }
 
+bool FlutterWindow::NeedsVSync() {
+  // If the Desktop Window Manager composition is enabled,
+  // the system itself synchronizes with v-sync.
+  // See: https://learn.microsoft.com/windows/win32/dwm/composition-ovw
+  BOOL composition_enabled;
+  if (SUCCEEDED(::DwmIsCompositionEnabled(&composition_enabled))) {
+    return !composition_enabled;
+  }
+
+  return true;
+}
+
 }  // namespace flutter

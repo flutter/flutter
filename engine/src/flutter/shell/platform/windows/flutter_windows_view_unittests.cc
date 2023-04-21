@@ -12,6 +12,7 @@
 #include <future>
 #include <vector>
 
+#include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/platform/common/json_message_codec.h"
 #include "flutter/shell/platform/embedder/test_utils/proc_table_replacement.h"
 #include "flutter/shell/platform/windows/flutter_window.h"
@@ -27,8 +28,10 @@
 namespace flutter {
 namespace testing {
 
+using ::testing::_;
 using ::testing::InSequence;
 using ::testing::NiceMock;
+using ::testing::Return;
 
 constexpr uint64_t kScanCodeKeyA = 0x1e;
 constexpr uint64_t kVirtualKeyA = 0x41;
@@ -117,7 +120,11 @@ class MockAngleSurfaceManager : public AngleSurfaceManager {
  public:
   MockAngleSurfaceManager() {}
 
+  MOCK_METHOD4(CreateSurface, bool(WindowsRenderTarget*, EGLint, EGLint, bool));
+  MOCK_METHOD4(ResizeSurface, void(WindowsRenderTarget*, EGLint, EGLint, bool));
   MOCK_METHOD0(DestroySurface, void());
+
+  MOCK_METHOD1(SetVSyncEnabled, void(bool));
 
  private:
   FML_DISALLOW_COPY_AND_ASSIGN(MockAngleSurfaceManager);
@@ -714,28 +721,44 @@ TEST(FlutterWindowsViewTest, WindowResizeTests) {
 
   auto window_binding_handler =
       std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  std::unique_ptr<MockAngleSurfaceManager> surface_manager =
+      std::make_unique<MockAngleSurfaceManager>();
+
+  EXPECT_CALL(*window_binding_handler.get(), NeedsVSync)
+      .WillOnce(Return(false));
+  EXPECT_CALL(
+      *surface_manager.get(),
+      ResizeSurface(_, /*width=*/500, /*height=*/500, /*enable_vsync=*/false))
+      .Times(1);
+  EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
 
   FlutterWindowsView view(std::move(window_binding_handler));
+  modifier.SetSurfaceManager(surface_manager.release());
   view.SetEngine(std::move(engine));
 
-  bool send_window_metrics_event_called = false;
+  fml::AutoResetWaitableEvent metrics_sent_latch;
   modifier.embedder_api().SendWindowMetricsEvent = MOCK_ENGINE_PROC(
       SendWindowMetricsEvent,
-      ([&send_window_metrics_event_called](
-           auto engine, const FlutterWindowMetricsEvent* even) {
-        send_window_metrics_event_called = true;
+      ([&metrics_sent_latch](auto engine,
+                             const FlutterWindowMetricsEvent* event) {
+        metrics_sent_latch.Signal();
         return kSuccess;
       }));
 
-  std::promise<bool> resize_completed;
-  std::thread([&resize_completed, &view]() {
+  fml::AutoResetWaitableEvent resized_latch;
+  std::thread([&resized_latch, &view]() {
+    // Start the window resize. This sends the new window metrics
+    // and then blocks until another thread completes the window resize.
     view.OnWindowSizeChanged(500, 500);
-    resize_completed.set_value(true);
+    resized_latch.Signal();
   }).detach();
 
-  auto result = resize_completed.get_future().wait_for(std::chrono::seconds(1));
-  EXPECT_EQ(std::future_status::ready, result);
-  EXPECT_TRUE(send_window_metrics_event_called);
+  // Wait until the platform thread has started the window resize.
+  metrics_sent_latch.Wait();
+
+  // Complete the window resize by requesting a buffer with the new window size.
+  view.GetFrameBufferId(500, 500);
+  resized_latch.Wait();
 }
 
 TEST(FlutterWindowsViewTest, WindowRepaintTests) {
@@ -1081,6 +1104,97 @@ TEST(FlutterWindowsViewTest, TooltipNodeData) {
   ASSERT_EQ(uia_node->GetPropertyValue(UIA_HelpTextPropertyId, &varname), S_OK);
   std::string uia_tooltip = _com_util::ConvertBSTRToString(varname.bstrVal);
   EXPECT_EQ(uia_tooltip, "tooltip");
+}
+
+// Don't block until the v-blank if it is disabled by the window.
+TEST(FlutterWindowsViewTest, DisablesVSync) {
+  std::unique_ptr<MockFlutterWindowsEngine> engine =
+      std::make_unique<MockFlutterWindowsEngine>();
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  std::unique_ptr<MockAngleSurfaceManager> surface_manager =
+      std::make_unique<MockAngleSurfaceManager>();
+
+  EXPECT_CALL(*window_binding_handler.get(), NeedsVSync)
+      .WillOnce(Return(false));
+
+  EngineModifier modifier(engine.get());
+  FlutterWindowsView view(std::move(window_binding_handler));
+
+  InSequence s;
+  EXPECT_CALL(*surface_manager.get(),
+              CreateSurface(_, _, _, /*vsync_enabled=*/false))
+      .Times(1)
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(*engine.get(), Stop).Times(1);
+  EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
+
+  modifier.SetSurfaceManager(surface_manager.release());
+  view.SetEngine(std::move(engine));
+
+  view.CreateRenderSurface();
+}
+
+// Blocks until the v-blank if it is enabled by the window.
+TEST(FlutterWindowsViewTest, EnablesVSync) {
+  std::unique_ptr<MockFlutterWindowsEngine> engine =
+      std::make_unique<MockFlutterWindowsEngine>();
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  std::unique_ptr<MockAngleSurfaceManager> surface_manager =
+      std::make_unique<MockAngleSurfaceManager>();
+
+  EXPECT_CALL(*window_binding_handler.get(), NeedsVSync).WillOnce(Return(true));
+
+  EngineModifier modifier(engine.get());
+  FlutterWindowsView view(std::move(window_binding_handler));
+
+  InSequence s;
+  EXPECT_CALL(*surface_manager.get(),
+              CreateSurface(_, _, _, /*vsync_enabled=*/true))
+      .Times(1)
+      .WillOnce(Return(true));
+
+  EXPECT_CALL(*engine.get(), Stop).Times(1);
+  EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
+
+  modifier.SetSurfaceManager(surface_manager.release());
+  view.SetEngine(std::move(engine));
+
+  view.CreateRenderSurface();
+}
+
+// Desktop Window Manager composition can be disabled on Windows 7.
+// If this happens, the app must synchronize with the vsync to prevent
+// screen tearing.
+TEST(FlutterWindowsViewTest, UpdatesVSyncOnDwmUpdates) {
+  std::unique_ptr<MockFlutterWindowsEngine> engine =
+      std::make_unique<MockFlutterWindowsEngine>();
+  auto window_binding_handler =
+      std::make_unique<NiceMock<MockWindowBindingHandler>>();
+  std::unique_ptr<MockAngleSurfaceManager> surface_manager =
+      std::make_unique<MockAngleSurfaceManager>();
+
+  EXPECT_CALL(*window_binding_handler.get(), NeedsVSync)
+      .WillOnce(Return(true))
+      .WillOnce(Return(false));
+
+  EngineModifier modifier(engine.get());
+  FlutterWindowsView view(std::move(window_binding_handler));
+
+  InSequence s;
+  EXPECT_CALL(*surface_manager.get(), SetVSyncEnabled(true)).Times(1);
+  EXPECT_CALL(*surface_manager.get(), SetVSyncEnabled(false)).Times(1);
+
+  EXPECT_CALL(*engine.get(), Stop).Times(1);
+  EXPECT_CALL(*surface_manager.get(), DestroySurface).Times(1);
+
+  modifier.SetSurfaceManager(surface_manager.release());
+  view.SetEngine(std::move(engine));
+
+  view.GetEngine()->OnDwmCompositionChanged();
+  view.GetEngine()->OnDwmCompositionChanged();
 }
 
 }  // namespace testing
