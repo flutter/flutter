@@ -516,6 +516,22 @@ allprojects {
       }
     });
 
+    group('Parse gradle version from distribution url', () {
+      testWithoutContext('null distribution url returns null version', () {
+        expect(parseGradleVersionFromDistributionUrl(null), null);
+      });
+
+      testWithoutContext('unparseable format returns null', () {
+        const String distributionUrl = 'aString';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), null);
+      });
+
+      testWithoutContext('recognizable format returns correct version', () {
+        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
+      });
+    });
+
     group('validates java/gradle versions', () {
       final List<JavaGradleTestData> testData = <JavaGradleTestData>[
         // Values too new *these need to update* when

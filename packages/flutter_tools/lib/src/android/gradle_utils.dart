@@ -64,7 +64,7 @@ final RegExp _androidGradlePluginRegExp =
 // Version can have 2 or 3 numbers.
 // 'distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip'
 final RegExp distributionUrlRegex =
-    RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip');
+    RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
 
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
@@ -185,7 +185,6 @@ File getGradleWrapperFile(Directory directory) {
       .childFile(gradleWrapperPropertiesFilename);
 }
 
-//TODO(gmackall) - tests for this
 /// Parses the gradle wrapper distribution url to return a string containing
 /// the version number.
 ///
