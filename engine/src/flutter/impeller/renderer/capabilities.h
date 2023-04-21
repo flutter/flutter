@@ -65,12 +65,13 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsFramebufferFetch(bool value);
 
-  CapabilitiesBuilder& SetSupportsCompute(bool compute, bool subgroups);
+  CapabilitiesBuilder& SetSupportsCompute(bool value);
 
-  CapabilitiesBuilder& SetSupportsReadFromOnscreenTexture(
-      bool read_from_onscreen_texture);
+  CapabilitiesBuilder& SetSupportsComputeSubgroups(bool value);
 
-  CapabilitiesBuilder& SetSupportsReadFromResolve(bool read_from_resolve);
+  CapabilitiesBuilder& SetSupportsReadFromOnscreenTexture(bool value);
+
+  CapabilitiesBuilder& SetSupportsReadFromResolve(bool value);
 
   CapabilitiesBuilder& SetDefaultColorFormat(PixelFormat value);
 

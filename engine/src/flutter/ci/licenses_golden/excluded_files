@@ -144,6 +144,7 @@
 ../../../flutter/impeller/golden_tests_harvester/test
 ../../../flutter/impeller/image/README.md
 ../../../flutter/impeller/playground
+../../../flutter/impeller/renderer/capabilities_unittests.cc
 ../../../flutter/impeller/renderer/compute_subgroup_unittests.cc
 ../../../flutter/impeller/renderer/compute_unittests.cc
 ../../../flutter/impeller/renderer/device_buffer_unittests.cc
