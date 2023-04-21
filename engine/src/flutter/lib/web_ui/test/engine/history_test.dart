@@ -7,12 +7,16 @@
 library;
 
 import 'dart:async';
+import 'dart:js_interop'
+    show JSExportedDartFunction, JSExportedDartFunctionToFunction;
 
 import 'package:quiver/testing/async.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
-import 'package:ui/src/engine.dart' show DomEventListener, window;
+import 'package:ui/src/engine.dart' show window;
 import 'package:ui/src/engine/browser_detection.dart';
+import 'package:ui/src/engine/dom.dart'
+    show DomEvent, DomEventListener, createDomPopStateEvent;
 import 'package:ui/src/engine/navigation.dart';
 import 'package:ui/src/engine/services.dart';
 import 'package:ui/src/engine/test_embedding.dart';
@@ -647,6 +651,31 @@ void testMain() {
       location.hash = '#';
       expect(strategy.getPath(), '/');
     });
+
+    test('addPopStateListener fn unwraps DomPopStateEvent state', () {
+      final HashUrlStrategy strategy = HashUrlStrategy(location);
+      const String expected = 'expected value';
+      final List<Object?> states = <Object?>[];
+
+      // Put the popStates received from the `location` in a list
+      strategy.addPopStateListener(states.add);
+
+      // Simulate a popstate with a null state:
+      location.debugTriggerPopState(null);
+
+      expect(states, hasLength(1));
+      expect(states[0], isNull);
+
+      // Simulate a popstate event with `expected` as its 'state'.
+      location.debugTriggerPopState(expected);
+
+      expect(states, hasLength(2));
+      final Object? state = states[1];
+      expect(state, isNotNull);
+      // flutter/flutter#125228
+      expect(state, isNot(isA<DomEvent>()));
+      expect(state, expected);
+    });
   });
 }
 
@@ -694,15 +723,32 @@ class TestPlatformLocation extends PlatformLocation {
   @override
   dynamic state;
 
+  List<DomEventListener> popStateListeners = <DomEventListener>[];
+
   @override
   String get pathname => throw UnimplementedError();
 
   @override
   String get search => throw UnimplementedError();
 
+  /// Calls all the registered `popStateListeners` with a 'popstate'
+  /// event with value `state`
+  void debugTriggerPopState(Object? state) {
+    final DomEvent event = createDomPopStateEvent(
+      'popstate',
+      <Object, Object>{
+        if (state != null) 'state': state,
+      },
+    );
+    for (final DomEventListener listener in popStateListeners) {
+      final Function fn = (listener as JSExportedDartFunction).toDart;
+      fn(event);
+    }
+  }
+
   @override
   void addPopStateListener(DomEventListener fn) {
-    throw UnimplementedError();
+    popStateListeners.add(fn);
   }
 
   @override
