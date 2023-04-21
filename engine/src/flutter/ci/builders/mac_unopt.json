@@ -141,6 +141,7 @@
                "--unoptimized",
                "--no-lto",
                "--prebuilt-dart-sdk",
+               "--force-mac-arm64",
                "--mac-cpu",
                "arm64"
             ],
@@ -187,6 +188,7 @@
                 "debug",
                 "--simulator",
                 "--no-lto",
+                "--force-mac-arm64",
                 "--simulator-cpu",
                 "arm64"
             ],
