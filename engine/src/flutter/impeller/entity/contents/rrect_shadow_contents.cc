@@ -7,6 +7,7 @@
 
 #include "impeller/entity/contents/content_context.h"
 #include "impeller/entity/entity.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/path.h"
 #include "impeller/geometry/path_builder.h"
 #include "impeller/renderer/render_pass.h"
@@ -31,6 +32,10 @@ void RRectShadowContents::SetSigma(Sigma sigma) {
 
 void RRectShadowContents::SetColor(Color color) {
   color_ = color.Premultiply();
+}
+
+Color RRectShadowContents::GetColor() const {
+  return color_;
 }
 
 std::optional<Rect> RRectShadowContents::GetCoverage(

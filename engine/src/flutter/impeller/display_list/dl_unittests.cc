@@ -17,10 +17,14 @@
 #include "flutter/display_list/effects/dl_image_filter.h"
 #include "flutter/display_list/effects/dl_mask_filter.h"
 #include "flutter/testing/testing.h"
+#include "gtest/gtest.h"
+#include "impeller/display_list/dl_dispatcher.h"
 #include "impeller/display_list/dl_image_impeller.h"
 #include "impeller/display_list/dl_playground.h"
+#include "impeller/entity/contents/rrect_shadow_contents.h"
 #include "impeller/geometry/constants.h"
 #include "impeller/geometry/point.h"
+#include "impeller/geometry/scalar.h"
 #include "impeller/playground/widgets.h"
 #include "impeller/scene/node.h"
 #include "third_party/imgui/imgui.h"
@@ -823,6 +827,38 @@ TEST_P(DisplayListTest, CanDrawShadow) {
   }
 
   ASSERT_TRUE(OpenPlaygroundHere(builder.Build()));
+}
+
+TEST_P(DisplayListTest, TransparentShadowProducesCorrectColor) {
+  flutter::DisplayListBuilder builder;
+  {
+    builder.Save();
+    builder.Scale(1.618, 1.618);
+    builder.DrawShadow(SkPath{}.addRect(SkRect::MakeXYWH(0, 0, 200, 100)),
+                       SK_ColorTRANSPARENT, 15, false, 1);
+    builder.Restore();
+  }
+  auto dl = builder.Build();
+
+  DlDispatcher dispatcher;
+  dispatcher.drawDisplayList(dl, 1);
+  auto picture = dispatcher.EndRecordingAsPicture();
+
+  std::shared_ptr<RRectShadowContents> rrect_shadow;
+  picture.pass->IterateAllEntities([&rrect_shadow](Entity& entity) {
+    if (ScalarNearlyEqual(entity.GetTransformation().GetScale().x, 1.618f)) {
+      rrect_shadow =
+          std::static_pointer_cast<RRectShadowContents>(entity.GetContents());
+      return false;
+    }
+    return true;
+  });
+
+  ASSERT_NE(rrect_shadow, nullptr);
+  ASSERT_EQ(rrect_shadow->GetColor().red, 0);
+  ASSERT_EQ(rrect_shadow->GetColor().green, 0);
+  ASSERT_EQ(rrect_shadow->GetColor().blue, 0);
+  ASSERT_EQ(rrect_shadow->GetColor().alpha, 0);
 }
 
 // Draw a hexagon using triangle fan
