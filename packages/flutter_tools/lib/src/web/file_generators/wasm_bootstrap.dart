@@ -20,7 +20,7 @@ String generateWasmBootstrapFile(bool isSkwasm) {
     moduleInstance = await dart2wasm_runtime.instantiate(dartModulePromise, imports);
   } catch (exception) {
     console.error(`Failed to fetch and instantiate wasm module: \${exception}`);
-    console.error($kWasmMoreInfo);
+    console.error('$kWasmMoreInfo');
   }
 
   if (moduleInstance) {
