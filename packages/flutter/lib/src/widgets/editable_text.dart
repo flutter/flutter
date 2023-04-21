@@ -2380,8 +2380,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  @override
-  void startLiveTextInput(SelectionChangedCause cause) {
+  void _startLiveTextInput(SelectionChangedCause cause) {
     if (!liveTextInputEnabled) {
       return;
     }
@@ -2626,7 +2625,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           ? () => selectAll(SelectionChangedCause.toolbar)
           : null,
       onLiveTextInput: liveTextInputEnabled
-          ? () => startLiveTextInput(SelectionChangedCause.toolbar)
+          ? () => _startLiveTextInput(SelectionChangedCause.toolbar)
           : null,
     );
   }

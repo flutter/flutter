@@ -1084,12 +1084,6 @@ mixin TextSelectionDelegate {
   /// If [cause] is [SelectionChangedCause.toolbar], the position of
   /// [bringIntoView] to selection will be called and hide toolbar.
   void copySelection(SelectionChangedCause cause);
-
-  /// Start Live Text input.
-  ///
-  /// Live Text input will be started regardless of what the cause is,
-  /// and the toolbar will be hidden.
-  void startLiveTextInput(SelectionChangedCause cause);
 }
 
 /// An interface to receive information from [TextInput].

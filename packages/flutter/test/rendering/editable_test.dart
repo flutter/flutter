@@ -43,9 +43,6 @@ class _FakeEditableTextState with TextSelectionDelegate {
 
   @override
   void copySelection(SelectionChangedCause cause) { }
-
-  @override
-  void startLiveTextInput(SelectionChangedCause cause) {}
 }
 
 void main() {
