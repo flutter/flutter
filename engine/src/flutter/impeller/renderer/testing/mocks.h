@@ -78,6 +78,7 @@ class MockCommandBuffer : public CommandBuffer {
   MOCK_CONST_METHOD1(SetLabel, void(const std::string& label));
   MOCK_CONST_METHOD0(OnCreateBlitPass, std::shared_ptr<BlitPass>());
   MOCK_METHOD1(OnSubmitCommands, bool(CompletionCallback callback));
+  MOCK_METHOD0(OnWaitUntilScheduled, void());
   MOCK_CONST_METHOD0(OnCreateComputePass, std::shared_ptr<ComputePass>());
   MOCK_METHOD1(OnCreateRenderPass,
                std::shared_ptr<RenderPass>(RenderTarget render_target));
