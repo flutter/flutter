@@ -31,8 +31,8 @@ typedef ResponseDataCallback = FutureOr<void> Function(Map<String, dynamic>?);
 ///
 /// This is the default `responseDataCallback` in [integrationDriver].
 Future<void> writeResponseData(
-  Map<String, dynamic>? data, {
-  String testOutputFilename = 'integration_response_data',
+  final Map<String, dynamic>? data, {
+  final String testOutputFilename = 'integration_response_data',
   String? destinationDirectory,
 }) async {
   destinationDirectory ??= testOutputsDirectory;
@@ -68,8 +68,8 @@ Future<void> writeResponseData(
 /// `responseDataCallback` is the handler for processing [Response.data].
 /// The default value is `writeResponseData`.
 Future<void> integrationDriver({
-  Duration timeout = const Duration(minutes: 20),
-  ResponseDataCallback? responseDataCallback = writeResponseData,
+  final Duration timeout = const Duration(minutes: 20),
+  final ResponseDataCallback? responseDataCallback = writeResponseData,
 }) async {
   final FlutterDriver driver = await FlutterDriver.connect();
   final String jsonResult = await driver.requestData(null, timeout: timeout);
@@ -91,6 +91,6 @@ Future<void> integrationDriver({
 
 const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
-String _encodeJson(Map<String, dynamic>? jsonObject, bool pretty) {
+String _encodeJson(final Map<String, dynamic>? jsonObject, final bool pretty) {
   return pretty ? _prettyEncoder.convert(jsonObject) : json.encode(jsonObject);
 }

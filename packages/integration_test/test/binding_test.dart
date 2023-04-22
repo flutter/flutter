@@ -33,7 +33,7 @@ Future<void> main() async {
       );
     });
 
-    testWidgets('Run Integration app', (WidgetTester tester) async {
+    testWidgets('Run Integration app', (final WidgetTester tester) async {
       runApp(const MaterialApp(
         home: Text('Test'),
       ));
@@ -42,7 +42,7 @@ Future<void> main() async {
       await tester.pump();
     });
 
-    testWidgets('hitTesting works when using setSurfaceSize', (WidgetTester tester) async {
+    testWidgets('hitTesting works when using setSurfaceSize', (final WidgetTester tester) async {
       int invocations = 0;
       await tester.pumpWidget(
         MaterialApp(
@@ -74,7 +74,7 @@ Future<void> main() async {
       expect(invocations, 3);
     });
 
-    testWidgets('setSurfaceSize works', (WidgetTester tester) async {
+    testWidgets('setSurfaceSize works', (final WidgetTester tester) async {
       await tester.pumpWidget(const MaterialApp(home: Center(child: Text('Test'))));
 
       final Size viewCenter = tester.view.physicalSize /
@@ -100,7 +100,7 @@ Future<void> main() async {
       expect(widgetCenter.dy, viewCenterY);
     });
 
-    testWidgets('Test traceAction', (WidgetTester tester) async {
+    testWidgets('Test traceAction', (final WidgetTester tester) async {
       await binding.enableTimeline(vmService: fakeVM);
       await binding.traceAction(() async {});
       expect(binding.reportData, isNotNull);
@@ -125,7 +125,7 @@ Future<void> main() async {
     });
 
     // TODO(jiahaog): Remove when https://github.com/flutter/flutter/issues/66006 is fixed.
-    testWidgets('root widgets are wrapped with a RepaintBoundary', (WidgetTester tester) async {
+    testWidgets('root widgets are wrapped with a RepaintBoundary', (final WidgetTester tester) async {
       await tester.pumpWidget(const Placeholder());
 
       expect(find.byType(RepaintBoundary), findsOneWidget);
@@ -150,7 +150,7 @@ class FakeVM extends Fake implements vm.VmService {
   vm.Timeline timeline;
 
   @override
-  Future<vm.Timeline> getVMTimeline({int? timeOriginMicros, int? timeExtentMicros}) async {
+  Future<vm.Timeline> getVMTimeline({final int? timeOriginMicros, final int? timeExtentMicros}) async {
     return timeline;
   }
 

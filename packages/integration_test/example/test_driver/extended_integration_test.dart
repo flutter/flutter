@@ -10,9 +10,9 @@ Future<void> main() async {
   await integrationDriver(
     driver: driver,
     onScreenshot: (
-      String screenshotName,
-      List<int> screenshotBytes, [
-      Map<String, Object?>? args,
+      final String screenshotName,
+      final List<int> screenshotBytes, [
+      final Map<String, Object?>? args,
     ]) async {
       // Return false if the screenshot is invalid.
       // TODO(yjbanov): implement, see https://github.com/flutter/flutter/issues/86120

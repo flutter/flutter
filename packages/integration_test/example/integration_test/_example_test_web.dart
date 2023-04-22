@@ -18,7 +18,7 @@ import 'package:integration_test_example/main.dart' as app;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  testWidgets('verify text', (WidgetTester tester) async {
+  testWidgets('verify text', (final WidgetTester tester) async {
     // Build our app and trigger a frame.
     app.main();
 
@@ -28,7 +28,7 @@ void main() {
     // Verify that platform is retrieved.
     expect(
       find.byWidgetPredicate(
-        (Widget widget) =>
+        (final Widget widget) =>
             widget is Text &&
             widget.data!
                 .startsWith('Platform: ${html.window.navigator.platform}\n'),

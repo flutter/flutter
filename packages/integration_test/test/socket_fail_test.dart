@@ -9,7 +9,7 @@ import 'package:integration_test/integration_test.dart';
 
 class SocketExceptionHttpClient extends Fake implements HttpClient {
   @override
-  Future<HttpClientRequest> openUrl(String method, Uri url) {
+  Future<HttpClientRequest> openUrl(final String method, final Uri url) {
     throw const SocketException('always throw');
   }
 }

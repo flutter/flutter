@@ -43,7 +43,7 @@ import 'common.dart';
 ///
 /// As a result, returning `false` from `onScreenshot` will make the test fail.
 Future<void> integrationDriver(
-    {FlutterDriver? driver, ScreenshotCallback? onScreenshot}) async {
+    {FlutterDriver? driver, final ScreenshotCallback? onScreenshot}) async {
   driver ??= await FlutterDriver.connect();
   // Test states that it's waiting on web driver commands.
   // [DriverTestMessage] is converted to string since json format causes an

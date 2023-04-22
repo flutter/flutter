@@ -41,7 +41,7 @@ class Response {
       : _allTestsPassed = false;
 
   /// Constructor for failure response.
-  Response.toolException({String? ex})
+  Response.toolException({final String? ex})
       : _allTestsPassed = false,
         _failureDetails = <Failure>[Failure('ToolException', ex)];
 
@@ -75,7 +75,7 @@ class Response {
       });
 
   /// Deserializes the result from JSON.
-  static Response fromJson(String source) {
+  static Response fromJson(final String source) {
     final Map<String, dynamic> responseJson = json.decode(source) as Map<String, dynamic>;
     if ((responseJson['result'] as String?) == 'true') {
       return Response.allTestsPassed(data: responseJson['data'] as Map<String, dynamic>?);
@@ -88,7 +88,7 @@ class Response {
   }
 
   /// Method for formatting the test failures' details.
-  String formatFailures(List<Failure> failureDetails) {
+  String formatFailures(final List<Failure> failureDetails) {
     if (failureDetails.isEmpty) {
       return '';
     }
@@ -119,8 +119,8 @@ class Response {
   }
 
   /// Creates a [Failure] list using a json response.
-  static List<Failure> _failureDetailsFromJson(List<dynamic> list) {
-    return list.map((dynamic s) {
+  static List<Failure> _failureDetailsFromJson(final List<dynamic> list) {
+    return list.map((final dynamic s) {
       return Failure.fromJsonString(s as String);
     }).toList();
   }
@@ -149,7 +149,7 @@ class Failure {
   String toString() => toJson();
 
   /// Decode a JSON string to create a Failure object.
-  static Failure fromJsonString(String jsonString) {
+  static Failure fromJsonString(final String jsonString) {
     final Map<String, dynamic> failure = json.decode(jsonString) as Map<String, dynamic>;
     return Failure(failure['methodName'] as String, failure['details'] as String?);
   }
@@ -211,7 +211,7 @@ class DriverTestMessage {
   }
 
   /// Return a DriverTestMessage depending on `status`.
-  static DriverTestMessage fromString(String status) {
+  static DriverTestMessage fromString(final String status) {
     switch (status) {
       case 'error':
         return DriverTestMessage.error();
@@ -253,7 +253,7 @@ class WebDriverCommand {
         values = <String, dynamic>{};
 
   /// Constructor for [WebDriverCommandType.noop] screenshot.
-  WebDriverCommand.screenshot(String screenshotName, [Map<String, Object?>? args])
+  WebDriverCommand.screenshot(final String screenshotName, [final Map<String, Object?>? args])
       : type = WebDriverCommandType.screenshot,
         values = <String, dynamic>{
           'screenshot_name': screenshotName,
@@ -275,7 +275,7 @@ class WebDriverCommand {
   /// Util method for converting [WebDriverCommandType] to a map entry.
   ///
   /// Used for converting messages to json format.
-  static Map<String, dynamic> typeToMap(WebDriverCommandType type) => <String, dynamic>{
+  static Map<String, dynamic> typeToMap(final WebDriverCommandType type) => <String, dynamic>{
     'web_driver_command': '$type',
   };
 }
@@ -291,11 +291,11 @@ class WebDriverCommand {
 abstract class CallbackManager {
   /// The callback function to response the driver side input.
   Future<Map<String, dynamic>> callback(
-      Map<String, String> params, IntegrationTestResults testRunner);
+      final Map<String, String> params, final IntegrationTestResults testRunner);
 
   /// Takes a screenshot of the application.
   /// Returns the data that is sent back to the host.
-   Future<Map<String, dynamic>> takeScreenshot(String screenshot, [Map<String, Object?>? args]);
+   Future<Map<String, dynamic>> takeScreenshot(final String screenshot, [final Map<String, Object?>? args]);
 
   /// Android only. Converts the Flutter surface to an image view.
   Future<void> convertFlutterSurfaceToImage();
