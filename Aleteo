@@ -1,0 +1,41 @@
+LÉAME.md
+Aleteo
+Estado de construcción - Cirrus Insignia de discordia identificador de Twitter código cov Mejores prácticas de ICI Cuadro de mando de OpenSSF
+
+Flutter es el SDK de Google para crear experiencias de usuario atractivas y rápidas para dispositivos móviles, web y de escritorio a partir de una única base de código. Flutter funciona con código existente, lo utilizan desarrolladores y organizaciones de todo el mundo, y es gratuito y de código abierto.
+
+Documentación
+instalar aleteo
+Flutter documentación
+wiki de desarrollo
+Contribuyendo a Flutter
+Para anuncios sobre nuevos lanzamientos, siga la lista de correo flutter-announce@googlegroups.com . Nuestra documentación también realiza un seguimiento de los cambios importantes en las versiones.
+
+Términos de servicio
+La herramienta Flutter ocasionalmente puede descargar recursos de los servidores de Google. Al descargar o usar el SDK de Flutter, acepta los Términos de servicio de Google: https://policies.google.com/terms
+
+Por ejemplo, cuando se instala desde GitHub (a diferencia de un archivo preempaquetado), la herramienta Flutter descargará el SDK de Dart de los servidores de Google inmediatamente cuando se ejecute por primera vez, ya que se usa para ejecutar la herramienta en sí flutter. Esto también ocurrirá cuando se actualice Flutter (por ejemplo, al ejecutar el flutter upgradecomando).
+
+Acerca de Flutter
+Creemos que Flutter lo ayudará a crear aplicaciones hermosas y rápidas, con un modelo de desarrollo productivo, extensible y abierto, ya sea que se dirija a iOS o Android, web, Windows, macOS, Linux o incrustándolo como el kit de herramientas de UI para una plataforma de su elección.
+
+Hermosas experiencias de usuario
+Queremos permitir que los diseñadores entreguen su visión creativa completa sin verse obligados a diluirla debido a las limitaciones del marco subyacente. La arquitectura en capas de Flutter le brinda control sobre cada píxel en la pantalla y sus poderosas capacidades de composición le permiten superponer y animar gráficos, video, texto y controles sin limitación. Flutter incluye un conjunto completo de widgets que brindan experiencias de píxeles perfectos, ya sea que esté creando para iOS ( Cupertino ) u otras plataformas ( Material ), junto con soporte para personalizar o crear componentes visuales completamente nuevos.
+
+Imagen de héroe de Reflectly
+
+Resultados rápidos
+Flutter es rápido. Está alimentado por la misma biblioteca de gráficos 2D acelerada por hardware que sustenta Chrome y Android: Skia . Diseñamos Flutter para que sea compatible con gráficos sin fallas ni bloqueos a la velocidad nativa de su dispositivo. El código de Flutter funciona con la plataforma Dart de clase mundial , que permite la compilación en código de máquina ARM de 32 y 64 bits para iOS y Android, así como JavaScript para la web e Intel x64 para dispositivos de escritorio.
+
+Diagrama de dardos
+
+desarrollo productivo
+Flutter ofrece recarga en caliente con estado , lo que le permite realizar cambios en su código y ver los resultados al instante sin reiniciar su aplicación o perder su estado.
+
+Animación de recarga caliente
+
+
+Modelo extensible y abierto
+Flutter funciona con cualquier herramienta de desarrollo (o con ninguna), y también incluye complementos de edición para Visual Studio Code e IntelliJ/Android Studio . Flutter proporciona decenas de miles de paquetes para acelerar su desarrollo, independientemente de su plataforma de destino. Y acceder a otro código nativo es fácil, con soporte para FFI ( en Android , en iOS , en macOS y en Windows ), así como API específicas de la plataforma. .
+
+Flutter es un proyecto totalmente de código abierto y agradecemos las contribuciones. Puede encontrar información sobre cómo empezar en nuestra guía para colaboradores .
