@@ -12,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 class TestPlugin {
-  static void registerWith(Registrar registrar) {
+  static void registerWith(final Registrar registrar) {
     final MethodChannel channel = MethodChannel(
       'test_plugin',
       const StandardMethodCodec(),
@@ -24,7 +24,7 @@ class TestPlugin {
 
   static final List<String> calledMethods = <String>[];
 
-  Future<void> handleMethodCall(MethodCall call) async {
+  Future<void> handleMethodCall(final MethodCall call) async {
     calledMethods.add(call.method);
   }
 }
@@ -56,7 +56,7 @@ void main() {
 
       final List<String> loggedMessages = <String>[];
       ServicesBinding.instance.defaultBinaryMessenger
-          .setMessageHandler('test_send', (ByteData? data) {
+          .setMessageHandler('test_send', (final ByteData? data) {
         loggedMessages.add(codec.decodeMessage(data)! as String);
         return Future<ByteData?>.value();
       });

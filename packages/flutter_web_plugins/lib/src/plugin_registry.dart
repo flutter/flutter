@@ -44,7 +44,7 @@ class Registrar extends BinaryMessenger {
       'This argument is ignored. '
       'This feature was deprecated after v1.24.0-7.0.pre.'
     )
-    BinaryMessenger? binaryMessenger,
+    final BinaryMessenger? binaryMessenger,
   ]);
 
   /// Registers the registrar's message handler
@@ -75,9 +75,9 @@ class Registrar extends BinaryMessenger {
   )
   @override
   Future<void> handlePlatformMessage(
-    String channel,
-    ByteData? data,
-    ui.PlatformMessageResponseCallback? callback,
+    final String channel,
+    final ByteData? data,
+    final ui.PlatformMessageResponseCallback? callback,
   ) => handleFrameworkMessage(channel, data, callback);
 
   /// Message handler for web plugins.
@@ -104,9 +104,9 @@ class Registrar extends BinaryMessenger {
   /// ui.webOnlySetPluginHandler(webPluginRegistrar.handleFrameworkMessage);
   /// ```
   Future<void> handleFrameworkMessage(
-    String channel,
-    ByteData? data,
-    ui.PlatformMessageResponseCallback? callback,
+    final String channel,
+    final ByteData? data,
+    final ui.PlatformMessageResponseCallback? callback,
   ) async {
     ByteData? response;
     try {
@@ -139,9 +139,9 @@ class Registrar extends BinaryMessenger {
 
   /// Sends a platform message from the platform side back to the framework.
   @override
-  Future<ByteData?> send(String channel, ByteData? message) {
+  Future<ByteData?> send(final String channel, final ByteData? message) {
     final Completer<ByteData?> completer = Completer<ByteData?>();
-    ui.channelBuffers.push(channel, message, (ByteData? reply) {
+    ui.channelBuffers.push(channel, message, (final ByteData? reply) {
       try {
         completer.complete(reply);
       } catch (exception, stack) {
@@ -157,7 +157,7 @@ class Registrar extends BinaryMessenger {
   }
 
   @override
-  void setMessageHandler(String channel, MessageHandler? handler) {
+  void setMessageHandler(final String channel, final MessageHandler? handler) {
     if (handler == null) {
       _handlers.remove(channel);
     } else {
@@ -185,7 +185,7 @@ class PluginRegistry extends Registrar {
       'This argument is ignored. '
       'This feature was deprecated after v1.26.0-18.0.pre.'
     )
-    BinaryMessenger? binaryMessenger,
+    final BinaryMessenger? binaryMessenger,
   ]) : super();
 
   /// Returns `this`. The argument is ignored.
@@ -193,7 +193,7 @@ class PluginRegistry extends Registrar {
     'This method is redundant. It returns the object on which it is called. '
     'This feature was deprecated after v1.26.0-18.0.pre.'
   )
-  Registrar registrarFor(Type key) => this;
+  Registrar registrarFor(final Type key) => this;
 }
 
 /// The default plugin registrar for the web.

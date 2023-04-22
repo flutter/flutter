@@ -21,7 +21,7 @@ abstract class UrlStrategy {
 
   /// Adds a listener to the `popstate` event and returns a function that, when
   /// invoked, removes the listener.
-  ui.VoidCallback addPopStateListener(EventListener fn);
+  ui.VoidCallback addPopStateListener(final EventListener fn);
 
   /// Returns the active path in the browser.
   String getPath();
@@ -33,17 +33,17 @@ abstract class UrlStrategy {
 
   /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
-  String prepareExternalUrl(String internalUrl);
+  String prepareExternalUrl(final String internalUrl);
 
   /// Push a new history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object? state, String title, String url);
+  void pushState(final Object? state, final String title, final String url);
 
   /// Replace the currently active history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object? state, String title, String url);
+  void replaceState(final Object? state, final String title, final String url);
 
   /// Moves forwards or backwards through the history stack.
   ///
@@ -56,7 +56,7 @@ abstract class UrlStrategy {
   /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  Future<void> go(int count);
+  Future<void> go(final int count);
 }
 
 /// Encapsulates all calls to DOM apis, which allows the [UrlStrategy] classes
@@ -72,13 +72,13 @@ abstract class PlatformLocation {
   /// Registers an event listener for the `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void addPopStateListener(EventListener fn);
+  void addPopStateListener(final EventListener fn);
 
   /// Unregisters the given listener (added by [addPopStateListener]) from the
   /// `popstate` event.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onpopstate
-  void removePopStateListener(EventListener fn);
+  void removePopStateListener(final EventListener fn);
 
   /// The `pathname` part of the URL in the browser address bar.
   ///
@@ -103,12 +103,12 @@ abstract class PlatformLocation {
   /// Adds a new entry to the browser history stack.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  void pushState(Object? state, String title, String url);
+  void pushState(final Object? state, final String title, final String url);
 
   /// Replaces the current entry in the browser history stack.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  void replaceState(Object? state, String title, String url);
+  void replaceState(final Object? state, final String title, final String url);
 
   /// Moves forwards or backwards through the history stack.
   ///
@@ -121,7 +121,7 @@ abstract class PlatformLocation {
   /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  void go(int count);
+  void go(final int count);
 
   /// The base href where the Flutter app is being served.
   ///

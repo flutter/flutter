@@ -43,7 +43,7 @@ typedef _HistoryMove = Future<void> Function(int count);
 
 /// Given a Dart implementation of URL strategy, converts it to a JavaScript
 /// URL strategy to be passed through JS interop.
-JsUrlStrategy convertToJsUrlStrategy(UrlStrategy strategy) {
+JsUrlStrategy convertToJsUrlStrategy(final UrlStrategy strategy) {
   return JsUrlStrategy(
     getPath: allowInterop(strategy.getPath),
     getState: allowInterop(strategy.getState),
@@ -65,18 +65,18 @@ abstract class JsUrlStrategy {
   /// Creates an instance of [JsUrlStrategy] from a bag of URL strategy
   /// functions.
   external factory JsUrlStrategy({
-    @required _PathGetter getPath,
-    @required _StateGetter getState,
-    @required _AddPopStateListener addPopStateListener,
-    @required _StringToString prepareExternalUrl,
-    @required _StateOperation pushState,
-    @required _StateOperation replaceState,
-    @required _HistoryMove go,
+    @required final _PathGetter getPath,
+    @required final _StateGetter getState,
+    @required final _AddPopStateListener addPopStateListener,
+    @required final _StringToString prepareExternalUrl,
+    @required final _StateOperation pushState,
+    @required final _StateOperation replaceState,
+    @required final _HistoryMove go,
   });
 
   /// Adds a listener to the `popstate` event and returns a function that
   /// removes the listener.
-  external ui.VoidCallback addPopStateListener(html.EventListener fn);
+  external ui.VoidCallback addPopStateListener(final html.EventListener fn);
 
   /// Returns the active path in the browser.
   external String getPath();
@@ -88,17 +88,17 @@ abstract class JsUrlStrategy {
 
   /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
-  external String prepareExternalUrl(String internalUrl);
+  external String prepareExternalUrl(final String internalUrl);
 
   /// Push a new history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-  external void pushState(Object? state, String title, String url);
+  external void pushState(final Object? state, final String title, final String url);
 
   /// Replace the currently active history entry.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/replaceState
-  external void replaceState(Object? state, String title, String url);
+  external void replaceState(final Object? state, final String title, final String url);
 
   /// Moves forwards or backwards through the history stack.
   ///
@@ -111,5 +111,5 @@ abstract class JsUrlStrategy {
   /// * `go(3)` moves forward 3 steps in history.
   ///
   /// See: https://developer.mozilla.org/en-US/docs/Web/API/History/go
-  external Future<void> go(int count);
+  external Future<void> go(final int count);
 }

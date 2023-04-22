@@ -161,23 +161,23 @@ class TestPlatformLocation extends PlatformLocation {
   String baseHref = '';
 
   @override
-  void addPopStateListener(EventListener fn) {
+  void addPopStateListener(final EventListener fn) {
     throw UnimplementedError();
   }
 
   @override
-  void removePopStateListener(EventListener fn) {
+  void removePopStateListener(final EventListener fn) {
     throw UnimplementedError();
   }
 
   @override
-  void pushState(Object? state, String title, String url) {}
+  void pushState(final Object? state, final String title, final String url) {}
 
   @override
-  void replaceState(Object? state, String title, String url) {}
+  void replaceState(final Object? state, final String title, final String url) {}
 
   @override
-  void go(int count) {
+  void go(final int count) {
     throw UnimplementedError();
   }
 
