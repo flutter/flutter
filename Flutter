@@ -1,0 +1,218 @@
+saltar al contenido
+
+Código
+Asuntos
+5k+
+Solicitudes de extracción
+171
+Comportamiento
+Proyectos
+173
+wiki
+Seguridad
+Perspectivas
+Su cuenta ha sido marcada.
+Por eso, su perfil está oculto al público. Si cree que se trata de un error, póngase en contacto con el servicio de asistencia para que revisen el estado de su cuenta.
+Charlar
+Saltar al fondo
+Ian Hickson editó esta páginael 30 ago 2022 · 22 revisiones
+ Paginas160
+
+
+wiki
+Inicio de la wiki
+Mapa vial
+Referencia API (estable)
+Referencia API (maestro)
+Glosario
+Guía del colaborador
+Chatear en discordia
+Documentos de diseño
+Código de conducta
+Emitir informes de clasificación
+Informes de clasificación de problemas de 2023
+Informes de clasificación de problemas de 2022
+Informes de clasificación de problemas de 2021
+Proceso
+Nuestros Valores
+Higiene de árboles
+Emitir higiene y Triage
+Guía de estilo para el repositorio de Flutter
+equipos de proyecto
+Acceso de colaborador
+¿En qué debo trabajar?
+Problemas populares
+Ejecutar y escribir pruebas
+Agregar un nuevo fragmento de prueba
+Cómo escribir una prueba de velocidad de renderizado para Flutter
+Cómo escribir una prueba de memoria para Flutter
+Reducción de la descamación de la prueba
+Comprensión de un error de compilación de LUCI
+Comprender las pruebas de Google
+Proceso de liberación
+Canales de lanzamiento de compilación de Flutter
+¿Dónde está mi compromiso?
+Proceso Flutter Cherrypick
+Seguro de calidad
+dardo rodante
+Rollo de motor manual con compromisos de ruptura
+Actualización de fuentes e iconos de Material Design
+Autopsias y Retrospectivas
+Prácticas recomendadas de la documentación de revisiones
+repositorio marco
+Configuración del entorno de desarrollo de Framework
+La arquitectura del Marco
+Generación de bloques de código de API Docs
+Ejemplos de ejecución
+Usando el analizador Dart
+Las variantes flutter run
+Cobertura de prueba para el paquete: aleteo
+Escribiendo una prueba de archivo dorado para el paquete: aleteo
+Gestión de activos de imagen de plantilla
+La herramienta CLI de Flutter
+La herramienta de aleteo
+repositorio del motor
+Configuración del entorno de desarrollo del motor
+Compilando el motor
+Depurando el motor
+Uso de desinfectantes con el motor Flutter
+probando el motor
+La arquitectura del motor
+modos de flutter
+Huella del disco del motor
+Comparación de tamaños de instantáneas AOT
+Embebedores de motor Flutter personalizados
+Incrustación personalizada del motor Flutter en modo AOT
+Funcionamiento del motor Flutter en modo AOT
+Extensiones de protocolo de servicio específicas del motor
+Choques
+Compatibilidad con plataformas heredadas
+Motor Clang Tidy Linter
+Por qué tenemos un repositorio de motor separado
+Reduzca el tamaño del motor Flutter con MLGO
+Códecs de imagen en Flutter Engine
+Impulso
+Escena del impulsor
+Accesibilidad en Windows
+desarrollo android
+Actualización de la API de Android
+Multidex
+Prueba de cambios de Android en Devicelab en un emulador
+repositorio de paquetes
+Configuración del entorno de desarrollo de paquetes
+Estructura del repositorio de complementos y paquetes
+Pruebas de complementos
+Contribuir a complementos y paquetes
+Lanzamiento de un complemento o paquete
+Errores inesperados de complementos y paquetes
+aleteo migrar
+Información de infraestructura
+Bot de envío automático
+Tableros
+Cola de boletos de infraestructura
+rodillos automáticos
+Infraestructura de compilación de Flutter
+Paquetes de instalación de Flutter
+Flujos de trabajo de acciones de GitHub
+Información de liberación
+Notas de lanzamiento
+Hotfixes al canal estable
+Documentación antigua
+Inicio rápido de Android
+Soporte de silicona de Apple
+Conchas de escritorio
+Componentes diferidos
+Compilaciones de lanzamiento JIT
+Hacer GIF animados de aplicaciones Flutter
+Depuración multidispositivo en VS Code
+Estado de migración del paquete de seguridad nulo
+Ejecución de pruebas de Flutter Driver con Web
+Correcciones basadas en datos
+Compatibilidad con el integrador personalizado Flutter CLI
+malas compilaciones
+Clonar este wiki localmente
+https://github.com/flutter/flutter.wiki.git
+Chateando en Discord
+El equipo de Flutter utiliza un servidor de Discord, al que está invitado a unirse . El servidor está abierto al público, aunque algunos canales están destinados solo a personas que contribuyen activamente. Consulte el canal de #bienvenida para obtener instrucciones sobre cómo publicar en el servidor (no podrá ver los canales hasta que reconozca las reglas allí).
+
+Le recomendamos que use el mismo nombre para mostrar en Discord y GitHub.
+
+Canales existentes
+Tenemos diferentes canales para diferentes propósitos (esta lista no es exhaustiva):
+
+Canal	Descripción	Participantes
+#bienvenido	Mensaje de bienvenida.	Solo los administradores pueden publicar.
+Cualquiera puede leer.
+#anuncios	Anuncios de aleteo (por ejemplo, cambios de última hora).	Solo los miembros del equipo pueden publicar (pero no con frecuencia).
+Cualquiera puede leer.
+#soporte-servidor	Foro para solicitar que se cambie su función, que se planteen infracciones del código de conducta y otras cuestiones administrativas.	Alguien.
+#general	Chatea sobre cualquier cosa relacionada con Flutter.	Alguien.
+#ayuda	Personas que piden nuestra ayuda.	Alguien.
+#paquete-autores	Para personas que desarrollan paquetes de Flutter.	Gente escribiendo paquetes para pub.dev .
+#dardo	Preguntas sobre el lenguaje Dart.	Alguien.
+#estado-del-árbol	Anuncios sobre si los árboles están abiertos o cerrados.	Cualquiera, pero la discusión debería ocurrir en otro lugar.
+#hackers	Chatea sobre cualquier cosa relacionada con Flutter.	Colaboradores de Flutter.
+Cualquiera puede mirar.
+#hackers-*	Chatea específicamente sobre foo, donde foo tiene algo que ver con el desarrollo de Flutter, por ejemplo, "motor", "marco", "escritorio", etc.	Colaboradores de Flutter.
+Cualquiera puede mirar.
+#hackers-dart	Preguntas sobre el lenguaje Dart.	Colaboradores de Flutter.
+Cualquiera puede mirar.
+#hackers-nuevo	Gente nueva en el equipo y gente que quiera ayudarles.	Colaboradores de Flutter.
+Cualquiera puede mirar.
+#hackers-triaje	Para usar mientras se clasifican los errores.	Colaboradores de Flutter.
+Cualquiera puede mirar.
+#chat-oculto	Chatea sobre cualquier cosa relacionada con Flutter.	Solo colaboradores de Flutter.
+No publico.
+general (voz)	Charla (audio) sobre cualquier cosa relacionada con Flutter.	Alguien.
+equipo (voz)	Charla (audio) que solo está abierta a los miembros del equipo.	Colaboradores de Flutter.
+Los canales #chat-oculto y #equipo no se pueden leer públicamente, debe ser miembro del rol "miembro del equipo" para verlos.
+
+Nuevos canales
+Si necesita un nuevo canal, plantee el tema en #server-support. Los canales son baratos.
+
+Si encuentra que el canal de su equipo es difícil de seguir debido a que se discuten demasiados temas a la vez, solicite un nuevo canal.
+
+Si desea un canal para subcomunidades, por ejemplo, #mujeres o #china, debería estar bien. (Las subcomunidades que ya están sobrerrepresentadas en los canales principales, por ejemplo, personas que hablan #inglés, tienen menos probabilidades de ser buenos candidatos para canales dedicados).
+
+Por razones prácticas, no usamos Discord para grupos de chat limitados a clientes específicos. Por ejemplo, si su empresa quiere un canal de discusión privado con el equipo de Flutter, no usaríamos Discord.
+
+Cada canal describe su tema en la descripción del canal. Lea la descripción del canal antes de publicar en un canal, para asegurarse de que está utilizando el adecuado.
+
+Si no puede encontrar un canal apropiado, use #hackers o solicite que se cree un nuevo canal. Una vez más, los canales son baratos.
+
+Políticas
+Nuestro código de conducta se aplica al servidor de Discord, al igual que a cualquier comunicación que involucre a Flutter.
+
+Los canales #hackers-* son visibles para todos, pero solo publique en esos canales si está contribuyendo activamente. Si desea ayuda con su aplicación, pregunte en #ayuda. Si quieres aprender a contribuir, echa un vistazo a nuestra guía de contribución .
+
+Consulte la página wiki de acceso de contribuyentes para obtener detalles sobre cómo convertirse en miembro del rol de "equipo".
+
+Por favor, no envíe mensajes directos a las personas a menos que se sientan cómodos con ello (pregunte públicamente primero). Puede deshabilitar los mensajes directos en este servidor cambiando su configuración de Privacidad para el servidor, o globalmente cambiando su configuración de usuario de Privacidad y Seguridad.
+
+Características de la discordia
+enhebrar
+Discord tiene hilos reales (nuevos canales temporales) y una característica de hilo llamada Respuestas que le permite vincular mensajes a mensajes anteriores y notificar al comentarista original.
+
+Estado
+Puedes cambiar tu estado (en línea, ausente, mensajes personalizados) haciendo clic en tu avatar en Discord.
+
+Documentos de diseño
+Esta página solía discutir cómo crear documentos de diseño, pero ese contenido ahora está en su propia página: Documentos de diseño .
+
+Flutter • Escribir prueba, encontrar error • Adoptar el afeitado de yak • Nuestros compromisos con la equidad racial • https://flutter.dev/
+
+Pie de página
+© 2023 GitHub, Inc.
+Pie de página de navegación
+Términos
+Privacidad
+Seguridad
+Estado
+Documentos
+Póngase en contacto con GitHub
+Precios
+API
+Capacitación
+Blog
+Acerca de
+Chat · Flutter/Wiki Flutter
