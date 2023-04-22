@@ -49,7 +49,7 @@ class BackgroundProject extends Project {
   }
   ''';
 
-  void updateTestIsolatePhrase(String message) {
+  void updateTestIsolatePhrase(final String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
     writeFile(fileSystem.path.join(dir.path, 'lib', 'main.dart'), newMainContents,
         writeFutureModifiedDate: true);
@@ -100,7 +100,7 @@ class RepeatingBackgroundProject extends Project {
   }
   ''';
 
-  void updateTestIsolatePhrase(String message) {
+  void updateTestIsolatePhrase(final String message) {
     final String newMainContents = main.replaceFirst('Isolate thread', message);
     writeFile(
       fileSystem.path.join(dir.path, 'lib', 'main.dart'),

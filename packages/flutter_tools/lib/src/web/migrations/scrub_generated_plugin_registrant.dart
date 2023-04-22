@@ -10,7 +10,7 @@ import '../../project.dart';
 /// Remove lib/generated_plugin_registrant.dart if it exists.
 class ScrubGeneratedPluginRegistrant extends ProjectMigrator {
   ScrubGeneratedPluginRegistrant(
-    WebProject project,
+    final WebProject project,
     super.logger,
   ) : _project = project, _logger = logger;
 
@@ -32,11 +32,11 @@ class ScrubGeneratedPluginRegistrant extends ProjectMigrator {
 
   // Cleans up the .gitignore by removing the line that mentions generated_plugin_registrant.
   @override
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     return line.contains('lib/generated_plugin_registrant.dart') ? null : line;
   }
 
-  bool removeFile(File file) {
+  bool removeFile(final File file) {
     if (!file.existsSync()) {
       _logger.printTrace('${file.basename} not found. Skipping.');
       return true;

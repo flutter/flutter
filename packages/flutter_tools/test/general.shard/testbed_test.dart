@@ -76,7 +76,7 @@ void main() {
       final Testbed testbed = Testbed();
 
       expect(testbed.run(() async {
-        Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
+        Timer.periodic(const Duration(seconds: 1), (final Timer timer) { });
       }), throwsStateError);
     });
 
@@ -84,7 +84,7 @@ void main() {
       final Testbed testbed = Testbed();
 
       await testbed.run(() async {
-        final Timer timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) { });
+        final Timer timer = Timer.periodic(const Duration(seconds: 1), (final Timer timer) { });
         timer.cancel();
       });
     });

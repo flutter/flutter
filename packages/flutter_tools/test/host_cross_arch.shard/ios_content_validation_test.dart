@@ -358,7 +358,7 @@ void main() {
   );
 }
 
-bool _containsBitcode(String pathToBinary, ProcessManager processManager) {
+bool _containsBitcode(final String pathToBinary, final ProcessManager processManager) {
   // See: https://stackoverflow.com/questions/32755775/how-to-check-a-static-library-is-built-contain-bitcode
   final ProcessResult result = processManager.runSync(<String>[
     'otool',
@@ -386,12 +386,12 @@ bool _containsBitcode(String pathToBinary, ProcessManager processManager) {
   //  offset 3932160
   //  ...
   final List<String> lines = LineSplitter.split(loadCommands).toList();
-  lines.asMap().forEach((int index, String line) {
+  lines.asMap().forEach((final int index, final String line) {
     if (line.contains('segname __LLVM') && lines.length - index - 1 > 3) {
       final bool bitcodeMarkerFound = lines
           .skip(index - 1)
           .take(4)
-          .any((String line) => line.contains(' size 0x0000000000000001'));
+          .any((final String line) => line.contains(' size 0x0000000000000001'));
       if (bitcodeMarkerFound) {
         emptyBitcodeMarkerFound = true;
         return;

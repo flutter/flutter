@@ -12,8 +12,8 @@ import '../../src/common.dart';
 import '../../src/custom_devices_common.dart';
 
 Map<String, dynamic> copyJsonObjectWith(
-  Map<String, dynamic> object,
-  Map<String, dynamic> overrides
+  final Map<String, dynamic> object,
+  final Map<String, dynamic> overrides
 ) => Map<String, dynamic>.of(object)..addAll(overrides);
 
 void main() {

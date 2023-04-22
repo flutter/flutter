@@ -10,19 +10,19 @@ abstract class TestWatcher {
   ///
   /// If startPaused was true, the caller needs to resume in DevTools to
   /// start running the tests.
-  void handleStartedDevice(Uri? vmServiceUri) { }
+  void handleStartedDevice(final Uri? vmServiceUri) { }
 
   /// Called after the tests finish but before the test device exits.
   ///
   /// The test device won't exit until this method completes.
   /// Not called if the test device died.
-  Future<void> handleFinishedTest(TestDevice testDevice);
+  Future<void> handleFinishedTest(final TestDevice testDevice);
 
   /// Called when the test device crashed before it could be connected to the
   /// test harness.
-  Future<void> handleTestCrashed(TestDevice testDevice);
+  Future<void> handleTestCrashed(final TestDevice testDevice);
 
   /// Called if we timed out waiting for the test device to connect to test
   /// harness.
-  Future<void> handleTestTimedOut(TestDevice testDevice);
+  Future<void> handleTestTimedOut(final TestDevice testDevice);
 }

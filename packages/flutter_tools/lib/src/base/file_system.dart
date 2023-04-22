@@ -30,8 +30,8 @@ class FileNotFoundException implements IOException {
 /// Various convenience file system methods.
 class FileSystemUtils {
   FileSystemUtils({
-    required FileSystem fileSystem,
-    required Platform platform,
+    required final FileSystem fileSystem,
+    required final Platform platform,
   }) : _fileSystem = fileSystem,
        _platform = platform;
 
@@ -41,13 +41,13 @@ class FileSystemUtils {
 
   /// Appends a number to a filename in order to make it unique under a
   /// directory.
-  File getUniqueFile(Directory dir, String baseName, String ext) {
+  File getUniqueFile(final Directory dir, final String baseName, final String ext) {
     return _getUniqueFile(dir, baseName, ext);
   }
 
   /// Appends a number to a directory name in order to make it unique under a
   /// directory.
-  Directory getUniqueDirectory(Directory dir, String baseName) {
+  Directory getUniqueDirectory(final Directory dir, final String baseName) {
     final FileSystem fs = dir.fileSystem;
     int i = 1;
 
@@ -65,7 +65,7 @@ class FileSystemUtils {
   ///
   /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
   /// path unchanged.
-  String escapePath(String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
+  String escapePath(final String path) => _platform.isWindows ? path.replaceAll(r'\', r'\\') : path;
 
   /// Returns true if the file system [entity] has not been modified since the
   /// latest modification to [referenceFile].
@@ -74,8 +74,8 @@ class FileSystemUtils {
   ///
   /// Returns false, if [entity] exists, but [referenceFile] does not.
   bool isOlderThanReference({
-    required FileSystemEntity entity,
-    required File referenceFile,
+    required final FileSystemEntity entity,
+    required final File referenceFile,
   }) {
     if (!entity.existsSync()) {
       return true;
@@ -98,7 +98,7 @@ class FileSystemUtils {
 
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
-String getDisplayPath(String fullPath, FileSystem fileSystem) {
+String getDisplayPath(final String fullPath, final FileSystem fileSystem) {
   final String cwd = fileSystem.currentDirectory.path + fileSystem.path.separator;
   return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
@@ -110,11 +110,11 @@ String getDisplayPath(String fullPath, FileSystem fileSystem) {
 /// Skips files if [shouldCopyFile] returns `false`.
 /// Does not recurse over directories if [shouldCopyDirectory] returns `false`.
 void copyDirectory(
-  Directory srcDir,
-  Directory destDir, {
-  bool Function(File srcFile, File destFile)? shouldCopyFile,
-  bool Function(Directory)? shouldCopyDirectory,
-  void Function(File srcFile, File destFile)? onFileCopied,
+  final Directory srcDir,
+  final Directory destDir, {
+  final bool Function(File srcFile, File destFile)? shouldCopyFile,
+  final bool Function(Directory)? shouldCopyDirectory,
+  final void Function(File srcFile, File destFile)? onFileCopied,
 }) {
   if (!srcDir.existsSync()) {
     throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
@@ -152,7 +152,7 @@ void copyDirectory(
   }
 }
 
-File _getUniqueFile(Directory dir, String baseName, String ext) {
+File _getUniqueFile(final Directory dir, final String baseName, final String ext) {
   final FileSystem fs = dir.fileSystem;
   int i = 1;
 
@@ -169,7 +169,7 @@ File _getUniqueFile(Directory dir, String baseName, String ext) {
 
 /// Appends a number to a filename in order to make it unique under a
 /// directory.
-File getUniqueFile(Directory dir, String baseName, String ext) {
+File getUniqueFile(final Directory dir, final String baseName, final String ext) {
   return _getUniqueFile(dir, baseName, ext);
 }
 
@@ -181,8 +181,8 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
 
   @visibleForTesting
   LocalFileSystem.test({
-    required Signals signals,
-    List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
+    required final Signals signals,
+    final List<ProcessSignal> fatalSignals = Signals.defaultExitSignals,
   }) : this(signals, fatalSignals, ShutdownHooks());
 
   Directory? _systemTemp;
@@ -232,7 +232,7 @@ class LocalFileSystem extends local_fs.LocalFileSystem {
       for (final ProcessSignal signal in _fatalSignals) {
         final Object token = _signals.addHandler(
           signal,
-          (ProcessSignal _) {
+          (final ProcessSignal _) {
             _tryToDeleteTemp();
           },
         );

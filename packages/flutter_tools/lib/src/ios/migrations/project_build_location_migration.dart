@@ -9,7 +9,7 @@ import '../../xcode_project.dart';
 // Update the xcodeproj build location. Legacy build location does not work with Swift Packages.
 class ProjectBuildLocationMigration extends ProjectMigrator {
   ProjectBuildLocationMigration(
-    IosProject project,
+    final IosProject project,
     super.logger,
   ) : _xcodeProjectWorkspaceData = project.xcodeProjectWorkspaceData;
 
@@ -26,7 +26,7 @@ class ProjectBuildLocationMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateLine(String line) {
+  String migrateLine(final String line) {
     const String legacyBuildLocation = 'location = "group:Runner.xcodeproj"';
     const String defaultBuildLocation = 'location = "self:"';
 
@@ -34,7 +34,7 @@ class ProjectBuildLocationMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateFileContents(String fileContents) {
+  String migrateFileContents(final String fileContents) {
     const String podLocation = '''
    <FileRef
       location = "group:Pods/Pods.xcodeproj">

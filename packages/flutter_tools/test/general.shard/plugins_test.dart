@@ -93,7 +93,7 @@ void main() {
     const String ephemeralPackagePath = '/path/to/app/linux/flutter/ephemeral/foo-1.2.3';
 
     // Adds basic properties to the flutterProject and its subprojects.
-    void setUpProject(FileSystem fileSystem) {
+    void setUpProject(final FileSystem fileSystem) {
       flutterProject = FakeFlutterProject();
       flutterManifest = FakeFlutterManifest();
 
@@ -179,7 +179,7 @@ void main() {
     // the location of the package, with the name being the last component.
     // Otherwise it will be treated as a name, and put in a default location
     // (a fake pub cache).
-    List<Directory> createFakePlugins(FileSystem fileSystem, List<String> pluginNamesOrPaths) {
+    List<Directory> createFakePlugins(final FileSystem fileSystem, final List<String> pluginNamesOrPaths) {
       const String pluginYamlTemplate = '''
   flutter:
     plugin:
@@ -221,7 +221,7 @@ void main() {
     }
 
     // Makes a fake plugin package, adds it to flutterProject, and returns its directory.
-    Directory createFakePlugin(FileSystem fileSystem) {
+    Directory createFakePlugin(final FileSystem fileSystem) {
       return createFakePlugins(fileSystem, <String>['some_plugin'])[0];
     }
 
@@ -314,7 +314,7 @@ flutter:
         );
     }
 
-    void createOldJavaPlugin(String pluginName) {
+    void createOldJavaPlugin(final String pluginName) {
       final Directory pluginUsingOldEmbeddingDir =
         fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
       pluginUsingOldEmbeddingDir
@@ -376,8 +376,8 @@ flutter:
     }
 
     Directory createLegacyPluginWithDependencies({
-      required String name,
-      required List<String> dependencies,
+      required final String name,
+      required final List<String> dependencies,
     }) {
 
       final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('flutter_plugin.');
@@ -406,12 +406,12 @@ dependencies:
     }
 
     Directory createPlugin({
-      required String name,
-      required Map<String, _PluginPlatformInfo> platforms,
-      List<String> dependencies = const <String>[],
+      required final String name,
+      required final Map<String, _PluginPlatformInfo> platforms,
+      final List<String> dependencies = const <String>[],
     }) {
 
-      final Iterable<String> platformSections = platforms.entries.map((MapEntry<String, _PluginPlatformInfo> entry) => '''
+      final Iterable<String> platformSections = platforms.entries.map((final MapEntry<String, _PluginPlatformInfo> entry) => '''
       ${entry.key}:
 ${entry.value.indentedPubspecSection}
 ''');
@@ -443,7 +443,7 @@ dependencies:
 
     // Creates the files that would indicate that pod install has run for the
     // given project.
-    void simulatePodInstallRun(XcodeBasedProject project) {
+    void simulatePodInstallRun(final XcodeBasedProject project) {
       project.podManifestLock.createSync(recursive: true);
     }
 
@@ -1583,7 +1583,7 @@ flutter:
         tryToDelete(tempDir);
       });
 
-      void createPubspecFile(String yamlString) {
+      void createPubspecFile(final String yamlString) {
         projectDir.childFile('pubspec.yaml')..createSync(recursive: true)..writeAsStringSync(yamlString);
       }
 

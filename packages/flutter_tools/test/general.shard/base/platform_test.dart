@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 
 import '../../src/common.dart';
 
-void _expectPlatformsEqual(Platform actual, Platform expected) {
+void _expectPlatformsEqual(final Platform actual, final Platform expected) {
   expect(actual.numberOfProcessors, expected.numberOfProcessors);
   expect(actual.pathSeparator, expected.pathSeparator);
   expect(actual.operatingSystem, expected.operatingSystem);

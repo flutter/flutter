@@ -9,34 +9,34 @@ class DisabledUsage implements Usage {
   bool get suppressAnalytics => true;
 
   @override
-  set suppressAnalytics(bool value) { }
+  set suppressAnalytics(final bool value) { }
 
   @override
   bool get enabled => false;
 
   @override
-  set enabled(bool value) { }
+  set enabled(final bool value) { }
 
   @override
   String get clientId => '';
 
   @override
-  void sendCommand(String command, { CustomDimensions? parameters }) { }
+  void sendCommand(final String command, { final CustomDimensions? parameters }) { }
 
   @override
   void sendEvent(
-    String category,
-    String parameter, {
-    String? label,
-    int? value,
-    CustomDimensions? parameters,
+    final String category,
+    final String parameter, {
+    final String? label,
+    final int? value,
+    final CustomDimensions? parameters,
   }) { }
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, { String? label }) { }
+  void sendTiming(final String category, final String variableName, final Duration duration, { final String? label }) { }
 
   @override
-  void sendException(dynamic exception) { }
+  void sendException(final dynamic exception) { }
 
   @override
   Stream<Map<String, dynamic>> get onSend => const Stream<Map<String, dynamic>>.empty();

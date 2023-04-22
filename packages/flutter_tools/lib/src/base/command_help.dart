@@ -14,10 +14,10 @@ const int maxLineWidth = 84;
 /// Encapsulates the help text construction and printing.
 class CommandHelp {
   CommandHelp({
-    required Logger logger,
-    required AnsiTerminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
+    required final Logger logger,
+    required final AnsiTerminal terminal,
+    required final Platform platform,
+    required final OutputPreferences outputPreferences,
   }) : _logger = logger,
        _terminal = terminal,
        _platform = platform,
@@ -181,8 +181,8 @@ class CommandHelp {
   // When updating the list above, see the notes above the list regarding order
   // and tests.
 
-  CommandHelpOption _makeOption(String key, String description, [
-    String inParenthesis = '',
+  CommandHelpOption _makeOption(final String key, final String description, [
+    final String inParenthesis = '',
   ]) {
     return CommandHelpOption(
       key,
@@ -202,10 +202,10 @@ class CommandHelpOption {
     this.key,
     this.description, {
     this.inParenthesis = '',
-    required Logger logger,
-    required Terminal terminal,
-    required Platform platform,
-    required OutputPreferences outputPreferences,
+    required final Logger logger,
+    required final Terminal terminal,
+    required final Platform platform,
+    required final OutputPreferences outputPreferences,
   }) : _logger = logger,
        _terminal = terminal,
        _platform = platform,

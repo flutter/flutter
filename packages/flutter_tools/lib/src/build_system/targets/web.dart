@@ -62,7 +62,7 @@ class WebEntrypointTarget extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? targetFile = environment.defines[kTargetFile];
     final Uri importUri = environment.fileSystem.file(targetFile).absolute.uri;
     // TODO(zanderso): support configuration of this file.
@@ -130,7 +130,7 @@ abstract class Dart2WebTarget extends Target {
   @override
   List<Source> get outputs => const <Source>[];
 
-  String _collectOutput(ProcessResult result) {
+  String _collectOutput(final ProcessResult result) {
     final String stdout = result.stdout is List<int>
         ? utf8.decode(result.stdout as List<int>)
         : result.stdout as String;
@@ -156,7 +156,7 @@ class Dart2JSTarget extends Dart2WebTarget {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -237,7 +237,7 @@ class Dart2WasmTarget extends Dart2WebTarget {
   Dart2WasmTarget(super.webRenderer);
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, name);
@@ -378,13 +378,13 @@ class WebReleaseBundle extends Target {
     'web_resources.d',
   ];
 
-  bool shouldCopy(String name) =>
+  bool shouldCopy(final String name) =>
       // Do not copy the deps file.
       (name.contains(outputFileName) && !name.endsWith('.deps')) ||
       (isWasm && name == wasmJSRuntimeFileName);
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
       final String basename = globals.fs.path.basename(outputFile.path);
       if (shouldCopy(basename)) {
@@ -457,7 +457,7 @@ class WebReleaseBundle extends Target {
   }
 
   /// Create version.json file that contains data about version for package_info
-  void createVersionFile(Environment environment, Map<String, String> defines) {
+  void createVersionFile(final Environment environment, final Map<String, String> defines) {
     final Map<String, dynamic> versionInfo =
         jsonDecode(FlutterProject.current().getVersionInfo())
             as Map<String, dynamic>;
@@ -512,7 +512,7 @@ class WebBuiltInAssets extends Target {
 
   List<File> get _canvasKitFiles => _canvasKitDirectory.listSync(recursive: true).whereType<File>().toList();
 
-  String _filePathRelativeToCanvasKitDirectory(File file) =>
+  String _filePathRelativeToCanvasKitDirectory(final File file) =>
     fileSystem.path.relative(file.path, from: _canvasKitDirectory.path);
 
   @override
@@ -524,7 +524,7 @@ class WebBuiltInAssets extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     for (final File file in _canvasKitFiles) {
       final String relativePath = _filePathRelativeToCanvasKitDirectory(file);
       final String targetPath = fileSystem.path.join(environment.outputDir.path, 'canvaskit', relativePath);
@@ -577,11 +577,11 @@ class WebServiceWorker extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final List<File> contents = environment.outputDir
       .listSync(recursive: true)
       .whereType<File>()
-      .where((File file) => !file.path.endsWith('flutter_service_worker.js')
+      .where((final File file) => !file.path.endsWith('flutter_service_worker.js')
         && !globals.fs.path.basename(file.path).startsWith('.'))
       .toList();
 

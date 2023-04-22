@@ -13,8 +13,8 @@ import 'analyze_base.dart';
 class AnalyzeContinuously extends AnalyzeBase {
   AnalyzeContinuously(
     super.argResults,
-    List<String> repoRoots,
-    List<Directory> repoPackages, {
+    final List<String> repoRoots,
+    final List<Directory> repoPackages, {
     required super.fileSystem,
     required super.logger,
     required super.terminal,
@@ -66,7 +66,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       protocolTrafficLog: protocolTrafficLog,
       suppressAnalytics: suppressAnalytics,
     );
-    server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
+    server.onAnalyzing.listen((final bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
     await server.start();
@@ -83,7 +83,7 @@ class AnalyzeContinuously extends AnalyzeBase {
     }
   }
 
-  void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
+  void _handleAnalysisStatus(final AnalysisServer server, final bool isAnalyzing) {
     if (isAnalyzing) {
       analysisStatus?.cancel();
       if (!firstAnalysis) {
@@ -102,14 +102,14 @@ class AnalyzeContinuously extends AnalyzeBase {
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> sortedErrors = <AnalysisError>[];
       final List<String> pathsToRemove = <String>[];
-      analysisErrors.forEach((String path, List<AnalysisError> errors) {
+      analysisErrors.forEach((final String path, final List<AnalysisError> errors) {
         if (fileSystem.isFileSync(path)) {
           sortedErrors.addAll(errors);
         } else {
           pathsToRemove.add(path);
         }
       });
-      analysisErrors.removeWhere((String path, _) => pathsToRemove.contains(path));
+      analysisErrors.removeWhere((final String path, final _) => pathsToRemove.contains(path));
 
       sortedErrors.sort();
 
@@ -118,7 +118,7 @@ class AnalyzeContinuously extends AnalyzeBase {
         logger.printTrace('error code: ${error.code}');
       }
 
-      dumpErrors(sortedErrors.map<String>((AnalysisError error) => error.toLegacyString()));
+      dumpErrors(sortedErrors.map<String>((final AnalysisError error) => error.toLegacyString()));
 
       final int issueCount = sortedErrors.length;
       final int issueDiff = issueCount - lastErrorCount;
@@ -142,8 +142,8 @@ class AnalyzeContinuously extends AnalyzeBase {
     }
   }
 
-  void _handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-    fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+  void _handleAnalysisErrors(final FileAnalysisErrors fileErrors) {
+    fileErrors.errors.removeWhere((final AnalysisError error) => error.type == 'TODO');
 
     analyzedPaths.add(fileErrors.file);
     analysisErrors[fileErrors.file] = fileErrors.errors;

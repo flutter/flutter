@@ -160,7 +160,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   int runColdCode = 0;
 
   @override
-  Future<int> runCold({ColdRunner? coldRunner, String? route}) async {
+  Future<int> runCold({final ColdRunner? coldRunner, final String? route}) async {
     return runColdCode;
   }
 
@@ -200,9 +200,9 @@ class FakeDevice extends Fake implements Device {
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
-    required Device device,
+    required final Device device,
     required this.exception,
-    required ResidentCompiler generator,
+    required final ResidentCompiler generator,
   })  : super(device, buildInfo: BuildInfo.debug, generator: generator, developmentShaderCompiler: const FakeShaderCompiler());
 
   /// The exception to throw when the connect method is called.
@@ -210,19 +210,19 @@ class TestFlutterDevice extends FlutterDevice {
 
   @override
   Future<void> connect({
-    ReloadSources? reloadSources,
-    Restart? restart,
-    CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
-    FlutterProject? flutterProject,
-    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    bool disableServiceAuthCodes = false,
-    int? hostVmServicePort,
-    int? ddsPort,
-    bool? ipv6 = false,
-    bool allowExistingDdsInstance = false,
+    final ReloadSources? reloadSources,
+    final Restart? restart,
+    final CompileExpression? compileExpression,
+    final GetSkSLMethod? getSkSLMethod,
+    final FlutterProject? flutterProject,
+    final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    final bool enableDds = true,
+    final bool cacheStartupProfile = false,
+    final bool disableServiceAuthCodes = false,
+    final int? hostVmServicePort,
+    final int? ddsPort,
+    final bool? ipv6 = false,
+    final bool allowExistingDdsInstance = false,
   }) async {
     throw exception;
   }
@@ -235,12 +235,12 @@ class FakeFlutterVmService extends Fake implements FlutterVmService {
   VmService get service => FakeVmService();
 
   @override
-  Future<List<FlutterView>> getFlutterViews({bool returnEarly = false, Duration delay = const Duration(milliseconds: 50)}) async {
+  Future<List<FlutterView>> getFlutterViews({final bool returnEarly = false, final Duration delay = const Duration(milliseconds: 50)}) async {
     return <FlutterView>[];
   }
 
   @override
-  Future<bool> flutterAlreadyPaintedFirstUsefulFrame({String? isolateId}) async => true;
+  Future<bool> flutterAlreadyPaintedFirstUsefulFrame({final String? isolateId}) async => true;
 
   @override
   Future<Response?> getTimeline() async {
@@ -263,12 +263,12 @@ class FakeFlutterVmService extends Fake implements FlutterVmService {
   }
 
   @override
-  Future<void> setTimelineFlags(List<String> recordedStreams) async {}
+  Future<void> setTimelineFlags(final List<String> recordedStreams) async {}
 }
 
 class FakeVmService extends Fake implements VmService {
   @override
-  Future<Success> streamListen(String streamId) async => Success();
+  Future<Success> streamListen(final String streamId) async => Success();
 
   @override
   Stream<Event> get onExtensionEvent {
@@ -283,12 +283,12 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
+    final TargetPlatform? platform, {
+    required final ImpellerStatus impellerStatus,
   }) { }
 
   @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+  Future<DevFSContent> recompileShader(final DevFSContent inputShader) {
     throw UnimplementedError();
   }
 }

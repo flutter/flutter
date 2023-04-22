@@ -9,7 +9,7 @@ import '../../xcode_project.dart';
 /// Remove deprecated bitcode build setting.
 class RemoveBitcodeMigration extends ProjectMigrator {
   RemoveBitcodeMigration(
-    IosProject project,
+    final IosProject project,
     super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile;
 
@@ -27,7 +27,7 @@ class RemoveBitcodeMigration extends ProjectMigrator {
   }
 
   @override
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     if (line.contains('ENABLE_BITCODE = YES;')) {
       if (!migrationRequired) {
         // Only print for the first discovered change found.

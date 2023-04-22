@@ -16,7 +16,7 @@ import '../runner/flutter_command.dart';
 
 class CleanCommand extends FlutterCommand {
   CleanCommand({
-    bool verbose = false,
+    final bool verbose = false,
   }) : _verbose = verbose {
     requiresPubspecYaml();
     argParser.addOption(
@@ -75,7 +75,7 @@ class CleanCommand extends FlutterCommand {
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-  Future<void> _cleanXcode(XcodeBasedProject xcodeProject) async {
+  Future<void> _cleanXcode(final XcodeBasedProject xcodeProject) async {
     final Directory? xcodeWorkspace = xcodeProject.xcodeWorkspace;
     if (xcodeWorkspace == null) {
       return;
@@ -113,7 +113,7 @@ class CleanCommand extends FlutterCommand {
   }
 
   @visibleForTesting
-  void deleteFile(FileSystemEntity file) {
+  void deleteFile(final FileSystemEntity file) {
     // This will throw a FileSystemException if the directory is missing permissions.
     try {
       if (!file.existsSync()) {

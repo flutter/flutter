@@ -16,7 +16,7 @@ import '../../convert.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
 
-List<Map<String, Object?>> _getList(Object? object, String errorMessage) {
+List<Map<String, Object?>> _getList(final Object? object, final String errorMessage) {
   if (object is List<Object?>) {
     return object.cast<Map<String, Object?>>();
   }
@@ -37,11 +37,11 @@ class IconTreeShaker {
   /// font subsetting has been requested in a debug build mode.
   IconTreeShaker(
     this._environment,
-    DevFSStringContent? fontManifest, {
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
+    final DevFSStringContent? fontManifest, {
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Artifacts artifacts,
   }) : _processManager = processManager,
        _logger = logger,
        _fs = fileSystem,
@@ -89,7 +89,7 @@ class IconTreeShaker {
                    && _environment.defines[kBuildMode] != 'debug';
 
   // Fills the [_iconData] map.
-  Future<void> _getIconData(Environment environment) async {
+  Future<void> _getIconData(final Environment environment) async {
     if (!enabled) {
       return;
     }
@@ -151,9 +151,9 @@ class IconTreeShaker {
   /// If the font-subset subprocess fails, it will [throwToolExit].
   /// Otherwise, it will return true.
   Future<bool> subsetFont({
-    required File input,
-    required String outputPath,
-    required String relativePath,
+    required final File input,
+    required final String outputPath,
+    required final String relativePath,
   }) async {
 
     if (!enabled) {
@@ -212,7 +212,7 @@ class IconTreeShaker {
   }
 
   @visibleForTesting
-  String getSubsetSummaryMessage(File inputFont, File outputFont) {
+  String getSubsetSummaryMessage(final File inputFont, final File outputFont) {
     final String fontName = inputFont.basename;
     final double inputSize = inputFont.lengthSync().toDouble();
     final double outputSize = outputFont.lengthSync().toDouble();
@@ -226,8 +226,8 @@ class IconTreeShaker {
 
   /// Returns a map of { fontFamily: relativePath } pairs.
   Future<Map<String, String>> _parseFontJson(
-    String fontManifestData,
-    Set<String> families,
+    final String fontManifestData,
+    final Set<String> families,
   ) async {
     final Map<String, String> result = <String, String>{};
     final List<Map<String, Object?>> fontList = _getList(
@@ -266,9 +266,9 @@ class IconTreeShaker {
   }
 
   Future<Map<String, List<int>>> _findConstants(
-    File dart,
-    File constFinder,
-    File appDill,
+    final File dart,
+    final File constFinder,
+    final File appDill,
   ) async {
     final List<String> cmd = <String>[
       dart.path,
@@ -310,7 +310,7 @@ class IconTreeShaker {
     return _parseConstFinderResult(constFinderResult);
   }
 
-  Map<String, List<int>> _parseConstFinderResult(_ConstFinderResult constants) {
+  Map<String, List<int>> _parseConstFinderResult(final _ConstFinderResult constants) {
     final Map<String, List<int>> result = <String, List<int>>{};
     for (final Map<String, Object?> iconDataMap in constants.constantInstances) {
       final Object? package = iconDataMap['fontPackage'];

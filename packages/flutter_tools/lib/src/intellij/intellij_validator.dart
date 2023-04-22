@@ -23,8 +23,8 @@ const String _communityEditionId = 'IdeaIC';
 /// A doctor validator for both Intellij and Android Studio.
 abstract class IntelliJValidator extends DoctorValidator {
   IntelliJValidator(super.title, this.installPath, {
-    required FileSystem fileSystem,
-    required UserMessages userMessages,
+    required final FileSystem fileSystem,
+    required final UserMessages userMessages,
   }) : _fileSystem = fileSystem,
        _userMessages = userMessages;
 
@@ -48,11 +48,11 @@ abstract class IntelliJValidator extends DoctorValidator {
   /// On platforms other than macOS, Linux, and Windows this returns an
   /// empty list.
   static Iterable<DoctorValidator> installedValidators({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required UserMessages userMessages,
-    required PlistParser plistParser,
-    required ProcessManager processManager,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    required final UserMessages userMessages,
+    required final PlistParser plistParser,
+    required final ProcessManager processManager,
   }) {
     final FileSystemUtils fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform);
     if (platform.isWindows) {
@@ -120,11 +120,11 @@ abstract class IntelliJValidator extends DoctorValidator {
     );
   }
 
-  bool _hasIssues(List<ValidationMessage> messages) {
-    return messages.any((ValidationMessage message) => message.isError);
+  bool _hasIssues(final List<ValidationMessage> messages) {
+    return messages.any((final ValidationMessage message) => message.isError);
   }
 
-  void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
+  void _validateIntelliJVersion(final List<ValidationMessage> messages, final Version minVersion) {
     final Version? installedVersion = Version.parse(version);
     if (installedVersion == null) {
       return;
@@ -138,9 +138,9 @@ abstract class IntelliJValidator extends DoctorValidator {
 
 /// A windows specific implementation of the intellij validator.
 class IntelliJValidatorOnWindows extends IntelliJValidator {
-  IntelliJValidatorOnWindows(String title, this.version, String installPath, this.pluginsPath, {
-    required FileSystem fileSystem,
-    required UserMessages userMessages,
+  IntelliJValidatorOnWindows(final String title, this.version, final String installPath, this.pluginsPath, {
+    required final FileSystem fileSystem,
+    required final UserMessages userMessages,
   }) : super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
 
   @override
@@ -150,17 +150,17 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
   final String pluginsPath;
 
   static Iterable<DoctorValidator> installed({
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
-    required Platform platform,
-    required UserMessages userMessages,
+    required final FileSystem fileSystem,
+    required final FileSystemUtils fileSystemUtils,
+    required final Platform platform,
+    required final UserMessages userMessages,
   }) {
     final List<DoctorValidator> validators = <DoctorValidator>[];
     if (fileSystemUtils.homeDirPath == null) {
       return validators;
     }
 
-    void addValidator(String title, String version, String installPath, String pluginsPath) {
+    void addValidator(final String title, final String version, final String installPath, final String pluginsPath) {
       final IntelliJValidatorOnWindows validator = IntelliJValidatorOnWindows(
         title,
         version,
@@ -185,7 +185,7 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
     final Directory homeDir = fileSystem.directory(fileSystemUtils.homeDirPath);
     for (final Directory dir in homeDir.listSync().whereType<Directory>()) {
       final String name = fileSystem.path.basename(dir.path);
-      IntelliJValidator._idToTitle.forEach((String id, String title) {
+      IntelliJValidator._idToTitle.forEach((final String id, final String title) {
         if (name.startsWith('.$id')) {
           final String version = name.substring(id.length + 1);
           String? installPath;
@@ -212,7 +212,7 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
     }
     for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
       final String name = fileSystem.path.basename(dir.path);
-      IntelliJValidator._idToTitle.forEach((String id, String title) {
+      IntelliJValidator._idToTitle.forEach((final String id, final String title) {
         if (name.startsWith(id)) {
           final String version = name.substring(id.length);
           String? installPath;
@@ -246,9 +246,9 @@ class IntelliJValidatorOnWindows extends IntelliJValidator {
 
 /// A linux specific implementation of the intellij validator.
 class IntelliJValidatorOnLinux extends IntelliJValidator {
-  IntelliJValidatorOnLinux(String title, this.version, String installPath, this.pluginsPath, {
-    required FileSystem fileSystem,
-    required UserMessages userMessages,
+  IntelliJValidatorOnLinux(final String title, this.version, final String installPath, this.pluginsPath, {
+    required final FileSystem fileSystem,
+    required final UserMessages userMessages,
   }) : super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
 
   @override
@@ -258,9 +258,9 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
   final String pluginsPath;
 
   static Iterable<DoctorValidator> installed({
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
-    required UserMessages userMessages,
+    required final FileSystem fileSystem,
+    required final FileSystemUtils fileSystemUtils,
+    required final UserMessages userMessages,
   }) {
     final List<DoctorValidator> validators = <DoctorValidator>[];
     final String? homeDirPath = fileSystemUtils.homeDirPath;
@@ -268,7 +268,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
       return validators;
     }
 
-    void addValidator(String title, String version, String installPath, String pluginsPath) {
+    void addValidator(final String title, final String version, final String installPath, final String pluginsPath) {
       final IntelliJValidatorOnLinux validator = IntelliJValidatorOnLinux(
         title,
         version,
@@ -293,7 +293,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
     final Directory homeDir = fileSystem.directory(homeDirPath);
     for (final Directory dir in homeDir.listSync().whereType<Directory>()) {
       final String name = fileSystem.path.basename(dir.path);
-      IntelliJValidator._idToTitle.forEach((String id, String title) {
+      IntelliJValidator._idToTitle.forEach((final String id, final String title) {
         if (name.startsWith('.$id')) {
           final String version = name.substring(id.length + 1);
           String? installPath;
@@ -316,7 +316,7 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
     }
     for (final Directory dir in cacheDir.listSync().whereType<Directory>()) {
       final String name = fileSystem.path.basename(dir.path);
-      IntelliJValidator._idToTitle.forEach((String id, String title) {
+      IntelliJValidator._idToTitle.forEach((final String id, final String title) {
         if (name.startsWith(id)) {
           final String version = name.substring(id.length);
           String? installPath;
@@ -359,11 +359,11 @@ class IntelliJValidatorOnLinux extends IntelliJValidator {
 
 /// A macOS specific implementation of the intellij validator.
 class IntelliJValidatorOnMac extends IntelliJValidator {
-  IntelliJValidatorOnMac(String title, this.id, String installPath, {
-    required FileSystem fileSystem,
-    required UserMessages userMessages,
-    required PlistParser plistParser,
-    required String? homeDirPath,
+  IntelliJValidatorOnMac(final String title, this.id, final String installPath, {
+    required final FileSystem fileSystem,
+    required final UserMessages userMessages,
+    required final PlistParser plistParser,
+    required final String? homeDirPath,
   }) : _plistParser = plistParser,
        _homeDirPath = homeDirPath,
        super(title, installPath, fileSystem: fileSystem, userMessages: userMessages);
@@ -379,11 +379,11 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   };
 
   static Iterable<DoctorValidator> installed({
-    required FileSystem fileSystem,
-    required FileSystemUtils fileSystemUtils,
-    required UserMessages userMessages,
-    required PlistParser plistParser,
-    required ProcessManager processManager,
+    required final FileSystem fileSystem,
+    required final FileSystemUtils fileSystemUtils,
+    required final UserMessages userMessages,
+    required final PlistParser plistParser,
+    required final ProcessManager processManager,
   }) {
     final List<DoctorValidator> validators = <DoctorValidator>[];
     final String? homeDirPath = fileSystemUtils.homeDirPath;
@@ -393,9 +393,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
         fileSystem.path.join(homeDirPath, 'Applications'),
     ];
 
-    void checkForIntelliJ(Directory dir) {
+    void checkForIntelliJ(final Directory dir) {
       final String name = fileSystem.path.basename(dir.path);
-      _dirNameToId.forEach((String dirName, String id) {
+      _dirNameToId.forEach((final String dirName, final String id) {
         if (name == dirName) {
           assert(IntelliJValidator._idToTitle.containsKey(id));
           final String title = IntelliJValidator._idToTitle[id]!;
@@ -415,8 +415,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     try {
       final Iterable<Directory> installDirs = installPaths
         .map(fileSystem.directory)
-        .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-        .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
+        .map<List<FileSystemEntity>>((final Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+        .expand<FileSystemEntity>((final List<FileSystemEntity> mappedDirs) => mappedDirs)
         .whereType<Directory>();
       for (final Directory dir in installDirs) {
         checkForIntelliJ(dir);
@@ -448,7 +448,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
 
       for (final String installPath in LineSplitter.split(ceSpotlightResult)) {
-        if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
+        if (!validators.whereType<IntelliJValidatorOnMac>().any((final IntelliJValidatorOnMac e) => e.installPath == installPath)) {
           validators.add(IntelliJValidatorOnMac(
             _communityEditionTitle,
             _communityEditionId,
@@ -462,7 +462,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
       }
 
       for (final String installPath in LineSplitter.split(ultimateSpotlightResult)) {
-        if (!validators.whereType<IntelliJValidatorOnMac>().any((IntelliJValidatorOnMac e) => e.installPath == installPath)) {
+        if (!validators.whereType<IntelliJValidatorOnMac>().any((final IntelliJValidatorOnMac e) => e.installPath == installPath)) {
           validators.add(IntelliJValidatorOnMac(
             _ultimateEditionTitle,
             _ultimateEditionId,

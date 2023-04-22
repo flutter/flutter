@@ -187,7 +187,7 @@ class FakePlatform extends Platform {
     this.environment = const <String, String>{},
     this.executable = '',
     this.resolvedExecutable = '',
-    Uri? script,
+    final Uri? script,
     this.executableArguments = const <String>[],
     this.packageConfig,
     this.version = '',
@@ -198,7 +198,7 @@ class FakePlatform extends Platform {
 
   /// Creates a new [FakePlatform] with properties whose initial values mirror
   /// the specified [platform].
-  FakePlatform.fromPlatform(Platform platform)
+  FakePlatform.fromPlatform(final Platform platform)
       : numberOfProcessors = platform.numberOfProcessors,
         pathSeparator = platform.pathSeparator,
         operatingSystem = platform.operatingSystem,

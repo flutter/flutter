@@ -47,7 +47,7 @@ void main() {
     )..appPid = appPid;
     final Completer<void> onDone = Completer<void>.sync();
     final List<String> emittedLines = <String>[];
-    logReader.logLines.listen((String line) {
+    logReader.logLines.listen((final String line) {
         emittedLines.add(line);
     }, onDone: onDone.complete);
     await null;
@@ -175,7 +175,7 @@ void main() {
       processManager,
     );
     final Completer<void> onDone = Completer<void>.sync();
-    logReader.logLines.listen((String _) { }, onDone: onDone.complete);
+    logReader.logLines.listen((final String _) { }, onDone: onDone.complete);
 
     logReader.dispose();
     await onDone.future;
@@ -218,7 +218,7 @@ void main() {
   });
 }
 
-AndroidDevice createFakeDevice(int? sdkLevel) {
+AndroidDevice createFakeDevice(final int? sdkLevel) {
   return FakeAndroidDevice(
     sdkLevel.toString(),
     kLastLogcatTimestamp,
@@ -244,7 +244,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   Future<String> lastLogcatTimestamp() async => _lastLogcatTimestamp;
 
   @override
-  List<String> adbCommandForDevice(List<String> command) {
+  List<String> adbCommandForDevice(final List<String> command) {
     return <String>[
       'adb', '-s', '1234', ...command,
     ];

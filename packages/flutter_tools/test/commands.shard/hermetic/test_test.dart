@@ -241,7 +241,7 @@ dev_dependencies:
       '--coverage',
       '--',
       'test/fake_test.dart',
-    ]), throwsA(isA<ToolExit>().having((ToolExit toolExit) => toolExit.message, 'message', isNull)));
+    ]), throwsA(isA<ToolExit>().having((final ToolExit toolExit) => toolExit.message, 'message', isNull)));
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
@@ -361,12 +361,12 @@ dev_dependencies:
     ]);
 
     // Expect one message for each phase.
-    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    final List<String> logPhaseMessages = logger.messages.where((final String m) => m.startsWith('Runtime for phase ')).toList();
     expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
 
     // As we force the `runTests` command to take at least 1 ms expect at least
     // one phase to take a non-zero amount of time.
-    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+    final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((final String m) => !m.contains(Duration.zero.toString())).toList();
     expect(logPhaseMessagesNonZero, isNotEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
@@ -389,7 +389,7 @@ dev_dependencies:
       'test/fake_test.dart',
     ]);
 
-    final List<String> logPhaseMessages = logger.messages.where((String m) => m.startsWith('Runtime for phase ')).toList();
+    final List<String> logPhaseMessages = logger.messages.where((final String m) => m.startsWith('Runtime for phase ')).toList();
     expect(logPhaseMessages, isEmpty);
   }, overrides: <Type, Generator>{
     FileSystem: () => fs,
@@ -855,36 +855,36 @@ class FakeFlutterTestRunner implements FlutterTestRunner {
 
   @override
   Future<int> runTests(
-    TestWrapper testWrapper,
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
-    bool enableVmService = false,
-    bool ipv6 = false,
-    bool machine = false,
-    String? precompiledDillPath,
-    Map<String, String>? precompiledDillFiles,
-    bool updateGoldens = false,
-    TestWatcher? watcher,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    Directory? coverageDirectory,
-    bool web = false,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    Device? integrationTestDevice,
-    String? integrationTestUserIdentifier,
-    TestTimeRecorder? testTimeRecorder,
+    final TestWrapper testWrapper,
+    final List<Uri> testFiles, {
+    required final DebuggingOptions debuggingOptions,
+    final List<String> names = const <String>[],
+    final List<String> plainNames = const <String>[],
+    final String? tags,
+    final String? excludeTags,
+    final bool enableVmService = false,
+    final bool ipv6 = false,
+    final bool machine = false,
+    final String? precompiledDillPath,
+    final Map<String, String>? precompiledDillFiles,
+    final bool updateGoldens = false,
+    final TestWatcher? watcher,
+    required final int? concurrency,
+    final String? testAssetDirectory,
+    final FlutterProject? flutterProject,
+    final String? icudtlPath,
+    final Directory? coverageDirectory,
+    final bool web = false,
+    final String? randomSeed,
+    final String? reporter,
+    final String? fileReporter,
+    final String? timeout,
+    final bool runSkipped = false,
+    final int? shardIndex,
+    final int? totalShards,
+    final Device? integrationTestDevice,
+    final String? integrationTestUserIdentifier,
+    final TestTimeRecorder? testTimeRecorder,
   }) async {
     lastEnableVmServiceValue = enableVmService;
     lastDebuggingOptionsValue = debuggingOptions;
@@ -903,14 +903,14 @@ class FakePackageTest implements TestWrapper {
   List<String>? lastArgs;
 
   @override
-  Future<void> main(List<String> args) async {
+  Future<void> main(final List<String> args) async {
     lastArgs = args;
   }
 
   @override
   void registerPlatformPlugin(
-    Iterable<Runtime> runtimes,
-    FutureOr<PlatformPlugin> Function() platforms,
+    final Iterable<Runtime> runtimes,
+    final FutureOr<PlatformPlugin> Function() platforms,
   ) {}
 }
 
@@ -921,13 +921,13 @@ class _FakeDeviceManager extends DeviceManager {
 
   @override
   Future<List<Device>> getAllDevices({
-    DeviceDiscoveryFilter? filter,
+    final DeviceDiscoveryFilter? filter,
   }) async => filteredDevices(filter);
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
-  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+  List<Device> filteredDevices(final DeviceDiscoveryFilter? filter) {
     if (filter?.deviceConnectionInterface == DeviceConnectionInterface.wireless) {
       return <Device>[];
     }

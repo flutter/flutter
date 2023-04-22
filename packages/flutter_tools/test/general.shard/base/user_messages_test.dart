@@ -14,7 +14,7 @@ void main() {
   final FakePlatform linuxPlatform = FakePlatform();
   final FakePlatform windowsPlatform = FakePlatform(operatingSystem: 'windows');
 
-  void checkInstallationURL(_InstallationMessage message) {
+  void checkInstallationURL(final _InstallationMessage message) {
     expect(message(macPlatform), contains('https://flutter.dev/docs/get-started/install/macos#android-setup'));
     expect(message(linuxPlatform), contains('https://flutter.dev/docs/get-started/install/linux#android-setup'));
     expect(message(windowsPlatform), contains('https://flutter.dev/docs/get-started/install/windows#android-setup'));
@@ -23,12 +23,12 @@ void main() {
 
   testWithoutContext('Android installation instructions', () {
     final UserMessages userMessages = UserMessages();
-    checkInstallationURL((Platform platform) => userMessages.androidMissingSdkInstructions(platform));
-    checkInstallationURL((Platform platform) => userMessages.androidSdkInstallHelp(platform));
-    checkInstallationURL((Platform platform) => userMessages.androidMissingSdkManager('/', platform));
-    checkInstallationURL((Platform platform) => userMessages.androidCannotRunSdkManager('/', '', platform));
-    checkInstallationURL((Platform platform) => userMessages.androidSdkBuildToolsOutdated(0, '', platform));
-    checkInstallationURL((Platform platform) => userMessages.androidStudioInstallation(platform));
+    checkInstallationURL((final Platform platform) => userMessages.androidMissingSdkInstructions(platform));
+    checkInstallationURL((final Platform platform) => userMessages.androidSdkInstallHelp(platform));
+    checkInstallationURL((final Platform platform) => userMessages.androidMissingSdkManager('/', platform));
+    checkInstallationURL((final Platform platform) => userMessages.androidCannotRunSdkManager('/', '', platform));
+    checkInstallationURL((final Platform platform) => userMessages.androidSdkBuildToolsOutdated(0, '', platform));
+    checkInstallationURL((final Platform platform) => userMessages.androidStudioInstallation(platform));
   });
 
   testWithoutContext('Xcode installation instructions', () {

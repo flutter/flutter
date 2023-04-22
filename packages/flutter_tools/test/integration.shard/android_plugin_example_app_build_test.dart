@@ -25,8 +25,8 @@ void main() {
   });
 
   Future<void> testPlugin({
-    required String template,
-    required Directory tempDir,
+    required final String template,
+    required final Directory tempDir,
   }) async {
     final String flutterBin = fileSystem.path.join(
       getFlutterRoot(),

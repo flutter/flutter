@@ -365,7 +365,7 @@ void main() {
 }
 
 /// Generates a fake app bundle at the location [directoryName]/[fileName].
-FlutterProject generateFakeAppBundle(String directoryName, String fileName, FileSystem fileSystem) {
+FlutterProject generateFakeAppBundle(final String directoryName, final String fileName, final FileSystem fileSystem) {
   final FlutterProject project = FlutterProject.fromDirectoryTest(fileSystem.currentDirectory);
 
   final Directory bundleDirectory = getBundleDirectory(project);

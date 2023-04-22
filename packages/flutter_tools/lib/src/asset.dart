@@ -59,10 +59,10 @@ abstract class AssetBundleFactory {
   static AssetBundleFactory get instance => context.get<AssetBundleFactory>()!;
 
   static AssetBundleFactory defaultInstance({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    bool splitDeferredAssets = false,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    final bool splitDeferredAssets = false,
   }) => _ManifestAssetBundleFactory(logger: logger, fileSystem: fileSystem, platform: platform, splitDeferredAssets: splitDeferredAssets);
 
   /// Creates a new [AssetBundle].
@@ -94,23 +94,23 @@ abstract class AssetBundle {
 
   bool wasBuiltOnce();
 
-  bool needsBuild({ String manifestPath = defaultManifestPath });
+  bool needsBuild({ final String manifestPath = defaultManifestPath });
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
-    String manifestPath = defaultManifestPath,
-    required String packagesPath,
-    bool deferredComponentsEnabled = false,
-    TargetPlatform? targetPlatform,
+    final String manifestPath = defaultManifestPath,
+    required final String packagesPath,
+    final bool deferredComponentsEnabled = false,
+    final TargetPlatform? targetPlatform,
   });
 }
 
 class _ManifestAssetBundleFactory implements AssetBundleFactory {
   _ManifestAssetBundleFactory({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    bool splitDeferredAssets = false,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    final bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
@@ -130,10 +130,10 @@ class ManifestAssetBundle implements AssetBundle {
   /// Constructs an [ManifestAssetBundle] that gathers the set of assets from the
   /// pubspec.yaml manifest.
   ManifestAssetBundle({
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    bool splitDeferredAssets = false,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    final bool splitDeferredAssets = false,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _platform = platform,
@@ -183,7 +183,7 @@ class ManifestAssetBundle implements AssetBundle {
   bool wasBuiltOnce() => _lastBuildTimestamp != null;
 
   @override
-  bool needsBuild({ String manifestPath = defaultManifestPath }) {
+  bool needsBuild({ final String manifestPath = defaultManifestPath }) {
     final DateTime? lastBuildTimestamp = _lastBuildTimestamp;
     if (lastBuildTimestamp == null) {
       return true;
@@ -211,11 +211,11 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   Future<int> build({
-    String manifestPath = defaultManifestPath,
+    final String manifestPath = defaultManifestPath,
     FlutterProject? flutterProject,
-    required String packagesPath,
-    bool deferredComponentsEnabled = false,
-    TargetPlatform? targetPlatform,
+    required final String packagesPath,
+    final bool deferredComponentsEnabled = false,
+    final TargetPlatform? targetPlatform,
   }) async {
 
     if (flutterProject == null) {
@@ -472,7 +472,7 @@ class ManifestAssetBundle implements AssetBundle {
 
   @override
   List<File> additionalDependencies = <File>[];
-  void _setIfChanged(String key, DevFSContent content, AssetKind assetKind) {
+  void _setIfChanged(final String key, final DevFSContent content, final AssetKind assetKind) {
     final DevFSContent? oldContent = entries[key];
     // In the case that the content is unchanged, we want to avoid an overwrite
     // as the isModified property may be reset to true,
@@ -485,7 +485,7 @@ class ManifestAssetBundle implements AssetBundle {
     entryKinds[key] = assetKind;
   }
 
-  static bool _compareIntLists(List<int> o1, List<int> o2) {
+  static bool _compareIntLists(final List<int> o1, final List<int> o2) {
     if (o1.length != o2.length) {
       return false;
     }
@@ -500,8 +500,8 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   void _setLicenseIfChanged(
-    String combinedLicenses,
-    TargetPlatform? targetPlatform,
+    final String combinedLicenses,
+    final TargetPlatform? targetPlatform,
   ) {
     // On the web, don't compress the NOTICES file since the client doesn't have
     // dart:io to decompress it. So use the standard _setIfChanged to check if
@@ -586,10 +586,10 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   List<Map<String, Object?>> _parseFonts(
-    FlutterManifest manifest,
-    PackageConfig packageConfig, {
-    String? packageName,
-    required bool primary,
+    final FlutterManifest manifest,
+    final PackageConfig packageConfig, {
+    final String? packageName,
+    required final bool primary,
   }) {
     return <Map<String, Object?>>[
       if (primary && manifest.usesMaterialDesign)
@@ -606,12 +606,12 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   Map<String, Map<_Asset, List<_Asset>>> _parseDeferredComponentsAssets(
-    FlutterManifest flutterManifest,
-    PackageConfig packageConfig,
-    String assetBasePath,
-    List<Uri> wildcardDirectories,
-    Directory projectDirectory, {
-    List<String> excludeDirs = const <String>[],
+    final FlutterManifest flutterManifest,
+    final PackageConfig packageConfig,
+    final String assetBasePath,
+    final List<Uri> wildcardDirectories,
+    final Directory projectDirectory, {
+    final List<String> excludeDirs = const <String>[],
   }) {
     final List<DeferredComponent>? components = flutterManifest.deferredComponents;
     final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants = <String, Map<_Asset, List<_Asset>>>{};
@@ -649,19 +649,19 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   Map<String, List<String>> _createAssetManifest(
-    Map<_Asset, List<_Asset>> assetVariants,
-    Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
+    final Map<_Asset, List<_Asset>> assetVariants,
+    final Map<String, Map<_Asset, List<_Asset>>> deferredComponentsAssetVariants
   ) {
     final Map<String, List<String>> manifest = <String, List<String>>{};
     final Map<_Asset, List<String>> entries = <_Asset, List<String>>{};
-    assetVariants.forEach((_Asset main, List<_Asset> variants) {
+    assetVariants.forEach((final _Asset main, final List<_Asset> variants) {
       entries[main] = <String>[
         for (final _Asset variant in variants)
           variant.entryUri.path,
       ];
     });
     for (final Map<_Asset, List<_Asset>> componentAssets in deferredComponentsAssetVariants.values) {
-      componentAssets.forEach((_Asset main, List<_Asset> variants) {
+      componentAssets.forEach((final _Asset main, final List<_Asset> variants) {
         entries[main] = <String>[
           for (final _Asset variant in variants)
             variant.entryUri.path,
@@ -669,12 +669,12 @@ class ManifestAssetBundle implements AssetBundle {
       });
     }
     final List<_Asset> sortedKeys = entries.keys.toList()
-        ..sort((_Asset left, _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
+        ..sort((final _Asset left, final _Asset right) => left.entryUri.path.compareTo(right.entryUri.path));
     for (final _Asset main in sortedKeys) {
       final String decodedEntryPath = Uri.decodeFull(main.entryUri.path);
       final List<String> rawEntryVariantsPaths = entries[main]!;
       final List<String> decodedEntryVariantPaths = rawEntryVariantsPaths
-        .map((String value) => Uri.decodeFull(value))
+        .map((final String value) => Uri.decodeFull(value))
         .toList();
       manifest[decodedEntryPath] = decodedEntryVariantPaths;
     }
@@ -686,9 +686,9 @@ class ManifestAssetBundle implements AssetBundle {
   static final RegExp _extractPixelRatioFromKeyRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
   DevFSByteContent _createAssetManifestBinary(
-    Map<String, List<String>> assetManifest
+    final Map<String, List<String>> assetManifest
   ) {
-    double parseScale(String key) {
+    double parseScale(final String key) {
       final Uri assetUri = Uri.parse(key);
       String directoryPath = '';
       if (assetUri.pathSegments.length > 1) {
@@ -729,9 +729,9 @@ class ManifestAssetBundle implements AssetBundle {
   /// Prefixes family names and asset paths of fonts included from packages with
   /// 'packages/<package_name>'
   List<Font> _parsePackageFonts(
-    FlutterManifest manifest,
-    String packageName,
-    PackageConfig packageConfig,
+    final FlutterManifest manifest,
+    final String packageName,
+    final PackageConfig packageConfig,
   ) {
     final List<Font> packageFonts = <Font>[];
     for (final Font font in manifest.fonts) {
@@ -785,13 +785,13 @@ class ManifestAssetBundle implements AssetBundle {
   /// }
   /// ```
   Map<_Asset, List<_Asset>>? _parseAssets(
-    PackageConfig packageConfig,
-    FlutterManifest flutterManifest,
-    List<Uri> wildcardDirectories,
-    String assetBase,
-    TargetPlatform? targetPlatform, {
-    String? packageName,
-    Package? attributedPackage,
+    final PackageConfig packageConfig,
+    final FlutterManifest flutterManifest,
+    final List<Uri> wildcardDirectories,
+    final String assetBase,
+    final TargetPlatform? targetPlatform, {
+    final String? packageName,
+    final Package? attributedPackage,
   }) {
     final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
@@ -874,14 +874,14 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   void _parseAssetsFromFolder(
-    PackageConfig packageConfig,
-    FlutterManifest flutterManifest,
-    String assetBase,
-    _AssetDirectoryCache cache,
-    Map<_Asset, List<_Asset>> result,
-    Uri assetUri, {
-    String? packageName,
-    Package? attributedPackage,
+    final PackageConfig packageConfig,
+    final FlutterManifest flutterManifest,
+    final String assetBase,
+    final _AssetDirectoryCache cache,
+    final Map<_Asset, List<_Asset>> result,
+    final Uri assetUri, {
+    final String? packageName,
+    final Package? attributedPackage,
   }) {
     final String directoryPath = _fileSystem.path.join(
         assetBase, assetUri.toFilePath(windows: _platform.isWindows));
@@ -912,16 +912,16 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   void _parseAssetFromFile(
-    PackageConfig packageConfig,
-    FlutterManifest flutterManifest,
-    String assetBase,
-    _AssetDirectoryCache cache,
-    Map<_Asset, List<_Asset>> result,
-    Uri assetUri, {
-    List<String> excludeDirs = const <String>[],
-    String? packageName,
-    Package? attributedPackage,
-    AssetKind assetKind = AssetKind.regular,
+    final PackageConfig packageConfig,
+    final FlutterManifest flutterManifest,
+    final String assetBase,
+    final _AssetDirectoryCache cache,
+    final Map<_Asset, List<_Asset>> result,
+    final Uri assetUri, {
+    final List<String> excludeDirs = const <String>[],
+    final String? packageName,
+    final Package? attributedPackage,
+    final AssetKind assetKind = AssetKind.regular,
   }) {
     final _Asset asset = _resolveAsset(
       packageConfig,
@@ -956,12 +956,12 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   _Asset _resolveAsset(
-    PackageConfig packageConfig,
-    String assetsBaseDir,
-    Uri assetUri,
-    String? packageName,
-    Package? attributedPackage, {
-    AssetKind assetKind = AssetKind.regular,
+    final PackageConfig packageConfig,
+    final String assetsBaseDir,
+    final Uri assetUri,
+    final String? packageName,
+    final Package? attributedPackage, {
+    final AssetKind assetKind = AssetKind.regular,
   }) {
     final String assetPath = _fileSystem.path.fromUri(assetUri);
     if (assetUri.pathSegments.first == 'packages'
@@ -991,10 +991,10 @@ class ManifestAssetBundle implements AssetBundle {
   }
 
   _Asset? _resolvePackageAsset(
-    Uri assetUri,
-    PackageConfig packageConfig,
-    Package? attributedPackage, {
-    AssetKind assetKind = AssetKind.regular,
+    final Uri assetUri,
+    final PackageConfig packageConfig,
+    final Package? attributedPackage, {
+    final AssetKind assetKind = AssetKind.regular,
   }) {
     assert(assetUri.pathSegments.first == 'packages');
     if (assetUri.pathSegments.length > 1) {
@@ -1043,7 +1043,7 @@ class _Asset {
 
   final AssetKind assetKind;
 
-  File lookupAssetFile(FileSystem fileSystem) {
+  File lookupAssetFile(final FileSystem fileSystem) {
     return fileSystem.file(fileSystem.path.join(baseDir, fileSystem.path.fromUri(relativeUri)));
   }
 
@@ -1061,7 +1061,7 @@ class _Asset {
   String toString() => 'asset: $entryUri';
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(other, this)) {
       return true;
     }
@@ -1097,7 +1097,7 @@ class _AssetDirectoryCache {
   final Map<String, List<String>> _cache = <String, List<String>>{};
   final Map<String, List<File>> _variantsPerFolder = <String, List<File>>{};
 
-  List<String> variantsFor(String assetPath) {
+  List<String> variantsFor(final String assetPath) {
     final String directory = _fileSystem.path.dirname(assetPath);
 
     if (!_fileSystem.directory(directory).existsSync()) {
@@ -1111,8 +1111,8 @@ class _AssetDirectoryCache {
       _variantsPerFolder[directory] = _fileSystem.directory(directory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
-        .expand((Directory dir) => dir.listSync())
+        .where((final Directory dir) => _assetVariantDirectoryRegExp.hasMatch(dir.basename))
+        .expand((final Directory dir) => dir.listSync())
         .whereType<File>()
         .toList();
     }
@@ -1125,8 +1125,8 @@ class _AssetDirectoryCache {
       if (assetFile.existsSync())
         assetPath,
       ...potentialVariants
-        .where((File file) => file.basename == basename)
-        .map((File file) => file.path),
+        .where((final File file) => file.basename == basename)
+        .map((final File file) => file.path),
     ];
   }
 }

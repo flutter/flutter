@@ -23,12 +23,12 @@ import 'test_config.dart';
 /// A web compiler for the test runner.
 class WebTestCompiler {
   WebTestCompiler({
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Artifacts artifacts,
-    required Platform platform,
-    required ProcessManager processManager,
-    required Config config,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Artifacts artifacts,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final Config config,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
@@ -44,10 +44,10 @@ class WebTestCompiler {
   final Config _config;
 
   Future<WebMemoryFS> initialize({
-    required Directory projectDirectory,
-    required String testOutputDir,
-    required List<String> testFiles,
-    required BuildInfo buildInfo,
+    required final Directory projectDirectory,
+    required final String testOutputDir,
+    required final List<String> testFiles,
+    required final BuildInfo buildInfo,
   }) async {
     LanguageVersion languageVersion = LanguageVersion(2, 8);
     late final String platformDillName;

@@ -29,12 +29,12 @@ export 'compiler_config.dart';
 
 class WebBuilder {
   WebBuilder({
-    required Logger logger,
-    required ProcessManager processManager,
-    required BuildSystem buildSystem,
-    required Usage usage,
-    required FlutterVersion flutterVersion,
-    required FileSystem fileSystem,
+    required final Logger logger,
+    required final ProcessManager processManager,
+    required final BuildSystem buildSystem,
+    required final Usage usage,
+    required final FlutterVersion flutterVersion,
+    required final FileSystem fileSystem,
   })  : _logger = logger,
         _processManager = processManager,
         _buildSystem = buildSystem,
@@ -50,13 +50,13 @@ class WebBuilder {
   final FileSystem _fileSystem;
 
   Future<void> buildWeb(
-    FlutterProject flutterProject,
-    String target,
-    BuildInfo buildInfo,
-    ServiceWorkerStrategy serviceWorkerStrategy, {
-    required WebCompilerConfig compilerConfig,
-    String? baseHref,
-    String? outputDirectoryPath,
+    final FlutterProject flutterProject,
+    final String target,
+    final BuildInfo buildInfo,
+    final ServiceWorkerStrategy serviceWorkerStrategy, {
+    required final WebCompilerConfig compilerConfig,
+    final String? baseHref,
+    final String? outputDirectoryPath,
   }) async {
     if (compilerConfig.isWasm) {
       globals.logger.printBox(
@@ -68,7 +68,7 @@ class WebBuilder {
     }
 
     final bool hasWebPlugins =
-        (await findPlugins(flutterProject)).any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
+        (await findPlugins(flutterProject)).any((final Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
     final Directory outputDirectory = outputDirectoryPath == null
         ? _fileSystem.directory(getWebBuildDirectory(compilerConfig.isWasm))
         : _fileSystem.directory(outputDirectoryPath);
@@ -227,8 +227,8 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
 const String kWasmPreviewUri = 'https://flutter.dev/wasm';
 
 String _buildEventAnalyticsSettings({
-  required WebCompilerConfig config,
-  required BuildInfo buildInfo,
+  required final WebCompilerConfig config,
+  required final BuildInfo buildInfo,
 }) {
   final Map<String, Object> values = <String, Object>{
     ...config.buildEventAnalyticsValues,
@@ -236,7 +236,7 @@ String _buildEventAnalyticsSettings({
   };
 
   final List<String> sortedList = values.entries
-      .map((MapEntry<String, Object> e) => '${e.key}: ${e.value};')
+      .map((final MapEntry<String, Object> e) => '${e.key}: ${e.value};')
       .toList()
     ..sort();
 

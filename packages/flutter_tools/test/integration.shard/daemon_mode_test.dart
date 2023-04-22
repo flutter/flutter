@@ -40,11 +40,11 @@ void main() {
     );
 
     final StreamController<String> stdout = StreamController<String>.broadcast();
-    transformToLines(daemonProcess.stdout).listen((String line) => stdout.add(line));
+    transformToLines(daemonProcess.stdout).listen((final String line) => stdout.add(line));
     final Stream<Map<String, Object?>?> stream = stdout
       .stream
       .map<Map<String, Object?>?>(parseFlutterResponse)
-      .where((Map<String, Object?>? value) => value != null);
+      .where((final Map<String, Object?>? value) => value != null);
 
     Map<String, Object?> response = (await stream.first)!;
     expect(response['event'], 'daemon.connected');
@@ -54,7 +54,7 @@ void main() {
       'id': 1,
       'method': 'device.enable',
     })}]');
-    response = (await stream.firstWhere((Map<String, Object?>? json) => json!['id'] == 1))!;
+    response = (await stream.firstWhere((final Map<String, Object?>? json) => json!['id'] == 1))!;
     expect(response['id'], 1);
     expect(response['error'], isNull);
 
@@ -69,7 +69,7 @@ void main() {
       'method': 'device.getDevices',
     })}]');
     // Skip other device.added events that may fire (desktop/web devices).
-    response = (await stream.firstWhere((Map<String, Object?>? response) => response!['event'] != 'device.added'))!;
+    response = (await stream.firstWhere((final Map<String, Object?>? response) => response!['event'] != 'device.added'))!;
     expect(response['id'], 2);
     expect(response['error'], isNull);
 

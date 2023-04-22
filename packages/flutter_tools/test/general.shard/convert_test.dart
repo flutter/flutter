@@ -29,7 +29,7 @@ void main() {
       () => decoder.convert(nonpassString.codeUnits),
       throwsA(
         isA<ToolExit>().having(
-          (ToolExit error) => error.message,
+          (final ToolExit error) => error.message,
           'message',
           contains('(U+FFFD; REPLACEMENT CHARACTER)'), // Added paragraph
         ),

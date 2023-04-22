@@ -110,7 +110,7 @@ group('PrebuiltMacOSApp', () {
 
     testUsingContext('Bad zipped app, two app bundles', () {
       fileSystem.file('app.zip').createSync();
-      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+      os.unzipOverride = (final File zipFile, final Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
           return;
         }
@@ -127,7 +127,7 @@ group('PrebuiltMacOSApp', () {
 
     testUsingContext('Success with zipped app', () {
       fileSystem.file('app.zip').createSync();
-      os.unzipOverride = (File zipFile, Directory targetDirectory) {
+      os.unzipOverride = (final File zipFile, final Directory targetDirectory) {
         if (zipFile.path != 'app.zip') {
           return;
         }
@@ -179,7 +179,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   void Function(File, Directory)? unzipOverride;
 
   @override
-  void unzip(File file, Directory targetDirectory) {
+  void unzip(final File file, final Directory targetDirectory) {
     unzipOverride?.call(file, targetDirectory);
   }
 }
@@ -190,7 +190,7 @@ class FakePlistUtils extends Fake implements PlistParser {
   final FileSystem? fileSystem;
 
   @override
-  Map<String, Object> parseFile(String plistFilePath) {
+  Map<String, Object> parseFile(final String plistFilePath) {
     final File file = fileSystem!.file(plistFilePath);
     if (!file.existsSync()) {
       return <String, Object>{};

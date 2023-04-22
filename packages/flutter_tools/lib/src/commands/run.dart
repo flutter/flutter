@@ -33,7 +33,7 @@ import 'daemon.dart';
 
 /// Shared logic between `flutter run` and `flutter drive` commands.
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
-  RunCommandBase({ required bool verboseHelp }) {
+  RunCommandBase({ required final bool verboseHelp }) {
     addBuildModeFlags(verboseHelp: verboseHelp, defaultToRelease: false);
     usesDartDefineOption();
     usesFlavorOption();
@@ -220,7 +220,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   /// Create a debugging options instance for the current `run` or `drive` invocation.
   @visibleForTesting
   @protected
-  Future<DebuggingOptions> createDebuggingOptions(bool webMode) async {
+  Future<DebuggingOptions> createDebuggingOptions(final bool webMode) async {
     final BuildInfo buildInfo = await getBuildInfo();
     final int? webBrowserDebugPort = featureFlags.isWebEnabled && argResults!.wasParsed('web-browser-debug-port')
       ? int.parse(stringArg('web-browser-debug-port')!)
@@ -304,7 +304,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
 }
 
 class RunCommand extends RunCommandBase {
-  RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
+  RunCommand({ final bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
     usesExtraDartFlagOptions(verboseHelp: verboseHelp);
@@ -481,7 +481,7 @@ class RunCommand extends RunCommandBase {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
-            .where((File file) => globals.fs.path.extension(file.path) == '.swift');
+            .where((final File file) => globals.fs.path.extension(file.path) == '.swift');
         hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
       }
     }
@@ -512,7 +512,7 @@ class RunCommand extends RunCommandBase {
     return super.shouldRunPub;
   }
 
-  bool shouldUseHotMode(BuildInfo buildInfo) {
+  bool shouldUseHotMode(final BuildInfo buildInfo) {
     final bool hotArg = boolArg('hot');
     final bool shouldUseHotMode = hotArg && !traceStartup;
     return buildInfo.isDebug && shouldUseHotMode;
@@ -538,13 +538,13 @@ class RunCommand extends RunCommandBase {
     }
 
     if (userIdentifier != null
-      && devices!.every((Device device) => device.platformType != PlatformType.android)) {
+      && devices!.every((final Device device) => device.platformType != PlatformType.android)) {
       throwToolExit(
         '--${FlutterOptions.kDeviceUser} is only supported for Android. At least one Android device is required.'
       );
     }
 
-    if (devices!.any((Device device) => device is AndroidDevice)) {
+    if (devices!.any((final Device device) => device is AndroidDevice)) {
       _deviceDeprecationBehavior = DeprecationBehavior.exit;
     }
     // Only support "web mode" with a single web device due to resident runner
@@ -556,10 +556,10 @@ class RunCommand extends RunCommandBase {
 
   @visibleForTesting
   Future<ResidentRunner> createRunner({
-    required bool hotMode,
-    required List<FlutterDevice> flutterDevices,
-    required String? applicationBinaryPath,
-    required FlutterProject flutterProject,
+    required final bool hotMode,
+    required final List<FlutterDevice> flutterDevices,
+    required final String? applicationBinaryPath,
+    required final FlutterProject flutterProject,
   }) async {
     if (hotMode && !webMode) {
       return HotRunner(
@@ -729,7 +729,7 @@ class RunCommand extends RunCommandBase {
     TerminalHandler? handler;
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
-      (_) {
+      (final _) {
         appStartedTime = globals.systemClock.now();
         if (stayResident) {
           handler = TerminalHandler(

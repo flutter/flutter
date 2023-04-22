@@ -16,7 +16,7 @@ import '../../src/common.dart';
 void main() {
   late FileSystem fileSystem;
 
-  void writeFileCreatingDirectories(String path, List<int> bytes) {
+  void writeFileCreatingDirectories(final String path, final List<int> bytes) {
     final File file = fileSystem.file(path);
     file.parent.createSync(recursive: true);
     file.writeAsBytesSync(bytes);
@@ -60,11 +60,11 @@ void main() {
     );
 
     ValidationMessage message = messages
-        .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
+        .firstWhere((final ValidationMessage m) => m.message.startsWith('Dart '));
     expect(message.message, 'Dart plugin version 162.2485');
 
     message = messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('Flutter '));
+        (final ValidationMessage m) => m.message.startsWith('Flutter '));
     expect(message.message, contains('Flutter plugin version 0.1.3'));
     expect(message.message, contains('recommended minimum version'));
   });
@@ -101,7 +101,7 @@ Manifest-Version: 1.0
     );
 
     final ValidationMessage message = messages.firstWhere(
-            (ValidationMessage m) => m.message.startsWith('Flutter '));
+            (final ValidationMessage m) => m.message.startsWith('Flutter '));
     expect(message.message, contains('Flutter plugin version 50.0'));
   });
 
@@ -140,7 +140,7 @@ Manifest-Version: 1.0
     );
 
     final ValidationMessage message = messages.firstWhere(
-            (ValidationMessage m) => m.message.startsWith('Flutter '));
+            (final ValidationMessage m) => m.message.startsWith('Flutter '));
     expect(message.message, contains('Flutter plugin version 51.0'));
   });
 
@@ -155,12 +155,12 @@ Manifest-Version: 1.0
     );
 
     ValidationMessage message = messages
-        .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
+        .firstWhere((final ValidationMessage m) => m.message.startsWith('Dart '));
     expect(message.message, contains('Dart plugin can be installed from'));
     expect(message.contextUrl, isNotNull);
 
     message = messages.firstWhere(
-        (ValidationMessage m) => m.message.startsWith('Flutter '));
+        (final ValidationMessage m) => m.message.startsWith('Flutter '));
     expect(message.message, contains('Flutter plugin can be installed from'));
     expect(message.contextUrl, isNotNull);
   });
@@ -186,7 +186,7 @@ Manifest-Version: 1.0
 
 const String _kPluginsPath = '/data/intellij/plugins';
 
-Archive buildSingleFileArchive(String path, String content) {
+Archive buildSingleFileArchive(final String path, final String content) {
   final Archive archive = Archive();
 
   final List<int> bytes = utf8.encode(content);

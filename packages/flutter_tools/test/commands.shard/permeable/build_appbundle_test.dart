@@ -211,8 +211,8 @@ void main() {
 }
 
 Future<BuildAppBundleCommand> runBuildAppBundleCommand(
-  String target, {
-  List<String>? arguments,
+  final String target, {
+  final List<String>? arguments,
 }) async {
   final BuildAppBundleCommand command = BuildAppBundleCommand(logger: BufferLogger.test());
   final CommandRunner<void> runner = createTestCommandRunner(command);

@@ -155,15 +155,15 @@ class AndroidSdk {
     return AndroidSdk(globals.fs.directory(androidHomeDir));
   }
 
-  static bool validSdkDirectory(String dir) {
+  static bool validSdkDirectory(final String dir) {
     return sdkDirectoryHasLicenses(dir) || sdkDirectoryHasPlatformTools(dir);
   }
 
-  static bool sdkDirectoryHasPlatformTools(String dir) {
+  static bool sdkDirectoryHasPlatformTools(final String dir) {
     return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'platform-tools'));
   }
 
-  static bool sdkDirectoryHasLicenses(String dir) {
+  static bool sdkDirectoryHasLicenses(final String dir) {
     return globals.fs.isDirectorySync(globals.fs.path.join(dir, 'licenses'));
   }
 
@@ -234,7 +234,7 @@ class AndroidSdk {
       } else {
         msg.write(' Candidates were:\n');
         msg.write(_platforms
-          .map((Directory dir) => '  - ${dir.basename}')
+          .map((final Directory dir) => '  - ${dir.basename}')
           .join('\n'));
       }
       return <String>[msg.toString()];
@@ -243,7 +243,7 @@ class AndroidSdk {
     return latestVersion!.validateSdkWellFormed();
   }
 
-  String? getPlatformToolsPath(String binaryName) {
+  String? getPlatformToolsPath(final String binaryName) {
     final File cmdlineToolsBinary = directory.childDirectory('cmdline-tools').childFile(binaryName);
     if (cmdlineToolsBinary.existsSync()) {
       return cmdlineToolsBinary.path;
@@ -269,7 +269,7 @@ class AndroidSdk {
     return null;
   }
 
-  String? getCmdlineToolsPath(String binaryName, {bool skipOldTools = false}) {
+  String? getCmdlineToolsPath(final String binaryName, {final bool skipOldTools = false}) {
     // First look for the latest version of the command-line tools
     final File cmdlineToolsLatestBinary = directory
       .childDirectory('cmdline-tools')
@@ -286,7 +286,7 @@ class AndroidSdk {
       final List<Version> cmdlineTools = cmdlineToolsDir
         .listSync()
         .whereType<Directory>()
-        .map((Directory subDirectory) {
+        .map((final Directory subDirectory) {
           try {
             return Version.parse(subDirectory.basename);
           } on Exception {
@@ -334,7 +334,7 @@ class AndroidSdk {
     if (buildToolsDir.existsSync()) {
       buildTools = buildToolsDir
         .listSync()
-        .map((FileSystemEntity entity) {
+        .map((final FileSystemEntity entity) {
           try {
             return Version.parse(entity.basename);
           } on Exception {
@@ -346,7 +346,7 @@ class AndroidSdk {
     }
 
     // Match up platforms with the best corresponding build-tools.
-    _sdkVersions = _platforms.map<AndroidSdkVersion?>((Directory platformDir) {
+    _sdkVersions = _platforms.map<AndroidSdkVersion?>((final Directory platformDir) {
       final String platformName = platformDir.basename;
       int platformVersion;
 
@@ -375,7 +375,7 @@ class AndroidSdk {
         return null;
       }
 
-      Version? buildToolsVersion = Version.primary(buildTools.where((Version version) {
+      Version? buildToolsVersion = Version.primary(buildTools.where((final Version version) {
         return version.major == platformVersion;
       }).toList());
 
@@ -414,11 +414,11 @@ class AndroidSdk {
   /// Returns the version of java in the format \d(.\d)+(.\d)+
   /// Returns null if version not found.
   String? getJavaVersion({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
-    required ProcessUtils processUtils,
+    required final AndroidStudio? androidStudio,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Platform platform,
+    required final ProcessUtils processUtils,
   }) {
     final String? javaBinary = findJavaBinary(
       androidStudio: androidStudio,
@@ -444,7 +444,7 @@ class AndroidSdk {
 
   /// Extracts JDK version from the output of java --version.
   @visibleForTesting
-  static String? parseJavaVersion(String rawVersionOutput) {
+  static String? parseJavaVersion(final String rawVersionOutput) {
     // The contents that matter come in the format '11.0.18' or '1.8.0_202'.
     final RegExp jdkVersionRegex = RegExp(r'\d+\.\d+(\.\d+(?:_\d+)?)?');
     final Iterable<RegExpMatch> matches =
@@ -478,10 +478,10 @@ class AndroidSdk {
 
 
   static String? findJavaHome({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
+    required final AndroidStudio? androidStudio,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Platform platform,
   }) {
     if (androidStudio?.javaPath != null) {
       globals.printTrace("Using Android Studio's java.");
@@ -508,10 +508,10 @@ class AndroidSdk {
   // Android apps exists independently of this method.
   // See https://github.com/flutter/flutter/issues/124252.
   static String? findJavaBinary({
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required Platform platform,
+    required final AndroidStudio? androidStudio,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Platform platform,
   }) {
     final String? javaHome = findJavaHome(
       androidStudio: androidStudio,
@@ -536,7 +536,7 @@ class AndroidSdk {
 
   // Returns a user visible String that says the tool failed to parse
   // the version of java along with the output.
-  static String _formatJavaVersionWarning(String javaVersionRaw) {
+  static String _formatJavaVersionWarning(final String javaVersionRaw) {
     return 'Could not parse java version from: \n'
         '$javaVersionRaw \n'
         'If there is a version please look for an existing bug '
@@ -596,7 +596,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     required this.sdkLevel,
     required this.platformName,
     required this.buildToolsVersion,
-    required FileSystem fileSystem,
+    required final FileSystem fileSystem,
   }) : _fileSystem = fileSystem;
 
   final AndroidSdk sdk;
@@ -632,28 +632,28 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     return <String>[];
   }
 
-  String getPlatformsPath(String itemName) {
+  String getPlatformsPath(final String itemName) {
     return sdk.directory.childDirectory('platforms').childDirectory(platformName).childFile(itemName).path;
   }
 
-  String getBuildToolsPath(String binaryName) {
+  String getBuildToolsPath(final String binaryName) {
     return sdk.directory.childDirectory('build-tools').childDirectory(buildToolsVersionName).childFile(binaryName).path;
   }
 
   @override
-  int compareTo(AndroidSdkVersion other) => sdkLevel - other.sdkLevel;
+  int compareTo(final AndroidSdkVersion other) => sdkLevel - other.sdkLevel;
 
   @override
   String toString() => '[${sdk.directory}, SDK version $sdkLevel, build-tools $buildToolsVersionName]';
 
-  String? _exists(String path) {
+  String? _exists(final String path) {
     if (!_fileSystem.isFileSync(path)) {
       return 'Android SDK file not found: $path.';
     }
     return null;
   }
 
-  String? _canRun(String path) {
+  String? _canRun(final String path) {
     if (!globals.processManager.canRun(path)) {
       return 'Android SDK file not found: $path.';
     }

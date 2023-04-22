@@ -40,7 +40,7 @@ const ProcessManager processManager = LocalProcessManager();
 final String flutterRoot = getFlutterRoot();
 final String flutterBin = fileSystem.path.join(flutterRoot, 'bin', 'flutter');
 
-void debugPrint(String message) {
+void debugPrint(final String message) {
   // This is called to intentionally print debugging output when a test is
   // either taking too long or has failed.
   // ignore: avoid_print
@@ -64,10 +64,10 @@ abstract class Transition {
   /// The default value, null, leaves the logging state unaffected.
   final bool? logging;
 
-  bool matches(String line);
+  bool matches(final String line);
 
   @protected
-  bool lineMatchesPattern(String line, Pattern pattern) {
+  bool lineMatchesPattern(final String line, final Pattern pattern) {
     if (pattern is String) {
       return line == pattern;
     }
@@ -75,7 +75,7 @@ abstract class Transition {
   }
 
   @protected
-  String describe(Pattern pattern) {
+  String describe(final Pattern pattern) {
     if (pattern is String) {
       return '"$pattern"';
     }
@@ -91,14 +91,14 @@ class Barrier extends Transition {
   final Pattern pattern;
 
   @override
-  bool matches(String line) => lineMatchesPattern(line, pattern);
+  bool matches(final String line) => lineMatchesPattern(line, pattern);
 
   @override
   String toString() => describe(pattern);
 }
 
 class Multiple extends Transition {
-  Multiple(List<Pattern> patterns, {
+  Multiple(final List<Pattern> patterns, {
     super.handler,
     super.logging,
   }) : _originalPatterns = patterns,
@@ -108,7 +108,7 @@ class Multiple extends Transition {
   final List<Pattern> patterns;
 
   @override
-  bool matches(String line) {
+  bool matches(final String line) {
     for (int index = 0; index < patterns.length; index += 1) {
       if (lineMatchesPattern(line, patterns[index])) {
         patterns.removeAt(index);
@@ -142,8 +142,8 @@ class LogLine {
     debugPrint('$stamp $channel: ${clarify(message)}');
   }
 
-  static String clarify(String line) {
-    return line.runes.map<String>((int rune) {
+  static String clarify(final String line) {
+    return line.runes.map<String>((final int rune) {
       if (rune >= 0x20 && rune <= 0x7F) {
         return String.fromCharCode(rune);
       }
@@ -167,15 +167,15 @@ class ProcessTestResult {
 
   List<String> get stdout {
     return logs
-      .where((LogLine log) => log.channel == 'stdout')
-      .map<String>((LogLine log) => log.message)
+      .where((final LogLine log) => log.channel == 'stdout')
+      .map<String>((final LogLine log) => log.message)
       .toList();
   }
 
   List<String> get stderr {
     return logs
-      .where((LogLine log) => log.channel == 'stderr')
-      .map<String>((LogLine log) => log.message)
+      .where((final LogLine log) => log.channel == 'stderr')
+      .map<String>((final LogLine log) => log.message)
       .toList();
   }
 
@@ -184,12 +184,12 @@ class ProcessTestResult {
 }
 
 Future<ProcessTestResult> runFlutter(
-  List<String> arguments,
-  String workingDirectory,
-  List<Transition> transitions, {
-  bool debug = false,
+  final List<String> arguments,
+  final String workingDirectory,
+  final List<Transition> transitions, {
+  final bool debug = false,
   bool logging = true,
-  Duration expectedMaxDuration = const Duration(minutes: 10), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
+  final Duration expectedMaxDuration = const Duration(minutes: 10), // must be less than test timeout of 15 minutes! See ../../dart_test.yaml.
 }) async {
   final Stopwatch clock = Stopwatch()..start();
   final Process process = await processManager.start(
@@ -233,7 +233,7 @@ Future<ProcessTestResult> runFlutter(
     }
   }
   String stamp() => '[${(clock.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1).padLeft(5)}s]';
-  void processStdout(String line) {
+  void processStdout(final String line) {
     final LogLine log = LogLine('stdout', stamp(), line);
     if (logging) {
       logs.add(log);
@@ -274,7 +274,7 @@ Future<ProcessTestResult> runFlutter(
       timeout = Timer(expectedMaxDuration ~/ 5, processTimeout); // This is not a failure timeout, just when to start logging verbosely to help debugging.
     }
   }
-  void processStderr(String line) {
+  void processStderr(final String line) {
     final LogLine log = LogLine('stdout', stamp(), line);
     logs.add(log);
     if (streamingLogs) {
@@ -299,8 +299,8 @@ Future<ProcessTestResult> runFlutter(
     process.stdin.write('q');
     return -1; // discarded
   }).then(
-    (int i) => i,
-    onError: (Object error) {
+    (final int i) => i,
+    onError: (final Object error) {
       // ignore errors here, they will be reported on the next line
       return -1; // discarded
     },
@@ -312,7 +312,7 @@ Future<ProcessTestResult> runFlutter(
   timeout?.cancel();
   if (nextTransition < transitions.length) {
     debugPrint('The subprocess terminated before all the expected transitions had been matched.');
-    if (logs.any((LogLine line) => line.couldBeCrash)) {
+    if (logs.any((final LogLine line) => line.couldBeCrash)) {
       debugPrint('The subprocess may in fact have crashed. Check the stderr logs below.');
     }
     debugPrint('The transition that we were hoping to see next but that we never saw was:');
@@ -343,7 +343,7 @@ void main() {
         <String>['run', '-dflutter-tester', '--pid-file', pidFile],
         testDirectory,
         <Transition>[
-          Barrier('q Quit (terminate the application on the device).', handler: (String line) {
+          Barrier('q Quit (terminate the application on the device).', handler: (final String line) {
             existsDuringTest = fileSystem.file(pidFile).existsSync();
             return 'q';
           }),
@@ -376,19 +376,19 @@ void main() {
         <String>['run', '-dflutter-tester', '--report-ready', '--pid-file', pidFile, '--no-devtools', testScript],
         testDirectory,
         <Transition>[
-          Multiple(<Pattern>['Flutter run key commands.', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>['Flutter run key commands.', 'called paint'], handler: (final String line) {
             pid = int.parse(fileSystem.file(pidFile).readAsStringSync());
             processManager.killPid(pid, ProcessSignal.sigusr1);
             return null;
           }),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms \(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.$'), 'called reassemble', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>[RegExp(r'^Reloaded 0 libraries in [0-9]+ms \(compile: \d+ ms, reload: \d+ ms, reassemble: \d+ ms\)\.$'), 'called reassemble', 'called paint'], handler: (final String line) {
             processManager.killPid(pid, ProcessSignal.sigusr2);
             return null;
           }),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
           // This could look like 'Restarted application in 1,237ms.'
-          Multiple(<Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>[RegExp(r'^Restarted application in .+m?s.$'), 'called main', 'called paint'], handler: (final String line) {
             return 'q';
           }),
           const Barrier('Application finished.'),
@@ -398,7 +398,7 @@ void main() {
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing
       // is verified by the expected transitions above.
-      expect(result.stdout.where((String line) => line.startsWith('called ')), <Object>[
+      expect(result.stdout.where((final String line) => line.startsWith('called ')), <Object>[
         // logs start after we receive the response to sending SIGUSR1
         // SIGUSR1:
         'called reassemble',
@@ -407,7 +407,7 @@ void main() {
         'called main',
         'called paint',
       ]);
-      expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
+      expect(result.stdout.where((final String line) => !line.startsWith('called ')), <Object>[
         // logs start after we receive the response to sending SIGUSR1
         'Performing hot reload...'.padRight(progressMessageWidth),
         startsWith('Reloaded 0 libraries in '),
@@ -432,21 +432,21 @@ void main() {
         <String>['run', '-dflutter-tester', '--report-ready', '--no-devtools', testScript],
         testDirectory,
         <Transition>[
-          Multiple(<Pattern>['Flutter run key commands.', 'called main', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>['Flutter run key commands.', 'called main', 'called paint'], handler: (final String line) {
             return 'r';
           }),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Multiple(<Pattern>['ready', 'called reassemble', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>['ready', 'called reassemble', 'called paint'], handler: (final String line) {
             return 'R';
           }),
           Barrier('Performing hot restart...'.padRight(progressMessageWidth)),
-          Multiple(<Pattern>['ready', 'called main', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>['ready', 'called main', 'called paint'], handler: (final String line) {
             return 'p';
           }),
-          Multiple(<Pattern>['ready', 'called paint', 'called debugPaintSize'], handler: (String line) {
+          Multiple(<Pattern>['ready', 'called paint', 'called debugPaintSize'], handler: (final String line) {
             return 'p';
           }),
-          Multiple(<Pattern>['ready', 'called paint'], handler: (String line) {
+          Multiple(<Pattern>['ready', 'called paint'], handler: (final String line) {
             return 'q';
           }),
           const Barrier('Application finished.'),
@@ -456,7 +456,7 @@ void main() {
       // We check the output from the app (all starts with "called ...") and the output from the tool
       // (everything else) separately, because their relative timing isn't guaranteed. Their rough timing
       // is verified by the expected transitions above.
-      expect(result.stdout.where((String line) => line.startsWith('called ')), <Object>[
+      expect(result.stdout.where((final String line) => line.startsWith('called ')), <Object>[
         // logs start after we initiate the hot reload
         // hot reload:
         'called reassemble',
@@ -470,7 +470,7 @@ void main() {
         // debugPaintSizeEnabled = false:
         'called paint',
       ]);
-      expect(result.stdout.where((String line) => !line.startsWith('called ')), <Object>[
+      expect(result.stdout.where((final String line) => !line.startsWith('called ')), <Object>[
         // logs start after we receive the response to hitting "r"
         'Performing hot reload...'.padRight(progressMessageWidth),
         startsWith('Reloaded 0 libraries in '),
@@ -503,11 +503,11 @@ void main() {
         testDirectory,
         <Transition>[
           Barrier(RegExp(r'^A Dart VM Service on Flutter test device is available at: ')),
-          Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (String line) {
+          Barrier(RegExp(r'^The Flutter DevTools debugger and profiler on Flutter test device is available at: '), handler: (final String line) {
             return 'r';
           }),
           Barrier('Performing hot reload...'.padRight(progressMessageWidth), logging: true),
-          Barrier(RegExp(r'^Reloaded 0 libraries in [0-9]+ms.'), handler: (String line) {
+          Barrier(RegExp(r'^Reloaded 0 libraries in [0-9]+ms.'), handler: (final String line) {
             return 'q';
           }),
         ],
@@ -571,10 +571,10 @@ void main() {
       <String>['run', '-dflutter-tester'],
       testDirectory,
       <Transition>[
-        Barrier(finalLine, handler: (String line) {
+        Barrier(finalLine, handler: (final String line) {
           return 'h';
         }),
-        Barrier(finalLine, handler: (String line) {
+        Barrier(finalLine, handler: (final String line) {
           return 'q';
         }),
         const Barrier('Application finished.'),

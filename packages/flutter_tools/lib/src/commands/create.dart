@@ -36,7 +36,7 @@ class CreateCommand extends CreateBase {
     argParser.addOption(
       'template',
       abbr: 't',
-      allowed: FlutterProjectType.values.map<String>((FlutterProjectType e) => e.cliName),
+      allowed: FlutterProjectType.values.map<String>((final FlutterProjectType e) => e.cliName),
       help: 'Specify the type of project to create.',
       valueHelp: 'type',
       allowedHelp: CliEnum.allowedHelp(FlutterProjectType.values),
@@ -98,7 +98,7 @@ class CreateCommand extends CreateBase {
         ? 'api.flutter.dev'
         : 'master-api.flutter.dev';
 
-  Future<String?> _fetchSampleFromServer(String sampleId) async {
+  Future<String?> _fetchSampleFromServer(final String sampleId) async {
     // Sanity check the sampleId
     if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
       throwToolExit('Sample ID "$sampleId" contains invalid characters. Check the ID in the '
@@ -125,7 +125,7 @@ class CreateCommand extends CreateBase {
 
   /// Fetches the samples index file from the server and writes it to
   /// [outputFilePath].
-  Future<void> _writeSamplesJson(String outputFilePath) async {
+  Future<void> _writeSamplesJson(final String outputFilePath) async {
     try {
       final File outputFile = globals.fs.file(outputFilePath);
       if (outputFile.existsSync()) {
@@ -143,7 +143,7 @@ class CreateCommand extends CreateBase {
     }
   }
 
-  FlutterProjectType _getProjectType(Directory projectDir) {
+  FlutterProjectType _getProjectType(final Directory projectDir) {
     FlutterProjectType? template;
     FlutterProjectType? detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
@@ -477,10 +477,10 @@ Your $application code is in $relativeAppMain.
   }
 
   Future<int> _generateModule(
-    Directory directory,
-    Map<String, Object?> templateContext, {
-    bool overwrite = false,
-    bool printStatusWhenWriting = true,
+    final Directory directory,
+    final Map<String, Object?> templateContext, {
+    final bool overwrite = false,
+    final bool printStatusWhenWriting = true,
   }) async {
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
@@ -498,10 +498,10 @@ Your $application code is in $relativeAppMain.
   }
 
   Future<int> _generatePackage(
-    Directory directory,
-    Map<String, Object?> templateContext, {
-    bool overwrite = false,
-    bool printStatusWhenWriting = true,
+    final Directory directory,
+    final Map<String, Object?> templateContext, {
+    final bool overwrite = false,
+    final bool printStatusWhenWriting = true,
   }) async {
     int generatedCount = 0;
     final String? description = argResults!.wasParsed('description')
@@ -519,11 +519,11 @@ Your $application code is in $relativeAppMain.
   }
 
   Future<int> _generateMethodChannelPlugin(
-    Directory directory,
-    Map<String, Object?> templateContext, {
-    bool overwrite = false,
-    bool printStatusWhenWriting = true,
-    required FlutterProjectType projectType,
+    final Directory directory,
+    final Map<String, Object?> templateContext, {
+    final bool overwrite = false,
+    final bool printStatusWhenWriting = true,
+    required final FlutterProjectType projectType,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults!.wasParsed('platforms')) {
@@ -587,11 +587,11 @@ Your $application code is in $relativeAppMain.
   }
 
   Future<int> _generateFfiPlugin(
-    Directory directory,
-    Map<String, Object?> templateContext, {
-    bool overwrite = false,
-    bool printStatusWhenWriting = true,
-    required FlutterProjectType projectType,
+    final Directory directory,
+    final Map<String, Object?> templateContext, {
+    final bool overwrite = false,
+    final bool printStatusWhenWriting = true,
+    required final FlutterProjectType projectType,
   }) async {
     // Plugins only add a platform if it was requested explicitly by the user.
     if (!argResults!.wasParsed('platforms')) {
@@ -659,20 +659,20 @@ Your $application code is in $relativeAppMain.
   // documentation website in sampleCode. Returns the difference in the number
   // of files after applying the sample, since it also deletes the application's
   // test directory (since the template's test doesn't apply to the sample).
-  void _applySample(Directory directory, String sampleCode) {
+  void _applySample(final Directory directory, final String sampleCode) {
     final File mainDartFile = directory.childDirectory('lib').childFile('main.dart');
     mainDartFile.createSync(recursive: true);
     mainDartFile.writeAsStringSync(sampleCode);
   }
 
-  int _removeTestDir(Directory directory) {
+  int _removeTestDir(final Directory directory) {
     final Directory testDir = directory.childDirectory('test');
     final List<FileSystemEntity> files = testDir.listSync(recursive: true);
     testDir.deleteSync(recursive: true);
     return -files.length;
   }
 
-  List<String> _getSupportedPlatformsFromTemplateContext(Map<String, Object?> templateContext) {
+  List<String> _getSupportedPlatformsFromTemplateContext(final Map<String, Object?> templateContext) {
     return <String>[
       for (String platform in kAllCreatePlatforms)
         if (templateContext[platform] == true) platform,
@@ -690,7 +690,7 @@ Your $application code is in $relativeAppMain.
 
 
 // Determine what platforms are supported based on generated files.
-List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
+List<String> _getSupportedPlatformsInPlugin(final Directory projectDir) {
   final String pubspecPath = globals.fs.path.join(projectDir.absolute.path, 'pubspec.yaml');
   final FlutterManifest? manifest = FlutterManifest.createFromPath(pubspecPath, fileSystem: globals.fs, logger: globals.logger);
   final Map<String, Object?>? validSupportedPlatforms = manifest?.validSupportedPlatforms;
@@ -700,7 +700,7 @@ List<String> _getSupportedPlatformsInPlugin(Directory projectDir) {
   return platforms;
 }
 
-void _printPluginDirectoryLocationMessage(String pluginPath, String projectName, String platformsString) {
+void _printPluginDirectoryLocationMessage(final String pluginPath, final String projectName, final String platformsString) {
   final String relativePluginMain = globals.fs.path.join(pluginPath, 'lib', '$projectName.dart');
   final String relativeExampleMain = globals.fs.path.join(pluginPath, 'example', 'lib', 'main.dart');
   globals.printStatus('''
@@ -719,7 +719,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   }
 }
 
-void _printPluginUpdatePubspecMessage(String pluginPath, String platformsString) {
+void _printPluginUpdatePubspecMessage(final String pluginPath, final String platformsString) {
   globals.printStatus('''
 You need to update $pluginPath/pubspec.yaml to support $platformsString.
 ''', emphasis: true, color: TerminalColor.red);
@@ -731,7 +731,7 @@ You've created a plugin project that doesn't yet support any platforms.
 ''');
 }
 
-void _printPluginAddPlatformMessage(String pluginPath, String template) {
+void _printPluginAddPlatformMessage(final String pluginPath, final String template) {
   globals.printStatus('''
 To add platforms, run `flutter create -t $template --platforms <platforms> .` under $pluginPath.
 For more information, see https://flutter.dev/go/plugin-platforms.
@@ -740,7 +740,7 @@ For more information, see https://flutter.dev/go/plugin-platforms.
 }
 
 // returns a list disabled, but requested platforms
-List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
+List<String> _getPlatformWarningList(final List<String> requestedPlatforms) {
   final List<String> platformsToWarn = <String>[
   if (requestedPlatforms.contains('web') && !featureFlags.isWebEnabled)
     'web',
@@ -755,7 +755,7 @@ List<String> _getPlatformWarningList(List<String> requestedPlatforms) {
   return platformsToWarn;
 }
 
-void _printWarningDisabledPlatform(List<String> platforms) {
+void _printWarningDisabledPlatform(final List<String> platforms) {
   final List<String> desktop = <String>[];
   final List<String> web = <String>[];
 

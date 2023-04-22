@@ -9,7 +9,7 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({ bool verboseHelp = false }) {
+  ChannelCommand({ final bool verboseHelp = false }) {
     argParser.addFlag(
       'all',
       abbr: 'a',
@@ -51,7 +51,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _listChannels({ required bool showAll, required bool verbose }) async {
+  Future<void> _listChannels({ required bool showAll, required final bool verbose }) async {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = globals.flutterVersion.channel;
     final String currentBranch = globals.flutterVersion.getBranchName();
@@ -64,7 +64,7 @@ class ChannelCommand extends FlutterCommand {
     final int result = await globals.processUtils.stream(
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
-      mapFunction: (String line) {
+      mapFunction: (final String line) {
         rawOutput.add(line);
         return null;
       },
@@ -125,7 +125,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _switchChannel(String branchName) async {
+  Future<void> _switchChannel(final String branchName) async {
     globals.printStatus("Switching to flutter channel '$branchName'...");
     if (kObsoleteBranches.containsKey(branchName)) {
       final String alternative = kObsoleteBranches[branchName]!;
@@ -138,7 +138,7 @@ class ChannelCommand extends FlutterCommand {
     globals.printStatus("To ensure that you're on the latest build from this channel, run 'flutter upgrade'");
   }
 
-  static Future<void> upgradeChannel(FlutterVersion currentVersion) async {
+  static Future<void> upgradeChannel(final FlutterVersion currentVersion) async {
     final String channel = currentVersion.channel;
     if (kObsoleteBranches.containsKey(channel)) {
       final String alternative = kObsoleteBranches[channel]!;
@@ -147,7 +147,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  static Future<void> _checkout(String branchName) async {
+  static Future<void> _checkout(final String branchName) async {
     // Get latest refs from upstream.
     int result = await globals.processUtils.stream(
       <String>['git', 'fetch'],

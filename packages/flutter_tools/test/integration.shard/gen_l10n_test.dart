@@ -34,7 +34,7 @@ void main() {
     // send '#l10n END' to its stdout.
     final Completer<void> l10nEnd = Completer<void>();
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = flutter.stdout.listen((String line) {
+    final StreamSubscription<String> subscription = flutter.stdout.listen((final String line) {
       if (line.contains('#l10n')) {
         stdout.writeln(line.substring(line.indexOf('#l10n')));
       }
@@ -48,7 +48,7 @@ void main() {
     return stdout;
   }
 
-  void expectOutput(StringBuffer stdout) {
+  void expectOutput(final StringBuffer stdout) {
     expect(stdout.toString(),
       '#l10n 0 (--- supportedLocales tests ---)\n'
       '#l10n 1 (supportedLocales[0]: languageCode: en, countryCode: null, scriptCode: null)\n'

@@ -53,12 +53,12 @@ FakeDeviceManager get testDeviceManager => context.get<DeviceManager>()! as Fake
 
 @isTest
 void testUsingContext(
-  String description,
-  dynamic Function() testMethod, {
-  Map<Type, Generator> overrides = const <Type, Generator>{},
-  bool initializeFlutterRoot = true,
-  String? testOn,
-  bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  final String description,
+  final dynamic Function() testMethod, {
+  final Map<Type, Generator> overrides = const <Type, Generator>{},
+  final bool initializeFlutterRoot = true,
+  final String? testOn,
+  final bool? skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   if (overrides[FileSystem] != null && overrides[ProcessManager] == null) {
     throw StateError(
@@ -80,7 +80,7 @@ void testUsingContext(
       configDir = null;
     }
   });
-  Config buildConfig(FileSystem fs) {
+  Config buildConfig(final FileSystem fs) {
     configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return Config.test(
       name: Config.kFlutterSettings,
@@ -88,7 +88,7 @@ void testUsingContext(
       logger: globals.logger,
     );
   }
-  PersistentToolState buildPersistentToolState(FileSystem fs) {
+  PersistentToolState buildPersistentToolState(final FileSystem fs) {
     configDir ??= globals.fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
     return PersistentToolState.test(
       directory: configDir!,
@@ -143,7 +143,7 @@ void testUsingContext(
               _printBufferedErrors(context);
               rethrow;
             }
-          }, (Object error, StackTrace stackTrace) {
+          }, (final Object error, final StackTrace stackTrace) {
             // When things fail, it's ok to print to the console!
             print(error); // ignore: avoid_print
             print(stackTrace); // ignore: avoid_print
@@ -168,7 +168,7 @@ void testUsingContext(
   // definitely be enough.
 }
 
-void _printBufferedErrors(AppContext testContext) {
+void _printBufferedErrors(final AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>()! as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
@@ -195,7 +195,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  set specifiedDeviceId(String? id) {
+  set specifiedDeviceId(final String? id) {
     _specifiedDeviceId = id;
   }
 
@@ -209,44 +209,44 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   Future<List<Device>> getAllDevices({
-    DeviceDiscoveryFilter? filter,
+    final DeviceDiscoveryFilter? filter,
   }) async => filteredDevices(filter);
 
   @override
   Future<List<Device>> refreshAllDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) async => filteredDevices(filter);
 
   @override
   Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) async => filteredDevices(filter);
 
   @override
   Future<List<Device>> getDevicesById(
-    String deviceId, {
-    DeviceDiscoveryFilter? filter,
-    bool waitForDeviceToConnect = false,
+    final String deviceId, {
+    final DeviceDiscoveryFilter? filter,
+    final bool waitForDeviceToConnect = false,
   }) async {
-    return filteredDevices(filter).where((Device device) {
+    return filteredDevices(filter).where((final Device device) {
       return device.id == deviceId || device.id.startsWith(deviceId);
     }).toList();
   }
 
   @override
   Future<List<Device>> getDevices({
-    DeviceDiscoveryFilter? filter,
-    bool waitForDeviceToConnect = false,
+    final DeviceDiscoveryFilter? filter,
+    final bool waitForDeviceToConnect = false,
   }) {
     return hasSpecifiedDeviceId
         ? getDevicesById(specifiedDeviceId!, filter: filter)
         : getAllDevices(filter: filter);
   }
 
-  void addAttachedDevice(Device device) => attachedDevices.add(device);
-  void addWirelessDevice(Device device) => wirelessDevices.add(device);
+  void addAttachedDevice(final Device device) => attachedDevices.add(device);
+  void addWirelessDevice(final Device device) => wirelessDevices.add(device);
 
   @override
   bool get canListAnything => true;
@@ -259,16 +259,16 @@ class FakeDeviceManager implements DeviceManager {
 
   @override
   DeviceDiscoverySupportFilter deviceSupportFilter({
-    bool includeDevicesUnsupportedByProject = false,
-    FlutterProject? flutterProject,
+    final bool includeDevicesUnsupportedByProject = false,
+    final FlutterProject? flutterProject,
   }) {
     return TestDeviceDiscoverySupportFilter();
   }
 
   @override
-  Device? getSingleEphemeralDevice(List<Device> devices) => null;
+  Device? getSingleEphemeralDevice(final List<Device> devices) => null;
 
-  List<Device> filteredDevices(DeviceDiscoveryFilter? filter) {
+  List<Device> filteredDevices(final DeviceDiscoveryFilter? filter) {
     if (filter?.deviceConnectionInterface == DeviceConnectionInterface.attached) {
       return attachedDevices;
     }
@@ -289,7 +289,7 @@ class FakeAndroidLicenseValidator extends Fake implements AndroidLicenseValidato
 }
 
 class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger) : super(logger: logger);
+  FakeDoctor(final Logger logger) : super(logger: logger);
 
   // True for testing.
   @override
@@ -305,7 +305,7 @@ class FakeDoctor extends Doctor {
   /// the Doctor.
   List<DoctorValidator> get validators {
     final List<DoctorValidator> superValidators = super.validators;
-    return superValidators.map<DoctorValidator>((DoctorValidator v) {
+    return superValidators.map<DoctorValidator>((final DoctorValidator v) {
       if (v is AndroidLicenseValidator) {
         return FakeAndroidLicenseValidator();
       }
@@ -336,26 +336,26 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
-    XcodeProjectBuildContext? buildContext,
-    Duration timeout = const Duration(minutes: 1),
+    final String projectPath, {
+    final XcodeProjectBuildContext? buildContext,
+    final Duration timeout = const Duration(minutes: 1),
   }) async {
     return <String, String>{};
   }
 
   @override
   Future<String> pluginsBuildSettingsOutput(
-      Directory podXcodeProject, {
-        Duration timeout = const Duration(minutes: 1),
+      final Directory podXcodeProject, {
+        final Duration timeout = const Duration(minutes: 1),
       }) async {
     return '';
   }
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, { bool verbose = false }) async { }
+  Future<void> cleanWorkspace(final String workspacePath, final String scheme, { final bool verbose = false }) async { }
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(final String projectPath, {final String? projectFilename}) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -373,7 +373,7 @@ class NoopCrashReporter implements CrashReporter {
   const NoopCrashReporter();
 
   @override
-  Future<void> informUser(CrashDetails details, File crashFile) async { }
+  Future<void> informUser(final CrashDetails details, final File crashFile) async { }
 }
 
 class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
@@ -382,7 +382,7 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   );
 
   @override
-  set currentDirectory(dynamic value) {
+  set currentDirectory(final dynamic value) {
     throw Exception('globals.fs.currentDirectory should not be set on the local file system during '
           'tests as this can cause race conditions with concurrent tests. '
           'Consider using a MemoryFileSystem for testing if possible or refactor '
@@ -392,12 +392,12 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
 
 class FakeSignals implements Signals {
   @override
-  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+  Object addHandler(final ProcessSignal signal, final SignalHandler handler) {
     return Object();
   }
 
   @override
-  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+  Future<bool> removeHandler(final ProcessSignal signal, final Object token) async {
     return true;
   }
 

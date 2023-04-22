@@ -463,7 +463,7 @@ void main() {
 
     expect(const AotAssemblyRelease().build(environment), throwsA(isException
       .having(
-        (Exception exception) => exception.toString(),
+        (final Exception exception) => exception.toString(),
         'description',
         contains('release/profile builds are only supported for physical devices.'),
       )
@@ -491,7 +491,7 @@ void main() {
     environment.defines[kIosArchs] = 'x86_64';
 
     expect(const AotAssemblyRelease().build(environment), throwsA(isException.having(
-      (Exception exception) => exception.toString(),
+      (final Exception exception) => exception.toString(),
       'description',
       contains('required define SdkRoot but it was not provided'),
     )));
@@ -615,7 +615,7 @@ void main() {
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'description',
           contains('Flutter.framework/Flutter does not exist, cannot thin'),
         )));
@@ -656,7 +656,7 @@ void main() {
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'description',
           contains('does not contain arm64 armv7. Running lipo -info:\nArchitectures in the fat file:'),
         )),
@@ -709,7 +709,7 @@ void main() {
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'description',
           contains('Failed to extract arm64 armv7 for output/Flutter.framework/Flutter.\nlipo error\nRunning lipo -info:\nArchitectures in the fat file:'),
         )),
@@ -835,7 +835,7 @@ void main() {
       await expectLater(
         const ReleaseUnpackIOS().build(environment),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'description',
           contains('Failed to strip bitcode for output/Flutter.framework/Flutter.\nbitcode_strip error'),
         )),
@@ -911,7 +911,7 @@ void main() {
       await expectLater(
         const DebugUnpackIOS().build(environment),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'description',
           contains('Failed to codesign output/Flutter.framework/Flutter with identity ABC123.\ncodesign info\ncodesign error'),
         )),

@@ -9,9 +9,9 @@ import 'version.dart';
 
 class FlutterFeatureFlags implements FeatureFlags {
   FlutterFeatureFlags({
-    required FlutterVersion flutterVersion,
-    required Config config,
-    required Platform platform,
+    required final FlutterVersion flutterVersion,
+    required final Config config,
+    required final Platform platform,
   }) : _flutterVersion = flutterVersion,
        _config = config,
        _platform = platform;
@@ -51,7 +51,7 @@ class FlutterFeatureFlags implements FeatureFlags {
   bool get isFlutterWebWasmEnabled => isEnabled(flutterWebWasm);
 
   @override
-  bool isEnabled(Feature feature) {
+  bool isEnabled(final Feature feature) {
     final String currentChannel = _flutterVersion.channel;
     final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {

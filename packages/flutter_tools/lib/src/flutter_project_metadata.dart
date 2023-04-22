@@ -55,7 +55,7 @@ enum FlutterProjectType implements CliEnum {
           'Generate a project to add a Flutter module to an existing Android or iOS application.',
       };
 
-  static FlutterProjectType? fromCliName(String value) {
+  static FlutterProjectType? fromCliName(final String value) {
     for (final FlutterProjectType type in FlutterProjectType.values) {
       if (value == type.cliName) {
         return type;
@@ -66,7 +66,7 @@ enum FlutterProjectType implements CliEnum {
 }
 
   /// Verifies the expected yaml keys are present in the file.
-  bool _validateMetadataMap(YamlMap map, Map<String, Type> validations, Logger logger) {
+  bool _validateMetadataMap(final YamlMap map, final Map<String, Type> validations, final Logger logger) {
     bool isValid = true;
     for (final MapEntry<String, Object> entry in validations.entries) {
       if (!map.keys.contains(entry.key)) {
@@ -87,7 +87,7 @@ enum FlutterProjectType implements CliEnum {
 /// A wrapper around the `.metadata` file.
 class FlutterProjectMetadata {
   /// Creates a MigrateConfig by parsing an existing .migrate_config yaml file.
-  FlutterProjectMetadata(this.file, Logger logger) : _logger = logger,
+  FlutterProjectMetadata(this.file, final Logger logger) : _logger = logger,
                                                      migrateConfig = MigrateConfig() {
     if (!file.existsSync()) {
       _logger.printTrace('No .metadata file found at ${file.path}.');
@@ -126,11 +126,11 @@ class FlutterProjectMetadata {
   /// Creates a FlutterProjectMetadata by explicitly providing all values.
   FlutterProjectMetadata.explicit({
     required this.file,
-    required String? versionRevision,
-    required String? versionChannel,
-    required FlutterProjectType? projectType,
+    required final String? versionRevision,
+    required final String? versionChannel,
+    required final FlutterProjectType? projectType,
     required this.migrateConfig,
-    required Logger logger,
+    required final Logger logger,
   }) : _logger = logger,
        _versionChannel = versionChannel,
        _versionRevision = versionRevision,
@@ -183,13 +183,13 @@ ${migrateConfig.getOutputFileString()}''';
   }
 
   void populate({
-    List<SupportedPlatform>? platforms,
-    required Directory projectDirectory,
-    String? currentRevision,
-    String? createRevision,
-    bool create = true,
-    bool update = true,
-    required Logger logger,
+    final List<SupportedPlatform>? platforms,
+    required final Directory projectDirectory,
+    final String? currentRevision,
+    final String? createRevision,
+    final bool create = true,
+    final bool update = true,
+    required final Logger logger,
   }) {
     migrateConfig.populate(
       platforms: platforms,
@@ -203,7 +203,7 @@ ${migrateConfig.getOutputFileString()}''';
   }
 
   /// Finds the fallback revision to use when no base revision is found in the migrate config.
-  String getFallbackBaseRevision(Logger logger, FlutterVersion flutterVersion) {
+  String getFallbackBaseRevision(final Logger logger, final FlutterVersion flutterVersion) {
     // Use the .metadata file if it exists.
     if (versionRevision != null) {
       return versionRevision!;
@@ -221,7 +221,7 @@ ${migrateConfig.getOutputFileString()}''';
 /// used to add support for new platforms, so the base and create revision may not always be the same.
 class MigrateConfig {
   MigrateConfig({
-    Map<SupportedPlatform, MigratePlatformConfig>? platformConfigs,
+    final Map<SupportedPlatform, MigratePlatformConfig>? platformConfigs,
     this.unmanagedFiles = kDefaultUnmanagedFiles
   }) : platformConfigs = platformConfigs ?? <SupportedPlatform, MigratePlatformConfig>{};
 
@@ -245,12 +245,12 @@ class MigrateConfig {
   /// to reflect the project.
   void populate({
     List<SupportedPlatform>? platforms,
-    required Directory projectDirectory,
-    String? currentRevision,
-    String? createRevision,
-    bool create = true,
-    bool update = true,
-    required Logger logger,
+    required final Directory projectDirectory,
+    final String? currentRevision,
+    final String? createRevision,
+    final bool create = true,
+    final bool update = true,
+    required final Logger logger,
   }) {
     final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
     platforms ??= flutterProject.getSupportedPlatforms(includeRoot: true);
@@ -297,7 +297,7 @@ migration:
   }
 
   /// Parses and validates the `migration` section of the .metadata file.
-  void parseYaml(YamlMap map, Logger logger) {
+  void parseYaml(final YamlMap map, final Logger logger) {
     final Object? platformsYaml = map['platforms'];
     if (_validateMetadataMap(map, <String, Type>{'platforms': YamlList}, logger)) {
       if (platformsYaml is YamlList && platformsYaml.isNotEmpty) {
@@ -308,7 +308,7 @@ migration:
                 'base_revision': String,
               }, logger)) {
             final SupportedPlatform platformValue = SupportedPlatform.values.firstWhere(
-              (SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
+              (final SupportedPlatform val) => val.toString() == 'SupportedPlatform.${platformYamlMap['platform'] as String}'
             );
             platformConfigs[platformValue] = MigratePlatformConfig(
               platform: platformValue,
@@ -352,7 +352,7 @@ class MigratePlatformConfig {
   /// Null if the project was never migrated or the revision is unknown.
   String? baseRevision;
 
-  bool equals(MigratePlatformConfig other) {
+  bool equals(final MigratePlatformConfig other) {
     return platform == other.platform &&
            createRevision == other.createRevision &&
            baseRevision == other.baseRevision;

@@ -52,12 +52,12 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand({
-    bool verboseHelp = false,
-    @visibleForTesting FlutterDriverFactory? flutterDriverFactory,
+    final bool verboseHelp = false,
+    @visibleForTesting final FlutterDriverFactory? flutterDriverFactory,
     @visibleForTesting this.signalsToHandle = const <ProcessSignal>{ProcessSignal.sigint, ProcessSignal.sigterm},
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Platform platform,
     required this.signals,
   }) : _flutterDriverFactory = flutterDriverFactory,
        _fileSystem = fileSystem,
@@ -117,7 +117,7 @@ class DriveCommand extends RunCommandBase {
         'browser-name',
         defaultsTo: Browser.chrome.cliName,
         help: 'Name of the browser where tests will be executed.',
-        allowed: Browser.values.map((Browser e) => e.cliName),
+        allowed: Browser.values.map((final Browser e) => e.cliName),
         allowedHelp: CliEnum.allowedHelp(Browser.values),
       )
       ..addOption('browser-dimension',
@@ -369,13 +369,13 @@ class DriveCommand extends RunCommandBase {
     return timeoutSeconds;
   }
 
-  void _registerScreenshotCallbacks(Device device) {
+  void _registerScreenshotCallbacks(final Device device) {
     _logger.printTrace('Registering signal handlers...');
     final Map<ProcessSignal, Object> tokens = <ProcessSignal, Object>{};
     for (final ProcessSignal signal in signalsToHandle) {
       tokens[signal] = signals.addHandler(
         signal,
-        (ProcessSignal signal) {
+        (final ProcessSignal signal) {
           _unregisterScreenshotCallbacks();
           _logger.printError('Caught $signal');
           return _takeScreenshot(device);
@@ -450,7 +450,7 @@ class DriveCommand extends RunCommandBase {
     return '${pathWithNoExtension}_test${_fileSystem.path.extension(appFile)}';
   }
 
-  Future<void> _takeScreenshot(Device device) async {
+  Future<void> _takeScreenshot(final Device device) async {
     if (!device.supportsScreenshot) {
       return;
     }

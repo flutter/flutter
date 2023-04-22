@@ -179,7 +179,7 @@ void main() {
 
       // Verify that certificate value is passed into openssl command.
       String? stdin;
-      controller.stream.listen((List<int> chunk) {
+      controller.stream.listen((final List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
@@ -233,7 +233,7 @@ void main() {
 
       // Verify that certificate value is passed into openssl command.
       String? stdin;
-      controller.stream.listen((List<int> chunk) {
+      controller.stream.listen((final List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
@@ -284,7 +284,7 @@ void main() {
 
       // Verify that certificate value is passed into openssl command.
       String? stdin;
-      controller.stream.listen((List<int> chunk) {
+      controller.stream.listen((final List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
@@ -333,7 +333,7 @@ void main() {
 
       // Verify that certificate value is passed into openssl command.
       String? stdin;
-      controller.stream.listen((List<int> chunk) {
+      controller.stream.listen((final List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
@@ -390,7 +390,7 @@ void main() {
 
       // Verify that certificate value is passed into openssl command.
       String? stdin;
-      controller.stream.listen((List<int> chunk) {
+      controller.stream.listen((final List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
@@ -442,7 +442,7 @@ void main() {
 
       // Verify that certificate value is passed into openssl command.
       String? stdin;
-      controller.stream.listen((List<int> chunk) {
+      controller.stream.listen((final List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
@@ -499,7 +499,7 @@ void main() {
 
       // Verify that certificate value is passed into openssl command.
       String? stdin;
-      controller.stream.listen((List<int> chunk) {
+      controller.stream.listen((final List<int> chunk) {
         stdin = utf8.decode(chunk);
         completer.complete();
       });
@@ -590,7 +590,7 @@ class TestTerminal extends AnsiTerminal {
   TestTerminal() : super(stdio: globals.stdio, platform: globals.platform);
 
   @override
-  String bolden(String message) => '<bold>$message</bold>';
+  String bolden(final String message) => '<bold>$message</bold>';
 
   @override
   Stream<String> get keystrokes {

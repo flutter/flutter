@@ -17,7 +17,7 @@ typedef SignalHandler = FutureOr<void> Function(ProcessSignal signal);
 abstract class Signals {
   @visibleForTesting
   factory Signals.test({
-    List<ProcessSignal> exitSignals = defaultExitSignals,
+    final List<ProcessSignal> exitSignals = defaultExitSignals,
   }) => LocalSignals._(exitSignals);
 
   // The default list of signals that should cause the process to exit.
@@ -31,14 +31,14 @@ abstract class Signals {
   /// The handler will run after all handlers that were previously added for the
   /// signal. The function returns an abstract token that should be provided to
   /// removeHandler to remove the handler.
-  Object addHandler(ProcessSignal signal, SignalHandler handler);
+  Object addHandler(final ProcessSignal signal, final SignalHandler handler);
 
   /// Removes a signal handler.
   ///
   /// Removes the signal handler for the signal identified by the abstract
   /// token parameter. Returns true if the handler was removed and false
   /// otherwise.
-  Future<bool> removeHandler(ProcessSignal signal, Object token);
+  Future<bool> removeHandler(final ProcessSignal signal, final Object token);
 
   /// If a [SignalHandler] throws an error, either synchronously or
   /// asynchronously, it will be added to this stream instead of propagated.
@@ -78,7 +78,7 @@ class LocalSignals implements Signals {
   Stream<Object> get errors => _errorStreamController.stream;
 
   @override
-  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+  Object addHandler(final ProcessSignal signal, final SignalHandler handler) {
     final Object token = Object();
     _handlersTable.putIfAbsent(signal, () => <Object, SignalHandler>{});
     _handlersTable[signal]![token] = handler;
@@ -91,7 +91,7 @@ class LocalSignals implements Signals {
     if (_handlersList[signal]!.length == 1) {
       _streamSubscriptions[signal] = signal.watch().listen(
         _handleSignal,
-        onError: (Object e) {
+        onError: (final Object e) {
           _handlersTable[signal]?.remove(token);
           _handlersList[signal]?.remove(handler);
         },
@@ -101,7 +101,7 @@ class LocalSignals implements Signals {
   }
 
   @override
-  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+  Future<bool> removeHandler(final ProcessSignal signal, final Object token) async {
     // We don't know about this signal.
     if (!_handlersTable.containsKey(signal)) {
       return false;
@@ -127,7 +127,7 @@ class LocalSignals implements Signals {
     return true;
   }
 
-  Future<void> _handleSignal(ProcessSignal s) async {
+  Future<void> _handleSignal(final ProcessSignal s) async {
     final List<SignalHandler>? handlers = _handlersList[s];
     if (handlers != null) {
       final List<SignalHandler> handlersCopy = handlers.toList();
@@ -148,5 +148,5 @@ class LocalSignals implements Signals {
     }
   }
 
-  bool _shouldExitFor(ProcessSignal signal) => exitSignals.contains(signal);
+  bool _shouldExitFor(final ProcessSignal signal) => exitSignals.contains(signal);
 }

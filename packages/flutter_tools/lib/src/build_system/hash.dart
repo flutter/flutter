@@ -49,7 +49,7 @@ class Md5Hash {
   int _remainingLength = 0;
   int _contentLength = 0;
 
-  void addChunk(Uint8List data, [int? stop]) {
+  void addChunk(final Uint8List data, [int? stop]) {
     assert(_remainingLength == 0);
     stop ??= data.length;
     int i = 0;
@@ -69,7 +69,7 @@ class Md5Hash {
     _contentLength += stop;
   }
 
-  void _writeChunk(Uint32List chunk) {
+  void _writeChunk(final Uint32List chunk) {
     // help dart remove bounds checks
     // ignore: unnecessary_statements
     chunk[15];
@@ -158,11 +158,11 @@ class Md5Hash {
   }
 
   /// Adds [x] and [y] with 32-bit overflow semantics.
-  int _add32(int x, int y) => (x + y) & _mask32;
+  int _add32(final int x, final int y) => (x + y) & _mask32;
 
   /// Bitwise rotates [val] to the left by [shift], obeying 32-bit overflow
   /// semantics.
-  int _rotl32(int val, int shift) {
+  int _rotl32(final int val, final int shift) {
     final int modShift = shift & 31;
     return ((val << modShift) & _mask32) | ((val & _mask32) >> (32 - modShift));
   }

@@ -29,12 +29,12 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
-    required TargetPlatform platform,
-    required BuildInfo buildInfo,
+    required final TargetPlatform platform,
+    required final BuildInfo buildInfo,
     FlutterProject? project,
     String? mainPath,
-    String manifestPath = defaultManifestPath,
-    String? applicationKernelFilePath,
+    final String manifestPath = defaultManifestPath,
+    final String? applicationKernelFilePath,
     String? depfilePath,
     String? assetDirPath,
     @visibleForTesting BuildSystem? buildSystem,
@@ -108,10 +108,10 @@ class BundleBuilder {
 }
 
 Future<AssetBundle?> buildAssets({
-  required String manifestPath,
+  required final String manifestPath,
   String? assetDirPath,
   String? packagesPath,
-  TargetPlatform? targetPlatform,
+  final TargetPlatform? targetPlatform,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= globals.fs.path.absolute('.packages');
@@ -131,11 +131,11 @@ Future<AssetBundle?> buildAssets({
 }
 
 Future<void> writeBundle(
-  Directory bundleDir,
-  Map<String, DevFSContent> assetEntries,
-  Map<String, AssetKind> entryKinds, {
+  final Directory bundleDir,
+  final Map<String, DevFSContent> assetEntries,
+  final Map<String, AssetKind> entryKinds, {
   Logger? loggerOverride,
-  required TargetPlatform targetPlatform,
+  required final TargetPlatform targetPlatform,
 }) async {
   loggerOverride ??= globals.logger;
   if (bundleDir.existsSync()) {
@@ -167,7 +167,7 @@ Future<void> writeBundle(
   // Limit number of open files to avoid running out of file descriptors.
   final Pool pool = Pool(64);
   await Future.wait<void>(
-    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+    assetEntries.entries.map<Future<void>>((final MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
         // This will result in strange looking files, for example files with `/`

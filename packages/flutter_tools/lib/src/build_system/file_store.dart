@@ -17,7 +17,7 @@ import 'hash.dart';
 class FileStorage {
   FileStorage(this.version, this.files);
 
-  factory FileStorage.fromBuffer(Uint8List buffer) {
+  factory FileStorage.fromBuffer(final Uint8List buffer) {
     final Map<String, dynamic>? json = castStringKeyedMap(jsonDecode(utf8.decode(buffer)));
     if (json == null) {
       throw Exception('File storage format invalid');
@@ -48,7 +48,7 @@ class FileStorage {
 class FileHash {
   FileHash(this.path, this.hash);
 
-  factory FileHash._fromJson(Map<String, dynamic> json) {
+  factory FileHash._fromJson(final Map<String, dynamic> json) {
     if (!json.containsKey('path') || !json.containsKey('hash')) {
       throw Exception('File storage format invalid');
     }
@@ -91,9 +91,9 @@ enum FileStoreStrategy {
 /// The format of the file store is subject to change and not part of its API.
 class FileStore {
   FileStore({
-    required File cacheFile,
-    required Logger logger,
-    FileStoreStrategy strategy = FileStoreStrategy.hash,
+    required final File cacheFile,
+    required final Logger logger,
+    final FileStoreStrategy strategy = FileStoreStrategy.hash,
   }) : _logger = logger,
        _strategy = strategy,
        _cacheFile = cacheFile;
@@ -184,7 +184,7 @@ class FileStore {
 
   /// Computes a diff of the provided files and returns a list of files
   /// that were dirty.
-  List<File> diffFileList(List<File> files) {
+  List<File> diffFileList(final List<File> files) {
     final List<File> dirty = <File>[];
     switch (_strategy) {
       case FileStoreStrategy.hash:
@@ -199,7 +199,7 @@ class FileStore {
     return dirty;
   }
 
-  void _checkModification(File file, List<File> dirty) {
+  void _checkModification(final File file, final List<File> dirty) {
     final String absolutePath = file.path;
     final String? previousTime = previousAssetKeys[absolutePath];
 
@@ -220,7 +220,7 @@ class FileStore {
   // 64k is the same sized buffer used by dart:io for `File.openRead`.
   static final Uint8List _readBuffer = Uint8List(64 * 1024);
 
-  void _hashFile(File file, List<File> dirty) {
+  void _hashFile(final File file, final List<File> dirty) {
     final String absolutePath = file.path;
     final String? previousHash = previousAssetKeys[absolutePath];
     // If the file is missing it is assumed to be dirty.

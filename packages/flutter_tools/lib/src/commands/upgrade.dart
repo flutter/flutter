@@ -22,8 +22,8 @@ const String _flutterInstallDocs = 'https://flutter.dev/docs/get-started/install
 
 class UpgradeCommand extends FlutterCommand {
   UpgradeCommand({
-    required bool verboseHelp,
-    UpgradeCommandRunner? commandRunner,
+    required final bool verboseHelp,
+    final UpgradeCommandRunner? commandRunner,
   })
     : _commandRunner = commandRunner ?? UpgradeCommandRunner() {
     argParser
@@ -91,12 +91,12 @@ class UpgradeCommandRunner {
   String? workingDirectory;
 
   Future<FlutterCommandResult> runCommand({
-    required bool force,
-    required bool continueFlow,
-    required bool testFlow,
-    required GitTagVersion gitTagVersion,
-    required FlutterVersion flutterVersion,
-    required bool verifyOnly,
+    required final bool force,
+    required final bool continueFlow,
+    required final bool testFlow,
+    required final GitTagVersion gitTagVersion,
+    required final FlutterVersion flutterVersion,
+    required final bool verifyOnly,
   }) async {
     if (!continueFlow) {
       await runCommandFirstHalf(
@@ -113,11 +113,11 @@ class UpgradeCommandRunner {
   }
 
   Future<void> runCommandFirstHalf({
-    required bool force,
-    required GitTagVersion gitTagVersion,
-    required FlutterVersion flutterVersion,
-    required bool testFlow,
-    required bool verifyOnly,
+    required final bool force,
+    required final GitTagVersion gitTagVersion,
+    required final FlutterVersion flutterVersion,
+    required final bool testFlow,
+    required final bool verifyOnly,
   }) async {
     final FlutterVersion upstreamVersion = await fetchLatestVersion(localVersion: flutterVersion);
     if (flutterVersion.frameworkRevision == upstreamVersion.frameworkRevision) {
@@ -173,7 +173,7 @@ class UpgradeCommandRunner {
     }
   }
 
-  void recordState(FlutterVersion flutterVersion) {
+  void recordState(final FlutterVersion flutterVersion) {
     final Channel? channel = getChannelForName(flutterVersion.channel);
     if (channel == null) {
       return;
@@ -200,7 +200,7 @@ class UpgradeCommandRunner {
 
   // This method should only be called if the upgrade command is invoked
   // re-entrantly with the `--continue` flag
-  Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
+  Future<void> runCommandSecondHalf(final FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
     final PersistentToolState persistentToolState = globals.persistentToolState!;
     persistentToolState.setShouldRedisplayWelcomeMessage(false);
@@ -234,7 +234,7 @@ class UpgradeCommandRunner {
   ///
   /// Exits tool if HEAD isn't pointing to a branch, or there is no upstream.
   Future<FlutterVersion> fetchLatestVersion({
-    required FlutterVersion localVersion,
+    required final FlutterVersion localVersion,
   }) async {
     String revision;
     try {
@@ -289,7 +289,7 @@ class UpgradeCommandRunner {
   /// This is a reset instead of fast forward because if we are on a release
   /// branch with cherry picks, there may not be a direct fast-forward route
   /// to the next release.
-  Future<void> attemptReset(String newRevision) async {
+  Future<void> attemptReset(final String newRevision) async {
     try {
       await globals.processUtils.run(
         <String>['git', 'reset', '--hard', newRevision],
@@ -323,7 +323,7 @@ class UpgradeCommandRunner {
   }
 
   /// Update the user's packages.
-  Future<void> updatePackages(FlutterVersion flutterVersion) async {
+  Future<void> updatePackages(final FlutterVersion flutterVersion) async {
     globals.printStatus('');
     globals.printStatus(flutterVersion.toString());
     final String? projectRoot = findProjectRoot(globals.fs);

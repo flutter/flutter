@@ -198,7 +198,7 @@ void main() {
 
 class FakeTemplateRenderer extends TemplateRenderer {
   @override
-  String renderString(String template, dynamic context, {bool htmlEscapeValues = false}) {
+  String renderString(final String template, final dynamic context, {final bool htmlEscapeValues = false}) {
     return '';
   }
 }

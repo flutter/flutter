@@ -228,7 +228,7 @@ class FakeDaemonStreams implements DaemonStreams {
   }
 
   @override
-  void send(Map<String, dynamic> message, [ List<int>? binary ]) {
+  void send(final Map<String, dynamic> message, [ final List<int>? binary ]) {
     outputs.add(DaemonMessage(message, binary != null ? Stream<List<int>>.value(binary) : null));
   }
 
@@ -297,7 +297,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   BuildMode? supportsRuntimeModeCalledBuildMode;
   @override
-  Future<bool> supportsRuntimeMode(BuildMode buildMode) async {
+  Future<bool> supportsRuntimeMode(final BuildMode buildMode) async {
     supportsRuntimeModeCalledBuildMode = buildMode;
     return true;
   }
@@ -305,22 +305,22 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   late DeviceLogReader logReader;
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
+    final ApplicationPackage? app,
+    final bool includePastLogs = false,
   }) => logReader;
 
   ApplicationPackage? startAppPackage;
   late LaunchResult launchResult;
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    DebuggingOptions? debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    final DebuggingOptions? debuggingOptions,
+    final Map<String, Object?> platformArgs = const <String, Object>{},
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     startAppPackage = package;
     return launchResult;
@@ -329,8 +329,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   ApplicationPackage? stopAppPackage;
   @override
   Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
+    final ApplicationPackage? app, {
+    final String? userIdentifier,
   }) async {
     stopAppPackage = app;
     return true;
@@ -338,7 +338,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   late List<int> screenshot;
   @override
-  Future<void> takeScreenshot(File outputFile) {
+  Future<void> takeScreenshot(final File outputFile) {
     return outputFile.writeAsBytes(screenshot);
   }
 }
@@ -372,7 +372,7 @@ class FakeApplicationPackageFactory implements ApplicationPackageFactory {
   ApplicationPackage? applicationPackage;
 
   @override
-  Future<ApplicationPackage?> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
+  Future<ApplicationPackage?> getPackageForPlatform(final TargetPlatform platform, {final BuildInfo? buildInfo, final File? applicationBinary}) async {
     platformRequested = platform;
     applicationBinaryRequested = applicationBinary;
     return applicationPackage;

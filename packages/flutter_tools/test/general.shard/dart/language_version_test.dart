@@ -20,7 +20,7 @@ const String flutterRoot = '';
 const String testVersionString = '2.13';
 final LanguageVersion testCurrentLanguageVersion = LanguageVersion(2, 13);
 
-void setUpLanguageVersion(FileSystem fileSystem, [String version = testVersionString]) {
+void setUpLanguageVersion(final FileSystem fileSystem, [final String version = testVersionString]) {
   fileSystem.file(fileSystem.path.join('bin', 'cache', 'dart-sdk', 'version'))
     ..createSync(recursive: true)
     ..writeAsStringSync(version);

@@ -395,7 +395,7 @@ class TestChromiumLauncher implements ChromiumLauncher {
   TestChromiumLauncher();
 
   bool _hasInstance = false;
-  void setInstance(Chromium chromium) {
+  void setInstance(final Chromium chromium) {
     _hasInstance = true;
     currentCompleter.complete(chromium);
   }
@@ -421,18 +421,18 @@ class TestChromiumLauncher implements ChromiumLauncher {
 
   @override
   Future<Chromium> launch(
-    String url, {
-    bool headless = false,
-    int? debugPort,
-    bool skipCheck = false,
-    Directory? cacheDir,
-    List<String> webBrowserFlags = const <String>[],
+    final String url, {
+    final bool headless = false,
+    final int? debugPort,
+    final bool skipCheck = false,
+    final Directory? cacheDir,
+    final List<String> webBrowserFlags = const <String>[],
   }) async {
     return currentCompleter.future;
   }
 
   @override
-  Future<Chromium> connect(Chromium chrome, bool skipCheck) {
+  Future<Chromium> connect(final Chromium chrome, final bool skipCheck) {
     return currentCompleter.future;
   }
 }

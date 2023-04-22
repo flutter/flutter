@@ -56,13 +56,13 @@ class Plugin {
   ///            dartPluginClass: SamplePlugin
   ///            pluginClass: SamplePlugin
   factory Plugin.fromYaml(
-    String name,
-    String path,
-    YamlMap? pluginYaml,
-    VersionConstraint? flutterConstraint,
-    List<String> dependencies, {
-    required FileSystem fileSystem,
-    Set<String>? appDependencies,
+    final String name,
+    final String path,
+    final YamlMap? pluginYaml,
+    final VersionConstraint? flutterConstraint,
+    final List<String> dependencies, {
+    required final FileSystem fileSystem,
+    final Set<String>? appDependencies,
   }) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
@@ -91,13 +91,13 @@ class Plugin {
   }
 
   factory Plugin._fromMultiPlatformYaml(
-    String name,
-    String path,
-    YamlMap pluginYaml,
-    VersionConstraint? flutterConstraint,
-    List<String> dependencies,
-    FileSystem fileSystem,
-    bool isDirectDependency,
+    final String name,
+    final String path,
+    final YamlMap pluginYaml,
+    final VersionConstraint? flutterConstraint,
+    final List<String> dependencies,
+    final FileSystem fileSystem,
+    final bool isDirectDependency,
   ) {
     assert (pluginYaml['platforms'] != null, 'Invalid multi-platform plugin specification $name.');
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
@@ -178,13 +178,13 @@ class Plugin {
   }
 
   factory Plugin._fromLegacyYaml(
-    String name,
-    String path,
-    dynamic pluginYaml,
-    VersionConstraint? flutterConstraint,
-    List<String> dependencies,
-    FileSystem fileSystem,
-    bool isDirectDependency,
+    final String name,
+    final String path,
+    final dynamic pluginYaml,
+    final VersionConstraint? flutterConstraint,
+    final List<String> dependencies,
+    final FileSystem fileSystem,
+    final bool isDirectDependency,
   ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String? pluginClass = (pluginYaml as Map<dynamic, dynamic>)['pluginClass'] as String?;
@@ -229,7 +229,7 @@ class Plugin {
   ///       pluginClass: SamplePlugin
   ///     ios:
   ///       pluginClass: SamplePlugin
-  static YamlMap createPlatformsYamlMap(List<String> platforms, String pluginClass, String androidPackage) {
+  static YamlMap createPlatformsYamlMap(final List<String> platforms, final String pluginClass, final String androidPackage) {
     final Map<String, dynamic> map = <String, dynamic>{};
     for (final String platform in platforms) {
       map[platform] = <String, String>{
@@ -240,7 +240,7 @@ class Plugin {
     return YamlMap.wrap(map);
   }
 
-  static List<String> validatePluginYaml(YamlMap? yaml) {
+  static List<String> validatePluginYaml(final YamlMap? yaml) {
     if (yaml == null) {
       return <String>['Invalid "plugin" specification.'];
     }
@@ -280,8 +280,8 @@ class Plugin {
     }
   }
 
-  static List<String> _validateMultiPlatformYaml(YamlMap? yaml) {
-    bool isInvalid(String key, bool Function(YamlMap) validate) {
+  static List<String> _validateMultiPlatformYaml(final YamlMap? yaml) {
+    bool isInvalid(final String key, final bool Function(YamlMap) validate) {
       if (!yaml!.containsKey(key)) {
         return false;
       }
@@ -317,7 +317,7 @@ class Plugin {
     return errors;
   }
 
-  static List<String> _validateLegacyYaml(YamlMap yaml) {
+  static List<String> _validateLegacyYaml(final YamlMap yaml) {
     final List<String> errors = <String>[];
 
     if (yaml['androidPackage'] != null && yaml['androidPackage'] is! String) {
@@ -332,7 +332,7 @@ class Plugin {
     return errors;
   }
 
-  static bool _supportsPlatform(YamlMap platformsYaml, String platformKey) {
+  static bool _supportsPlatform(final YamlMap platformsYaml, final String platformKey) {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
@@ -342,7 +342,7 @@ class Plugin {
     return false;
   }
 
-  static String? _getDefaultPackageForPlatform(YamlMap platformsYaml, String platformKey) {
+  static String? _getDefaultPackageForPlatform(final YamlMap platformsYaml, final String platformKey) {
     if (!_supportsPlatform(platformsYaml, platformKey)) {
       return null;
     }
@@ -352,7 +352,7 @@ class Plugin {
     return null;
   }
 
-  static String? _getPluginDartClassForPlatform(YamlMap platformsYaml, String platformKey) {
+  static String? _getPluginDartClassForPlatform(final YamlMap platformsYaml, final String platformKey) {
     if (!_supportsPlatform(platformsYaml, platformKey)) {
       return null;
     }
@@ -362,7 +362,7 @@ class Plugin {
     return null;
   }
 
-  static bool _providesImplementationForPlatform(YamlMap platformsYaml, String platformKey) {
+  static bool _providesImplementationForPlatform(final YamlMap platformsYaml, final String platformKey) {
     if (!_supportsPlatform(platformsYaml, platformKey)) {
       return false;
     }

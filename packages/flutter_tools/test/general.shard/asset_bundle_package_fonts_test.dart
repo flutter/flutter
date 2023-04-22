@@ -16,7 +16,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  String fixPath(String path) {
+  String fixPath(final String path) {
     // The in-memory file system is strict about slashes on Windows being the
     // correct way so until https://github.com/google/file.dart/issues/112 is
     // fixed we fix them here.
@@ -24,7 +24,7 @@ void main() {
     // rolls into Flutter.
     return path.replaceAll('/', globals.fs.path.separator);
   }
-  void writePubspecFile(String path, String name, { String? fontsSection }) {
+  void writePubspecFile(final String path, final String name, { String? fontsSection }) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
@@ -46,17 +46,17 @@ $fontsSection
 ''');
   }
 
-  void writePackagesFile(String packages) {
+  void writePackagesFile(final String packages) {
     globals.fs.file('.packages')
       ..createSync()
       ..writeAsStringSync(packages);
   }
 
   Future<void> buildAndVerifyFonts(
-    List<String> localFonts,
-    List<String> packageFonts,
-    List<String> packages,
-    String expectedAssetManifest,
+    final List<String> localFonts,
+    final List<String> packageFonts,
+    final List<String> packages,
+    final String expectedAssetManifest,
   ) async {
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(packagesPath: '.packages');
@@ -86,7 +86,7 @@ $fontsSection
     );
   }
 
-  void writeFontAsset(String path, String font) {
+  void writeFontAsset(final String path, final String font) {
     globals.fs.file(fixPath('$path$font'))
       ..createSync(recursive: true)
       ..writeAsStringSync(font);

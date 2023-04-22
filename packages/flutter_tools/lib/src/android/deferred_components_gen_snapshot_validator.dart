@@ -29,8 +29,8 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// methods will exit the tool when this validator detects a recommended
   /// change. This defaults to true.
   DeferredComponentsGenSnapshotValidator(this.env, {
-    bool exitOnFail = true,
-    String? title,
+    final bool exitOnFail = true,
+    final String? title,
   }) : super(env.projectDir, env.logger, env.platform, exitOnFail: exitOnFail, title: title);
 
   /// The build environment that should be used to find the input files to run
@@ -62,7 +62,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   ///
   /// Where loading unit 2 is included in componentA, loading unit 3 is included
   /// in componentB, and loading unit 4 is included in componentC.
-  bool checkAppAndroidManifestComponentLoadingUnitMapping(List<DeferredComponent> components, List<LoadingUnit> generatedLoadingUnits) {
+  bool checkAppAndroidManifestComponentLoadingUnitMapping(final List<DeferredComponent> components, final List<LoadingUnit> generatedLoadingUnits) {
     final Directory androidDir = projectDir.childDirectory('android');
     inputs.add(projectDir.childFile('pubspec.yaml'));
 
@@ -182,7 +182,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
   /// the cache file does not exist, then all generatedLoadingUnits will be
   /// considered new.
   bool checkAgainstLoadingUnitsCache(
-      List<LoadingUnit> generatedLoadingUnits) {
+      final List<LoadingUnit> generatedLoadingUnits) {
     final List<LoadingUnit> cachedLoadingUnits = _parseLoadingUnitsCache(projectDir.childFile(DeferredComponentsValidator.kLoadingUnitsCacheFileName));
     loadingUnitComparisonResults = <String, Object>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
@@ -209,7 +209,7 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     return loadingUnitComparisonResults!['match']! as bool;
   }
 
-  List<LoadingUnit> _parseLoadingUnitsCache(File cacheFile) {
+  List<LoadingUnit> _parseLoadingUnitsCache(final File cacheFile) {
     final List<LoadingUnit> loadingUnits = <LoadingUnit>[];
     inputs.add(cacheFile);
     if (!cacheFile.existsSync()) {

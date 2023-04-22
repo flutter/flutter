@@ -31,7 +31,7 @@ void main() {
     final Completer<void> onFirstLoad = Completer<void>();
     final Completer<void> onSecondLoad = Completer<void>();
 
-    flutter.stdout.listen((String line) {
+    flutter.stdout.listen((final String line) {
       // If the asset fails to load, this message will be printed instead.
       // this indicates that the devFS was not able to locate the asset
       // after the hot reload.
@@ -58,7 +58,7 @@ void main() {
     final Completer<void> onFirstLoad = Completer<void>();
     final Completer<void> onSecondLoad = Completer<void>();
 
-    flutter.stdout.listen((String line) {
+    flutter.stdout.listen((final String line) {
       // If the asset fails to load, this message will be printed instead.
       // this indicates that the devFS was not able to locate the asset
       // after the hot reload.

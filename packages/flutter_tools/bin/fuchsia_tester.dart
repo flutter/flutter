@@ -39,13 +39,13 @@ const List<String> _kRequiredOptions = <String>[
 const String _kOptionCoverage = 'coverage';
 const String _kOptionCoveragePath = 'coverage-path';
 
-void main(List<String> args) {
+void main(final List<String> args) {
   runInContext<void>(() => run(args), overrides: <Type, Generator>{
     Usage: () => DisabledUsage(),
   });
 }
 
-Future<void> run(List<String> args) async {
+Future<void> run(final List<String> args) async {
   final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionShell, help: 'The Flutter shell binary')
@@ -64,7 +64,7 @@ Future<void> run(List<String> args) async {
     );
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions
-      .any((String option) => !argResults.options.contains(option))) {
+      .any((final String option) => !argResults.options.contains(option))) {
     throwToolExit('Missing option! All options must be specified.');
   }
   final Directory tempDir =

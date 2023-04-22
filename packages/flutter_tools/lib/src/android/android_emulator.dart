@@ -19,11 +19,11 @@ import 'android_workflow.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
   AndroidEmulators({
-    AndroidSdk? androidSdk,
-    required AndroidWorkflow androidWorkflow,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required ProcessManager processManager,
+    final AndroidSdk? androidSdk,
+    required final AndroidWorkflow androidWorkflow,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final ProcessManager processManager,
   }) : _androidSdk = androidSdk,
        _androidWorkflow = androidWorkflow,
        _fileSystem = fileSystem,
@@ -68,8 +68,8 @@ class AndroidEmulators extends EmulatorDiscovery {
 
   /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
   /// of emulators by reading information from the relevant ini files.
-  void _extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
-    for (final String id in text.trim().split('\n').where((String l) => l != '')) {
+  void _extractEmulatorAvdInfo(final String text, final List<AndroidEmulator> emulators) {
+    for (final String id in text.trim().split('\n').where((final String l) => l != '')) {
       emulators.add(_loadEmulatorInfo(id));
     }
   }
@@ -111,11 +111,11 @@ class AndroidEmulators extends EmulatorDiscovery {
 }
 
 class AndroidEmulator extends Emulator {
-  AndroidEmulator(String id, {
-    Map<String, String>? properties,
-    required Logger logger,
-    AndroidSdk? androidSdk,
-    required ProcessManager processManager,
+  AndroidEmulator(final String id, {
+    final Map<String, String>? properties,
+    required final Logger logger,
+    final AndroidSdk? androidSdk,
+    required final ProcessManager processManager,
   }) : _properties = properties,
        _logger = logger,
        _androidSdk = androidSdk,
@@ -141,10 +141,10 @@ class AndroidEmulator extends Emulator {
   @override
   PlatformType get platformType => PlatformType.android;
 
-  String? _prop(String name) => _properties != null ? _properties![name] : null;
+  String? _prop(final String name) => _properties != null ? _properties![name] : null;
 
   @override
-  Future<void> launch({@visibleForTesting Duration? startupDuration, bool coldBoot = false}) async {
+  Future<void> launch({@visibleForTesting final Duration? startupDuration, final bool coldBoot = false}) async {
     final String? emulatorPath = _androidSdk?.emulatorPath;
     if (emulatorPath == null) {
       throw Exception('Emulator is missing from the Android SDK');
@@ -179,7 +179,7 @@ class AndroidEmulator extends Emulator {
     // after the startup phase (3 seconds), then we only echo its output if
     // its error code is non-zero and its stderr is non-empty.
     bool earlyFailure = true;
-    unawaited(process.exitCode.then((int status) async {
+    unawaited(process.exitCode.then((final int status) async {
       if (status == 0) {
         _logger.printTrace('The Android emulator exited successfully');
         return;
@@ -212,17 +212,17 @@ class AndroidEmulator extends Emulator {
 
 
 @visibleForTesting
-Map<String, String> parseIniLines(List<String> contents) {
+Map<String, String> parseIniLines(final List<String> contents) {
   final Map<String, String> results = <String, String>{};
 
   final Iterable<List<String>> properties = contents
-      .map<String>((String l) => l.trim())
+      .map<String>((final String l) => l.trim())
       // Strip blank lines/comments
-      .where((String l) => l != '' && !l.startsWith('#'))
+      .where((final String l) => l != '' && !l.startsWith('#'))
       // Discard anything that isn't simple name=value
-      .where((String l) => l.contains('='))
+      .where((final String l) => l.contains('='))
       // Split into name/value
-      .map<List<String>>((String l) => l.split('='));
+      .map<List<String>>((final String l) => l.split('='));
 
   for (final List<String> property in properties) {
     results[property[0].trim()] = property[1].trim();

@@ -237,7 +237,7 @@ flutter:
         ),
       ]),
       id: 'emulator-5555',
-      androidConsoleSocketFactory: (String host, int port) async =>
+      androidConsoleSocketFactory: (final String host, final int port) async =>
         FakeWorkingAndroidConsoleSocket('dummyEmulatorId'),
     );
 
@@ -258,7 +258,7 @@ flutter:
           stdout: '[ro.hardware]: [samsungexynos7420]'
         ),
       ]),
-      androidConsoleSocketFactory: (String host, int port) async {
+      androidConsoleSocketFactory: (final String host, final int port) async {
         socketWasCreated = true;
         throw Exception('Socket was created for non-emulator');
       }
@@ -277,7 +277,7 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]'
         ),
       ]),
-      androidConsoleSocketFactory: (String host, int port) async {
+      androidConsoleSocketFactory: (final String host, final int port) async {
         socketWasCreated = true;
         throw Exception('Socket was created for emulator without port in ID');
       },
@@ -295,7 +295,7 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]'
         ),
       ]),
-      androidConsoleSocketFactory: (String host, int port) => throw Exception('Fake socket error'),
+      androidConsoleSocketFactory: (final String host, final int port) => throw Exception('Fake socket error'),
     );
 
     expect(await device.emulatorId, isNull);
@@ -309,7 +309,7 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]'
         ),
       ]),
-      androidConsoleSocketFactory: (String host, int port) async =>
+      androidConsoleSocketFactory: (final String host, final int port) async =>
         FakeUnresponsiveAndroidConsoleSocket(),
     );
 
@@ -324,7 +324,7 @@ flutter:
           stdout: '[ro.hardware]: [goldfish]'
         ),
       ]),
-      androidConsoleSocketFactory: (String host, int port) async =>
+      androidConsoleSocketFactory: (final String host, final int port) async =>
         FakeDisconnectingAndroidConsoleSocket()
     );
 
@@ -464,12 +464,12 @@ Uptime: 441088659 Realtime: 521464097
 }
 
 AndroidDevice setUpAndroidDevice({
-  String? id,
+  final String? id,
   AndroidSdk? androidSdk,
-  FileSystem? fileSystem,
-  ProcessManager? processManager,
-  Platform? platform,
-  AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
+  final FileSystem? fileSystem,
+  final ProcessManager? processManager,
+  final Platform? platform,
+  final AndroidConsoleSocketFactory androidConsoleSocketFactory = kAndroidConsoleSocketFactory,
 }) {
   androidSdk ??= FakeAndroidSdk();
   return AndroidDevice(id ?? '1234',
@@ -660,10 +660,10 @@ class FakeWorkingAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(final FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
-  void add(List<int> data) {
+  void add(final List<int> data) {
     final String text = ascii.decode(data);
     if (text == 'avd name\n') {
       _controller.add('$avdName\n');
@@ -684,10 +684,10 @@ class FakeUnresponsiveAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(final FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
-  void add(List<int> data) {}
+  void add(final List<int> data) {}
 
   @override
   void destroy() { }
@@ -705,10 +705,10 @@ class FakeDisconnectingAndroidConsoleSocket extends Fake implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(final FutureOr<E> Function(Uint8List event) convert) => _controller.stream as Stream<E>;
 
   @override
-  void add(List<int> data) {
+  void add(final List<int> data) {
     _controller.close();
   }
 

@@ -117,12 +117,12 @@ class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
   Cache({
-    @protected Directory? rootOverride,
-    @protected List<ArtifactSet>? artifacts,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Platform platform,
-    required OperatingSystemUtils osUtils,
+    @protected final Directory? rootOverride,
+    @protected final List<ArtifactSet>? artifacts,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    required final OperatingSystemUtils osUtils,
   }) : _rootOverride = rootOverride,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -138,12 +138,12 @@ class Cache {
   /// buffer logger, and no accessible artifacts.
   /// By default, the root cache directory path is "cache".
   factory Cache.test({
-    Directory? rootOverride,
-    List<ArtifactSet>? artifacts,
+    final Directory? rootOverride,
+    final List<ArtifactSet>? artifacts,
     Logger? logger,
     FileSystem? fileSystem,
     Platform? platform,
-    required ProcessManager processManager,
+    required final ProcessManager processManager,
   }) {
     fileSystem ??= rootOverride?.fileSystem ?? MemoryFileSystem.test();
     platform ??= FakePlatform(environment: <String, String>{});
@@ -176,7 +176,7 @@ class Cache {
 
   @visibleForTesting
   @protected
-  void registerArtifact(ArtifactSet artifactSet) {
+  void registerArtifact(final ArtifactSet artifactSet) {
     _artifacts.add(artifactSet);
   }
 
@@ -226,11 +226,11 @@ class Cache {
   /// If an exception is thrown during any of these checks, an error message is
   /// printed and `.` is returned by default (6).
   static String defaultFlutterRoot({
-    required Platform platform,
-    required FileSystem fileSystem,
-    required UserMessages userMessages,
+    required final Platform platform,
+    required final FileSystem fileSystem,
+    required final UserMessages userMessages,
   }) {
-    String normalize(String path) {
+    String normalize(final String path) {
       return fileSystem.path.normalize(fileSystem.path.absolute(path));
     }
     if (platform.environment.containsKey(kFlutterRootEnvironmentVariableName)) {
@@ -411,7 +411,7 @@ class Cache {
       // Make the version string more customer-friendly.
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
       final String justVersion = _platform.version.split(' ')[0];
-      _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+      _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (final Match match) {
         final String noFlutter = match[2]!.replaceAll('.flutter-', ' ');
         return '${match[1]} (build ${match[1]}$noFlutter)';
       });
@@ -426,7 +426,7 @@ class Cache {
       // Make the version string more customer-friendly.
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
       final String justVersion = _platform.version.split(' ')[0];
-      _dartSdkBuild = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+      _dartSdkBuild = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (final Match match) {
         final String noFlutter = match[2]!.replaceAll('.flutter-', ' ');
         return '${match[1]}$noFlutter';
       });
@@ -516,7 +516,7 @@ class Cache {
 
   bool _hasWarnedAboutStorageOverride = false;
 
-  void _maybeWarnAboutStorageOverride(String overrideUrl) {
+  void _maybeWarnAboutStorageOverride(final String overrideUrl) {
     if (_hasWarnedAboutStorageOverride) {
       return;
     }
@@ -544,7 +544,7 @@ class Cache {
   ///
   /// When [shouldCreate] is true, the cache directory at [name] will be created
   /// if it does not already exist.
-  Directory getCacheDir(String name, { bool shouldCreate = true }) {
+  Directory getCacheDir(final String name, { final bool shouldCreate = true }) {
     final Directory dir = _fileSystem.directory(_fileSystem.path.join(getRoot().path, name));
     if (!dir.existsSync() && shouldCreate) {
       dir.createSync(recursive: true);
@@ -564,7 +564,7 @@ class Cache {
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
-  Directory getArtifactDirectory(String name) {
+  Directory getArtifactDirectory(final String name) {
     return getCacheArtifacts().childDirectory(name);
   }
 
@@ -595,7 +595,7 @@ class Cache {
     return getRoot().childDirectory('flutter_web_sdk');
   }
 
-  String? getVersionFor(String artifactName) {
+  String? getVersionFor(final String artifactName) {
     final File versionFile = _fileSystem.file(_fileSystem.path.join(
       _rootOverride?.path ?? flutterRoot!,
       'bin',
@@ -621,7 +621,7 @@ class Cache {
   /// Read the stamp for [artifactName].
   ///
   /// If the file is missing or cannot be parsed, returns `null`.
-  String? getStampFor(String artifactName) {
+  String? getStampFor(final String artifactName) {
     final File stampFile = getStampFileFor(artifactName);
     if (!stampFile.existsSync()) {
       return null;
@@ -633,17 +633,17 @@ class Cache {
     }
   }
 
-  void setStampFor(String artifactName, String version) {
+  void setStampFor(final String artifactName, final String version) {
     getStampFileFor(artifactName).writeAsStringSync(version);
   }
 
-  File getStampFileFor(String artifactName) {
+  File getStampFileFor(final String artifactName) {
     return _fileSystem.file(_fileSystem.path.join(getRoot().path, '$artifactName.stamp'));
   }
 
   /// Returns `true` if either [entity] is older than the tools stamp or if
   /// [entity] doesn't exist.
-  bool isOlderThanToolsStamp(FileSystemEntity entity) {
+  bool isOlderThanToolsStamp(final FileSystemEntity entity) {
     final File flutterToolsStamp = getStampFileFor('flutter_tools');
     return _fsUtils.isOlderThanReference(
       entity: entity,
@@ -661,7 +661,7 @@ class Cache {
   }
 
   /// Update the cache to contain all `requiredArtifacts`.
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+  Future<void> updateAll(final Set<DevelopmentArtifact> requiredArtifacts, {final bool offline = false}) async {
     if (!_lockEnabled) {
       return;
     }
@@ -690,8 +690,8 @@ class Cache {
   }
 
   Future<bool> areRemoteArtifactsAvailable({
-    String? engineVersion,
-    bool includeAllPlatforms = true,
+    final String? engineVersion,
+    final bool includeAllPlatforms = true,
   }) async {
     final bool includeAllPlatformsState = this.includeAllPlatforms;
     bool allAvailable = true;
@@ -705,7 +705,7 @@ class Cache {
     return allAvailable;
   }
 
-  Future<bool> doesRemoteExist(String message, Uri url) async {
+  Future<bool> doesRemoteExist(final String message, final Uri url) async {
     final Status status = _logger.startProgress(
       message,
     );
@@ -727,7 +727,7 @@ abstract class ArtifactSet {
   final DevelopmentArtifact developmentArtifact;
 
   /// [true] if the artifact is up to date.
-  Future<bool> isUpToDate(FileSystem fileSystem);
+  Future<bool> isUpToDate(final FileSystem fileSystem);
 
   /// The environment variables (if any) required to consume the artifacts.
   Map<String, String> get environment {
@@ -736,11 +736,11 @@ abstract class ArtifactSet {
 
   /// Updates the artifact.
   Future<void> update(
-    ArtifactUpdater artifactUpdater,
-    Logger logger,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
-    {bool offline = false}
+    final ArtifactUpdater artifactUpdater,
+    final Logger logger,
+    final FileSystem fileSystem,
+    final OperatingSystemUtils operatingSystemUtils,
+    {final bool offline = false}
   );
 
   /// The canonical name of the artifact.
@@ -756,7 +756,7 @@ abstract class CachedArtifact extends ArtifactSet {
   CachedArtifact(
     this.name,
     this.cache,
-    DevelopmentArtifact developmentArtifact,
+    final DevelopmentArtifact developmentArtifact,
   ) : super(developmentArtifact);
 
   final Cache cache;
@@ -778,7 +778,7 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   @override
-  Future<bool> isUpToDate(FileSystem fileSystem) async {
+  Future<bool> isUpToDate(final FileSystem fileSystem) async {
     if (!location.existsSync()) {
       return false;
     }
@@ -790,11 +790,11 @@ abstract class CachedArtifact extends ArtifactSet {
 
   @override
   Future<void> update(
-    ArtifactUpdater artifactUpdater,
-    Logger logger,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
-    {bool offline = false}
+    final ArtifactUpdater artifactUpdater,
+    final Logger logger,
+    final FileSystem fileSystem,
+    final OperatingSystemUtils operatingSystemUtils,
+    {final bool offline = false}
   ) async {
     if (!location.existsSync()) {
       try {
@@ -830,12 +830,12 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   /// Hook method for extra checks for being up-to-date.
-  bool isUpToDateInner(FileSystem fileSystem) => true;
+  bool isUpToDateInner(final FileSystem fileSystem) => true;
 
   Future<void> updateInner(
-    ArtifactUpdater artifactUpdater,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
+    final ArtifactUpdater artifactUpdater,
+    final FileSystem fileSystem,
+    final OperatingSystemUtils operatingSystemUtils,
   );
 }
 
@@ -843,8 +843,8 @@ abstract class CachedArtifact extends ArtifactSet {
 abstract class EngineCachedArtifact extends CachedArtifact {
   EngineCachedArtifact(
     this.stampName,
-    Cache cache,
-    DevelopmentArtifact developmentArtifact,
+    final Cache cache,
+    final DevelopmentArtifact developmentArtifact,
   ) : super('engine', cache, developmentArtifact);
 
   @override
@@ -860,7 +860,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   List<String> getPackageDirs();
 
   @override
-  bool isUpToDateInner(FileSystem fileSystem) {
+  bool isUpToDateInner(final FileSystem fileSystem) {
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (final String pkgName in getPackageDirs()) {
       final String pkgPath = fileSystem.path.join(pkgDir.path, pkgName);
@@ -887,9 +887,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   Future<void> updateInner(
-    ArtifactUpdater artifactUpdater,
-    FileSystem fileSystem,
-    OperatingSystemUtils operatingSystemUtils,
+    final ArtifactUpdater artifactUpdater,
+    final FileSystem fileSystem,
+    final OperatingSystemUtils operatingSystemUtils,
   ) async {
     final String url = '${cache.storageBaseUrl}/flutter_infra_release/flutter/$version/';
 
@@ -949,7 +949,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     return true;
   }
 
-  void _makeFilesExecutable(Directory dir, OperatingSystemUtils operatingSystemUtils) {
+  void _makeFilesExecutable(final Directory dir, final OperatingSystemUtils operatingSystemUtils) {
     operatingSystemUtils.chmod(dir, 'a+r,a+x');
     for (final File file in dir.listSync(recursive: true).whereType<File>()) {
       final FileStat stat = file.statSync();
@@ -966,13 +966,13 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 /// additional source code.
 class ArtifactUpdater {
   ArtifactUpdater({
-    required OperatingSystemUtils operatingSystemUtils,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Directory tempStorage,
-    required HttpClient httpClient,
-    required Platform platform,
-    required List<String> allowedBaseUrls,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Directory tempStorage,
+    required final HttpClient httpClient,
+    required final Platform platform,
+    required final List<String> allowedBaseUrls,
   }) : _operatingSystemUtils = operatingSystemUtils,
        _httpClient = httpClient,
        _logger = logger,
@@ -1007,9 +1007,9 @@ class ArtifactUpdater {
 
   /// Download a zip archive from the given [url] and unzip it to [location].
   Future<void> downloadZipArchive(
-    String message,
-    Uri url,
-    Directory location,
+    final String message,
+    final Uri url,
+    final Directory location,
   ) {
     return _downloadArchive(
       message,
@@ -1020,7 +1020,7 @@ class ArtifactUpdater {
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<void> downloadZippedTarball(String message, Uri url, Directory location) {
+  Future<void> downloadZippedTarball(final String message, final Uri url, final Directory location) {
     return _downloadArchive(
       message,
       url,
@@ -1031,10 +1031,10 @@ class ArtifactUpdater {
 
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(
-    String message,
-    Uri url,
-    Directory location,
-    void Function(File, Directory) extractor,
+    final String message,
+    final Uri url,
+    final Directory location,
+    final void Function(File, Directory) extractor,
   ) async {
     final String downloadPath = flattenNameSubdirs(url, _fileSystem);
     final File tempFile = _createDownloadFile(downloadPath);
@@ -1133,8 +1133,8 @@ class ArtifactUpdater {
   ///
   /// See also:
   ///   * https://cloud.google.com/storage/docs/xml-api/reference-headers#xgooghash
-  Future<void> _download(Uri url, File file, Status status) async {
-    final bool isAllowedUrl = _allowedBaseUrls.any((String baseUrl) => url.toString().startsWith(baseUrl));
+  Future<void> _download(final Uri url, final File file, final Status status) async {
+    final bool isAllowedUrl = _allowedBaseUrls.any((final String baseUrl) => url.toString().startsWith(baseUrl));
 
     // In tests make this a hard failure.
     assert(
@@ -1168,7 +1168,7 @@ class ArtifactUpdater {
       inputSink = md5.startChunkedConversion(digests);
     }
     final RandomAccessFile randomAccessFile = file.openSync(mode: FileMode.writeOnly);
-    await response.forEach((List<int> chunk) {
+    await response.forEach((final List<int> chunk) {
       inputSink?.add(chunk);
       randomAccessFile.writeFromSync(chunk);
     });
@@ -1188,7 +1188,7 @@ class ArtifactUpdater {
     }
   }
 
-  String? _expectedMd5(HttpHeaders httpHeaders) {
+  String? _expectedMd5(final HttpHeaders httpHeaders) {
     final List<String>? values = httpHeaders['x-goog-hash'];
     if (values == null) {
       return null;
@@ -1216,14 +1216,14 @@ class ArtifactUpdater {
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
   /// argument, then add the temporary file to the [downloadedFiles].
-  File _createDownloadFile(String name) {
+  File _createDownloadFile(final String name) {
     final File tempFile = _fileSystem.file(_fileSystem.path.join(_tempStorage.path, name));
     downloadedFiles.add(tempFile);
     return tempFile;
   }
 
   /// Create the given [directory] and parents, as necessary.
-  void _ensureExists(Directory directory) {
+  void _ensureExists(final Directory directory) {
     if (!directory.existsSync()) {
       directory.createSync(recursive: true);
     }
@@ -1254,7 +1254,7 @@ class ArtifactUpdater {
     }
   }
 
-  static void _deleteIgnoringErrors(FileSystemEntity entity) {
+  static void _deleteIgnoringErrors(final FileSystemEntity entity) {
     if (!entity.existsSync()) {
       return;
     }
@@ -1267,7 +1267,7 @@ class ArtifactUpdater {
 }
 
 @visibleForTesting
-String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
+String flattenNameSubdirs(final Uri url, final FileSystem fileSystem) {
   final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fileSystem.path.joinAll(convertedPieces);
@@ -1275,7 +1275,7 @@ String flattenNameSubdirs(Uri url, FileSystem fileSystem) {
 
 /// Given a name containing slashes, colons, and backslashes, expand it into
 /// something that doesn't.
-String _flattenNameNoSubdirs(String fileName) {
+String _flattenNameNoSubdirs(final String fileName) {
   final List<int> replacedCodeUnits = <int>[
     for (int codeUnit in fileName.codeUnits)
       ..._flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit],

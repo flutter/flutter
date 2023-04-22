@@ -54,9 +54,9 @@ enum GradleBuildStatus {
 
 /// Returns a simple test function that evaluates to `true` if at least one of
 /// `errorMessages` is contained in the error message.
-GradleErrorTest _lineMatcher(List<String> errorMessages) {
-  return (String line) {
-    return errorMessages.any((String errorMessage) => line.contains(errorMessage));
+GradleErrorTest _lineMatcher(final List<String> errorMessages) {
+  return (final String line) {
+    return errorMessages.any((final String errorMessage) => line.contains(errorMessage));
   };
 }
 
@@ -97,10 +97,10 @@ final GradleHandledError multidexErrorHandler = GradleHandledError(
     'The number of method references in a .dex file cannot exceed 64K.',
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printStatus('${globals.logger.terminal.warningMark} App requires Multidex support', emphasis: true);
     if (multidexEnabled) {
@@ -192,10 +192,10 @@ final GradleHandledError permissionDeniedErrorHandler = GradleHandledError(
     'Permission denied',
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printBox(
       '${globals.logger.terminal.warningMark} Gradle does not have execution permission.\n'
@@ -223,10 +223,10 @@ final GradleHandledError networkErrorHandler = GradleHandledError(
     "> Could not get resource 'http",
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} '
@@ -254,10 +254,10 @@ final GradleHandledError zipExceptionHandler = GradleHandledError(
     'java.util.zip.ZipException: error in opening zip file',
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} '
@@ -306,10 +306,10 @@ final GradleHandledError r8FailureHandler = GradleHandledError(
     'com.android.tools.r8',
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printBox(
       '${globals.logger.terminal.warningMark} The shrinker may have failed to optimize the Java bytecode.\n'
@@ -331,10 +331,10 @@ final GradleHandledError licenseNotAcceptedHandler = GradleHandledError(
     'You have not accepted the license agreements of the following SDK components',
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     const String licenseNotAcceptedMatcher =
       r'You have not accepted the license agreements of the following SDK components:\s*\[(.+)\]';
@@ -361,14 +361,14 @@ final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 /// Handler when a flavor is undefined.
 @visibleForTesting
 final GradleHandledError flavorUndefinedHandler = GradleHandledError(
-  test: (String line) {
+  test: (final String line) {
     return _undefinedTaskPattern.hasMatch(line);
   },
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     final RunResult tasksRunResult = await globals.processUtils.run(
       <String>[
@@ -436,14 +436,14 @@ final RegExp _minSdkVersionPattern = RegExp(r'uses-sdk:minSdkVersion ([0-9]+) ca
 /// Handler when a plugin requires a higher Android API level.
 @visibleForTesting
 final GradleHandledError minSdkVersionHandler = GradleHandledError(
-  test: (String line) {
+  test: (final String line) {
     return _minSdkVersionPattern.hasMatch(line);
   },
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -478,14 +478,14 @@ final GradleHandledError minSdkVersionHandler = GradleHandledError(
 /// https://github.com/flutter/flutter/issues/58247 is triggered.
 @visibleForTesting
 final GradleHandledError transformInputIssueHandler = GradleHandledError(
-  test: (String line) {
+  test: (final String line) {
     return line.contains('https://issuetracker.google.com/issues/158753935');
   },
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -512,14 +512,14 @@ final GradleHandledError transformInputIssueHandler = GradleHandledError(
 /// Handler when a dependency is missing in the lockfile.
 @visibleForTesting
 final GradleHandledError lockFileDepMissingHandler = GradleHandledError(
-  test: (String line) {
+  test: (final String line) {
     return line.contains('which is not part of the dependency lock state');
   },
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -544,10 +544,10 @@ final GradleHandledError incompatibleKotlinVersionHandler = GradleHandledError(
     'was compiled with an incompatible version of Kotlin',
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -569,10 +569,10 @@ final RegExp _outdatedGradlePattern = RegExp(r'The current Gradle version (.+) i
 final GradleHandledError outdatedGradleHandler = GradleHandledError(
   test: _outdatedGradlePattern.hasMatch,
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     final File gradleFile = project.directory
         .childDirectory('android')
@@ -604,10 +604,10 @@ final RegExp _minCompileSdkVersionPattern = RegExp(r'The minCompileSdk \(([0-9]+
 final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
   test: _minCompileSdkVersionPattern.hasMatch,
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     final Match? minCompileSdkVersionMatch = _minCompileSdkVersionPattern.firstMatch(line);
     assert(minCompileSdkVersionMatch?.groupCount == 1);
@@ -631,14 +631,14 @@ final GradleHandledError minCompileSdkVersionHandler = GradleHandledError(
 
 @visibleForTesting
 final GradleHandledError jvm11RequiredHandler = GradleHandledError(
-  test: (String line) {
+  test: (final String line) {
     return line.contains('Android Gradle plugin requires Java 11 to run');
   },
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printBox(
       '${globals.logger.terminal.warningMark} You need Java 11 or higher to build your app with this version of Gradle.\n\n'
@@ -659,10 +659,10 @@ final GradleHandledError sslExceptionHandler = GradleHandledError(
     'javax.crypto.AEADBadTagException: Tag mismatch!',
   ]),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} '
@@ -680,14 +680,14 @@ final RegExp _unsupportedClassFileMajorVersionPattern = RegExp(r'Unsupported cla
 
 @visibleForTesting
 final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandledError(
-  test: (String line) {
+  test: (final String line) {
     return _unsupportedClassFileMajorVersionPattern.hasMatch(line);
   },
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     // TODO(reidbaker): Replace URL with constant defined in
     // https://github.com/flutter/flutter/pull/123916.
@@ -704,12 +704,12 @@ final GradleHandledError incompatibleJavaAndGradleVersionsHandler = GradleHandle
 
 @visibleForTesting
 final GradleHandledError remoteTerminatedHandshakeHandler = GradleHandledError(
-  test: (String line) => line.contains('Remote host terminated the handshake'),
+  test: (final String line) => line.contains('Remote host terminated the handshake'),
   handler: ({
-    required String line,
-    required FlutterProject project,
-    required bool usesAndroidX,
-    required bool multidexEnabled,
+    required final String line,
+    required final FlutterProject project,
+    required final bool usesAndroidX,
+    required final bool multidexEnabled,
   }) async {
     globals.printError(
       '${globals.logger.terminal.warningMark} '

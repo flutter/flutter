@@ -34,12 +34,12 @@ final RegExp _filteredOutput = RegExp(r'^((?!Requested but did not find extensio
 /// Builds the macOS project through xcodebuild.
 // TODO(zanderso): refactor to share code with the existing iOS code.
 Future<void> buildMacOS({
-  required FlutterProject flutterProject,
-  required BuildInfo buildInfo,
-  String? targetOverride,
-  required bool verboseLogging,
-  bool configOnly = false,
-  SizeAnalyzer? sizeAnalyzer,
+  required final FlutterProject flutterProject,
+  required final BuildInfo buildInfo,
+  final String? targetOverride,
+  required final bool verboseLogging,
+  final bool configOnly = false,
+  final SizeAnalyzer? sizeAnalyzer,
 }) async {
   final Directory? xcodeWorkspace = flutterProject.macos.xcodeWorkspace;
   if (xcodeWorkspace == null) {
@@ -132,7 +132,7 @@ Future<void> buildMacOS({
     ],
     trace: true,
     stdoutErrorMatcher: verboseLogging ? null : _filteredOutput,
-    mapFunction: verboseLogging ? null : (String line) => _filteredOutput.hasMatch(line) ? line : null,
+    mapFunction: verboseLogging ? null : (final String line) => _filteredOutput.hasMatch(line) ? line : null,
   );
   } finally {
     status.cancel();
@@ -154,7 +154,7 @@ Future<void> buildMacOS({
     );
     final Directory appDirectory = candidateDirectory.listSync()
       .whereType<Directory>()
-      .firstWhere((Directory directory) {
+      .firstWhere((final Directory directory) {
       return globals.fs.path.extension(directory.path) == '.app';
     });
     final Map<String, Object?> output = await sizeAnalyzer.analyzeAotSnapshot(

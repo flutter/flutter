@@ -41,7 +41,7 @@ abstract class DevFSContent {
   /// Return true if this is the first time this method is called
   /// or if the entry has been modified after the given time
   /// or if the given time is null.
-  bool isModifiedAfter(DateTime time);
+  bool isModifiedAfter(final DateTime time);
 
   int get size;
 
@@ -50,7 +50,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream(
-    OperatingSystemUtils osUtils,
+    final OperatingSystemUtils osUtils,
   ) {
     return osUtils.gzipLevel1Stream(contentsAsStream());
   }
@@ -117,7 +117,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  bool isModifiedAfter(DateTime time) {
+  bool isModifiedAfter(final DateTime time) {
     final FileStat? oldFileStat = _fileStat;
     _stat();
     final FileStat? newFileStat = _fileStat;
@@ -156,7 +156,7 @@ class DevFSByteContent extends DevFSContent {
 
   List<int> get bytes => _bytes;
 
-  set bytes(List<int> value) {
+  set bytes(final List<int> value) {
     _bytes = value;
     _isModified = true;
     _modificationTime = DateTime.now();
@@ -171,7 +171,7 @@ class DevFSByteContent extends DevFSContent {
   }
 
   @override
-  bool isModifiedAfter(DateTime time) {
+  bool isModifiedAfter(final DateTime time) {
     return _modificationTime.isAfter(time);
   }
 
@@ -188,7 +188,7 @@ class DevFSByteContent extends DevFSContent {
 
 /// String content to be copied to the device.
 class DevFSStringContent extends DevFSByteContent {
-  DevFSStringContent(String string)
+  DevFSStringContent(final String string)
     : _string = string,
       super(utf8.encode(string));
 
@@ -196,13 +196,13 @@ class DevFSStringContent extends DevFSByteContent {
 
   String get string => _string;
 
-  set string(String value) {
+  set string(final String value) {
     _string = value;
     super.bytes = utf8.encode(_string);
   }
 
   @override
-  set bytes(List<int> value) {
+  set bytes(final List<int> value) {
     string = utf8.decode(value);
   }
 }
@@ -218,7 +218,7 @@ class DevFSStringContent extends DevFSByteContent {
 /// The `hintString` parameter is a zlib dictionary hinting mechanism to suggest
 /// the most common string occurrences to potentially assist with compression.
 class DevFSStringCompressingBytesContent extends DevFSContent {
-  DevFSStringCompressingBytesContent(this._string, { String? hintString })
+  DevFSStringCompressingBytesContent(this._string, { final String? hintString })
     : _compressor = ZLibEncoder(
       dictionary: hintString == null
           ? null
@@ -244,7 +244,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
   }
 
   @override
-  bool isModifiedAfter(DateTime time) {
+  bool isModifiedAfter(final DateTime time) {
     return _modificationTime.isAfter(time);
   }
 
@@ -258,7 +258,7 @@ class DevFSStringCompressingBytesContent extends DevFSContent {
   Stream<List<int>> contentsAsStream() => Stream<List<int>>.value(bytes);
 
   /// This checks the source string with another string.
-  bool equals(String string) => _string == string;
+  bool equals(final String string) => _string == string;
 }
 
 class DevFSException implements Exception {
@@ -278,17 +278,17 @@ abstract class DevFSWriter {
   /// The keys of the map are relative from the [baseUri].
   ///
   /// Throws a [DevFSException] if the process fails to complete.
-  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, DevFSWriter parent);
+  Future<void> write(final Map<Uri, DevFSContent> entries, final Uri baseUri, final DevFSWriter parent);
 }
 
 class _DevFSHttpWriter implements DevFSWriter {
   _DevFSHttpWriter(
     this.fsName,
-    FlutterVmService serviceProtocol, {
-    required OperatingSystemUtils osUtils,
-    required HttpClient httpClient,
-    required Logger logger,
-    Duration? uploadRetryThrottle,
+    final FlutterVmService serviceProtocol, {
+    required final OperatingSystemUtils osUtils,
+    required final HttpClient httpClient,
+    required final Logger logger,
+    final Duration? uploadRetryThrottle,
   })
     : httpAddress = serviceProtocol.httpAddress,
       _client = httpClient,
@@ -315,7 +315,7 @@ class _DevFSHttpWriter implements DevFSWriter {
   late Completer<void> _completer;
 
   @override
-  Future<void> write(Map<Uri, DevFSContent> entries, Uri devFSBase, [DevFSWriter? parent]) async {
+  Future<void> write(final Map<Uri, DevFSContent> entries, final Uri devFSBase, [final DevFSWriter? parent]) async {
     try {
       _client.maxConnectionsPerHost = kMaxInFlight;
       _completer = Completer<void>();
@@ -344,8 +344,8 @@ class _DevFSHttpWriter implements DevFSWriter {
   }
 
   Future<void> _startWrite(
-    Uri deviceUri,
-    DevFSContent content, {
+    final Uri deviceUri,
+    final DevFSContent content, {
     int retry = 0,
   }) async {
     while(true) {
@@ -363,8 +363,8 @@ class _DevFSHttpWriter implements DevFSWriter {
         try {
           final HttpClientResponse response = await request.close().timeout(
             const Duration(seconds: 60));
-          response.listen((_) {},
-            onError: (dynamic error) {
+          response.listen((final _) {},
+            onError: (final dynamic error) {
               _logger.printTrace('error: $error');
             },
             cancelOnError: true,
@@ -398,14 +398,14 @@ class _DevFSHttpWriter implements DevFSWriter {
 // Basic statistics for DevFS update operation.
 class UpdateFSReport {
   UpdateFSReport({
-    bool success = false,
-    int invalidatedSourcesCount = 0,
-    int syncedBytes = 0,
+    final bool success = false,
+    final int invalidatedSourcesCount = 0,
+    final int syncedBytes = 0,
     this.fastReassembleClassName,
-    int scannedSourcesCount = 0,
-    Duration compileDuration = Duration.zero,
-    Duration transferDuration = Duration.zero,
-    Duration findInvalidatedDuration = Duration.zero,
+    final int scannedSourcesCount = 0,
+    final Duration compileDuration = Duration.zero,
+    final Duration transferDuration = Duration.zero,
+    final Duration findInvalidatedDuration = Duration.zero,
   }) : _success = success,
        _invalidatedSourcesCount = invalidatedSourcesCount,
        _syncedBytes = syncedBytes,
@@ -431,7 +431,7 @@ class UpdateFSReport {
   Duration _transferDuration;
   Duration _findInvalidatedDuration;
 
-  void incorporateResults(UpdateFSReport report) {
+  void incorporateResults(final UpdateFSReport report) {
     if (!report._success) {
       _success = false;
     }
@@ -450,15 +450,15 @@ class DevFS {
   ///
   /// Failed uploads are retried after [uploadRetryThrottle] duration, defaults to 500ms.
   DevFS(
-    FlutterVmService serviceProtocol,
+    final FlutterVmService serviceProtocol,
     this.fsName,
     this.rootDirectory, {
-    required OperatingSystemUtils osUtils,
-    required Logger logger,
-    required FileSystem fileSystem,
-    HttpClient? httpClient,
-    Duration? uploadRetryThrottle,
-    StopwatchFactory stopwatchFactory = const StopwatchFactory(),
+    required final OperatingSystemUtils osUtils,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    final HttpClient? httpClient,
+    final Duration? uploadRetryThrottle,
+    final StopwatchFactory stopwatchFactory = const StopwatchFactory(),
   }) : _vmService = serviceProtocol,
        _logger = logger,
        _fileSystem = fileSystem,
@@ -500,7 +500,7 @@ class DevFS {
   Uri? _baseUri;
   Uri? get baseUri => _baseUri;
 
-  Uri deviceUriToHostUri(Uri deviceUri) {
+  Uri deviceUriToHostUri(final Uri deviceUri) {
     final String deviceUriString = deviceUri.toString();
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
@@ -575,23 +575,23 @@ class DevFS {
   ///
   /// Returns the number of bytes synced.
   Future<UpdateFSReport> update({
-    required Uri mainUri,
-    required ResidentCompiler generator,
-    required bool trackWidgetCreation,
-    required String pathToReload,
-    required List<Uri> invalidatedFiles,
-    required PackageConfig packageConfig,
-    required String dillOutputPath,
-    required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
-    DevFSWriter? devFSWriter,
-    String? target,
-    AssetBundle? bundle,
-    DateTime? firstBuildTime,
-    bool bundleFirstUpload = false,
-    bool fullRestart = false,
-    String? projectRootPath,
-    File? dartPluginRegistrant,
+    required final Uri mainUri,
+    required final ResidentCompiler generator,
+    required final bool trackWidgetCreation,
+    required final String pathToReload,
+    required final List<Uri> invalidatedFiles,
+    required final PackageConfig packageConfig,
+    required final String dillOutputPath,
+    required final DevelopmentShaderCompiler shaderCompiler,
+    final DevelopmentSceneImporter? sceneImporter,
+    final DevFSWriter? devFSWriter,
+    final String? target,
+    final AssetBundle? bundle,
+    final DateTime? firstBuildTime,
+    final bool bundleFirstUpload = false,
+    final bool fullRestart = false,
+    final String? projectRootPath,
+    final File? dartPluginRegistrant,
   }) async {
     final DateTime candidateCompileTime = DateTime.now();
     didUpdateFontManifest = false;
@@ -623,7 +623,7 @@ class DevFS {
       packageConfig: packageConfig,
       checkDartPluginRegistry: true, // The entry point is assumed not to have changed.
       dartPluginRegistrant: dartPluginRegistrant,
-    ).then((CompilerOutput? result) {
+    ).then((final CompilerOutput? result) {
       compileTimer.stop();
       return result;
     });
@@ -639,7 +639,7 @@ class DevFS {
       // are in the same location in DevFS and the iOS simulator.
       final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
       final String assetDirectory = getAssetBuildDirectory();
-      bundle.entries.forEach((String archivePath, DevFSContent content) {
+      bundle.entries.forEach((String archivePath, final DevFSContent content) {
         // If the content is backed by a real file, isModified will file stat and return true if
         // it was modified since the last time this was called.
         if (!content.isModified || bundleFirstUpload) {
@@ -660,7 +660,7 @@ class DevFS {
           case AssetKind.shader:
             final Future<DevFSContent?> pending = shaderCompiler.recompileShader(content);
             pendingAssetBuilds.add(pending);
-            pending.then((DevFSContent? content) {
+            pending.then((final DevFSContent? content) {
               if (content == null) {
                 assetBuildFailed = true;
                 return;
@@ -677,7 +677,7 @@ class DevFS {
             }
             final Future<DevFSContent?> pending = sceneImporter.reimportScene(content);
             pendingAssetBuilds.add(pending);
-            pending.then((DevFSContent? content) {
+            pending.then((final DevFSContent? content) {
               if (content == null) {
                 assetBuildFailed = true;
                 return;
@@ -748,7 +748,7 @@ class DevFS {
   }
 
   /// Converts a platform-specific file path to a platform-independent URL path.
-  String _asUriPath(String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
+  String _asUriPath(final String filePath) => '${_fileSystem.path.toUri(filePath).path}/';
 }
 
 /// An implementation of a devFS writer which copies physical files for devices
@@ -761,13 +761,13 @@ class DevFS {
 /// Requires that the file system is the same for both the tool and application.
 class LocalDevFSWriter implements DevFSWriter {
   LocalDevFSWriter({
-    required FileSystem fileSystem,
+    required final FileSystem fileSystem,
   }) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
 
   @override
-  Future<void> write(Map<Uri, DevFSContent> entries, Uri baseUri, [DevFSWriter? parent]) async {
+  Future<void> write(final Map<Uri, DevFSContent> entries, final Uri baseUri, [final DevFSWriter? parent]) async {
     try {
       for (final MapEntry<Uri, DevFSContent> entry in entries.entries) {
         final Uri uri = entry.key;

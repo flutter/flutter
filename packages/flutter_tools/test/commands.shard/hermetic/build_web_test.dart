@@ -122,7 +122,7 @@ void main() {
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
         'HasWebPlugins': 'true',
@@ -174,7 +174,7 @@ void main() {
     FileSystem: () => fileSystem,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     ProcessManager: () => FakeProcessManager.any(),
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         'TargetFile': 'lib/main.dart',
         'HasWebPlugins': 'true',
@@ -286,7 +286,7 @@ void main() {
   });
 }
 
-void setupFileSystemForEndToEndTest(FileSystem fileSystem) {
+void setupFileSystemForEndToEndTest(final FileSystem fileSystem) {
   final List<String> dependencies = <String>[
     fileSystem.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'web.dart'),
     fileSystem.path.join('bin', 'cache', 'flutter_web_sdk'),
@@ -337,7 +337,7 @@ class UrlLauncherPlugin {}
 }
 
 class TestWebBuildCommand extends FlutterCommand {
-  TestWebBuildCommand({ required FileSystem fileSystem, bool verboseHelp = false }) :
+  TestWebBuildCommand({ required final FileSystem fileSystem, final bool verboseHelp = false }) :
     webCommand = BuildWebCommand(
       fileSystem: fileSystem,
       logger: BufferLogger.test(),

@@ -116,7 +116,7 @@ void main() {
         );
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((final String message) {
           if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
             // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
             completer.complete();
@@ -124,10 +124,10 @@ void main() {
         });
         final FakeHotRunner hotRunner = FakeHotRunner();
         hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
+          final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          final Completer<void>? appStartedCompleter,
+          final bool allowExistingDdsInstance,
+          final bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
         hotRunner.isWaitingForVmService = false;
@@ -179,10 +179,10 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
         hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
+          final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          final Completer<void>? appStartedCompleter,
+          final bool allowExistingDdsInstance,
+          final bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
         hotRunner.isWaitingForVmService = false;
@@ -245,10 +245,10 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
         hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
+          final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          final Completer<void>? appStartedCompleter,
+          final bool allowExistingDdsInstance,
+          final bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
         hotRunner.isWaitingForVmService = false;
@@ -317,10 +317,10 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
         hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
+          final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          final Completer<void>? appStartedCompleter,
+          final bool allowExistingDdsInstance,
+          final bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
         hotRunner.isWaitingForVmService = false;
@@ -393,10 +393,10 @@ void main() {
         testDeviceManager.devices = <Device>[device];
         final FakeHotRunner hotRunner = FakeHotRunner();
         hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
+          final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          final Completer<void>? appStartedCompleter,
+          final bool allowExistingDdsInstance,
+          final bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
         hotRunner.isWaitingForVmService = false;
@@ -467,7 +467,7 @@ void main() {
         };
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((final String message) {
           if (message == '[verbose] VM Service URL on device: http://127.0.0.1:$devicePort') {
             // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
             completer.complete();
@@ -538,10 +538,10 @@ void main() {
 
         final FakeHotRunner hotRunner = FakeHotRunner();
         hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
+          final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          final Completer<void>? appStartedCompleter,
+          final bool allowExistingDdsInstance,
+          final bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
         hotRunner.isWaitingForVmService = false;
@@ -630,7 +630,7 @@ void main() {
         );
         testDeviceManager.devices = <Device>[device];
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((final String message) {
           if (message == '[verbose] VM Service URL on device: http://[::1]:$devicePort') {
             // The "VM Service URL on device" message is output by the ProtocolDiscovery when it found the VM Service.
             completer.complete();
@@ -638,10 +638,10 @@ void main() {
         });
         final FakeHotRunner hotRunner = FakeHotRunner();
         hotRunner.onAttach = (
-          Completer<DebugConnectionInfo>? connectionInfoCompleter,
-          Completer<void>? appStartedCompleter,
-          bool allowExistingDdsInstance,
-          bool enableDevTools,
+          final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+          final Completer<void>? appStartedCompleter,
+          final bool allowExistingDdsInstance,
+          final bool enableDevTools,
         ) async => 0;
         hotRunner.exited = false;
         hotRunner.isWaitingForVmService = false;
@@ -723,7 +723,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((final String message) {
           if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -758,7 +758,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((final String message) {
           if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -794,7 +794,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((final String message) {
           if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -839,7 +839,7 @@ void main() {
         testDeviceManager.devices = <Device>[device];
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((final String message) {
           if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -965,10 +965,10 @@ void main() {
       final FakeHotRunnerFactory hotRunnerFactory = FakeHotRunnerFactory()
         ..hotRunner = hotRunner;
       hotRunner.onAttach = (
-        Completer<DebugConnectionInfo>? connectionInfoCompleter,
-        Completer<void>? appStartedCompleter,
-        bool allowExistingDdsInstance,
-        bool enableDevTools,
+        final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+        final Completer<void>? appStartedCompleter,
+        final bool allowExistingDdsInstance,
+        final bool enableDevTools,
       ) async {
         await null;
         throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kServiceDisappeared, '');
@@ -1006,10 +1006,10 @@ void main() {
         ..hotRunner = hotRunner;
 
       hotRunner.onAttach = (
-        Completer<DebugConnectionInfo>? connectionInfoCompleter,
-        Completer<void>? appStartedCompleter,
-        bool allowExistingDdsInstance,
-        bool enableDevTools,
+        final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+        final Completer<void>? appStartedCompleter,
+        final bool allowExistingDdsInstance,
+        final bool enableDevTools,
       ) async {
         await null;
         throw vm_service.RPCError('flutter._listViews', RPCErrorCodes.kInvalidParams, '');
@@ -1051,11 +1051,11 @@ class FakeHotRunner extends Fake implements HotRunner {
 
   @override
   Future<int> attach({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
-    bool needsFullRestart = true,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool allowExistingDdsInstance = false,
+    final bool enableDevTools = false,
+    final bool needsFullRestart = true,
   }) {
     return onAttach(connectionInfoCompleter, appStartedCompleter, allowExistingDdsInstance, enableDevTools);
   }
@@ -1069,18 +1069,18 @@ class FakeHotRunnerFactory extends Fake implements HotRunnerFactory {
 
   @override
   HotRunner build(
-    List<FlutterDevice> devices, {
-    required String target,
-    required DebuggingOptions debuggingOptions,
-    bool benchmarkMode = false,
-    File? applicationBinary,
-    bool hostIsIde = false,
-    String? projectRootPath,
-    String? packagesFilePath,
-    String? dillOutputPath,
-    bool stayResident = true,
-    bool ipv6 = false,
-    FlutterProject? flutterProject,
+    final List<FlutterDevice> devices, {
+    required final String target,
+    required final DebuggingOptions debuggingOptions,
+    final bool benchmarkMode = false,
+    final File? applicationBinary,
+    final bool hostIsIde = false,
+    final String? projectRootPath,
+    final String? packagesFilePath,
+    final String? dillOutputPath,
+    final bool stayResident = true,
+    final bool ipv6 = false,
+    final FlutterProject? flutterProject,
   }) {
     this.devices = devices;
     this.dillOutputPath = dillOutputPath;
@@ -1099,7 +1099,7 @@ class RecordingPortForwarder implements DevicePortForwarder {
   Future<void> dispose() async { }
 
   @override
-  Future<int> forward(int devicePort, {int? hostPort}) async {
+  Future<int> forward(final int devicePort, {final int? hostPort}) async {
     this.devicePort = devicePort;
     this.hostPort ??= hostPort;
     return this.hostPort!;
@@ -1109,7 +1109,7 @@ class RecordingPortForwarder implements DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async { }
+  Future<void> unforward(final ForwardedPort forwardedPort) async { }
 }
 
 class StreamLogger extends Logger {
@@ -1118,13 +1118,13 @@ class StreamLogger extends Logger {
 
   @override
   void printError(
-    String message, {
-    StackTrace? stackTrace,
-    bool? emphasis,
-    TerminalColor? color,
-    int? indent,
-    int? hangingIndent,
-    bool? wrap,
+    final String message, {
+    final StackTrace? stackTrace,
+    final bool? emphasis,
+    final TerminalColor? color,
+    final int? indent,
+    final int? hangingIndent,
+    final bool? wrap,
   }) {
     hadErrorOutput = true;
     _log('[stderr] $message');
@@ -1132,12 +1132,12 @@ class StreamLogger extends Logger {
 
   @override
   void printWarning(
-    String message, {
-    bool? emphasis,
-    TerminalColor? color,
-    int? indent,
-    int? hangingIndent,
-    bool? wrap,
+    final String message, {
+    final bool? emphasis,
+    final TerminalColor? color,
+    final int? indent,
+    final int? hangingIndent,
+    final bool? wrap,
   }) {
     hadWarningOutput = true;
     _log('[stderr] $message');
@@ -1145,21 +1145,21 @@ class StreamLogger extends Logger {
 
   @override
   void printStatus(
-    String message, {
-    bool? emphasis,
-    TerminalColor? color,
-    bool? newline,
-    int? indent,
-    int? hangingIndent,
-    bool? wrap,
+    final String message, {
+    final bool? emphasis,
+    final TerminalColor? color,
+    final bool? newline,
+    final int? indent,
+    final int? hangingIndent,
+    final bool? wrap,
   }) {
     _log('[stdout] $message');
   }
 
   @override
   void printBox(
-    String message, {
-    String? title,
+    final String message, {
+    final String? title,
   }) {
     if (title == null) {
       _log('[stdout] $message');
@@ -1169,18 +1169,18 @@ class StreamLogger extends Logger {
   }
 
   @override
-  void printTrace(String message) {
+  void printTrace(final String message) {
     _log('[verbose] $message');
   }
 
   @override
   Status startProgress(
-    String message, {
-    Duration? timeout,
-    String? progressId,
-    bool multilineOutput = false,
-    bool includeTiming = true,
-    int progressIndicatorPadding = kDefaultStatusPadding,
+    final String message, {
+    final Duration? timeout,
+    final String? progressId,
+    final bool multilineOutput = false,
+    final bool includeTiming = true,
+    final int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
     return SilentStatus(
@@ -1190,10 +1190,10 @@ class StreamLogger extends Logger {
 
   @override
   Status startSpinner({
-    VoidCallback? onFinish,
-    Duration? timeout,
-    SlowWarningCallback? slowWarningCallback,
-    TerminalColor? warningColor,
+    final VoidCallback? onFinish,
+    final Duration? timeout,
+    final SlowWarningCallback? slowWarningCallback,
+    final TerminalColor? warningColor,
   }) {
     return SilentStatus(
       stopwatch: Stopwatch(),
@@ -1209,7 +1209,7 @@ class StreamLogger extends Logger {
 
   final StreamController<String> _controller = StreamController<String>.broadcast();
 
-  void _log(String message) {
+  void _log(final String message) {
     _controller.add(message);
     if (_interrupt) {
       _interrupt = false;
@@ -1220,7 +1220,7 @@ class StreamLogger extends Logger {
   Stream<String> get stream => _controller.stream;
 
   @override
-  void sendEvent(String name, [Map<String, dynamic>? args]) { }
+  void sendEvent(final String name, [final Map<String, dynamic>? args]) { }
 
   @override
   bool get supportsColor => throw UnimplementedError();
@@ -1239,11 +1239,11 @@ class LoggerInterrupted implements Exception {
   const LoggerInterrupted();
 }
 
-Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logger) async {
+Future<void> expectLoggerInterruptEndsTask(final Future<void> task, final StreamLogger logger) async {
   logger.interrupt(); // an exception during the task should cause it to fail...
   await expectLater(
     () => task,
-    throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', 2)),
+    throwsA(isA<ToolExit>().having((final ToolExit error) => error.exitCode, 'exitCode', 2)),
   );
 }
 
@@ -1254,12 +1254,12 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
-    bool? disableServiceAuthCodes,
-    bool cacheStartupProfile = false,
+    final Uri vmServiceUri, {
+    required final Logger logger,
+    final int? hostPort,
+    final bool? ipv6,
+    final bool? disableServiceAuthCodes,
+    final bool cacheStartupProfile = false,
   }) async {}
 
   @override
@@ -1310,7 +1310,7 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
   bool get supportsFlutterExit => false;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(final FlutterProject flutterProject) => true;
 
   @override
   DevicePortForwarder? portForwarder;
@@ -1319,8 +1319,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
+    final ApplicationPackage? app,
+    final bool includePastLogs = false,
   }) {
     if (onGetLogReader == null) {
       throw UnimplementedError(
@@ -1348,8 +1348,8 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 // ignore: avoid_implementing_value_types
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
-    DevicePortForwarder? portForwarder,
-    DeviceLogReader? logReader,
+    final DevicePortForwarder? portForwarder,
+    final DeviceLogReader? logReader,
     this.onGetLogReader,
     this.connectionInterface = DeviceConnectionInterface.attached,
     this.majorSdkVersion = 0,
@@ -1379,8 +1379,8 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   DeviceLogReader getLogReader({
-    IOSApp? app,
-    bool includePastLogs = false,
+    final IOSApp? app,
+    final bool includePastLogs = false,
   }) {
     if (onGetLogReader == null) {
       throw UnimplementedError(
@@ -1406,7 +1406,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   bool isSupported() => true;
 
   @override
-  bool isSupportedForProject(FlutterProject project) => true;
+  bool isSupportedForProject(final FlutterProject project) => true;
 
   @override
   bool get isConnected => true;
@@ -1430,10 +1430,10 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
   @override
   Future<void> start({
-    InternetAddress? listenAddress,
-    NetworkInterfacesFactory? interfacesFactory,
-    int mDnsPort = 5353,
-    InternetAddress? mDnsAddress,
+    final InternetAddress? listenAddress,
+    final NetworkInterfacesFactory? interfacesFactory,
+    final int mDnsPort = 5353,
+    final InternetAddress? mDnsAddress,
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);
@@ -1442,8 +1442,8 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
   @override
   Stream<T> lookup<T extends ResourceRecord>(
-    ResourceRecordQuery query, {
-    Duration timeout = const Duration(seconds: 5),
+    final ResourceRecordQuery query, {
+    final Duration timeout = const Duration(seconds: 5),
   }) {
     if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;

@@ -149,13 +149,13 @@ ProcessInfo get processInfo => context.get<ProcessInfo>()!;
 /// Set [color] to a [TerminalColor] to color the output, if the logger
 /// supports it. The [color] defaults to [TerminalColor.red].
 void printError(
-    String message, {
-      StackTrace? stackTrace,
-      bool? emphasis,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
+    final String message, {
+      final StackTrace? stackTrace,
+      final bool? emphasis,
+      final TerminalColor? color,
+      final int? indent,
+      final int? hangingIndent,
+      final bool? wrap,
     }) {
   logger.printError(
     message,
@@ -175,12 +175,12 @@ void printError(
 /// Set [color] to a [TerminalColor] to color the output, if the logger
 /// supports it. The [color] defaults to [TerminalColor.cyan].
 void printWarning(
-    String message, {
-      bool? emphasis,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
+    final String message, {
+      final bool? emphasis,
+      final TerminalColor? color,
+      final int? indent,
+      final int? hangingIndent,
+      final bool? wrap,
     }) {
   logger.printWarning(
     message,
@@ -202,13 +202,13 @@ void printWarning(
 /// If `indent` is provided, each line of the message will be prepended by the
 /// specified number of whitespaces.
 void printStatus(
-    String message, {
-      bool? emphasis,
-      bool? newline,
-      TerminalColor? color,
-      int? indent,
-      int? hangingIndent,
-      bool? wrap,
+    final String message, {
+      final bool? emphasis,
+      final bool? newline,
+      final TerminalColor? color,
+      final int? indent,
+      final int? hangingIndent,
+      final bool? wrap,
     }) {
   logger.printStatus(
     message,
@@ -232,15 +232,15 @@ void printStatus(
 ///
 /// If a terminal is attached, the lines in [message] are automatically wrapped based on
 /// the available columns.
-void printBox(String message, {
-  String? title,
+void printBox(final String message, {
+  final String? title,
 }) {
   logger.printBox(message, title: title);
 }
 
 /// Use this for verbose tracing output. Users can turn this output on in order
 /// to help diagnose issues with the toolchain or with their setup.
-void printTrace(String message) => logger.printTrace(message);
+void printTrace(final String message) => logger.printTrace(message);
 
 AnsiTerminal get terminal {
   return context.get<AnsiTerminal>() ?? _defaultAnsiTerminal;

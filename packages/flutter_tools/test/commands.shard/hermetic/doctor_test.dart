@@ -63,11 +63,11 @@ void main() {
       expect(result.messages, hasLength(2));
 
       ValidationMessage message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+          .firstWhere((final ValidationMessage m) => m.message.startsWith('VS Code '));
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+          .firstWhere((final ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
       expect(message.isError, isFalse);
     });
@@ -77,7 +77,7 @@ void main() {
       expect(result.type, ValidationType.notAvailable);
 
       expect(
-        result.messages.map((ValidationMessage vm) => vm.message),
+        result.messages.map((final ValidationMessage vm) => vm.message),
         UserMessages().noIdeInstallationInfo,
       );
     });
@@ -90,11 +90,11 @@ void main() {
       expect(result.messages, hasLength(2));
 
       ValidationMessage message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+          .firstWhere((final ValidationMessage m) => m.message.startsWith('VS Code '));
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+          .firstWhere((final ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
     });
 
@@ -105,11 +105,11 @@ void main() {
       expect(result.messages, hasLength(2));
 
       ValidationMessage message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+          .firstWhere((final ValidationMessage m) => m.message.startsWith('VS Code '));
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
       message = result.messages
-          .firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+          .firstWhere((final ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, startsWith('Flutter extension can be installed from'));
       expect(message.contextUrl, 'https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter');
       expect(message.isError, false);
@@ -351,7 +351,7 @@ void main() {
     });
 
     testUsingContext('validate tool exit when exceeding timeout', () async {
-      FakeAsync().run<void>((FakeAsync time) {
+      FakeAsync().run<void>((final FakeAsync time) {
         final Doctor doctor = FakeAsyncStuckDoctor(logger);
         doctor.diagnose(verbose: false);
         time.elapse(const Duration(minutes: 5));
@@ -365,8 +365,8 @@ void main() {
 
     testUsingContext('validate non-verbose output format for run with an async crash', () async {
       final Completer<void> completer = Completer<void>();
-      await FakeAsync().run((FakeAsync time) {
-        unawaited(FakeAsyncCrashingDoctor(time, logger).diagnose(verbose: false).then((bool r) {
+      await FakeAsync().run((final FakeAsync time) {
+        unawaited(FakeAsyncCrashingDoctor(time, logger).diagnose(verbose: false).then((final bool r) {
           expect(r, isFalse);
           completer.complete(null);
         }));
@@ -815,17 +815,17 @@ class NoOpDoctor implements Doctor {
   bool get canListAnything => true;
 
   @override
-  Future<bool> checkRemoteArtifacts(String engineRevision) async => true;
+  Future<bool> checkRemoteArtifacts(final String engineRevision) async => true;
 
   @override
   Future<bool> diagnose({
-    bool androidLicenses = false,
-    bool verbose = true,
-    bool showColor = true,
-    AndroidLicenseValidator? androidLicenseValidator,
-    bool showPii = true,
-    List<ValidatorTask>? startedValidatorTasks,
-    bool sendEvent = true,
+    final bool androidLicenses = false,
+    final bool verbose = true,
+    final bool showColor = true,
+    final AndroidLicenseValidator? androidLicenseValidator,
+    final bool showPii = true,
+    final List<ValidatorTask>? startedValidatorTasks,
+    final bool sendEvent = true,
   }) async => true;
 
   @override
@@ -962,7 +962,7 @@ class AsyncCrashingValidator extends DoctorValidator {
 
 /// A doctor that fails with a missing [ValidationResult].
 class FakeDoctor extends Doctor {
-  FakeDoctor(Logger logger) : super(logger: logger);
+  FakeDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -976,7 +976,7 @@ class FakeDoctor extends Doctor {
 
 /// A doctor that should pass, but still has issues in some categories.
 class FakePassingDoctor extends Doctor {
-  FakePassingDoctor(Logger logger) : super(logger: logger);
+  FakePassingDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -990,7 +990,7 @@ class FakePassingDoctor extends Doctor {
 /// A doctor that should pass, but still has 1 issue to test the singular of
 /// categories.
 class FakeSinglePassingDoctor extends Doctor {
-  FakeSinglePassingDoctor(Logger logger) : super(logger: logger);
+  FakeSinglePassingDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1000,7 +1000,7 @@ class FakeSinglePassingDoctor extends Doctor {
 
 /// A doctor that passes and has no issues anywhere.
 class FakeQuietDoctor extends Doctor {
-  FakeQuietDoctor(Logger logger) : super(logger: logger);
+  FakeQuietDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1013,7 +1013,7 @@ class FakeQuietDoctor extends Doctor {
 
 /// A doctor that passes and contains PII that can be hidden.
 class FakePiiDoctor extends Doctor {
-  FakePiiDoctor(Logger logger) : super(logger: logger);
+  FakePiiDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1023,7 +1023,7 @@ class FakePiiDoctor extends Doctor {
 
 /// A doctor with a validator that throws an exception.
 class FakeCrashingDoctor extends Doctor {
-  FakeCrashingDoctor(Logger logger) : super(logger: logger);
+  FakeCrashingDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1037,7 +1037,7 @@ class FakeCrashingDoctor extends Doctor {
 
 /// A doctor with a validator that will never finish.
 class FakeAsyncStuckDoctor extends Doctor {
-  FakeAsyncStuckDoctor(Logger logger) : super(logger: logger);
+  FakeAsyncStuckDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1051,7 +1051,7 @@ class FakeAsyncStuckDoctor extends Doctor {
 
 /// A doctor with a validator that throws an exception.
 class FakeAsyncCrashingDoctor extends Doctor {
-  FakeAsyncCrashingDoctor(this._time, Logger logger) : super(logger: logger);
+  FakeAsyncCrashingDoctor(this._time, final Logger logger) : super(logger: logger);
 
   final FakeAsync _time;
 
@@ -1131,7 +1131,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
 
 /// A doctor that has two groups of two validators each.
 class FakeGroupedDoctor extends Doctor {
-  FakeGroupedDoctor(Logger logger) : super(logger: logger);
+  FakeGroupedDoctor(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1147,7 +1147,7 @@ class FakeGroupedDoctor extends Doctor {
 }
 
 class FakeGroupedDoctorWithStatus extends Doctor {
-  FakeGroupedDoctorWithStatus(Logger logger) : super(logger: logger);
+  FakeGroupedDoctorWithStatus(final Logger logger) : super(logger: logger);
 
   @override
   late final List<DoctorValidator> validators = <DoctorValidator>[
@@ -1161,7 +1161,7 @@ class FakeGroupedDoctorWithStatus extends Doctor {
 /// A doctor that takes any two validators. Used to check behavior when
 /// merging ValidationTypes (installed, missing, partial).
 class FakeSmallGroupDoctor extends Doctor {
-  FakeSmallGroupDoctor(Logger logger, DoctorValidator val1, DoctorValidator val2)
+  FakeSmallGroupDoctor(final Logger logger, final DoctorValidator val1, final DoctorValidator val2)
     : validators = <DoctorValidator>[GroupedValidator(<DoctorValidator>[val1, val2])],
       super(logger: logger);
 
@@ -1170,7 +1170,7 @@ class FakeSmallGroupDoctor extends Doctor {
 }
 
 class VsCodeValidatorTestTargets extends VsCodeValidator {
-  VsCodeValidatorTestTargets._(String installDirectory, String extensionDirectory, {String? edition})
+  VsCodeValidatorTestTargets._(final String installDirectory, final String extensionDirectory, {final String? edition})
     : super(VsCode.fromDirectory(installDirectory, extensionDirectory, edition: edition, fileSystem: globals.fs));
 
   static VsCodeValidatorTestTargets get installedWithExtension =>
@@ -1193,13 +1193,13 @@ class FakeDeviceManager extends Fake implements DeviceManager {
 
   @override
   Future<List<Device>> getAllDevices({
-    DeviceDiscoveryFilter? filter,
+    final DeviceDiscoveryFilter? filter,
   }) async => devices;
 
   @override
   Future<List<Device>> refreshAllDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) async => devices;
 
   @override

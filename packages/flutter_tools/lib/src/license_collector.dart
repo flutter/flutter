@@ -25,7 +25,7 @@ import 'base/file_system.dart';
 /// sources, and might need to include a license for each one.
 class LicenseCollector {
   LicenseCollector({
-    required FileSystem fileSystem
+    required final FileSystem fileSystem
   }) : _fileSystem = fileSystem;
 
   final FileSystem _fileSystem;
@@ -38,8 +38,8 @@ class LicenseCollector {
   /// [additionalLicenses] should contain aggregated license files from all
   /// of the current applications dependencies.
   LicenseResult obtainLicenses(
-    PackageConfig packageConfig,
-    Map<String, List<File>> additionalLicenses,
+    final PackageConfig packageConfig,
+    final Map<String, List<File>> additionalLicenses,
   ) {
     final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
     final Set<String> allPackages = <String>{};
@@ -83,7 +83,7 @@ class LicenseCollector {
     }
 
     final List<String> combinedLicensesList = packageLicenses.keys
-      .map<String>((String license) {
+      .map<String>((final String license) {
         final List<String> packageNames = packageLicenses[license]!.toList()
           ..sort();
         return '${packageNames.join('\n')}\n\n$license';

@@ -40,7 +40,7 @@ class LogsCommand extends FlutterCommand {
   Device? device;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String? commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand(final String? commandPath) async {
     device = await findTargetDevice(includeDevicesUnsupportedByProject: true);
     if (device == null) {
       throwToolExit(null);
@@ -67,22 +67,22 @@ class LogsCommand extends FlutterCommand {
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => globals.printStatus(message, wrap: false),
+      (final String message) => globals.printStatus(message, wrap: false),
       onDone: () {
         exitCompleter.complete(0);
       },
-      onError: (dynamic error) {
+      onError: (final dynamic error) {
         exitCompleter.complete(error is int ? error : 1);
       },
     );
 
     // When terminating, close down the log reader.
-    ProcessSignal.sigint.watch().listen((ProcessSignal signal) {
+    ProcessSignal.sigint.watch().listen((final ProcessSignal signal) {
       subscription.cancel();
       globals.printStatus('');
       exitCompleter.complete(0);
     });
-    ProcessSignal.sigterm.watch().listen((ProcessSignal signal) {
+    ProcessSignal.sigterm.watch().listen((final ProcessSignal signal) {
       subscription.cancel();
       exitCompleter.complete(0);
     });

@@ -55,7 +55,7 @@ void main() {
     // Ensure we don't send anything when analytics is disabled.
     testUsingContext("doesn't send when disabled", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((final Map<String, dynamic> data) => count++);
 
       final FlutterCommand command = FakeFlutterCommand();
       final CommandRunner<void>runner = createTestCommandRunner(command);
@@ -88,7 +88,7 @@ void main() {
     // Ensure we don't send for the 'flutter config' command.
     testUsingContext("config doesn't send", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((final Map<String, dynamic> data) => count++);
 
       globals.flutterUsage.enabled = false;
       final ConfigCommand command = ConfigCommand();
@@ -304,7 +304,7 @@ void main() {
 
     testUsingContext("don't send on bots with unknown version", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((final Map<String, dynamic> data) => count++);
       await createTestCommandRunner().run(<String>['--version']);
 
       expect(count, 0);
@@ -319,7 +319,7 @@ void main() {
 
     testUsingContext("don't send on bots even when opted in", () async {
       int count = 0;
-      globals.flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
+      globals.flutterUsage.onSend.listen((final Map<String, dynamic> data) => count++);
       globals.flutterUsage.enabled = true;
       await createTestCommandRunner().run(<String>['--version']);
 
@@ -350,11 +350,11 @@ void main() {
 }
 
 Analytics throwingAnalyticsIOFactory(
-  String trackingId,
-  String applicationName,
-  String applicationVersion, {
-  String? analyticsUrl,
-  Directory? documentDirectory,
+  final String trackingId,
+  final String applicationName,
+  final String applicationVersion, {
+  final String? analyticsUrl,
+  final Directory? documentDirectory,
 }) {
   throw const FileSystemException('Could not create file');
 }
@@ -377,13 +377,13 @@ class FakeDoctor extends Fake implements Doctor {
 
   @override
   Future<bool> diagnose({
-    bool androidLicenses = false,
-    bool verbose = true,
-    bool showColor = true,
-    AndroidLicenseValidator? androidLicenseValidator,
-    bool showPii = true,
-    List<ValidatorTask>? startedValidatorTasks,
-    bool sendEvent = true,
+    final bool androidLicenses = false,
+    final bool verbose = true,
+    final bool showColor = true,
+    final AndroidLicenseValidator? androidLicenseValidator,
+    final bool showPii = true,
+    final List<ValidatorTask>? startedValidatorTasks,
+    final bool sendEvent = true,
   }) async {
     return diagnoseSucceeds;
   }

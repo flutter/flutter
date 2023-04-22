@@ -20,12 +20,12 @@ abstract class ProjectMigrator {
 
   /// Return null if the line should be deleted.
   @protected
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     return line;
   }
 
   @protected
-  String migrateFileContents(String fileContents) {
+  String migrateFileContents(final String fileContents) {
     return fileContents;
   }
 
@@ -36,7 +36,7 @@ abstract class ProjectMigrator {
   @protected
   /// Calls [migrateLine] per line, then [migrateFileContents]
   /// including the line migrations.
-  void processFileLines(File file) {
+  void processFileLines(final File file) {
     final List<String> lines = file.readAsLinesSync();
 
     final StringBuffer newProjectContents = StringBuffer();

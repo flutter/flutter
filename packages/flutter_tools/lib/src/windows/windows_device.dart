@@ -20,10 +20,10 @@ import 'windows_workflow.dart';
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends DesktopDevice {
   WindowsDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
   }) : super(
       'windows',
       platformType: PlatformType.windows,
@@ -44,14 +44,14 @@ class WindowsDevice extends DesktopDevice {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.windows_x64;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) {
+  bool isSupportedForProject(final FlutterProject flutterProject) {
     return flutterProject.windows.existsSync();
   }
 
   @override
   Future<void> buildForDevice({
-    String? mainPath,
-    required BuildInfo buildInfo,
+    final String? mainPath,
+    required final BuildInfo buildInfo,
   }) async {
     await buildWindows(
       FlutterProject.current().windows,
@@ -61,18 +61,18 @@ class WindowsDevice extends DesktopDevice {
   }
 
   @override
-  String executablePathForDevice(covariant WindowsApp package, BuildInfo buildInfo) {
+  String executablePathForDevice(covariant final WindowsApp package, final BuildInfo buildInfo) {
     return package.executable(buildInfo.mode);
   }
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
-    required WindowsWorkflow windowsWorkflow,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final WindowsWorkflow windowsWorkflow,
   }) : _fileSystem = fileSystem,
       _logger = logger,
       _processManager = processManager,
@@ -93,7 +93,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   bool get canListAnything => _windowsWorkflow.canListDevices;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({ final Duration? timeout }) async {
     if (!canListAnything) {
       return const <Device>[];
     }

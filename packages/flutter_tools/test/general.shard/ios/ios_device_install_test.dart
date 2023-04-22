@@ -317,10 +317,10 @@ void main() {
 }
 
 IOSDevice setUpIOSDevice({
-  required ProcessManager processManager,
-  FileSystem? fileSystem,
+  required final ProcessManager processManager,
+  final FileSystem? fileSystem,
   Logger? logger,
-  DeviceConnectionInterface? interfaceType,
+  final DeviceConnectionInterface? interfaceType,
   Artifacts? artifacts,
 }) {
   logger ??= BufferLogger.test();

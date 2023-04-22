@@ -23,9 +23,9 @@ typedef UrlTunneller = Future<String> Function(String url);
 /// If [httpClientFactory] is null, a default [HttpClient] is used.
 class Net {
   Net({
-    HttpClientFactory? httpClientFactory,
-    required Logger logger,
-    required Platform platform,
+    final HttpClientFactory? httpClientFactory,
+    required final Logger logger,
+    required final Platform platform,
   }) :
     _httpClientFactory = httpClientFactory ?? (() => HttpClient()),
     _logger = logger,
@@ -45,10 +45,10 @@ class Net {
   /// returns an empty list.
   ///
   /// If [maxAttempts] is exceeded, returns null.
-  Future<List<int>?> fetchUrl(Uri url, {
-    int? maxAttempts,
-    File? destFile,
-    @visibleForTesting Duration? durationOverride,
+  Future<List<int>?> fetchUrl(final Uri url, {
+    final int? maxAttempts,
+    final File? destFile,
+    @visibleForTesting final Duration? durationOverride,
   }) async {
     int attempts = 0;
     int durationSeconds = 1;
@@ -87,12 +87,12 @@ class Net {
   }
 
   /// Check if the given URL points to a valid endpoint.
-  Future<bool> doesRemoteFileExist(Uri url) => _attempt(url, onlyHeaders: true);
+  Future<bool> doesRemoteFileExist(final Uri url) => _attempt(url, onlyHeaders: true);
 
   // Returns true on success and false on failure.
-  Future<bool> _attempt(Uri url, {
-    IOSink? destSink,
-    bool onlyHeaders = false,
+  Future<bool> _attempt(final Uri url, {
+    final IOSink? destSink,
+    final bool onlyHeaders = false,
   }) async {
     assert(onlyHeaders || destSink != null);
     _logger.printTrace('Downloading: $url');
@@ -177,34 +177,34 @@ class _MemoryIOSink implements IOSink {
   final BytesBuilder writes = BytesBuilder(copy: false);
 
   @override
-  void add(List<int> data) {
+  void add(final List<int> data) {
     writes.add(data);
   }
 
   @override
-  Future<void> addStream(Stream<List<int>> stream) {
+  Future<void> addStream(final Stream<List<int>> stream) {
     final Completer<void> completer = Completer<void>();
     stream.listen(add).onDone(completer.complete);
     return completer.future;
   }
 
   @override
-  void writeCharCode(int charCode) {
+  void writeCharCode(final int charCode) {
     add(<int>[charCode]);
   }
 
   @override
-  void write(Object? obj) {
+  void write(final Object? obj) {
     add(encoding.encode('$obj'));
   }
 
   @override
-  void writeln([ Object? obj = '' ]) {
+  void writeln([ final Object? obj = '' ]) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
+  void writeAll(final Iterable<dynamic> objects, [ final String separator = '' ]) {
     bool addSeparator = false;
     for (final dynamic object in objects) {
       if (addSeparator) {
@@ -216,7 +216,7 @@ class _MemoryIOSink implements IOSink {
   }
 
   @override
-  void addError(dynamic error, [ StackTrace? stackTrace ]) {
+  void addError(final dynamic error, [ final StackTrace? stackTrace ]) {
     throw UnimplementedError();
   }
 
@@ -231,7 +231,7 @@ class _MemoryIOSink implements IOSink {
 }
 
 /// Returns [true] if [address] is an IPv6 address.
-bool isIPv6Address(String address) {
+bool isIPv6Address(final String address) {
   try {
     Uri.parseIPv6Address(address);
     return true;

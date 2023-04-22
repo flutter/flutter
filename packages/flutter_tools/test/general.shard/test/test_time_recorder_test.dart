@@ -44,8 +44,8 @@ void main() {
   });
 }
 
-TestTimeRecorder createRecorderWithTimesForPhase(TestTimePhases phase,
-    Duration combinedDuration, Duration wallClockDuration) {
+TestTimeRecorder createRecorderWithTimesForPhase(final TestTimePhases phase,
+    final Duration combinedDuration, final Duration wallClockDuration) {
   final LoggingLogger logger = LoggingLogger();
   final TestTimeRecorder recorder =
       TestTimeRecorder(logger, stopwatchFactory: FakeStopwatchFactory());

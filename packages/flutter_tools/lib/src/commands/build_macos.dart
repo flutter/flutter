@@ -17,7 +17,7 @@ import 'build.dart';
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand({
     required super.logger,
-    required bool verboseHelp,
+    required final bool verboseHelp,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
     usesFlavorOption();

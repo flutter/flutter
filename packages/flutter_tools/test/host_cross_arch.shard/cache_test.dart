@@ -24,7 +24,7 @@ Future<void> main() async {
 }
 
 // Call `file` on the path and parse the output.
-HostPlatform _identifyMacBinaryArch(String path) {
+HostPlatform _identifyMacBinaryArch(final String path) {
   // Expect STDOUT like:
   //   bin/cache/dart-sdk/bin/dart: Mach-O 64-bit executable x86_64
   final RegExp pattern = RegExp(r'Mach-O 64-bit executable (\w+)');

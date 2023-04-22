@@ -24,11 +24,11 @@ import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
-  factory FlutterTesterApp.fromCurrentDirectory(FileSystem fileSystem) {
+  factory FlutterTesterApp.fromCurrentDirectory(final FileSystem fileSystem) {
     return FlutterTesterApp._(fileSystem.currentDirectory);
   }
 
-  FlutterTesterApp._(Directory directory)
+  FlutterTesterApp._(final Directory directory)
     : _directory = directory,
       super(id: directory.path);
 
@@ -45,12 +45,12 @@ class FlutterTesterApp extends ApplicationPackage {
 /// to the flutter command.
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(super.deviceId, {
-    required ProcessManager processManager,
-    required FlutterVersion flutterVersion,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final ProcessManager processManager,
+    required final FlutterVersion flutterVersion,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Artifacts artifacts,
+    required final OperatingSystemUtils operatingSystemUtils,
   }) : _processManager = processManager,
        _flutterVersion = flutterVersion,
        _logger = logger,
@@ -92,7 +92,7 @@ class FlutterTesterDevice extends Device {
   }
 
   @override
-  bool supportsRuntimeMode(BuildMode buildMode) => buildMode == BuildMode.debug;
+  bool supportsRuntimeMode(final BuildMode buildMode) => buildMode == BuildMode.debug;
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
@@ -104,40 +104,40 @@ class FlutterTesterDevice extends Device {
 
   @override
   DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
+    final ApplicationPackage? app,
+    final bool includePastLogs = false,
   }) {
     return _logReader;
   }
 
   @override
   Future<bool> installApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => true;
 
   @override
   Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => false;
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
+  Future<bool> isLatestBuildInstalled(final ApplicationPackage app) async => false;
 
   @override
   bool isSupported() => true;
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    required final DebuggingOptions debuggingOptions,
+    final Map<String, Object?> platformArgs = const <String, Object>{},
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (!buildInfo.isDebug) {
@@ -217,8 +217,8 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
+    final ApplicationPackage? app, {
+    final String? userIdentifier,
   }) async {
     _process?.kill();
     _process = null;
@@ -227,17 +227,17 @@ class FlutterTesterDevice extends Device {
 
   @override
   Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => true;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(final FlutterProject flutterProject) => true;
 
   @override
   DevFSWriter createDevFSWriter(
-    ApplicationPackage? app,
-    String? userIdentifier,
+    final ApplicationPackage? app,
+    final String? userIdentifier,
   ) {
     return LocalDevFSWriter(
       fileSystem: _fileSystem,
@@ -253,12 +253,12 @@ class FlutterTesterDevice extends Device {
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
   FlutterTesterDevices({
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FlutterVersion flutterVersion,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final FileSystem fileSystem,
+    required final Artifacts artifacts,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FlutterVersion flutterVersion,
+    required final OperatingSystemUtils operatingSystemUtils,
   }) : _testerDevice = FlutterTesterDevice(
         kTesterDeviceId,
         fileSystem: fileSystem,
@@ -283,7 +283,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({ final Duration? timeout }) async {
     return showFlutterTesterDevice ? <Device>[_testerDevice] : <Device>[];
   }
 

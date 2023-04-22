@@ -25,7 +25,7 @@ void main() {
     fakeProcessManager = FakeProcessManager.empty();
   });
 
-  OperatingSystemUtils createOSUtils(Platform platform) {
+  OperatingSystemUtils createOSUtils(final Platform platform) {
     return OperatingSystemUtils(
       fileSystem: MemoryFileSystem.test(),
       logger: BufferLogger.test(),
@@ -581,7 +581,7 @@ void main() {
         () => utils.unzip(fakeZipFile, targetDirectory),
         throwsA(
           isA<StateError>().having(
-            (StateError error) => error.message,
+            (final StateError error) => error.message,
             'correct error message',
             contains('Tried to extract the file '),
           ),

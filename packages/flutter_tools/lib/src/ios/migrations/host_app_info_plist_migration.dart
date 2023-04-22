@@ -12,7 +12,7 @@ const String _kIndirectInputEventsKey = 'UIApplicationSupportsIndirectInputEvent
 /// Update Info.plist.
 class HostAppInfoPlistMigration extends ProjectMigrator {
   HostAppInfoPlistMigration(
-    IosProject project,
+    final IosProject project,
     super.logger,
   ) : _infoPlist = project.defaultHostInfoPlist;
 
@@ -29,7 +29,7 @@ class HostAppInfoPlistMigration extends ProjectMigrator {
   }
 
   @override
-  String migrateFileContents(String fileContents) {
+  String migrateFileContents(final String fileContents) {
     String newContents = fileContents;
     if (!newContents.contains(_kDisableMinimumFrameDurationKey)) {
       logger.printTrace('Adding $_kDisableMinimumFrameDurationKey to Info.plist');

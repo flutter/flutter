@@ -303,11 +303,11 @@ void main() {
 }
 
 FakeDesktopDevice setUpDesktopDevice({
-  FileSystem? fileSystem,
-  Logger? logger,
-  ProcessManager? processManager,
-  OperatingSystemUtils? operatingSystemUtils,
-  bool nullExecutablePathForDevice = false,
+  final FileSystem? fileSystem,
+  final Logger? logger,
+  final ProcessManager? processManager,
+  final OperatingSystemUtils? operatingSystemUtils,
+  final bool nullExecutablePathForDevice = false,
 }) {
   return FakeDesktopDevice(
     fileSystem: fileSystem ?? MemoryFileSystem.test(),
@@ -321,10 +321,10 @@ FakeDesktopDevice setUpDesktopDevice({
 /// A trivial subclass of DesktopDevice for testing the shared functionality.
 class FakeDesktopDevice extends DesktopDevice {
   FakeDesktopDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
     this.nullExecutablePathForDevice = false,
   }) : super(
       'dummy',
@@ -354,12 +354,12 @@ class FakeDesktopDevice extends DesktopDevice {
   bool isSupported() => true;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(final FlutterProject flutterProject) => true;
 
   @override
   Future<void> buildForDevice({
-    String? mainPath,
-    BuildInfo? buildInfo,
+    final String? mainPath,
+    final BuildInfo? buildInfo,
   }) async {
     lastBuiltMainPath = mainPath;
     lastBuildInfo = buildInfo;
@@ -367,7 +367,7 @@ class FakeDesktopDevice extends DesktopDevice {
 
   // Dummy implementation that just returns the build mode name.
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) {
+  String? executablePathForDevice(final ApplicationPackage package, final BuildInfo buildInfo) {
     if (nullExecutablePathForDevice) {
       return null;
     }

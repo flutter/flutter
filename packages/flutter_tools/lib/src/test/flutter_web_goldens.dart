@@ -25,9 +25,9 @@ import 'test_config.dart';
 class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator(this.shellPath, this.compilerFactory, {
-    required Logger logger,
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final ProcessManager processManager,
     required this.webRenderer,
   }) : tempDir = fileSystem.systemTempDirectory.createTempSync('flutter_web_platform.'),
        _logger = logger,
@@ -54,7 +54,7 @@ class TestGoldenComparator {
 
   /// Start golden comparator in a separate process. Start one file per test file
   /// to reduce the overhead of starting `flutter_tester`.
-  Future<TestGoldenComparatorProcess?> _processForTestFile(Uri testUri) async {
+  Future<TestGoldenComparatorProcess?> _processForTestFile(final Uri testUri) async {
     if (testUri == _previousTestUri) {
       return _previousComparator!;
     }
@@ -71,7 +71,7 @@ class TestGoldenComparator {
     return _previousComparator!;
   }
 
-  Future<Process?> _startProcess(String testBootstrap) async {
+  Future<Process?> _startProcess(final String testBootstrap) async {
     // Prepare the Dart file that will talk to us and start the test.
     final File listenerFile = (await tempDir.createTemp('listener')).childFile('listener.dart');
     await listenerFile.writeAsString(testBootstrap);
@@ -98,7 +98,7 @@ class TestGoldenComparator {
     return _processManager.start(command, environment: environment);
   }
 
-  Future<String?> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool? updateGoldens) async {
+  Future<String?> compareGoldens(final Uri testUri, final Uint8List bytes, final Uri goldenKey, final bool? updateGoldens) async {
     final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
     final TestGoldenComparatorProcess? process = await _processForTestFile(testUri);
     if (process == null) {
@@ -116,14 +116,14 @@ class TestGoldenComparator {
 /// handles communication with the child process.
 class TestGoldenComparatorProcess {
   /// Creates a [TestGoldenComparatorProcess] backed by [process].
-  TestGoldenComparatorProcess(this.process, {required Logger logger}) : _logger = logger {
+  TestGoldenComparatorProcess(this.process, {required final Logger logger}) : _logger = logger {
     // Pipe stdout and stderr to printTrace and printError.
     // Also parse stdout as a stream of JSON objects.
     streamIterator = StreamIterator<Map<String, dynamic>>(
       process.stdout
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .where((String line) {
+        .where((final String line) {
           logger.printTrace('<<< $line');
           return line.isNotEmpty && line[0] == '{';
         })
@@ -133,7 +133,7 @@ class TestGoldenComparatorProcess {
     process.stderr
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
-        .forEach((String line) {
+        .forEach((final String line) {
           logger.printError('<<< $line');
         });
   }
@@ -147,7 +147,7 @@ class TestGoldenComparatorProcess {
     await process.exitCode;
   }
 
-  void sendCommand(File imageFile, Uri? goldenKey, bool? updateGoldens) {
+  void sendCommand(final File imageFile, final Uri? goldenKey, final bool? updateGoldens) {
     final Object command = jsonEncode(<String, dynamic>{
       'imageFile': imageFile.path,
       'key': goldenKey.toString(),
@@ -163,7 +163,7 @@ class TestGoldenComparatorProcess {
     return streamIterator.current;
   }
 
-  static String generateBootstrap(File testFile, Uri testUri, {required Logger logger}) {
+  static String generateBootstrap(final File testFile, final Uri testUri, {required final Logger logger}) {
     final File? testConfigFile = findTestConfigFile(testFile, logger);
     // Generate comparator process for the file.
     return '''

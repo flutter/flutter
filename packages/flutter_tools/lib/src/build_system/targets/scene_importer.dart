@@ -21,9 +21,9 @@ import '../build_system.dart';
 /// A wrapper around [SceneImporter] to support hot reload of 3D models.
 class DevelopmentSceneImporter {
   DevelopmentSceneImporter({
-    required SceneImporter sceneImporter,
-    required FileSystem fileSystem,
-    @visibleForTesting math.Random? random,
+    required final SceneImporter sceneImporter,
+    required final FileSystem fileSystem,
+    @visibleForTesting final math.Random? random,
   }) : _sceneImporter = sceneImporter,
        _fileSystem = fileSystem,
        _random = random ?? math.Random();
@@ -35,7 +35,7 @@ class DevelopmentSceneImporter {
 
   /// Recompile the input ipscene and return a devfs content that should be
   /// synced to the attached device in its place.
-  Future<DevFSContent?> reimportScene(DevFSContent inputScene) async {
+  Future<DevFSContent?> reimportScene(final DevFSContent inputScene) async {
     final File output = _fileSystem.systemTempDirectory.childFile('${_random.nextDouble()}.temp');
     late File inputFile;
     bool cleanupInput = false;
@@ -73,10 +73,10 @@ class DevelopmentSceneImporter {
 /// A class the wraps the functionality of the Impeller Scene importer scenec.
 class SceneImporter {
   SceneImporter({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required Artifacts artifacts,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final Artifacts artifacts,
   })  : _processManager = processManager,
         _logger = logger,
         _fs = fileSystem,
@@ -105,9 +105,9 @@ class SceneImporter {
   /// stderr to the log and throw a [SceneImporterException]. Otherwise, it
   /// will return true.
   Future<bool> importScene({
-    required File input,
-    required String outputPath,
-    bool fatal = true,
+    required final File input,
+    required final String outputPath,
+    final bool fatal = true,
   }) async {
     final File scenec = _fs.file(
       _artifacts.getHostArtifact(HostArtifact.scenec),

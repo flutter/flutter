@@ -25,11 +25,11 @@ import 'windows/application_package.dart';
 /// A package factory that supports all Flutter target platforms.
 class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
   FlutterApplicationPackageFactory({
-    required AndroidSdk? androidSdk,
-    required ProcessManager processManager,
-    required Logger logger,
-    required UserMessages userMessages,
-    required FileSystem fileSystem,
+    required final AndroidSdk? androidSdk,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final UserMessages userMessages,
+    required final FileSystem fileSystem,
   }) : _androidSdk = androidSdk,
        _processManager = processManager,
        _logger = logger,
@@ -47,9 +47,9 @@ class FlutterApplicationPackageFactory extends ApplicationPackageFactory {
 
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
-    TargetPlatform platform, {
-    BuildInfo? buildInfo,
-    File? applicationBinary,
+    final TargetPlatform platform, {
+    final BuildInfo? buildInfo,
+    final File? applicationBinary,
   }) async {
     switch (platform) {
       case TargetPlatform.android:

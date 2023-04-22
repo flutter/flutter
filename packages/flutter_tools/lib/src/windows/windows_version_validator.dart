@@ -19,7 +19,7 @@ const String kWindowsOSVersionSemVerPattern = r'([0-9]+)\.([0-9]+)\.([0-9\.]+)';
 /// Validator for supported Windows host machine operating system version.
 class WindowsVersionValidator extends DoctorValidator {
   const WindowsVersionValidator({
-    required OperatingSystemUtils operatingSystemUtils,
+    required final OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
         super('Windows Version');
 

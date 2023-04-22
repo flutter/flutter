@@ -372,10 +372,10 @@ void main() {
 }
 
 Matcher matchesEngineBuildPaths({
-  String? hostEngine,
-  String? targetEngine,
+  final String? hostEngine,
+  final String? targetEngine,
 }) {
   return const TypeMatcher<EngineBuildPaths>()
-    .having((EngineBuildPaths paths) => paths.hostEngine, 'hostEngine', hostEngine)
-    .having((EngineBuildPaths paths) => paths.targetEngine, 'targetEngine', targetEngine);
+    .having((final EngineBuildPaths paths) => paths.hostEngine, 'hostEngine', hostEngine)
+    .having((final EngineBuildPaths paths) => paths.targetEngine, 'targetEngine', targetEngine);
 }

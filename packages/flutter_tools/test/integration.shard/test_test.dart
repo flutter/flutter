@@ -221,7 +221,7 @@ void main() {
         extraArguments: const <String>['--start-paused', '--serve-observatory']);
       final Completer<Uri> completer = Completer<Uri>();
       final RegExp vmServiceUriRegExp = RegExp(r'((http)?:\/\/)[^\s]+');
-      sub = process.stdout.transform(utf8.decoder).listen((String e) {
+      sub = process.stdout.transform(utf8.decoder).listen((final String e) {
         if (!completer.isCompleted && vmServiceUriRegExp.hasMatch(e)) {
           completer.complete(Uri.parse(vmServiceUriRegExp.firstMatch(e)!.group(0)!));
         }
@@ -246,7 +246,7 @@ void main() {
         extraArguments: const <String>['--start-paused']);
       final Completer<Uri> completer = Completer<Uri>();
       final RegExp devToolsUriRegExp = RegExp(r'The Flutter DevTools debugger and profiler is available at: (http://[^\s]+)');
-      sub = process.stdout.transform(utf8.decoder).listen((String e) {
+      sub = process.stdout.transform(utf8.decoder).listen((final String e) {
         if (!completer.isCompleted && devToolsUriRegExp.hasMatch(e)) {
           completer.complete(Uri.parse(devToolsUriRegExp.firstMatch(e)!.group(1)!));
         }
@@ -265,11 +265,11 @@ void main() {
 }
 
 Future<void> _testFile(
-  String testName,
-  String workingDirectory,
-  String testDirectory, {
+  final String testName,
+  final String workingDirectory,
+  final String testDirectory, {
   Matcher? exitCode,
-  List<String> extraArguments = const <String>[],
+  final List<String> extraArguments = const <String>[],
 }) async {
   exitCode ??= isNonZero;
   final String fullTestExpectation = fileSystem.path.join(testDirectory, '${testName}_expectation.txt');
@@ -350,11 +350,11 @@ Future<void> _testFile(
 }
 
 Future<ProcessResult> _runFlutterTest(
-  String? testName,
-  String workingDirectory,
-  String testDirectory, {
-  List<String> extraArguments = const <String>[],
-  String? query,
+  final String? testName,
+  final String workingDirectory,
+  final String testDirectory, {
+  final List<String> extraArguments = const <String>[],
+  final String? query,
 }) async {
 
   String testPath;
@@ -396,10 +396,10 @@ Future<ProcessResult> _runFlutterTest(
 }
 
 Future<Process> _runFlutterTestConcurrent(
-  String? testName,
-  String workingDirectory,
-  String testDirectory, {
-  List<String> extraArguments = const <String>[],
+  final String? testName,
+  final String workingDirectory,
+  final String testDirectory, {
+  final List<String> extraArguments = const <String>[],
 }) async {
 
   String testPath;

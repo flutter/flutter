@@ -214,7 +214,7 @@ void main() {
 
 class FakeTestCompiler extends Fake implements TestCompiler {
   @override
-  Future<String> compile(Uri mainDart) {
+  Future<String> compile(final Uri mainDart) {
     return Future<String>.value('compiler_output');
   }
 

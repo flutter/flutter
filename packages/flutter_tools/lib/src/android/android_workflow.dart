@@ -42,8 +42,8 @@ final RegExp licenseAccepted = RegExp(r'All SDK package licenses accepted.');
 
 class AndroidWorkflow implements Workflow {
   AndroidWorkflow({
-    required AndroidSdk? androidSdk,
-    required FeatureFlags featureFlags,
+    required final AndroidSdk? androidSdk,
+    required final FeatureFlags featureFlags,
   }) : _androidSdk = androidSdk,
        _featureFlags = featureFlags;
 
@@ -75,13 +75,13 @@ class AndroidWorkflow implements Workflow {
 /// Android Studio.
 class AndroidValidator extends DoctorValidator {
   AndroidValidator({
-    required AndroidSdk? androidSdk,
-    required AndroidStudio? androidStudio,
-    required FileSystem fileSystem,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
-    required UserMessages userMessages,
+    required final AndroidSdk? androidSdk,
+    required final AndroidStudio? androidStudio,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final UserMessages userMessages,
   }) : _androidSdk = androidSdk,
        _androidStudio = androidStudio,
        _fileSystem = fileSystem,
@@ -116,7 +116,7 @@ class AndroidValidator extends DoctorValidator {
   /// `java -version` response is not only a number, but also includes other
   /// information eg. `openjdk version "1.7.0_212"`.
   /// This method extracts only the semantic version from that response.
-  static String? _extractJavaVersion(String? text) {
+  static String? _extractJavaVersion(final String? text) {
     if (text == null || text.isEmpty) {
       return null;
     }
@@ -129,7 +129,7 @@ class AndroidValidator extends DoctorValidator {
 
   /// Returns false if we cannot determine the Java version or if the version
   /// is older that the minimum allowed version of 1.8.
-  Future<bool> _checkJavaVersion(String javaBinary, List<ValidationMessage> messages) async {
+  Future<bool> _checkJavaVersion(final String javaBinary, final List<ValidationMessage> messages) async {
     _task = 'Checking Java status';
     try {
       if (!_processManager.canRun(javaBinary)) {
@@ -231,7 +231,7 @@ class AndroidValidator extends DoctorValidator {
 
     if (validationResult.isNotEmpty) {
       // Android SDK is not functional.
-      messages.addAll(validationResult.map<ValidationMessage>((String message) {
+      messages.addAll(validationResult.map<ValidationMessage>((final String message) {
         return ValidationMessage.error(message);
       }));
       messages.add(ValidationMessage(_userMessages.androidSdkInstallHelp(_platform)));
@@ -266,15 +266,15 @@ class AndroidValidator extends DoctorValidator {
 /// SDK have been accepted.
 class AndroidLicenseValidator extends DoctorValidator {
   AndroidLicenseValidator({
-    required AndroidSdk? androidSdk,
-    required Platform platform,
-    required OperatingSystemUtils operatingSystemUtils,
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
-    required AndroidStudio? androidStudio,
-    required Stdio stdio,
-    required UserMessages userMessages,
+    required final AndroidSdk? androidSdk,
+    required final Platform platform,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final FileSystem fileSystem,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final AndroidStudio? androidStudio,
+    required final Stdio stdio,
+    required final UserMessages userMessages,
   }) : _androidSdk = androidSdk,
        _platform = platform,
        _operatingSystemUtils = operatingSystemUtils,
@@ -362,7 +362,7 @@ class AndroidLicenseValidator extends DoctorValidator {
   Future<LicensesAccepted> get licensesAccepted async {
     LicensesAccepted? status;
 
-    void handleLine(String line) {
+    void handleLine(final String line) {
       if (licenseCounts.hasMatch(line)) {
         final Match? match = licenseCounts.firstMatch(line);
         if (match?.group(1) != match?.group(2)) {
@@ -436,8 +436,8 @@ class AndroidLicenseValidator extends DoctorValidator {
         // If the process exits unexpectedly with an error, that will be
         // handled by the caller.
         .then(
-          (Object? socket) => socket,
-          onError: (dynamic err, StackTrace stack) {
+          (final Object? socket) => socket,
+          onError: (final dynamic err, final StackTrace stack) {
             _logger.printTrace('Echoing stdin to the licenses subprocess failed:');
             _logger.printTrace('$err\n$stack');
           },

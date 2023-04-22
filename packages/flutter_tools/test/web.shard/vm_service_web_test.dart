@@ -90,12 +90,12 @@ void main() {
   });
 }
 
-Future<void> validateFlutterVersion(VmService client) async {
+Future<void> validateFlutterVersion(final VmService client) async {
   String? method;
 
   final Future<dynamic> registration = expectLater(
     client.onEvent('Service'),
-      emitsThrough(predicate((Event e) {
+      emitsThrough(predicate((final Event e) {
         if (e.kind == EventKind.kServiceRegistered &&
             e.service == kFlutterVersionServiceName) {
           method = e.method;
@@ -111,8 +111,8 @@ Future<void> validateFlutterVersion(VmService client) async {
 
   final dynamic version1 = await client.callServiceExtension(method!);
   expect(version1, const TypeMatcher<Success>()
-    .having((Success r) => r.type, 'type', 'Success')
-    .having((Success r) => r.json!['frameworkVersion'], 'frameworkVersion', isNotNull));
+    .having((final Success r) => r.type, 'type', 'Success')
+    .having((final Success r) => r.json!['frameworkVersion'], 'frameworkVersion', isNotNull));
 
   await client.dispose();
 }

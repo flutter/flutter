@@ -25,7 +25,7 @@ const Map<String, String> unknownFlutterBuildMode = <String, String>{
 };
 
 void main() {
-  Future<void> expectXcodeBackendFails(Map<String, String> environment) async {
+  Future<void> expectXcodeBackendFails(final Map<String, String> environment) async {
     final ProcessResult result = await Process.run(
       xcodeBackendPath,
       <String>['build'],

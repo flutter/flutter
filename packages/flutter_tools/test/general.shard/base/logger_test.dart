@@ -408,7 +408,7 @@ void main() {
     List<String> outputStdout() => mockStdio.writtenToStdout.join().split('\n');
     List<String> outputStderr() => mockStdio.writtenToStderr.join().split('\n');
 
-    void doWhileAsync(FakeAsync time, bool Function() doThis) {
+    void doWhileAsync(final FakeAsync time, final bool Function() doThis) {
       do {
         mockStopwatch.elapsed += const Duration(milliseconds: 1);
         time.elapse(const Duration(milliseconds: 1));
@@ -449,7 +449,7 @@ void main() {
         testWithoutContext('AnonymousSpinnerStatus works (1)', () async {
           bool done = false;
           mockStopwatch = FakeStopwatch();
-          FakeAsync().run((FakeAsync time) {
+          FakeAsync().run((final FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
               stopwatch: mockStopwatch,
@@ -483,7 +483,7 @@ void main() {
         testWithoutContext('AnonymousSpinnerStatus logs warning after timeout without color support', () async {
           mockStopwatch = FakeStopwatch();
           const String warningMessage = 'a warning message.';
-          final bool done = FakeAsync().run<bool>((FakeAsync time) {
+          final bool done = FakeAsync().run<bool>((final FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
               stopwatch: mockStopwatch,
@@ -511,7 +511,7 @@ void main() {
         testWithoutContext('AnonymousSpinnerStatus logs warning after timeout with color support', () async {
           mockStopwatch = FakeStopwatch();
           const String warningMessage = 'a warning message.';
-          final bool done = FakeAsync().run<bool>((FakeAsync time) {
+          final bool done = FakeAsync().run<bool>((final FakeAsync time) {
             final AnonymousSpinnerStatus spinner = AnonymousSpinnerStatus(
               stdio: mockStdio,
               stopwatch: mockStopwatch,
@@ -572,7 +572,7 @@ void main() {
 
         testWithoutContext('Stdout startProgress on colored terminal pauses', () async {
           bool done = false;
-          FakeAsync().run((FakeAsync time) {
+          FakeAsync().run((final FakeAsync time) {
             mockStopwatch.elapsed = const Duration(seconds: 5);
             final Logger logger = StdoutLogger(
               terminal: coloredTerminal,
@@ -612,7 +612,7 @@ void main() {
 
         testWithoutContext('Stdout startProgress on non-colored terminal pauses', () async {
           bool done = false;
-          FakeAsync().run((FakeAsync time) {
+          FakeAsync().run((final FakeAsync time) {
             mockStopwatch.elapsed = const Duration(seconds: 5);
             final Logger logger = StdoutLogger(
               terminal: terminal,
@@ -642,7 +642,7 @@ void main() {
 
         testWithoutContext('SpinnerStatus works when canceled', () async {
           bool done = false;
-          FakeAsync().run((FakeAsync time) {
+          FakeAsync().run((final FakeAsync time) {
             spinnerStatus.start();
             mockStopwatch.elapsed = const Duration(seconds: 1);
             doWhileAsync(time, () => spinnerStatus.ticks < 10);
@@ -678,7 +678,7 @@ void main() {
 
         testWithoutContext('SpinnerStatus works when stopped', () async {
           bool done = false;
-          FakeAsync().run((FakeAsync time) {
+          FakeAsync().run((final FakeAsync time) {
             spinnerStatus.start();
             mockStopwatch.elapsed = const Duration(seconds: 1);
             doWhileAsync(time, () => spinnerStatus.ticks < 10);
@@ -1292,11 +1292,11 @@ void main() {
 /// A fake [Logger] that throws the [Invocation] for any method call.
 class FakeLogger implements Logger {
   @override
-  dynamic noSuchMethod(Invocation invocation) => throw invocation; // ignore: only_throw_errors
+  dynamic noSuchMethod(final Invocation invocation) => throw invocation; // ignore: only_throw_errors
 }
 
 /// Returns the [Invocation] thrown from a call to [FakeLogger].
-Invocation _invocationFor(dynamic Function() fakeCall) {
+Invocation _invocationFor(final dynamic Function() fakeCall) {
   try {
     fakeCall();
   } on Invocation catch (invocation) {
@@ -1307,21 +1307,21 @@ Invocation _invocationFor(dynamic Function() fakeCall) {
 }
 
 /// Returns a [Matcher] that matches against an expected [Invocation].
-Matcher _matchesInvocation(Invocation expected) {
+Matcher _matchesInvocation(final Invocation expected) {
   return const TypeMatcher<Invocation>()
     // Compare Symbol strings instead of comparing Symbols directly for a nicer failure message.
-    .having((Invocation actual) => actual.memberName.toString(), 'memberName', expected.memberName.toString())
-    .having((Invocation actual) => actual.isGetter, 'isGetter', expected.isGetter)
-    .having((Invocation actual) => actual.isSetter, 'isSetter', expected.isSetter)
-    .having((Invocation actual) => actual.isMethod, 'isMethod', expected.isMethod)
-    .having((Invocation actual) => actual.typeArguments, 'typeArguments', expected.typeArguments)
-    .having((Invocation actual) => actual.positionalArguments, 'positionalArguments', expected.positionalArguments)
-    .having((Invocation actual) => actual.namedArguments, 'namedArguments', expected.namedArguments);
+    .having((final Invocation actual) => actual.memberName.toString(), 'memberName', expected.memberName.toString())
+    .having((final Invocation actual) => actual.isGetter, 'isGetter', expected.isGetter)
+    .having((final Invocation actual) => actual.isSetter, 'isSetter', expected.isSetter)
+    .having((final Invocation actual) => actual.isMethod, 'isMethod', expected.isMethod)
+    .having((final Invocation actual) => actual.typeArguments, 'typeArguments', expected.typeArguments)
+    .having((final Invocation actual) => actual.positionalArguments, 'positionalArguments', expected.positionalArguments)
+    .having((final Invocation actual) => actual.namedArguments, 'namedArguments', expected.namedArguments);
 }
 
 /// Returns a [Matcher] that matches against an [Invocation] thrown from a call
 /// to [FakeLogger].
-Matcher _throwsInvocationFor(dynamic Function() fakeCall) =>
+Matcher _throwsInvocationFor(final dynamic Function() fakeCall) =>
   throwsA(_matchesInvocation(_invocationFor(fakeCall)));
 
 class FakeStdout extends Fake implements Stdout {
@@ -1332,11 +1332,11 @@ class FakeStdout extends Fake implements Stdout {
   final Completer<void> _completer = Completer<void>();
 
   @override
-  void write(Object? object) {
+  void write(final Object? object) {
     if (syncError) {
       throw Exception('Error!');
     }
-    Zone.current.runUnaryGuarded<void>((_) {
+    Zone.current.runUnaryGuarded<void>((final _) {
       if (completeWithError) {
         _completer.completeError(Exception('Some pipe error'));
       } else {

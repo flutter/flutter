@@ -16,7 +16,7 @@ const String _androidStudioPreviewTitle = 'Android Studio Preview';
 const String _androidStudioPreviewId = 'AndroidStudioPreview';
 
 class AndroidStudioValidator extends DoctorValidator {
-  AndroidStudioValidator(this._studio, { required FileSystem fileSystem })
+  AndroidStudioValidator(this._studio, { required final FileSystem fileSystem })
     : _fileSystem = fileSystem,
       super('Android Studio');
 
@@ -28,14 +28,14 @@ class AndroidStudioValidator extends DoctorValidator {
     _androidStudioPreviewId: _androidStudioPreviewTitle,
   };
 
-  static List<DoctorValidator> allValidators(Config config, Platform platform, FileSystem fileSystem, UserMessages userMessages) {
+  static List<DoctorValidator> allValidators(final Config config, final Platform platform, final FileSystem fileSystem, final UserMessages userMessages) {
     final List<AndroidStudio> studios = AndroidStudio.allInstalled();
     return <DoctorValidator>[
       if (studios.isEmpty)
         NoAndroidStudioValidator(config: config, platform: platform, userMessages: userMessages)
       else
         ...studios.map<DoctorValidator>(
-          (AndroidStudio studio) => AndroidStudioValidator(studio, fileSystem: fileSystem)
+          (final AndroidStudio studio) => AndroidStudioValidator(studio, fileSystem: fileSystem)
         ),
     ];
   }
@@ -74,12 +74,12 @@ class AndroidStudioValidator extends DoctorValidator {
         ? ValidationType.partial
         : ValidationType.success;
       messages.addAll(_studio.validationMessages.map<ValidationMessage>(
-        (String m) => ValidationMessage(m),
+        (final String m) => ValidationMessage(m),
       ));
     } else {
       type = ValidationType.partial;
       messages.addAll(_studio.validationMessages.map<ValidationMessage>(
-        (String m) => ValidationMessage.error(m),
+        (final String m) => ValidationMessage.error(m),
       ));
       messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
       if (_studio.configuredPath != null) {
@@ -90,16 +90,16 @@ class AndroidStudioValidator extends DoctorValidator {
     return ValidationResult(type, messages, statusInfo: studioVersionText);
   }
 
-  bool _hasIssues(List<ValidationMessage> messages) {
-    return messages.any((ValidationMessage message) => message.isError);
+  bool _hasIssues(final List<ValidationMessage> messages) {
+    return messages.any((final ValidationMessage message) => message.isError);
   }
 }
 
 class NoAndroidStudioValidator extends DoctorValidator {
   NoAndroidStudioValidator({
-    required Config config,
-    required Platform platform,
-    required UserMessages userMessages,
+    required final Config config,
+    required final Platform platform,
+    required final UserMessages userMessages,
   }) : _config = config,
        _platform = platform,
        _userMessages = userMessages,

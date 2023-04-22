@@ -307,7 +307,7 @@ Handshake error in client (OS Error:
     expect(
       result.messages.first,
       isA<ValidationMessage>().having(
-        (ValidationMessage msg) => msg.message,
+        (final ValidationMessage msg) => msg.message,
         'message',
         contains(handshakeMessage),
       ),

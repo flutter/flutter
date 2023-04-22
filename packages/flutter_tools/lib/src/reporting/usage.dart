@@ -10,13 +10,13 @@ abstract class Usage {
   /// Create a new Usage instance; [versionOverride], [configDirOverride], and
   /// [logFile] are used for testing.
   factory Usage({
-    String settingsName = 'flutter',
-    String? versionOverride,
-    String? configDirOverride,
-    String? logFile,
-    AnalyticsFactory? analyticsIOFactory,
-    FirstRunMessenger? firstRunMessenger,
-    required bool runningOnBot,
+    final String settingsName = 'flutter',
+    final String? versionOverride,
+    final String? configDirOverride,
+    final String? logFile,
+    final AnalyticsFactory? analyticsIOFactory,
+    final FirstRunMessenger? firstRunMessenger,
+    required final bool runningOnBot,
   }) =>
       _DefaultUsage.initialize(
         settingsName: settingsName,
@@ -29,21 +29,21 @@ abstract class Usage {
       );
 
   /// Uses the global [Usage] instance to send a 'command' to analytics.
-  static void command(String command, {
-    CustomDimensions? parameters,
+  static void command(final String command, {
+    final CustomDimensions? parameters,
   }) => globals.flutterUsage.sendCommand(command, parameters: parameters);
 
   /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
 
   /// Suppress analytics for this session.
-  set suppressAnalytics(bool value);
+  set suppressAnalytics(final bool value);
 
   /// Whether analytics reporting is enabled.
   bool get enabled;
 
   /// Enable or disable reporting analytics.
-  set enabled(bool value);
+  set enabled(final bool value);
 
   /// A stable randomly generated UUID used to deduplicate multiple identical
   /// reports coming from the same computer.
@@ -54,8 +54,8 @@ abstract class Usage {
   /// Using [command] above is preferred to ensure that the parameter
   /// keys are well-defined in [CustomDimensions] above.
   void sendCommand(
-    String command, {
-    CustomDimensions? parameters,
+    final String command, {
+    final CustomDimensions? parameters,
   });
 
   /// Sends an 'event' to the underlying analytics implementation.
@@ -65,23 +65,23 @@ abstract class Usage {
   @visibleForOverriding
   @visibleForTesting
   void sendEvent(
-    String category,
-    String parameter, {
-    String? label,
-    int? value,
-    CustomDimensions? parameters,
+    final String category,
+    final String parameter, {
+    final String? label,
+    final int? value,
+    final CustomDimensions? parameters,
   });
 
   /// Sends timing information to the underlying analytics implementation.
   void sendTiming(
-    String category,
-    String variableName,
-    Duration duration, {
-    String? label,
+    final String category,
+    final String variableName,
+    final Duration duration, {
+    final String? label,
   });
 
   /// Sends an exception to the underlying analytics implementation.
-  void sendException(dynamic exception);
+  void sendException(final dynamic exception);
 
   /// Fires whenever analytics data is sent over the network.
   @visibleForTesting
@@ -105,11 +105,11 @@ typedef AnalyticsFactory = Analytics Function(
 });
 
 Analytics _defaultAnalyticsIOFactory(
-  String trackingId,
-  String applicationName,
-  String applicationVersion, {
-  String? analyticsUrl,
-  Directory? documentDirectory,
+  final String trackingId,
+  final String applicationName,
+  final String applicationVersion, {
+  final String? analyticsUrl,
+  final Directory? documentDirectory,
 }) {
   return AnalyticsIO(
     trackingId,
@@ -122,22 +122,22 @@ Analytics _defaultAnalyticsIOFactory(
 
 class _DefaultUsage implements Usage {
   _DefaultUsage._({
-    required bool suppressAnalytics,
-    required Analytics analytics,
+    required final bool suppressAnalytics,
+    required final Analytics analytics,
     required this.firstRunMessenger,
-    required SystemClock clock,
+    required final SystemClock clock,
   })  : _suppressAnalytics = suppressAnalytics,
         _analytics = analytics,
         _clock = clock;
 
   static _DefaultUsage initialize({
-    String settingsName = 'flutter',
-    String? versionOverride,
-    String? configDirOverride,
-    String? logFile,
-    AnalyticsFactory? analyticsIOFactory,
-    required FirstRunMessenger? firstRunMessenger,
-    required bool runningOnBot,
+    final String settingsName = 'flutter',
+    final String? versionOverride,
+    final String? configDirOverride,
+    final String? logFile,
+    final AnalyticsFactory? analyticsIOFactory,
+    required final FirstRunMessenger? firstRunMessenger,
+    required final bool runningOnBot,
   }) {
     final FlutterVersion flutterVersion = globals.flutterVersion;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
@@ -203,11 +203,11 @@ class _DefaultUsage implements Usage {
       // For each flutter experimental feature, record a session value in a comma
       // separated list.
       final String enabledFeatures = allFeatures
-          .where((Feature feature) {
+          .where((final Feature feature) {
         final String? configSetting = feature.configSetting;
         return configSetting != null && globals.config.getValue(configSetting) == true;
       })
-          .map((Feature feature) => feature.configSetting)
+          .map((final Feature feature) => feature.configSetting)
           .join(',');
       analytics.setSessionValue(
         cdKey(CustomDimensionsEnum.enabledFlutterFeatures),
@@ -240,7 +240,7 @@ class _DefaultUsage implements Usage {
   bool get suppressAnalytics => _suppressAnalytics || _analytics.firstRun;
 
   @override
-  set suppressAnalytics(bool value) {
+  set suppressAnalytics(final bool value) {
     _suppressAnalytics = value;
   }
 
@@ -248,7 +248,7 @@ class _DefaultUsage implements Usage {
   bool get enabled => _analytics.enabled;
 
   @override
-  set enabled(bool value) {
+  set enabled(final bool value) {
     _analytics.enabled = value;
   }
 
@@ -256,7 +256,7 @@ class _DefaultUsage implements Usage {
   String get clientId => _analytics.clientId;
 
   @override
-  void sendCommand(String command, { CustomDimensions? parameters }) {
+  void sendCommand(final String command, { final CustomDimensions? parameters }) {
     if (suppressAnalytics) {
       return;
     }
@@ -271,11 +271,11 @@ class _DefaultUsage implements Usage {
 
   @override
   void sendEvent(
-    String category,
-    String parameter, {
-    String? label,
-    int? value,
-    CustomDimensions? parameters,
+    final String category,
+    final String parameter, {
+    final String? label,
+    final int? value,
+    final CustomDimensions? parameters,
   }) {
     if (suppressAnalytics) {
       return;
@@ -294,10 +294,10 @@ class _DefaultUsage implements Usage {
 
   @override
   void sendTiming(
-    String category,
-    String variableName,
-    Duration duration, {
-    String? label,
+    final String category,
+    final String variableName,
+    final Duration duration, {
+    final String? label,
   }) {
     if (suppressAnalytics) {
       return;
@@ -311,7 +311,7 @@ class _DefaultUsage implements Usage {
   }
 
   @override
-  void sendException(dynamic exception) {
+  void sendException(final dynamic exception) {
     if (suppressAnalytics) {
       return;
     }
@@ -351,7 +351,7 @@ class _DefaultUsage implements Usage {
 // But stdout can't be used for testing since wrapper scripts like
 // xcode_backend.sh etc manipulates them.
 class LogToFileAnalytics extends AnalyticsMock {
-  LogToFileAnalytics(String logFilePath) :
+  LogToFileAnalytics(final String logFilePath) :
     logFile = globals.fs.file(logFilePath)..createSync(recursive: true),
     super(true);
 
@@ -365,7 +365,7 @@ class LogToFileAnalytics extends AnalyticsMock {
   Stream<Map<String, dynamic>> get onSend => _sendController.stream;
 
   @override
-  Future<void> sendScreenView(String viewName, {
+  Future<void> sendScreenView(final String viewName, {
     Map<String, String>? parameters,
   }) {
     if (!enabled) {
@@ -380,8 +380,8 @@ class LogToFileAnalytics extends AnalyticsMock {
   }
 
   @override
-  Future<void> sendEvent(String category, String action,
-      {String? label, int? value, Map<String, String>? parameters}) {
+  Future<void> sendEvent(final String category, final String action,
+      {final String? label, final int? value, Map<String, String>? parameters}) {
     if (!enabled) {
       return Future<void>.value();
     }
@@ -394,8 +394,8 @@ class LogToFileAnalytics extends AnalyticsMock {
   }
 
   @override
-  Future<void> sendTiming(String variableName, int time,
-      {String? category, String? label}) {
+  Future<void> sendTiming(final String variableName, final int time,
+      {final String? category, final String? label}) {
     if (!enabled) {
       return Future<void>.value();
     }
@@ -411,7 +411,7 @@ class LogToFileAnalytics extends AnalyticsMock {
   }
 
   @override
-  void setSessionValue(String param, dynamic value) {
+  void setSessionValue(final String param, final dynamic value) {
     _sessionValues[param] = value.toString();
   }
 }
@@ -450,22 +450,22 @@ class TestUsage implements Usage {
   void printWelcome() { }
 
   @override
-  void sendCommand(String command, {CustomDimensions? parameters}) {
+  void sendCommand(final String command, {final CustomDimensions? parameters}) {
     commands.add(TestUsageCommand(command, parameters: parameters));
   }
 
   @override
-  void sendEvent(String category, String parameter, {String? label, int? value, CustomDimensions? parameters}) {
+  void sendEvent(final String category, final String parameter, {final String? label, final int? value, final CustomDimensions? parameters}) {
     events.add(TestUsageEvent(category, parameter, label: label, value: value, parameters: parameters));
   }
 
   @override
-  void sendException(dynamic exception) {
+  void sendException(final dynamic exception) {
     exceptions.add(exception);
   }
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, {String? label}) {
+  void sendTiming(final String category, final String variableName, final Duration duration, {final String? label}) {
     timings.add(TestTimingEvent(category, variableName, duration, label: label));
   }
 }
@@ -479,7 +479,7 @@ class TestUsageCommand {
   final CustomDimensions? parameters;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is TestUsageCommand &&
       other.command == command &&
       other.parameters == parameters;
@@ -504,7 +504,7 @@ class TestUsageEvent {
   final CustomDimensions? parameters;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is TestUsageEvent &&
       other.category == category &&
       other.parameter == parameter &&
@@ -531,7 +531,7 @@ class TestTimingEvent {
   final String? label;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is TestTimingEvent &&
       other.category == category &&
       other.variableName == variableName &&
@@ -546,7 +546,7 @@ class TestTimingEvent {
   String toString() => 'TestTimingEvent($category, $variableName, $duration, label:$label)';
 }
 
-bool _mapsEqual(Map<dynamic, dynamic>? a, Map<dynamic, dynamic>? b) {
+bool _mapsEqual(final Map<dynamic, dynamic>? a, final Map<dynamic, dynamic>? b) {
   if (a == b) {
     return true;
   }

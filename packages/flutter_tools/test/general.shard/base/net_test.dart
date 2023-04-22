@@ -24,7 +24,7 @@ void main() {
     testLogger = BufferLogger.test();
   });
 
-  Net createNet(io.HttpClient client) {
+  Net createNet(final io.HttpClient client) {
     return Net(
       httpClientFactory: () => client,
       logger: testLogger,
@@ -126,10 +126,10 @@ void main() {
       ])
     );
     String? error;
-    FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int>? value) async {
+    FakeAsync().run((final FakeAsync time) {
+      net.fetchUrl(invalid).then((final List<int>? value) async {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic exception) {
+      }, onError: (final dynamic exception) {
         error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
@@ -157,10 +157,10 @@ void main() {
       ])
     );
     String? error;
-    FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int>? value) async {
+    FakeAsync().run((final FakeAsync time) {
+      net.fetchUrl(invalid).then((final List<int>? value) async {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic exception) {
+      }, onError: (final dynamic exception) {
         error = 'test failed: $exception';
       });
       expect(testLogger.statusText, '');
@@ -187,10 +187,10 @@ void main() {
       ),
     );
     String? error;
-    FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(Uri.parse('example.invalid/')).then((List<int>? value) async {
+    FakeAsync().run((final FakeAsync time) {
+      net.fetchUrl(Uri.parse('example.invalid/')).then((final List<int>? value) async {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic exception) {
+      }, onError: (final dynamic exception) {
         error = 'test failed: $exception';
       });
       expect(testLogger.statusText, '');
@@ -213,10 +213,10 @@ void main() {
       ])
     );
     String? error;
-    FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int>? value) async {
+    FakeAsync().run((final FakeAsync time) {
+      net.fetchUrl(invalid).then((final List<int>? value) async {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic exception) {
+      }, onError: (final dynamic exception) {
         error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
@@ -244,10 +244,10 @@ void main() {
       ])
     );
     String? error;
-    FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid).then((List<int>? value) async {
+    FakeAsync().run((final FakeAsync time) {
+      net.fetchUrl(invalid).then((final List<int>? value) async {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic exception) {
+      }, onError: (final dynamic exception) {
         error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
@@ -281,10 +281,10 @@ void main() {
     );
     String? error;
     List<int>? actualResult;
-    FakeAsync().run((FakeAsync time) {
-      net.fetchUrl(invalid, maxAttempts: 3).then((List<int>? value) async {
+    FakeAsync().run((final FakeAsync time) {
+      net.fetchUrl(invalid, maxAttempts: 3).then((final List<int>? value) async {
         actualResult = value;
-      }, onError: (dynamic exception) {
+      }, onError: (final dynamic exception) {
         error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');

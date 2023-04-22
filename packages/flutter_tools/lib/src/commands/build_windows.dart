@@ -20,7 +20,7 @@ import 'build.dart';
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
     required super.logger,
-    bool verboseHelp = false,
+    final bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
   }

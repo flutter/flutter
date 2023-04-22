@@ -194,7 +194,7 @@ class CustomDimensions {
 
   /// Merge the values of two [CustomDimensions] into one. If a value is defined
   /// in both instances, the value in [other] will override the value in this.
-  CustomDimensions merge(CustomDimensions? other) {
+  CustomDimensions merge(final CustomDimensions? other) {
     if (other == null) {
       return this;
     }
@@ -261,7 +261,7 @@ class CustomDimensions {
     );
   }
 
-  static CustomDimensions fromMap(Map<String, String> map) => CustomDimensions(
+  static CustomDimensions fromMap(final Map<String, String> map) => CustomDimensions(
       sessionHostOsDetails: _extractString(map, CustomDimensionsEnum.sessionHostOsDetails),
       sessionChannelName: _extractString(map, CustomDimensionsEnum.sessionChannelName),
       commandRunIsEmulator: _extractBool(map, CustomDimensionsEnum.commandRunIsEmulator),
@@ -322,20 +322,20 @@ class CustomDimensions {
       commandRunIsTest: _extractBool(map, CustomDimensionsEnum.commandRunIsTest),
     );
 
-  static bool? _extractBool(Map<String, String> map, CustomDimensionsEnum field) =>
+  static bool? _extractBool(final Map<String, String> map, final CustomDimensionsEnum field) =>
     map.containsKey(cdKey(field))? map[cdKey(field)] == 'true' : null;
 
-  static String? _extractString(Map<String, String> map, CustomDimensionsEnum field) =>
+  static String? _extractString(final Map<String, String> map, final CustomDimensionsEnum field) =>
     map.containsKey(cdKey(field))? map[cdKey(field)] : null;
 
-  static int? _extractInt(Map<String, String> map, CustomDimensionsEnum field) =>
+  static int? _extractInt(final Map<String, String> map, final CustomDimensionsEnum field) =>
     map.containsKey(cdKey(field))? int.parse(map[cdKey(field)]!) : null;
 
   @override
   String toString() => toMap().toString();
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     return other is CustomDimensions &&
       _mapsEqual(other.toMap(), toMap());
   }
@@ -410,4 +410,4 @@ enum CustomDimensionsEnum {
   commandRunIsTest, // cd58
 }
 
-String cdKey(CustomDimensionsEnum cd) => 'cd${cd.index + 1}';
+String cdKey(final CustomDimensionsEnum cd) => 'cd${cd.index + 1}';

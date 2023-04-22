@@ -54,11 +54,11 @@ void main() {
   });
 }
 
-void expectResult(ExpressionCompilationResult result, bool isError, String value) {
+void expectResult(final ExpressionCompilationResult result, final bool isError, final String value) {
   expect(result,
     const TypeMatcher<ExpressionCompilationResult>()
-      .having((ExpressionCompilationResult instance) => instance.isError, 'isError', isError)
-      .having((ExpressionCompilationResult instance) => instance.result, 'result', value));
+      .having((final ExpressionCompilationResult instance) => instance.isError, 'isError', isError)
+      .having((final ExpressionCompilationResult instance) => instance.result, 'result', value));
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -68,13 +68,13 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
   @override
   Future<CompilerOutput?> compileExpressionToJs(
-    String libraryUri,
-    int line,
-    int column,
-    Map<String, String> jsModules,
-    Map<String, String> jsFrameValues,
-    String moduleName,
-    String expression,
+    final String libraryUri,
+    final int line,
+    final int column,
+    final Map<String, String> jsModules,
+    final Map<String, String> jsFrameValues,
+    final String moduleName,
+    final String expression,
   ) async {
     return output;
   }

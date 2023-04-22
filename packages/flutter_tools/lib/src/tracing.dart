@@ -23,7 +23,7 @@ const String kFirstFrameRasterizedEventName = 'Rasterized first useful frame';
 class Tracing {
   Tracing({
     required this.vmService,
-    required Logger logger,
+    required final Logger logger,
   }) : _logger = logger;
 
   static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
@@ -38,7 +38,7 @@ class Tracing {
 
   /// Stops tracing; optionally wait for first frame.
   Future<Map<String, Object?>> stopTracingAndDownloadTimeline({
-    bool awaitFirstFrame = false,
+    final bool awaitFirstFrame = false,
   }) async {
     if (awaitFirstFrame) {
       final Status status = _logger.startProgress(
@@ -54,7 +54,7 @@ class Tracing {
         }
         final StringBuffer bufferedEvents = StringBuffer();
         void Function(String) handleBufferedEvent = bufferedEvents.writeln;
-        vmService.service.onExtensionEvent.listen((vm_service.Event event) {
+        vmService.service.onExtensionEvent.listen((final vm_service.Event event) {
           handleBufferedEvent('${event.extensionKind}: ${event.extensionData}');
           if (event.extensionKind == 'Flutter.FirstFrame') {
             whenFirstFrameRendered.complete();
@@ -122,10 +122,10 @@ class Tracing {
 
 /// Download the startup trace information from the given VM Service client and
 /// store it to `$output/start_up_info.json`.
-Future<void> downloadStartupTrace(FlutterVmService vmService, {
-  bool awaitFirstFrame = true,
-  required Logger logger,
-  required Directory output,
+Future<void> downloadStartupTrace(final FlutterVmService vmService, {
+  final bool awaitFirstFrame = true,
+  required final Logger logger,
+  required final Directory output,
 }) async {
   final File traceInfoFile = output.childFile('start_up_info.json');
 
@@ -146,7 +146,7 @@ Future<void> downloadStartupTrace(FlutterVmService vmService, {
   final File traceTimelineFile = output.childFile('start_up_timeline.json');
   traceTimelineFile.writeAsStringSync(toPrettyJson(timeline));
 
-  int? extractInstantEventTimestamp(String eventName) {
+  int? extractInstantEventTimestamp(final String eventName) {
     final List<Object?>? traceEvents = timeline['traceEvents'] as List<Object?>?;
     if (traceEvents == null) {
       return null;

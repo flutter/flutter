@@ -34,7 +34,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  void standardTests({List<String>? toolArgs}) {
+  void standardTests({final List<String>? toolArgs}) {
     test('can run in debug mode', () async {
       // Collect output and test events while running the script.
       final TestEvents outputEvents = await client.collectTestOutput(
@@ -47,7 +47,7 @@ void main() {
 
       // Check the printed output shows that the run finished, and it's exit
       // code (which is 1 due to the failing test).
-      final String output = outputEvents.output.map((OutputEventBody e) => e.output).join();
+      final String output = outputEvents.output.map((final OutputEventBody e) => e.output).join();
       expectLines(
         output,
         <Object>[
@@ -73,7 +73,7 @@ void main() {
 
     // Check the printed output shows that the run finished, and it's exit
     // code (which is 1 due to the failing test).
-    final String output = outputEvents.output.map((OutputEventBody e) => e.output).join();
+    final String output = outputEvents.output.map((final OutputEventBody e) => e.output).join();
     expectLines(
       output,
       _testsProjectExpectedOutput,
@@ -101,8 +101,8 @@ void main() {
     );
 
     final List<Object> testsNames = outputEvents.testNotifications
-        .where((Map<String, Object?> e) => e['type'] == 'testStart')
-        .map((Map<String, Object?> e) => (e['test']! as Map<String, Object?>)['name']!)
+        .where((final Map<String, Object?> e) => e['type'] == 'testStart')
+        .map((final Map<String, Object?> e) => (e['test']! as Map<String, Object?>)['name']!)
         .toList();
 
     expect(testsNames, contains('Flutter tests can pass'));
@@ -151,11 +151,11 @@ final List<Object> _testsProjectExpectedOutput = <Object>[
 
 /// A helper that verifies a full set of expected test results for the
 /// [TestsProject] script.
-void _expectStandardTestsProjectResults(TestEvents events) {
+void _expectStandardTestsProjectResults(final TestEvents events) {
   // Check we received all expected test events passed through from
   // package:test.
   final List<Object> eventNames = events.testNotifications
-      .map((Map<String, Object?> e) => e['type']!)
+      .map((final Map<String, Object?> e) => e['type']!)
       .toList();
 
   // start/done should always be first/last.

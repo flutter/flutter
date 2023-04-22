@@ -927,7 +927,7 @@ Build settings for action build and target plugin2:
       });
     });
 
-    void testUsingOsxContext(String description, dynamic Function() testMethod) {
+    void testUsingOsxContext(final String description, final dynamic Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         Artifacts: () => localIosArtifacts,
         Platform: () => macOS,
@@ -1115,20 +1115,20 @@ Build settings for action build and target plugin2:
       });
     });
 
-    String? propertyFor(String key, File file) {
+    String? propertyFor(final String key, final File file) {
       final List<String> properties = file
           .readAsLinesSync()
-          .where((String line) => line.startsWith('$key='))
-          .map((String line) => line.split('=')[1])
+          .where((final String line) => line.startsWith('$key='))
+          .map((final String line) => line.split('=')[1])
           .toList();
       return properties.isEmpty ? null : properties.first;
     }
 
     Future<void> checkBuildVersion({
-      required String manifestString,
-      required BuildInfo buildInfo,
-      String? expectedBuildName,
-      String? expectedBuildNumber,
+      required final String manifestString,
+      required final BuildInfo buildInfo,
+      final String? expectedBuildName,
+      final String? expectedBuildNumber,
     }) async {
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);

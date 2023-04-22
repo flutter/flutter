@@ -790,15 +790,15 @@ wireless ios (mobile)     • wireless-ios     • ios         • iOS 16 (simul
 
 class _FakeDeviceManager extends DeviceManager {
   _FakeDeviceManager({
-    List<FakeDeviceJsonData>? devices,
-    FakeBufferLogger? logger,
+    final List<FakeDeviceJsonData>? devices,
+    final FakeBufferLogger? logger,
   })  : fakeDevices = devices ?? <FakeDeviceJsonData>[],
         super(logger: logger ?? testLogger);
 
   List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[];
 
   @override
-  Future<List<Device>> getAllDevices({DeviceDiscoveryFilter? filter}) async {
+  Future<List<Device>> getAllDevices({final DeviceDiscoveryFilter? filter}) async {
     final List<Device> devices = <Device>[];
     for (final FakeDeviceJsonData deviceJson in fakeDevices) {
       if (filter?.deviceConnectionInterface == null ||
@@ -811,14 +811,14 @@ class _FakeDeviceManager extends DeviceManager {
 
   @override
   Future<List<Device>> refreshAllDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) => getAllDevices(filter: filter);
 
   @override
   Future<List<Device>> refreshExtendedWirelessDeviceDiscoverers({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) => getAllDevices(filter: filter);
 
   @override
@@ -849,7 +849,7 @@ class FakeTerminal extends Fake implements AnsiTerminal {
   bool singleCharMode = false;
 
   @override
-  String clearLines(int numberOfLines) {
+  String clearLines(final int numberOfLines) {
     return 'CLEAR_LINES_$numberOfLines';
   }
 }
@@ -865,13 +865,13 @@ class FakeBufferLogger extends BufferLogger {
 
   @override
   void printStatus(
-    String message, {
-    bool? emphasis,
-    TerminalColor? color,
-    bool? newline,
-    int? indent,
-    int? hangingIndent,
-    bool? wrap,
+    final String message, {
+    final bool? emphasis,
+    final TerminalColor? color,
+    final bool? newline,
+    final int? indent,
+    final int? hangingIndent,
+    final bool? wrap,
   }) {
     if (message.startsWith('CLEAR_LINES_')) {
       expect(statusText, equals(originalStatusText));

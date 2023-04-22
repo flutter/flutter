@@ -13,10 +13,10 @@ import '../base/process.dart';
 /// See https://github.com/libimobiledevice/libusbmuxd.
 class IProxy {
   IProxy({
-    required String iproxyPath,
-    required Logger logger,
-    required ProcessManager processManager,
-    required MapEntry<String, String> dyLdLibEntry,
+    required final String iproxyPath,
+    required final Logger logger,
+    required final ProcessManager processManager,
+    required final MapEntry<String, String> dyLdLibEntry,
   }) : _dyLdLibEntry = dyLdLibEntry,
         _processUtils = ProcessUtils(processManager: processManager, logger: logger),
         _logger = logger,
@@ -27,8 +27,8 @@ class IProxy {
   /// This specifies the path to iproxy as 'iproxy` and the dyLdLibEntry as
   /// 'DYLD_LIBRARY_PATH: /path/to/libs'.
   factory IProxy.test({
-    required Logger logger,
-    required ProcessManager processManager,
+    required final Logger logger,
+    required final ProcessManager processManager,
   }) {
     return IProxy(
       iproxyPath: 'iproxy',
@@ -45,7 +45,7 @@ class IProxy {
   final Logger _logger;
   final MapEntry<String, String> _dyLdLibEntry;
 
-  Future<Process> forward(int devicePort, int hostPort, String deviceId) {
+  Future<Process> forward(final int devicePort, final int hostPort, final String deviceId) {
     // Usage: iproxy LOCAL_PORT:DEVICE_PORT --udid UDID
     return _processUtils.start(
       <String>[

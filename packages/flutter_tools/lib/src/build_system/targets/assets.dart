@@ -27,13 +27,13 @@ import 'shader_compiler.dart';
 ///
 /// Returns a [Depfile] containing all assets used in the build.
 Future<Depfile> copyAssets(
-  Environment environment,
-  Directory outputDirectory, {
-  Map<String, DevFSContent>? additionalContent,
-  required TargetPlatform targetPlatform,
-  BuildMode? buildMode,
-  required ShaderTarget shaderTarget,
-  List<File> additionalInputs = const <File>[],
+  final Environment environment,
+  final Directory outputDirectory, {
+  final Map<String, DevFSContent>? additionalContent,
+  required final TargetPlatform targetPlatform,
+  final BuildMode? buildMode,
+  required final ShaderTarget shaderTarget,
+  final List<File> additionalInputs = const <File>[],
 }) async {
   // Check for an SkSL bundle.
   final String? shaderBundlePath = environment.defines[kBundleSkSLPath] ?? environment.inputs[kBundleSkSLPath];
@@ -103,7 +103,7 @@ Future<Depfile> copyAssets(
   };
 
   await Future.wait<void>(
-    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+    assetEntries.entries.map<Future<void>>((final MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
         // This will result in strange looking files, for example files with `/`
@@ -158,7 +158,7 @@ Future<Depfile> copyAssets(
   // building as debug.
   if (environment.defines[kDeferredComponents] == 'true' && buildMode != null) {
     await Future.wait<void>(assetBundle.deferredComponentsEntries.entries.map<Future<void>>(
-      (MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
+      (final MapEntry<String, Map<String, DevFSContent>> componentEntries) async {
         final Directory componentOutputDir =
             environment.projectDir
                 .childDirectory('build')
@@ -166,7 +166,7 @@ Future<Depfile> copyAssets(
                 .childDirectory('intermediates')
                 .childDirectory('flutter');
         await Future.wait<void>(
-          componentEntries.value.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+          componentEntries.value.entries.map<Future<void>>((final MapEntry<String, DevFSContent> entry) async {
             final PoolResource resource = await pool.request();
             try {
               // This will result in strange looking files, for example files with `/`
@@ -223,11 +223,11 @@ const String kSkSLShaderBundlePath = 'io.flutter.shaders.json';
 ///
 /// If the current target platform is different than the platform constructed
 /// for the bundle, a warning will be printed.
-DevFSContent? processSkSLBundle(String? bundlePath, {
-  required TargetPlatform targetPlatform,
-  required FileSystem fileSystem,
-  required Logger logger,
-  String? engineVersion,
+DevFSContent? processSkSLBundle(final String? bundlePath, {
+  required final TargetPlatform targetPlatform,
+  required final FileSystem fileSystem,
+  required final Logger logger,
+  final String? engineVersion,
 }) {
   if (bundlePath == null) {
     return null;
@@ -312,7 +312,7 @@ class CopyAssets extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final Directory output = environment
       .buildDir
       .childDirectory('flutter_assets');

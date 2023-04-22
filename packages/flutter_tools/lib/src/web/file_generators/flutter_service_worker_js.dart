@@ -17,10 +17,10 @@ enum ServiceWorkerStrategy implements CliEnum {
   @override
   String get cliName => snakeCase(name, '-');
 
-  static ServiceWorkerStrategy fromCliName(String? value) => value == null
+  static ServiceWorkerStrategy fromCliName(final String? value) => value == null
       ? ServiceWorkerStrategy.offlineFirst
       : values.singleWhere(
-          (ServiceWorkerStrategy element) => element.cliName == value,
+          (final ServiceWorkerStrategy element) => element.cliName == value,
           orElse: () =>
               throw ArgumentError.value(value, 'value', 'Not supported.'),
         );
@@ -46,10 +46,10 @@ enum ServiceWorkerStrategy implements CliEnum {
 /// invalidation will automatically reactivate workers whenever a new
 /// version is deployed.
 String generateServiceWorker(
-  String fileGeneratorsPath,
-  Map<String, String> resources,
-  List<String> coreBundle, {
-  required ServiceWorkerStrategy serviceWorkerStrategy,
+  final String fileGeneratorsPath,
+  final Map<String, String> resources,
+  final List<String> coreBundle, {
+  required final ServiceWorkerStrategy serviceWorkerStrategy,
 }) {
   if (serviceWorkerStrategy == ServiceWorkerStrategy.none) {
     return '';
@@ -65,10 +65,10 @@ String generateServiceWorker(
       .readAsStringSync()
       .replaceAll(
         r'$$RESOURCES_MAP',
-        '{${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}}',
+        '{${resources.entries.map((final MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}}',
       )
       .replaceAll(
         r'$$CORE_LIST',
-        '[${coreBundle.map((String file) => '"$file"').join(',\n')}]',
+        '[${coreBundle.map((final String file) => '"$file"').join(',\n')}]',
       );
 }

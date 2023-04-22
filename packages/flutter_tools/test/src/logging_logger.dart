@@ -11,17 +11,17 @@ class LoggingLogger extends BufferLogger {
   List<String> messages = <String>[];
 
   @override
-  void printError(String message, {StackTrace? stackTrace, bool? emphasis, TerminalColor? color, int? indent, int? hangingIndent, bool? wrap}) {
+  void printError(final String message, {final StackTrace? stackTrace, final bool? emphasis, final TerminalColor? color, final int? indent, final int? hangingIndent, final bool? wrap}) {
     messages.add(message);
   }
 
   @override
-  void printStatus(String message, {bool? emphasis, TerminalColor? color, bool? newline, int? indent, int? hangingIndent, bool? wrap}) {
+  void printStatus(final String message, {final bool? emphasis, final TerminalColor? color, final bool? newline, final int? indent, final int? hangingIndent, final bool? wrap}) {
     messages.add(message);
   }
 
   @override
-  void printTrace(String message) {
+  void printTrace(final String message) {
     messages.add(message);
   }
 }

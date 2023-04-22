@@ -12,9 +12,9 @@ import 'package:flutter_tools/src/base/multi_root_file_system.dart';
 import '../../src/common.dart';
 
 void setupFileSystem({
-  required MemoryFileSystem fs,
-  required List<String> directories,
-  required List<String> files,
+  required final MemoryFileSystem fs,
+  required final List<String> directories,
+  required final List<String> files,
 }) {
   for (final String directory in directories) {
     fs.directory(directory).createSync(recursive: true);
@@ -35,7 +35,7 @@ void main() {
   });
 }
 
-void runTest(FileSystemStyle style) {
+void runTest(final FileSystemStyle style) {
   final String sep = style == FileSystemStyle.windows ? r'\' : '/';
   final String root = style == FileSystemStyle.windows ? r'C:\' : '/';
   final String rootUri = style == FileSystemStyle.windows ? 'C:/' : '';

@@ -11,8 +11,8 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/localizations.dart';
 
 Future<void> generateLocalizationsSyntheticPackage({
-  required Environment environment,
-  required BuildSystem buildSystem,
+  required final Environment environment,
+  required final BuildSystem buildSystem,
 }) async {
 
   final FileSystem fileSystem = environment.fileSystem;
@@ -62,7 +62,7 @@ Future<void> generateLocalizationsSyntheticPackage({
     throwToolExit(
       'Generating synthetic localizations package failed with ${result.exceptions.length} ${pluralize('error', result.exceptions.length)}:'
       '\n\n'
-      '${result.exceptions.values.map<Object?>((ExceptionMeasurement e) => e.exception).join('\n\n')}',
+      '${result.exceptions.values.map<Object?>((final ExceptionMeasurement e) => e.exception).join('\n\n')}',
     );
   }
 }

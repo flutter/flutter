@@ -52,7 +52,7 @@ typedef BrowserFinder = String Function(Platform, FileSystem);
 /// Find the chrome executable on the current platform.
 ///
 /// Does not verify whether the executable exists.
-String findChromeExecutable(Platform platform, FileSystem fileSystem) {
+String findChromeExecutable(final Platform platform, final FileSystem fileSystem) {
   if (platform.environment.containsKey(kChromeEnvironment)) {
     return platform.environment[kChromeEnvironment]!;
   }
@@ -72,7 +72,7 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
       if (platform.environment.containsKey('PROGRAMFILES(X86)'))
         platform.environment['PROGRAMFILES(X86)']!,
     ];
-    final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((final String prefix) {
       final String path = fileSystem.path.join(prefix, kWindowsExecutable);
       return fileSystem.file(path).existsSync();
     }, orElse: () => '.');
@@ -84,7 +84,7 @@ String findChromeExecutable(Platform platform, FileSystem fileSystem) {
 /// Find the Microsoft Edge executable on the current platform.
 ///
 /// Does not verify whether the executable exists.
-String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
+String findEdgeExecutable(final Platform platform, final FileSystem fileSystem) {
   if (platform.environment.containsKey(kEdgeEnvironment)) {
     return platform.environment[kEdgeEnvironment]!;
   }
@@ -98,7 +98,7 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
       if (platform.environment.containsKey('PROGRAMFILES(X86)'))
         platform.environment['PROGRAMFILES(X86)']!,
     ];
-    final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((final String prefix) {
       final String path = fileSystem.path.join(prefix, kWindowsEdgeExecutable);
       return fileSystem.file(path).existsSync();
     }, orElse: () => '.');
@@ -111,12 +111,12 @@ String findEdgeExecutable(Platform platform, FileSystem fileSystem) {
 /// A launcher for Chromium browsers with devtools configured.
 class ChromiumLauncher {
   ChromiumLauncher({
-    required FileSystem fileSystem,
-    required Platform platform,
-    required ProcessManager processManager,
-    required OperatingSystemUtils operatingSystemUtils,
-    required BrowserFinder browserFinder,
-    required Logger logger,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final OperatingSystemUtils operatingSystemUtils,
+    required final BrowserFinder browserFinder,
+    required final Logger logger,
   }) : _fileSystem = fileSystem,
        _platform = platform,
        _processManager = processManager,
@@ -160,12 +160,12 @@ class ChromiumLauncher {
   /// [skipCheck] does not attempt to make a devtools connection before returning.
   ///
   /// [webBrowserFlags] add arbitrary browser flags.
-  Future<Chromium> launch(String url, {
-    bool headless = false,
-    int? debugPort,
-    bool skipCheck = false,
-    Directory? cacheDir,
-    List<String> webBrowserFlags = const <String>[],
+  Future<Chromium> launch(final String url, {
+    final bool headless = false,
+    final int? debugPort,
+    final bool skipCheck = false,
+    final Directory? cacheDir,
+    final List<String> webBrowserFlags = const <String>[],
   }) async {
     if (currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');
@@ -239,7 +239,7 @@ class ChromiumLauncher {
     ), skipCheck);
   }
 
-  Future<Process?> _spawnChromiumProcess(List<String> args, String chromeExecutable) async {
+  Future<Process?> _spawnChromiumProcess(final List<String> args, final String chromeExecutable) async {
     if (_operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64) {
       final ProcessResult result = _processManager.runSync(<String>['file', chromeExecutable]);
       // Check if ARM Chrome is installed.
@@ -262,7 +262,7 @@ class ChromiumLauncher {
       process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen((String line) {
+        .listen((final String line) {
           _logger.printTrace('[CHROME]: $line');
         });
 
@@ -274,7 +274,7 @@ class ChromiumLauncher {
       await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .map((String line) {
+        .map((final String line) {
           _logger.printTrace('[CHROME]: $line');
           errors.add('[CHROME]:$line');
           if (line.contains(_kGlibcError)) {
@@ -283,7 +283,7 @@ class ChromiumLauncher {
           }
           return line;
         })
-        .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+        .firstWhere((final String line) => line.startsWith('DevTools listening'), orElse: () {
           if (hitGlibcBug) {
             _logger.printTrace(
               'Encountered glibc bug https://sourceware.org/bugzilla/show_bug.cgi?id=19329. '
@@ -341,7 +341,7 @@ class ChromiumLauncher {
   /// For workflows that may require this data, using the start-paused flag and
   /// dart debug extension with a user controlled browser profile will lead to a
   /// better experience.
-  void _cacheUserSessionInformation(Directory userDataDir, Directory cacheDir) {
+  void _cacheUserSessionInformation(final Directory userDataDir, final Directory cacheDir) {
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
     if (sourceChromeDefault.existsSync()) {
@@ -373,7 +373,7 @@ class ChromiumLauncher {
 
   /// Restore Chrome user information from a per-project cache into Chrome's
   /// user data directory.
-  void _restoreUserSessionInformation(Directory cacheDir, Directory userDataDir) {
+  void _restoreUserSessionInformation(final Directory cacheDir, final Directory userDataDir) {
     final Directory sourceChromeDefault = _fileSystem.directory(_fileSystem.path.join(cacheDir.path, _chromeDefaultPath));
     final Directory targetChromeDefault = _fileSystem.directory(_fileSystem.path.join(userDataDir.path, _chromeDefaultPath));
     try {
@@ -391,7 +391,7 @@ class ChromiumLauncher {
   }
 
   // Cache, Code Cache, and GPUCache are nearly 1GB of data
-  bool _isNotCacheDirectory(Directory directory) {
+  bool _isNotCacheDirectory(final Directory directory) {
     return !directory.path.endsWith('Cache') &&
            !directory.path.endsWith('Code Cache') &&
            !directory.path.endsWith('GPUCache');
@@ -400,7 +400,7 @@ class ChromiumLauncher {
   /// Connect to the [chrome] instance, testing the connection if
   /// [skipCheck] is set to false.
   @visibleForTesting
-  Future<Chromium> connect(Chromium chrome, bool skipCheck) async {
+  Future<Chromium> connect(final Chromium chrome, final bool skipCheck) async {
     // The connection is lazy. Try a simple call to make sure the provided
     // connection is valid.
     if (!skipCheck) {
@@ -426,7 +426,7 @@ class ChromiumLauncher {
   // TODO(ianh): remove the timeouts here, they violate our style guide.
   // (We should just keep waiting forever, and print a warning when it's
   // taking too long.)
-  Future<ChromeTab?> _getFirstTab(Chromium chrome) async {
+  Future<ChromeTab?> _getFirstTab(final Chromium chrome) async {
     const Duration retryFor = Duration(seconds: 2);
     const int attempts = 5;
 
@@ -460,8 +460,8 @@ class Chromium {
     this.debugPort,
     this.chromeConnection, {
     this.url,
-    Process? process,
-    required ChromiumLauncher chromiumLauncher,
+    final Process? process,
+    required final ChromiumLauncher chromiumLauncher,
   })  : _process = process,
         _chromiumLauncher = chromiumLauncher;
 

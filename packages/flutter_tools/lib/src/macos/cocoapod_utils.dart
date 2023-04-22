@@ -12,9 +12,9 @@ import '../project.dart';
 /// For a given build, determines whether dependencies have changed since the
 /// last call to processPods, then calls processPods with that information.
 Future<void> processPodsIfNeeded(
-  XcodeBasedProject xcodeProject,
-  String buildDirectory,
-  BuildMode buildMode) async {
+  final XcodeBasedProject xcodeProject,
+  final String buildDirectory,
+  final BuildMode buildMode) async {
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   await refreshPluginsList(project, macOSPlatform: project.macos.existsSync());

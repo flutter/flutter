@@ -425,9 +425,9 @@ void main() {
 
 FlutterDriverService setUpDriverService({
   Logger? logger,
-  ProcessManager? processManager,
-  FlutterVmService? vmService,
-  DevtoolsLauncher? devtoolsLauncher,
+  final ProcessManager? processManager,
+  final FlutterVmService? vmService,
+  final DevtoolsLauncher? devtoolsLauncher,
 }) {
   logger ??= BufferLogger.test();
   return FlutterDriverService(
@@ -439,16 +439,16 @@ FlutterDriverService setUpDriverService({
     ),
     dartSdkPath: 'dart',
     devtoolsLauncher: devtoolsLauncher ?? FakeDevtoolsLauncher(),
-    vmServiceConnector: (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      Device? device,
-      required Logger logger,
+    vmServiceConnector: (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+      final Device? device,
+      required final Logger logger,
     }) async {
       if (httpUri.scheme != 'http') {
         fail('Expected an HTTP scheme, found $httpUri');
@@ -468,9 +468,9 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
 
   @override
   Future<ApplicationPackage> getPackageForPlatform(
-    TargetPlatform platform, {
-    BuildInfo? buildInfo,
-    File? applicationBinary,
+    final TargetPlatform platform, {
+    final BuildInfo? buildInfo,
+    final File? applicationBinary,
   }) async => applicationPackage;
 }
 
@@ -504,20 +504,20 @@ class FakeDevice extends Fake implements Device {
 
   @override
   Future<DeviceLogReader> getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
+    final ApplicationPackage? app,
+    final bool includePastLogs = false,
   }) async => NoOpDeviceLogReader('test');
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    required final DebuggingOptions debuggingOptions,
+    final Map<String, Object?> platformArgs = const <String, Object?>{},
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
     }) async {
     if (failOnce) {
       failOnce = false;
@@ -527,13 +527,13 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(final ApplicationPackage? app, {final String? userIdentifier}) async {
     didStopApp = true;
     return true;
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(final ApplicationPackage app, {final String? userIdentifier}) async {
     didUninstallApp = true;
     return true;
   }
@@ -553,12 +553,12 @@ class FakeDartDevelopmentService extends Fake implements DartDevelopmentService 
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
-    bool? disableServiceAuthCodes,
-    bool cacheStartupProfile = false,
+    final Uri vmServiceUri, {
+    required final Logger logger,
+    final int? hostPort,
+    final bool? ipv6,
+    final bool? disableServiceAuthCodes,
+    final bool cacheStartupProfile = false,
   }) async {
     started = true;
   }
@@ -574,7 +574,7 @@ class FakeDevtoolsLauncher extends Fake implements DevtoolsLauncher {
   final Completer<void> _processStarted = Completer<void>();
 
   @override
-  Future<void> launch(Uri vmServiceUri, {List<String>? additionalArguments}) {
+  Future<void> launch(final Uri vmServiceUri, {final List<String>? additionalArguments}) {
     _processStarted.complete();
     return Completer<void>().future;
   }

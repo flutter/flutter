@@ -27,7 +27,7 @@ abstract class ShutdownHooks {
 
   /// Registers a [ShutdownHook] to be executed before the VM exits.
   void addShutdownHook(
-    ShutdownHook shutdownHook
+    final ShutdownHook shutdownHook
   );
 
   @visibleForTesting
@@ -43,7 +43,7 @@ abstract class ShutdownHooks {
   ///
   /// This class is constructed before the [Logger], so it cannot be direct
   /// injected in the constructor.
-  Future<void> runShutdownHooks(Logger logger);
+  Future<void> runShutdownHooks(final Logger logger);
 }
 
 class _DefaultShutdownHooks implements ShutdownHooks {
@@ -56,14 +56,14 @@ class _DefaultShutdownHooks implements ShutdownHooks {
 
   @override
   void addShutdownHook(
-    ShutdownHook shutdownHook
+    final ShutdownHook shutdownHook
   ) {
     assert(!_shutdownHooksRunning);
     registeredHooks.add(shutdownHook);
   }
 
   @override
-  Future<void> runShutdownHooks(Logger logger) async {
+  Future<void> runShutdownHooks(final Logger logger) async {
     logger.printTrace(
       'Running ${registeredHooks.length} shutdown hook${registeredHooks.length == 1 ? '' : 's'}',
     );
@@ -121,7 +121,7 @@ class RunResult {
   }
 
   /// Throws a [ProcessException] with the given `message`.
-  void throwException(String message) {
+  void throwException(final String message) {
     throw ProcessException(
       _command.first,
       _command.skip(1).toList(),
@@ -135,8 +135,8 @@ typedef RunResultChecker = bool Function(int);
 
 abstract class ProcessUtils {
   factory ProcessUtils({
-    required ProcessManager processManager,
-    required Logger logger,
+    required final ProcessManager processManager,
+    required final Logger logger,
   }) => _DefaultProcessUtils(
     processManager: processManager,
     logger: logger,
@@ -166,37 +166,37 @@ abstract class ProcessUtils {
   /// If [timeout] is supplied, the command will be retried [timeoutRetries] times
   /// if it times out.
   Future<RunResult> run(
-    List<String> cmd, {
-    bool throwOnError = false,
-    RunResultChecker? allowedFailures,
-    String? workingDirectory,
-    bool allowReentrantFlutter = false,
-    Map<String, String>? environment,
-    Duration? timeout,
-    int timeoutRetries = 0,
+    final List<String> cmd, {
+    final bool throwOnError = false,
+    final RunResultChecker? allowedFailures,
+    final String? workingDirectory,
+    final bool allowReentrantFlutter = false,
+    final Map<String, String>? environment,
+    final Duration? timeout,
+    final int timeoutRetries = 0,
   });
 
   /// Run the command and block waiting for its result.
   RunResult runSync(
-    List<String> cmd, {
-    bool throwOnError = false,
-    bool verboseExceptions = false,
-    RunResultChecker? allowedFailures,
-    bool hideStdout = false,
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool allowReentrantFlutter = false,
-    Encoding encoding = systemEncoding,
+    final List<String> cmd, {
+    final bool throwOnError = false,
+    final bool verboseExceptions = false,
+    final RunResultChecker? allowedFailures,
+    final bool hideStdout = false,
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool allowReentrantFlutter = false,
+    final Encoding encoding = systemEncoding,
   });
 
   /// This runs the command in the background from the specified working
   /// directory. Completes when the process has been started.
   Future<Process> start(
-    List<String> cmd, {
-    String? workingDirectory,
-    bool allowReentrantFlutter = false,
-    Map<String, String>? environment,
-    ProcessStartMode mode = ProcessStartMode.normal,
+    final List<String> cmd, {
+    final String? workingDirectory,
+    final bool allowReentrantFlutter = false,
+    final Map<String, String>? environment,
+    final ProcessStartMode mode = ProcessStartMode.normal,
   });
 
   /// This runs the command and streams stdout/stderr from the child process to
@@ -211,32 +211,32 @@ abstract class ProcessUtils {
   /// If [stdoutErrorMatcher] is non-null, matching lines from stdout will be
   /// treated as errors, just as if they had been logged to stderr instead.
   Future<int> stream(
-    List<String> cmd, {
-    String? workingDirectory,
-    bool allowReentrantFlutter = false,
-    String prefix = '',
-    bool trace = false,
-    RegExp? filter,
-    RegExp? stdoutErrorMatcher,
-    StringConverter? mapFunction,
-    Map<String, String>? environment,
+    final List<String> cmd, {
+    final String? workingDirectory,
+    final bool allowReentrantFlutter = false,
+    final String prefix = '',
+    final bool trace = false,
+    final RegExp? filter,
+    final RegExp? stdoutErrorMatcher,
+    final StringConverter? mapFunction,
+    final Map<String, String>? environment,
   });
 
   bool exitsHappySync(
-    List<String> cli, {
-    Map<String, String>? environment,
+    final List<String> cli, {
+    final Map<String, String>? environment,
   });
 
   Future<bool> exitsHappy(
-    List<String> cli, {
-    Map<String, String>? environment,
+    final List<String> cli, {
+    final Map<String, String>? environment,
   });
 }
 
 class _DefaultProcessUtils implements ProcessUtils {
   _DefaultProcessUtils({
-    required ProcessManager processManager,
-    required Logger logger,
+    required final ProcessManager processManager,
+    required final Logger logger,
   }) : _processManager = processManager,
       _logger = logger;
 
@@ -246,13 +246,13 @@ class _DefaultProcessUtils implements ProcessUtils {
 
   @override
   Future<RunResult> run(
-    List<String> cmd, {
-    bool throwOnError = false,
-    RunResultChecker? allowedFailures,
-    String? workingDirectory,
-    bool allowReentrantFlutter = false,
-    Map<String, String>? environment,
-    Duration? timeout,
+    final List<String> cmd, {
+    final bool throwOnError = false,
+    final RunResultChecker? allowedFailures,
+    final String? workingDirectory,
+    final bool allowReentrantFlutter = false,
+    final Map<String, String>? environment,
+    final Duration? timeout,
     int timeoutRetries = 0,
   }) async {
     if (cmd.isEmpty) {
@@ -305,7 +305,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           .asFuture<void>();
 
       int? exitCode;
-      exitCode = await process.exitCode.then<int?>((int x) => x).timeout(timeout, onTimeout: () {
+      exitCode = await process.exitCode.then<int?>((final int x) => x).timeout(timeout, onTimeout: () {
         // The process timed out. Kill it.
         _processManager.killPid(process.pid);
         return null;
@@ -361,15 +361,15 @@ class _DefaultProcessUtils implements ProcessUtils {
 
   @override
   RunResult runSync(
-    List<String> cmd, {
-    bool throwOnError = false,
-    bool verboseExceptions = false,
-    RunResultChecker? allowedFailures,
-    bool hideStdout = false,
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool allowReentrantFlutter = false,
-    Encoding encoding = systemEncoding,
+    final List<String> cmd, {
+    final bool throwOnError = false,
+    final bool verboseExceptions = false,
+    final RunResultChecker? allowedFailures,
+    final bool hideStdout = false,
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool allowReentrantFlutter = false,
+    final Encoding encoding = systemEncoding,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
     final ProcessResult results = _processManager.runSync(
@@ -418,11 +418,11 @@ class _DefaultProcessUtils implements ProcessUtils {
 
   @override
   Future<Process> start(
-    List<String> cmd, {
-    String? workingDirectory,
-    bool allowReentrantFlutter = false,
-    Map<String, String>? environment,
-    ProcessStartMode mode = ProcessStartMode.normal,
+    final List<String> cmd, {
+    final String? workingDirectory,
+    final bool allowReentrantFlutter = false,
+    final Map<String, String>? environment,
+    final ProcessStartMode mode = ProcessStartMode.normal,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
     return _processManager.start(
@@ -435,15 +435,15 @@ class _DefaultProcessUtils implements ProcessUtils {
 
   @override
   Future<int> stream(
-    List<String> cmd, {
-    String? workingDirectory,
-    bool allowReentrantFlutter = false,
-    String prefix = '',
-    bool trace = false,
-    RegExp? filter,
-    RegExp? stdoutErrorMatcher,
-    StringConverter? mapFunction,
-    Map<String, String>? environment,
+    final List<String> cmd, {
+    final String? workingDirectory,
+    final bool allowReentrantFlutter = false,
+    final String prefix = '',
+    final bool trace = false,
+    final RegExp? filter,
+    final RegExp? stdoutErrorMatcher,
+    final StringConverter? mapFunction,
+    final Map<String, String>? environment,
   }) async {
     final Process process = await start(
       cmd,
@@ -454,8 +454,8 @@ class _DefaultProcessUtils implements ProcessUtils {
     final StreamSubscription<String> stdoutSubscription = process.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .where((String line) => filter == null || filter.hasMatch(line))
-      .listen((String line) {
+      .where((final String line) => filter == null || filter.hasMatch(line))
+      .listen((final String line) {
         String? mappedLine = line;
         if (mapFunction != null) {
           mappedLine = mapFunction(line);
@@ -474,8 +474,8 @@ class _DefaultProcessUtils implements ProcessUtils {
     final StreamSubscription<String> stderrSubscription = process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .where((String line) => filter == null || filter.hasMatch(line))
-      .listen((String line) {
+      .where((final String line) => filter == null || filter.hasMatch(line))
+      .listen((final String line) {
         String? mappedLine = line;
         if (mapFunction != null) {
           mappedLine = mapFunction(line);
@@ -505,8 +505,8 @@ class _DefaultProcessUtils implements ProcessUtils {
 
   @override
   bool exitsHappySync(
-    List<String> cli, {
-    Map<String, String>? environment,
+    final List<String> cli, {
+    final Map<String, String>? environment,
   }) {
     _traceCommand(cli);
     if (!_processManager.canRun(cli.first)) {
@@ -524,8 +524,8 @@ class _DefaultProcessUtils implements ProcessUtils {
 
   @override
   Future<bool> exitsHappy(
-    List<String> cli, {
-    Map<String, String>? environment,
+    final List<String> cli, {
+    final Map<String, String>? environment,
   }) async {
     _traceCommand(cli);
     if (!_processManager.canRun(cli.first)) {
@@ -541,7 +541,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
   }
 
-  Map<String, String>? _environment(bool allowReentrantFlutter, [
+  Map<String, String>? _environment(final bool allowReentrantFlutter, [
     Map<String, String>? environment,
   ]) {
     if (allowReentrantFlutter) {
@@ -555,7 +555,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     return environment;
   }
 
-  void _traceCommand(List<String> args, { String? workingDirectory }) {
+  void _traceCommand(final List<String> args, { final String? workingDirectory }) {
     final String argsText = args.join(' ');
     if (workingDirectory == null) {
       _logger.printTrace('executing: $argsText');

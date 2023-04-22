@@ -21,7 +21,7 @@ void main() {
   testUsingContext('Copies assets to expected directory after building', () async {
     final BuildSystem buildSystem = TestBuildSystem.all(
       BuildResult(success: true),
-      (Target target, Environment environment) {
+      (final Target target, final Environment environment) {
         environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
         environment.outputDir.childFile('isolate_snapshot_data').createSync();
         environment.outputDir.childFile('vm_snapshot_data').createSync();
@@ -72,7 +72,7 @@ void main() {
     Environment? env;
     final BuildSystem buildSystem = TestBuildSystem.all(
       BuildResult(success: true),
-      (Target target, Environment environment) {
+      (final Target target, final Environment environment) {
         env = environment;
         environment.outputDir.childFile('kernel_blob.bin').createSync(recursive: true);
         environment.outputDir.childFile('isolate_snapshot_data').createSync();

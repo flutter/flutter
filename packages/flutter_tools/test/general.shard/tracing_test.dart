@@ -187,7 +187,7 @@ void main() {
     final BufferLogger logger = BufferLogger.test();
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Completer<void> completer = Completer<void>();
-    await FakeAsync().run((FakeAsync time) {
+    await FakeAsync().run((final FakeAsync time) {
       final Map<String, String> extensionData = <String, String>{
         'test': 'data',
         'renderedErrorText': 'error text',

@@ -31,9 +31,9 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
 
   @override
   Future<Map<String, String>> getBuildSettings(
-      String projectPath, {
-        XcodeProjectBuildContext? buildContext,
-        Duration timeout = const Duration(minutes: 1),
+      final String projectPath, {
+        final XcodeProjectBuildContext? buildContext,
+        final Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
       'PRODUCT_BUNDLE_IDENTIFIER': productBundleIdentifier ?? 'io.flutter.someProject',
@@ -94,7 +94,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpRsyncCommand({void Function()? onRun}) {
+  FakeCommand setUpRsyncCommand({final void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'rsync',
@@ -108,7 +108,7 @@ void main() {
     );
   }
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
+  FakeCommand setUpXCResultCommand({final String stdout = '', final void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -127,12 +127,12 @@ void main() {
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
   FakeCommand setUpFakeXcodeBuildHandler({
-    bool verbose = false,
-    bool simulator = false,
-    String? deviceId,
-    int exitCode = 0,
-    String? stdout,
-    void Function()? onRun,
+    final bool verbose = false,
+    final bool simulator = false,
+    final String? deviceId,
+    final int exitCode = 0,
+    final String? stdout,
+    final void Function()? onRun,
   }) {
     return FakeCommand(
       command: <String>[
@@ -393,7 +393,7 @@ void main() {
       }),
       setUpRsyncCommand(onRun: () => fileSystem.file('build/ios/iphoneos/Runner.app/Frameworks/App.framework/App')
         ..createSync(recursive: true)
-        ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0))),
+        ..writeAsBytesSync(List<int>.generate(10000, (final int index) => 0))),
     ]),
     Platform: () => macosPlatform,
     FileSystemUtils: () => FileSystemUtils(fileSystem: fileSystem, platform: macosPlatform),

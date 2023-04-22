@@ -15,11 +15,11 @@ import 'package:flutter_tools/src/debug_adapters/flutter_test_adapter.dart';
 /// A [FlutterDebugAdapter] that captures what process/args will be launched.
 class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   factory MockFlutterDebugAdapter({
-    required FileSystem fileSystem,
-    required Platform platform,
-    bool simulateAppStarted = true,
-    bool supportsRestart = true,
-    FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart,
+    required final FileSystem fileSystem,
+    required final Platform platform,
+    final bool simulateAppStarted = true,
+    final bool supportsRestart = true,
+    final FutureOr<void> Function(MockFlutterDebugAdapter adapter)? preAppStart,
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
@@ -46,7 +46,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     this.supportsRestart = true,
     this.preAppStart,
   }) {
-    clientChannel.listen((ProtocolMessage message) {
+    clientChannel.listen((final ProtocolMessage message) {
       _handleDapToClientMessage(message);
     });
   }
@@ -76,7 +76,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     const List<String> progressEventTypes = <String>['progressStart', 'progressUpdate', 'progressEnd'];
 
     return dapToClientMessages
-        .where((Map<String, Object?> message) => progressEventTypes.contains(message['event'] as String?));
+        .where((final Map<String, Object?> message) => progressEventTypes.contains(message['event'] as String?));
   }
 
   /// A list of all messages sent from the adapter to the `flutter run` processes `stdin`.
@@ -85,7 +85,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   /// The `method`s of all messages sent to the `flutter run` processes `stdin`
   /// by the debug adapter.
   List<String> get dapToFlutterRequests => dapToFlutterMessages
-      .map((Map<String, Object?> message) => message['method'] as String?)
+      .map((final Map<String, Object?> message) => message['method'] as String?)
       .whereNotNull()
       .toList();
 
@@ -94,9 +94,9 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 
   @override
   Future<void> launchAsProcess({
-    required String executable,
-    required List<String> processArgs,
-    required Map<String, String>? env,
+    required final String executable,
+    required final List<String> processArgs,
+    required final Map<String, String>? env,
   }) async {
     this.executable = executable;
     this.processArgs = processArgs;
@@ -123,7 +123,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   }
 
   /// Handles messages sent from the debug adapter back to the client.
-  void _handleDapToClientMessage(ProtocolMessage message) {
+  void _handleDapToClientMessage(final ProtocolMessage message) {
     _dapToClientMessagesController.add(message.toJson());
 
     // Pretend to be the client, delegating any reverse-requests to the relevant
@@ -147,7 +147,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
     }
   }
 
-  Object? _handleReverseRequest(String method, Map<String, Object?>? params) {
+  Object? _handleReverseRequest(final String method, final Map<String, Object?>? params) {
     switch (method) {
       case 'app.exposeUrl':
         final String url = params!['url']! as String;
@@ -161,7 +161,7 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   /// calling the debug adapters [handleStdout] method.
   ///
   /// Use [simulateRawStdout] to simulate non-daemon text output.
-  void simulateStdoutMessage(Map<String, Object?> message) {
+  void simulateStdoutMessage(final Map<String, Object?> message) {
     // Messages are wrapped in a list because Flutter only processes messages
     // wrapped in brackets.
     handleStdout(jsonEncode(<Object?>[message]));
@@ -171,12 +171,12 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
   /// calling the debug adapters [handleStdout] method.
   ///
   /// Use [simulateStdoutMessage] to simulate a daemon JSON message.
-  void simulateRawStdout(String output) {
+  void simulateRawStdout(final String output) {
     handleStdout(output);
   }
 
   @override
-  void sendFlutterMessage(Map<String, Object?> message) {
+  void sendFlutterMessage(final Map<String, Object?> message) {
     dapToFlutterMessages.add(message);
     // Don't call super because it will try to write to the process that we
     // didn't actually spawn.
@@ -194,8 +194,8 @@ class MockFlutterDebugAdapter extends FlutterDebugAdapter {
 /// A [FlutterTestDebugAdapter] that captures what process/args will be launched.
 class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   factory MockFlutterTestDebugAdapter({
-    required FileSystem fileSystem,
-    required Platform platform,
+    required final FileSystem fileSystem,
+    required final Platform platform,
   }) {
     final StreamController<List<int>> stdinController = StreamController<List<int>>();
     final StreamController<List<int>> stdoutController = StreamController<List<int>>();
@@ -213,9 +213,9 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
   MockFlutterTestDebugAdapter._(
     this.stdin,
     this.stdout,
-    ByteStreamServerChannel channel, {
-    required FileSystem fileSystem,
-    required Platform platform,
+    final ByteStreamServerChannel channel, {
+    required final FileSystem fileSystem,
+    required final Platform platform,
   }) : super(channel, fileSystem: fileSystem, platform: platform);
 
   final StreamSink<List<int>> stdin;
@@ -227,9 +227,9 @@ class MockFlutterTestDebugAdapter extends FlutterTestDebugAdapter {
 
   @override
   Future<void> launchAsProcess({
-    required String executable,
-    required List<String> processArgs,
-    required Map<String, String>? env,
+    required final String executable,
+    required final List<String> processArgs,
+    required final Map<String, String>? env,
   }) async {
     this.executable = executable;
     this.processArgs = processArgs;

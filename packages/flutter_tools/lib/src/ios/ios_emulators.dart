@@ -24,7 +24,7 @@ class IOSEmulators extends EmulatorDiscovery {
 }
 
 class IOSEmulator extends Emulator {
-  const IOSEmulator(String id) : super(id, true);
+  const IOSEmulator(final String id) : super(id, true);
 
   @override
   String get name => 'iOS Simulator';
@@ -39,12 +39,12 @@ class IOSEmulator extends Emulator {
   PlatformType get platformType => PlatformType.ios;
 
   @override
-  Future<void> launch({bool coldBoot = false}) async {
+  Future<void> launch({final bool coldBoot = false}) async {
     final String? simulatorPath = globals.xcode?.getSimulatorPath();
     if (simulatorPath == null) {
       throwToolExit('Could not find Simulator app');
     }
-    Future<bool> launchSimulator(List<String> additionalArgs) async {
+    Future<bool> launchSimulator(final List<String> additionalArgs) async {
       final List<String> args = <String>[
         'open',
         ...additionalArgs,

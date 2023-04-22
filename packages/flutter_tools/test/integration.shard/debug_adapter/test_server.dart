@@ -28,7 +28,7 @@ abstract class DapTestServer {
 /// serialized and deserialized but it's not quite the same running out of
 /// process.
 class InProcessDapTestServer extends DapTestServer {
-  InProcessDapTestServer._(List<String> args) {
+  InProcessDapTestServer._(final List<String> args) {
     _server = DapServer(
       stdinController.stream,
       stdoutController.sink,
@@ -57,8 +57,8 @@ class InProcessDapTestServer extends DapTestServer {
   }
 
   static Future<InProcessDapTestServer> create({
-    Logger? logger,
-    List<String>? additionalArgs,
+    final Logger? logger,
+    final List<String>? additionalArgs,
   }) async {
     return InProcessDapTestServer._(additionalArgs ?? <String>[]);
   }
@@ -72,15 +72,15 @@ class InProcessDapTestServer extends DapTestServer {
 class OutOfProcessDapTestServer extends DapTestServer {
   OutOfProcessDapTestServer._(
     this._process,
-    Logger? logger,
+    final Logger? logger,
   ) {
     // Unless we're given an error handler, treat anything written to stderr as
     // the DAP crashing and fail the test unless it's "Waiting for another
     // flutter command to release the startup lock" or we're tearing down.
     _process.stderr
         .transform(utf8.decoder)
-        .where((String error) => !error.contains('Waiting for another flutter command to release the startup lock'))
-        .listen((String error) {
+        .where((final String error) => !error.contains('Waiting for another flutter command to release the startup lock'))
+        .listen((final String error) {
       logger?.call(error);
       if (!_isShuttingDown) {
         final Function(String message)? stderrHandler = onStderrOutput;
@@ -91,7 +91,7 @@ class OutOfProcessDapTestServer extends DapTestServer {
         }
       }
     });
-    unawaited(_process.exitCode.then((int code) {
+    unawaited(_process.exitCode.then((final int code) {
       final String message = 'Out-of-process DAP server terminated with code $code';
       logger?.call(message);
       if (!_isShuttingDown && code != 0 && onStderrOutput == null) {
@@ -119,8 +119,8 @@ class OutOfProcessDapTestServer extends DapTestServer {
   }
 
   static Future<OutOfProcessDapTestServer> create({
-    Logger? logger,
-    List<String>? additionalArgs,
+    final Logger? logger,
+    final List<String>? additionalArgs,
   }) async {
     // runFromSource=true will run "dart bin/flutter_tools.dart ..." to avoid
     // having to rebuild the flutter_tools snapshot.

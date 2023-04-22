@@ -28,7 +28,7 @@ void main() {
     tryToDelete(tempDir);
   });
 
-  Future<void> start({bool verbose = false}) async {
+  Future<void> start({final bool verbose = false}) async {
       // The non-test project has a loop around its breakpoints.
       // No need to start paused as all breakpoint would be eventually reached.
       await flutter.run(
@@ -44,10 +44,10 @@ void main() {
     final ObjRef res =
       await flutter.evaluate('package:characters/characters.dart', 'true');
     expect(res, isA<InstanceRef>()
-      .having((InstanceRef o) => o.kind, 'kind', 'Bool'));
+      .having((final InstanceRef o) => o.kind, 'kind', 'Bool'));
   }
 
-  Future<void> sendEvent(Map<String, Object> event) async {
+  Future<void> sendEvent(final Map<String, Object> event) async {
     final VmService client = await vmServiceConnectUri(
       '${flutter.vmServiceWsUri}');
     final Response result = await client.callServiceExtension(
@@ -78,7 +78,7 @@ void main() {
   testWithoutContext(
       'flutter run output skips DartUri warning messages from dwds', () async {
     bool containsDartUriWarning = false;
-    flutter.stderr.listen((String msg) {
+    flutter.stderr.listen((final String msg) {
       if (msg.contains('DartUri')) {
         containsDartUriWarning = true;
       }

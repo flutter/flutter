@@ -106,7 +106,7 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
   }
 
   @override
-  Future<void> debuggerConnected(vm.VM vmInfo) async {
+  Future<void> debuggerConnected(final vm.VM vmInfo) async {
     // Usually we'd capture the pid from the VM here and record it for
     // terminating, however for Flutter apps it may be running on a remote
     // device so it's not valid to terminate a process with that pid locally.
@@ -128,14 +128,14 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
   }
 
   Future<void> launchAsProcess({
-    required String executable,
-    required List<String> processArgs,
-    required Map<String, String>? env,
+    required final String executable,
+    required final List<String> processArgs,
+    required final Map<String, String>? env,
   }) async {
     final Process process = await (
-      String executable,
-      List<String> processArgs, {
-      required Map<String, String>? env,
+      final String executable,
+      final List<String> processArgs, {
+      required final Map<String, String>? env,
     }) async {
       logger?.call('Spawning $executable with $processArgs in ${args.cwd}');
       final Process process = await Process.start(
@@ -154,7 +154,7 @@ abstract class FlutterBaseDebugAdapter extends DartDebugAdapter<FlutterLaunchReq
     unawaited(process.exitCode.then(handleExitCode));
   }
 
-  void handleExitCode(int code);
-  void handleStderr(List<int> data);
-  void handleStdout(String data);
+  void handleExitCode(final int code);
+  void handleStderr(final List<int> data);
+  void handleStdout(final String data);
 }

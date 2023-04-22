@@ -13,10 +13,10 @@ import '../cmake_project.dart';
 import '../globals.dart' as globals;
 
 abstract class WindowsApp extends ApplicationPackage {
-  WindowsApp({required String projectBundleId}) : super(id: projectBundleId);
+  WindowsApp({required final String projectBundleId}) : super(id: projectBundleId);
 
   /// Creates a new [WindowsApp] from a windows sub project.
-  factory WindowsApp.fromWindowsProject(WindowsProject project) {
+  factory WindowsApp.fromWindowsProject(final WindowsProject project) {
     return BuildableWindowsApp(
       project: project,
     );
@@ -25,7 +25,7 @@ abstract class WindowsApp extends ApplicationPackage {
   /// Creates a new [WindowsApp] from an existing executable or a zip archive.
   ///
   /// `applicationBinary` is the path to the executable or the zipped archive.
-  static WindowsApp? fromPrebuiltApp(FileSystemEntity applicationBinary) {
+  static WindowsApp? fromPrebuiltApp(final FileSystemEntity applicationBinary) {
     if (!applicationBinary.existsSync()) {
       globals.printError('File "${applicationBinary.path}" does not exist.');
       return null;
@@ -78,12 +78,12 @@ abstract class WindowsApp extends ApplicationPackage {
   @override
   String get displayName => id;
 
-  String executable(BuildMode buildMode);
+  String executable(final BuildMode buildMode);
 }
 
 class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackage {
   PrebuiltWindowsApp({
-    required String executable,
+    required final String executable,
     required this.applicationPackage,
   }) : _executable = executable,
        super(projectBundleId: executable);
@@ -91,7 +91,7 @@ class PrebuiltWindowsApp extends WindowsApp implements PrebuiltApplicationPackag
   final String _executable;
 
   @override
-  String executable(BuildMode buildMode) => _executable;
+  String executable(final BuildMode buildMode) => _executable;
 
   @override
   String get name => _executable;
@@ -108,7 +108,7 @@ class BuildableWindowsApp extends WindowsApp {
   final WindowsProject project;
 
   @override
-  String executable(BuildMode buildMode) {
+  String executable(final BuildMode buildMode) {
     final String? binaryName = getCmakeExecutableName(project);
     return globals.fs.path.join(
         getWindowsBuildDirectory(),

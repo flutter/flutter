@@ -378,7 +378,7 @@ void main() {
         final DeviceLogReader reader =
             device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
-        reader.logLines.listen((String line) {
+        reader.logLines.listen((final String line) {
           logLines.add(line);
           if (logLines.length == 2) {
             lock.complete();
@@ -415,7 +415,7 @@ void main() {
         final DeviceLogReader reader =
             device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
         final List<String> logLines = <String>[];
-        reader.logLines.listen((String line) {
+        reader.logLines.listen((final String line) {
           logLines.add(line);
           lock.complete();
         });
@@ -449,7 +449,7 @@ void main() {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
         final DeviceLogReader reader = device.getLogReader();
         final List<String> logLines = <String>[];
-        reader.logLines.listen((String line) {
+        reader.logLines.listen((final String line) {
           logLines.add(line);
           if (logLines.length == 3) {
             lock.complete();
@@ -504,7 +504,7 @@ void main() {
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
         throwsA(isA<Exception>().having(
-            (Exception exception) => exception.toString(),
+            (final Exception exception) => exception.toString(),
             'message',
             contains('file.invalid must be a .ppm file'))),
       );
@@ -523,7 +523,7 @@ void main() {
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
         throwsA(isA<Exception>().having(
-            (Exception exception) => exception.toString(),
+            (final Exception exception) => exception.toString(),
             'message',
             contains(
                 'Could not take a screenshot on device tester:\n<error-message>'))),
@@ -574,7 +574,7 @@ void main() {
       await expectLater(
         () => device.takeScreenshot(globals.fs.file('file.ppm')),
         throwsA(isA<Exception>().having(
-            (Exception exception) => exception.toString(),
+            (final Exception exception) => exception.toString(),
             'message',
             contains(
                 'Failed to copy screenshot from device:\n<error-message>'))),
@@ -730,7 +730,7 @@ void main() {
 
   group('FuchsiaIsolateDiscoveryProtocol', () {
     Future<Uri> findUri(
-        List<FlutterView> views, String expectedIsolateName) async {
+        final List<FlutterView> views, final String expectedIsolateName) async {
       final FakeVmServiceHost fakeVmServiceHost = FakeVmServiceHost(
         requests: <VmServiceExpectation>[
           FakeVmServiceRequest(
@@ -750,8 +750,8 @@ void main() {
           FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
-        (Uri uri) async => fakeVmServiceHost.vmService,
-        (Device device, Uri uri, bool enableServiceAuthCodes) async {},
+        (final Uri uri) async => fakeVmServiceHost.vmService,
+        (final Device device, final Uri uri, final bool enableServiceAuthCodes) async {},
         true, // only poll once.
       );
       return discoveryProtocol.uri;
@@ -987,12 +987,12 @@ class FakePortForwarder extends Fake implements DevicePortForwarder {
 
 class FakeFuchsiaFfx implements FuchsiaFfx {
   @override
-  Future<List<String>> list({Duration? timeout}) async {
+  Future<List<String>> list({final Duration? timeout}) async {
     return <String>['192.168.42.172 scare-cable-skip-ffx'];
   }
 
   @override
-  Future<String> resolve(String deviceName) async {
+  Future<String> resolve(final String deviceName) async {
     return '192.168.42.10';
   }
 
@@ -1002,7 +1002,7 @@ class FakeFuchsiaFfx implements FuchsiaFfx {
   }
 
   @override
-  Future<bool> sessionAdd(String url) async {
+  Future<bool> sessionAdd(final String url) async {
     return false;
   }
 }
@@ -1013,10 +1013,10 @@ class FakeFuchsiaKernelCompiler extends Fake implements FuchsiaKernelCompiler {}
 
 class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   FakeFuchsiaSdk({
-    FuchsiaPM? pm,
-    FuchsiaKernelCompiler? compiler,
-    FuchsiaFfx? ffx,
-    String? devices,
+    final FuchsiaPM? pm,
+    final FuchsiaKernelCompiler? compiler,
+    final FuchsiaFfx? ffx,
+    final String? devices,
   })  : fuchsiaPM = pm ?? FakeFuchsiaPM(),
         fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
         fuchsiaFfx = ffx ?? FakeFuchsiaFfx(),
@@ -1034,7 +1034,7 @@ class FakeFuchsiaSdk extends Fake implements FuchsiaSdk {
   final String? _devices;
 
   @override
-  Future<String?> listDevices({Duration? timeout}) async {
+  Future<String?> listDevices({final Duration? timeout}) async {
     return _devices;
   }
 }
@@ -1043,12 +1043,12 @@ class FakeDartDevelopmentService extends Fake
     implements DartDevelopmentService {
   @override
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
-    bool? disableServiceAuthCodes,
-    bool cacheStartupProfile = false,
+    final Uri vmServiceUri, {
+    required final Logger logger,
+    final int? hostPort,
+    final bool? ipv6,
+    final bool? disableServiceAuthCodes,
+    final bool cacheStartupProfile = false,
   }) async {}
 
   @override

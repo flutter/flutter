@@ -12,7 +12,7 @@ import '../src/common.dart';
 class ProjectValidatorTaskImpl extends ProjectValidator {
 
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+  Future<List<ProjectValidatorResult>> start(final FlutterProject project) async {
     const ProjectValidatorResult error = ProjectValidatorResult(
       name: 'result_1',
       value: 'this is an error',
@@ -36,7 +36,7 @@ class ProjectValidatorTaskImpl extends ProjectValidator {
   }
 
   @override
-  bool supportsProject(FlutterProject project) {
+  bool supportsProject(final FlutterProject project) {
     return true;
   }
 

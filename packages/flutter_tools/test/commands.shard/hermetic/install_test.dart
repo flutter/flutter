@@ -131,7 +131,7 @@ class FakeApplicationPackageFactory extends Fake implements ApplicationPackageFa
   BuildInfo? buildInfo;
 
   @override
-  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform, {BuildInfo? buildInfo, File? applicationBinary}) async {
+  Future<ApplicationPackage> getPackageForPlatform(final TargetPlatform platform, {final BuildInfo? buildInfo, final File? applicationBinary}) async {
     this.buildInfo = buildInfo;
     return app;
   }
@@ -148,14 +148,14 @@ class FakeIOSDevice extends Fake implements IOSDevice {
 
   @override
   Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
-    IOSApp app, {
-    String? userIdentifier,
+    final IOSApp app, {
+    final String? userIdentifier,
   }) async => true;
 
   @override
@@ -171,14 +171,14 @@ class FakeAndroidDevice extends Fake implements AndroidDevice {
 
   @override
   Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => false;
 
   @override
   Future<bool> installApp(
-    AndroidApk app, {
-    String? userIdentifier,
+    final AndroidApk app, {
+    final String? userIdentifier,
   }) async => true;
 
   @override

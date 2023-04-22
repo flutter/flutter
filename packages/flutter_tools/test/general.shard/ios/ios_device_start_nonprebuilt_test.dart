@@ -28,7 +28,7 @@ import '../../src/context.dart' hide FakeXcodeProjectInterpreter;
 import '../../src/fake_process_manager.dart';
 import '../../src/fakes.dart';
 
-List<String> _xattrArgs(FlutterProject flutterProject) {
+List<String> _xattrArgs(final FlutterProject flutterProject) {
   return <String>[
     'xattr',
     '-r',
@@ -265,7 +265,7 @@ void main() {
         ])
       );
 
-      await FakeAsync().run((FakeAsync time) async {
+      await FakeAsync().run((final FakeAsync time) async {
         final LaunchResult launchResult = await iosDevice.startApp(
           buildableIOSApp,
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -289,7 +289,7 @@ void main() {
   });
 }
 
-void setUpIOSProject(FileSystem fileSystem) {
+void setUpIOSProject(final FileSystem fileSystem) {
   fileSystem.file('pubspec.yaml').createSync();
   fileSystem.file('.packages').writeAsStringSync('\n');
   fileSystem.directory('ios').createSync();
@@ -300,10 +300,10 @@ void setUpIOSProject(FileSystem fileSystem) {
 }
 
 IOSDevice setUpIOSDevice({
-  String sdkVersion = '13.0.1',
-  FileSystem? fileSystem,
+  final String sdkVersion = '13.0.1',
+  final FileSystem? fileSystem,
   Logger? logger,
-  ProcessManager? processManager,
+  final ProcessManager? processManager,
   Artifacts? artifacts,
 }) {
   artifacts ??= Artifacts.test();
@@ -369,14 +369,14 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
 
   @override
   Future<XcodeProjectInfo?> getInfo(
-    String projectPath, {
-    String? projectFilename,
+    final String projectPath, {
+    final String? projectFilename,
   }) async => projectInfo;
 
   @override
   Future<Map<String, String>> getBuildSettings(
-    String projectPath, {
-    required XcodeProjectBuildContext buildContext,
-    Duration timeout = const Duration(minutes: 1),
+    final String projectPath, {
+    required final XcodeProjectBuildContext buildContext,
+    final Duration timeout = const Duration(minutes: 1),
   }) async => buildSettings;
 }

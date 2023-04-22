@@ -14,8 +14,8 @@ import 'analyze_base.dart';
 class AnalyzeOnce extends AnalyzeBase {
   AnalyzeOnce(
     super.argResults,
-    List<String> repoRoots,
-    List<Directory> repoPackages, {
+    final List<String> repoRoots,
+    final List<Directory> repoPackages, {
     required super.fileSystem,
     required super.logger,
     required super.platform,
@@ -76,7 +76,7 @@ class AnalyzeOnce extends AnalyzeBase {
     try {
       StreamSubscription<bool>? subscription;
 
-      void handleAnalysisStatus(bool isAnalyzing) {
+      void handleAnalysisStatus(final bool isAnalyzing) {
         if (!isAnalyzing) {
           analysisCompleter.complete();
           subscription?.cancel();
@@ -84,10 +84,10 @@ class AnalyzeOnce extends AnalyzeBase {
         }
       }
 
-      subscription = server.onAnalyzing.listen((bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
+      subscription = server.onAnalyzing.listen((final bool isAnalyzing) => handleAnalysisStatus(isAnalyzing));
 
-      void handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-        fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+      void handleAnalysisErrors(final FileAnalysisErrors fileErrors) {
+        fileErrors.errors.removeWhere((final AnalysisError error) => error.type == 'TODO');
 
         errors.addAll(fileErrors.errors);
       }
@@ -96,7 +96,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
       await server.start();
       // Completing the future in the callback can't fail.
-      unawaited(server.onExit.then<void>((int? exitCode) {
+      unawaited(server.onExit.then<void>((final int? exitCode) {
         if (!analysisCompleter.isCompleted) {
           analysisCompleter.completeError(
             // Include the last 20 lines of server output in exception message
@@ -131,7 +131,7 @@ class AnalyzeOnce extends AnalyzeBase {
     }
 
     // --write
-    dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+    dumpErrors(errors.map<String>((final AnalysisError error) => error.toLegacyString()));
 
     // report errors
     if (errors.isNotEmpty && (argResults['preamble'] as bool)) {
@@ -163,7 +163,7 @@ class AnalyzeOnce extends AnalyzeBase {
     }
   }
 
-  bool _isFatal(List<AnalysisError> errors) {
+  bool _isFatal(final List<AnalysisError> errors) {
     for (final AnalysisError error in errors) {
       final AnalysisSeverity severityLevel = error.writtenError.severityLevel;
       if (severityLevel == AnalysisSeverity.error) {

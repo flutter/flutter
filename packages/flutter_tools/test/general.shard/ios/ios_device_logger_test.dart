@@ -286,7 +286,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
       final Completer<void> streamComplete = Completer<void>();
       final FakeIOSDeployDebugger iosDeployDebugger = FakeIOSDeployDebugger();
       iosDeployDebugger.logLines = debuggingLogs;
-      logReader.logLines.listen(null, onError: (Object error) => streamComplete.complete());
+      logReader.logLines.listen(null, onError: (final Object error) => streamComplete.complete());
       logReader.debuggerStream = iosDeployDebugger;
 
       await streamComplete.future;
@@ -336,7 +336,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
             logReader.debuggerStream = iosDeployDebugger;
             await logReader.logLines.drain<void>();
           },
-          onError: (Object err, StackTrace stackTrace) {
+          onError: (final Object err, final StackTrace stackTrace) {
             exception = err;
             trace = stackTrace;
           }

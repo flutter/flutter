@@ -17,7 +17,7 @@ void main() {
     logger = BufferLogger.test();
   });
 
-  Future<void> testCompileShader(String source) async {
+  Future<void> testCompileShader(final String source) async {
     final Directory tmpDir = globals.fs.systemTempDirectory.createTempSync(
       'shader_compiler_test.',
     );
@@ -88,7 +88,7 @@ void main() {
 
     expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
       .having(
-        (ShaderCompilerException exception) => exception.message,
+        (final ShaderCompilerException exception) => exception.message,
         'message',
         contains('SkSL does not support inputs'),
       ),
@@ -110,7 +110,7 @@ void main() {
 
     expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
       .having(
-        (ShaderCompilerException exception) => exception.message,
+        (final ShaderCompilerException exception) => exception.message,
         'message',
         contains('SkSL does not support UBOs or SSBOs'),
       ),
@@ -130,7 +130,7 @@ void main() {
 
     expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
       .having(
-        (ShaderCompilerException exception) => exception.message,
+        (final ShaderCompilerException exception) => exception.message,
         'message',
         contains('Only sampler and position arguments are supported in texture() calls'),
       ),
@@ -149,7 +149,7 @@ void main() {}
 
     expect(() => testCompileShader(kShaderWithInput), throwsA(isA<ShaderCompilerException>()
       .having(
-        (ShaderCompilerException exception) => exception.message,
+        (final ShaderCompilerException exception) => exception.message,
         'message',
         contains('SkSL does not support unsigned integers'),
       ),

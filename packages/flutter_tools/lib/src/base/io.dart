@@ -146,8 +146,8 @@ bool _inUnitTest() {
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
-void setExitFunctionForTests([ ExitFunction? exitFunction ]) {
-  _exitFunction = exitFunction ?? (int exitCode) {
+void setExitFunctionForTests([ final ExitFunction? exitFunction ]) {
+  _exitFunction = exitFunction ?? (final int exitCode) {
     throw ProcessExit(exitCode, immediate: true);
   };
 }
@@ -170,7 +170,7 @@ void restoreExitFunction() {
 /// [ProcessSignal] instances are available on this class (e.g. "send").
 class ProcessSignal {
   @visibleForTesting
-  const ProcessSignal(this._delegate, {@visibleForTesting Platform platform = const LocalPlatform()})
+  const ProcessSignal(this._delegate, {@visibleForTesting final Platform platform = const LocalPlatform()})
     : _platform = platform;
 
   static const ProcessSignal sigwinch = PosixProcessSignal(io.ProcessSignal.sigwinch);
@@ -184,7 +184,7 @@ class ProcessSignal {
   final Platform _platform;
 
   Stream<ProcessSignal> watch() {
-    return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
+    return _delegate.watch().map<ProcessSignal>((final io.ProcessSignal signal) => this);
   }
 
   /// Sends the signal to the given process (identified by pid).
@@ -195,7 +195,7 @@ class ProcessSignal {
   /// terminates the process.
   ///
   /// This is implemented by sending the signal using [Process.killPid].
-  bool send(int pid) {
+  bool send(final int pid) {
     assert(!_platform.isWindows || this == ProcessSignal.sigterm);
     return io.Process.killPid(pid, _delegate);
   }
@@ -240,8 +240,8 @@ class Stdio {
   /// dart:io.
   @visibleForTesting
   Stdio.test({
-    required io.Stdout stdout,
-    required io.IOSink stderr,
+    required final io.Stdout stdout,
+    required final io.IOSink stderr,
   }) : _stdoutOverride = stdout, _stderrOverride = stderr;
 
   io.Stdout? _stdoutOverride;
@@ -261,8 +261,8 @@ class Stdio {
     }
     _stdout = _stdoutOverride ?? io.stdout;
     _stdout!.done.then(
-      (void _) { _stdoutDone = true; },
-      onError: (Object err, StackTrace st) { _stdoutDone = true; },
+      (final void _) { _stdoutDone = true; },
+      onError: (final Object err, final StackTrace st) { _stdoutDone = true; },
     );
     return _stdout!;
   }
@@ -274,8 +274,8 @@ class Stdio {
     }
     _stderr = _stderrOverride ?? io.stderr;
     _stderr!.done.then(
-      (void _) { _stderrDone = true; },
-      onError: (Object err, StackTrace st) { _stderrDone = true; },
+      (final void _) { _stderrDone = true; },
+      onError: (final Object err, final StackTrace st) { _stderrDone = true; },
     );
     return _stderr!;
   }
@@ -319,8 +319,8 @@ class Stdio {
   /// Writes [message] to [stderr], falling back on [fallback] if the write
   /// throws any exception. The default fallback calls [print] on [message].
   void stderrWrite(
-    String message, {
-    void Function(String, dynamic, StackTrace)? fallback,
+    final String message, {
+    final void Function(String, dynamic, StackTrace)? fallback,
   }) {
     if (!_stderrDone) {
       _stdioWrite(stderr, message, fallback: fallback);
@@ -336,8 +336,8 @@ class Stdio {
   /// Writes [message] to [stdout], falling back on [fallback] if the write
   /// throws any exception. The default fallback calls [print] on [message].
   void stdoutWrite(
-    String message, {
-    void Function(String, dynamic, StackTrace)? fallback,
+    final String message, {
+    final void Function(String, dynamic, StackTrace)? fallback,
   }) {
     if (!_stdoutDone) {
       _stdioWrite(stdout, message, fallback: fallback);
@@ -351,12 +351,12 @@ class Stdio {
   }
 
   // Helper for [stderrWrite] and [stdoutWrite].
-  void _stdioWrite(io.IOSink sink, String message, {
-    void Function(String, dynamic, StackTrace)? fallback,
+  void _stdioWrite(final io.IOSink sink, final String message, {
+    final void Function(String, dynamic, StackTrace)? fallback,
   }) {
     asyncGuard<void>(() async {
       sink.write(message);
-    }, onError: (Object error, StackTrace stackTrace) {
+    }, onError: (final Object error, final StackTrace stackTrace) {
       if (fallback == null) {
         print(message);
       } else {
@@ -366,23 +366,23 @@ class Stdio {
   }
 
   /// Adds [stream] to [stdout].
-  Future<void> addStdoutStream(Stream<List<int>> stream) => stdout.addStream(stream);
+  Future<void> addStdoutStream(final Stream<List<int>> stream) => stdout.addStream(stream);
 
   /// Adds [stream] to [stderr].
-  Future<void> addStderrStream(Stream<List<int>> stream) => stderr.addStream(stream);
+  Future<void> addStderrStream(final Stream<List<int>> stream) => stderr.addStream(stream);
 }
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {
-  factory ProcessInfo(FileSystem fs) => _DefaultProcessInfo(fs);
+  factory ProcessInfo(final FileSystem fs) => _DefaultProcessInfo(fs);
 
-  factory ProcessInfo.test(FileSystem fs) => _TestProcessInfo(fs);
+  factory ProcessInfo.test(final FileSystem fs) => _TestProcessInfo(fs);
 
   int get currentRss;
 
   int get maxRss;
 
-  File writePidFile(String pidFile);
+  File writePidFile(final String pidFile);
 }
 
 /// The default implementation of [ProcessInfo], which uses [io.ProcessInfo].
@@ -398,7 +398,7 @@ class _DefaultProcessInfo implements ProcessInfo {
   int get maxRss => io.ProcessInfo.maxRss;
 
   @override
-  File writePidFile(String pidFile) {
+  File writePidFile(final String pidFile) {
     return _fileSystem.file(pidFile)
       ..writeAsStringSync(io.pid.toString());
   }
@@ -417,7 +417,7 @@ class _TestProcessInfo implements ProcessInfo {
   int maxRss = 2000;
 
   @override
-  File writePidFile(String pidFile) {
+  File writePidFile(final String pidFile) {
     return _fileSystem.file(pidFile)
       ..writeAsStringSync('12345');
   }
@@ -452,7 +452,7 @@ NetworkInterfaceLister? _networkInterfaceListerOverride;
 
 // Tests can set up a non-default network interface lister.
 @visibleForTesting
-void setNetworkInterfaceLister(NetworkInterfaceLister lister) {
+void setNetworkInterfaceLister(final NetworkInterfaceLister lister) {
   _networkInterfaceListerOverride = lister;
 }
 
@@ -465,9 +465,9 @@ void resetNetworkInterfaceLister() {
 /// [setNetworkInterfaceLister] for a test. If it is overridden for a test,
 /// it should be reset with [resetNetworkInterfaceLister].
 Future<List<NetworkInterface>> listNetworkInterfaces({
-  bool includeLoopback = false,
-  bool includeLinkLocal = false,
-  io.InternetAddressType type = io.InternetAddressType.any,
+  final bool includeLoopback = false,
+  final bool includeLinkLocal = false,
+  final io.InternetAddressType type = io.InternetAddressType.any,
 }) async {
   if (_networkInterfaceListerOverride != null) {
     return _networkInterfaceListerOverride!.call(
@@ -482,6 +482,6 @@ Future<List<NetworkInterface>> listNetworkInterfaces({
     type: type,
   );
   return interfaces.map(
-    (io.NetworkInterface interface) => NetworkInterface(interface),
+    (final io.NetworkInterface interface) => NetworkInterface(interface),
   ).toList();
 }

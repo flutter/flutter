@@ -19,9 +19,9 @@ class FuchsiaKernelCompiler {
   /// the Flutter tool should make no use of that fact), and a manifest that
   /// refers to them.
   Future<void> build({
-    required FuchsiaProject fuchsiaProject,
-    required String target, // E.g., lib/main.dart
-    BuildInfo buildInfo = BuildInfo.debug,
+    required final FuchsiaProject fuchsiaProject,
+    required final String target, // E.g., lib/main.dart
+    final BuildInfo buildInfo = BuildInfo.debug,
   }) async {
     // TODO(zanderso): Use filesystem root and scheme information from buildInfo.
     const String multiRootScheme = 'main-root';
@@ -97,8 +97,8 @@ class FuchsiaKernelCompiler {
   /// Provide flags that are affected by [BuildInfo]
   @visibleForTesting
   static List<String> getBuildInfoFlags({
-    required BuildInfo buildInfo,
-    required String manifestPath,
+    required final BuildInfo buildInfo,
+    required final String manifestPath,
   }) {
     return <String>[
       // AOT/JIT:

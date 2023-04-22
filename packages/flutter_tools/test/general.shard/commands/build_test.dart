@@ -127,7 +127,7 @@ void main() {
 }
 
 class FakeBuildSubCommand extends BuildSubCommand {
-  FakeBuildSubCommand(Logger logger) : super(logger: logger, verboseHelp: false);
+  FakeBuildSubCommand(final Logger logger) : super(logger: logger, verboseHelp: false);
 
   @override
   String get description => throw UnimplementedError();
@@ -135,7 +135,7 @@ class FakeBuildSubCommand extends BuildSubCommand {
   @override
   String get name => throw UnimplementedError();
 
-  void test(BuildInfo buildInfo) {
+  void test(final BuildInfo buildInfo) {
     displayNullSafetyMode(buildInfo);
   }
 

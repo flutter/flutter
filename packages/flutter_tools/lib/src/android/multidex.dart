@@ -9,7 +9,7 @@ import '../base/file_system.dart';
 // These utility methods are used to generate the code for multidex support as
 // well as verifying the project is properly set up.
 
-File _getMultiDexApplicationFile(Directory projectDir) {
+File _getMultiDexApplicationFile(final Directory projectDir) {
   return projectDir.childDirectory('android')
     .childDirectory('app')
     .childDirectory('src')
@@ -75,7 +75,7 @@ bool multiDexApplicationExists(final Directory projectDir) {
   return false;
 }
 
-File _getManifestFile(Directory projectDir) {
+File _getManifestFile(final Directory projectDir) {
   return projectDir.childDirectory('android')
     .childDirectory('app')
     .childDirectory('src')

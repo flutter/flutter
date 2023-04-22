@@ -45,8 +45,8 @@ class ValidateProject {
         results[validator] = validator
             .start(project)
             .then(
-              (List<ProjectValidatorResult> results) => results,
-              onError: (Object exception, StackTrace trace) {
+              (final List<ProjectValidatorResult> results) => results,
+              onError: (final Object exception, final StackTrace trace) {
                 hasCrash = true;
                 return <ProjectValidatorResult>[
                   ProjectValidatorResult.crash(exception, trace),
@@ -97,7 +97,7 @@ class ValidateProject {
     }
   }
 
-  String getStringResult(ProjectValidatorResult result) {
+  String getStringResult(final ProjectValidatorResult result) {
     final String icon;
     switch(result.status) {
       case StatusProjectValidator.error:

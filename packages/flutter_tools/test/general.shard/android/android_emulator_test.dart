@@ -210,7 +210,7 @@ void main() {
       await expectLater(
         () => emulator.launch(startupDuration: Duration.zero),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'description',
           contains('Emulator is missing from the Android SDK'),
         )),

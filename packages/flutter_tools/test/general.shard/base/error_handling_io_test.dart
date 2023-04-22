@@ -447,7 +447,7 @@ void main() {
       expect(() => file.createSync(), throwsToolExit(message: createMessage));
       // Recursive does not contain the "sudo chown" suggestion.
       expect(() async => file.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+          throwsA(isA<ToolExit>().having((final ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String readMessage =
           'Flutter failed to read a file at "dir/file".\n'
@@ -488,7 +488,7 @@ void main() {
 
       // Recursive does not contain the "sudo chown" suggestion.
       expect(() async => directory.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+          throwsA(isA<ToolExit>().having((final ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String deleteMessage =
           'Flutter failed to delete a directory at "parent/childDir".\n'
@@ -502,7 +502,7 @@ void main() {
 
       // Recursive does not contain the "sudo chown" suggestion.
       expect(() async => directory.deleteSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+          throwsA(isA<ToolExit>().having((final ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -654,7 +654,7 @@ void main() {
 
       // Recursive does not contain the "sudo chown" suggestion.
       expect(() async => file.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+          throwsA(isA<ToolExit>().having((final ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String readMessage =
           'Flutter failed to read a file at "dir/file".\n'
@@ -694,7 +694,7 @@ void main() {
 
       // Recursive does not contain the "sudo chown" suggestion.
       expect(() async => directory.createSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+          throwsA(isA<ToolExit>().having((final ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
 
       const String deleteMessage =
           'Flutter failed to delete a directory at "parent/childDir".\n'
@@ -708,7 +708,7 @@ void main() {
 
       // Recursive does not contain the "sudo chown" suggestion.
       expect(() async => directory.deleteSync(recursive: true),
-          throwsA(isA<ToolExit>().having((ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
+          throwsA(isA<ToolExit>().having((final ToolExit e) => e.message, 'message', isNot(contains('sudo chown')))));
     });
 
     testWithoutContext('when writing to a full device', () async {
@@ -1225,7 +1225,7 @@ void main() {
     });
 
     testWithoutContext('copySync can directly copy bytes if both files can be opened but copySync fails', () {
-      final List<int> expectedBytes = List<int>.generate(64 * 1024 + 3, (int i) => i.isEven ? 0 : 1);
+      final List<int> expectedBytes = List<int>.generate(64 * 1024 + 3, (final int i) => i.isEven ? 0 : 1);
       fileSystem.file('source').writeAsBytesSync(expectedBytes);
       final File dest = fileSystem.file('dest');
 
@@ -1245,19 +1245,19 @@ class FakeSignalProcessManager extends Fake implements ProcessManager {
   final Map<int, io.ProcessSignal> killedProcesses = <int, io.ProcessSignal>{};
 
   @override
-  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+  bool killPid(final int pid, [final io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
     killedProcesses[pid] = signal;
     return true;
   }
 }
 
 class ThrowingFakeProcessManager extends Fake implements ProcessManager {
-  ThrowingFakeProcessManager(Exception exception) : _exception = exception;
+  ThrowingFakeProcessManager(final Exception exception) : _exception = exception;
 
   final Exception _exception;
 
   @override
-  bool canRun(dynamic executable, {String? workingDirectory}) {
+  bool canRun(final dynamic executable, {final String? workingDirectory}) {
     throw _exception;
   }
 }
@@ -1286,7 +1286,7 @@ class FakeExistsFile extends Fake implements File {
   }
 
   @override
-  void deleteSync({bool recursive = false}) {
+  void deleteSync({final bool recursive = false}) {
     throw error;
   }
 }
@@ -1300,5 +1300,5 @@ class FakeFileSystem extends Fake implements FileSystem {
     throw UnimplementedError();
   }
   @override
-  set currentDirectory(dynamic path) { }
+  set currentDirectory(final dynamic path) { }
 }

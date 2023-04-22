@@ -22,9 +22,9 @@ abstract class ProjectValidator {
   const ProjectValidator();
   String get title;
   bool get machineOutput => false;
-  bool supportsProject(FlutterProject project);
+  bool supportsProject(final FlutterProject project);
   /// Can return more than one result in case a file/command have a lot of info to share to the user
-  Future<List<ProjectValidatorResult>> start(FlutterProject project);
+  Future<List<ProjectValidatorResult>> start(final FlutterProject project);
 }
 
 abstract class MachineProjectValidator extends ProjectValidator {
@@ -48,7 +48,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
   final FileSystem fileSystem;
   final Platform platform;
 
-  String _toJsonValue(Object? obj) {
+  String _toJsonValue(final Object? obj) {
     String value = obj.toString();
     if (obj is String) {
       value = '"$obj"';
@@ -58,7 +58,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
   }
 
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+  Future<List<ProjectValidatorResult>> start(final FlutterProject project) async {
     final List<ProjectValidatorResult> result = <ProjectValidatorResult>[];
 
     result.add(ProjectValidatorResult(
@@ -190,7 +190,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
   }
 
   @override
-  bool supportsProject(FlutterProject project) {
+  bool supportsProject(final FlutterProject project) {
     // this validator will run for any type of project
     return true;
   }
@@ -204,7 +204,7 @@ class VariableDumpMachineProjectValidator extends MachineProjectValidator {
 /// Specific info from different platforms should be written in their own ProjectValidator.
 class GeneralInfoProjectValidator extends ProjectValidator{
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+  Future<List<ProjectValidatorResult>> start(final FlutterProject project) async {
     final FlutterManifest flutterManifest = project.manifest;
     final List<ProjectValidatorResult> result = <ProjectValidatorResult>[];
     final ProjectValidatorResult appNameValidatorResult = _getAppNameResult(flutterManifest);
@@ -228,7 +228,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     return result;
   }
 
-  ProjectValidatorResult _getAppNameResult(FlutterManifest flutterManifest) {
+  ProjectValidatorResult _getAppNameResult(final FlutterManifest flutterManifest) {
     final String appName = flutterManifest.appName;
     const String name = 'App Name';
     if (appName.isEmpty) {
@@ -245,7 +245,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     );
   }
 
-  ProjectValidatorResult _isFlutterPackageValidatorResult(FlutterManifest flutterManifest) {
+  ProjectValidatorResult _isFlutterPackageValidatorResult(final FlutterManifest flutterManifest) {
     final String value;
     final StatusProjectValidator status;
     if (flutterManifest.flutterDescriptor.isNotEmpty) {
@@ -263,7 +263,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     );
   }
 
-  ProjectValidatorResult _materialDesignResult(FlutterManifest flutterManifest) {
+  ProjectValidatorResult _materialDesignResult(final FlutterManifest flutterManifest) {
     return ProjectValidatorResult(
       name: 'Uses Material Design',
       value: flutterManifest.usesMaterialDesign? 'yes' : 'no',
@@ -271,11 +271,11 @@ class GeneralInfoProjectValidator extends ProjectValidator{
     );
   }
 
-  String _getSupportedPlatforms(FlutterProject project) {
-    return project.getSupportedPlatforms().map((SupportedPlatform platform) => platform.name).join(', ');
+  String _getSupportedPlatforms(final FlutterProject project) {
+    return project.getSupportedPlatforms().map((final SupportedPlatform platform) => platform.name).join(', ');
   }
 
-  ProjectValidatorResult _pluginValidatorResult(FlutterManifest flutterManifest) {
+  ProjectValidatorResult _pluginValidatorResult(final FlutterManifest flutterManifest) {
     return ProjectValidatorResult(
       name: 'Is Plugin',
       value: flutterManifest.isPlugin? 'yes' : 'no',
@@ -284,7 +284,7 @@ class GeneralInfoProjectValidator extends ProjectValidator{
   }
 
   @override
-  bool supportsProject(FlutterProject project) {
+  bool supportsProject(final FlutterProject project) {
     // this validator will run for any type of project
     return true;
   }
@@ -298,7 +298,7 @@ class PubDependenciesProjectValidator extends ProjectValidator {
   final ProcessManager _processManager;
 
   @override
-  Future<List<ProjectValidatorResult>> start(FlutterProject project) async {
+  Future<List<ProjectValidatorResult>> start(final FlutterProject project) async {
     const String name = 'Dart dependencies';
     final ProcessResult processResult = await _processManager.run(<String>['dart', 'pub', 'deps', '--json']);
     if (processResult.stdout is! String) {
@@ -352,14 +352,14 @@ class PubDependenciesProjectValidator extends ProjectValidator {
   }
 
   @override
-  bool supportsProject(FlutterProject project) {
+  bool supportsProject(final FlutterProject project) {
     return true;
   }
 
   @override
   String get title => 'Pub dependencies';
 
-  ProjectValidatorResult _createProjectValidatorError(String name, String value) {
+  ProjectValidatorResult _createProjectValidatorError(final String name, final String value) {
     return ProjectValidatorResult(name: name, value: value, status: StatusProjectValidator.error);
   }
 }

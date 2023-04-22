@@ -31,18 +31,18 @@ void main() {
       // FakeProcess. When a specific encoding is desired, it can be specified
       // on FakeCommand or in the encoding parameter of FakeProcessManager.run
       // or FakeProcessManager.runAsync.
-      expect((await process.stderr.toList()).expand((List<int> x) => x), 'stderr\u{FFFD}'.codeUnits);
-      expect((await process.stdout.toList()).expand((List<int> x) => x), 'stdout\u{FFFD}'.codeUnits);
+      expect((await process.stderr.toList()).expand((final List<int> x) => x), 'stderr\u{FFFD}'.codeUnits);
+      expect((await process.stdout.toList()).expand((final List<int> x) => x), 'stdout\u{FFFD}'.codeUnits);
     });
 
     testWithoutContext('exits after specified delay (if no completer specified)', () {
-      final bool done = FakeAsync().run<bool>((FakeAsync time) {
+      final bool done = FakeAsync().run<bool>((final FakeAsync time) {
         final FakeProcess process = FakeProcess(
           duration: const Duration(seconds: 30),
         );
 
         bool hasExited = false;
-        unawaited(process.exitCode.then((int _) { hasExited = true; }));
+        unawaited(process.exitCode.then((final int _) { hasExited = true; }));
 
         // Verify process hasn't exited before specified delay.
         time.elapse(const Duration(seconds: 15));
@@ -58,14 +58,14 @@ void main() {
     });
 
     testWithoutContext('exits when completer completes (if no duration specified)', () {
-      final bool done = FakeAsync().run<bool>((FakeAsync time) {
+      final bool done = FakeAsync().run<bool>((final FakeAsync time) {
         final Completer<void> completer = Completer<void>();
         final FakeProcess process = FakeProcess(
           completer: completer,
         );
 
         bool hasExited = false;
-        unawaited(process.exitCode.then((int _) { hasExited = true; }));
+        unawaited(process.exitCode.then((final int _) { hasExited = true; }));
 
         // Verify process hasn't exited when all async tasks flushed.
         time.elapse(Duration.zero);
@@ -82,7 +82,7 @@ void main() {
     });
 
     testWithoutContext('when completer and duration are specified, does not exit until completer is completed', () {
-      final bool done = FakeAsync().run<bool>((FakeAsync time) {
+      final bool done = FakeAsync().run<bool>((final FakeAsync time) {
         final Completer<void> completer = Completer<void>();
         final FakeProcess process = FakeProcess(
           duration: const Duration(seconds: 30),
@@ -90,7 +90,7 @@ void main() {
         );
 
         bool hasExited = false;
-        unawaited(process.exitCode.then((int _) { hasExited = true; }));
+        unawaited(process.exitCode.then((final int _) { hasExited = true; }));
 
         // Verify process hasn't exited before specified delay.
         time.elapse(const Duration(seconds: 15));
@@ -111,7 +111,7 @@ void main() {
     });
 
     testWithoutContext('when completer and duration are specified, does not exit until duration has elapsed', () {
-      final bool done = FakeAsync().run<bool>((FakeAsync time) {
+      final bool done = FakeAsync().run<bool>((final FakeAsync time) {
         final Completer<void> completer = Completer<void>();
         final FakeProcess process = FakeProcess(
           duration: const Duration(seconds: 30),
@@ -119,7 +119,7 @@ void main() {
         );
 
         bool hasExited = false;
-        unawaited(process.exitCode.then((int _) { hasExited = true; }));
+        unawaited(process.exitCode.then((final int _) { hasExited = true; }));
 
         // Verify process hasn't exited before specified delay.
         time.elapse(const Duration(seconds: 15));
@@ -142,7 +142,7 @@ void main() {
       final FakeProcess process = FakeProcess();
 
       bool hasExited = false;
-      unawaited(process.exitCode.then((int _) { hasExited = true; }));
+      unawaited(process.exitCode.then((final int _) { hasExited = true; }));
 
       // Verify process hasn't completed.
       expect(hasExited, isFalse);
@@ -206,8 +206,8 @@ void main() {
 
         // Start the process.
         final Process process = await manager.start(<String>['faketool']);
-        final StreamSubscription<List<int>> stderrSubscription = process.stderr.listen((List<int> chunk) { stderrBytes.addAll(chunk); });
-        final StreamSubscription<List<int>> stdoutSubscription = process.stdout.listen((List<int> chunk) { stdoutBytes.addAll(chunk); });
+        final StreamSubscription<List<int>> stderrSubscription = process.stderr.listen((final List<int> chunk) { stderrBytes.addAll(chunk); });
+        final StreamSubscription<List<int>> stdoutSubscription = process.stdout.listen((final List<int> chunk) { stdoutBytes.addAll(chunk); });
 
         // Immediately after exit, no output is emitted.
         await process.exitCode;

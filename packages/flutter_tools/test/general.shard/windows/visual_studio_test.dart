@@ -129,14 +129,14 @@ const List<String> _requirementsBuildTools = <String>[
 // exactly the given required components will provide a result. By default it
 // return a preset installation, but the response can be overridden.
 void setMockVswhereResponse(
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  List<String>? requiredComponents,
-  List<String>? additionalArguments,
-  Map<String, dynamic>? response,
-  String? responseOverride,
-  int? exitCode,
-  Exception? exception,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager, [
+  final List<String>? requiredComponents,
+  final List<String>? additionalArguments,
+  final Map<String, dynamic>? response,
+  final String? responseOverride,
+  final int? exitCode,
+  final Exception? exception,
 ]) {
   fileSystem.file(vswherePath).createSync(recursive: true);
   fileSystem.file(cmakePath).createSync(recursive: true);
@@ -167,11 +167,11 @@ void setMockVswhereResponse(
 // Sets whether or not a vswhere query with the required components will
 // return an installation.
 void setMockCompatibleVisualStudioInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
+  final Map<String, dynamic>? response,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager, [
+  final int? exitCode,
+  final Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -188,11 +188,11 @@ void setMockCompatibleVisualStudioInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return a pre-release installation.
 void setMockPrereleaseVisualStudioInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
+  final Map<String, dynamic>? response,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager, [
+  final int? exitCode,
+  final Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -209,11 +209,11 @@ void setMockPrereleaseVisualStudioInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return an Build Tools installation.
 void setMockCompatibleVisualStudioBuildToolsInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
+  final Map<String, dynamic>? response,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager, [
+  final int? exitCode,
+  final Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -230,11 +230,11 @@ void setMockCompatibleVisualStudioBuildToolsInstallation(
 // Sets whether or not a vswhere query with the required components will
 // return a pre-release Build Tools installation.
 void setMockPrereleaseVisualStudioBuildToolsInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
+  final Map<String, dynamic>? response,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager, [
+  final int? exitCode,
+  final Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -251,11 +251,11 @@ void setMockPrereleaseVisualStudioBuildToolsInstallation(
 // Sets whether or not a vswhere query searching for 'all' and 'prerelease'
 // versions will return an installation.
 void setMockAnyVisualStudioInstallation(
-  Map<String, dynamic>? response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager, [
-  int? exitCode,
-  Exception? exception,
+  final Map<String, dynamic>? response,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager, [
+  final int? exitCode,
+  final Exception? exception,
 ]) {
   setMockVswhereResponse(
     fileSystem,
@@ -271,9 +271,9 @@ void setMockAnyVisualStudioInstallation(
 
 // Set a pre-encoded query result.
 void setMockEncodedAnyVisualStudioInstallation(
-  String response,
-  FileSystem fileSystem,
-  FakeProcessManager processManager,
+  final String response,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager,
 ) {
   setMockVswhereResponse(
     fileSystem,
@@ -291,10 +291,10 @@ void setMockEncodedAnyVisualStudioInstallation(
 // filesPresent controls where or not there are any SDK folders at the location
 // returned by the registry query.
 void setMockSdkRegResponse(
-  FileSystem fileSystem,
-  FakeProcessManager processManager, {
-  bool registryPresent = true,
-  bool filesPresent = true,
+  final FileSystem fileSystem,
+  final FakeProcessManager processManager, {
+  final bool registryPresent = true,
+  final bool filesPresent = true,
 }) {
   const String registryPath = r'HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Microsoft SDKs\Windows\v10.0';
   const String registryKey = r'InstallationFolder';
@@ -345,7 +345,7 @@ VisualStudioFixture setUpVisualStudio() {
 
 // Set all vswhere query with the required components return null.
 void setNoViableToolchainInstallation(
-  VisualStudioFixture fixture,
+  final VisualStudioFixture fixture,
 ) {
   setMockCompatibleVisualStudioInstallation(
     null,

@@ -21,7 +21,7 @@ import '../base/terminal.dart';
 abstract class DeferredComponentsValidator {
   DeferredComponentsValidator(this.projectDir, this.logger, this.platform, {
     this.exitOnFail = true,
-    String? title,
+    final String? title,
   }) : outputDir = projectDir
         .childDirectory('build')
         .childDirectory(kDeferredComponentsTempDirectory),

@@ -23,36 +23,36 @@ abstract class FlutterTestRunner {
 
   /// Runs tests using package:test and the Flutter engine.
   Future<int> runTests(
-    TestWrapper testWrapper,
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
-    bool enableVmService = false,
-    bool ipv6 = false,
-    bool machine = false,
-    String? precompiledDillPath,
-    Map<String, String>? precompiledDillFiles,
-    bool updateGoldens = false,
-    TestWatcher? watcher,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    Directory? coverageDirectory,
-    bool web = false,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    Device? integrationTestDevice,
-    String? integrationTestUserIdentifier,
-    TestTimeRecorder? testTimeRecorder,
+    final TestWrapper testWrapper,
+    final List<Uri> testFiles, {
+    required final DebuggingOptions debuggingOptions,
+    final List<String> names = const <String>[],
+    final List<String> plainNames = const <String>[],
+    final String? tags,
+    final String? excludeTags,
+    final bool enableVmService = false,
+    final bool ipv6 = false,
+    final bool machine = false,
+    final String? precompiledDillPath,
+    final Map<String, String>? precompiledDillFiles,
+    final bool updateGoldens = false,
+    final TestWatcher? watcher,
+    required final int? concurrency,
+    final String? testAssetDirectory,
+    final FlutterProject? flutterProject,
+    final String? icudtlPath,
+    final Directory? coverageDirectory,
+    final bool web = false,
+    final String? randomSeed,
+    final String? reporter,
+    final String? fileReporter,
+    final String? timeout,
+    final bool runSkipped = false,
+    final int? shardIndex,
+    final int? totalShards,
+    final Device? integrationTestDevice,
+    final String? integrationTestUserIdentifier,
+    final TestTimeRecorder? testTimeRecorder,
   });
 }
 
@@ -61,36 +61,36 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
   @override
   Future<int> runTests(
-    TestWrapper testWrapper,
-    List<Uri> testFiles, {
-    required DebuggingOptions debuggingOptions,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    String? tags,
-    String? excludeTags,
-    bool enableVmService = false,
-    bool ipv6 = false,
-    bool machine = false,
-    String? precompiledDillPath,
-    Map<String, String>? precompiledDillFiles,
-    bool updateGoldens = false,
-    TestWatcher? watcher,
-    required int? concurrency,
-    String? testAssetDirectory,
-    FlutterProject? flutterProject,
-    String? icudtlPath,
-    Directory? coverageDirectory,
-    bool web = false,
-    String? randomSeed,
-    String? reporter,
-    String? fileReporter,
-    String? timeout,
-    bool runSkipped = false,
-    int? shardIndex,
-    int? totalShards,
-    Device? integrationTestDevice,
-    String? integrationTestUserIdentifier,
-    TestTimeRecorder? testTimeRecorder,
+    final TestWrapper testWrapper,
+    final List<Uri> testFiles, {
+    required final DebuggingOptions debuggingOptions,
+    final List<String> names = const <String>[],
+    final List<String> plainNames = const <String>[],
+    final String? tags,
+    final String? excludeTags,
+    final bool enableVmService = false,
+    final bool ipv6 = false,
+    final bool machine = false,
+    final String? precompiledDillPath,
+    final Map<String, String>? precompiledDillFiles,
+    final bool updateGoldens = false,
+    final TestWatcher? watcher,
+    required final int? concurrency,
+    final String? testAssetDirectory,
+    final FlutterProject? flutterProject,
+    final String? icudtlPath,
+    final Directory? coverageDirectory,
+    final bool web = false,
+    final String? randomSeed,
+    final String? reporter,
+    final String? fileReporter,
+    final String? timeout,
+    final bool runSkipped = false,
+    final int? shardIndex,
+    final int? totalShards,
+    final Device? integrationTestDevice,
+    final String? integrationTestUserIdentifier,
+    final TestTimeRecorder? testTimeRecorder,
   }) async {
     // Configure package:test to use the Flutter engine for child processes.
     final String shellPath = globals.artifacts!.getArtifactPath(Artifact.flutterTester);
@@ -145,13 +145,13 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
       ).initialize(
         projectDirectory: flutterProject!.directory,
         testOutputDir: tempBuildDir,
-        testFiles: testFiles.map((Uri uri) => uri.toFilePath()).toList(),
+        testFiles: testFiles.map((final Uri uri) => uri.toFilePath()).toList(),
         buildInfo: debuggingOptions.buildInfo,
       );
       testArgs
         ..add('--platform=chrome')
         ..add('--')
-        ..addAll(testFiles.map((Uri uri) => uri.toString()));
+        ..addAll(testFiles.map((final Uri uri) => uri.toString()));
       testWrapper.registerPlatformPlugin(
         <Runtime>[Runtime.chrome],
         () {
@@ -186,7 +186,7 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
 
     testArgs
       ..add('--')
-      ..addAll(testFiles.map((Uri uri) => uri.toString()));
+      ..addAll(testFiles.map((final Uri uri) => uri.toString()));
 
     final InternetAddressType serverType =
         ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;

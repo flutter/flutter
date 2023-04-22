@@ -67,8 +67,8 @@ const String htmlSampleLegacyVar = '''
 ''';
 
 String htmlSample2Replaced({
-  required String baseHref,
-  required String serviceWorkerVersion,
+  required final String baseHref,
+  required final String serviceWorkerVersion,
 }) =>
     '''
 <!DOCTYPE html>

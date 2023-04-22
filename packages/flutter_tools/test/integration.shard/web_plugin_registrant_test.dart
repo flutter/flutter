@@ -54,7 +54,7 @@ void main() {
     final Directory buildDir = projectDir
         .childDirectory('.dart_tool/flutter_build')
         .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+        .firstWhere((final FileSystemEntity entity) => entity is Directory) as Directory;
 
     // Ensure the file exists, and passes analysis.
     final File registrant = buildDir.childFile('web_plugin_registrant.dart');
@@ -100,7 +100,7 @@ void main() {
     final Directory buildDir = projectDir
         .childDirectory('.dart_tool/flutter_build')
         .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+        .firstWhere((final FileSystemEntity entity) => entity is Directory) as Directory;
 
     // Ensure the file exists, and passes analysis.
     final File registrant = buildDir.childFile('web_plugin_registrant.dart');
@@ -136,7 +136,7 @@ void main() {
     final Directory buildDir = projectDir
         .childDirectory('.dart_tool/flutter_build')
         .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+        .firstWhere((final FileSystemEntity entity) => entity is Directory) as Directory;
 
     // Ensure the file exists, and passes analysis.
     final File registrant = buildDir.childFile('web_plugin_registrant.dart');
@@ -220,7 +220,7 @@ void main() {
     final Directory buildDir = projectDir
         .childDirectory('.dart_tool/flutter_build')
         .listSync()
-        .firstWhere((FileSystemEntity entity) => entity is Directory) as Directory;
+        .firstWhere((final FileSystemEntity entity) => entity is Directory) as Directory;
 
     expect(
       buildDir.childFile('web_plugin_registrant.dart'),
@@ -299,7 +299,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
   snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }
 
-Future<void> _createProject(Directory dir, List<String> createArgs) async {
+Future<void> _createProject(final Directory dir, final List<String> createArgs) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -313,8 +313,8 @@ Future<void> _createProject(Directory dir, List<String> createArgs) async {
 typedef PubspecEditor = void Function(List<String> pubSpecContents);
 
 Future<void> _editPubspecFile(
-  Directory projectDir,
-  PubspecEditor editor,
+  final Directory projectDir,
+  final PubspecEditor editor,
 ) async {
   final File pubspecYaml = projectDir.childFile('pubspec.yaml');
   expect(pubspecYaml, exists);
@@ -324,17 +324,17 @@ Future<void> _editPubspecFile(
   await pubspecYaml.writeAsString(lines.join('\n'));
 }
 
-Future<void> _replaceMainFile(Directory projectDir, String fileContents) async {
+Future<void> _replaceMainFile(final Directory projectDir, final String fileContents) async {
   final File mainFile = projectDir.childDirectory('lib').childFile('main.dart');
   await mainFile.writeAsString(fileContents);
 }
 
-PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String? path}) {
+PubspecEditor _addDependencyEditor(final String packageToAdd, {final String? version, final String? path}) {
   assert(version != null || path != null,
       'Need to define a source for the package.');
   assert(version == null || path == null,
       'Cannot only load a package from path or from Pub, not both.');
-  void editor(List<String> lines) {
+  void editor(final List<String> lines) {
     for (int i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith('dependencies:')) {
@@ -349,8 +349,8 @@ PubspecEditor _addDependencyEditor(String packageToAdd, {String? version, String
   return editor;
 }
 
-PubspecEditor _setDartSDKVersionEditor(String version) {
-  void editor(List<String> lines) {
+PubspecEditor _setDartSDKVersionEditor(final String version) {
+  void editor(final List<String> lines) {
     for (int i = 0; i < lines.length; i++) {
       final String line = lines[i];
       if (line.startsWith('environment:')) {
@@ -373,8 +373,8 @@ PubspecEditor _setDartSDKVersionEditor(String version) {
   return editor;
 }
 
-PubspecEditor _composeEditors(Iterable<PubspecEditor> editors) {
-  void composedEditor(List<String> lines) {
+PubspecEditor _composeEditors(final Iterable<PubspecEditor> editors) {
+  void composedEditor(final List<String> lines) {
     for (final PubspecEditor editor in editors) {
       editor(lines);
     }
@@ -383,17 +383,17 @@ PubspecEditor _composeEditors(Iterable<PubspecEditor> editors) {
 }
 
 Future<void> _addAnalysisOptions(
-    Directory projectDir, List<String> linterRules) async {
+    final Directory projectDir, final List<String> linterRules) async {
   assert(linterRules.isNotEmpty);
 
   await projectDir.childFile('analysis_options.yaml').writeAsString('''
 linter:
   rules:
-${linterRules.map((String rule) => '    - $rule').join('\n')}
+${linterRules.map((final String rule) => '    - $rule').join('\n')}
   ''');
 }
 
-Future<void> _analyzeEntity(FileSystemEntity target) async {
+Future<void> _analyzeEntity(final FileSystemEntity target) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
     globals.fs.path.join(
       '..',
@@ -421,11 +421,11 @@ Future<void> _analyzeEntity(FileSystemEntity target) async {
   expect(exec.exitCode, 0);
 }
 
-Future<void> _buildWebProject(Directory workingDir) async {
+Future<void> _buildWebProject(final Directory workingDir) async {
   return _runFlutterSnapshot(<String>['build', 'web'], workingDir);
 }
 
-Future<void> _doFlutterPubGet(Directory workingDir) async {
+Future<void> _doFlutterPubGet(final Directory workingDir) async {
   return _runFlutterSnapshot(<String>['pub', 'get'], workingDir);
 }
 
@@ -433,7 +433,7 @@ Future<void> _doFlutterPubGet(Directory workingDir) async {
 // `flutterCommandArgs` are the arguments passed to flutter, like: ['build', 'web']
 // to run `flutter build web`.
 // `workingDir` is the directory on which the flutter command will be run.
-Future<void> _runFlutterSnapshot(List<String> flutterCommandArgs, Directory workingDir) async {
+Future<void> _runFlutterSnapshot(final List<String> flutterCommandArgs, final Directory workingDir) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(
     globals.fs.path.join(
       '..',

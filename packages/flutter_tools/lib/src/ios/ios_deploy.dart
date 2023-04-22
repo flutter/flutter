@@ -27,11 +27,11 @@ const String unknownAppLaunchError = 'Error 0xe8000022';
 
 class IOSDeploy {
   IOSDeploy({
-    required Artifacts artifacts,
-    required Cache cache,
-    required Logger logger,
-    required Platform platform,
-    required ProcessManager processManager,
+    required final Artifacts artifacts,
+    required final Cache cache,
+    required final Logger logger,
+    required final Platform platform,
+    required final ProcessManager processManager,
   }) : _platform = platform,
        _cache = cache,
        _processUtils = ProcessUtils(processManager: processManager, logger: logger),
@@ -61,8 +61,8 @@ class IOSDeploy {
   ///
   /// Uses ios-deploy and returns the exit code.
   Future<int> uninstallApp({
-    required String deviceId,
-    required String bundleId,
+    required final String deviceId,
+    required final String bundleId,
   }) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
@@ -85,11 +85,11 @@ class IOSDeploy {
   ///
   /// Uses ios-deploy and returns the exit code.
   Future<int> installApp({
-    required String deviceId,
-    required String bundlePath,
-    required List<String>launchArguments,
-    required DeviceConnectionInterface interfaceType,
-    Directory? appDeltaDirectory,
+    required final String deviceId,
+    required final String bundlePath,
+    required final List<String>launchArguments,
+    required final DeviceConnectionInterface interfaceType,
+    final Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
     final List<String> launchCommand = <String>[
@@ -123,12 +123,12 @@ class IOSDeploy {
   /// This method does not install the app. Call [IOSDeployDebugger.launchAndAttach()]
   /// to install and attach the debugger to the specified app bundle.
   IOSDeployDebugger prepareDebuggerForLaunch({
-    required String deviceId,
-    required String bundlePath,
-    required List<String> launchArguments,
-    required DeviceConnectionInterface interfaceType,
-    Directory? appDeltaDirectory,
-    required bool uninstallFirst,
+    required final String deviceId,
+    required final String bundlePath,
+    required final List<String> launchArguments,
+    required final DeviceConnectionInterface interfaceType,
+    final Directory? appDeltaDirectory,
+    required final bool uninstallFirst,
   }) {
     appDeltaDirectory?.createSync(recursive: true);
     // Interactive debug session to support sending the lldb detach command.
@@ -168,12 +168,12 @@ class IOSDeploy {
   ///
   /// Uses ios-deploy and returns the exit code.
   Future<int> launchApp({
-    required String deviceId,
-    required String bundlePath,
-    required List<String> launchArguments,
-    required DeviceConnectionInterface interfaceType,
-    required bool uninstallFirst,
-    Directory? appDeltaDirectory,
+    required final String deviceId,
+    required final String bundlePath,
+    required final List<String> launchArguments,
+    required final DeviceConnectionInterface interfaceType,
+    required final bool uninstallFirst,
+    final Directory? appDeltaDirectory,
   }) async {
     appDeltaDirectory?.createSync(recursive: true);
     final List<String> launchCommand = <String>[
@@ -206,8 +206,8 @@ class IOSDeploy {
   }
 
   Future<bool> isAppInstalled({
-    required String bundleId,
-    required String deviceId,
+    required final String bundleId,
+    required final String deviceId,
   }) async {
     final List<String> launchCommand = <String>[
       _binaryPath,
@@ -235,7 +235,7 @@ class IOSDeploy {
     return true;
   }
 
-  String _monitorFailure(String stdout) => _monitorIOSDeployFailure(stdout, _logger);
+  String _monitorFailure(final String stdout) => _monitorIOSDeployFailure(stdout, _logger);
 }
 
 /// lldb attach state flow.
@@ -248,10 +248,10 @@ enum _IOSDeployDebuggerState {
 /// Wrapper to launch app and attach the debugger with ios-deploy.
 class IOSDeployDebugger {
   IOSDeployDebugger({
-    required Logger logger,
-    required ProcessUtils processUtils,
-    required List<String> launchCommand,
-    required Map<String, String> iosDeployEnv,
+    required final Logger logger,
+    required final ProcessUtils processUtils,
+    required final List<String> launchCommand,
+    required final Map<String, String> iosDeployEnv,
   }) : _processUtils = processUtils,
         _logger = logger,
         _launchCommand = launchCommand,
@@ -263,8 +263,8 @@ class IOSDeployDebugger {
   /// Sets the command to "ios-deploy" and environment to an empty map.
   @visibleForTesting
   factory IOSDeployDebugger.test({
-    required ProcessManager processManager,
-    Logger? logger,
+    required final ProcessManager processManager,
+    final Logger? logger,
   }) {
     final Logger debugLogger = logger ?? BufferLogger.test();
     return IOSDeployDebugger(
@@ -340,7 +340,7 @@ class IOSDeployDebugger {
       final StreamSubscription<String> stdoutSubscription = _iosDeployProcess!.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
         _monitorIOSDeployFailure(line, _logger);
 
         // (lldb)    platform select remote-'ios' --sysroot
@@ -450,11 +450,11 @@ class IOSDeployDebugger {
       final StreamSubscription<String> stderrSubscription = _iosDeployProcess!.stderr
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
-          .listen((String line) {
+          .listen((final String line) {
         _monitorIOSDeployFailure(line, _logger);
         _logger.printTrace(line);
       });
-      unawaited(_iosDeployProcess!.exitCode.then((int status) async {
+      unawaited(_iosDeployProcess!.exitCode.then((final int status) async {
         _logger.printTrace('ios-deploy exited with code $exitCode');
         _debuggerState = _IOSDeployDebuggerState.detached;
         await stdoutSubscription.cancel();
@@ -541,7 +541,7 @@ class IOSDeployDebugger {
 }
 
 // Maps stdout line stream. Must return original line.
-String _monitorIOSDeployFailure(String stdout, Logger logger) {
+String _monitorIOSDeployFailure(final String stdout, final Logger logger) {
   // Installation issues.
   if (stdout.contains(noProvisioningProfileErrorOne) || stdout.contains(noProvisioningProfileErrorTwo)) {
     logger.printError(noProvisioningProfileInstruction, emphasis: true);

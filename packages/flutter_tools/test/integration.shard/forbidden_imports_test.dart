@@ -15,7 +15,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'commands'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test'),
     ];
-    bool isNotSkipped(FileSystemEntity entity) => skippedPaths.every((String path) => !entity.path.startsWith(path));
+    bool isNotSkipped(final FileSystemEntity entity) => skippedPaths.every((final String path) => !entity.path.startsWith(path));
 
     final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, 'lib', 'src'))
       .listSync(recursive: true)
@@ -39,7 +39,7 @@ void main() {
 
   test('no imports of globals without a global prefix', () {
     final List<String> skippedPaths = <String> [];
-    bool isNotSkipped(FileSystemEntity entity) => skippedPaths.every((String path) => !entity.path.startsWith(path));
+    bool isNotSkipped(final FileSystemEntity entity) => skippedPaths.every((final String path) => !entity.path.startsWith(path));
 
     final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, 'lib', 'src'))
       .listSync(recursive: true)
@@ -68,7 +68,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'multi_root_file_system.dart'),
     ];
-    bool isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
+    bool isNotAllowed(final FileSystemEntity entity) => allowedPaths.every((final String path) => path != entity.path);
 
     for (final String dirName in <String>['lib', 'bin']) {
       final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
@@ -93,7 +93,7 @@ void main() {
       // Used only for multi-part file uploads, which are non-trivial to reimplement.
       fileSystem.path.join(flutterTools, 'lib', 'src', 'reporting', 'crash_reporting.dart'),
     ];
-    bool isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
+    bool isNotAllowed(final FileSystemEntity entity) => allowedPaths.every((final String path) => path != entity.path);
 
     for (final String dirName in <String>['lib', 'bin']) {
       final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
@@ -119,7 +119,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'test', 'test_wrapper.dart'),
     ];
-    bool isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
+    bool isNotAllowed(final FileSystemEntity entity) => allowedPaths.every((final String path) => path != entity.path);
 
     for (final String dirName in <String>['lib']) {
       final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
@@ -148,7 +148,7 @@ void main() {
       final Iterable<File> files =  fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
-        .where((FileSystemEntity entity) => !allowedPath.contains(entity.path))
+        .where((final FileSystemEntity entity) => !allowedPath.contains(entity.path))
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
@@ -171,7 +171,7 @@ void main() {
       final Iterable<File> files =  fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
-        .where((FileSystemEntity entity) => !allowedPath.contains(entity.path))
+        .where((final FileSystemEntity entity) => !allowedPath.contains(entity.path))
         .map(_asFile);
       for (final File file in files) {
         for (final String line in file.readAsLinesSync()) {
@@ -189,7 +189,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_io.dart'),
     ];
-    bool isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => path != entity.path);
+    bool isNotAllowed(final FileSystemEntity entity) => allowedPaths.every((final String path) => path != entity.path);
 
     for (final String dirName in <String>['lib']) {
       final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
@@ -217,7 +217,7 @@ void main() {
       fileSystem.path.join(flutterTools, 'lib', 'devfs_web.dart'),
       fileSystem.path.join(flutterTools, 'lib', 'resident_web_runner.dart'),
     ];
-    bool isNotAllowed(FileSystemEntity entity) => allowedPaths.every((String path) => !entity.path.contains(path));
+    bool isNotAllowed(final FileSystemEntity entity) => allowedPaths.every((final String path) => !entity.path.contains(path));
 
     for (final String dirName in <String>['lib']) {
       final Iterable<File> files = fileSystem.directory(fileSystem.path.join(flutterTools, dirName))
@@ -252,6 +252,6 @@ void main() {
   });
 }
 
-bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
+bool _isDartFile(final FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
 
-File _asFile(FileSystemEntity entity) => entity as File;
+File _asFile(final FileSystemEntity entity) => entity as File;

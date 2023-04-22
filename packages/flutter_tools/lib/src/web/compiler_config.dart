@@ -29,7 +29,7 @@ class JsCompilerConfig extends WebCompilerConfig {
   });
 
   /// Instantiates [JsCompilerConfig] suitable for the `flutter run` command.
-  const JsCompilerConfig.run({required bool nativeNullAssertions})
+  const JsCompilerConfig.run({required final bool nativeNullAssertions})
       : this(
           csp: false,
           dumpInfo: false,
@@ -43,7 +43,7 @@ class JsCompilerConfig extends WebCompilerConfig {
   ///
   /// Should correspond exactly with [toBuildSystemEnvironment].
   factory JsCompilerConfig.fromBuildSystemEnvironment(
-          Map<String, String> defines) =>
+          final Map<String, String> defines) =>
       JsCompilerConfig(
         csp: defines[kCspMode] == 'true',
         dumpInfo: defines[kDart2jsDumpInfo] == 'true',
@@ -141,7 +141,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
   ///
   /// Should correspond exactly with [toBuildSystemEnvironment].
   factory WasmCompilerConfig.fromBuildSystemEnvironment(
-          Map<String, String> defines) =>
+          final Map<String, String> defines) =>
       WasmCompilerConfig(
         omitTypeChecks: defines[kOmitTypeChecks] == 'true',
         runWasmOpt: defines[kRunWasmOpt] == 'true',
@@ -176,7 +176,7 @@ class WasmCompilerConfig extends WebCompilerConfig {
     for (MapEntry<String, String> entry in toBuildSystemEnvironment()
         .entries
         .where(
-            (MapEntry<String, String> element) => element.value == 'true'))
+            (final MapEntry<String, String> element) => element.value == 'true'))
       entry.key: entry.value,
   };
 }

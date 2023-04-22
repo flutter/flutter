@@ -15,8 +15,8 @@ import '../xcode_project.dart';
 // See https://github.com/flutter/flutter/issues/123890#issuecomment-1494825976.
 class CocoaPodsScriptReadlink extends ProjectMigrator {
   CocoaPodsScriptReadlink(
-    XcodeBasedProject project,
-    XcodeProjectInterpreter xcodeProjectInterpreter,
+    final XcodeBasedProject project,
+    final XcodeProjectInterpreter xcodeProjectInterpreter,
     super.logger,
   )   : _podRunnerFrameworksScript = project.podRunnerFrameworksScript,
         _xcodeProjectInterpreter = xcodeProjectInterpreter;
@@ -43,7 +43,7 @@ class CocoaPodsScriptReadlink extends ProjectMigrator {
   }
 
   @override
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     const String originalReadLinkLine = r'source="$(readlink "${source}")"';
     const String replacementReadLinkLine = r'source="$(readlink -f "${source}")"';
 

@@ -95,10 +95,10 @@ void main() {
         testAssetDirectory: '/build/test',
         serverType: InternetAddressType.IPv6,
         icudtlPath: 'ghi',
-        platformPluginRegistration: (FlutterPlatform platform) {
+        platformPluginRegistration: (final FlutterPlatform platform) {
           capturedPlatform = platform;
         },
-        uriConverter: (String input) => '$input/test',
+        uriConverter: (final String input) => '$input/test',
       );
 
       expect(identical(capturedPlatform, flutterPlatform), equals(true));

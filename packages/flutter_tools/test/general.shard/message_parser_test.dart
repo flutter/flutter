@@ -272,7 +272,7 @@ void main() {
     expect(
       () => Parser('escaping', 'app_en.arb', message, useEscaping: true).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains(expectedError),
     )));
@@ -287,7 +287,7 @@ void main() {
     expect(
       () => Parser('lex', 'app_en.arb', message).lexIntoTokens(),
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains(expectedError),
     )));
@@ -490,7 +490,7 @@ void main() {
     expect(
       () => Parser('unexpectedToken', 'app_en.arb', '{ placeholder =').parseIntoTree(),
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains(expectedError1),
     )));
@@ -502,7 +502,7 @@ void main() {
     expect(
       () => Parser('unexpectedToken', 'app_en.arb', '{ count, plural, = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains(expectedError2),
     )));
@@ -514,7 +514,7 @@ void main() {
     expect(
       () => Parser('unexpectedToken', 'app_en.arb', '{ , plural , = }').parseIntoTree(),
       throwsA(isA<L10nException>().having(
-        (L10nException e) => e.message,
+        (final L10nException e) => e.message,
         'message',
         contains(expectedError3),
     )));

@@ -45,7 +45,7 @@ abstract class UnpackMacOS extends Target {
   List<Target> get dependencies => <Target>[];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'unpack_macos');
@@ -81,7 +81,7 @@ abstract class UnpackMacOS extends Target {
     _thinFramework(environment, frameworkBinaryPath);
   }
 
-  void _thinFramework(Environment environment, String frameworkBinaryPath) {
+  void _thinFramework(final Environment environment, final String frameworkBinaryPath) {
     final String archs = environment.defines[kDarwinArchs] ?? 'x86_64 arm64';
     final List<String> archList = archs.split(' ').toList();
     final ProcessResult infoResult = environment.processManager.runSync(<String>[
@@ -181,7 +181,7 @@ class DebugMacOSFramework extends Target {
   String get name => 'debug_macos_framework';
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final File outputFile = environment.fileSystem.file(environment.fileSystem.path.join(
         environment.buildDir.path, 'App.framework', 'App'));
 
@@ -191,7 +191,7 @@ class DebugMacOSFramework extends Target {
       ?? <DarwinArch>[DarwinArch.x86_64, DarwinArch.arm64];
 
     final Iterable<String> darwinArchArguments =
-        darwinArchs.expand((DarwinArch arch) => <String>['-arch', getNameForDarwinArch(arch)]);
+        darwinArchs.expand((final DarwinArch arch) => <String>['-arch', getNameForDarwinArch(arch)]);
 
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
@@ -236,7 +236,7 @@ class CompileMacOSFramework extends Target {
   String get name => 'compile_macos_framework';
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
@@ -298,7 +298,7 @@ class CompileMacOSFramework extends Target {
     }
 
     final List<int> results = await Future.wait(pending);
-    if (results.any((int result) => result != 0)) {
+    if (results.any((final int result) => result != 0)) {
       throw Exception('AOT snapshotter exited with code ${results.join()}');
     }
 
@@ -367,7 +367,7 @@ abstract class MacOSBundleFlutterAssets extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'compile_macos_framework');
@@ -596,7 +596,7 @@ class ReleaseMacOSBundleFlutterAssets extends MacOSBundleFlutterAssets {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     bool buildSuccess = true;
     try {
       await super.build(environment);

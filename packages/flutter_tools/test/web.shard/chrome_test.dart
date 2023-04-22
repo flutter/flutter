@@ -630,7 +630,7 @@ void main() {
   });
 }
 
-Future<Chromium> _testLaunchChrome(String userDataDir, FakeProcessManager processManager, ChromiumLauncher chromeLauncher) {
+Future<Chromium> _testLaunchChrome(final String userDataDir, final FakeProcessManager processManager, final ChromiumLauncher chromeLauncher) {
   processManager.addCommand(FakeCommand(
     command: <String>[
       'example_chrome',
@@ -661,12 +661,12 @@ class FakeChromeConnection extends Fake implements ChromeConnection {
   int _retries;
 
   @override
-  Future<ChromeTab?> getTab(bool Function(ChromeTab tab) accept, {Duration? retryFor}) async {
+  Future<ChromeTab?> getTab(final bool Function(ChromeTab tab) accept, {final Duration? retryFor}) async {
     return tabs.firstWhere(accept);
   }
 
   @override
-  Future<List<ChromeTab>> getTabs({Duration? retryFor}) async {
+  Future<List<ChromeTab>> getTabs({final Duration? retryFor}) async {
     _retries ++;
     if (maxRetries == null || _retries < maxRetries!) {
       throw ConnectionException(

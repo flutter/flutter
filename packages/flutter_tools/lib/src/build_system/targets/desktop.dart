@@ -14,12 +14,12 @@ import '../depfile.dart';
 /// Throws an [Exception] if [artifacts] includes missing files, directories,
 /// or links.
 Depfile unpackDesktopArtifacts({
-  required FileSystem fileSystem,
-  required List<String> artifacts,
-  required Directory outputDirectory,
-  required String engineSourcePath,
-  List<String>? clientSourcePaths,
-  String? icuDataPath,
+  required final FileSystem fileSystem,
+  required final List<String> artifacts,
+  required final Directory outputDirectory,
+  required final String engineSourcePath,
+  final List<String>? clientSourcePaths,
+  final String? icuDataPath,
 }) {
   final List<File> inputs = <File>[];
   final List<File> outputs = <File>[];

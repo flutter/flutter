@@ -57,13 +57,13 @@ enum XCDeviceEventInterface {
 /// A utility class for interacting with Xcode xcdevice command line tools.
 class XCDevice {
   XCDevice({
-    required Artifacts artifacts,
-    required Cache cache,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Xcode xcode,
-    required Platform platform,
-    required IProxy iproxy,
+    required final Artifacts artifacts,
+    required final Cache cache,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final Xcode xcode,
+    required final Platform platform,
+    required final IProxy iproxy,
   }) : _processUtils = ProcessUtils(logger: logger, processManager: processManager),
       _logger = logger,
       _iMobileDevice = IMobileDevice(
@@ -123,8 +123,8 @@ class XCDevice {
   bool get isInstalled => _xcode.isInstalledAndMeetsVersionCheck;
 
   Future<List<Object>?> _getAllDevices({
-    bool useCache = false,
-    required Duration timeout,
+    final bool useCache = false,
+    required final Duration timeout,
   }) async {
     if (!isInstalled) {
       _logger.printTrace("Xcode not found. Run 'flutter doctor' for more information.");
@@ -198,13 +198,13 @@ class XCDevice {
         XCDeviceEventInterface.wifi,
       );
 
-      final Future<void> usbProcessExited = _usbDeviceObserveProcess!.exitCode.then((int status) {
+      final Future<void> usbProcessExited = _usbDeviceObserveProcess!.exitCode.then((final int status) {
         _logger.printTrace('xcdevice observe --usb exited with code $exitCode');
         // Kill other process in case only one was killed.
         _wifiDeviceObserveProcess?.kill();
       });
 
-      final Future<void> wifiProcessExited = _wifiDeviceObserveProcess!.exitCode.then((int status) {
+      final Future<void> wifiProcessExited = _wifiDeviceObserveProcess!.exitCode.then((final int status) {
         _logger.printTrace('xcdevice observe --wifi exited with code $exitCode');
         // Kill other process in case only one was killed.
         _usbDeviceObserveProcess?.kill();
@@ -231,7 +231,7 @@ class XCDevice {
     }
   }
 
-  Future<Process> _startObserveProcess(XCDeviceEventInterface eventInterface) {
+  Future<Process> _startObserveProcess(final XCDeviceEventInterface eventInterface) {
     // Run in interactive mode (via script) to convince
     // xcdevice it has a terminal attached in order to redirect stdout.
     return _streamXCDeviceEventCommand(
@@ -246,7 +246,7 @@ class XCDevice {
         '--${eventInterface.name}',
       ],
       prefix: 'xcdevice observe --${eventInterface.name}: ',
-      mapFunction: (String line) {
+      mapFunction: (final String line) {
         final XCDeviceEventNotification? event = _processXCDeviceStdOut(
           line,
           eventInterface,
@@ -265,16 +265,16 @@ class XCDevice {
   /// If [mapFunction] is present, all lines are forwarded to [mapFunction] for
   /// further processing.
   Future<Process> _streamXCDeviceEventCommand(
-    List<String> cmd, {
-    String prefix = '',
-    StringConverter? mapFunction,
+    final List<String> cmd, {
+    final String prefix = '',
+    final StringConverter? mapFunction,
   }) async {
     final Process process = await _processUtils.start(cmd);
 
     final StreamSubscription<String> stdoutSubscription = process.stdout
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .listen((String line) {
+      .listen((final String line) {
         String? mappedLine = line;
         if (mapFunction != null) {
           mappedLine = mapFunction(line);
@@ -287,7 +287,7 @@ class XCDevice {
     final StreamSubscription<String> stderrSubscription = process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
-      .listen((String line) {
+      .listen((final String line) {
         String? mappedLine = line;
         if (mapFunction != null) {
           mappedLine = mapFunction(line);
@@ -311,8 +311,8 @@ class XCDevice {
   }
 
   XCDeviceEventNotification? _processXCDeviceStdOut(
-    String line,
-    XCDeviceEventInterface eventInterface,
+    final String line,
+    final XCDeviceEventInterface eventInterface,
   ) {
     // xcdevice observe example output of UDIDs:
     //
@@ -346,7 +346,7 @@ class XCDevice {
   ///
   /// To cancel this process, call [cancelWaitForDeviceToConnect].
   Future<XCDeviceEventNotification?> waitForDeviceToConnect(
-    String deviceId,
+    final String deviceId,
   ) async {
     try {
       if (_usbDeviceWaitProcess != null || _wifiDeviceWaitProcess != null) {
@@ -365,13 +365,13 @@ class XCDevice {
         XCDeviceEventInterface.wifi,
       );
 
-      final Future<void> usbProcessExited = _usbDeviceWaitProcess!.exitCode.then((int status) {
+      final Future<void> usbProcessExited = _usbDeviceWaitProcess!.exitCode.then((final int status) {
         _logger.printTrace('xcdevice wait --usb exited with code $exitCode');
         // Kill other process in case only one was killed.
         _wifiDeviceWaitProcess?.kill();
       });
 
-      final Future<void> wifiProcessExited = _wifiDeviceWaitProcess!.exitCode.then((int status) {
+      final Future<void> wifiProcessExited = _wifiDeviceWaitProcess!.exitCode.then((final int status) {
         _logger.printTrace('xcdevice wait --wifi exited with code $exitCode');
         // Kill other process in case only one was killed.
         _usbDeviceWaitProcess?.kill();
@@ -389,7 +389,7 @@ class XCDevice {
 
       return await Future.any(
         <Future<XCDeviceEventNotification?>>[
-          allProcessesExited.then((_) => null),
+          allProcessesExited.then((final _) => null),
           waitStreamController!.stream.first.whenComplete(() async {
             cancelWaitForDeviceToConnect();
           }),
@@ -406,7 +406,7 @@ class XCDevice {
     return null;
   }
 
-  Future<Process> _startWaitProcess(String deviceId, XCDeviceEventInterface eventInterface) {
+  Future<Process> _startWaitProcess(final String deviceId, final XCDeviceEventInterface eventInterface) {
     // Run in interactive mode (via script) to convince
     // xcdevice it has a terminal attached in order to redirect stdout.
     return _streamXCDeviceEventCommand(
@@ -422,7 +422,7 @@ class XCDevice {
         deviceId,
       ],
       prefix: 'xcdevice wait --${eventInterface.name}: ',
-      mapFunction: (String line) {
+      mapFunction: (final String line) {
         final XCDeviceEventNotification? event = _processXCDeviceStdOut(
           line,
           eventInterface,
@@ -449,7 +449,7 @@ class XCDevice {
   /// information.
   ///
   /// [timeout] defaults to 2 seconds.
-  Future<List<IOSDevice>> getAvailableIOSDevices({ Duration? timeout }) async {
+  Future<List<IOSDevice>> getAvailableIOSDevices({ final Duration? timeout }) async {
     final List<Object>? allAvailableDevices = await _getAllDevices(timeout: timeout ?? const Duration(seconds: 2));
 
     if (allAvailableDevices == null) {
@@ -557,7 +557,7 @@ class XCDevice {
 
   /// Despite the name, com.apple.platform.iphoneos includes iPhone, iPads, and all iOS devices.
   /// Excludes simulators.
-  static bool _isIPhoneOSDevice(Map<String, Object?> deviceProperties) {
+  static bool _isIPhoneOSDevice(final Map<String, Object?> deviceProperties) {
     final Object? platform = deviceProperties['platform'];
     if (platform is String) {
       return platform == 'com.apple.platform.iphoneos';
@@ -565,12 +565,12 @@ class XCDevice {
     return false;
   }
 
-  static Map<String, Object?>? _errorProperties(Map<String, Object?> deviceProperties) {
+  static Map<String, Object?>? _errorProperties(final Map<String, Object?> deviceProperties) {
     final Object? error = deviceProperties['error'];
     return error is Map<String, Object?> ? error : null;
   }
 
-  static int? _errorCode(Map<String, Object?>? errorProperties) {
+  static int? _errorCode(final Map<String, Object?>? errorProperties) {
     if (errorProperties == null) {
       return null;
     }
@@ -578,7 +578,7 @@ class XCDevice {
     return code is int ? code : null;
   }
 
-  static DeviceConnectionInterface _interfaceType(Map<String, Object?> deviceProperties) {
+  static DeviceConnectionInterface _interfaceType(final Map<String, Object?> deviceProperties) {
     // Interface can be "usb" or "network". It can also be missing
     // (e.g. simulators do not have an interface property).
     // If the interface is "network", use `DeviceConnectionInterface.wireless`,
@@ -590,7 +590,7 @@ class XCDevice {
     return DeviceConnectionInterface.attached;
   }
 
-  static String? _sdkVersion(Map<String, Object?> deviceProperties) {
+  static String? _sdkVersion(final Map<String, Object?> deviceProperties) {
     final Object? operatingSystemVersion = deviceProperties['operatingSystemVersion'];
     if (operatingSystemVersion is String) {
       // Parse out the OS version, ignore the build number in parentheses.
@@ -604,7 +604,7 @@ class XCDevice {
     return null;
   }
 
-  static String? _buildVersion(Map<String, Object?> deviceProperties) {
+  static String? _buildVersion(final Map<String, Object?> deviceProperties) {
     final Object? operatingSystemVersion = deviceProperties['operatingSystemVersion'];
     if (operatingSystemVersion is String) {
       // Parse out the build version, for example 17C54 from "13.3 (17C54)".
@@ -614,7 +614,7 @@ class XCDevice {
     return null;
   }
 
-  DarwinArch _cpuArchitecture(Map<String, Object?> deviceProperties) {
+  DarwinArch _cpuArchitecture(final Map<String, Object?> deviceProperties) {
     DarwinArch? cpuArchitecture;
     final Object? architecture = deviceProperties['architecture'];
     if (architecture is String) {
@@ -640,7 +640,7 @@ class XCDevice {
   }
 
   /// Error message parsed from xcdevice. null if no error.
-  static String? _parseErrorMessage(Map<String, Object?>? errorProperties) {
+  static String? _parseErrorMessage(final Map<String, Object?>? errorProperties) {
     //  {
     //    "simulator" : false,
     //    "operatingSystemVersion" : "13.3 (17C54)",

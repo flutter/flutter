@@ -785,7 +785,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    void expectExists(String relPath) {
+    void expectExists(final String relPath) {
       expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
@@ -1185,7 +1185,7 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
-    void expectExists(String relPath, [bool expectation = true]) {
+    void expectExists(final String relPath, [final bool expectation = true]) {
       expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), expectation);
     }
 
@@ -1286,7 +1286,7 @@ void main() {
 
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
-    void expectExists(String relPath) {
+    void expectExists(final String relPath) {
       expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
@@ -1388,7 +1388,7 @@ void main() {
       ),
     ]);
 
-    controller.stream.listen((List<int> chunk) {
+    controller.stream.listen((final List<int> chunk) {
       completer.complete();
     });
 
@@ -1550,7 +1550,7 @@ void main() {
 
     await runner.run(<String>['create', '--template=app', '--platforms=macos', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
-    void expectExists(String relPath) {
+    void expectExists(final String relPath) {
       expect(globals.fs.isFileSync('${projectDir.path}/$relPath'), true);
     }
 
@@ -1950,14 +1950,14 @@ void main() {
       await runner.run(<String>['create', '--pub', projectDir.path]);
       final RegExp dartCommand = RegExp(r'dart-sdk[\\/]bin[\\/]dart');
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
+        (final List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && !c.contains('--offline')
       )));
 
       // Run pub offline.
       loggingProcessManager.clear();
       await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
       expect(loggingProcessManager.commands, contains(predicate(
-        (List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
+        (final List<String> c) => dartCommand.hasMatch(c[0]) && c[1].contains('pub') && c.contains('--offline'),
       )));
     },
     overrides: <Type, Generator>{
@@ -3243,10 +3243,10 @@ void main() {
 }
 
 Future<void> _createProject(
-  Directory dir,
-  List<String> createArgs,
-  List<String> expectedPaths, {
-  List<String> unexpectedPaths = const <String>[],
+  final Directory dir,
+  final List<String> createArgs,
+  final List<String> expectedPaths, {
+  final List<String> unexpectedPaths = const <String>[],
 }) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
@@ -3257,7 +3257,7 @@ Future<void> _createProject(
     dir.path,
   ]);
 
-  bool pathExists(String path) {
+  bool pathExists(final String path) {
     final String fullPath = globals.fs.path.join(dir.path, path);
     return globals.fs.typeSync(fullPath) != FileSystemEntityType.notFound;
   }
@@ -3274,10 +3274,10 @@ Future<void> _createProject(
 }
 
 Future<void> _createAndAnalyzeProject(
-  Directory dir,
-  List<String> createArgs,
-  List<String> expectedPaths, {
-  List<String> unexpectedPaths = const <String>[],
+  final Directory dir,
+  final List<String> createArgs,
+  final List<String> expectedPaths, {
+  final List<String> unexpectedPaths = const <String>[],
 }) async {
   await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths);
   await _analyzeProject(dir.path);
@@ -3338,7 +3338,7 @@ Future<void> _restoreFlutterToolsSnapshot() async {
   snapshotBackup.renameSync(flutterToolsSnapshotPath);
 }
 
-Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures = const <String>[] }) async {
+Future<void> _analyzeProject(final String workingDir, { final List<String> expectedFailures = const <String>[] }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -3365,7 +3365,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
     return;
   }
   expect(exec.exitCode, isNot(0));
-  String lineParser(String line) {
+  String lineParser(final String line) {
     try {
       final String analyzerSeparator = globals.platform.isWindows ? ' - ' : ' • ';
       final List<String> lineComponents = line.trim().split(analyzerSeparator);
@@ -3380,7 +3380,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
   final List<String> errors = <String>[];
   try {
     bool analyzeLineFound = false;
-    const LineSplitter().convert(stdout).forEach((String line) {
+    const LineSplitter().convert(stdout).forEach((final String line) {
       // Conditional to filter out any stdout from `pub get`
       if (!analyzeLineFound && line.startsWith('Analyzing')) {
         analyzeLineFound = true;
@@ -3398,7 +3398,7 @@ Future<void> _analyzeProject(String workingDir, { List<String> expectedFailures 
       reason: 'Failed with stdout:\n\n$stdout');
 }
 
-Future<void> _getPackages(Directory workingDir) async {
+Future<void> _getPackages(final Directory workingDir) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -3420,7 +3420,7 @@ Future<void> _getPackages(Directory workingDir) async {
   );
 }
 
-Future<void> _runFlutterTest(Directory workingDir, { String? target }) async {
+Future<void> _runFlutterTest(final Directory workingDir, { final String? target }) async {
   final String flutterToolsSnapshotPath = globals.fs.path.absolute(globals.fs.path.join(
     '..',
     '..',
@@ -3456,14 +3456,14 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<Object> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    ProcessStartMode mode = ProcessStartMode.normal,
+    final List<Object> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true,
+    final bool runInShell = false,
+    final ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    commands.add(command.map((Object arg) => arg.toString()).toList());
+    commands.add(command.map((final Object arg) => arg.toString()).toList());
     return super.start(
       command,
       workingDirectory: workingDirectory,
@@ -3479,15 +3479,15 @@ class LoggingProcessManager extends LocalProcessManager {
   }
 }
 
-String _getStringValueFromPlist({required File plistFile, String? key}) {
-  final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
+String _getStringValueFromPlist({required final File plistFile, final String? key}) {
+  final List<String> plist = plistFile.readAsLinesSync().map((final String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<string>', '').replaceAll('</string>', '');
 }
 
-bool _getBooleanValueFromPlist({required File plistFile, String? key}) {
-  final List<String> plist = plistFile.readAsLinesSync().map((String line) => line.trim()).toList();
+bool _getBooleanValueFromPlist({required final File plistFile, final String? key}) {
+  final List<String> plist = plistFile.readAsLinesSync().map((final String line) => line.trim()).toList();
   final int keyIndex = plist.indexOf('<key>$key</key>');
   assert(keyIndex > 0);
   return plist[keyIndex+1].replaceAll('<', '').replaceAll('/>', '') == 'true';

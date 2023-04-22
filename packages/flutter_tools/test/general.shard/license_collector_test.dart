@@ -302,7 +302,7 @@ void main() {
     expect(result.combinedLicenses.split(LicenseCollector.licenseSeparator), hasLength(2));
 
     // All input licenses included in result.
-    final Iterable<String> filePaths = result.dependencies.map((File file) => file.path);
+    final Iterable<String> filePaths = result.dependencies.map((final File file) => file.path);
     expect(filePaths, unorderedEquals(<String>[
       '/foo/NOTICES',
       '/bar/NOTICES',
@@ -353,7 +353,7 @@ void main() {
     expect(result.combinedLicenses, contains('bar.txt'));
 
     // All input licenses included in result.
-    final Iterable<String> filePaths = result.dependencies.map((File file) => file.path);
+    final Iterable<String> filePaths = result.dependencies.map((final File file) => file.path);
     expect(filePaths, unorderedEquals(<String>[
       '/foo/NOTICES',
       '/bar/NOTICES',

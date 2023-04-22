@@ -32,7 +32,7 @@ class ProjectValidatorResult {
     return '$name: $value';
   }
 
-  static ProjectValidatorResult crash(Object exception, StackTrace trace) {
+  static ProjectValidatorResult crash(final Object exception, final StackTrace trace) {
     return ProjectValidatorResult(
         name: exception.toString(),
         value: trace.toString(),

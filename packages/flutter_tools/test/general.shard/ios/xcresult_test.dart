@@ -16,11 +16,11 @@ void main() {
   // Creates a FakeCommand for the xcresult get call to build the app
   // in the given configuration.
   FakeCommand setUpFakeXCResultGetCommand({
-    required String stdout,
-    required String tempResultPath,
-    required Xcode xcode,
-    int exitCode = 0,
-    String stderr = '',
+    required final String stdout,
+    required final String tempResultPath,
+    required final Xcode xcode,
+    final int exitCode = 0,
+    final String stderr = '',
   }) {
     return FakeCommand(
       command: <String>[
@@ -55,9 +55,9 @@ void main() {
   );
 
   XCResultGenerator setupGenerator({
-    required String resultJson,
-    int exitCode = 0,
-    String stderr = '',
+    required final String resultJson,
+    final int exitCode = 0,
+    final String stderr = '',
   }) {
     final FakeProcessManager fakeProcessManager =
         FakeProcessManager.list(<FakeCommand>[

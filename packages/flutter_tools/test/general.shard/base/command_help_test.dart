@@ -11,8 +11,8 @@ import '../../src/common.dart';
 import '../../src/fakes.dart';
 
 CommandHelp _createCommandHelp({
-  required bool ansi,
-  required int wrapColumn,
+  required final bool ansi,
+  required final int wrapColumn,
 }) {
   final Platform platform = FakePlatform(
     stdoutSupportsAnsi: ansi,
@@ -33,9 +33,9 @@ CommandHelp _createCommandHelp({
 
 // Used to use the message length in different scenarios in a DRY way
 void _testMessageLength({
-  required bool stdoutSupportsAnsi,
-  required int maxTestLineLength,
-  required int wrapColumn,
+  required final bool stdoutSupportsAnsi,
+  required final int maxTestLineLength,
+  required final int wrapColumn,
 }) {
   final CommandHelp commandHelp = _createCommandHelp(
     ansi: stdoutSupportsAnsi,

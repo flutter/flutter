@@ -69,8 +69,8 @@ import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
-  FutureOr<T> Function() runner, {
-  Map<Type, Generator>? overrides,
+  final FutureOr<T> Function() runner, {
+  final Map<Type, Generator>? overrides,
 }) async {
 
   // Wrap runner with any asynchronous initialization that should run with the

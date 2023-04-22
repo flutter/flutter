@@ -221,7 +221,7 @@ void main() {
   });
 }
 
-FlutterProject setupProjectUnderTest(Directory currentDirectory, bool setupXcodeWorkspace) {
+FlutterProject setupProjectUnderTest(final Directory currentDirectory, final bool setupXcodeWorkspace) {
   // This needs to be run within testWithoutContext and not setUp since FlutterProject uses context.
   final FlutterProject projectUnderTest = FlutterProject.fromDirectory(currentDirectory);
   if (setupXcodeWorkspace == true) {
@@ -257,7 +257,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   Version version = Version(0, 0, 0);
 
   @override
-  Future<XcodeProjectInfo> getInfo(String projectPath, {String? projectFilename}) async {
+  Future<XcodeProjectInfo> getInfo(final String projectPath, {final String? projectFilename}) async {
     return XcodeProjectInfo(
       const <String>[],
       const <String>[],
@@ -269,7 +269,7 @@ class FakeXcodeProjectInterpreter extends Fake implements XcodeProjectInterprete
   final List<CleanWorkspaceCall> workspaces = <CleanWorkspaceCall>[];
 
   @override
-  Future<void> cleanWorkspace(String workspacePath, String scheme, {bool verbose = false}) async {
+  Future<void> cleanWorkspace(final String workspacePath, final String scheme, {final bool verbose = false}) async {
     workspaces.add(CleanWorkspaceCall(workspacePath, scheme, verbose));
     return;
   }
@@ -284,7 +284,7 @@ class CleanWorkspaceCall {
   final bool verbose;
 
   @override
-  bool operator ==(Object other) => other is CleanWorkspaceCall &&
+  bool operator ==(final Object other) => other is CleanWorkspaceCall &&
     workspacePath == other.workspacePath &&
     scheme == other.scheme &&
     verbose == other.verbose;

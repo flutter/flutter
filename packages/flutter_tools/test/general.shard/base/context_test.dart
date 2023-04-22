@@ -79,7 +79,7 @@ void main() {
         String? value;
         await context.run<void>(
           body: () {
-            outer.future.then<void>((_) {
+            outer.future.then<void>((final _) {
               value = context.get<String>();
               inner.complete();
             });
@@ -165,9 +165,9 @@ void main() {
           () => value,
           throwsA(
             isA<ContextDependencyCycleException>()
-              .having((ContextDependencyCycleException error) => error.cycle, 'cycle', <Type>[String, double, int])
+              .having((final ContextDependencyCycleException error) => error.cycle, 'cycle', <Type>[String, double, int])
               .having(
-                (ContextDependencyCycleException error) => error.toString(),
+                (final ContextDependencyCycleException error) => error.toString(),
                 'toString()',
                 'Dependency cycle detected: String -> double -> int',
               ),

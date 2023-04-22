@@ -22,7 +22,7 @@ class DartPluginRegistrantTarget extends Target {
   ///
   /// If `project` is unset, a [FlutterProject] based on environment is used.
   @visibleForTesting
-  factory DartPluginRegistrantTarget.test(FlutterProject project) {
+  factory DartPluginRegistrantTarget.test(final FlutterProject project) {
     return DartPluginRegistrantTarget._(project);
   }
 
@@ -31,7 +31,7 @@ class DartPluginRegistrantTarget extends Target {
   final FlutterProject? _project;
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     assert(environment.generateDartPluginRegistry);
     final FlutterProject project = _project
       ?? FlutterProject.fromDirectory(environment.projectDir);
@@ -55,7 +55,7 @@ class DartPluginRegistrantTarget extends Target {
   }
 
   @override
-  bool canSkip(Environment environment) {
+  bool canSkip(final Environment environment) {
     if (!environment.generateDartPluginRegistry) {
       return true;
     }

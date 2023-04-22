@@ -39,12 +39,12 @@ void main() {
     expect(fileSystem.file('outputs/d.txt'), isNot(exists));
 
     // Depfile is correct.
-    expect(depfile.inputs.map((File file) => file.path), unorderedEquals(<String>[
+    expect(depfile.inputs.map((final File file) => file.path), unorderedEquals(<String>[
       'inputs/a.txt',
       'inputs/b.txt',
       'foo/c.txt',
     ]));
-    expect(depfile.outputs.map((File file) => file.path), unorderedEquals(<String>[
+    expect(depfile.outputs.map((final File file) => file.path), unorderedEquals(<String>[
       'outputs/a.txt',
       'outputs/b.txt',
       'outputs/foo/c.txt',

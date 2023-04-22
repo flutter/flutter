@@ -2079,7 +2079,7 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
+    ddsLauncherCallback = (final Uri uri, {final bool enableAuthCodes = true, final bool ipv6 = false, final Uri? serviceUri, final List<String> cachedUserTags = const <String>[], final dds.UriConverter? uriConverter}) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
       expect(ipv6, isFalse);
@@ -2097,8 +2097,8 @@ flutter:
     bool caught = false;
     final Completer<void>done = Completer<void>();
     runZonedGuarded(() {
-      flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
-    }, (Object e, StackTrace st) {
+      flutterDevice.connect(allowExistingDdsInstance: true).then((final _) => done.complete());
+    }, (final Object e, final StackTrace st) {
       expect(e, isA<ToolExit>());
       expect((e as ToolExit).message,
         contains('Existing VM service clients prevent DDS from taking control.',
@@ -2111,16 +2111,16 @@ flutter:
       fail('Expected ToolExit to be thrown.');
     }
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
-      required Logger logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
+      required final Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2128,7 +2128,7 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
+    ddsLauncherCallback = (final Uri uri, {final bool enableAuthCodes = true, final bool ipv6 = false, final Uri? serviceUri, final List<String> cachedUserTags = const <String>[], final dds.UriConverter? uriConverter}) {
       throw dds.DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
         ddsUri: Uri.parse('http://localhost/existingDdsInField'),
@@ -2140,22 +2140,22 @@ flutter:
     );
     final Completer<void> done = Completer<void>();
     await runZonedGuarded(
-      () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
-      (_, __) => done.complete(),
+      () => flutterDevice.connect(allowExistingDdsInstance: true).then((final _) => done.complete()),
+      (final _, final __) => done.complete(),
     );
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInField'));
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
-      required Logger logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
+      required final Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2163,7 +2163,7 @@ flutter:
     fakeVmServiceHost = FakeVmServiceHost(requests: <VmServiceExpectation>[]);
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) {
+    ddsLauncherCallback = (final Uri uri, {final bool enableAuthCodes = true, final bool ipv6 = false, final Uri? serviceUri, final List<String> cachedUserTags = const <String>[], final dds.UriConverter? uriConverter}) {
       throw dds.DartDevelopmentServiceException.existingDdsInstance(
         'Existing DDS at http://localhost/existingDdsInMessage.',
       );
@@ -2174,22 +2174,22 @@ flutter:
     );
     final Completer<void>done = Completer<void>();
     await runZonedGuarded(
-      () => flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete()),
-      (_, __) => done.complete(),
+      () => flutterDevice.connect(allowExistingDdsInstance: true).then((final _) => done.complete()),
+      (final _, final __) => done.complete(),
     );
     await done.future;
     expect(device.dds.uri, Uri.parse('http://localhost/existingDdsInMessage'));
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
-      required Logger logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
+      required final Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2198,7 +2198,7 @@ flutter:
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
     final Completer<void>done = Completer<void>();
-    ddsLauncherCallback = (Uri uri, {bool enableAuthCodes = true, bool ipv6 = false, Uri? serviceUri, List<String> cachedUserTags = const <String>[], dds.UriConverter? uriConverter}) async {
+    ddsLauncherCallback = (final Uri uri, {final bool enableAuthCodes = true, final bool ipv6 = false, final Uri? serviceUri, final List<String> cachedUserTags = const <String>[], final dds.UriConverter? uriConverter}) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
       expect(ipv6, isTrue);
@@ -2215,16 +2215,16 @@ flutter:
     await flutterDevice.connect(allowExistingDdsInstance: true, ipv6: true, disableServiceAuthCodes: true);
     await done.future;
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions? compression,
-      Device? device,
-      required Logger logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions? compression,
+      final Device? device,
+      required final Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2234,12 +2234,12 @@ flutter:
       ..dds = DartDevelopmentService();
     final Completer<void>done = Completer<void>();
     ddsLauncherCallback = (
-      Uri uri, {
-      bool enableAuthCodes = false,
-      bool ipv6 = false,
-      Uri? serviceUri,
-      List<String> cachedUserTags = const <String>[],
-      dds.UriConverter? uriConverter,
+      final Uri uri, {
+      final bool enableAuthCodes = false,
+      final bool ipv6 = false,
+      final Uri? serviceUri,
+      final List<String> cachedUserTags = const <String>[],
+      final dds.UriConverter? uriConverter,
     }) async {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isFalse);
@@ -2257,18 +2257,18 @@ flutter:
     await flutterDevice.connect(allowExistingDdsInstance: true, ipv6: true, disableServiceAuthCodes: true);
     await done.future;
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      Device? device,
-      required Logger logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+      final Device? device,
+      required final Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
-    dds.UriConverter: () => (String uri) => 'test',
+    dds.UriConverter: () => (final String uri) => 'test',
   }));
 
   testUsingContext('Failed DDS start outputs error message', () => testbed.run(() async {
@@ -2276,12 +2276,12 @@ flutter:
     final FakeDevice device = FakeDevice()
       ..dds = DartDevelopmentService();
     ddsLauncherCallback = (
-      Uri uri, {
-      bool enableAuthCodes = false,
-      bool ipv6 = false,
-      Uri? serviceUri,
-      List<String> cachedUserTags = const <String>[],
-      dds.UriConverter? uriConverter,
+      final Uri uri, {
+      final bool enableAuthCodes = false,
+      final bool ipv6 = false,
+      final Uri? serviceUri,
+      final List<String> cachedUserTags = const <String>[],
+      final dds.UriConverter? uriConverter,
     }) {
       expect(uri, Uri(scheme: 'foo', host: 'bar'));
       expect(enableAuthCodes, isTrue);
@@ -2298,8 +2298,8 @@ flutter:
     bool caught = false;
     final Completer<void>done = Completer<void>();
     runZonedGuarded(() {
-      flutterDevice.connect(allowExistingDdsInstance: true).then((_) => done.complete());
-    }, (Object e, StackTrace st) {
+      flutterDevice.connect(allowExistingDdsInstance: true).then((final _) => done.complete());
+    }, (final Object e, final StackTrace st) {
       expect(e, isA<StateError>());
       expect((e as StateError).message, contains('No URI'));
       expect(testLogger.errorText, contains(
@@ -2313,16 +2313,16 @@ flutter:
       fail('Expected a StateError to be thrown.');
     }
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, {
-      ReloadSources? reloadSources,
-      Restart? restart,
-      CompileExpression? compileExpression,
-      GetSkSLMethod? getSkSLMethod,
-      FlutterProject? flutterProject,
-      PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-      io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
-      Device? device,
-      required Logger logger,
+    VMServiceConnector: () => (final Uri httpUri, {
+      final ReloadSources? reloadSources,
+      final Restart? restart,
+      final CompileExpression? compileExpression,
+      final GetSkSLMethod? getSkSLMethod,
+      final FlutterProject? flutterProject,
+      final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+      final io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+      final Device? device,
+      required final Logger logger,
     }) async => FakeVmServiceHost(requests: <VmServiceExpectation>[]).vmService,
   }));
 
@@ -2462,7 +2462,7 @@ class FakeDartDevelopmentServiceException implements dds.DartDevelopmentServiceE
 }
 
 class TestFlutterDevice extends FlutterDevice {
-  TestFlutterDevice(super.device, { Stream<Uri>? vmServiceUris })
+  TestFlutterDevice(super.device, { final Stream<Uri>? vmServiceUris })
     : _vmServiceUris = vmServiceUris, super(buildInfo: BuildInfo.debug, developmentShaderCompiler: const FakeShaderCompiler());
 
   final Stream<Uri>? _vmServiceUris;
@@ -2475,7 +2475,7 @@ class ThrowingForwardingFileSystem extends ForwardingFileSystem {
   ThrowingForwardingFileSystem(super.delegate);
 
   @override
-  File file(dynamic path) {
+  File file(final dynamic path) {
     if (path == 'foo') {
       throw const FileSystemException();
     }
@@ -2516,7 +2516,7 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   DevFS? get devFS => _devFS;
 
   @override
-  set devFS(DevFS? value) { }
+  set devFS(final DevFS? value) { }
 
   @override
   Device? device;
@@ -2528,17 +2528,17 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   Future<void> initLogReader() async { }
 
   @override
-  Future<Uri> setupDevFS(String fsName, Directory rootDirectory) async {
+  Future<Uri> setupDevFS(final String fsName, final Directory rootDirectory) async {
     return testUri!;
   }
 
   @override
-  Future<int> runHot({required HotRunner hotRunner, String? route}) async {
+  Future<int> runHot({required final HotRunner hotRunner, final String? route}) async {
     return runHotCode;
   }
 
   @override
-  Future<int> runCold({required ColdRunner coldRunner, String? route}) async {
+  Future<int> runCold({required final ColdRunner coldRunner, final String? route}) async {
     if (runColdError != null) {
       throw runColdError!;
     }
@@ -2547,35 +2547,35 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
 
   @override
   Future<void> connect({
-    ReloadSources? reloadSources,
-    Restart? restart,
-    CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
-    FlutterProject? flutterProject,
-    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    int? hostVmServicePort,
-    int? ddsPort,
-    bool disableServiceAuthCodes = false,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    required bool allowExistingDdsInstance,
-    bool ipv6 = false,
+    final ReloadSources? reloadSources,
+    final Restart? restart,
+    final CompileExpression? compileExpression,
+    final GetSkSLMethod? getSkSLMethod,
+    final FlutterProject? flutterProject,
+    final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    final int? hostVmServicePort,
+    final int? ddsPort,
+    final bool disableServiceAuthCodes = false,
+    final bool enableDds = true,
+    final bool cacheStartupProfile = false,
+    required final bool allowExistingDdsInstance,
+    final bool ipv6 = false,
   }) async { }
 
   @override
   Future<UpdateFSReport> updateDevFS({
-    required Uri mainUri,
-    String? target,
-    AssetBundle? bundle,
-    DateTime? firstBuildTime,
-    bool bundleFirstUpload = false,
-    bool bundleDirty = false,
-    bool fullRestart = false,
-    String? projectRootPath,
-    required String pathToReload,
-    required String dillOutputPath,
-    required List<Uri> invalidatedFiles,
-    required PackageConfig packageConfig,
+    required final Uri mainUri,
+    final String? target,
+    final AssetBundle? bundle,
+    final DateTime? firstBuildTime,
+    final bool bundleFirstUpload = false,
+    final bool bundleDirty = false,
+    final bool fullRestart = false,
+    final String? projectRootPath,
+    required final String pathToReload,
+    required final String dillOutputPath,
+    required final List<Uri> invalidatedFiles,
+    required final PackageConfig packageConfig,
   }) async {
     if (reportError != null) {
       throw reportError!;
@@ -2584,32 +2584,32 @@ class FakeFlutterDevice extends Fake implements FlutterDevice {
   }
 
   @override
-  Future<void> updateReloadStatus(bool wasReloadSuccessful) async { }
+  Future<void> updateReloadStatus(final bool wasReloadSuccessful) async { }
 }
 
 class FakeDelegateFlutterDevice extends FlutterDevice {
   FakeDelegateFlutterDevice(
     super.device,
-    BuildInfo buildInfo,
-    ResidentCompiler residentCompiler,
+    final BuildInfo buildInfo,
+    final ResidentCompiler residentCompiler,
     this.fakeDevFS,
   ) : super(buildInfo: buildInfo, generator: residentCompiler, developmentShaderCompiler: const FakeShaderCompiler());
 
   @override
   Future<void> connect({
-    ReloadSources? reloadSources,
-    Restart? restart,
-    bool enableDds = true,
-    bool cacheStartupProfile = false,
-    bool disableServiceAuthCodes = false,
-    bool ipv6 = false,
-    CompileExpression? compileExpression,
-    GetSkSLMethod? getSkSLMethod,
-    FlutterProject? flutterProject,
-    int? hostVmServicePort,
-    int? ddsPort,
-    PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
-    bool allowExistingDdsInstance = false,
+    final ReloadSources? reloadSources,
+    final Restart? restart,
+    final bool enableDds = true,
+    final bool cacheStartupProfile = false,
+    final bool disableServiceAuthCodes = false,
+    final bool ipv6 = false,
+    final CompileExpression? compileExpression,
+    final GetSkSLMethod? getSkSLMethod,
+    final FlutterProject? flutterProject,
+    final int? hostVmServicePort,
+    final int? ddsPort,
+    final PrintStructuredErrorLogMethod? printStructuredErrorLogMethod,
+    final bool allowExistingDdsInstance = false,
   }) async { }
 
 
@@ -2619,7 +2619,7 @@ class FakeDelegateFlutterDevice extends FlutterDevice {
   DevFS? get devFS => fakeDevFS;
 
   @override
-  set devFS(DevFS? value) {}
+  set devFS(final DevFS? value) {}
 }
 
 class FakeResidentCompiler extends Fake implements ResidentCompiler {
@@ -2628,15 +2628,15 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 
   @override
   Future<CompilerOutput?> recompile(
-    Uri mainUri,
-    List<Uri>? invalidatedFiles, {
-    required String outputPath,
-    required PackageConfig packageConfig,
-    String? projectRootPath,
-    required FileSystem fs,
-    bool suppressErrors = false,
-    bool checkDartPluginRegistry = false,
-    File? dartPluginRegistrant,
+    final Uri mainUri,
+    final List<Uri>? invalidatedFiles, {
+    required final String outputPath,
+    required final PackageConfig packageConfig,
+    final String? projectRootPath,
+    required final FileSystem fs,
+    final bool suppressErrors = false,
+    final bool checkDartPluginRegistry = false,
+    final File? dartPluginRegistrant,
   }) async {
     didSuppressErrors = suppressErrors;
     return nextOutput ?? const CompilerOutput('foo.dill', 0, <Uri>[]);
@@ -2652,11 +2652,11 @@ class FakeResidentCompiler extends Fake implements ResidentCompiler {
 class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator {
   @override
   Future<InvalidationResult> findInvalidated({
-    required DateTime? lastCompiled,
-    required List<Uri> urisToMonitor,
-    required String packagesPath,
-    required PackageConfig packageConfig,
-    bool asyncScanning = false,
+    required final DateTime? lastCompiled,
+    required final List<Uri> urisToMonitor,
+    required final String packagesPath,
+    required final PackageConfig packageConfig,
+    final bool asyncScanning = false,
   }) async {
     return InvalidationResult(
       packageConfig: packageConfig,
@@ -2670,9 +2670,9 @@ class FakeProjectFileInvalidator extends Fake implements ProjectFileInvalidator 
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
-    String sdkNameAndVersion = 'Android',
-    TargetPlatform targetPlatform = TargetPlatform.android_arm,
-    bool isLocalEmulator = false,
+    final String sdkNameAndVersion = 'Android',
+    final TargetPlatform targetPlatform = TargetPlatform.android_arm,
+    final bool isLocalEmulator = false,
     this.supportsHotRestart = true,
     this.supportsScreenshot = true,
     this.supportsFlutterExit = true,
@@ -2723,23 +2723,23 @@ class FakeDevice extends Fake implements Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(final ApplicationPackage? app, {final String? userIdentifier}) async {
     appStopped = true;
     return true;
   }
 
   @override
-  Future<void> takeScreenshot(File outputFile) async {
+  Future<void> takeScreenshot(final File outputFile) async {
     if (failScreenshot) {
       throw Exception();
     }
-    outputFile.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
+    outputFile.writeAsBytesSync(List<int>.generate(1024, (final int i) => i));
   }
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
+    final ApplicationPackage? app,
+    final bool includePastLogs = false,
   }) => NoOpDeviceLogReader(name);
 
   @override
@@ -2791,23 +2791,23 @@ class FakeDevFS extends Fake implements DevFS {
 
   @override
   Future<UpdateFSReport> update({
-    required Uri mainUri,
-    required ResidentCompiler generator,
-    required bool trackWidgetCreation,
-    required String pathToReload,
-    required List<Uri> invalidatedFiles,
-    required PackageConfig packageConfig,
-    required String dillOutputPath,
-    required DevelopmentShaderCompiler shaderCompiler,
-    DevelopmentSceneImporter? sceneImporter,
-    DevFSWriter? devFSWriter,
-    String? target,
-    AssetBundle? bundle,
-    DateTime? firstBuildTime,
-    bool bundleFirstUpload = false,
-    bool fullRestart = false,
-    String? projectRootPath,
-    File? dartPluginRegistrant,
+    required final Uri mainUri,
+    required final ResidentCompiler generator,
+    required final bool trackWidgetCreation,
+    required final String pathToReload,
+    required final List<Uri> invalidatedFiles,
+    required final PackageConfig packageConfig,
+    required final String dillOutputPath,
+    required final DevelopmentShaderCompiler shaderCompiler,
+    final DevelopmentSceneImporter? sceneImporter,
+    final DevFSWriter? devFSWriter,
+    final String? target,
+    final AssetBundle? bundle,
+    final DateTime? firstBuildTime,
+    final bool bundleFirstUpload = false,
+    final bool fullRestart = false,
+    final String? projectRootPath,
+    final File? dartPluginRegistrant,
   }) async {
     return nextUpdateReport;
   }
@@ -2818,12 +2818,12 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
+    final TargetPlatform? platform, {
+    required final ImpellerStatus impellerStatus,
   }) { }
 
   @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+  Future<DevFSContent> recompileShader(final DevFSContent inputShader) {
     throw UnimplementedError();
   }
 }

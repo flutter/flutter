@@ -69,8 +69,8 @@ void main() {
         ),
         throwsA(
           isA<ToolExit>()
-            .having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))
-            .having((ToolExit error) => error.message, 'message', contains('Use --overwrite')),
+            .having((final ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))
+            .having((final ToolExit error) => error.message, 'message', contains('Use --overwrite')),
         ),
       );
       expect(globals.fs.isFileSync(outputFile), isTrue);

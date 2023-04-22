@@ -275,16 +275,16 @@ class FakePub extends Fake implements Pub {
 
   @override
   Future<void> get({
-    required PubContext context,
-    required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.all,
+    required final PubContext context,
+    required final FlutterProject project,
+    final bool upgrade = false,
+    final bool offline = false,
+    final bool generateSyntheticPackage = false,
+    final bool generateSyntheticPackageForExample = false,
+    final String? flutterRootOverride,
+    final bool checkUpToDate = false,
+    final bool shouldSkipThirdPartyGenerator = true,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) async {
     pubGetDirectories.add(project.directory.path);
     project.directory.childFile('pubspec.lock')
@@ -312,11 +312,11 @@ sdks:
 
   @override
   Future<void> batch(
-      List<String> arguments, {
-        required PubContext context,
-        String? directory,
-        MessageFilter? filter,
-        String failureMessage = 'pub failed',
+      final List<String> arguments, {
+        required final PubContext context,
+        final String? directory,
+        final MessageFilter? filter,
+        final String failureMessage = 'pub failed',
       }) async {
     if (directory != null) {
       pubBatchDirectories.add(directory);

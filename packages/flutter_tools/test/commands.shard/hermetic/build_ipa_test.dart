@@ -33,9 +33,9 @@ class FakeXcodeProjectInterpreterWithBuildSettings extends FakeXcodeProjectInter
 
   @override
   Future<Map<String, String>> getBuildSettings(
-      String projectPath, {
-        XcodeProjectBuildContext? buildContext,
-        Duration timeout = const Duration(minutes: 1),
+      final String projectPath, {
+        final XcodeProjectBuildContext? buildContext,
+        final Duration timeout = const Duration(minutes: 1),
       }) async {
     return <String, String>{
       ...overrides,
@@ -62,7 +62,7 @@ class FakePlistUtils extends Fake implements PlistParser {
   final Map<String, Map<String, Object>> fileContents = <String, Map<String, Object>>{};
 
   @override
-  String? getStringValueFromFile(String plistFilePath, String key) {
+  String? getStringValueFromFile(final String plistFilePath, final String key) {
     return fileContents[plistFilePath]![key] as String?;
   }
 }
@@ -119,7 +119,7 @@ void main() {
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
 
-  FakeCommand setUpXCResultCommand({String stdout = '', void Function()? onRun}) {
+  FakeCommand setUpXCResultCommand({final String stdout = '', final void Function()? onRun}) {
     return FakeCommand(
       command: const <String>[
         'xcrun',
@@ -137,7 +137,7 @@ void main() {
 
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
-  FakeCommand setUpFakeXcodeBuildHandler({ bool verbose = false, int exitCode = 0, void Function()? onRun }) {
+  FakeCommand setUpFakeXcodeBuildHandler({ final bool verbose = false, final int exitCode = 0, final void Function()? onRun }) {
     return FakeCommand(
       command: <String>[
         'xcrun',
@@ -166,8 +166,8 @@ void main() {
   }
 
   FakeCommand exportArchiveCommand({
-    String exportOptionsPlist =  '/ExportOptions.plist',
-    File? cachePlist,
+    final String exportOptionsPlist =  '/ExportOptions.plist',
+    final File? cachePlist,
   }) {
     return FakeCommand(
       command: <String>[
@@ -647,7 +647,7 @@ void main() {
 
     fileSystem.file('build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Frameworks/App.framework/App')
       ..createSync(recursive: true)
-      ..writeAsBytesSync(List<int>.generate(10000, (int index) => 0));
+      ..writeAsBytesSync(List<int>.generate(10000, (final int index) => 0));
     fakeProcessManager.addCommands(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: () {

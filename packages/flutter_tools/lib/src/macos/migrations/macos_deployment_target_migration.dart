@@ -9,7 +9,7 @@ import '../../xcode_project.dart';
 /// Update the minimum macOS deployment version to the minimum allowed by Xcode without causing a warning.
 class MacOSDeploymentTargetMigration extends ProjectMigrator {
   MacOSDeploymentTargetMigration(
-    MacOSProject project,
+    final MacOSProject project,
     super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
         _podfile = project.podfile;
@@ -33,7 +33,7 @@ class MacOSDeploymentTargetMigration extends ProjectMigrator {
   }
 
   @override
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     // Xcode project file changes.
     const String deploymentTargetOriginal1011 = 'MACOSX_DEPLOYMENT_TARGET = 10.11;';
     const String deploymentTargetOriginal1013 = 'MACOSX_DEPLOYMENT_TARGET = 10.13;';

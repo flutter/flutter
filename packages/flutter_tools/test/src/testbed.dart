@@ -79,7 +79,7 @@ class Testbed {
   /// `overrides` provides more overrides in addition to the test defaults.
   /// `setup` may be provided to apply mocks within the tool managed zone,
   /// including any specified overrides.
-  Testbed({FutureOr<void> Function()? setup, Map<Type, Generator>? overrides})
+  Testbed({final FutureOr<void> Function()? setup, final Map<Type, Generator>? overrides})
       : _setup = setup,
         _overrides = overrides;
 
@@ -90,7 +90,7 @@ class Testbed {
   ///
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
-  Future<T?> run<T>(FutureOr<T> Function() test, {Map<Type, Generator>? overrides}) {
+  Future<T?> run<T>(final FutureOr<T> Function() test, {final Map<Type, Generator>? overrides}) {
     final Map<Type, Generator> testOverrides = <Type, Generator>{
       ..._testbedDefaults,
       // Add the initial setUp overrides
@@ -112,12 +112,12 @@ class Testbed {
           name: 'testbed',
           overrides: testOverrides,
           zoneSpecification: ZoneSpecification(
-            createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() timer) {
+            createTimer: (final Zone self, final ZoneDelegate parent, final Zone zone, final Duration duration, final void Function() timer) {
               final Timer result = parent.createTimer(zone, duration, timer);
               timers[result] = StackTrace.current;
               return result;
             },
-            createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void Function(Timer) timer) {
+            createPeriodicTimer: (final Zone self, final ZoneDelegate parent, final Zone zone, final Duration period, final void Function(Timer) timer) {
               final Timer result = parent.createPeriodicTimer(zone, period, timer);
               timers[result] = StackTrace.current;
               return result;
@@ -138,6 +138,6 @@ class Testbed {
             return null;
           });
       });
-    }, createHttpClient: (SecurityContext? c) => FakeHttpClient.any());
+    }, createHttpClient: (final SecurityContext? c) => FakeHttpClient.any());
   }
 }

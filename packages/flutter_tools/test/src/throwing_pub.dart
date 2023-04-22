@@ -7,42 +7,42 @@ import 'package:flutter_tools/src/project.dart';
 
 class ThrowingPub implements Pub {
   @override
-  Future<void> batch(List<String> arguments, {
-    PubContext? context,
-    String? directory,
-    MessageFilter? filter,
-    String? failureMessage = 'pub failed',
+  Future<void> batch(final List<String> arguments, {
+    final PubContext? context,
+    final String? directory,
+    final MessageFilter? filter,
+    final String? failureMessage = 'pub failed',
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
 
   @override
   Future<void> get({
-    PubContext? context,
-    required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    bool checkLastModified = true,
-    bool skipPubspecYamlCheck = false,
-    bool generateSyntheticPackage = false,
-    bool generateSyntheticPackageForExample = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.all,
+    final PubContext? context,
+    required final FlutterProject project,
+    final bool upgrade = false,
+    final bool offline = false,
+    final bool checkLastModified = true,
+    final bool skipPubspecYamlCheck = false,
+    final bool generateSyntheticPackage = false,
+    final bool generateSyntheticPackageForExample = false,
+    final String? flutterRootOverride,
+    final bool checkUpToDate = false,
+    final bool shouldSkipThirdPartyGenerator = true,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }
 
   @override
   Future<void> interactively(
-    List<String> arguments, {
-    FlutterProject? project,
-    required PubContext context,
-    required String command,
-    bool touchesPackageConfig = false,
-    bool generateSyntheticPackage = false,
-    PubOutputMode outputMode = PubOutputMode.all,
+    final List<String> arguments, {
+    final FlutterProject? project,
+    required final PubContext context,
+    required final String command,
+    final bool touchesPackageConfig = false,
+    final bool generateSyntheticPackage = false,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) {
     throw UnsupportedError('Attempted to invoke pub during test.');
   }

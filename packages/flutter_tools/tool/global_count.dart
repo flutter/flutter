@@ -19,13 +19,13 @@ void main() {
 
 final RegExp globalImport = RegExp("import.*globals.dart' as globals;");
 
-int countGlobalImports(Directory directory) {
+int countGlobalImports(final Directory directory) {
   int count = 0;
   for (final FileSystemEntity file in directory.listSync(recursive: true)) {
     if (!file.path.endsWith('.dart') || file is! File) {
       continue;
     }
-    final bool hasImport = file.readAsLinesSync().any((String line) {
+    final bool hasImport = file.readAsLinesSync().any((final String line) {
       return globalImport.hasMatch(line);
     });
     if (hasImport) {

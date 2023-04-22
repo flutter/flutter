@@ -9,9 +9,9 @@ import '../macos/xcode.dart';
 
 class IOSWorkflow implements Workflow {
   const IOSWorkflow({
-    required Platform platform,
-    required FeatureFlags featureFlags,
-    required Xcode xcode,
+    required final Platform platform,
+    required final FeatureFlags featureFlags,
+    required final Xcode xcode,
   }) : _platform = platform,
        _featureFlags = featureFlags,
        _xcode = xcode;

@@ -49,7 +49,7 @@ void main() {
       '--dart-define=flutter.inspector.structuredErrors=true',
     ], workingDirectory: tempDir.path);
 
-    transformToLines(process.stdout).listen((String line) async {
+    transformToLines(process.stdout).listen((final String line) async {
       stdout.writeln(line);
 
       if (line.startsWith('A Dart VM Service on')) {
@@ -87,7 +87,7 @@ void main() {
     final Completer<void> completer = Completer<void>();
 
     await Future<void>(() async {
-      flutter.stdout.listen((String line) {
+      flutter.stdout.listen((final String line) {
         stdout.writeln(line);
       });
       await completer.future;

@@ -16,8 +16,8 @@ import 'build.dart';
 class BuildBundleCommand extends BuildSubCommand {
   BuildBundleCommand({
     required super.logger,
-    bool verboseHelp = false,
-    BundleBuilder? bundleBuilder,
+    final bool verboseHelp = false,
+    final BundleBuilder? bundleBuilder,
   }) :  _bundleBuilder = bundleBuilder ?? BundleBuilder(), super(verboseHelp: verboseHelp) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);

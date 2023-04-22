@@ -1304,7 +1304,7 @@ void main() {
 }
 
 class FakeResidentRunner extends ResidentHandlers {
-  FakeResidentRunner(FlutterDevice device, this.logger, this.fileSystem) : flutterDevices = <FlutterDevice>[device];
+  FakeResidentRunner(final FlutterDevice device, this.logger, this.fileSystem) : flutterDevices = <FlutterDevice>[device];
 
   bool calledDetach = false;
   bool calledPrint = false;
@@ -1365,7 +1365,7 @@ class FakeResidentRunner extends ResidentHandlers {
   }
 
   @override
-  void printHelp({required bool details}) {
+  void printHelp({required final bool details}) {
     if (details) {
       calledPrintWithDetails = true;
     } else {
@@ -1377,7 +1377,7 @@ class FakeResidentRunner extends ResidentHandlers {
   Future<void> runSourceGenerators() async {  }
 
   @override
-  Future<OperationResult> restart({bool fullRestart = false, bool pause = false, String? reason}) async {
+  Future<OperationResult> restart({final bool fullRestart = false, final bool pause = false, final String? reason}) async {
     if (fullRestart && !supportsRestart) {
       throw StateError('illegal restart');
     }
@@ -1401,7 +1401,7 @@ class FakeResidentDevtoolsHandler extends Fake implements ResidentDevtoolsHandle
   bool calledLaunchDevToolsInBrowser = false;
 
   @override
-  bool launchDevToolsInBrowser({List<FlutterDevice?>? flutterDevices}) {
+  bool launchDevToolsInBrowser({final List<FlutterDevice?>? flutterDevices}) {
     return calledLaunchDevToolsInBrowser = true;
   }
 }
@@ -1420,7 +1420,7 @@ class FakeDevice extends Fake implements Device {
   String get name => 'Fake Device';
 
   @override
-  Future<void> takeScreenshot(File file) async {
+  Future<void> takeScreenshot(final File file) async {
     if (!supportsScreenshot) {
       throw StateError('illegal screenshot attempt');
     }
@@ -1429,17 +1429,17 @@ class FakeDevice extends Fake implements Device {
 
 }
 
-TerminalHandler setUpTerminalHandler(List<FakeVmServiceRequest> requests, {
-  bool supportsRestart = true,
-  bool supportsServiceProtocol = true,
-  bool supportsHotReload = true,
-  bool web = false,
-  bool fatalReloadError = false,
-  bool supportsScreenshot = false,
-  int reloadExitCode = 0,
-  BuildMode buildMode = BuildMode.debug,
-  Logger? logger,
-  FileSystem? fileSystem,
+TerminalHandler setUpTerminalHandler(final List<FakeVmServiceRequest> requests, {
+  final bool supportsRestart = true,
+  final bool supportsServiceProtocol = true,
+  final bool supportsHotReload = true,
+  final bool web = false,
+  final bool fatalReloadError = false,
+  final bool supportsScreenshot = false,
+  final int reloadExitCode = 0,
+  final BuildMode buildMode = BuildMode.debug,
+  final Logger? logger,
+  final FileSystem? fileSystem,
 }) {
   final Logger testLogger = logger ?? BufferLogger.test();
   final Signals signals = Signals.test();
@@ -1505,25 +1505,25 @@ class TestRunner extends Fake implements ResidentRunner {
   Future<void> cleanupAtFinish() async { }
 
   @override
-  void printHelp({ bool? details }) {
+  void printHelp({ final bool? details }) {
     hasHelpBeenPrinted = true;
   }
 
   @override
   Future<int?> run({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
-    String? route,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool enableDevTools = false,
+    final String? route,
   }) async => null;
 
   @override
   Future<int?> attach({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool allowExistingDdsInstance = false,
-    bool enableDevTools = false,
-    bool needsFullRestart = true,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool allowExistingDdsInstance = false,
+    final bool enableDevTools = false,
+    final bool needsFullRestart = true,
   }) async => null;
 }
 
@@ -1536,14 +1536,14 @@ class _TestSignals implements Signals {
       <ProcessSignal, Map<Object, SignalHandler>>{};
 
   @override
-  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+  Object addHandler(final ProcessSignal signal, final SignalHandler handler) {
     final Object token = Object();
     _handlersTable.putIfAbsent(signal, () => <Object, SignalHandler>{})[token] = handler;
     return token;
   }
 
   @override
-  Future<bool> removeHandler(ProcessSignal signal, Object token) async {
+  Future<bool> removeHandler(final ProcessSignal signal, final Object token) async {
     if (!_handlersTable.containsKey(signal)) {
       return false;
     }
@@ -1564,12 +1564,12 @@ class FakeShaderCompiler implements DevelopmentShaderCompiler {
 
   @override
   void configureCompiler(
-    TargetPlatform? platform, {
-    required ImpellerStatus impellerStatus,
+    final TargetPlatform? platform, {
+    required final ImpellerStatus impellerStatus,
   }) { }
 
   @override
-  Future<DevFSContent> recompileShader(DevFSContent inputShader) {
+  Future<DevFSContent> recompileShader(final DevFSContent inputShader) {
     throw UnimplementedError();
   }
 }

@@ -48,32 +48,32 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set a VM Service port explicitly.
 FlutterPlatform installHook({
-  TestWrapper testWrapper = const TestWrapper(),
-  required String shellPath,
-  required DebuggingOptions debuggingOptions,
-  TestWatcher? watcher,
+  final TestWrapper testWrapper = const TestWrapper(),
+  required final String shellPath,
+  required final DebuggingOptions debuggingOptions,
+  final TestWatcher? watcher,
   // TODO(bkonyi): remove after roll into google3.
-  bool enableObservatory = false,
-  bool enableVmService = false,
-  bool machine = false,
-  String? precompiledDillPath,
-  Map<String, String>? precompiledDillFiles,
-  bool updateGoldens = false,
-  String? testAssetDirectory,
-  InternetAddressType serverType = InternetAddressType.IPv4,
-  Uri? projectRootDirectory,
-  FlutterProject? flutterProject,
-  String? icudtlPath,
+  final bool enableObservatory = false,
+  final bool enableVmService = false,
+  final bool machine = false,
+  final String? precompiledDillPath,
+  final Map<String, String>? precompiledDillFiles,
+  final bool updateGoldens = false,
+  final String? testAssetDirectory,
+  final InternetAddressType serverType = InternetAddressType.IPv4,
+  final Uri? projectRootDirectory,
+  final FlutterProject? flutterProject,
+  final String? icudtlPath,
   PlatformPluginRegistration? platformPluginRegistration,
-  Device? integrationTestDevice,
-  String? integrationTestUserIdentifier,
-  TestTimeRecorder? testTimeRecorder,
-  UriConverter? uriConverter,
+  final Device? integrationTestDevice,
+  final String? integrationTestUserIdentifier,
+  final TestTimeRecorder? testTimeRecorder,
+  final UriConverter? uriConverter,
 }) {
   assert(enableVmService || enableObservatory || (!debuggingOptions.startPaused && debuggingOptions.hostVmServicePort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
-  platformPluginRegistration ??= (FlutterPlatform platform) {
+  platformPluginRegistration ??= (final FlutterPlatform platform) {
     testWrapper.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
       () {
@@ -126,14 +126,14 @@ FlutterPlatform installHook({
 // This API is used by the Fuchsia source tree, do not add new
 // required or position parameters.
 String generateTestBootstrap({
-  required Uri testUrl,
-  required InternetAddress host,
-  File? testConfigFile,
-  bool updateGoldens = false,
-  String languageVersionHeader = '',
-  bool nullSafety = false,
-  bool flutterTestDep = true,
-  bool integrationTest = false,
+  required final Uri testUrl,
+  required final InternetAddress host,
+  final File? testConfigFile,
+  final bool updateGoldens = false,
+  final String languageVersionHeader = '',
+  final bool nullSafety = false,
+  final bool flutterTestDep = true,
+  final bool integrationTest = false,
 }) {
 
   final String websocketUrl = host.type == InternetAddressType.IPv4
@@ -340,10 +340,10 @@ class FlutterPlatform extends PlatformPlugin {
 
   @override
   Future<RunnerSuite> load(
-    String path,
-    SuitePlatform platform,
-    SuiteConfiguration suiteConfig,
-    Object message,
+    final String path,
+    final SuitePlatform platform,
+    final SuiteConfiguration suiteConfig,
+    final Object message,
   ) async {
     // loadChannel may throw an exception. That's fine; it will cause the
     // LoadSuite to emit an error, which will be presented to the user.
@@ -355,7 +355,7 @@ class FlutterPlatform extends PlatformPlugin {
     return controller.suite;
   }
 
-  StreamChannel<dynamic> loadChannel(String path, SuitePlatform platform) {
+  StreamChannel<dynamic> loadChannel(final String path, final SuitePlatform platform) {
     if (_testCount > 0) {
       // Fail if there will be a port conflict.
       if (debuggingOptions.hostVmServicePort != null) {
@@ -389,13 +389,13 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   Future<String> _compileExpressionService(
-    String isolateId,
-    String expression,
-    List<String> definitions,
-    List<String> typeDefinitions,
-    String libraryUri,
-    String? klass,
-    bool isStatic,
+    final String isolateId,
+    final String expression,
+    final List<String> definitions,
+    final List<String> typeDefinitions,
+    final String libraryUri,
+    final String? klass,
+    final bool isStatic,
   ) async {
     if (compiler == null || compiler!.compiler == null) {
       throw Exception('Compiler is not set up properly to compile $expression');
@@ -409,7 +409,7 @@ class FlutterPlatform extends PlatformPlugin {
     throw Exception('Failed to compile $expression');
   }
 
-  TestDevice _createTestDevice(int ourTestCount) {
+  TestDevice _createTestDevice(final int ourTestCount) {
     if (_isIntegrationTest) {
       return IntegrationTestTestDevice(
         id: ourTestCount,
@@ -440,9 +440,9 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   Future<_AsyncError?> _startTest(
-    String testPath,
-    StreamChannel<dynamic> testHarnessChannel,
-    int ourTestCount,
+    final String testPath,
+    final StreamChannel<dynamic> testHarnessChannel,
+    final int ourTestCount,
   ) async {
     globals.printTrace('test $ourTestCount: starting test $testPath');
 
@@ -456,7 +456,7 @@ class FlutterPlatform extends PlatformPlugin {
         controllerSinkClosed = true;
       }));
 
-      void initializeExpressionCompiler(String path) {
+      void initializeExpressionCompiler(final String path) {
         // When start paused is specified, it means that the user is likely
         // running this with a debugger attached. Initialize the resident
         // compiler in this case.
@@ -586,9 +586,9 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   String _createListenerDart(
-    List<Finalizer> finalizers,
-    int ourTestCount,
-    String testPath,
+    final List<Finalizer> finalizers,
+    final int ourTestCount,
+    final String testPath,
   ) {
     // Prepare a temporary directory to store the Dart file that will talk to us.
     final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_test_listener.');
@@ -607,7 +607,7 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   String _generateTestMain({
-    required Uri testUrl,
+    required final Uri testUrl,
   }) {
     assert(testUrl.scheme == 'file');
     final File file = globals.fs.file(testUrl);
@@ -668,7 +668,7 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
       _parent.close(),
       _shellProcessClosed,
     ]).then<void>(
-      (List<dynamic> futureResults) {
+      (final List<dynamic> futureResults) {
         assert(futureResults.length == 2);
         assert(futureResults.first == null);
         final dynamic lastResult = futureResults.last;
@@ -685,11 +685,11 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
   }
 
   @override
-  void add(S event) => _parent.add(event);
+  void add(final S event) => _parent.add(event);
   @override
-  void addError(Object errorEvent, [ StackTrace? stackTrace ]) => _parent.addError(errorEvent, stackTrace);
+  void addError(final Object errorEvent, [ final StackTrace? stackTrace ]) => _parent.addError(errorEvent, stackTrace);
   @override
-  Future<dynamic> addStream(Stream<S> stream) => _parent.addStream(stream);
+  Future<dynamic> addStream(final Stream<S> stream) => _parent.addStream(stream);
 }
 
 @immutable
@@ -704,9 +704,9 @@ class _AsyncError {
 /// The returned future completes when either side is closed, which also
 /// indicates when the tests have finished.
 Future<void> _pipeHarnessToRemote({
-  required int id,
-  required StreamChannel<dynamic> harnessChannel,
-  required StreamChannel<String> remoteChannel,
+  required final int id,
+  required final StreamChannel<dynamic> harnessChannel,
+  required final StreamChannel<String> remoteChannel,
 }) async {
   globals.printTrace('test $id: Waiting for test harness or tests to finish');
 
@@ -714,13 +714,13 @@ Future<void> _pipeHarnessToRemote({
     harnessChannel.stream
       .map<String>(json.encode)
       .pipe(remoteChannel.sink)
-      .then<void>((void value) {
+      .then<void>((final void value) {
         globals.printTrace('test $id: Test process is no longer needed by test harness');
       }),
     remoteChannel.stream
       .map<dynamic>(json.decode)
       .pipe(harnessChannel.sink)
-      .then<void>((void value) {
+      .then<void>((final void value) {
         globals.printTrace('test $id: Test harness is no longer needed by test process');
       }),
   ]);

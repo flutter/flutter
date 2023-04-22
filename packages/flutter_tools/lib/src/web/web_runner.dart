@@ -20,17 +20,17 @@ abstract class WebRunnerFactory {
 
   /// Create a [ResidentRunner] for the web.
   ResidentRunner createWebRunner(
-    FlutterDevice device, {
-    String? target,
-    required bool stayResident,
-    required FlutterProject flutterProject,
-    required bool? ipv6,
-    required DebuggingOptions debuggingOptions,
-    UrlTunneller? urlTunneller,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required SystemClock systemClock,
-    required Usage usage,
-    bool machine = false,
+    final FlutterDevice device, {
+    final String? target,
+    required final bool stayResident,
+    required final FlutterProject flutterProject,
+    required final bool? ipv6,
+    required final DebuggingOptions debuggingOptions,
+    final UrlTunneller? urlTunneller,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final SystemClock systemClock,
+    required final Usage usage,
+    final bool machine = false,
   });
 }

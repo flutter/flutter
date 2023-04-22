@@ -1178,7 +1178,7 @@ void main() {
 
       expect(fileSystem.directory(configuredAndroidStudioDir).existsSync(), false);
       expect(() => AndroidStudio.latestValid(), throwsA(
-        (dynamic e) => e is ToolExit &&
+        (final dynamic e) => e is ToolExit &&
           e.message!.startsWith('Could not find the Android Studio installation at the manually configured path')
         )
       );
@@ -1195,7 +1195,7 @@ class FakePlistUtils extends Fake implements PlistParser {
   final Map<String, Map<String, Object>> fileContents = <String, Map<String, Object>>{};
 
   @override
-  Map<String, Object> parseFile(String plistFilePath) {
+  Map<String, Object> parseFile(final String plistFilePath) {
     return fileContents[plistFilePath]!;
   }
 }

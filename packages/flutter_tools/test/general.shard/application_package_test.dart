@@ -379,7 +379,7 @@ void main() {
 
     testUsingContext('Bad ipa zip-file, two app bundles', () {
       globals.fs.file('app.ipa').createSync();
-      os.onUnzip = (File zipFile, Directory targetDirectory) {
+      os.onUnzip = (final File zipFile, final Directory targetDirectory) {
         if (zipFile.path != 'app.ipa') {
           return;
         }
@@ -398,7 +398,7 @@ void main() {
 
     testUsingContext('Success with ipa', () {
       globals.fs.file('app.ipa').createSync();
-      os.onUnzip = (File zipFile, Directory targetDirectory) {
+      os.onUnzip = (final File zipFile, final Directory targetDirectory) {
         if (zipFile.path != 'app.ipa') {
           return;
         }
@@ -942,7 +942,7 @@ class FakeOperatingSystemUtils extends Fake implements OperatingSystemUtils {
   void Function(File, Directory)? onUnzip;
 
   @override
-  void unzip(File file, Directory targetDirectory) {
+  void unzip(final File file, final Directory targetDirectory) {
     onUnzip?.call(file, targetDirectory);
   }
 }

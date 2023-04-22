@@ -62,7 +62,7 @@ void main() {
     // message list.
     for (final DoctorValidator validator in AndroidStudioValidator.allValidators(globals.config, globals.platform, globals.fs, globals.userMessages)) {
       final ValidationResult result = await validator.validate();
-      expect(result.messages.where((ValidationMessage message) {
+      expect(result.messages.where((final ValidationMessage message) {
         return message.isError && message.message.contains('ProcessException');
       }).isNotEmpty, true);
     }

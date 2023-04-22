@@ -20,13 +20,13 @@ class AnalysisServer {
   AnalysisServer(
     this.sdkPath,
     this.directories, {
-    required FileSystem fileSystem,
-    required ProcessManager processManager,
-    required Logger logger,
-    required Platform platform,
-    required Terminal terminal,
+    required final FileSystem fileSystem,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final Platform platform,
+    required final Terminal terminal,
     required this.suppressAnalytics,
-    String? protocolTrafficLog,
+    final String? protocolTrafficLog,
   }) : _fileSystem = fileSystem,
        _processManager = processManager,
        _logger = logger,
@@ -102,7 +102,7 @@ class AnalysisServer {
   ///
   /// This can be surfaced to the user if the server crashes. If [tail] is null,
   /// returns all logs, else only the last [tail] lines.
-  String getLogs([int? tail]) {
+  String getLogs([final int? tail]) {
     if (tail == null) {
       return _logs.join('\n');
     }
@@ -113,7 +113,7 @@ class AnalysisServer {
     return firstTailLogs.reversed.join('\n');
   }
 
-  void _handleError(String message) {
+  void _handleError(final String message) {
     _logs.add('[stderr] $message');
     _logger.printError(message);
   }
@@ -126,7 +126,7 @@ class AnalysisServer {
 
   Future<int?> get onExit async => _process?.exitCode;
 
-  void _sendCommand(String method, Map<String, dynamic> params) {
+  void _sendCommand(final String method, final Map<String, dynamic> params) {
     final String message = json.encode(<String, dynamic>{
       'id': (++_id).toString(),
       'method': method,
@@ -136,7 +136,7 @@ class AnalysisServer {
     _logger.printTrace('==> $message');
   }
 
-  void _handleServerResponse(String line) {
+  void _handleServerResponse(final String line) {
     _logs.add('[stdout] $line');
     _logger.printTrace('<== $line');
 
@@ -172,7 +172,7 @@ class AnalysisServer {
     }
   }
 
-  void _handleStatus(Map<String, dynamic> statusInfo) {
+  void _handleStatus(final Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
     if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
       final bool isAnalyzing = (statusInfo['analysis'] as Map<String, dynamic>)['isAnalyzing'] as bool;
@@ -180,7 +180,7 @@ class AnalysisServer {
     }
   }
 
-  void _handleServerError(Map<String, dynamic> error) {
+  void _handleServerError(final Map<String, dynamic> error) {
     // Fields are 'isFatal', 'message', and 'stackTrace'.
     _logger.printError('Error from the analysis server: ${error['message']}');
     if (error['stackTrace'] != null) {
@@ -189,13 +189,13 @@ class AnalysisServer {
     _didServerErrorOccur = true;
   }
 
-  void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {
+  void _handleAnalysisIssues(final Map<String, dynamic> issueInfo) {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
     final String file = issueInfo['file'] as String;
     final List<dynamic> errorsList = issueInfo['errors'] as List<dynamic>;
     final List<AnalysisError> errors = errorsList
-        .map<Map<String, dynamic>>((dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
-        .map<AnalysisError>((Map<String, dynamic> json) {
+        .map<Map<String, dynamic>>((final dynamic e) => castStringKeyedMap(e) ?? <String, dynamic>{})
+        .map<AnalysisError>((final Map<String, dynamic> json) {
           return AnalysisError(WrittenError.fromJson(json),
             fileSystem: _fileSystem,
             platform: _platform,
@@ -226,9 +226,9 @@ enum AnalysisSeverity {
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(
     this.writtenError, {
-    required Platform platform,
-    required Terminal terminal,
-    required FileSystem fileSystem,
+    required final Platform platform,
+    required final Terminal terminal,
+    required final FileSystem fileSystem,
   }) : _platform = platform,
        _terminal = terminal,
        _fileSystem = fileSystem;
@@ -256,7 +256,7 @@ class AnalysisError implements Comparable<AnalysisError> {
   String get code => writtenError.code;
 
   @override
-  int compareTo(AnalysisError other) {
+  int compareTo(final AnalysisError other) {
     // Sort in order of file path, error location, severity, and message.
     if (writtenError.file != other.writtenError.file) {
       return writtenError.file.compareTo(other.writtenError.file);
@@ -317,7 +317,7 @@ class WrittenError {
   ///      "message":"...",
   ///      "hasFix":false
   ///  }
-  static WrittenError fromJson(Map<String, dynamic> json) {
+  static WrittenError fromJson(final Map<String, dynamic> json) {
     final Map<String, dynamic> location = json['location'] as Map<String, dynamic>;
     return WrittenError._(
       severity: json['severity'] as String,

@@ -20,7 +20,7 @@ import '../src/common.dart';
 
 void main() {
 
-  Future<Map<String, List<String>>> extractAssetManifestFromBundle(ManifestAssetBundle bundle) async {
+  Future<Map<String, List<String>>> extractAssetManifestFromBundle(final ManifestAssetBundle bundle) async {
     final String manifestJson = utf8.decode(await bundle.entries['AssetManifest.json']!.contentsAsBytes());
     final Map<String, dynamic> parsedJson = json.decode(manifestJson) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;

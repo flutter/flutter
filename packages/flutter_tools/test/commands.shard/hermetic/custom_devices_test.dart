@@ -168,7 +168,7 @@ final Platform windowsPlatform = FakePlatform(
 );
 
 class FakeTerminal implements Terminal {
-  factory FakeTerminal({required Platform platform}) {
+  factory FakeTerminal({required final Platform platform}) {
     return FakeTerminal._private(
         stdio: FakeStdio(),
         platform: platform
@@ -177,7 +177,7 @@ class FakeTerminal implements Terminal {
 
   FakeTerminal._private({
     required this.stdio,
-    required Platform platform
+    required final Platform platform
   }) :
     terminal = AnsiTerminal(
       stdio: stdio,
@@ -187,35 +187,35 @@ class FakeTerminal implements Terminal {
   final FakeStdio stdio;
   final AnsiTerminal terminal;
 
-  void simulateStdin(String line) {
+  void simulateStdin(final String line) {
     stdio.simulateStdin(line);
   }
 
   @override
-  set usesTerminalUi(bool value) => terminal.usesTerminalUi = value;
+  set usesTerminalUi(final bool value) => terminal.usesTerminalUi = value;
 
   @override
   bool get usesTerminalUi => terminal.usesTerminalUi;
 
   @override
-  String bolden(String message) => terminal.bolden(message);
+  String bolden(final String message) => terminal.bolden(message);
 
   @override
   String clearScreen() => terminal.clearScreen();
 
   @override
-  String color(String message, TerminalColor color) => terminal.color(message, color);
+  String color(final String message, final TerminalColor color) => terminal.color(message, color);
 
   @override
   Stream<String> get keystrokes => terminal.keystrokes;
 
   @override
   Future<String> promptForCharInput(
-    List<String> acceptedCharacters, {
-    required Logger logger,
-    String? prompt,
-    int? defaultChoiceIndex,
-    bool displayAcceptedCharacters = true
+    final List<String> acceptedCharacters, {
+    required final Logger logger,
+    final String? prompt,
+    final int? defaultChoiceIndex,
+    final bool displayAcceptedCharacters = true
   }) => terminal.promptForCharInput(
       acceptedCharacters,
       logger: logger,
@@ -227,7 +227,7 @@ class FakeTerminal implements Terminal {
   @override
   bool get singleCharMode => terminal.singleCharMode;
   @override
-  set singleCharMode(bool value) => terminal.singleCharMode = value;
+  set singleCharMode(final bool value) => terminal.singleCharMode = value;
 
   @override
   bool get stdinHasTerminal => terminal.stdinHasTerminal;
@@ -250,10 +250,10 @@ class FakeTerminal implements Terminal {
 
 class FakeCommandRunner extends FlutterCommandRunner {
   FakeCommandRunner({
-    required Platform platform,
-    required FileSystem fileSystem,
-    required Logger logger,
-    UserMessages? userMessages
+    required final Platform platform,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    final UserMessages? userMessages
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -265,7 +265,7 @@ class FakeCommandRunner extends FlutterCommandRunner {
   final UserMessages _userMessages;
 
   @override
-  Future<void> runCommand(ArgResults topLevelResults) async {
+  Future<void> runCommand(final ArgResults topLevelResults) async {
     final Logger logger = (topLevelResults['verbose'] as bool) ? VerboseLogger(_logger) : _logger;
 
     return context.run<void>(
@@ -289,14 +289,14 @@ class FakeCommandRunner extends FlutterCommandRunner {
 /// May take platform, logger, processManager and fileSystem from context if
 /// not explicitly specified.
 CustomDevicesCommand createCustomDevicesCommand({
-  CustomDevicesConfig Function(FileSystem, Logger)? config,
-  Terminal Function(Platform)? terminal,
+  final CustomDevicesConfig Function(FileSystem, Logger)? config,
+  final Terminal Function(Platform)? terminal,
   Platform? platform,
   FileSystem? fileSystem,
   ProcessManager? processManager,
   Logger? logger,
   PrintFn? usagePrintFn,
-  bool featureEnabled = false
+  final bool featureEnabled = false
 }) {
   platform ??= FakePlatform();
   processManager ??= FakeProcessManager.any();
@@ -334,14 +334,14 @@ CustomDevicesCommand createCustomDevicesCommand({
 /// May take platform, logger, processManager and fileSystem from context if
 /// not explicitly specified.
 CommandRunner<void> createCustomDevicesCommandRunner({
-  CustomDevicesConfig Function(FileSystem, Logger)? config,
-  Terminal Function(Platform)? terminal,
+  final CustomDevicesConfig Function(FileSystem, Logger)? config,
+  final Terminal Function(Platform)? terminal,
   Platform? platform,
   FileSystem? fileSystem,
-  ProcessManager? processManager,
+  final ProcessManager? processManager,
   Logger? logger,
-  PrintFn? usagePrintFn,
-  bool featureEnabled = false,
+  final PrintFn? usagePrintFn,
+  final bool featureEnabled = false,
 }) {
   platform ??= FakePlatform();
   fileSystem ??= MemoryFileSystem.test();
@@ -366,17 +366,17 @@ CommandRunner<void> createCustomDevicesCommandRunner({
 }
 
 FakeTerminal createFakeTerminalForAddingSshDevice({
-  required Platform platform,
-  required String id,
-  required String label,
-  required String sdkNameAndVersion,
-  required String enabled,
-  required String hostname,
-  required String username,
-  required String runDebug,
-  required String usePortForwarding,
-  required String screenshot,
-  required String apply
+  required final Platform platform,
+  required final String id,
+  required final String label,
+  required final String sdkNameAndVersion,
+  required final String enabled,
+  required final String hostname,
+  required final String username,
+  required final String runDebug,
+  required final String usePortForwarding,
+  required final String screenshot,
+  required final String apply
 }) {
   return FakeTerminal(platform: platform)
     ..simulateStdin(id)
@@ -410,7 +410,7 @@ void main() {
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           logger: logger,
-          usagePrintFn: (Object o) => logger.printStatus(o.toString()),
+          usagePrintFn: (final Object o) => logger.printStatus(o.toString()),
           featureEnabled: true
         );
         await expectLater(
@@ -431,7 +431,7 @@ void main() {
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
           logger: logger,
-          usagePrintFn: (Object o) => logger.printStatus(o.toString()),
+          usagePrintFn: (final Object o) => logger.printStatus(o.toString()),
           featureEnabled: true
         );
 
@@ -498,7 +498,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          terminal: (final Platform platform) => createFakeTerminalForAddingSshDevice(
             platform: platform,
             id: 'testid',
             label: 'testlabel',
@@ -588,7 +588,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          terminal: (final Platform platform) => createFakeTerminalForAddingSshDevice(
             platform: platform,
             id: 'testid',
             label: 'testlabel',
@@ -678,7 +678,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          terminal: (final Platform platform) => createFakeTerminalForAddingSshDevice(
             platform: platform,
             id: 'testid',
             label: 'testlabel',
@@ -773,7 +773,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          terminal: (final Platform platform) => createFakeTerminalForAddingSshDevice(
             platform: platform,
             id: 'testid',
             label: 'testlabel',
@@ -853,7 +853,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test();
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          terminal: (final Platform platform) => createFakeTerminalForAddingSshDevice(
             platform: platform,
             id: 'testid',
             label: 'testlabel',
@@ -944,7 +944,7 @@ void main() {
         config.add(CustomDeviceConfig.exampleUnix.copyWith(id: 'testid'));
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          config: (_, __) => config,
+          config: (final _, final __) => config,
           fileSystem: fs,
           featureEnabled: true
         );
@@ -1176,7 +1176,7 @@ void main() {
         final MemoryFileSystem fs = MemoryFileSystem.test(style: FileSystemStyle.windows);
 
         final CommandRunner<void> runner = createCustomDevicesCommandRunner(
-          terminal: (Platform platform) => createFakeTerminalForAddingSshDevice(
+          terminal: (final Platform platform) => createFakeTerminalForAddingSshDevice(
             platform: platform,
             id: 'testid',
             label: 'testlabel',

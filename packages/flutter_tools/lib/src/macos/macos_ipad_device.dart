@@ -22,10 +22,10 @@ import '../project.dart';
 /// https://developer.apple.com/documentation/apple-silicon/running-your-ios-apps-on-macos
 class MacOSDesignedForIPadDevice extends DesktopDevice {
   MacOSDesignedForIPadDevice({
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
   })  : _operatingSystemUtils = operatingSystemUtils,
         super(
           'designed-for-ipad',
@@ -49,23 +49,23 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
   bool isSupported() => _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) {
+  bool isSupportedForProject(final FlutterProject flutterProject) {
     return flutterProject.ios.existsSync() && _operatingSystemUtils.hostPlatform == HostPlatform.darwin_arm64;
   }
 
   @override
-  String? executablePathForDevice(ApplicationPackage package, BuildInfo buildInfo) => null;
+  String? executablePathForDevice(final ApplicationPackage package, final BuildInfo buildInfo) => null;
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    required final DebuggingOptions debuggingOptions,
+    final Map<String, Object?> platformArgs = const <String, Object>{},
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');
@@ -73,14 +73,14 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
   @override
   Future<bool> stopApp(
-    ApplicationPackage? app, {
-    String? userIdentifier,
+    final ApplicationPackage? app, {
+    final String? userIdentifier,
   }) async => false;
 
   @override
   Future<void> buildForDevice({
-    String? mainPath,
-    required BuildInfo buildInfo,
+    final String? mainPath,
+    required final BuildInfo buildInfo,
   }) async {
     // Only attaching to a running app launched from Xcode is supported.
     throw UnimplementedError('Building for "$name" is not supported.');
@@ -89,12 +89,12 @@ class MacOSDesignedForIPadDevice extends DesktopDevice {
 
 class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   MacOSDesignedForIPadDevices({
-    required Platform platform,
-    required IOSWorkflow iosWorkflow,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    required OperatingSystemUtils operatingSystemUtils,
+    required final Platform platform,
+    required final IOSWorkflow iosWorkflow,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    required final OperatingSystemUtils operatingSystemUtils,
   })  : _logger = logger,
         _platform = platform,
         _iosWorkflow = iosWorkflow,
@@ -123,7 +123,7 @@ class MacOSDesignedForIPadDevices extends PollingDeviceDiscovery {
   static bool allowDiscovery = false;
 
   @override
-  Future<List<Device>> pollingGetDevices({Duration? timeout}) async {
+  Future<List<Device>> pollingGetDevices({final Duration? timeout}) async {
     if (!canListAnything) {
       return const <Device>[];
     }

@@ -19,7 +19,7 @@ abstract class TestDevice {
   ///
   /// It is up to the device to determine if [entrypointPath] is a precompiled
   /// or raw source file.
-  Future<StreamChannel<String>> start(String entrypointPath);
+  Future<StreamChannel<String>> start(final String entrypointPath);
 
   /// Should complete with null if the VM Service is not enabled.
   Future<Uri?> get vmServiceUri;

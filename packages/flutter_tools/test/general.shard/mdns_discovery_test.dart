@@ -22,9 +22,9 @@ void main() {
     setUp(() {
       setNetworkInterfaceLister(
         ({
-          bool? includeLoopback,
-          bool? includeLinkLocal,
-          InternetAddressType? type,
+          final bool? includeLoopback,
+          final bool? includeLinkLocal,
+          final InternetAddressType? type,
         }) async => <NetworkInterface>[],
       );
     });
@@ -854,10 +854,10 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
   @override
   Future<void> start({
-    InternetAddress? listenAddress,
-    NetworkInterfacesFactory? interfacesFactory,
-    int mDnsPort = 5353,
-    InternetAddress? mDnsAddress,
+    final InternetAddress? listenAddress,
+    final NetworkInterfacesFactory? interfacesFactory,
+    final int mDnsPort = 5353,
+    final InternetAddress? mDnsAddress,
   }) async {
     if (osErrorOnStart) {
       throw const OSError('Operation not supported on socket', 102);
@@ -866,8 +866,8 @@ class FakeMDnsClient extends Fake implements MDnsClient {
 
   @override
   Stream<T> lookup<T extends ResourceRecord>(
-    ResourceRecordQuery query, {
-    Duration timeout = const Duration(seconds: 5),
+    final ResourceRecordQuery query, {
+    final Duration timeout = const Duration(seconds: 5),
   }) {
     if (T == PtrResourceRecord && query.fullyQualifiedName == MDnsVmServiceDiscovery.dartVmServiceName) {
       return Stream<PtrResourceRecord>.fromIterable(ptrRecords) as Stream<T>;
@@ -902,7 +902,7 @@ class FakeIOSDevice extends Fake implements IOSDevice {
   bool isSupported() => true;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(final FlutterProject flutterProject) => true;
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();

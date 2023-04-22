@@ -301,7 +301,7 @@ platform :osx, '10.14'
       );
     });
 
-    void testWithMocks(String description, Future<void> Function() testMethod) {
+    void testWithMocks(final String description, final Future<void> Function() testMethod) {
       testUsingContext(description, testMethod, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
         ProcessManager: () => FakeProcessManager.any(),

@@ -16,9 +16,9 @@ void main() {
   setUp(() {
     setNetworkInterfaceLister(
       ({
-        bool includeLoopback = true,
-        bool includeLinkLocal = true,
-        InternetAddressType type = InternetAddressType.any,
+        final bool includeLoopback = true,
+        final bool includeLinkLocal = true,
+        final InternetAddressType type = InternetAddressType.any,
       }) async {
         final List<FakeNetworkInterface> interfaces = <FakeNetworkInterface>[
           FakeNetworkInterface(<FakeInternetAddress>[
@@ -203,7 +203,7 @@ void main() {
 }
 
 class FakeNetworkInterface extends NetworkInterface {
-  FakeNetworkInterface(List<FakeInternetAddress> addresses):
+  FakeNetworkInterface(final List<FakeInternetAddress> addresses):
         super(FakeNetworkInterfaceDelegate(addresses));
 
   @override

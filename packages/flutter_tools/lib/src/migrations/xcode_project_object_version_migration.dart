@@ -9,7 +9,7 @@ import '../xcode_project.dart';
 /// Migrate the Xcode project for Xcode compatibility to avoid an "Update to recommended settings" Xcode warning.
 class XcodeProjectObjectVersionMigration extends ProjectMigrator {
   XcodeProjectObjectVersionMigration(
-    XcodeBasedProject project,
+    final XcodeBasedProject project,
     super.logger,
   )   : _xcodeProjectInfoFile = project.xcodeProjectInfoFile,
         _xcodeProjectSchemeFile = project.xcodeProjectSchemeFile;
@@ -32,7 +32,7 @@ class XcodeProjectObjectVersionMigration extends ProjectMigrator {
   }
 
   @override
-  String? migrateLine(String line) {
+  String? migrateLine(final String line) {
     String updatedString = line;
     final Map<Pattern, String> originalToReplacement = <Pattern, String>{
       // objectVersion value has been 46, 50, 51, and 54 in the template.
@@ -44,7 +44,7 @@ class XcodeProjectObjectVersionMigration extends ProjectMigrator {
       RegExp(r'LastUpgradeVersion = "\d+"'): 'LastUpgradeVersion = "1300"',
     };
 
-    originalToReplacement.forEach((Pattern original, String replacement) {
+    originalToReplacement.forEach((final Pattern original, final String replacement) {
       if (line.contains(original)) {
         updatedString = line.replaceAll(original, replacement);
         if (!migrationRequired && updatedString != line) {

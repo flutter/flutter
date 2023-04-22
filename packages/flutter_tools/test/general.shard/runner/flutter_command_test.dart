@@ -178,7 +178,7 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    void testUsingCommandContext(String testName, dynamic Function() testBody) {
+    void testUsingCommandContext(final String testName, final dynamic Function() testBody) {
       testUsingContext(testName, testBody, overrides: <Type, Generator>{
         FileSystem: () => fileSystem,
         ProcessInfo: () => processInfo,
@@ -341,7 +341,7 @@ void main() {
         clock.times = <int>[1000, 2000];
 
         final Completer<void> completer = Completer<void>();
-        setExitFunctionForTests((int exitCode) {
+        setExitFunctionForTests((final int exitCode) {
           expect(exitCode, 0);
           restoreExitFunction();
           completer.complete();
@@ -387,7 +387,7 @@ void main() {
       testUsingContext('command release lock on kill signal', () async {
         clock.times = <int>[1000, 2000];
         final Completer<void> completer = Completer<void>();
-        setExitFunctionForTests((int exitCode) {
+        setExitFunctionForTests((final int exitCode) {
           expect(exitCode, 0);
           restoreExitFunction();
           completer.complete();
@@ -798,7 +798,7 @@ class FakeCache extends Fake implements Cache {
   List<Set<DevelopmentArtifact>> artifacts = <Set<DevelopmentArtifact>>[];
 
   @override
-  Future<void> updateAll(Set<DevelopmentArtifact> requiredArtifacts, {bool offline = false}) async {
+  Future<void> updateAll(final Set<DevelopmentArtifact> requiredArtifacts, {final bool offline = false}) async {
     artifacts.add(requiredArtifacts.toSet());
   }
 
@@ -809,14 +809,14 @@ class FakeCache extends Fake implements Cache {
 class FakeSignals implements Signals {
   FakeSignals({
     required this.subForSigTerm,
-    required List<ProcessSignal> exitSignals,
+    required final List<ProcessSignal> exitSignals,
   }) : delegate = Signals.test(exitSignals: exitSignals);
 
   final ProcessSignal subForSigTerm;
   final Signals delegate;
 
   @override
-  Object addHandler(ProcessSignal signal, SignalHandler handler) {
+  Object addHandler(final ProcessSignal signal, final SignalHandler handler) {
     if (signal == ProcessSignal.sigterm) {
       return delegate.addHandler(subForSigTerm, handler);
     }
@@ -824,7 +824,7 @@ class FakeSignals implements Signals {
   }
 
   @override
-  Future<bool> removeHandler(ProcessSignal signal, Object token) =>
+  Future<bool> removeHandler(final ProcessSignal signal, final Object token) =>
     delegate.removeHandler(signal, token);
 
   @override
@@ -843,13 +843,13 @@ class FakeClock extends Fake implements SystemClock {
 class FakePub extends Fake implements Pub {
   @override
   Future<void> get({
-    required PubContext context,
-    required FlutterProject project,
-    bool upgrade = false,
-    bool offline = false,
-    String? flutterRootOverride,
-    bool checkUpToDate = false,
-    bool shouldSkipThirdPartyGenerator = true,
-    PubOutputMode outputMode = PubOutputMode.all,
+    required final PubContext context,
+    required final FlutterProject project,
+    final bool upgrade = false,
+    final bool offline = false,
+    final String? flutterRootOverride,
+    final bool checkUpToDate = false,
+    final bool shouldSkipThirdPartyGenerator = true,
+    final PubOutputMode outputMode = PubOutputMode.all,
   }) async { }
 }

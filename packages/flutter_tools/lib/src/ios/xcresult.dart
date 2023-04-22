@@ -40,7 +40,7 @@ class XCResultGenerator {
   ///
   /// A`issueDiscarders` can be passed to discard any issues that matches the description of any [XCResultIssueDiscarder] in the list.
   Future<XCResult> generate(
-      {List<XCResultIssueDiscarder> issueDiscarders =
+      {final List<XCResultIssueDiscarder> issueDiscarders =
           const <XCResultIssueDiscarder>[]}) async {
     final RunResult result = await processUtils.run(
       <String>[
@@ -78,7 +78,7 @@ class XCResultGenerator {
 /// The result contains useful information such as build errors and warnings.
 class XCResult {
   /// Parse the `resultJson` and stores useful informations in the returned `XCResult`.
-  factory XCResult({required Map<String, Object?> resultJson, List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
+  factory XCResult({required final Map<String, Object?> resultJson, final List<XCResultIssueDiscarder> issueDiscarders = const <XCResultIssueDiscarder>[]}) {
     final List<XCResultIssue> issues = <XCResultIssue>[];
 
     final Object? issuesMap = resultJson['issues'];
@@ -107,7 +107,7 @@ class XCResult {
     return XCResult._(issues: issues);
   }
 
-  factory XCResult.failed({required String errorMessage}) {
+  factory XCResult.failed({required final String errorMessage}) {
     return XCResult._(
       parseSuccess: false,
       parsingErrorMessage: errorMessage,
@@ -117,9 +117,9 @@ class XCResult {
   /// Create a [XCResult] with constructed [XCResultIssue]s for testing.
   @visibleForTesting
   factory XCResult.test({
-    List<XCResultIssue>? issues,
-    bool? parseSuccess,
-    String? parsingErrorMessage,
+    final List<XCResultIssue>? issues,
+    final bool? parseSuccess,
+    final String? parsingErrorMessage,
   }) {
     return XCResult._(
       issues: issues ?? const <XCResultIssue>[],
@@ -154,8 +154,8 @@ class XCResultIssue {
   ///
   /// `issueJson` is the object at xcresultJson[['actions']['_values'][0]['buildResult']['issues']['errorSummaries'/'warningSummaries']['_values'].
   factory XCResultIssue({
-    required XCResultIssueType type,
-    required Map<String, Object?> issueJson,
+    required final XCResultIssueType type,
+    required final Map<String, Object?> issueJson,
   }) {
     // Parse type.
     final Object? issueSubTypeMap = issueJson['issueType'];
@@ -208,11 +208,11 @@ class XCResultIssue {
   /// Create a [XCResultIssue] without JSON parsing for testing.
   @visibleForTesting
   factory XCResultIssue.test({
-    XCResultIssueType type = XCResultIssueType.error,
-    String? subType,
-    String? message,
-    String? location,
-    List<String> warnings = const <String>[],
+    final XCResultIssueType type = XCResultIssueType.error,
+    final String? subType,
+    final String? message,
+    final String? location,
+    final List<String> warnings = const <String>[],
   }) {
     return XCResultIssue._(
       type: type,
@@ -304,7 +304,7 @@ class XCResultIssueDiscarder {
 // A typical location url string looks like file:///foo.swift#CharacterRangeLen=0&EndingColumnNumber=82&EndingLineNumber=7&StartingColumnNumber=82&StartingLineNumber=7.
 //
 // This function converts it to something like: /foo.swift:<StartingLineNumber>:<StartingColumnNumber>.
-String? _convertUrlToLocationString(String url) {
+String? _convertUrlToLocationString(final String url) {
   final Uri? fragmentLocation = Uri.tryParse(url);
   if (fragmentLocation == null) {
     return null;
@@ -329,7 +329,7 @@ String? _convertUrlToLocationString(String url) {
 
 // Determine if an `issue` should be discarded based on the `discarder`.
 bool _shouldDiscardIssue(
-    {required XCResultIssue issue, required XCResultIssueDiscarder discarder}) {
+    {required final XCResultIssue issue, required final XCResultIssueDiscarder discarder}) {
   if (issue.type == discarder.typeMatcher) {
     return true;
   }
@@ -353,9 +353,9 @@ bool _shouldDiscardIssue(
 }
 
 List<XCResultIssue> _parseIssuesFromIssueSummariesJson({
-  required XCResultIssueType type,
-  required Map<String, Object?> issueSummariesJson,
-  required List<XCResultIssueDiscarder> issueDiscarder,
+  required final XCResultIssueType type,
+  required final Map<String, Object?> issueSummariesJson,
+  required final List<XCResultIssueDiscarder> issueDiscarder,
 }) {
   final List<XCResultIssue> issues = <XCResultIssue>[];
   final Object? errorsList = issueSummariesJson['_values'];

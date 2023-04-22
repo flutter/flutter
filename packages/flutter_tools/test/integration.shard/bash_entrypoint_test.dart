@@ -26,7 +26,7 @@ Future<void> main() async {
     );
     final Future<Object?> stdoutFuture = process.stdout
         .transform<String>(utf8.decoder)
-        .forEach((String str) {
+        .forEach((final String str) {
           stdout += str;
           if (stdout.contains('Ready to receive signals') && !childReadyCompleter.isCompleted) {
             childReadyCompleter.complete();

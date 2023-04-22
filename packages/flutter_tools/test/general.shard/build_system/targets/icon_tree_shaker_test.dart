@@ -33,7 +33,7 @@ void main() {
   late String fontSubsetPath;
   late List<String> fontSubsetArgs;
 
-  List<String> getConstFinderArgs(String appDillPath) => <String>[
+  List<String> getConstFinderArgs(final String appDillPath) => <String>[
     dartPath,
     '--disable-dart-dev',
     constFinderPath,
@@ -45,10 +45,10 @@ void main() {
   ];
 
   void addConstFinderInvocation(
-    String appDillPath, {
-    int exitCode = 0,
-    String stdout = '',
-    String stderr = '',
+    final String appDillPath, {
+    final int exitCode = 0,
+    final String stdout = '',
+    final String stderr = '',
   }) {
     processManager.addCommand(FakeCommand(
       command: getConstFinderArgs(appDillPath),
@@ -59,10 +59,10 @@ void main() {
   }
 
   void resetFontSubsetInvocation({
-    int exitCode = 0,
-    String stdout = '',
-    String stderr = '',
-    required CompleterIOSink stdinSink,
+    final int exitCode = 0,
+    final String stdout = '',
+    final String stderr = '',
+    required final CompleterIOSink stdinSink,
   }) {
     stdinSink.clear();
     processManager.addCommand(FakeCommand(
@@ -98,7 +98,7 @@ void main() {
       ..writeAsBytesSync(_kTtfHeaderBytes);
   });
 
-  Environment createEnvironment(Map<String, String> defines) {
+  Environment createEnvironment(final Map<String, String> defines) {
     return Environment.test(
       fileSystem.directory('/icon_test')..createSync(recursive: true),
       defines: defines,

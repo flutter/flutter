@@ -18,9 +18,9 @@ import 'utils.dart';
 class Fingerprinter {
   Fingerprinter({
     required this.fingerprintPath,
-    required Iterable<String> paths,
-    required FileSystem fileSystem,
-    required Logger logger,
+    required final Iterable<String> paths,
+    required final FileSystem fileSystem,
+    required final Logger logger,
   }) : _paths = paths.toList(),
        _logger = logger,
        _fileSystem = fileSystem;
@@ -79,12 +79,12 @@ class Fingerprinter {
 @immutable
 class Fingerprint {
   const Fingerprint._({
-    Map<String, String>? checksums,
+    final Map<String, String>? checksums,
   })  : _checksums = checksums ?? const <String, String>{};
 
-  factory Fingerprint.fromBuildInputs(Iterable<String> inputPaths, FileSystem fileSystem) {
+  factory Fingerprint.fromBuildInputs(final Iterable<String> inputPaths, final FileSystem fileSystem) {
     final Iterable<File> files = inputPaths.map<File>(fileSystem.file);
-    final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
+    final Iterable<File> missingInputs = files.where((final File file) => !file.existsSync());
     if (missingInputs.isNotEmpty) {
       throw Exception('Missing input files:\n${missingInputs.join('\n')}');
     }
@@ -100,7 +100,7 @@ class Fingerprint {
   ///
   /// Throws [Exception], if there is a version mismatch between the
   /// serializing framework and this framework.
-  factory Fingerprint.fromJson(String jsonData) {
+  factory Fingerprint.fromJson(final String jsonData) {
     final Map<String, dynamic>? content = castStringKeyedMap(json.decode(jsonData));
     final Map<String, String>? files = content == null
         ? null
@@ -117,14 +117,14 @@ class Fingerprint {
   });
 
   @override
-  bool operator==(Object other) {
+  bool operator==(final Object other) {
     return other is Fingerprint
         && _equalMaps(other._checksums, _checksums);
   }
 
-  bool _equalMaps(Map<String, String> a, Map<String, String> b) {
+  bool _equalMaps(final Map<String, String> a, final Map<String, String> b) {
     return a.length == b.length
-        && a.keys.every((String key) => a[key] == b[key]);
+        && a.keys.every((final String key) => a[key] == b[key]);
   }
 
   @override

@@ -20,10 +20,10 @@ void main() {
     late Directory intellijDir;
     late Directory toolsDir;
 
-    Map<String, String> getFilesystemContents([ Directory? root ]) {
+    Map<String, String> getFilesystemContents([ final Directory? root ]) {
       final String tempPath = tempDir.absolute.path;
       final List<String> paths =
-        (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
+        (root ?? tempDir).listSync(recursive: true).map((final FileSystemEntity entity) {
           final String relativePath = globals.fs.path.relative(entity.path, from: tempPath);
           return relativePath;
         }).toList();
@@ -39,7 +39,7 @@ void main() {
       return contents;
     }
 
-    Map<String, String> getManifest(Directory base, String marker, { bool isTemplate = false }) {
+    Map<String, String> getManifest(final Directory base, final String marker, { final bool isTemplate = false }) {
       final String basePath = globals.fs.path.relative(base.path, from: tempDir.absolute.path);
       final String suffix = isTemplate ? Template.copyTemplateExtension : '';
       return <String, String>{
@@ -55,7 +55,7 @@ void main() {
       };
     }
 
-    void populateDir(Map<String, String> manifest) {
+    void populateDir(final Map<String, String> manifest) {
       for (final String key in manifest.keys) {
         if (manifest[key] == 'dir') {
           tempDir.childDirectory(key).createSync(recursive: true);
@@ -70,16 +70,16 @@ void main() {
       }
     }
 
-    bool fileOrDirectoryExists(String path) {
+    bool fileOrDirectoryExists(final String path) {
       final String absPath = globals.fs.path.join(tempDir.absolute.path, path);
       return globals.fs.file(absPath).existsSync() || globals.fs.directory(absPath).existsSync();
     }
 
     Future<void> updateIdeConfig({
       Directory? dir,
-      List<String> args = const <String>[],
-      Map<String, String> expectedContents = const <String, String>{},
-      List<String> unexpectedPaths = const <String>[],
+      final List<String> args = const <String>[],
+      final Map<String, String> expectedContents = const <String, String>{},
+      final List<String> unexpectedPaths = const <String>[],
     }) async {
       dir ??= tempDir;
       Cache.flutterRoot = tempDir.absolute.path;

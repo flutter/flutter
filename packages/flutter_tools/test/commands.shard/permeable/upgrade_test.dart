@@ -471,19 +471,19 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   late FlutterVersion remoteVersion;
 
   @override
-  Future<FlutterVersion> fetchLatestVersion({FlutterVersion? localVersion}) async => remoteVersion;
+  Future<FlutterVersion> fetchLatestVersion({final FlutterVersion? localVersion}) async => remoteVersion;
 
   @override
   Future<bool> hasUncommittedChanges() async => willHaveUncommittedChanges;
 
   @override
-  Future<void> attemptReset(String newRevision) async {}
+  Future<void> attemptReset(final String newRevision) async {}
 
   @override
   Future<void> precacheArtifacts() async {}
 
   @override
-  Future<void> updatePackages(FlutterVersion flutterVersion) async {}
+  Future<void> updatePackages(final FlutterVersion flutterVersion) async {}
 
   @override
   Future<void> runDoctor() async {}

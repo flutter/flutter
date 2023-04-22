@@ -19,8 +19,8 @@ import 'build.dart';
 class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand({
     required super.logger,
-    required FileSystem fileSystem,
-    required bool verboseHelp,
+    required final FileSystem fileSystem,
+    required final bool verboseHelp,
   }) : _fileSystem = fileSystem, super(verboseHelp: verboseHelp) {
     addTreeShakeIconsFlag();
     usesTargetOption();
@@ -48,7 +48,7 @@ class BuildWebCommand extends BuildSubCommand {
       'pwa-strategy',
       defaultsTo: ServiceWorkerStrategy.offlineFirst.cliName,
       help: 'The caching strategy to be used by the PWA service worker.',
-      allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
+      allowed: ServiceWorkerStrategy.values.map((final ServiceWorkerStrategy e) => e.cliName),
       allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
     usesWebRendererOption();

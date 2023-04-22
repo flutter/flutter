@@ -110,14 +110,14 @@ List<FakeDeviceJsonData> fakeDevices = <FakeDeviceJsonData>[
 
 /// Fake device to test `devices` command.
 class FakeDevice extends Device {
-  FakeDevice(this.name, String id, {
-    bool ephemeral = true,
-    bool isSupported = true,
-    bool isSupportedForProject = true,
+  FakeDevice(this.name, final String id, {
+    final bool ephemeral = true,
+    final bool isSupported = true,
+    final bool isSupportedForProject = true,
     this.isConnected = true,
     this.connectionInterface = DeviceConnectionInterface.attached,
-    PlatformType type = PlatformType.web,
-    LaunchResult? launchResult,
+    final PlatformType type = PlatformType.web,
+    final LaunchResult? launchResult,
   }) : _isSupported = isSupported,
       _isSupportedForProject = isSupportedForProject,
       _launchResult = launchResult ?? LaunchResult.succeeded(),
@@ -136,25 +136,25 @@ class FakeDevice extends Device {
   final String name;
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    DebuggingOptions? debuggingOptions,
-    Map<String, dynamic>? platformArgs,
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+  Future<LaunchResult> startApp(final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    final DebuggingOptions? debuggingOptions,
+    final Map<String, dynamic>? platformArgs,
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async => _launchResult;
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {
-    String? userIdentifier,
+  Future<bool> stopApp(final ApplicationPackage? app, {
+    final String? userIdentifier,
   }) async => true;
 
   @override
   Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) async => true;
 
   @override
@@ -164,10 +164,10 @@ class FakeDevice extends Device {
   Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
 
   @override
-  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  void noSuchMethod(final Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupportedForProject;
+  bool isSupportedForProject(final FlutterProject flutterProject) => _isSupportedForProject;
 
   @override
   bool isSupported() => _isSupported;
@@ -203,7 +203,7 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
 
   @override
-  Future<List<Device>> pollingGetDevices({ Duration? timeout }) async {
+  Future<List<Device>> pollingGetDevices({ final Duration? timeout }) async {
     lastPollingTimeout = timeout;
     return _devices;
   }
@@ -219,17 +219,17 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
   @override
   bool requiresExtendedWirelessDeviceDiscovery;
 
-  void addDevice(Device device) {
+  void addDevice(final Device device) {
     _devices.add(device);
     _onAddedController.add(device);
   }
 
-  void _removeDevice(Device device) {
+  void _removeDevice(final Device device) {
     _devices.remove(device);
     _onRemovedController.add(device);
   }
 
-  void setDevices(List<Device> devices) {
+  void setDevices(final List<Device> devices) {
     while(_devices.isNotEmpty) {
       _removeDevice(_devices.first);
     }
@@ -240,8 +240,8 @@ class FakePollingDeviceDiscovery extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> discoverDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter,
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter,
   }) {
     discoverDevicesCalled = true;
     return super.discoverDevices(timeout: timeout);
@@ -275,7 +275,7 @@ class FakeDeviceLogReader extends DeviceLogReader {
   @override
   Stream<String> get logLines => _linesController.stream;
 
-  void addLine(String line) {
+  void addLine(final String line) {
     if (_linesController.hasListener) {
       _linesController.add(line);
     } else {

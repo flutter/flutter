@@ -73,7 +73,7 @@ class DeferredComponentsGenSnapshotValidatorTarget extends Target {
   DeferredComponentsGenSnapshotValidator? validator;
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final DepfileService depfileService = DepfileService(
       fileSystem: environment.fileSystem,
       logger: environment.logger,

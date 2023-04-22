@@ -20,7 +20,7 @@ class HotReloadProject extends Project {
   @override
   final String main = getCode(false);
 
-  static String getCode(bool stateful) {
+  static String getCode(final bool stateful) {
     return '''
   import 'package:flutter/material.dart';
   import 'package:flutter/scheduler.dart';

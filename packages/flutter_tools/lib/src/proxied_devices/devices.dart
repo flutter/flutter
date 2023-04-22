@@ -23,7 +23,7 @@ import 'file_transfer.dart';
 
 bool _isNullable<T>() => null is T;
 
-T _cast<T>(Object? object) {
+T _cast<T>(final Object? object) {
   if (!_isNullable<T>() && object == null) {
     throw Exception('Expected $T, received null!');
   } else {
@@ -38,9 +38,9 @@ T _cast<T>(Object? object) {
 /// only transfers the changed part of the application package for deployment.
 class ProxiedDevices extends DeviceDiscovery {
   ProxiedDevices(this.connection, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
-    required Logger logger,
+    final bool deltaFileTransfer = true,
+    final bool enableDdsProxy = false,
+    required final Logger logger,
   }) : _deltaFileTransfer = deltaFileTransfer,
        _enableDdsProxy = enableDdsProxy,
        _logger = logger;
@@ -63,13 +63,13 @@ class ProxiedDevices extends DeviceDiscovery {
   List<Device>? _devices;
 
   @override
-  Future<List<Device>> devices({DeviceDiscoveryFilter? filter}) async =>
+  Future<List<Device>> devices({final DeviceDiscoveryFilter? filter}) async =>
       _filterDevices(_devices ?? await discoverDevices(), filter);
 
   @override
   Future<List<Device>> discoverDevices({
-    Duration? timeout,
-    DeviceDiscoveryFilter? filter
+    final Duration? timeout,
+    final DeviceDiscoveryFilter? filter
   }) async {
     final List<Map<String, Object?>> discoveredDevices = _cast<List<dynamic>>(await connection.sendRequest('device.discoverDevices')).cast<Map<String, Object?>>();
     final List<ProxiedDevice> devices = <ProxiedDevice>[
@@ -81,7 +81,7 @@ class ProxiedDevices extends DeviceDiscovery {
     return _filterDevices(devices, filter);
   }
 
-  Future<List<Device>> _filterDevices(List<Device> devices, DeviceDiscoveryFilter? filter) async {
+  Future<List<Device>> _filterDevices(final List<Device> devices, final DeviceDiscoveryFilter? filter) async {
     if (filter == null) {
       return devices;
     }
@@ -92,7 +92,7 @@ class ProxiedDevices extends DeviceDiscovery {
   List<String> get wellKnownIds => const <String>[];
 
   @visibleForTesting
-  ProxiedDevice deviceFromDaemonResult(Map<String, Object?> device) {
+  ProxiedDevice deviceFromDaemonResult(final Map<String, Object?> device) {
     final Map<String, Object?> capabilities = _cast<Map<String, Object?>>(device['capabilities']);
     return ProxiedDevice(
       connection, _cast<String>(device['id']),
@@ -127,24 +127,24 @@ class ProxiedDevices extends DeviceDiscovery {
 /// If [enableDdsProxy] is true, DDS will be started on the daemon instead of
 /// starting locally.
 class ProxiedDevice extends Device {
-  ProxiedDevice(this.connection, String id, {
-    bool deltaFileTransfer = true,
-    bool enableDdsProxy = false,
-    required Category? category,
-    required PlatformType? platformType,
-    required TargetPlatform targetPlatform,
-    required bool ephemeral,
+  ProxiedDevice(this.connection, final String id, {
+    final bool deltaFileTransfer = true,
+    final bool enableDdsProxy = false,
+    required final Category? category,
+    required final PlatformType? platformType,
+    required final TargetPlatform targetPlatform,
+    required final bool ephemeral,
     required this.name,
-    required bool isLocalEmulator,
-    required String? emulatorId,
-    required String sdkNameAndVersion,
+    required final bool isLocalEmulator,
+    required final String? emulatorId,
+    required final String sdkNameAndVersion,
     required this.supportsHotReload,
     required this.supportsHotRestart,
     required this.supportsFlutterExit,
     required this.supportsScreenshot,
     required this.supportsFastStart,
-    required bool supportsHardwareRendering,
-    required Logger logger,
+    required final bool supportsHardwareRendering,
+    required final Logger logger,
   }): _deltaFileTransfer = deltaFileTransfer,
       _enableDdsProxy = enableDdsProxy,
       _isLocalEmulator = isLocalEmulator,
@@ -179,7 +179,7 @@ class ProxiedDevice extends Device {
   Future<String?> get emulatorId async => _emulatorId;
 
   @override
-  Future<bool> supportsRuntimeMode(BuildMode buildMode) async =>
+  Future<bool> supportsRuntimeMode(final BuildMode buildMode) async =>
      _cast<bool>(await connection.sendRequest('device.supportsRuntimeMode', <String, Object>{
       'deviceId': id,
       'buildMode': buildMode.toString(),
@@ -192,27 +192,27 @@ class ProxiedDevice extends Device {
   // ProxiedDevice is intended to be used with prebuilt projects. No building
   // is required, so we returns true for all projects.
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(final FlutterProject flutterProject) => true;
 
   @override
   Future<bool> isAppInstalled(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) => throw UnimplementedError();
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) => throw UnimplementedError();
+  Future<bool> isLatestBuildInstalled(final ApplicationPackage app) => throw UnimplementedError();
 
   @override
   Future<bool> installApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) => throw UnimplementedError();
 
   @override
   Future<bool> uninstallApp(
-    ApplicationPackage app, {
-    String? userIdentifier,
+    final ApplicationPackage app, {
+    final String? userIdentifier,
   }) => throw UnimplementedError();
 
   @override
@@ -229,8 +229,8 @@ class ProxiedDevice extends Device {
 
   @override
   FutureOr<DeviceLogReader> getLogReader({
-    covariant PrebuiltApplicationPackage? app,
-    bool includePastLogs = false,
+    covariant final PrebuiltApplicationPackage? app,
+    final bool includePastLogs = false,
   }) => _ProxiedLogReader(connection, this, app);
 
   ProxiedPortForwarder? _proxiedPortForwarder;
@@ -258,14 +258,14 @@ class ProxiedDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    PrebuiltApplicationPackage package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final PrebuiltApplicationPackage package, {
+    final String? mainPath,
+    final String? route,
+    required final DebuggingOptions debuggingOptions,
+    final Map<String, Object?> platformArgs = const <String, Object?>{},
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     final Map<String, Object?> result = _cast<Map<String, Object?>>(await connection.sendRequest('device.startApp', <String, Object?>{
       'deviceId': id,
@@ -311,8 +311,8 @@ class ProxiedDevice extends Device {
 
   @override
   Future<bool> stopApp(
-    covariant PrebuiltApplicationPackage? app, {
-    String? userIdentifier,
+    covariant final PrebuiltApplicationPackage? app, {
+    final String? userIdentifier,
   }) async {
     return _cast<bool>(await connection.sendRequest('device.stopApp', <String, Object?>{
       'deviceId': id,
@@ -326,7 +326,7 @@ class ProxiedDevice extends Device {
   Future<MemoryInfo> queryMemoryInfo() => throw UnimplementedError();
 
   @override
-  Future<void> takeScreenshot(File outputFile) async {
+  Future<void> takeScreenshot(final File outputFile) async {
     final String imageBase64 = _cast<String>(await connection.sendRequest('device.takeScreenshot', <String, Object?>{
       'deviceId': id,
     }));
@@ -341,7 +341,7 @@ class ProxiedDevice extends Device {
   final Map<String, Future<String>> _applicationPackageMap =
       <String, Future<String>>{};
   Future<String> applicationPackageId(
-      PrebuiltApplicationPackage package) async {
+      final PrebuiltApplicationPackage package) async {
     final File binary = package.applicationPackage as File;
     final String path = binary.absolute.path;
     if (_applicationPackageMap.containsKey(path)) {
@@ -371,7 +371,7 @@ class ProxiedDevice extends Device {
 
       // Delta is empty if the file does not need to be updated
       if (delta.isNotEmpty) {
-        final List<Map<String, Object>> deltaJson = delta.map((FileDeltaBlock block) => block.toJson()).toList();
+        final List<Map<String, Object>> deltaJson = delta.map((final FileDeltaBlock block) => block.toJson()).toList();
         final Uint8List buffer = await FileTransfer().binaryForRebuilding(binary, delta);
 
         await connection.sendRequest('proxy.updateFile', <String, Object>{
@@ -412,15 +412,15 @@ class _ProxiedLogReader extends DeviceLogReader {
   Stream<String> _start() {
     final PrebuiltApplicationPackage? package = applicationPackage;
     final Future<String?> applicationPackageId = package != null ? device.applicationPackageId(package) : Future<String?>.value();
-    final Future<String> idFuture = applicationPackageId.then((String? applicationPackageId) async =>
+    final Future<String> idFuture = applicationPackageId.then((final String? applicationPackageId) async =>
        _cast<String>(await connection.sendRequest('device.logReader.start', <String, Object>{
         'deviceId': device.id,
         if (applicationPackageId != null)
           'applicationPackageId': applicationPackageId,
       })));
-    idFuture.then((String id) {
+    idFuture.then((final String id) {
       _id = id;
-      final Stream<String> stream = connection.listenToEvent('device.logReader.logLines.$_id').map((DaemonEventData event) => event.data! as String);
+      final Stream<String> stream = connection.listenToEvent('device.logReader.logLines.$_id').map((final DaemonEventData event) => event.data! as String);
       _logLinesStreamController.addStream(stream);
     });
     return _logLinesStreamController.stream;
@@ -439,8 +439,8 @@ class _ProxiedLogReader extends DeviceLogReader {
 /// A port forwarded by a [ProxiedPortForwarder].
 class _ProxiedForwardedPort extends ForwardedPort {
   _ProxiedForwardedPort(this.connection, {
-    required int hostPort,
-    required int devicePort,
+    required final int hostPort,
+    required final int devicePort,
     required this.remoteDevicePort,
     required this.deviceId,
     required this.serverSocket
@@ -489,9 +489,9 @@ typedef CreateSocketServer = Future<ServerSocket> Function(Logger logger, int? h
 @visibleForTesting
 class ProxiedPortForwarder extends DevicePortForwarder {
   ProxiedPortForwarder(this.connection, {
-    String? deviceId,
-    required Logger logger,
-    @visibleForTesting CreateSocketServer createSocketServer = _defaultCreateServerSocket,
+    final String? deviceId,
+    required final Logger logger,
+    @visibleForTesting final CreateSocketServer createSocketServer = _defaultCreateServerSocket,
   }) : _logger = logger,
        _deviceId = deviceId,
        _createSocketServer = createSocketServer;
@@ -512,7 +512,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
   final List<Socket> _connectedSockets = <Socket>[];
 
   @override
-  Future<int> forward(int devicePort, {int? hostPort, bool? ipv6}) async {
+  Future<int> forward(int devicePort, {final int? hostPort, final bool? ipv6}) async {
     int? remoteDevicePort;
     final String? deviceId = _deviceId;
 
@@ -542,34 +542,34 @@ class ProxiedPortForwarder extends DevicePortForwarder {
     return serverSocket.port;
   }
 
-  Future<ServerSocket> _startProxyServer(int devicePort, int? hostPort, bool? ipv6) async {
+  Future<ServerSocket> _startProxyServer(final int devicePort, final int? hostPort, final bool? ipv6) async {
     final ServerSocket serverSocket = await _createSocketServer(_logger, hostPort, ipv6);
 
-    serverSocket.listen((Socket socket) async {
+    serverSocket.listen((final Socket socket) async {
       final String id = _cast<String>(await connection.sendRequest('proxy.connect', <String, Object>{
         'port': devicePort,
       }));
-      final Stream<List<int>> dataStream = connection.listenToEvent('proxy.data.$id').asyncExpand((DaemonEventData event) => event.binary);
+      final Stream<List<int>> dataStream = connection.listenToEvent('proxy.data.$id').asyncExpand((final DaemonEventData event) => event.binary);
       dataStream.listen(socket.add);
       final Future<DaemonEventData> disconnectFuture = connection.listenToEvent('proxy.disconnected.$id').first;
-      unawaited(disconnectFuture.then<void>((_) async {
+      unawaited(disconnectFuture.then<void>((final _) async {
           try {
             await socket.close();
           } on Exception {
             // ignore
           }
         },
-        onError: (_) {
+        onError: (final _) {
           // The event is not guaranteed to be sent if we initiated the disconnection.
           // Do nothing here.
         },
       ));
-      debounceDataStream(socket).listen((Uint8List data) {
+      debounceDataStream(socket).listen((final Uint8List data) {
         unawaited(connection.sendRequest('proxy.write', <String, Object>{
           'id': id,
         }, data).then(
-          (Object? obj) => obj,
-          onError: (Object error, StackTrace stackTrace) {
+          (final Object? obj) => obj,
+          onError: (final Object error, final StackTrace stackTrace) {
             // Log the error, but proceed normally. Network failure should not
             // crash the tool. If this is critical, the place where the connection
             // is being used would crash.
@@ -582,8 +582,8 @@ class ProxiedPortForwarder extends DevicePortForwarder {
       _connectedSockets.add(socket);
 
       unawaited(socket.done.then(
-        (Object? obj) => obj,
-        onError: (Object error, StackTrace stackTrace) {
+        (final Object? obj) => obj,
+        onError: (final Object error, final StackTrace stackTrace) {
         // Do nothing here. Everything will be handled in the `then` block below.
         return false;
       }).whenComplete(() {
@@ -591,8 +591,8 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         unawaited(connection.sendRequest('proxy.disconnect', <String, Object>{
           'id': id,
         }).then(
-          (Object? obj) => obj,
-          onError: (Object error, StackTrace stackTrace) {
+          (final Object? obj) => obj,
+          onError: (final Object error, final StackTrace stackTrace) {
             // Ignore the error here. There might be a race condition when the
             // remote end also disconnects. In any case, this request is just to
             // notify the remote end to disconnect and we should not crash when
@@ -602,7 +602,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
         ));
         _connectedSockets.remove(socket);
       }));
-    }, onError: (Object error, StackTrace stackTrace) {
+    }, onError: (final Object error, final StackTrace stackTrace) {
       _logger.printWarning('Server socket error: $error');
       _logger.printTrace('Server socket error: $error, stack trace: $stackTrace');
     });
@@ -611,7 +611,7 @@ class ProxiedPortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async {
+  Future<void> unforward(final ForwardedPort forwardedPort) async {
     // Look for the forwarded port entry in our own map.
     final _ProxiedForwardedPort? proxiedForwardedPort = _hostPortToForwardedPorts.remove(forwardedPort.hostPort);
     await proxiedForwardedPort?.unforward();
@@ -632,12 +632,12 @@ class ProxiedPortForwarder extends DevicePortForwarder {
   /// Returns the original remote port given the local port.
   ///
   /// If this is not a port that is handled by this port forwarder, return null.
-  int? originalRemotePort(int localForwardedPort) {
+  int? originalRemotePort(final int localForwardedPort) {
     return _hostPortToForwardedPorts[localForwardedPort]?.devicePort;
   }
 }
 
-Future<ServerSocket> _defaultCreateServerSocket(Logger logger, int? hostPort, bool? ipv6) async {
+Future<ServerSocket> _defaultCreateServerSocket(final Logger logger, final int? hostPort, final bool? ipv6) async {
   if (ipv6 == null || ipv6 == false) {
     try {
       return await ServerSocket.bind(InternetAddress.loopbackIPv4, hostPort ?? 0);
@@ -660,9 +660,9 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   ProxiedDartDevelopmentService(
     this.connection,
     this.deviceId, {
-    required Logger logger,
-    required ProxiedPortForwarder proxiedPortForwarder,
-    @visibleForTesting DartDevelopmentService? localDds,
+    required final Logger logger,
+    required final ProxiedPortForwarder proxiedPortForwarder,
+    @visibleForTesting final DartDevelopmentService? localDds,
   })  : _logger = logger,
         _proxiedPortForwarder = proxiedPortForwarder,
         _localDds = localDds ?? DartDevelopmentService();
@@ -691,12 +691,12 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
 
   @override
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
-    bool? disableServiceAuthCodes,
-    bool cacheStartupProfile = false,
+    final Uri vmServiceUri, {
+    required final Logger logger,
+    final int? hostPort,
+    final bool? ipv6,
+    final bool? disableServiceAuthCodes,
+    final bool cacheStartupProfile = false,
   }) async {
     // Locate the original VM service port on the remote daemon.
     final int? remoteVMServicePort = _proxiedPortForwarder.originalRemotePort(vmServiceUri.port);
@@ -726,8 +726,8 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
           .listenToEvent('device.dds.done.$deviceId')
           .first
           .then(
-            (DaemonEventData event) => _completer.complete(),
-            onError: (_) {
+            (final DaemonEventData event) => _completer.complete(),
+            onError: (final _) {
               // Ignore if we did not receive any event from the server.
             },
           ));
@@ -784,7 +784,7 @@ class ProxiedDartDevelopmentService implements DartDevelopmentService {
   }
 
   @override
-  void setExternalDevToolsUri(Uri uri) {
+  void setExternalDevToolsUri(final Uri uri) {
     connection.sendRequest('device.setExternalDevToolsUriForDartDevelopmentService', <String, Object?>{
       'deviceId': deviceId,
       'uri': uri.toString(),

@@ -35,12 +35,12 @@ class DartDevelopmentService {
   final Completer<void> _completer = Completer<void>();
 
   Future<void> startDartDevelopmentService(
-    Uri vmServiceUri, {
-    required Logger logger,
-    int? hostPort,
-    bool? ipv6,
-    bool? disableServiceAuthCodes,
-    bool cacheStartupProfile = false,
+    final Uri vmServiceUri, {
+    required final Logger logger,
+    final int? hostPort,
+    final bool? ipv6,
+    final bool? disableServiceAuthCodes,
+    final bool cacheStartupProfile = false,
   }) async {
     final Uri ddsUri = Uri(
       scheme: 'http',
@@ -78,7 +78,7 @@ class DartDevelopmentService {
             // This is not completely reliable which is why the new field above
             // was added.
             if (_existingDdsUri == null) {
-              String parsedUrl = e.message.split(' ').firstWhere((String e) => e.startsWith('http'));
+              String parsedUrl = e.message.split(' ').firstWhere((final String e) => e.startsWith('http'));
               // Trim trailing full stops from the message.
               // https://github.com/flutter/flutter/issues/118609.
               if (parsedUrl.endsWith('.')) {
@@ -109,7 +109,7 @@ class DartDevelopmentService {
 
   Future<void> shutdown() async => _ddsInstance?.shutdown();
 
-  void setExternalDevToolsUri(Uri uri) {
+  void setExternalDevToolsUri(final Uri uri) {
     _ddsInstance?.setExternalDevToolsUri(uri);
   }
 }

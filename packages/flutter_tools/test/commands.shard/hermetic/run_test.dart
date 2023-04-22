@@ -59,7 +59,7 @@ void main() {
       final RunCommand command = RunCommand();
       expect(
         () => createTestCommandRunner(command).run(<String>['run', '-t', 'abc123', '--no-pub']),
-        throwsA(isA<ToolExit>().having((ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
+        throwsA(isA<ToolExit>().having((final ToolExit error) => error.exitCode, 'exitCode', anyOf(isNull, 1))),
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => fileSystem,
@@ -80,7 +80,7 @@ void main() {
           '--no-sound-null-safety',
         ]),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'toString',
           contains('Could not find an option named "no-sound-null-safety"'),
         )),
@@ -128,7 +128,7 @@ void main() {
           '--show-test-device',
         ]),
         throwsA(isException.having(
-          (Exception exception) => exception.toString(),
+          (final Exception exception) => exception.toString(),
           'toString',
           isNot(contains('--fast-start is not supported with --use-application-binary')),
         )),
@@ -223,7 +223,7 @@ void main() {
             '--no-pub',
             '--no-hot',
           ]),
-          throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
+          throwsA(isA<ToolExit>().having((final ToolExit error) => error.message, 'message', isNull)),
         );
 
         expect(
@@ -399,7 +399,7 @@ void main() {
             '--no-pub',
             '--no-hot',
           ]),
-          throwsA(isA<ToolExit>().having((ToolExit error) => error.message, 'message', isNull)),
+          throwsA(isA<ToolExit>().having((final ToolExit error) => error.message, 'message', isNull)),
         );
 
         expect(
@@ -765,7 +765,7 @@ void main() {
           expect(
             error,
             isA<ToolExit>().having(
-              (ToolExit exception) => exception.message,
+              (final ToolExit exception) => exception.message,
               'message',
               contains('No pubspec.yaml file found'),
             ),
@@ -805,7 +805,7 @@ void main() {
           expect(
             error,
             isA<ToolExit>().having(
-              (ToolExit exception) => exception.message,
+              (final ToolExit exception) => exception.message,
               'message',
               contains('No pubspec.yaml file found'),
             ),
@@ -849,7 +849,7 @@ void main() {
           expect(
             error,
             isA<ToolExit>().having(
-              (ToolExit exception) => exception.message,
+              (final ToolExit exception) => exception.message,
               'message',
               contains('No pubspec.yaml file found'),
             ),
@@ -894,7 +894,7 @@ void main() {
           expect(
             error,
             isA<ToolExit>().having(
-              (ToolExit exception) => exception.message,
+              (final ToolExit exception) => exception.message,
               'message',
               contains('No pubspec.yaml file found'),
             ),
@@ -1128,7 +1128,7 @@ void main() {
         '--web-launch-url=http://flutter.dev',
       ]),
       throwsA(isException.having(
-            (Exception exception) => exception.toString(),
+            (final Exception exception) => exception.toString(),
         'toString',
         isNot(contains('web-launch-url')),
       )),
@@ -1169,11 +1169,11 @@ class FakeAndroidSdk extends Fake implements AndroidSdk {
 // ignore: avoid_implementing_value_types
 class FakeDevice extends Fake implements Device {
   FakeDevice({
-    bool isLocalEmulator = false,
-    TargetPlatform targetPlatform = TargetPlatform.ios,
-    String sdkNameAndVersion = '',
-    PlatformType platformType = PlatformType.ios,
-    bool isSupported = true,
+    final bool isLocalEmulator = false,
+    final TargetPlatform targetPlatform = TargetPlatform.ios,
+    final String sdkNameAndVersion = '',
+    final PlatformType platformType = PlatformType.ios,
+    final bool isSupported = true,
   }): _isLocalEmulator = isLocalEmulator,
       _targetPlatform = targetPlatform,
       _sdkNameAndVersion = sdkNameAndVersion,
@@ -1194,13 +1194,13 @@ class FakeDevice extends Fake implements Device {
   @override
   String get id => 'fake_device';
 
-  Never _throwToolExit(int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
+  Never _throwToolExit(final int code) => throwToolExit('FakeDevice tool exit', exitCode: code);
 
   @override
   Future<bool> get isLocalEmulator => Future<bool>.value(_isLocalEmulator);
 
   @override
-  bool supportsRuntimeMode(BuildMode mode) => true;
+  bool supportsRuntimeMode(final BuildMode mode) => true;
 
   @override
   Future<bool> get supportsHardwareRendering async => true;
@@ -1227,7 +1227,7 @@ class FakeDevice extends Fake implements Device {
   bool supported = true;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
+  bool isSupportedForProject(final FlutterProject flutterProject) => _isSupported;
 
   @override
   bool isSupported() => supported;
@@ -1241,8 +1241,8 @@ class FakeDevice extends Fake implements Device {
 
   @override
   DeviceLogReader getLogReader({
-    ApplicationPackage? app,
-    bool includePastLogs = false,
+    final ApplicationPackage? app,
+    final bool includePastLogs = false,
   }) {
     return FakeDeviceLogReader();
   }
@@ -1260,23 +1260,23 @@ class FakeDevice extends Fake implements Device {
 
   @override
   DevFSWriter? createDevFSWriter(
-    ApplicationPackage? app,
-    String? userIdentifier,
+    final ApplicationPackage? app,
+    final String? userIdentifier,
   ) {
     return null;
   }
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, Object?> platformArgs = const <String, Object?>{},
-    bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
-    bool ipv6 = false,
-    String? userIdentifier,
+    final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    required final DebuggingOptions debuggingOptions,
+    final Map<String, Object?> platformArgs = const <String, Object?>{},
+    final bool prebuiltApplication = false,
+    final bool usesTerminalUi = true,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     if (startAppSuccess == false) {
       return LaunchResult.failed();
@@ -1308,8 +1308,8 @@ class FakeDevice extends Fake implements Device {
 class FakeIOSDevice extends Fake implements IOSDevice {
   FakeIOSDevice({
     this.connectionInterface = DeviceConnectionInterface.attached,
-    bool isLocalEmulator = false,
-    String sdkNameAndVersion = '',
+    final bool isLocalEmulator = false,
+    final String sdkNameAndVersion = '',
   }): _isLocalEmulator = isLocalEmulator,
       _sdkNameAndVersion = sdkNameAndVersion;
 
@@ -1344,7 +1344,7 @@ class TestRunCommandForUsageValues extends RunCommand {
   List<Device>? devices;
 
   @override
-  Future<BuildInfo> getBuildInfo({ BuildMode? forcedBuildMode, File? forcedTargetFile }) async {
+  Future<BuildInfo> getBuildInfo({ final BuildMode? forcedBuildMode, final File? forcedTargetFile }) async {
     return const BuildInfo(BuildMode.debug, null, treeShakeIcons: false);
   }
 }
@@ -1354,10 +1354,10 @@ class TestRunCommandWithFakeResidentRunner extends RunCommand {
 
   @override
   Future<ResidentRunner> createRunner({
-    required bool hotMode,
-    required List<FlutterDevice> flutterDevices,
-    required String? applicationBinaryPath,
-    required FlutterProject flutterProject,
+    required final bool hotMode,
+    required final List<FlutterDevice> flutterDevices,
+    required final String? applicationBinaryPath,
+    required final FlutterProject flutterProject,
   }) async {
     return fakeResidentRunner;
   }
@@ -1381,10 +1381,10 @@ class FakeResidentRunner extends Fake implements ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo>? connectionInfoCompleter,
-    Completer<void>? appStartedCompleter,
-    bool enableDevTools = false,
-    String? route,
+    final Completer<DebugConnectionInfo>? connectionInfoCompleter,
+    final Completer<void>? appStartedCompleter,
+    final bool enableDevTools = false,
+    final String? route,
   }) async {
     await null;
     if (rpcError != null) {
@@ -1416,23 +1416,23 @@ class CapturingAppDomain extends AppDomain {
 
   @override
   Future<AppInstance> startApp(
-    Device device,
-    String projectDirectory,
-    String target,
-    String? route,
-    DebuggingOptions options,
-    bool enableHotReload, {
-    File? applicationBinary,
-    required bool trackWidgetCreation,
-    String? projectRootPath,
-    String? packagesFilePath,
-    String? dillOutputPath,
-    bool ipv6 = false,
-    bool multidexEnabled = false,
-    String? isolateFilter,
-    bool machine = true,
-    String? userIdentifier,
-    bool enableDevTools = true,
+    final Device device,
+    final String projectDirectory,
+    final String target,
+    final String? route,
+    final DebuggingOptions options,
+    final bool enableHotReload, {
+    final File? applicationBinary,
+    required final bool trackWidgetCreation,
+    final String? projectRootPath,
+    final String? packagesFilePath,
+    final String? dillOutputPath,
+    final bool ipv6 = false,
+    final bool multidexEnabled = false,
+    final String? isolateFilter,
+    final bool machine = true,
+    final String? userIdentifier,
+    final bool enableDevTools = true,
   }) async {
     this.multidexEnabled = multidexEnabled;
     this.userIdentifier = userIdentifier;
@@ -1452,7 +1452,7 @@ class FakeAnsiTerminal extends Fake implements AnsiTerminal {
   List<bool> setSingleCharModeHistory = <bool>[];
 
   @override
-  set singleCharMode(bool value) {
+  set singleCharMode(final bool value) {
     if (!hasStdin) {
       throw const StdinException('Error setting terminal line mode', OSError('The handle is invalid', 6));
     }

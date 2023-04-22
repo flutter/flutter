@@ -64,9 +64,9 @@ class DaemonInputStreamConverter {
   DaemonInputStreamConverter(this.inputStream) {
     // Lazily listen to the input stream.
     _controller.onListen = () {
-      final StreamSubscription<List<int>> subscription = inputStream.listen((List<int> chunk) {
+      final StreamSubscription<List<int>> subscription = inputStream.listen((final List<int> chunk) {
         _processChunk(chunk);
-      }, onError: (Object error, StackTrace stackTrace) {
+      }, onError: (final Object error, final StackTrace stackTrace) {
         _controller.addError(error, stackTrace);
       }, onDone: () {
         unawaited(_controller.close());
@@ -97,7 +97,7 @@ class DaemonInputStreamConverter {
   final BytesBuilder bytesBuilder = BytesBuilder(copy: false);
 
   // Processes a single chunk received in the input stream.
-  void _processChunk(List<int> chunk) {
+  void _processChunk(final List<int> chunk) {
 
     int start = 0;
     while (start < chunk.length) {
@@ -119,7 +119,7 @@ class DaemonInputStreamConverter {
   }
 
   /// Processes a chunk in JSON mode, and returns the number of bytes processed.
-  int _processChunkInJsonMode(List<int> chunk, int start) {
+  int _processChunkInJsonMode(final List<int> chunk, final int start) {
     const int LF = 10; // The '\n' character
 
     // Search for newline character.
@@ -153,7 +153,7 @@ class DaemonInputStreamConverter {
     return indexOfNewLine + 1 - start;
   }
 
-  int _addBinaryChunk(List<int> chunk, int start, int maximumSizeToRead) {
+  int _addBinaryChunk(final List<int> chunk, final int start, final int maximumSizeToRead) {
     if (start == 0 && chunk.length <= remainingBinaryLength) {
       currentBinaryStream.add(chunk);
       return chunk.length;
@@ -169,31 +169,31 @@ class DaemonInputStreamConverter {
 /// A stream that a [DaemonConnection] uses to communicate with each other.
 class DaemonStreams {
   DaemonStreams(
-    Stream<List<int>> rawInputStream,
-    StreamSink<List<int>> outputSink, {
-    required Logger logger,
+    final Stream<List<int>> rawInputStream,
+    final StreamSink<List<int>> outputSink, {
+    required final Logger logger,
   }) :
     _outputSink = outputSink,
     inputStream = DaemonInputStreamConverter(rawInputStream).convertedStream,
     _logger = logger;
 
   /// Creates a [DaemonStreams] that uses stdin and stdout as the underlying streams.
-  DaemonStreams.fromStdio(Stdio stdio, { required Logger logger })
+  DaemonStreams.fromStdio(final Stdio stdio, { required final Logger logger })
     : this(stdio.stdin, stdio.stdout, logger: logger);
 
   /// Creates a [DaemonStreams] that uses [Socket] as the underlying streams.
-  DaemonStreams.fromSocket(Socket socket, { required Logger logger })
+  DaemonStreams.fromSocket(final Socket socket, { required final Logger logger })
     : this(socket, socket, logger: logger);
 
   /// Connects to a server and creates a [DaemonStreams] from the connection as the underlying streams.
-  factory DaemonStreams.connect(String host, int port, { required Logger logger }) {
+  factory DaemonStreams.connect(final String host, final int port, { required final Logger logger }) {
     final Future<Socket> socketFuture = Socket.connect(host, port);
     final StreamController<List<int>> inputStreamController = StreamController<List<int>>();
     final StreamController<List<int>> outputStreamController = StreamController<List<int>>();
-    socketFuture.then((Socket socket) {
+    socketFuture.then((final Socket socket) {
       inputStreamController.addStream(socket);
       socket.addStream(outputStreamController.stream);
-    }).onError((Object error, StackTrace stackTrace) {
+    }).onError((final Object error, final StackTrace stackTrace) {
       logger.printError('Socket error: $error');
       logger.printTrace('$stackTrace');
       // Propagate the error to the streams.
@@ -210,7 +210,7 @@ class DaemonStreams {
   final Stream<DaemonMessage> inputStream;
 
   /// Outputs a message through the connection.
-  void send(Map<String, Object?> message, [ List<int>? binary ]) {
+  void send(final Map<String, Object?> message, [ final List<int>? binary ]) {
     try {
       if (binary != null) {
         message[_binaryLengthKey] = binary.length;
@@ -239,13 +239,13 @@ class DaemonStreams {
 /// Connection between a flutter daemon and a client.
 class DaemonConnection {
   DaemonConnection({
-    required DaemonStreams daemonStreams,
-    required Logger logger,
+    required final DaemonStreams daemonStreams,
+    required final Logger logger,
   }): _logger = logger,
       _daemonStreams = daemonStreams {
     _commandSubscription = daemonStreams.inputStream.listen(
       _handleMessage,
-      onError: (Object error, StackTrace stackTrace) {
+      onError: (final Object error, final StackTrace stackTrace) {
         // We have to listen for on error otherwise the error on the socket
         // will end up in the Zone error handler.
         // Do nothing here and let the stream close handlers handle shutting
@@ -270,15 +270,15 @@ class DaemonConnection {
   Stream<DaemonMessage> get incomingCommands => _incomingCommands.stream;
 
   /// Listens to the event with the event name [eventToListen].
-  Stream<DaemonEventData> listenToEvent(String eventToListen) {
+  Stream<DaemonEventData> listenToEvent(final String eventToListen) {
     return _events.stream
-      .where((DaemonEventData event) => event.eventName == eventToListen);
+      .where((final DaemonEventData event) => event.eventName == eventToListen);
   }
 
   /// Sends a request to the other end of the connection.
   ///
   /// Returns a [Future] that resolves with the content.
-  Future<Object?> sendRequest(String method, [Object? params, List<int>? binary]) async {
+  Future<Object?> sendRequest(final String method, [final Object? params, final List<int>? binary]) async {
     final String id = '${++_outgoingRequestId}';
     final Completer<Object?> completer = Completer<Object?>();
     _outgoingRequestCompleters[id] = completer;
@@ -293,7 +293,7 @@ class DaemonConnection {
   }
 
   /// Sends a response to the other end of the connection.
-  void sendResponse(Object id, [Object? result]) {
+  void sendResponse(final Object id, [final Object? result]) {
     _daemonStreams.send(<String, Object?>{
       'id': id,
       if (result != null) 'result': result,
@@ -301,7 +301,7 @@ class DaemonConnection {
   }
 
   /// Sends an error response to the other end of the connection.
-  void sendErrorResponse(Object id, Object? error, StackTrace trace) {
+  void sendErrorResponse(final Object id, final Object? error, final StackTrace trace) {
     _daemonStreams.send(<String, Object?>{
       'id': id,
       'error': error,
@@ -310,7 +310,7 @@ class DaemonConnection {
   }
 
   /// Sends an event to the client.
-  void sendEvent(String name, [ Object? params, List<int>? binary ]) {
+  void sendEvent(final String name, [ final Object? params, final List<int>? binary ]) {
     _daemonStreams.send(<String, Object?>{
       'event': name,
       if (params != null) 'params': params,
@@ -330,7 +330,7 @@ class DaemonConnection {
   ///
   /// Event:
   /// {"event": <String>. "params": <optional, Object?>}
-  void _handleMessage(DaemonMessage message) {
+  void _handleMessage(final DaemonMessage message) {
     final Map<String, Object?> data = message.data;
     if (data['id'] != null) {
       if (data['method'] == null) {

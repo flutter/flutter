@@ -64,7 +64,7 @@ void main() {
 
 class TestTarget extends Target {
   @override
-  Future<void> build(Environment environment) async {}
+  Future<void> build(final Environment environment) async {}
 
   @override
   List<Target> dependencies = <Target>[];

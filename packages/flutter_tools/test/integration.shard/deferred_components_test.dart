@@ -48,7 +48,7 @@ void main() {
 
     final String line = result.stdout.toString()
       .split('\n')
-      .firstWhere((String line) => line.contains('app-release.aab'));
+      .firstWhere((final String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
     final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
@@ -83,7 +83,7 @@ void main() {
 
     final String line = result.stdout.toString()
       .split('\n')
-      .firstWhere((String line) => line.contains('app-release.aab'));
+      .firstWhere((final String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
     final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
@@ -129,7 +129,7 @@ void main() {
 
     final String line = result.stdout.toString()
       .split('\n')
-      .firstWhere((String line) => line.contains('app-release.aab'));
+      .firstWhere((final String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
     final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));
@@ -180,7 +180,7 @@ void main() {
 
     final String line = result.stdout.toString()
       .split('\n')
-      .firstWhere((String line) => line.contains('app-release.aab'));
+      .firstWhere((final String line) => line.contains('app-release.aab'));
 
     final String outputFilePath = line.split(' ')[2].trim();
     final File outputFile = fileSystem.file(fileSystem.path.join(tempDir.path, outputFilePath));

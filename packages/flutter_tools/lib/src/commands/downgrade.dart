@@ -28,14 +28,14 @@ import '../version.dart';
 /// the command would fail since there was no previously recorded stable version.
 class DowngradeCommand extends FlutterCommand {
   DowngradeCommand({
-    bool verboseHelp = false,
-    PersistentToolState? persistentToolState,
-    required Logger logger,
-    ProcessManager? processManager,
-    FlutterVersion? flutterVersion,
-    Terminal? terminal,
-    Stdio? stdio,
-    FileSystem? fileSystem,
+    final bool verboseHelp = false,
+    final PersistentToolState? persistentToolState,
+    required final Logger logger,
+    final ProcessManager? processManager,
+    final FlutterVersion? flutterVersion,
+    final Terminal? terminal,
+    final Stdio? stdio,
+    final FileSystem? fileSystem,
   }) : _terminal = terminal,
        _flutterVersion = flutterVersion,
        _persistentToolState = persistentToolState,
@@ -178,7 +178,7 @@ class DowngradeCommand extends FlutterCommand {
   }
 
   // Formats an error message that lists the currently stored versions.
-  Future<String> _createErrorMessage(String workingDirectory, Channel currentChannel) async {
+  Future<String> _createErrorMessage(final String workingDirectory, final Channel currentChannel) async {
     final StringBuffer buffer = StringBuffer();
     for (final Channel channel in Channel.values) {
       if (channel == currentChannel) {

@@ -22,10 +22,10 @@ class MDnsVmServiceDiscovery {
   ///
   /// The [_client] parameter will be defaulted to a new [MDnsClient] if null.
   MDnsVmServiceDiscovery({
-    MDnsClient? mdnsClient,
-    MDnsClient? preliminaryMDnsClient,
-    required Logger logger,
-    required Usage flutterUsage,
+    final MDnsClient? mdnsClient,
+    final MDnsClient? preliminaryMDnsClient,
+    required final Logger logger,
+    required final Usage flutterUsage,
   })  : _client = mdnsClient ?? MDnsClient(),
         _preliminaryClient = preliminaryMDnsClient,
         _logger = logger,
@@ -77,11 +77,11 @@ class MDnsVmServiceDiscovery {
   /// what application the service instance is for.
   @visibleForTesting
   Future<MDnsVmServiceDiscoveryResult?> queryForAttach({
-    String? applicationId,
-    int? deviceVmservicePort,
-    bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
-    Duration timeout = const Duration(minutes: 10),
+    final String? applicationId,
+    final int? deviceVmservicePort,
+    final bool ipv6 = false,
+    final bool useDeviceIPAsHost = false,
+    final Duration timeout = const Duration(minutes: 10),
   }) async {
     // Poll for 5 seconds to see if there are already services running.
     // Use a new instance of MDnsClient so results don't get cached in _client.
@@ -145,11 +145,11 @@ class MDnsVmServiceDiscovery {
   /// cannot be found after the [timeout], it will call [throwToolExit].
   @visibleForTesting
   Future<MDnsVmServiceDiscoveryResult?> queryForLaunch({
-    required String applicationId,
-    required int deviceVmservicePort,
-    bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
-    Duration timeout = const Duration(minutes: 10),
+    required final String applicationId,
+    required final int deviceVmservicePort,
+    final bool ipv6 = false,
+    final bool useDeviceIPAsHost = false,
+    final Duration timeout = const Duration(minutes: 10),
   }) async {
     // Query for a specific application and device port.
     return firstMatchingVmService(
@@ -167,12 +167,12 @@ class MDnsVmServiceDiscovery {
   /// Returns null if no results are found.
   @visibleForTesting
   Future<MDnsVmServiceDiscoveryResult?> firstMatchingVmService(
-    MDnsClient client, {
-    String? applicationId,
-    int? deviceVmservicePort,
-    bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
-    Duration timeout = const Duration(minutes: 10),
+    final MDnsClient client, {
+    final String? applicationId,
+    final int? deviceVmservicePort,
+    final bool ipv6 = false,
+    final bool useDeviceIPAsHost = false,
+    final Duration timeout = const Duration(minutes: 10),
   }) async {
     final List<MDnsVmServiceDiscoveryResult> results = await _pollingVmService(
       client,
@@ -190,13 +190,13 @@ class MDnsVmServiceDiscovery {
   }
 
   Future<List<MDnsVmServiceDiscoveryResult>> _pollingVmService(
-    MDnsClient client, {
-    String? applicationId,
-    int? deviceVmservicePort,
-    bool ipv6 = false,
-    bool useDeviceIPAsHost = false,
-    required Duration timeout,
-    bool quitOnFind = false,
+    final MDnsClient client, {
+    final String? applicationId,
+    final int? deviceVmservicePort,
+    final bool ipv6 = false,
+    final bool useDeviceIPAsHost = false,
+    required final Duration timeout,
+    final bool quitOnFind = false,
   }) async {
     _logger.printTrace('Checking for advertised Dart VM Services...');
     try {
@@ -279,7 +279,7 @@ class MDnsVmServiceDiscovery {
 
           // Filter out link-local addresses.
           if (ipAddresses.length > 1) {
-            ipAddresses = ipAddresses.where((IPAddressResourceRecord element) => !element.address.isLinkLocal).toList();
+            ipAddresses = ipAddresses.where((final IPAddressResourceRecord element) => !element.address.isLinkLocal).toList();
           }
 
           ipAddress = ipAddresses.first.address;
@@ -332,10 +332,10 @@ class MDnsVmServiceDiscovery {
     }
   }
 
-  String _getAuthCode(String txtRecord) {
+  String _getAuthCode(final String txtRecord) {
     const String authCodePrefix = 'authCode=';
     final Iterable<String> matchingRecords =
-        LineSplitter.split(txtRecord).where((String record) => record.startsWith(authCodePrefix));
+        LineSplitter.split(txtRecord).where((final String record) => record.startsWith(authCodePrefix));
     if (matchingRecords.isEmpty) {
       return '';
     }
@@ -359,13 +359,13 @@ class MDnsVmServiceDiscovery {
   /// or a specific service matching [applicationId]/[deviceVmservicePort].
   /// It may find more than one service, which will throw an error listing the found services.
   Future<Uri?> getVMServiceUriForAttach(
-    String? applicationId,
-    Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
-    int? deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
-    Duration timeout = const Duration(minutes: 10),
+    final String? applicationId,
+    final Device device, {
+    final bool usesIpv6 = false,
+    final int? hostVmservicePort,
+    final int? deviceVmservicePort,
+    final bool useDeviceIPAsHost = false,
+    final Duration timeout = const Duration(minutes: 10),
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForAttach(
       applicationId: applicationId,
@@ -394,13 +394,13 @@ class MDnsVmServiceDiscovery {
   /// Differs from `getVMServiceUriForAttach` because it only searches for a specific service.
   /// This is enforced by [applicationId] and [deviceVmservicePort] being required.
   Future<Uri?> getVMServiceUriForLaunch(
-    String applicationId,
-    Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
-    required int deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
-    Duration timeout = const Duration(minutes: 10),
+    final String applicationId,
+    final Device device, {
+    final bool usesIpv6 = false,
+    final int? hostVmservicePort,
+    required final int deviceVmservicePort,
+    final bool useDeviceIPAsHost = false,
+    final Duration timeout = const Duration(minutes: 10),
   }) async {
     final MDnsVmServiceDiscoveryResult? result = await queryForLaunch(
       applicationId: applicationId,
@@ -421,13 +421,13 @@ class MDnsVmServiceDiscovery {
   }
 
   Future<Uri?> _handleResult(
-    MDnsVmServiceDiscoveryResult? result,
-    Device device, {
-    String? applicationId,
-    int? deviceVmservicePort,
-    int? hostVmservicePort,
-    bool usesIpv6 = false,
-    bool useDeviceIPAsHost = false,
+    final MDnsVmServiceDiscoveryResult? result,
+    final Device device, {
+    final String? applicationId,
+    final int? deviceVmservicePort,
+    final int? hostVmservicePort,
+    final bool usesIpv6 = false,
+    final bool useDeviceIPAsHost = false,
   }) async {
     if (result == null) {
       await _checkForIPv4LinkLocal(device);
@@ -455,7 +455,7 @@ class MDnsVmServiceDiscovery {
 
   // If there's not an ipv4 link local address in `NetworkInterfaces.list`,
   // then request user interventions with a `printError()` if possible.
-  Future<void> _checkForIPv4LinkLocal(Device device) async {
+  Future<void> _checkForIPv4LinkLocal(final Device device) async {
     _logger.printTrace(
       'mDNS query failed. Checking for an interface with a ipv4 link local address.'
     );
@@ -467,8 +467,8 @@ class MDnsVmServiceDiscovery {
       _logInterfaces(interfaces);
     }
     final bool hasIPv4LinkLocal = interfaces.any(
-      (NetworkInterface interface) => interface.addresses.any(
-        (InternetAddress address) => address.isLinkLocal,
+      (final NetworkInterface interface) => interface.addresses.any(
+        (final InternetAddress address) => address.isLinkLocal,
       ),
     );
     if (hasIPv4LinkLocal) {
@@ -503,7 +503,7 @@ class MDnsVmServiceDiscovery {
     }
   }
 
-  void _logInterfaces(List<NetworkInterface> interfaces) {
+  void _logInterfaces(final List<NetworkInterface> interfaces) {
     for (final NetworkInterface interface in interfaces) {
       if (_logger.isVerbose) {
         _logger.printTrace('Found interface "${interface.name}":');
@@ -530,12 +530,12 @@ class MDnsVmServiceDiscoveryResult {
 }
 
 Future<Uri> buildVMServiceUri(
-  Device device,
-  String host,
-  int devicePort, [
+  final Device device,
+  final String host,
+  final int devicePort, [
   int? hostVmservicePort,
-  String? authCode,
-  bool useDeviceIPAsHost = false,
+  final String? authCode,
+  final bool useDeviceIPAsHost = false,
 ]) async {
   String path = '/';
   if (authCode != null) {

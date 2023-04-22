@@ -9,7 +9,7 @@ import 'cache.dart';
 /// A validator that runs before the tool runs any command.
 abstract class PreRunValidator {
   factory PreRunValidator({
-    required FileSystem fileSystem,
+    required final FileSystem fileSystem,
   }) => _DefaultPreRunValidator(fileSystem: fileSystem);
 
   void validate();

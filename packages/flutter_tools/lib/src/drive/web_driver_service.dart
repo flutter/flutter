@@ -27,9 +27,9 @@ import 'drive_service.dart';
 /// An implementation of the driver service for web debug and release applications.
 class WebDriverService extends DriverService {
   WebDriverService({
-    required ProcessUtils processUtils,
-    required String dartSdkPath,
-    required Logger logger,
+    required final ProcessUtils processUtils,
+    required final String dartSdkPath,
+    required final Logger logger,
   }) : _processUtils = processUtils,
        _dartSdkPath = dartSdkPath,
        _logger = logger;
@@ -50,15 +50,15 @@ class WebDriverService extends DriverService {
 
   @override
   Future<void> start(
-    BuildInfo buildInfo,
-    Device device,
-    DebuggingOptions debuggingOptions,
-    bool ipv6, {
-    File? applicationBinary,
-    String? route,
-    String? userIdentifier,
-    String? mainPath,
-    Map<String, Object> platformArgs = const <String, Object>{},
+    final BuildInfo buildInfo,
+    final Device device,
+    final DebuggingOptions debuggingOptions,
+    final bool ipv6, {
+    final File? applicationBinary,
+    final String? route,
+    final String? userIdentifier,
+    final String? mainPath,
+    final Map<String, Object> platformArgs = const <String, Object>{},
   }) async {
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
@@ -95,11 +95,11 @@ class WebDriverService extends DriverService {
 
     bool isAppStarted = false;
     await Future.any(<Future<Object?>>[
-      runFuture.then((int? result) {
+      runFuture.then((final int? result) {
         _runResult = result;
         return null;
       }),
-      appStartedCompleter.future.then((_) {
+      appStartedCompleter.future.then((final _) {
         isAppStarted = true;
         return null;
       }),
@@ -125,18 +125,18 @@ class WebDriverService extends DriverService {
 
   @override
   Future<int> startTest(
-    String testFile,
-    List<String> arguments,
-    Map<String, String> environment,
-    PackageConfig packageConfig, {
-    bool? headless,
-    String? chromeBinary,
-    String? browserName,
-    bool? androidEmulator,
-    int? driverPort,
-    List<String> webBrowserFlags = const <String>[],
-    List<String>? browserDimension,
-    String? profileMemory,
+    final String testFile,
+    final List<String> arguments,
+    final Map<String, String> environment,
+    final PackageConfig packageConfig, {
+    final bool? headless,
+    final String? chromeBinary,
+    final String? browserName,
+    final bool? androidEmulator,
+    final int? driverPort,
+    final List<String> webBrowserFlags = const <String>[],
+    final List<String>? browserDimension,
+    final String? profileMemory,
   }) async {
     late async_io.WebDriver webDriver;
     final Browser browser = Browser.fromCliName(browserName);
@@ -191,7 +191,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> stop({File? writeSkslOnExit, String? userIdentifier}) async {
+  Future<void> stop({final File? writeSkslOnExit, final String? userIdentifier}) async {
     final bool appDidFinishPrematurely = _runResult != null;
     await _residentRunner.exitApp();
     await _residentRunner.cleanupAtFinish();
@@ -204,7 +204,7 @@ class WebDriverService extends DriverService {
     }
   }
 
-  Map<String, String> _additionalDriverEnvironment(async_io.WebDriver webDriver, String? browserName, bool? androidEmulator) {
+  Map<String, String> _additionalDriverEnvironment(final async_io.WebDriver webDriver, final String? browserName, final bool? androidEmulator) {
     return <String, String>{
       'DRIVER_SESSION_ID': webDriver.id,
       'DRIVER_SESSION_URI': webDriver.uri.toString(),
@@ -217,7 +217,7 @@ class WebDriverService extends DriverService {
   }
 
   @override
-  Future<void> reuseApplication(Uri vmServiceUri, Device device, DebuggingOptions debuggingOptions, bool ipv6) async {
+  Future<void> reuseApplication(final Uri vmServiceUri, final Device device, final DebuggingOptions debuggingOptions, final bool ipv6) async {
     throwToolExit('--use-existing-app is not supported with flutter web driver');
   }
 }
@@ -255,8 +255,8 @@ enum Browser implements CliEnum {
   @override
   String get cliName => snakeCase(name, '-');
 
-  static Browser fromCliName(String? value) => Browser.values.singleWhere(
-    (Browser element) => element.cliName == value,
+  static Browser fromCliName(final String? value) => Browser.values.singleWhere(
+    (final Browser element) => element.cliName == value,
     orElse: () => throw UnsupportedError('Browser $value not supported'),
   );
 }
@@ -265,10 +265,10 @@ enum Browser implements CliEnum {
 /// and [webBrowserFlags].
 @visibleForTesting
 Map<String, dynamic> getDesiredCapabilities(
-  Browser browser,
-  bool? headless, {
-  List<String> webBrowserFlags = const <String>[],
-  String? chromeBinary,
+  final Browser browser,
+  final bool? headless, {
+  final List<String> webBrowserFlags = const <String>[],
+  final String? chromeBinary,
 }) =>
     switch (browser) {
       Browser.chrome => <String, dynamic>{

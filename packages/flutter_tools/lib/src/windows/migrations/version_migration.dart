@@ -61,7 +61,7 @@ const String _resourceFileAfter = '''
 ///
 /// See https://github.com/flutter/flutter/issues/73652.
 class VersionMigration extends ProjectMigrator {
-  VersionMigration(WindowsProject project, super.logger)
+  VersionMigration(final WindowsProject project, super.logger)
     : _cmakeFile = project.runnerCmakeFile, _resourceFile = project.runnerResourceFile;
 
   final File _cmakeFile;
@@ -134,7 +134,7 @@ This indicates non-trivial changes have been made to the Windows runner in the
   /// 'a\n'.replaceFirst('a\n', 'b\n'); // 'b\n'
   /// 'a\r\n'.replaceFirst('a\n', 'b\n'); // 'b\r\n'
   /// ```
-String _replaceFirst(String originalContents, String before, String after) {
+String _replaceFirst(final String originalContents, final String before, final String after) {
   final String result = originalContents.replaceFirst(before, after);
   if (result != originalContents) {
     return result;

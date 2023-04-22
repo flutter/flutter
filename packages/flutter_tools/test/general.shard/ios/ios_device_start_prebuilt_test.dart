@@ -66,9 +66,9 @@ const FakeCommand kLaunchDebugCommand = FakeCommand(command: <String>[
 
 // The command used to actually launch the app and attach the debugger with args in debug.
 FakeCommand attachDebuggerCommand({
-  IOSink? stdin,
-  Completer<void>? completer,
-  bool isWirelessDevice = false,
+  final IOSink? stdin,
+  final Completer<void>? completer,
+  final bool isWirelessDevice = false,
 }) {
   return FakeCommand(
     command: <String>[
@@ -555,12 +555,12 @@ void main() {
 }
 
 IOSDevice setUpIOSDevice({
-  String sdkVersion = '13.0.1',
-  FileSystem? fileSystem,
+  final String sdkVersion = '13.0.1',
+  final FileSystem? fileSystem,
   Logger? logger,
-  ProcessManager? processManager,
-  IOSDeploy? iosDeploy,
-  DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
+  final ProcessManager? processManager,
+  final IOSDeploy? iosDeploy,
+  final DeviceConnectionInterface interfaceType = DeviceConnectionInterface.attached,
 }) {
   final Artifacts artifacts = Artifacts.test();
   final FakePlatform macPlatform = FakePlatform(
@@ -615,13 +615,13 @@ class FakeDevicePortForwarder extends Fake implements DevicePortForwarder {
 class FakeMDnsVmServiceDiscovery extends Fake implements MDnsVmServiceDiscovery {
   @override
   Future<Uri?> getVMServiceUriForLaunch(
-    String applicationId,
-    Device device, {
-    bool usesIpv6 = false,
-    int? hostVmservicePort,
-    required int deviceVmservicePort,
-    bool useDeviceIPAsHost = false,
-    Duration timeout = Duration.zero,
+    final String applicationId,
+    final Device device, {
+    final bool usesIpv6 = false,
+    final int? hostVmservicePort,
+    required final int deviceVmservicePort,
+    final bool useDeviceIPAsHost = false,
+    final Duration timeout = Duration.zero,
   }) async {
     return Uri.tryParse('http://0.0.0.0:1234');
   }

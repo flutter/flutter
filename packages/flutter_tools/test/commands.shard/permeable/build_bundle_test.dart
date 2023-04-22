@@ -45,7 +45,7 @@ void main() {
     return MemoryFileSystem.test(style: fileSystemStyle);
   }
 
-  Future<BuildBundleCommand> runCommandIn(String projectPath, { List<String>? arguments }) async {
+  Future<BuildBundleCommand> runCommandIn(final String projectPath, { final List<String>? arguments }) async {
     final BuildBundleCommand command = BuildBundleCommand(
         logger: BufferLogger.test(),
         bundleBuilder: fakeBundleBuilder,
@@ -242,7 +242,7 @@ void main() {
       '--track-widget-creation',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
@@ -274,7 +274,7 @@ void main() {
       '--dart-define=foo=bar',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
@@ -307,7 +307,7 @@ void main() {
       '--filesystem-scheme=org-dartlang-root2',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
@@ -339,7 +339,7 @@ void main() {
       '--filesystem-root=test1,test2',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
@@ -372,7 +372,7 @@ void main() {
       '--extra-front-end-options=--testflag,--testflag2',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
@@ -405,7 +405,7 @@ void main() {
       '--extra-gen-snapshot-options=--testflag,--testflag2',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'debug',
         kTargetPlatform: 'android-arm',
@@ -443,7 +443,7 @@ void main() {
       '--extra-front-end-options=--testflagFront,--testflagFront2',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'profile',
         kTargetPlatform: 'android-arm',
@@ -484,7 +484,7 @@ void main() {
       '--extra-front-end-options=--testflagFront,--testflagFront2',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines, <String, String>{
         kBuildMode: 'release',
         kTargetPlatform: 'android-arm',
@@ -536,7 +536,7 @@ void main() {
       '--dart-define-from-file=config2.json',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines[kDartDefines], 'a0ludD0x,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=,Ym9keT10aGlzIGlzIGJvZHkgZnJvbSBjb25maWcganNvbiBmaWxl');
     }),
     FileSystem: fsFactory,
@@ -575,7 +575,7 @@ void main() {
       '--dart-define-from-file=config2.json',
     ]);
   }, overrides: <Type, Generator>{
-    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (Target target, Environment environment) {
+    BuildSystem: () => TestBuildSystem.all(BuildResult(success: true), (final Target target, final Environment environment) {
       expect(environment.defines[kDartDefines], 'a0ludD0y,a0RvdWJsZT0xLjE=,bmFtZT1kZW5naGFpemh1,dGl0bGU9dGhpcyBpcyB0aXRsZSBmcm9tIGNvbmZpZyBqc29uIGZpbGU=');
     }),
     FileSystem: fsFactory,
@@ -635,14 +635,14 @@ void main() {
 class FakeBundleBuilder extends Fake implements BundleBuilder {
   @override
   Future<void> build({
-    required TargetPlatform platform,
-    required BuildInfo buildInfo,
-    FlutterProject? project,
-    String? mainPath,
-    String manifestPath = defaultManifestPath,
-    String? applicationKernelFilePath,
-    String? depfilePath,
-    String? assetDirPath,
-    @visibleForTesting BuildSystem? buildSystem,
+    required final TargetPlatform platform,
+    required final BuildInfo buildInfo,
+    final FlutterProject? project,
+    final String? mainPath,
+    final String manifestPath = defaultManifestPath,
+    final String? applicationKernelFilePath,
+    final String? depfilePath,
+    final String? assetDirPath,
+    @visibleForTesting final BuildSystem? buildSystem,
   }) async {}
 }

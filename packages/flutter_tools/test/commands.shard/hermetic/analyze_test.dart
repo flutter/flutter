@@ -107,7 +107,7 @@ void main() {
         runner.run(<String>['analyze']),
         throwsA(
           isA<Exception>().having(
-            (Exception e) => e.toString(),
+            (final Exception e) => e.toString(),
             'description',
             contains('analysis server exited with code $SIGABRT and output:\n[stderr] $stderr'),
           ),
@@ -166,7 +166,7 @@ void main() {
   });
 }
 
-bool inRepo(List<String>? fileList, FileSystem fileSystem) {
+bool inRepo(List<String>? fileList, final FileSystem fileSystem) {
   if (fileList == null || fileList.isEmpty) {
     fileList = <String>[fileSystem.path.current];
   }

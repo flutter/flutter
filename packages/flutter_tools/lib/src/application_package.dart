@@ -11,9 +11,9 @@ abstract class ApplicationPackageFactory {
 
   /// Create an [ApplicationPackage] for the given platform.
   Future<ApplicationPackage?> getPackageForPlatform(
-    TargetPlatform platform, {
-    BuildInfo? buildInfo,
-    File? applicationBinary,
+    final TargetPlatform platform, {
+    final BuildInfo? buildInfo,
+    final File? applicationBinary,
   });
 }
 

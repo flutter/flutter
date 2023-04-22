@@ -53,7 +53,7 @@ class Utf8Decoder extends Converter<List<int>, String> {
   final bool reportErrors;
 
   @override
-  String convert(List<int> input, [int start = 0, int? end]) {
+  String convert(final List<int> input, [final int start = 0, final int? end]) {
     final String result = _systemDecoder.convert(input, start, end);
     // Finding a Unicode replacement character indicates that the input
     // was malformed.
@@ -69,13 +69,13 @@ class Utf8Decoder extends Converter<List<int>, String> {
   }
 
   @override
-  ByteConversionSink startChunkedConversion(Sink<String> sink) =>
+  ByteConversionSink startChunkedConversion(final Sink<String> sink) =>
       _systemDecoder.startChunkedConversion(sink);
 
   @override
-  Stream<String> bind(Stream<List<int>> stream) => _systemDecoder.bind(stream);
+  Stream<String> bind(final Stream<List<int>> stream) => _systemDecoder.bind(stream);
 
   @override
-  Converter<List<int>, T> fuse<T>(Converter<String, T> other) =>
+  Converter<List<int>, T> fuse<T>(final Converter<String, T> other) =>
       _systemDecoder.fuse(other);
 }

@@ -444,7 +444,7 @@ void main() {
 
       Future<void> getHitMapAndVerify() async {
         final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
-        await collector.finalizeCoverage(formatter: (Map<String, HitMap> hitmap) {
+        await collector.finalizeCoverage(formatter: (final Map<String, HitMap> hitmap) {
           gottenHitmap.addAll(hitmap);
           return '';
         });
@@ -455,7 +455,7 @@ void main() {
 
       Future<void> verifyHitmapEmpty() async {
         final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
-        await collector.finalizeCoverage(formatter: (Map<String, HitMap> hitmap) {
+        await collector.finalizeCoverage(formatter: (final Map<String, HitMap> hitmap) {
           gottenHitmap.addAll(hitmap);
           return '';
         });
@@ -504,7 +504,7 @@ void main() {
         );
 
       final Map<String, HitMap> gottenHitmap = <String, HitMap>{};
-      await collector.finalizeCoverage(formatter: (Map<String, HitMap> hitmap) {
+      await collector.finalizeCoverage(formatter: (final Map<String, HitMap> hitmap) {
         gottenHitmap.addAll(hitmap);
         return '';
       });
@@ -541,12 +541,12 @@ void main() {
         );
 
       // Expect one message for each phase.
-      final List<String> logPhaseMessages = testTimeRecorder.getPrintAsListForTesting().where((String m) => m.startsWith('Runtime for phase ')).toList();
+      final List<String> logPhaseMessages = testTimeRecorder.getPrintAsListForTesting().where((final String m) => m.startsWith('Runtime for phase ')).toList();
       expect(logPhaseMessages, hasLength(TestTimePhases.values.length));
 
       // Several phases actually does something, but here we just expect at
       // least one phase to take a non-zero amount of time.
-      final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((String m) => !m.contains(Duration.zero.toString())).toList();
+      final List<String> logPhaseMessagesNonZero = logPhaseMessages.where((final String m) => !m.contains(Duration.zero.toString())).toList();
       expect(logPhaseMessagesNonZero, isNotEmpty);
     } finally {
       tempDir?.deleteSync(recursive: true);
@@ -554,7 +554,7 @@ void main() {
   });
 }
 
-File writeFooBarPackagesJson(Directory tempDir) {
+File writeFooBarPackagesJson(final Directory tempDir) {
   final File file = File('${tempDir.path}/packages.json');
   file.writeAsStringSync(jsonEncode(<String, dynamic>{
     'configVersion': 2,
@@ -573,7 +573,7 @@ File writeFooBarPackagesJson(Directory tempDir) {
 }
 
 FakeVmServiceHost createFakeVmServiceHostWithFooAndBar({
-    List<String>? libraryFilters,
+    final List<String>? libraryFilters,
   }) {
   return FakeVmServiceHost(
     requests: <VmServiceExpectation>[
@@ -650,7 +650,7 @@ class TestTestDevice extends TestDevice {
   Future<Uri?> get vmServiceUri => Future<Uri?>.value(Uri());
 
   @override
-  Future<StreamChannel<String>> start(String entrypointPath) {
+  Future<StreamChannel<String>> start(final String entrypointPath) {
     throw UnimplementedError();
   }
 }

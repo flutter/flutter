@@ -84,9 +84,9 @@ void main() {
     expect(outputDepfile, exists);
 
     final List<String> inputPaths = depfileService.parse(outputDepfile)
-      .inputs.map((File file) => file.path).toList();
+      .inputs.map((final File file) => file.path).toList();
     final List<String> outputPaths = depfileService.parse(outputDepfile)
-      .outputs.map((File file) => file.path).toList();
+      .outputs.map((final File file) => file.path).toList();
 
     // Depfile has expected sources.
     expect(inputPaths, unorderedEquals(<String>[

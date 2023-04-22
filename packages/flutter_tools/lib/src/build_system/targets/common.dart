@@ -51,7 +51,7 @@ class CopyFlutterBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final String? buildModeEnvironment = environment.defines[kBuildMode];
     if (buildModeEnvironment == null) {
       throw MissingDefineException(kBuildMode, 'copy_flutter_bundle');
@@ -151,7 +151,7 @@ class KernelSnapshot extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final KernelCompiler compiler = KernelCompiler(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
@@ -254,7 +254,7 @@ abstract class AotElfBase extends Target {
   String get analyticsName => 'android_aot';
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final AOTSnapshotter snapshotter = AOTSnapshotter(
       fileSystem: environment.fileSystem,
       logger: environment.logger,
@@ -384,7 +384,7 @@ abstract class CopyFlutterAotBundle extends Target {
   ];
 
   @override
-  Future<void> build(Environment environment) async {
+  Future<void> build(final Environment environment) async {
     final File outputFile = environment.outputDir.childFile('app.so');
     if (!outputFile.parent.existsSync()) {
       outputFile.parent.createSync(recursive: true);
@@ -400,18 +400,18 @@ abstract final class Lipo {
   /// the expected input paths exist and ignore the command if they don't.
   /// Otherwise, `lipo` would fail if the given paths didn't exist.
   static Future<void> create(
-    Environment environment,
-    List<DarwinArch> darwinArchs, {
-    required String relativePath,
-    required String inputDir,
-    bool skipMissingInputs = false,
+    final Environment environment,
+    final List<DarwinArch> darwinArchs, {
+    required final String relativePath,
+    required final String inputDir,
+    final bool skipMissingInputs = false,
   }) async {
 
     final String resultPath = environment.fileSystem.path.join(environment.buildDir.path, relativePath);
     environment.fileSystem.directory(resultPath).parent.createSync(recursive: true);
 
     Iterable<String> inputPaths = darwinArchs.map(
-      (DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, getNameForDarwinArch(iosArch), relativePath)
+      (final DarwinArch iosArch) => environment.fileSystem.path.join(inputDir, getNameForDarwinArch(iosArch), relativePath)
     );
     if (skipMissingInputs) {
       inputPaths = inputPaths.where(environment.fileSystem.isFileSync);

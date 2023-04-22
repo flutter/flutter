@@ -21,9 +21,9 @@ class CustomDevicesConfig {
   /// when it's not valid JSON (which other configurations do) and will not
   /// be implicitly created when it doesn't exist.
   CustomDevicesConfig({
-    required Platform platform,
-    required FileSystem fileSystem,
-    required Logger logger,
+    required final Platform platform,
+    required final FileSystem fileSystem,
+    required final Logger logger,
   }) : _platform = platform,
        _fileSystem = fileSystem,
        _logger = logger,
@@ -36,10 +36,10 @@ class CustomDevicesConfig {
 
   @visibleForTesting
   CustomDevicesConfig.test({
-    required FileSystem fileSystem,
-    required Logger logger,
-    Directory? directory,
-    Platform? platform,
+    required final FileSystem fileSystem,
+    required final Logger logger,
+    final Directory? directory,
+    final Platform? platform,
   }) : _platform = platform ?? FakePlatform(),
        _fileSystem = fileSystem,
        _logger = logger,
@@ -167,10 +167,10 @@ class CustomDevicesConfig {
   /// It should generally be avoided to call this often, since this could mean
   /// data loss. If you want to add or remove a device from the config,
   /// consider using [add] or [remove].
-  set devices(List<CustomDeviceConfig> configs) {
+  set devices(final List<CustomDeviceConfig> configs) {
     _config.setValue(
       _kCustomDevicesConfigKey,
-      configs.map<dynamic>((CustomDeviceConfig c) => c.toJson()).toList()
+      configs.map<dynamic>((final CustomDeviceConfig c) => c.toJson()).toList()
     );
   }
 
@@ -181,7 +181,7 @@ class CustomDevicesConfig {
   ///
   /// May throw a [CustomDeviceRevivalException] if `config['custom-devices']`
   /// is not a list.
-  void add(CustomDeviceConfig config) {
+  void add(final CustomDeviceConfig config) {
     _config.setValue(
       _kCustomDevicesConfigKey,
       <dynamic>[
@@ -192,22 +192,22 @@ class CustomDevicesConfig {
   }
 
   /// Returns true if the config file contains a device with id [deviceId].
-  bool contains(String deviceId) {
-    return devices.any((CustomDeviceConfig device) => device.id == deviceId);
+  bool contains(final String deviceId) {
+    return devices.any((final CustomDeviceConfig device) => device.id == deviceId);
   }
 
   /// Removes the first device with this device id from the config file.
   ///
   /// Returns true if the device was successfully removed, false if a device
   /// with this id could not be found.
-  bool remove(String deviceId) {
+  bool remove(final String deviceId) {
     final List<CustomDeviceConfig> modifiedDevices = devices;
 
     // we use this instead of filtering so we can detect if we actually removed
     // anything.
     final CustomDeviceConfig? device = modifiedDevices
       .cast<CustomDeviceConfig?>()
-      .firstWhere((CustomDeviceConfig? d) => d!.id == deviceId,
+      .firstWhere((final CustomDeviceConfig? d) => d!.id == deviceId,
       orElse: () => null
     );
 

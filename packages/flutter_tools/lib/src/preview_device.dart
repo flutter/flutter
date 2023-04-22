@@ -35,11 +35,11 @@ BundleBuilder _defaultBundleBuilder() {
 /// device is not currently discoverable.
 class PreviewDevice extends Device {
   PreviewDevice({
-    required Platform platform,
-    required ProcessManager processManager,
-    required Logger logger,
-    required FileSystem fileSystem,
-    @visibleForTesting BundleBuilderFactory builderFactory = _defaultBundleBuilder,
+    required final Platform platform,
+    required final ProcessManager processManager,
+    required final Logger logger,
+    required final FileSystem fileSystem,
+    @visibleForTesting final BundleBuilderFactory builderFactory = _defaultBundleBuilder,
   }) : _platform = platform,
        _processManager = processManager,
        _logger = logger,
@@ -65,16 +65,16 @@ class PreviewDevice extends Device {
   final DesktopLogReader _logReader = DesktopLogReader();
 
   @override
-  FutureOr<DeviceLogReader> getLogReader({ApplicationPackage? app, bool includePastLogs = false}) => _logReader;
+  FutureOr<DeviceLogReader> getLogReader({final ApplicationPackage? app, final bool includePastLogs = false}) => _logReader;
 
   @override
-  Future<bool> installApp(ApplicationPackage? app, {String? userIdentifier}) async => true;
+  Future<bool> installApp(final ApplicationPackage? app, {final String? userIdentifier}) async => true;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app, {String? userIdentifier}) async => false;
+  Future<bool> isAppInstalled(final ApplicationPackage app, {final String? userIdentifier}) async => false;
 
   @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
+  Future<bool> isLatestBuildInstalled(final ApplicationPackage app) async => false;
 
   @override
   Future<bool> get isLocalEmulator async => false;
@@ -83,7 +83,7 @@ class PreviewDevice extends Device {
   bool isSupported() => true;
 
   @override
-  bool isSupportedForProject(FlutterProject flutterProject) => true;
+  bool isSupportedForProject(final FlutterProject flutterProject) => true;
 
   @override
   String get name => 'preview';
@@ -97,14 +97,14 @@ class PreviewDevice extends Device {
   Process? _process;
 
   @override
-  Future<LaunchResult> startApp(ApplicationPackage? package, {
-    String? mainPath,
-    String? route,
-    required DebuggingOptions debuggingOptions,
-    Map<String, dynamic> platformArgs = const <String, dynamic>{},
-    bool prebuiltApplication = false,
-    bool ipv6 = false,
-    String? userIdentifier,
+  Future<LaunchResult> startApp(final ApplicationPackage? package, {
+    final String? mainPath,
+    final String? route,
+    required final DebuggingOptions debuggingOptions,
+    final Map<String, dynamic> platformArgs = const <String, dynamic>{},
+    final bool prebuiltApplication = false,
+    final bool ipv6 = false,
+    final String? userIdentifier,
   }) async {
     final Directory assetDirectory = _fileSystem.systemTempDirectory
       .createTempSync('flutter_preview.');
@@ -163,7 +163,7 @@ class PreviewDevice extends Device {
   }
 
   @override
-  Future<bool> stopApp(ApplicationPackage? app, {String? userIdentifier}) async {
+  Future<bool> stopApp(final ApplicationPackage? app, {final String? userIdentifier}) async {
     return _process?.kill() ?? false;
   }
 
@@ -176,12 +176,12 @@ class PreviewDevice extends Device {
   }
 
   @override
-  Future<bool> uninstallApp(ApplicationPackage app, {String? userIdentifier}) async {
+  Future<bool> uninstallApp(final ApplicationPackage app, {final String? userIdentifier}) async {
     return true;
   }
 
   @override
-  DevFSWriter createDevFSWriter(ApplicationPackage? app, String? userIdentifier) {
+  DevFSWriter createDevFSWriter(final ApplicationPackage? app, final String? userIdentifier) {
     return LocalDevFSWriter(fileSystem: _fileSystem);
   }
 }

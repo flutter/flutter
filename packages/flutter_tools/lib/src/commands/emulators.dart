@@ -39,7 +39,7 @@ class EmulatorsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (globals.doctor!.workflows.every((Workflow w) => !w.canListEmulators)) {
+    if (globals.doctor!.workflows.every((final Workflow w) => !w.canListEmulators)) {
       throwToolExit(
           'Unable to find any emulator sources. Please ensure you have some\n'
           'Android AVD images ${globals.platform.isMacOS ? 'or an iOS Simulator ' : ''}available.',
@@ -62,7 +62,7 @@ class EmulatorsCommand extends FlutterCommand {
     return FlutterCommandResult.success();
   }
 
-  Future<void> _launchEmulator(String id, { required bool coldBoot }) async {
+  Future<void> _launchEmulator(final String id, { required final bool coldBoot }) async {
     final List<Emulator> emulators =
         await emulatorManager!.getEmulatorsMatching(id);
 
@@ -78,7 +78,7 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _createEmulator({ String? name }) async {
+  Future<void> _createEmulator({ final String? name }) async {
     final CreateEmulatorResult createResult =
         await emulatorManager!.createEmulator(name: name);
 
@@ -94,7 +94,7 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _listEmulators(String? searchText) async {
+  Future<void> _listEmulators(final String? searchText) async {
     final List<Emulator> emulators = searchText == null
         ? await emulatorManager!.getAllAvailableEmulators()
         : await emulatorManager!.getEmulatorsMatching(searchText);
@@ -110,15 +110,15 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  void _printEmulatorList(List<Emulator> emulators, String message) {
+  void _printEmulatorList(final List<Emulator> emulators, final String message) {
     globals.printStatus('$message\n');
     Emulator.printEmulators(emulators, globals.logger);
     _printAdditionalInfo(showCreateInstruction: true, showRunInstruction: true);
   }
 
   void _printAdditionalInfo({
-    bool showRunInstruction = false,
-    bool showCreateInstruction = false,
+    final bool showRunInstruction = false,
+    final bool showCreateInstruction = false,
   }) {
     globals.printStatus('');
     if (showRunInstruction) {
