@@ -49,11 +49,8 @@ export 'package:matcher/expect.dart' hide expect, isInstanceOf;
 // The test_api package has a deprecation warning to discourage direct use but
 // that doesn't apply here.
 export 'package:test_api/hooks.dart' show TestFailure;
-// ignore: deprecated_member_use
 export 'package:test_api/scaffolding.dart'
     hide group, setUp, setUpAll, tearDown, tearDownAll, test;
-// ignore: implementation_imports
-export 'package:test_api/src/scaffolding/utils.dart' show registerException;
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
