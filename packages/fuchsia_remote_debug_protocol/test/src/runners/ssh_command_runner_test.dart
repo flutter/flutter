@@ -132,13 +132,13 @@ class FakeProcessManager extends Fake implements ProcessManager {
   List<List<dynamic>> runCommands = <List<dynamic>>[];
 
   @override
-  Future<ProcessResult> run(List<dynamic> command, {
-    String? workingDirectory,
-    Map<String, String>? environment,
-    bool includeParentEnvironment = true,
-    bool runInShell = false,
-    Encoding? stdoutEncoding = systemEncoding,
-    Encoding? stderrEncoding = systemEncoding,
+  Future<ProcessResult> run(final List<dynamic> command, {
+    final String? workingDirectory,
+    final Map<String, String>? environment,
+    final bool includeParentEnvironment = true,
+    final bool runInShell = false,
+    final Encoding? stdoutEncoding = systemEncoding,
+    final Encoding? stderrEncoding = systemEncoding,
   }) async {
     runCommands.add(command);
     return fakeResult!;
