@@ -4597,7 +4597,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             minLines: widget.minLines,
                             expands: widget.expands,
                             strutStyle: widget.strutStyle,
-                            selectionColor: widget.selectionColor,
+                            selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                : widget.selectionColor,
                             textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                             textAlign: widget.textAlign,
                             textDirection: _textDirection,

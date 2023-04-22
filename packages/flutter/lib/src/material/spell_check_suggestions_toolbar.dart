@@ -18,17 +18,40 @@ import 'text_selection_toolbar_text_button.dart';
 // Size eyeballed on Pixel 4 emulator running Android API 31.
 const double _kDefaultToolbarHeight = 193.0;
 
+/// The maximum number of suggestions in the toolbar is 3, plus a delete button.
+const int _kMaxSuggestions = 3;
+
 /// The default spell check suggestions toolbar for Android.
 ///
 /// Tries to position itself below the [anchor], but if it doesn't fit, then it
 /// readjusts to fit above bottom view insets.
+///
+/// See also:
+///
+///  * [CupertinoSpellCheckSuggestionsToolbar], which is similar but builds an
+///    iOS-style spell check toolbar.
 class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// Constructs a [SpellCheckSuggestionsToolbar].
+  ///
+  /// [buttonItems] must not contain more than four items, generally three
+  /// suggestions and one delete button.
   const SpellCheckSuggestionsToolbar({
     super.key,
     required this.anchor,
     required this.buttonItems,
-  });
+  }) : assert(buttonItems.length <= _kMaxSuggestions + 1);
+
+  /// Constructs a [SpellCheckSuggestionsToolbar] with the default children for
+  /// an [EditableText].
+  ///
+  /// See also:
+  ///  * [CupertinoSpellCheckSuggestionsToolbar.editableText], which is similar
+  ///    but builds an iOS-style toolbar.
+  SpellCheckSuggestionsToolbar.editableText({
+    super.key,
+    required EditableTextState editableTextState,
+  }) : buttonItems = buildButtonItems(editableTextState) ?? <ContextMenuButtonItem>[],
+       anchor = getToolbarAnchor(editableTextState.contextMenuAnchors);
 
   /// {@template flutter.material.SpellCheckSuggestionsToolbar.anchor}
   /// The focal point below which the toolbar attempts to position itself.
@@ -37,6 +60,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   /// The [ContextMenuButtonItem]s that will be turned into the correct button
   /// widgets and displayed in the spell check suggestions toolbar.
+  ///
+  /// Must not contain more than four items, typically three suggestions and a
+  /// delete button.
   ///
   /// See also:
   ///
@@ -52,17 +78,9 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
   /// running Android API 31.
   static const double kToolbarContentDistanceBelow = TextSelectionToolbar.kHandleSize - 3.0;
 
-  /// Builds the default Android Material spell check suggestions toolbar.
-  static Widget _spellCheckSuggestionsToolbarBuilder(BuildContext context, Widget child) {
-    return _SpellCheckSuggestionsToolbarContainer(
-      child: child,
-    );
-  }
-
   /// Builds the button items for the toolbar based on the available
   /// spell check suggestions.
   static List<ContextMenuButtonItem>? buildButtonItems(
-    BuildContext context,
     EditableTextState editableTextState,
   ) {
     // Determine if composing region is misspelled.
@@ -78,7 +96,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
     final List<ContextMenuButtonItem> buttonItems = <ContextMenuButtonItem>[];
 
     // Build suggestion buttons.
-    for (final String suggestion in spanAtCursorIndex.suggestions) {
+    for (final String suggestion in spanAtCursorIndex.suggestions.take(_kMaxSuggestions)) {
       buttonItems.add(ContextMenuButtonItem(
         onPressed: () {
           if (!editableTextState.mounted) {
@@ -164,6 +182,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (buttonItems.isEmpty){
+      return const SizedBox.shrink();
+    }
+
     // Adjust toolbar height if needed.
     final double spellCheckSuggestionsToolbarHeight =
         _kDefaultToolbarHeight - (48.0 * (4 - buttonItems.length));
@@ -191,10 +213,10 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
           // This duration was eyeballed on a Pixel 2 emulator running Android
           // API 28 for the Material TextSelectionToolbar.
           duration: const Duration(milliseconds: 140),
-          child: _spellCheckSuggestionsToolbarBuilder(context, _SpellCheckSuggestsionsToolbarItemsLayout(
+          child: _SpellCheckSuggestionsToolbarContainer(
             height: spellCheckSuggestionsToolbarHeight,
             children: <Widget>[..._buildToolbarButtons(context)],
-          )),
+          ),
         ),
       ),
     );
@@ -205,10 +227,12 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
 /// toolbar.
 class _SpellCheckSuggestionsToolbarContainer extends StatelessWidget {
   const _SpellCheckSuggestionsToolbarContainer({
-    required this.child,
+    required this.height,
+    required this.children,
   });
 
-  final Widget child;
+  final double height;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -217,34 +241,16 @@ class _SpellCheckSuggestionsToolbarContainer extends StatelessWidget {
       // API 31 for the SpellCheckSuggestionsToolbar.
       elevation: 2.0,
       type: MaterialType.card,
-      child: child,
-    );
-  }
-}
-
-/// Renders the spell check suggestions toolbar items in the correct positions
-/// in the menu.
-class _SpellCheckSuggestsionsToolbarItemsLayout extends StatelessWidget {
-  const _SpellCheckSuggestsionsToolbarItemsLayout({
-    required this.height,
-    required this.children,
-  });
-
-  final double height;
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      // This width was eyeballed on a Pixel 4 emulator running Android
-      // API 31 for the SpellCheckSuggestionsToolbar.
-      width: 165,
-      height: height,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
+      child: SizedBox(
+        // This width was eyeballed on a Pixel 4 emulator running Android
+        // API 31 for the SpellCheckSuggestionsToolbar.
+        width: 165.0,
+        height: height,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
       ),
     );
   }
