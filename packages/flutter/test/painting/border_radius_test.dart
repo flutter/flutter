@@ -573,7 +573,7 @@ void main() {
     final BorderRadius borderRadius = BorderRadius.circular(double.infinity);
     expect(borderRadius.toRRect(rect), RRect.fromRectAndRadius(
       rect,
-      const Radius.circular(3.402823e+38),
+      const Radius.circular(4.0),
     ));
 
     await tester.pumpWidget(
@@ -588,7 +588,7 @@ void main() {
     expect(
       box,
       paints
-        ..rrect(rrect: RRect.fromLTRBR(0.0, 0.0, 800.0, 600.0, const Radius.circular(3.402823e+38))),
+        ..rrect(rrect: RRect.fromLTRBR(0.0, 0.0, 800.0, 600.0, const Radius.circular(300.0))),
     );
   });
 }

@@ -405,7 +405,9 @@ class BorderRadius extends BorderRadiusGeometry {
     // the rect, since radii larger than that don't make sense either.
     // We only do this if the radii are circular, since non-circular radii
     // can be larger than half the width or height of the rect.
-    final Radius maxRadius = Radius.circular(math.min(rect.width, rect.height) / 2);
+    // We ceil the value to prevent precision issues.
+    // Related: https://github.com/flutter/flutter/issues/124525
+    final Radius maxRadius = Radius.circular((math.min(rect.width, rect.height) / 2).ceilToDouble());
     final Radius? maxTopLeft = topLeft.x == topLeft.y ? maxRadius : null;
     final Radius? maxTopRight = topRight.x == topRight.y ? maxRadius : null;
     final Radius? maxBottomLeft = bottomLeft.x == bottomLeft.y ? maxRadius : null;
