@@ -399,6 +399,22 @@ void main() {
       expect(dismissCallbackCalled, true);
     });
 
+    testWidgets('when onDismiss throws, should have correct context', (tester) async {
+      final barrierKey = UniqueKey();
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: ModalBarrier(
+            key: barrierKey,
+            onDismiss: () => throw Exception('deliberate'),
+          ),
+        ),
+      ));
+      await tester.tap(find.byKey(barrierKey));
+      await tester.pump();
+      expect(tester.binding.takeException(), 'TODO_assert_the_error_context');
+    });
+
+
     testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (BuildContext context) => const FirstWidget(),
