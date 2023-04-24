@@ -30,8 +30,7 @@
                 "targets": [
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -64,8 +63,7 @@
                 "targets": [
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -97,9 +95,7 @@
                 "targets": [
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
-            },
-            "tests": []
+            }
         }
-    ],
-    "tests": []
+    ]
 }

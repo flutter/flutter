@@ -22,8 +22,7 @@
                     "flutter",
                     "flutter/sky/packages"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [],
@@ -230,6 +229,5 @@
                 }
             ]
         }
-    ],
-    "tests": []
+    ]
 }

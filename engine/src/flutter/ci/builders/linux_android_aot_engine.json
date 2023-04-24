@@ -34,8 +34,7 @@
                     "flutter/shell/platform/android:embedding_jars",
                     "flutter/shell/platform/android:abi_jars"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -71,8 +70,7 @@
                     "flutter/shell/platform/android:embedding_jars",
                     "flutter/shell/platform/android:abi_jars"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -109,8 +107,7 @@
                     "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:analyze_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -146,8 +143,7 @@
                     "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:analyze_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -184,8 +180,7 @@
                     "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:analyze_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -222,9 +217,7 @@
                     "flutter/shell/platform/android:abi_jars",
                     "flutter/shell/platform/android:analyze_snapshot"
                 ]
-            },
-            "tests": []
+            }
         }
-    ],
-    "tests": []
+    ]
 }

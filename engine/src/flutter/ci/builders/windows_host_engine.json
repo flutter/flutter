@@ -87,8 +87,7 @@
                     "gen_snapshot",
                     "flutter/build/archives:windows_flutter"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -122,8 +121,7 @@
                     "gen_snapshot",
                     "flutter/build/archives:windows_flutter"
                 ]
-            },
-            "tests": []
+            }
         }
     ]
 }

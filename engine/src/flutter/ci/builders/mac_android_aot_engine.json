@@ -32,8 +32,7 @@
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -68,8 +67,7 @@
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -104,8 +102,7 @@
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -139,8 +136,7 @@
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -175,8 +171,7 @@
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -211,11 +206,9 @@
                     "flutter/lib/snapshot",
                     "flutter/shell/platform/android:gen_snapshot"
                 ]
-            },
-            "tests": []
+            }
         }
     ],
-    "tests": [],
     "generators": [],
     "archives": []
 }

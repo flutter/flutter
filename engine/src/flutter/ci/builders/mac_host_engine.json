@@ -214,8 +214,7 @@
                     "flutter/build/archives:dart_sdk_archive",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -252,8 +251,7 @@
                     "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -292,11 +290,9 @@
                     "flutter/build/archives:artifacts",
                     "flutter/shell/platform/darwin/macos:zip_macos_flutter_framework"
                 ]
-            },
-            "tests": []
+            }
         }
     ],
-    "tests": [],
     "generators": {
         "tasks": [
             {

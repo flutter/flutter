@@ -156,8 +156,7 @@
                 "$flutter/osx_sdk": {
                     "sdk_version": "14c18"
                 }
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -231,6 +230,5 @@
 
             ]
         }
-    ],
-    "tests": []
+    ]
 }
