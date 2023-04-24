@@ -560,6 +560,7 @@ class SliverGeometry with Diagnosticable {
     double? layoutExtent,
     this.maxPaintExtent = 0.0,
     this.maxScrollObstructionExtent = 0.0,
+    this.crossAxisExtent,
     double? hitTestExtent,
     bool? visible,
     this.hasVisualOverflow = false,
@@ -570,6 +571,36 @@ class SliverGeometry with Diagnosticable {
        hitTestExtent = hitTestExtent ?? paintExtent,
        cacheExtent = cacheExtent ?? layoutExtent ?? paintExtent,
        visible = visible ?? paintExtent > 0.0;
+
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  SliverGeometry copyWith({
+    double? scrollExtent,
+    double? paintExtent,
+    double? paintOrigin,
+    double? layoutExtent,
+    double? maxPaintExtent,
+    double? maxScrollObstructionExtent,
+    double? crossAxisExtent,
+    double? hitTestExtent,
+    bool? visible,
+    bool? hasVisualOverflow,
+    double? cacheExtent,
+  }) {
+    return SliverGeometry(
+      scrollExtent: scrollExtent ?? this.scrollExtent,
+      paintExtent: paintExtent ?? this.paintExtent,
+      paintOrigin: paintOrigin ?? this.paintOrigin,
+      layoutExtent: layoutExtent ?? this.layoutExtent,
+      maxPaintExtent: maxPaintExtent ?? this.maxPaintExtent,
+      maxScrollObstructionExtent: maxScrollObstructionExtent ?? this.maxScrollObstructionExtent,
+      crossAxisExtent: crossAxisExtent ?? this.crossAxisExtent,
+      hitTestExtent: hitTestExtent ?? this.hitTestExtent,
+      visible: visible ?? this.visible,
+      hasVisualOverflow: hasVisualOverflow ?? this.hasVisualOverflow,
+      cacheExtent: cacheExtent ?? this.cacheExtent,
+    );
+  }
 
   /// A sliver that occupies no space at all.
   static const SliverGeometry zero = SliverGeometry();
@@ -718,6 +749,20 @@ class SliverGeometry with Diagnosticable {
   ///
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheExtent;
+
+  /// The amount of space allocated to the cross axis.
+  ///
+  /// This value will be typically null unless it is different from
+  /// [SliverConstraints.crossAxisExtent]. If null, then the cross axis extent of
+  /// the sliver is assumed to be the same as the [SliverConstraints.crossAxisExtent].
+  /// This is because slivers typically consume all of the extent that is available
+  /// in the cross axis.
+  ///
+  /// See also:
+  ///
+  ///   * [SliverConstrainedCrossAxis] for an example of a sliver which takes up
+  ///     a smaller cross axis extent than the provided constraint.
+  final double? crossAxisExtent;
 
   /// Asserts that this geometry is internally consistent.
   ///
@@ -956,6 +1001,11 @@ class SliverPhysicalParentData extends ParentData {
   /// This is the distance from the top left visible corner of the parent to the
   /// top left visible corner of the sliver.
   Offset paintOffset = Offset.zero;
+
+  /// The [crossAxisFlex] factor to use for this sliver child.
+  ///
+  /// If null or zero, the child is inflexible and determines its own size in the cross axis.
+  int? crossAxisFlex;
 
   /// Apply the [paintOffset] to the given [transform].
   ///
