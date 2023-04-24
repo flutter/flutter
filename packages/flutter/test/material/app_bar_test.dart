@@ -4815,7 +4815,7 @@ void main() {
     const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
     Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(hasIssue99933 ? 93.0 : 92.0, 0.1));
+    expect(titleTop.dy, closeTo(hasIssue99933 ? 91.0 : 92.0, 0.1));
     Offset titleBottom = tester.getBottomLeft(expandedTitle);
     expect(titleBottom.dy, closeTo(128.0, 0.1));
 
