@@ -53,10 +53,10 @@ enum TabBarIndicatorSize {
 ///
 /// See also:
 ///
-/// * [TabBar], which displays a row of tabs.
-/// * [TabBarView], which displays a widget for the currently selected tab.
-/// * [TabBar.tabAlignment], which defines the horizontal alignment of the
-///   tabs within the [TabBar].
+///   * [TabBar], which displays a row of tabs.
+///   * [TabBarView], which displays a widget for the currently selected tab.
+///   * [TabBar.tabAlignment], which defines the horizontal alignment of the
+///     tabs within the [TabBar].
 enum TabAlignment {
   /// When [TabBar.isScrollable] is true, tabs are aligned to the
   /// start of the [TabBar] with a horizontal offset of 56.0 pixels.
