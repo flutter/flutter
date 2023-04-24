@@ -5,7 +5,7 @@
 /// Json response template for the contents of the auth_opt.json file created by
 /// goldctl.
 String authTemplate({
-  bool gsutil = false,
+  final bool gsutil = false,
 }) {
   return '''
     {
