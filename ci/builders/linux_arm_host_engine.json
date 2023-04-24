@@ -32,8 +32,7 @@
                 "targets": [
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -72,8 +71,7 @@
                     "flutter/tools/font-subset",
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -106,9 +104,7 @@
                 "targets": [
                     "flutter/shell/platform/linux:flutter_gtk"
                 ]
-            },
-            "tests": []
+            }
         }
-    ],
-    "tests": []
+    ]
 }
