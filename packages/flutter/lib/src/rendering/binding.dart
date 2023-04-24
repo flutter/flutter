@@ -197,9 +197,35 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   MouseTracker get mouseTracker => _mouseTracker!;
   MouseTracker? _mouseTracker;
 
-  /// The render tree's owner, which maintains dirty state for layout,
-  /// composite, paint, and accessibility semantics.
-  @Deprecated('do not use')
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// This is typically the owner of the render tree bootstrapped by [runApp]
+  /// and rooted in [renderView]. It maintains dirty state for layout,
+  /// composite, paint, and accessibility semantics for that tree.
+  ///
+  /// However, by default, the [pipelineOwner] does not participate in frame
+  /// production because it is not automatically attached to the
+  /// [rootPipelineOwner] or any of its descendants. It is also not
+  /// automatically associated with the [renderView]. This is left as a
+  /// responsibility for a higher level abstraction. The [WidgetsBinding], for
+  /// example, wires this up in [WidgetsBinding.wrapWithDefaultView], which is
+  /// called indirectly from [runApp].
+  ///
+  /// Apps, that don't use the [WidgetsBinding] or don't call [ranApp] (or
+  /// [WidgetsBinding.wrapWithDefaultView]) must manually add this pipeline owner
+  /// to the pipeline owner tree rooted at [rootPipelineOwner] and assign a
+  /// [RenderView] to it if the they want to use this deprecated property.
+  ///
+  /// Instead of accessing this deprecated property, consider interacting with
+  /// the root of the pipelineOwner tree (exposed in [rootPipelineOwner]) or
+  /// instead of accessing the [SemanticsOwner] of any [PipelineOwner] consider
+  /// interacting with the [SemanticsBinding] (exposed via
+  /// [SemanticsBinding.instance]) directly.
+  @Deprecated(
+    'Interact with the pipelineOwner tree rooted at RendererBinding.rootPipelineOwner instead. '
+    'Or instead of accessing the SemanticsOwner of any PipelineOwner interact with the SemanticsBinding directly. '
+    'This feature was deprecated after v3.10.0-12.0.pre.'
+  )
   late final PipelineOwner pipelineOwner = PipelineOwner(
     onSemanticsOwnerCreated: () {
       (pipelineOwner.rootNode as RenderView?)?.scheduleInitialSemantics();
@@ -212,8 +238,31 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
     }
   );
 
-  /// The render tree that's attached to the output surface.
-  @Deprecated('do not use')
+  /// Deprecated. Will be removed in a future version of Flutter.
+  ///
+  /// This is typically the root of the render tree bootstrapped by [runApp].
+  ///
+  /// However, by default this render view is not associated with any
+  /// [PipelineOwner] and therefore isn't considered during frame production.
+  /// It is also not registered with this binding via [addRenderView].
+  /// Wiring this up is left as a responsibility for a higher level. The
+  /// [WidgetsBinding], for example, sets this up in
+  /// [WidgetsBinding.wrapWithDefaultView], which is called indirectly from
+  /// [runApp].
+  ///
+  /// Apps, that don't use the [WidgetsBinding] or don't call [ranApp] (or
+  /// [WidgetsBinding.wrapWithDefaultView]) must manually assign a
+  /// [PipelineOwner] to this [RenderView], make sure the pipeline owner is part
+  /// of the pipeline owner tree rooted at [rootPipelineOwner], and call
+  /// [addRenderView] if they want to use this deprecated property.
+  ///
+  /// Instead of interacting with this deprecated property, consider using
+  /// [renderViews] instead, which contains all [RenderView]s managed by the
+  /// binding.
+  @Deprecated(
+    'Consider using RendererBinding.renderViews instead as the binding may manage multiple RenderViews. '
+    'This feature was deprecated after v3.10.0-12.0.pre.'
+  )
   late final RenderView renderView = RenderView(
     view: platformDispatcher.implicitView!,
   );

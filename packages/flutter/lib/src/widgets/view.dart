@@ -32,9 +32,17 @@ class View extends StatefulWidget {
   /// Injects the provided [view] into the widget tree.
   View({
     required this.view,
-    @Deprecated('Do not use')
+    @Deprecated(
+      'Do not use. '
+      'This parameter only exists to implement the deprecated RendererBinding.pipelineOwner property until it is removed. '
+      'This feature was deprecated after v3.10.0-12.0.pre.'
+    )
     PipelineOwner? deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,
-    @Deprecated('Do not use')
+    @Deprecated(
+      'Do not use. '
+      'This parameter only exists to implement the deprecated RendererBinding.renderView property until it is removed. '
+      'This feature was deprecated after v3.10.0-12.0.pre.'
+    )
     RenderView? deprecatedDoNotUseWillBeRemovedWithoutNoticeRenderView,
     required this.child,
   }) : _deprecatedPipelineOwner = deprecatedDoNotUseWillBeRemovedWithoutNoticePipelineOwner,

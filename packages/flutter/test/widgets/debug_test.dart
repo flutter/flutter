@@ -148,7 +148,7 @@ void main() {
         },
       ),
     );
-  }, skip: true); // TODO(goderbauer): enable when we have rawview.
+  }, skip: true); // [intended] enable when we have RawView.
 
   test('debugWidgetBuilderValue control test', () {
     final Widget widget = Container();

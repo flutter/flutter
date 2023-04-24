@@ -13,7 +13,6 @@ import 'framework.dart';
 /// inserted into. It must be a [RenderObject] that implements the
 /// [RenderObjectWithChildMixin] protocol. The type argument `T` is the kind of
 /// [RenderObject] that the container expects as its child.
-// TODO(goderbauer): Consider deprecation, this is no longer used by the framework.
 class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWidget {
   /// Creates a bridge from a [RenderObject] to an [Element] tree.
   ///
@@ -82,7 +81,6 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
 /// whose container is the [RenderView] that connects to the Flutter engine. In
 /// this usage, it is normally instantiated by the bootstrapping logic in the
 /// [WidgetsFlutterBinding] singleton created by [runApp].
-// TODO(goderbauer): Consider deprecation, this is no longer used by the framework.
 class RenderObjectToWidgetElement<T extends RenderObject> extends RenderObjectElement with RootElementMixin {
   /// Creates an element that is hosted by a [RenderObject].
   ///
