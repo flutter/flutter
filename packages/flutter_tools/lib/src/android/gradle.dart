@@ -212,6 +212,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       isBuildingBundle: false,
       localGradleErrors: gradleErrors,
       configOnly: configOnly,
+      maxRetries: 1,
     );
   }
 
@@ -234,6 +235,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
       validateDeferredComponents: validateDeferredComponents,
       deferredComponentsEnabled: deferredComponentsEnabled,
       configOnly: configOnly,
+      maxRetries: 1,
     );
   }
 

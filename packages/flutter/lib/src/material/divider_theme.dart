@@ -46,7 +46,7 @@ class DividerThemeData with Diagnosticable {
   /// used between [ListTile]s, between rows in [DataTable]s, and so forth.
   final Color? color;
 
-  /// The [Divider]'s width or the [VerticalDivider]'s height.
+  /// The [Divider]'s height or the [VerticalDivider]'s width.
   ///
   /// This represents the amount of horizontal or vertical space the divider
   /// takes up.
