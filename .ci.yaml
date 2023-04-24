@@ -2956,6 +2956,7 @@ targets:
 
   - name: Mac module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/125425
     timeout: 60
     properties:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
@@ -2975,6 +2976,7 @@ targets:
 
   - name: Mac_arm64_ios module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/125425
     presubmit: false
     timeout: 60
     properties:
