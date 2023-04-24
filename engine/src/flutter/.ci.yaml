@@ -376,6 +376,7 @@ targets:
       add_recipes_cq: "true"
       runtime_versions: >-
         [
+          "ios-16-2_14c18",
           "ios-16-0_14a5294e"
         ]
       mac_model: "Macmini8,1"
