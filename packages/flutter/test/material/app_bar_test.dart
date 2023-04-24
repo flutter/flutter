@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -4715,8 +4716,15 @@ void main() {
 
     await tester.pumpWidget(buildAppBar());
 
+    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+    //                A bug in the HTML renderer and/or Chrome 96+ causes a
+    //                discrepancy in the paragraph height.
+    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
-    expect(tester.getRect(expandedTitle).height, closeTo(36.0, 0.1));
+    expect(
+      tester.getRect(expandedTitle).height,
+      closeTo( hasIssue99933 ? 37.0 : 36.0, 0.1),
+    );
 
     await tester.pumpWidget(buildAppBar(textScaleFactor: 2.0));
     expect(tester.getRect(expandedTitle).height, closeTo(48.0, 0.1));
@@ -4801,10 +4809,13 @@ void main() {
     }
 
     await tester.pumpWidget(buildAppBar());
-
+    // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
+    //                A bug in the HTML renderer and/or Chrome 96+ causes a
+    //                discrepancy in the paragraph height.
+    const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
     Offset titleTop = tester.getTopLeft(expandedTitle);
-    expect(titleTop.dy, closeTo(92.0, 0.1));
+    expect(titleTop.dy, closeTo(hasIssue99933 ? 93.0 : 92.0, 0.1));
     Offset titleBottom = tester.getBottomLeft(expandedTitle);
     expect(titleBottom.dy, closeTo(128.0, 0.1));
 
