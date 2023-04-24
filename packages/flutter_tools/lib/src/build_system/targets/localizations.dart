@@ -45,7 +45,7 @@ class GenerateLocalizationsTarget extends Target {
     final File configFile = environment.projectDir.childFile('l10n.yaml');
     assert(configFile.existsSync());
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: environment.logger,
     );

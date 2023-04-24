@@ -11,9 +11,17 @@ import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 
 import '../../../src/common.dart';
-import '../../../src/fake_process_manager.dart';
+import '../../../src/context.dart';
 
 void main() {
+  late FileSystem fileSystem;
+  late FakeProcessManager processManager;
+
+  setUp(() {
+    fileSystem = MemoryFileSystem.test();
+    processManager = FakeProcessManager.empty();
+  });
+
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
@@ -49,37 +57,39 @@ required-resource-attributes: false
 nullable-getter: false
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
     );
 
-    expect(options.arbDirectory, Uri.parse('arb'));
-    expect(options.templateArbFile, Uri.parse('example.arb'));
-    expect(options.outputLocalizationsFile, Uri.parse('bar'));
-    expect(options.untranslatedMessagesFile, Uri.parse('untranslated'));
+    expect(options.arbDir, Uri.parse('arb').path);
+    expect(options.templateArbFile, Uri.parse('example.arb').path);
+    expect(options.outputLocalizationFile, Uri.parse('bar').path);
+    expect(options.untranslatedMessagesFile, Uri.parse('untranslated').path);
     expect(options.outputClass, 'Foo');
-    expect(options.headerFile, Uri.parse('header'));
+    expect(options.headerFile, Uri.parse('header').path);
     expect(options.header, 'HEADER');
-    expect(options.deferredLoading, true);
+    expect(options.useDeferredLoading, true);
     expect(options.preferredSupportedLocales, <String>['en_US']);
-    expect(options.useSyntheticPackage, false);
-    expect(options.areResourceAttributesRequired, false);
-    expect(options.usesNullableGetter, false);
+    expect(options.syntheticPackage, false);
+    expect(options.requiredResourceAttributes, false);
+    expect(options.nullableGetter, false);
   });
 
-  testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
-    final FileSystem fileSystem = MemoryFileSystem.test();
+  testUsingContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 preferred-supported-locales: ['en_US', 'de']
 ''');
 
-    final LocalizationOptions options = parseLocalizationsOptions(
+    final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
     );
 
     expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => processManager,
   });
 
   testWithoutContext(
@@ -91,7 +101,7 @@ use-deferred-loading: string
 ''');
 
     expect(
-      () => parseLocalizationsOptions(
+      () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
       ),
@@ -106,7 +116,7 @@ template-arb-file: {name}_en.arb
 ''');
 
     expect(
-      () => parseLocalizationsOptions(
+      () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
       ),
