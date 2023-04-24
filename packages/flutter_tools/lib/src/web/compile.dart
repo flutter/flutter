@@ -24,6 +24,7 @@ import '../version.dart';
 import 'compiler_config.dart';
 import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
+import 'web_constants.dart';
 
 export 'compiler_config.dart';
 
@@ -63,7 +64,7 @@ class WebBuilder {
         title: 'Experimental feature',
         '''
   WebAssembly compilation is experimental.
-  See $kWasmPreviewUri for more information.''',
+  $kWasmMoreInfo''',
       );
     }
 
@@ -223,8 +224,6 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
     NullSafetyMode.unsound: HostArtifact.webPrecompiledSdkSourcemaps,
   },
 };
-
-const String kWasmPreviewUri = 'https://flutter.dev/wasm';
 
 String _buildEventAnalyticsSettings({
   required WebCompilerConfig config,
