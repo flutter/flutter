@@ -2262,14 +2262,12 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   }
 }
 
-/// An property than displays enum values tersely.
+/// [DiagnosticsProperty] that has an [Enum] as value.
 ///
-/// The enum value is displayed with the class name stripped. For example:
+/// The enum value is displayed with the enum name stripped. For example:
 /// [HitTestBehavior.deferToChild] is shown as `deferToChild`.
 ///
-/// This class can be used with classes that appear like enums but are not
-/// "real" enums, so long as their `toString` implementation, in debug mode,
-/// returns a string consisting of the class name followed by the value name. It
+/// This class can be used with enums and returns the enum's name getter. It
 /// can also be used with nullable properties; the null value is represented as
 /// `null`.
 ///
