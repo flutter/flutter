@@ -73,7 +73,7 @@ class GetOffsetResult extends Result {
   final double dy;
 
   /// Deserializes the result from JSON.
-  static GetOffsetResult fromJson(Map<String, dynamic> json) {
+  static GetOffsetResult fromJson(final Map<String, dynamic> json) {
     return GetOffsetResult(
       dx: json['dx'] as double,
       dy: json['dy'] as double,

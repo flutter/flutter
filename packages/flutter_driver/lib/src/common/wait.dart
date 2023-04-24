@@ -91,7 +91,7 @@ class NoTransientCallbacks extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [json] argument must not be null.
-  factory NoTransientCallbacks.deserialize(Map<String, String> json) {
+  factory NoTransientCallbacks.deserialize(final Map<String, String> json) {
     if (json['conditionName'] != 'NoTransientCallbacksCondition') {
       throw SerializationException('Error occurred during deserializing the NoTransientCallbacksCondition JSON string: $json');
     }
@@ -111,7 +111,7 @@ class NoPendingFrame extends SerializableWaitCondition {
   /// JSON map.
   ///
   /// The [json] argument must not be null.
-  factory NoPendingFrame.deserialize(Map<String, String> json) {
+  factory NoPendingFrame.deserialize(final Map<String, String> json) {
     if (json['conditionName'] != 'NoPendingFrameCondition') {
       throw SerializationException('Error occurred during deserializing the NoPendingFrameCondition JSON string: $json');
     }
@@ -131,7 +131,7 @@ class FirstFrameRasterized extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [json] argument must not be null.
-  factory FirstFrameRasterized.deserialize(Map<String, String> json) {
+  factory FirstFrameRasterized.deserialize(final Map<String, String> json) {
     if (json['conditionName'] != 'FirstFrameRasterizedCondition') {
       throw SerializationException('Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: $json');
     }
@@ -154,7 +154,7 @@ class NoPendingPlatformMessages extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [json] argument must not be null.
-  factory NoPendingPlatformMessages.deserialize(Map<String, String> json) {
+  factory NoPendingPlatformMessages.deserialize(final Map<String, String> json) {
     if (json['conditionName'] != 'NoPendingPlatformMessagesCondition') {
       throw SerializationException('Error occurred during deserializing the NoPendingPlatformMessagesCondition JSON string: $json');
     }
@@ -176,7 +176,7 @@ class CombinedCondition extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [jsonMap] argument must not be null.
-  factory CombinedCondition.deserialize(Map<String, String> jsonMap) {
+  factory CombinedCondition.deserialize(final Map<String, String> jsonMap) {
     if (jsonMap['conditionName'] != 'CombinedCondition') {
       throw SerializationException('Error occurred during deserializing the CombinedCondition JSON string: $jsonMap');
     }
@@ -201,7 +201,7 @@ class CombinedCondition extends SerializableWaitCondition {
   Map<String, String> serialize() {
     final Map<String, String> jsonMap = super.serialize();
     final List<Map<String, String>> jsonConditions = conditions.map(
-      (SerializableWaitCondition condition) {
+      (final SerializableWaitCondition condition) {
         return condition.serialize();
       }).toList();
     jsonMap['conditions'] = json.encode(jsonConditions);
@@ -212,7 +212,7 @@ class CombinedCondition extends SerializableWaitCondition {
 /// Parses a [SerializableWaitCondition] or its subclass from the given [json] map.
 ///
 /// The [json] argument must not be null.
-SerializableWaitCondition _deserialize(Map<String, String> json) {
+SerializableWaitCondition _deserialize(final Map<String, String> json) {
   final String conditionName = json['conditionName']!;
   switch (conditionName) {
     case 'NoTransientCallbacksCondition':

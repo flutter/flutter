@@ -36,7 +36,7 @@ class SetSemanticsResult extends Result {
   final bool changedState;
 
   /// Deserializes this result from JSON.
-  static SetSemanticsResult fromJson(Map<String, dynamic> json) {
+  static SetSemanticsResult fromJson(final Map<String, dynamic> json) {
     return SetSemanticsResult(json['changedState'] as bool);
   }
 

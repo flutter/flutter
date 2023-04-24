@@ -18,37 +18,37 @@ import '../../common.dart';
 void main() {
   group('TimelineSummary', () {
 
-    TimelineSummary summarize(List<Map<String, dynamic>> testEvents) {
+    TimelineSummary summarize(final List<Map<String, dynamic>> testEvents) {
       return TimelineSummary.summarize(Timeline.fromJson(<String, dynamic>{
         'traceEvents': testEvents,
       }));
     }
 
-    Map<String, dynamic> frameBegin(int timeStamp) => <String, dynamic>{
+    Map<String, dynamic> frameBegin(final int timeStamp) => <String, dynamic>{
       'name': 'Frame',
       'ph': 'B',
       'ts': timeStamp,
     };
 
-    Map<String, dynamic> frameEnd(int timeStamp) => <String, dynamic>{
+    Map<String, dynamic> frameEnd(final int timeStamp) => <String, dynamic>{
       'name': 'Frame',
       'ph': 'E',
       'ts': timeStamp,
     };
 
-    Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
+    Map<String, dynamic> begin(final int timeStamp) => <String, dynamic>{
       'name': 'GPURasterizer::Draw',
       'ph': 'B',
       'ts': timeStamp,
     };
 
-    Map<String, dynamic> end(int timeStamp) => <String, dynamic>{
+    Map<String, dynamic> end(final int timeStamp) => <String, dynamic>{
       'name': 'GPURasterizer::Draw',
       'ph': 'E',
       'ts': timeStamp,
     };
 
-    Map<String, dynamic> lagBegin(int timeStamp, int vsyncsMissed) => <String, dynamic>{
+    Map<String, dynamic> lagBegin(final int timeStamp, final int vsyncsMissed) => <String, dynamic>{
       'name': 'SceneDisplayLag',
       'ph': 'b',
       'ts': timeStamp,
@@ -57,7 +57,7 @@ void main() {
       },
     };
 
-    Map<String, dynamic> lagEnd(int timeStamp, int vsyncsMissed) => <String, dynamic>{
+    Map<String, dynamic> lagEnd(final int timeStamp, final int vsyncsMissed) => <String, dynamic>{
       'name': 'SceneDisplayLag',
       'ph': 'e',
       'ts': timeStamp,
@@ -66,7 +66,7 @@ void main() {
       },
     };
 
-    Map<String, dynamic> cpuUsage(int timeStamp, double cpuUsage) => <String, dynamic>{
+    Map<String, dynamic> cpuUsage(final int timeStamp, final double cpuUsage) => <String, dynamic>{
       'cat': 'embedder',
       'name': 'CpuUsage',
       'ts': timeStamp,
@@ -75,7 +75,7 @@ void main() {
       },
     };
 
-    Map<String, dynamic> memoryUsage(int timeStamp, double dirty, double shared) => <String, dynamic>{
+    Map<String, dynamic> memoryUsage(final int timeStamp, final double dirty, final double shared) => <String, dynamic>{
       'cat': 'embedder',
       'name': 'MemoryUsage',
       'ts': timeStamp,
@@ -85,13 +85,13 @@ void main() {
       },
     };
 
-    Map<String, dynamic> platformVsync(int timeStamp) => <String, dynamic>{
+    Map<String, dynamic> platformVsync(final int timeStamp) => <String, dynamic>{
       'name': 'VSYNC',
       'ph': 'B',
       'ts': timeStamp,
     };
 
-    Map<String, dynamic> vsyncCallback(int timeStamp, {String phase = 'B', String startTime = '2750850055428', String endTime = '2750866722095'}) => <String, dynamic>{
+    Map<String, dynamic> vsyncCallback(final int timeStamp, {final String phase = 'B', final String startTime = '2750850055428', final String endTime = '2750866722095'}) => <String, dynamic>{
       'name': 'VsyncProcessCallback',
       'ph': phase,
       'ts': timeStamp,
@@ -101,7 +101,7 @@ void main() {
       },
     };
 
-    List<Map<String, dynamic>> genGC(String name, int count, int startTime, int timeDiff) {
+    List<Map<String, dynamic>> genGC(final String name, final int count, final int startTime, final int timeDiff) {
       int ts = startTime;
       bool begin = true;
       final List<Map<String, dynamic>> ret = <Map<String, dynamic>>[];
@@ -124,15 +124,15 @@ void main() {
       return ret;
     }
 
-    List<Map<String, dynamic>> newGenGC(int count, int startTime, int timeDiff) {
+    List<Map<String, dynamic>> newGenGC(final int count, final int startTime, final int timeDiff) {
       return genGC('CollectNewGeneration', count, startTime, timeDiff);
     }
 
-    List<Map<String, dynamic>> oldGenGC(int count, int startTime, int timeDiff) {
+    List<Map<String, dynamic>> oldGenGC(final int count, final int startTime, final int timeDiff) {
       return genGC('CollectOldGeneration', count, startTime, timeDiff);
     }
 
-    List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(List<int> sequence) {
+    List<Map<String, dynamic>> rasterizeTimeSequenceInMillis(final List<int> sequence) {
       final List<Map<String, dynamic>> result = <Map<String, dynamic>>[];
       int t = 0;
       for (final int duration in sequence) {
@@ -161,7 +161,7 @@ void main() {
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameBuildTimeMillis(),
           throwsA(
             isA<StateError>()
-              .having((StateError e) => e.message,
+              .having((final StateError e) => e.message,
               'message',
               contains('The TimelineSummary had no events to summarize.'),
             )),
@@ -230,7 +230,7 @@ void main() {
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameBuildTimeMillis(),
           throwsA(
             isA<StateError>()
-              .having((StateError e) => e.message,
+              .having((final StateError e) => e.message,
               'message',
               contains('The TimelineSummary had no events to summarize.'),
             )),
@@ -294,7 +294,7 @@ void main() {
           () => summarize(<Map<String, dynamic>>[]).computeAverageFrameRasterizerTimeMillis(),
           throwsA(
             isA<StateError>()
-              .having((StateError e) => e.message,
+              .having((final StateError e) => e.message,
               'message',
               contains('The TimelineSummary had no events to summarize.'),
             )),
@@ -338,7 +338,7 @@ void main() {
           () => summarize(<Map<String, dynamic>>[]).computeWorstFrameRasterizerTimeMillis(),
           throwsA(
             isA<StateError>()
-              .having((StateError e) => e.message,
+              .having((final StateError e) => e.message,
               'message',
               contains('The TimelineSummary had no events to summarize.'),
             )),
@@ -390,7 +390,7 @@ void main() {
           () => summarize(<Map<String, dynamic>>[]).computePercentileFrameRasterizerTimeMillis(90.0),
           throwsA(
             isA<StateError>()
-              .having((StateError e) => e.message,
+              .having((final StateError e) => e.message,
               'message',
               contains('The TimelineSummary had no events to summarize.'),
             )),
@@ -630,7 +630,7 @@ void main() {
     });
 
     group('SceneDisplayLagSummarizer tests', () {
-      SceneDisplayLagSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
+      SceneDisplayLagSummarizer summarize(final List<Map<String, dynamic>> traceEvents) {
           final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
           });
@@ -681,7 +681,7 @@ void main() {
     });
 
     group('ProfilingSummarizer tests', () {
-      ProfilingSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
+      ProfilingSummarizer summarize(final List<Map<String, dynamic>> traceEvents) {
           final Timeline timeline = Timeline.fromJson(<String, dynamic>{
             'traceEvents': traceEvents,
           });
@@ -720,7 +720,7 @@ void main() {
     });
 
     group('VsyncFrameLagSummarizer tests', () {
-      VsyncFrameLagSummarizer summarize(List<Map<String, dynamic>> traceEvents) {
+      VsyncFrameLagSummarizer summarize(final List<Map<String, dynamic>> traceEvents) {
         final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
         });
@@ -781,14 +781,14 @@ void main() {
     group('RefreshRateSummarizer tests', () {
 
       const double kCompareDelta = 0.01;
-      RefreshRateSummary summarizeRefresh(List<Map<String, dynamic>> traceEvents) {
+      RefreshRateSummary summarizeRefresh(final List<Map<String, dynamic>> traceEvents) {
         final Timeline timeline = Timeline.fromJson(<String, dynamic>{
           'traceEvents': traceEvents,
         });
         return RefreshRateSummary(vsyncEvents: timeline.events!);
       }
 
-      List<Map<String, dynamic>> populateEvents({required int numberOfEvents, required  int startTime, required int interval, required int margin}) {
+      List<Map<String, dynamic>> populateEvents({required final int numberOfEvents, required  final int startTime, required final int interval, required final int margin}) {
         final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
         int startTimeInNanoseconds = startTime;
         for (int i = 0; i < numberOfEvents; i ++) {

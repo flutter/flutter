@@ -9,10 +9,10 @@ void main() {
   test('flutter_driver.TextInputAction should be sync with TextInputAction',
       () {
     final List<String> actual = flutter_driver.TextInputAction.values
-        .map((flutter_driver.TextInputAction action) => action.name)
+        .map((final flutter_driver.TextInputAction action) => action.name)
         .toList();
     final List<String> matcher = TextInputAction.values
-        .map((TextInputAction action) => action.name)
+        .map((final TextInputAction action) => action.name)
         .toList();
     expect(actual, matcher);
   });

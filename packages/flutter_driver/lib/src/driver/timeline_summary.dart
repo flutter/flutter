@@ -58,7 +58,7 @@ class TimelineSummary {
   /// The [p]-th percentile frame rasterization time in milliseconds.
   ///
   /// Throws a [StateError] if this summary contains no timeline events.
-  double computePercentileFrameBuildTimeMillis(double p) {
+  double computePercentileFrameBuildTimeMillis(final double p) {
     return _percentileInMillis(_extractFrameDurations(), p);
   }
 
@@ -71,8 +71,8 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractFrameDurations()
-    .where((Duration duration) => duration > kBuildBudget)
+  int computeMissedFrameBuildBudgetCount([ final Duration frameBuildBudget = kBuildBudget ]) => _extractFrameDurations()
+    .where((final Duration duration) => duration > kBuildBudget)
     .length;
 
   /// Average amount of time spent per frame in the engine rasterizer.
@@ -92,14 +92,14 @@ class TimelineSummary {
   /// The [p]-th percentile frame rasterization time in milliseconds.
   ///
   /// Throws a [StateError] if this summary contains no timeline events.
-  double computePercentileFrameRasterizerTimeMillis(double p) {
+  double computePercentileFrameRasterizerTimeMillis(final double p) {
     return _percentileInMillis(_extractGpuRasterizerDrawDurations(), p);
   }
 
   /// The number of frames that missed the [kBuildBudget] on the raster thread
   /// and therefore are in the danger of missing frames.
-  int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawDurations()
-      .where((Duration duration) => duration > kBuildBudget)
+  int computeMissedFrameRasterizerBudgetCount([ final Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawDurations()
+      .where((final Duration duration) => duration > kBuildBudget)
       .length;
 
   /// The total number of frames recorded in the timeline.
@@ -110,14 +110,14 @@ class TimelineSummary {
 
   /// The total number of old generation garbage collections recorded in the timeline.
   int oldGenerationGarbageCollections() {
-    return _timeline.events!.where((TimelineEvent event) {
+    return _timeline.events!.where((final TimelineEvent event) {
       return event.category == 'GC' && event.name == 'CollectOldGeneration';
     }).length;
   }
 
   /// The total number of new generation garbage collections recorded in the timeline.
   int newGenerationGarbageCollections() {
-    return _timeline.events!.where((TimelineEvent event) {
+    return _timeline.events!.where((final TimelineEvent event) {
       return event.category == 'GC' && event.name == 'CollectNewGeneration';
     }).length;
   }
@@ -249,16 +249,16 @@ class TimelineSummary {
       'new_gen_gc_count': newGenerationGarbageCollections(),
       'old_gen_gc_count': oldGenerationGarbageCollections(),
       'frame_build_times': _extractFrameDurations()
-          .map<int>((Duration duration) => duration.inMicroseconds)
+          .map<int>((final Duration duration) => duration.inMicroseconds)
           .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawDurations()
-          .map<int>((Duration duration) => duration.inMicroseconds)
+          .map<int>((final Duration duration) => duration.inMicroseconds)
           .toList(),
       'frame_begin_times': _extractBeginTimestamps(kBuildFrameEventName)
-          .map<int>((Duration duration) => duration.inMicroseconds)
+          .map<int>((final Duration duration) => duration.inMicroseconds)
           .toList(),
       'frame_rasterizer_begin_times': _extractBeginTimestamps(kRasterizeFrameEventName)
-          .map<int>((Duration duration) => duration.inMicroseconds)
+          .map<int>((final Duration duration) => duration.inMicroseconds)
           .toList(),
       'average_vsync_transitions_missed': sceneDisplayLagSummarizer.computeAverageVsyncTransitionsMissed(),
       '90th_percentile_vsync_transitions_missed': sceneDisplayLagSummarizer.computePercentileVsyncTransitionsMissed(90.0),
@@ -305,10 +305,10 @@ class TimelineSummary {
   ///
   /// * [Timeline.fromJson], which explains detail about the timeline data.
   Future<void> writeTimelineToFile(
-    String traceName, {
+    final String traceName, {
     String? destinationDirectory,
-    bool pretty = false,
-    bool includeSummary = true,
+    final bool pretty = false,
+    final bool includeSummary = true,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
@@ -326,45 +326,45 @@ class TimelineSummary {
     'This feature was deprecated after v2.1.0-13.0.pre.'
   )
   Future<void> writeSummaryToFile(
-    String traceName, {
+    final String traceName, {
     String? destinationDirectory,
-    bool pretty = false,
+    final bool pretty = false,
   }) async {
     destinationDirectory ??= testOutputsDirectory;
     await _writeSummaryToFile(traceName, destinationDirectory: destinationDirectory, pretty: pretty);
   }
 
   Future<void> _writeSummaryToFile(
-    String traceName, {
-    required String destinationDirectory,
-    bool pretty = false,
+    final String traceName, {
+    required final String destinationDirectory,
+    final bool pretty = false,
   }) async {
     await fs.directory(destinationDirectory).create(recursive: true);
     final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
     await file.writeAsString(_encodeJson(summaryJson, pretty));
   }
 
-  String _encodeJson(Map<String, dynamic> jsonObject, bool pretty) {
+  String _encodeJson(final Map<String, dynamic> jsonObject, final bool pretty) {
     return pretty
       ? _prettyEncoder.convert(jsonObject)
       : json.encode(jsonObject);
   }
 
-  List<TimelineEvent> _extractNamedEvents(String name) {
+  List<TimelineEvent> _extractNamedEvents(final String name) {
     return _timeline.events!
-      .where((TimelineEvent event) => event.name == name)
+      .where((final TimelineEvent event) => event.name == name)
       .toList();
   }
 
-  List<TimelineEvent> _extractEventsWithNames(Set<String> names) {
+  List<TimelineEvent> _extractEventsWithNames(final Set<String> names) {
     return _timeline.events!
-      .where((TimelineEvent event) => names.contains(event.name))
+      .where((final TimelineEvent event) => names.contains(event.name))
       .toList();
   }
 
   List<Duration> _extractDurations(
-    String name,
-    Duration Function(TimelineEvent beginEvent, TimelineEvent endEvent) extractor,
+    final String name,
+    final Duration Function(TimelineEvent beginEvent, TimelineEvent endEvent) extractor,
   ) {
     final List<Duration> result = <Duration>[];
     final List<TimelineEvent> events = _extractNamedEvents(name);
@@ -395,19 +395,19 @@ class TimelineSummary {
   /// 'b' and 'e', meaning begin and end phase for an async event.
   /// See [SceneDisplayLagSummarizer].
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
-  List<Duration> _extractBeginEndEvents(String name) {
+  List<Duration> _extractBeginEndEvents(final String name) {
     return _extractDurations(
       name,
-      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+      (final TimelineEvent beginEvent, final TimelineEvent endEvent) {
         return Duration(microseconds: endEvent.timestampMicros! - beginEvent.timestampMicros!);
       },
     );
   }
 
-  List<Duration> _extractBeginTimestamps(String name) {
+  List<Duration> _extractBeginTimestamps(final String name) {
     final List<Duration> result = _extractDurations(
       name,
-      (TimelineEvent beginEvent, TimelineEvent endEvent) {
+      (final TimelineEvent beginEvent, final TimelineEvent endEvent) {
         return Duration(microseconds: beginEvent.timestampMicros!);
       },
     );
@@ -419,29 +419,29 @@ class TimelineSummary {
     return result;
   }
 
-  double _averageInMillis(List<Duration> durations) {
+  double _averageInMillis(final List<Duration> durations) {
     if (durations.isEmpty) {
       throw StateError(_kEmptyDurationMessage);
     }
-    final double total = durations.fold<double>(0.0, (double t, Duration duration) => t + duration.inMicroseconds.toDouble() / 1000.0);
+    final double total = durations.fold<double>(0.0, (final double t, final Duration duration) => t + duration.inMicroseconds.toDouble() / 1000.0);
     return total / durations.length;
   }
 
-  double _percentileInMillis(List<Duration> durations, double percentile) {
+  double _percentileInMillis(final List<Duration> durations, final double percentile) {
     if (durations.isEmpty) {
       throw StateError(_kEmptyDurationMessage);
     }
     assert(percentile >= 0.0 && percentile <= 100.0);
-    final List<double> doubles = durations.map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
+    final List<double> doubles = durations.map<double>((final Duration duration) => duration.inMicroseconds.toDouble() / 1000.0).toList();
     return findPercentile(doubles, percentile);
   }
 
-  double _maxInMillis(List<Duration> durations) {
+  double _maxInMillis(final List<Duration> durations) {
     if (durations.isEmpty) {
       throw StateError(_kEmptyDurationMessage);
     }
     return durations
-        .map<double>((Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
+        .map<double>((final Duration duration) => duration.inMicroseconds.toDouble() / 1000.0)
         .reduce(math.max);
   }
 

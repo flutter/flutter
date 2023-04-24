@@ -54,7 +54,7 @@ class ProfilingSummarizer {
   ProfilingSummarizer._(this.eventByType);
 
   /// Creates a ProfilingSummarizer given the timeline events.
-  static ProfilingSummarizer fromEvents(List<TimelineEvent> profilingEvents) {
+  static ProfilingSummarizer fromEvents(final List<TimelineEvent> profilingEvents) {
     final Map<ProfileType, List<TimelineEvent>> eventsByType =
         <ProfileType, List<TimelineEvent>>{};
     for (final TimelineEvent event in profilingEvents) {
@@ -80,7 +80,7 @@ class ProfilingSummarizer {
     return summary;
   }
 
-  Map<String, double> _summarize(ProfileType profileType, String name) {
+  Map<String, double> _summarize(final ProfileType profileType, final String name) {
     final Map<String, double> summary = <String, double>{};
     if (!hasProfilingInfo(profileType)) {
       return summary;
@@ -92,7 +92,7 @@ class ProfilingSummarizer {
   }
 
   /// Returns true if there are events in the timeline corresponding to [profileType].
-  bool hasProfilingInfo(ProfileType profileType) {
+  bool hasProfilingInfo(final ProfileType profileType) {
     if (eventByType.containsKey(profileType)) {
       return eventByType[profileType]!.isNotEmpty;
     } else {
@@ -101,26 +101,26 @@ class ProfilingSummarizer {
   }
 
   /// Computes the average of the `profileType` over the recorded events.
-  double computeAverage(ProfileType profileType) {
+  double computeAverage(final ProfileType profileType) {
     final List<TimelineEvent> events = eventByType[profileType]!;
     assert(events.isNotEmpty);
     final double total = events
-        .map((TimelineEvent e) => _getProfileValue(profileType, e))
-        .reduce((double a, double b) => a + b);
+        .map((final TimelineEvent e) => _getProfileValue(profileType, e))
+        .reduce((final double a, final double b) => a + b);
     return total / events.length;
   }
 
   /// The [percentile]-th percentile `profileType` over the recorded events.
-  double computePercentile(ProfileType profileType, double percentile) {
+  double computePercentile(final ProfileType profileType, final double percentile) {
     final List<TimelineEvent> events = eventByType[profileType]!;
     assert(events.isNotEmpty);
     final List<double> doubles = events
-        .map((TimelineEvent e) => _getProfileValue(profileType, e))
+        .map((final TimelineEvent e) => _getProfileValue(profileType, e))
         .toList();
     return findPercentile(doubles, percentile);
   }
 
-  static ProfileType _getProfileType(String? eventName) {
+  static ProfileType _getProfileType(final String? eventName) {
     switch (eventName) {
       case _kCpuProfile:
         return ProfileType.CPU;
@@ -133,7 +133,7 @@ class ProfilingSummarizer {
     }
   }
 
-  double _getProfileValue(ProfileType profileType, TimelineEvent e) {
+  double _getProfileValue(final ProfileType profileType, final TimelineEvent e) {
     switch (profileType) {
       case ProfileType.CPU:
         return _getArgValue('total_cpu_usage', e);
@@ -147,7 +147,7 @@ class ProfilingSummarizer {
     }
   }
 
-  double _getArgValue(String argKey, TimelineEvent e) {
+  double _getArgValue(final String argKey, final TimelineEvent e) {
     assert(e.arguments!.containsKey(argKey));
     final dynamic argVal = e.arguments![argKey];
     assert(argVal is String);

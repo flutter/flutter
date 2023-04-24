@@ -30,7 +30,7 @@ class _DummyPortForwarder implements PortForwarder {
 class _DummySshCommandRunner implements SshCommandRunner {
   _DummySshCommandRunner();
 
-  void _log(String message) {
+  void _log(final String message) {
     driverLog('_DummySshCommandRunner', message);
   }
 
@@ -44,7 +44,7 @@ class _DummySshCommandRunner implements SshCommandRunner {
   String get interface => '';
 
   @override
-  Future<List<String>> run(String command) async {
+  Future<List<String>> run(final String command) async {
     try {
       final List<String> splitCommand = command.split(' ');
       final String exe = splitCommand[0];
@@ -65,10 +65,10 @@ class _DummySshCommandRunner implements SshCommandRunner {
 }
 
 Future<PortForwarder> _dummyPortForwardingFunction(
-  String address,
-  int remotePort, [
-  String? interface,
-  String? configFile,
+  final String address,
+  final int remotePort, [
+  final String? interface,
+  final String? configFile,
 ]) async {
   return _DummyPortForwarder(remotePort, remotePort);
 }

@@ -30,8 +30,8 @@ class WebFlutterDriver extends FlutterDriver {
   /// [_connection].
   WebFlutterDriver.connectedTo(
     this._connection, {
-    bool printCommunication = false,
-    bool logCommunicationToFile = true,
+    final bool printCommunication = false,
+    final bool logCommunicationToFile = true,
   })  : _printCommunication = printCommunication,
         _logCommunicationToFile = logCommunicationToFile,
         _startTime = DateTime.now(),
@@ -83,9 +83,9 @@ class WebFlutterDriver extends FlutterDriver {
   /// See [FlutterDriver.connect] for more documentation.
   static Future<FlutterDriver> connectWeb({
     String? hostUrl,
-    bool printCommunication = false,
-    bool logCommunicationToFile = true,
-    Duration? timeout,
+    final bool printCommunication = false,
+    final bool logCommunicationToFile = true,
+    final Duration? timeout,
   }) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
     final Map<String, dynamic> settings = <String, dynamic>{
@@ -105,7 +105,7 @@ class WebFlutterDriver extends FlutterDriver {
     );
   }
 
-  static DriverError _createMalformedExtensionResponseError(Object? data) {
+  static DriverError _createMalformedExtensionResponseError(final Object? data) {
     throw DriverError(
       'Received malformed response from the FlutterDriver extension.\n'
       'Expected a JSON map containing a "response" field and, optionally, an '
@@ -114,7 +114,7 @@ class WebFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<Map<String, dynamic>> sendCommand(Command command) async {
+  Future<Map<String, dynamic>> sendCommand(final Command command) async {
     final Map<String, dynamic> response;
     final Object? data;
     final Map<String, String> serialized = command.serialize();
@@ -169,7 +169,7 @@ class WebFlutterDriver extends FlutterDriver {
     throw UnimplementedError();
   }
 
-  void _logCommunication(String message) {
+  void _logCommunication(final String message) {
     if (_printCommunication) {
       driverLog('WebFlutterDriver', message);
     }
@@ -189,14 +189,14 @@ class WebFlutterDriver extends FlutterDriver {
 
   @override
   Future<void> startTracing({
-    List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
-    Duration timeout = kUnusuallyLongTimeout,
+    final List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
+    final Duration timeout = kUnusuallyLongTimeout,
   }) async {
     _checkBrowserSupportsTimeline();
   }
 
   @override
-  Future<Timeline> stopTracingAndDownloadTimeline({Duration timeout = kUnusuallyLongTimeout}) async {
+  Future<Timeline> stopTracingAndDownloadTimeline({final Duration timeout = kUnusuallyLongTimeout}) async {
     _checkBrowserSupportsTimeline();
 
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
@@ -223,9 +223,9 @@ class WebFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<Timeline> traceAction(Future<dynamic> Function() action, {
-    List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
-    bool retainPriorEvents = false,
+  Future<Timeline> traceAction(final Future<dynamic> Function() action, {
+    final List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
+    final bool retainPriorEvents = false,
   }) async {
     _checkBrowserSupportsTimeline();
     if (!retainPriorEvents) {
@@ -238,7 +238,7 @@ class WebFlutterDriver extends FlutterDriver {
   }
 
   @override
-  Future<void> clearTimeline({Duration timeout = kUnusuallyLongTimeout}) async {
+  Future<void> clearTimeline({final Duration timeout = kUnusuallyLongTimeout}) async {
     _checkBrowserSupportsTimeline();
 
     // Reset start time
@@ -268,8 +268,8 @@ class FlutterWebConnection {
   /// establishes the connection to Flutter Web application.
   static Future<FlutterWebConnection> connect(
       String url,
-      Map<String, dynamic> settings,
-      {Duration? timeout}) async {
+      final Map<String, dynamic> settings,
+      {final Duration? timeout}) async {
     final String sessionId = settings['session-id'].toString();
     final Uri sessionUri = Uri.parse(settings['session-uri'].toString());
     final async_io.WebDriver driver = async_io.WebDriver(
@@ -293,7 +293,7 @@ class FlutterWebConnection {
   }
 
   /// Sends command via WebDriver to Flutter web application.
-  Future<dynamic> sendCommand(String script, Duration? duration) async {
+  Future<dynamic> sendCommand(final String script, final Duration? duration) async {
     // This code should not be reachable before the VM service extension is
     // initialized. The VM service extension is expected to initialize both
     // `$flutterDriverResult` and `$flutterDriver` variables before attempting
@@ -356,7 +356,7 @@ class FlutterWebConnection {
 }
 
 /// Waits until extension is installed.
-Future<void> waitUntilExtensionInstalled(async_io.WebDriver driver, Duration? timeout) async {
+Future<void> waitUntilExtensionInstalled(final async_io.WebDriver driver, final Duration? timeout) async {
   await waitFor<void>(() =>
       driver.execute(r'return typeof(window.$flutterDriver)', <String>[]),
       matcher: 'function',

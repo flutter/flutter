@@ -10,7 +10,7 @@ class Timeline {
   /// and loaded in Chrome for visual inspection.
   ///
   /// See https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
-  factory Timeline.fromJson(Map<String, dynamic> json) {
+  factory Timeline.fromJson(final Map<String, dynamic> json) {
     return Timeline._(json, _parseEvents(json));
   }
 
@@ -108,7 +108,7 @@ class TimelineEvent {
   final Map<String, dynamic>? arguments;
 }
 
-List<TimelineEvent>? _parseEvents(Map<String, dynamic> json) {
+List<TimelineEvent>? _parseEvents(final Map<String, dynamic> json) {
   final List<dynamic>? jsonEvents = json['traceEvents'] as List<dynamic>?;
 
   if (jsonEvents == null) {
@@ -118,10 +118,10 @@ List<TimelineEvent>? _parseEvents(Map<String, dynamic> json) {
   final List<TimelineEvent> timelineEvents =
       Iterable.castFrom<dynamic, Map<String, dynamic>>(jsonEvents)
           .map<TimelineEvent>(
-              (Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
+              (final Map<String, dynamic> eventJson) => TimelineEvent(eventJson))
           .toList();
 
-  timelineEvents.sort((TimelineEvent e1, TimelineEvent e2) {
+  timelineEvents.sort((final TimelineEvent e1, final TimelineEvent e2) {
     final int? ts1 = e1.timestampMicros;
     final int? ts2 = e2.timestampMicros;
     if (ts1 == null) {

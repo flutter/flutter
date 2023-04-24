@@ -12,7 +12,7 @@ void main() {
     late Future<Map<String, dynamic>> Function(Map<String, String>) call;
 
     setUp(() {
-      call = (Map<String, String> args) async {
+      call = (final Map<String, String> args) async {
         return Future<Map<String, dynamic>>.value(args);
       };
     });

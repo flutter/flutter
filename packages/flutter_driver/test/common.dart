@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 export 'package:test/fake.dart';
 export 'package:test/test.dart';
 
-void tryToDelete(Directory directory) {
+void tryToDelete(final Directory directory) {
   // This should not be necessary, but it turns out that
   // on Windows it's common for deletions to fail due to
   // bogus (we think) "access denied" errors.
