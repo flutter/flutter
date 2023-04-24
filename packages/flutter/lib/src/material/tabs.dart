@@ -66,6 +66,7 @@ enum TabAlignment {
   /// It is not recommended to set [TabAlignment.start] when
   /// [ThemeData.useMaterial3] is false.
   start,
+  
   /// When [TabBar.isScrollable] is true, tabs are aligned to the
   /// start of the [TabBar].
   ///
@@ -74,11 +75,13 @@ enum TabAlignment {
   /// It is not recommended to set [TabAlignment.startOffset] when
   /// [ThemeData.useMaterial3] is false.
   startOffset,
+  
   /// When [TabBar.isScrollable] is false, tabs are stretched to fill the
   /// [TabBar].
   ///
   /// If [TabBar.isScrollable] is true, this is ignored.
   fill,
+  
   /// Tabs are aligned to the center of the [TabBar].
   center,
 }
