@@ -2482,6 +2482,26 @@ void main() {
     testWidgets('black87 icon color defined by users shows correctly in Material3', (WidgetTester tester) async {
 
     });
+
+    testWidgets("IconButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
+      // This is a regression test for https://github.com/flutter/flutter/issues/118071.
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: IconButton(
+              style: OutlinedButton.styleFrom(
+                enabledMouseCursor: SystemMouseCursors.text,
+              ),
+              onPressed: () {},
+              icon: const Icon(Icons.add),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
   });
 }
 
