@@ -60,7 +60,7 @@ enum SliderInteraction {
 
   /// Allows the user to interact with a [Slider] only by sliding the thumb.
   ///
-  /// Taping and sliding interactions on the track are ignored.
+  /// Tapping and sliding interactions on the track are ignored.
   slideThumb;
 }
 
@@ -850,8 +850,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ?? sliderTheme.mouseCursor?.resolve(states)
       ?? MaterialStateMouseCursor.clickable.resolve(states);
     final SliderInteraction effectiveAllowedInteraction = widget.allowedInteraction
-        ?? sliderTheme.allowedInteraction
-        ?? defaultAllowedInteraction;
+      ?? sliderTheme.allowedInteraction
+      ?? defaultAllowedInteraction;
 
     // This size is used as the max bounds for the painting of the value
     // indicators It must be kept in sync with the function with the same name

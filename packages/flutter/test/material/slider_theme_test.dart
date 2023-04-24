@@ -1864,7 +1864,7 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.debugDeviceActiveCursor(1), SystemMouseCursors.text);
   });
 
-  testWidgets('The allowed interaction is themeable', (WidgetTester tester) async {
+  testWidgets('SliderTheme.allowedInteraction is themeable', (WidgetTester tester) async {
     double value = 0.0;
 
     Widget buildApp({

@@ -3705,7 +3705,7 @@ void main() {
   });
 
   group('Slider.allowedInteraction', () {
-    testWidgets('is tapOnly', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.tapOnly', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
@@ -3747,7 +3747,7 @@ void main() {
       expect(value, 0.5);
     });
 
-    testWidgets('is tapAndSlide', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.tapAndSlide', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
@@ -3776,7 +3776,7 @@ void main() {
 
       await tester.pumpWidget(buildWidget());
 
-      // test tap
+      // Test tap.
       final TestGesture gesture = await tester.startGesture(centerOfTheSlideTrack);
       await tester.pump();
       // changes from 1.0 -> 0.5
@@ -3793,7 +3793,7 @@ void main() {
       expect(value, 1.0);
     });
 
-    testWidgets('is slideOnly', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.slideOnly', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
@@ -3841,7 +3841,7 @@ void main() {
       expect(value, 1.0);
     });
 
-    testWidgets('is slideThumb', (WidgetTester tester) async {
+    testWidgets('SliderInteraction.slideThumb', (WidgetTester tester) async {
       double value = 1.0;
       final Key sliderKey = UniqueKey();
       // (slider's left padding (overlayRadius), windowHeight / 2)
