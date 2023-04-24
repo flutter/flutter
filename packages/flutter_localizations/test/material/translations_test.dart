@@ -16,7 +16,7 @@ final String rootDirectoryPath = Directory.current.path;
 
 void main() {
   for (final String language in kMaterialSupportedLanguages) {
-    testWidgets('translations exist for $language', (WidgetTester tester) async {
+    testWidgets('translations exist for $language', (final WidgetTester tester) async {
       final Locale locale = Locale(language);
 
       expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
@@ -103,7 +103,7 @@ void main() {
     });
   }
 
-  testWidgets('translations spot check', (WidgetTester tester) async {
+  testWidgets('translations spot check', (final WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
@@ -118,7 +118,7 @@ void main() {
     expect(localizations.lastPageTooltip, 'Ikhasi lokugcina');
   });
 
-  testWidgets('translations spot check expansionTileExpandedHint', (WidgetTester tester) async {
+  testWidgets('translations spot check expansionTileExpandedHint', (final WidgetTester tester) async {
     const Locale locale = Locale.fromSubtags(languageCode: 'en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     final MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
@@ -126,7 +126,7 @@ void main() {
     expect(localizations.expansionTileExpandedHint, 'double tap to collapse');
   });
 
-  testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
+  testWidgets('spot check selectedRowCount translations', (final WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
     expect(localizations.selectedRowCountTitle(0), 'No items selected');
     expect(localizations.selectedRowCountTitle(1), '1 item selected');
@@ -174,7 +174,7 @@ void main() {
     expect(localizations.selectedRowCountTitle(123456789), 'បាន​ជ្រើស​រើស​ធាតុ 123.456.789');
   });
 
-  testWidgets('spot check formatMediumDate(), formatFullDate() translations', (WidgetTester tester) async {
+  testWidgets('spot check formatMediumDate(), formatFullDate() translations', (final WidgetTester tester) async {
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(const Locale('en'));
     expect(localizations.formatMediumDate(DateTime(2015, 7, 23)), 'Thu, Jul 23');
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Thursday, July 23, 2015');
@@ -192,7 +192,7 @@ void main() {
     expect(localizations.formatFullDate(DateTime(2015, 7, 23)), 'Donnerstag, 23. Juli 2015');
   });
 
-  testWidgets('Chinese resolution', (WidgetTester tester) async {
+  testWidgets('Chinese resolution', (final WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
@@ -284,7 +284,7 @@ void main() {
     expect(localizations, isA<MaterialLocalizationZh>());
   });
 
-  testWidgets('Serbian resolution', (WidgetTester tester) async {
+  testWidgets('Serbian resolution', (final WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'sr');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
@@ -331,7 +331,7 @@ void main() {
     expect(localizations, isA<MaterialLocalizationSr>());
   });
 
-  testWidgets('Misc resolution', (WidgetTester tester) async {
+  testWidgets('Misc resolution', (final WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'en');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
@@ -453,7 +453,7 @@ void main() {
     expect(localizations, isA<MaterialLocalizationRu>());
   });
 
-  testWidgets('Chinese translations spot check', (WidgetTester tester) async {
+  testWidgets('Chinese translations spot check', (final WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'zh');
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);
@@ -501,7 +501,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/36704.
-  testWidgets('kn arb file should be properly Unicode escaped', (WidgetTester tester) async {
+  testWidgets('kn arb file should be properly Unicode escaped', (final WidgetTester tester) async {
     final File file = File(
       path.join(rootDirectoryPath, 'lib', 'src', 'l10n', 'material_kn.arb'),
     );

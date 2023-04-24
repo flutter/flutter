@@ -2714,7 +2714,7 @@ final Set<String> kWidgetsSupportedLanguages = HashSet<String>.from(const <Strin
 /// Generally speaking, this method is only intended to be used by
 /// [GlobalWidgetsLocalizations.delegate].
 GlobalWidgetsLocalizations? getWidgetsTranslation(
-  Locale locale,
+  final Locale locale,
 ) {
   switch (locale.languageCode) {
     case 'af':

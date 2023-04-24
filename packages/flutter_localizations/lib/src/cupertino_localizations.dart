@@ -54,15 +54,15 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   /// The remaining '*Format' arguments uses the intl package to provide
   /// [DateFormat] configurations for the `localeName`.
   const GlobalCupertinoLocalizations({
-    required String localeName,
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat dayFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat singleDigitHourFormat,
-    required intl.DateFormat singleDigitMinuteFormat,
-    required intl.DateFormat doubleDigitMinuteFormat,
-    required intl.DateFormat singleDigitSecondFormat,
-    required intl.NumberFormat decimalFormat,
+    required final String localeName,
+    required final intl.DateFormat fullYearFormat,
+    required final intl.DateFormat dayFormat,
+    required final intl.DateFormat mediumDateFormat,
+    required final intl.DateFormat singleDigitHourFormat,
+    required final intl.DateFormat singleDigitMinuteFormat,
+    required final intl.DateFormat doubleDigitMinuteFormat,
+    required final intl.DateFormat singleDigitSecondFormat,
+    required final intl.NumberFormat decimalFormat,
   }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
        _dayFormat = dayFormat,
@@ -84,12 +84,12 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   final intl.NumberFormat _decimalFormat;
 
   @override
-  String datePickerYear(int yearIndex) {
+  String datePickerYear(final int yearIndex) {
     return _fullYearFormat.format(DateTime.utc(yearIndex));
   }
 
   @override
-  String datePickerMonth(int monthIndex) {
+  String datePickerMonth(final int monthIndex) {
     // It doesn't actually have anything to do with _fullYearFormat. It's just
     // taking advantage of the fact that _fullYearFormat loaded the needed
     // locale's symbols.
@@ -97,7 +97,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerDayOfMonth(int dayIndex, [int? weekDay]) {
+  String datePickerDayOfMonth(final int dayIndex, [final int? weekDay]) {
      if (weekDay != null) {
       return ' ${DefaultCupertinoLocalizations.shortWeekdays[weekDay - DateTime.monday]} $dayIndex ';
     }
@@ -106,17 +106,17 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String datePickerMediumDate(DateTime date) {
+  String datePickerMediumDate(final DateTime date) {
     return _mediumDateFormat.format(date);
   }
 
   @override
-  String datePickerHour(int hour) {
+  String datePickerHour(final int hour) {
     return _singleDigitHourFormat.format(DateTime.utc(0, 0, 0, hour));
   }
 
   @override
-  String datePickerMinute(int minute) {
+  String datePickerMinute(final int minute) {
     return _doubleDigitMinuteFormat.format(DateTime.utc(0, 0, 0, 0, minute));
   }
 
@@ -140,7 +140,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   String? get datePickerHourSemanticsLabelOther;
 
   @override
-  String? datePickerHourSemanticsLabel(int hour) {
+  String? datePickerHourSemanticsLabel(final int hour) {
     return intl.Intl.pluralLogic(
       hour,
       zero: datePickerHourSemanticsLabelZero,
@@ -173,7 +173,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   String? get datePickerMinuteSemanticsLabelOther;
 
   @override
-  String? datePickerMinuteSemanticsLabel(int minute) {
+  String? datePickerMinuteSemanticsLabel(final int minute) {
     return intl.Intl.pluralLogic(
       minute,
       zero: datePickerMinuteSemanticsLabelZero,
@@ -260,7 +260,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   String get tabSemanticsLabelRaw;
 
   @override
-  String tabSemanticsLabel({ required int tabIndex, required int tabCount }) {
+  String tabSemanticsLabel({ required final int tabIndex, required final int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabSemanticsLabelRaw;
@@ -270,17 +270,17 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   }
 
   @override
-  String timerPickerHour(int hour) {
+  String timerPickerHour(final int hour) {
     return _singleDigitHourFormat.format(DateTime.utc(0, 0, 0, hour));
   }
 
   @override
-  String timerPickerMinute(int minute) {
+  String timerPickerMinute(final int minute) {
     return _singleDigitMinuteFormat.format(DateTime.utc(0, 0, 0, 0, minute));
   }
 
   @override
-  String timerPickerSecond(int second) {
+  String timerPickerSecond(final int second) {
     return _singleDigitSecondFormat.format(DateTime.utc(0, 0, 0, 0, 0, second));
   }
 
@@ -304,7 +304,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   String? get timerPickerHourLabelOther;
 
   @override
-  String? timerPickerHourLabel(int hour) {
+  String? timerPickerHourLabel(final int hour) {
     return intl.Intl.pluralLogic(
       hour,
       zero: timerPickerHourLabelZero,
@@ -347,7 +347,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   String? get timerPickerMinuteLabelOther;
 
   @override
-  String? timerPickerMinuteLabel(int minute) {
+  String? timerPickerMinuteLabel(final int minute) {
     return intl.Intl.pluralLogic(
       minute,
       zero: timerPickerMinuteLabelZero,
@@ -390,7 +390,7 @@ abstract class GlobalCupertinoLocalizations implements CupertinoLocalizations {
   String? get timerPickerSecondLabelOther;
 
   @override
-  String? timerPickerSecondLabel(int second) {
+  String? timerPickerSecondLabel(final int second) {
     return intl.Intl.pluralLogic(
       second,
       zero: timerPickerSecondLabelZero,
@@ -451,12 +451,12 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
   const _GlobalCupertinoLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => kCupertinoSupportedLanguages.contains(locale.languageCode);
+  bool isSupported(final Locale locale) => kCupertinoSupportedLanguages.contains(locale.languageCode);
 
   static final Map<Locale, Future<CupertinoLocalizations>> _loadedTranslations = <Locale, Future<CupertinoLocalizations>>{};
 
   @override
-  Future<CupertinoLocalizations> load(Locale locale) {
+  Future<CupertinoLocalizations> load(final Locale locale) {
     assert(isSupported(locale));
     return _loadedTranslations.putIfAbsent(locale, () {
       util.loadDateIntlDataIfNotLoaded();
@@ -479,7 +479,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
       late intl.DateFormat singleDigitSecondFormat;
       late intl.NumberFormat decimalFormat;
 
-      void loadFormats(String? locale) {
+      void loadFormats(final String? locale) {
         fullYearFormat = intl.DateFormat.y(locale);
         dayFormat = intl.DateFormat.d(locale);
         mediumDateFormat = intl.DateFormat.MMMEd(locale);
@@ -514,7 +514,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
   }
 
   @override
-  bool shouldReload(_GlobalCupertinoLocalizationsDelegate old) => false;
+  bool shouldReload(final _GlobalCupertinoLocalizationsDelegate old) => false;
 
   @override
   String toString() => 'GlobalCupertinoLocalizations.delegate(${kCupertinoSupportedLanguages.length} locales)';

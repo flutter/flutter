@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // Encodes ARB file resource values with Unicode escapes.
-void encodeBundleTranslations(Map<String, dynamic> bundle) {
+void encodeBundleTranslations(final Map<String, dynamic> bundle) {
   for (final String key in bundle.keys) {
     // The ARB file resource "attributes" for foo are called @foo. Don't need
     // to encode them.
@@ -13,14 +13,14 @@ void encodeBundleTranslations(Map<String, dynamic> bundle) {
     final String translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
-    bundle[key] = translation.runes.map((int code) {
+    bundle[key] = translation.runes.map((final int code) {
       final String codeString = '00${code.toRadixString(16)}';
       return '\\u${codeString.substring(codeString.length - 4)}';
     }).join();
   }
 }
 
-String generateArbString(Map<String, dynamic> bundle) {
+String generateArbString(final Map<String, dynamic> bundle) {
   final StringBuffer contents = StringBuffer();
   contents.writeln('{');
   for (final String key in bundle.keys) {

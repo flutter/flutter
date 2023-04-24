@@ -87,16 +87,16 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// The [narrowWeekdays] and [firstDayOfWeekIndex] properties use the values
   /// from the [intl.DateFormat] used by [formatFullDate].
   const GlobalMaterialLocalizations({
-    required String localeName,
-    required intl.DateFormat fullYearFormat,
-    required intl.DateFormat compactDateFormat,
-    required intl.DateFormat shortDateFormat,
-    required intl.DateFormat mediumDateFormat,
-    required intl.DateFormat longDateFormat,
-    required intl.DateFormat yearMonthFormat,
-    required intl.DateFormat shortMonthDayFormat,
-    required intl.NumberFormat decimalFormat,
-    required intl.NumberFormat twoDigitZeroPaddedFormat,
+    required final String localeName,
+    required final intl.DateFormat fullYearFormat,
+    required final intl.DateFormat compactDateFormat,
+    required final intl.DateFormat shortDateFormat,
+    required final intl.DateFormat mediumDateFormat,
+    required final intl.DateFormat longDateFormat,
+    required final intl.DateFormat yearMonthFormat,
+    required final intl.DateFormat shortMonthDayFormat,
+    required final intl.NumberFormat decimalFormat,
+    required final intl.NumberFormat twoDigitZeroPaddedFormat,
   }) : _localeName = localeName,
        _fullYearFormat = fullYearFormat,
        _compactDateFormat = compactDateFormat,
@@ -120,7 +120,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   final intl.NumberFormat _twoDigitZeroPaddedFormat;
 
   @override
-  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatHour(final TimeOfDay timeOfDay, { final bool alwaysUse24HourFormat = false }) {
     switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
@@ -133,47 +133,47 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatMinute(TimeOfDay timeOfDay) {
+  String formatMinute(final TimeOfDay timeOfDay) {
     return _twoDigitZeroPaddedFormat.format(timeOfDay.minute);
   }
 
   @override
-  String formatYear(DateTime date) {
+  String formatYear(final DateTime date) {
     return _fullYearFormat.format(date);
   }
 
   @override
-  String formatCompactDate(DateTime date) {
+  String formatCompactDate(final DateTime date) {
     return _compactDateFormat.format(date);
   }
 
   @override
-  String formatShortDate(DateTime date) {
+  String formatShortDate(final DateTime date) {
     return _shortDateFormat.format(date);
   }
 
   @override
-  String formatMediumDate(DateTime date) {
+  String formatMediumDate(final DateTime date) {
     return _mediumDateFormat.format(date);
   }
 
   @override
-  String formatFullDate(DateTime date) {
+  String formatFullDate(final DateTime date) {
     return _longDateFormat.format(date);
   }
 
   @override
-  String formatMonthYear(DateTime date) {
+  String formatMonthYear(final DateTime date) {
     return _yearMonthFormat.format(date);
   }
 
   @override
-  String formatShortMonthDay(DateTime date) {
+  String formatShortMonthDay(final DateTime date) {
     return _shortMonthDayFormat.format(date);
   }
 
   @override
-  DateTime? parseCompactDate(String? inputString) {
+  DateTime? parseCompactDate(final String? inputString) {
     try {
       return inputString != null ? _compactDateFormat.parseStrict(inputString) : null;
     } on FormatException {
@@ -190,12 +190,12 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   int get firstDayOfWeekIndex => (_longDateFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
 
   @override
-  String formatDecimal(int number) {
+  String formatDecimal(final int number) {
     return _decimalFormat.format(number);
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat = false }) {
+  String formatTimeOfDay(final TimeOfDay timeOfDay, { final bool alwaysUse24HourFormat = false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -221,7 +221,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
     }
   }
 
-  String? _formatDayPeriod(TimeOfDay timeOfDay) {
+  String? _formatDayPeriod(final TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
       case DayPeriod.am:
         return anteMeridiemAbbreviation;
@@ -236,7 +236,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeStartDateSemanticLabelRaw;
 
   @override
-  String dateRangeStartDateSemanticLabel(String formattedDate) {
+  String dateRangeStartDateSemanticLabel(final String formattedDate) {
     return dateRangeStartDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
@@ -246,7 +246,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get dateRangeEndDateSemanticLabelRaw;
 
   @override
-  String dateRangeEndDateSemanticLabel(String formattedDate) {
+  String dateRangeEndDateSemanticLabel(final String formattedDate) {
     return dateRangeEndDateSemanticLabelRaw.replaceFirst(r'$fullDate', formattedDate);
   }
 
@@ -256,7 +256,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get scrimOnTapHintRaw;
 
   @override
-  String scrimOnTapHint(String modalRouteContentName) {
+  String scrimOnTapHint(final String modalRouteContentName) {
     final String text = scrimOnTapHintRaw;
     return text.replaceFirst(r'$modalRouteContentName', modalRouteContentName);
   }
@@ -267,7 +267,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get aboutListTileTitleRaw;
 
   @override
-  String aboutListTileTitle(String applicationName) {
+  String aboutListTileTitle(final String applicationName) {
     final String text = aboutListTileTitleRaw;
     return text.replaceFirst(r'$applicationName', applicationName);
   }
@@ -285,7 +285,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get pageRowsInfoTitleRaw;
 
   @override
-  String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
+  String pageRowsInfoTitle(final int firstRow, final int lastRow, final int rowCount, final bool rowCountIsApproximate) {
     String? text = rowCountIsApproximate ? pageRowsInfoTitleApproximateRaw : null;
     text ??= pageRowsInfoTitleRaw;
     return text
@@ -300,7 +300,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get tabLabelRaw;
 
   @override
-  String tabLabel({ required int tabIndex, required int tabCount }) {
+  String tabLabel({ required final int tabIndex, required final int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     final String template = tabLabelRaw;
@@ -400,7 +400,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get selectedRowCountTitleOther;
 
   @override
-  String selectedRowCountTitle(int selectedRowCount) {
+  String selectedRowCountTitle(final int selectedRowCount) {
     return intl.Intl.pluralLogic(
       selectedRowCount,
       zero: selectedRowCountTitleZero,
@@ -434,7 +434,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * <http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US>, which shows
   ///    the short time pattern used in the `en_US` locale.
   @override
-  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat = false }) {
+  TimeOfDayFormat timeOfDayFormat({ final bool alwaysUse24HourFormat = false }) {
     if (alwaysUse24HourFormat) {
       return _get24HourVersionOf(timeOfDayFormatRaw);
     }
@@ -537,7 +537,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get licensesPackageDetailTextOther;
 
   @override
-  String licensesPackageDetailText(int licenseCount) {
+  String licensesPackageDetailText(final int licenseCount) {
     return intl.Intl.pluralLogic(
       licenseCount,
       zero: licensesPackageDetailTextZero,
@@ -646,7 +646,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get remainingTextFieldCharacterCountOther;
 
   @override
-  String remainingTextFieldCharacterCount(int remaining) {
+  String remainingTextFieldCharacterCount(final int remaining) {
     return intl.Intl.pluralLogic(
       remaining,
       zero: remainingTextFieldCharacterCountZero,
@@ -700,7 +700,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
 /// Finds the [TimeOfDayFormat] to use instead of the `original` when the
 /// `original` uses 12-hour format and [MediaQueryData.alwaysUse24HourFormat]
 /// is true.
-TimeOfDayFormat _get24HourVersionOf(TimeOfDayFormat original) {
+TimeOfDayFormat _get24HourVersionOf(final TimeOfDayFormat original) {
   switch (original) {
     case TimeOfDayFormat.HH_colon_mm:
     case TimeOfDayFormat.HH_dot_mm:
@@ -717,12 +717,12 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   const _MaterialLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => kMaterialSupportedLanguages.contains(locale.languageCode);
+  bool isSupported(final Locale locale) => kMaterialSupportedLanguages.contains(locale.languageCode);
 
   static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations = <Locale, Future<MaterialLocalizations>>{};
 
   @override
-  Future<MaterialLocalizations> load(Locale locale) {
+  Future<MaterialLocalizations> load(final Locale locale) {
     assert(isSupported(locale));
     return _loadedTranslations.putIfAbsent(locale, () {
       util.loadDateIntlDataIfNotLoaded();
@@ -796,7 +796,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   }
 
   @override
-  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+  bool shouldReload(final _MaterialLocalizationsDelegate old) => false;
 
   @override
   String toString() => 'GlobalMaterialLocalizations.delegate(${kMaterialSupportedLanguages.length} locales)';

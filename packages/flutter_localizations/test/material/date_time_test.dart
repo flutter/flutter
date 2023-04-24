@@ -30,13 +30,13 @@ void main() {
     });
 
     group('formatHour', () {
-      Future<String> formatHour(WidgetTester tester, Locale locale, TimeOfDay timeOfDay) async {
+      Future<String> formatHour(final WidgetTester tester, final Locale locale, final TimeOfDay timeOfDay) async {
         final Completer<String> completer = Completer<String>();
         await tester.pumpWidget(MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          home: Builder(builder: (BuildContext context) {
+          home: Builder(builder: (final BuildContext context) {
             completer.complete(MaterialLocalizations.of(context).formatHour(timeOfDay));
             return Container();
           }),
@@ -44,12 +44,12 @@ void main() {
         return completer.future;
       }
 
-      testWidgets('formats h', (WidgetTester tester) async {
+      testWidgets('formats h', (final WidgetTester tester) async {
         expect(await formatHour(tester, const Locale('en', 'US'), const TimeOfDay(hour: 10, minute: 0)), '10');
         expect(await formatHour(tester, const Locale('en', 'US'), const TimeOfDay(hour: 20, minute: 0)), '8');
       });
 
-      testWidgets('formats HH', (WidgetTester tester) async {
+      testWidgets('formats HH', (final WidgetTester tester) async {
         expect(await formatHour(tester, const Locale('de'), const TimeOfDay(hour: 9, minute: 0)), '09');
         expect(await formatHour(tester, const Locale('de'), const TimeOfDay(hour: 20, minute: 0)), '20');
 
@@ -57,7 +57,7 @@ void main() {
         expect(await formatHour(tester, const Locale('en', 'GB'), const TimeOfDay(hour: 20, minute: 0)), '20');
       });
 
-      testWidgets('formats H', (WidgetTester tester) async {
+      testWidgets('formats H', (final WidgetTester tester) async {
         expect(await formatHour(tester, const Locale('es'), const TimeOfDay(hour: 9, minute: 0)), '9');
         expect(await formatHour(tester, const Locale('es'), const TimeOfDay(hour: 20, minute: 0)), '20');
 
@@ -75,13 +75,13 @@ void main() {
     });
 
     group('formatTimeOfDay', () {
-      Future<String> formatTimeOfDay(WidgetTester tester, Locale locale, TimeOfDay timeOfDay) async {
+      Future<String> formatTimeOfDay(final WidgetTester tester, final Locale locale, final TimeOfDay timeOfDay) async {
         final Completer<String> completer = Completer<String>();
         await tester.pumpWidget(MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          home: Builder(builder: (BuildContext context) {
+          home: Builder(builder: (final BuildContext context) {
             completer.complete(MaterialLocalizations.of(context).formatTimeOfDay(timeOfDay));
             return Container();
           }),
@@ -89,17 +89,17 @@ void main() {
         return completer.future;
       }
 
-      testWidgets('formats ${TimeOfDayFormat.h_colon_mm_space_a}', (WidgetTester tester) async {
+      testWidgets('formats ${TimeOfDayFormat.h_colon_mm_space_a}', (final WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('en'), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
         expect(await formatTimeOfDay(tester, const Locale('en'), const TimeOfDay(hour: 20, minute: 32)), '8:32 PM');
       });
 
-      testWidgets('formats ${TimeOfDayFormat.HH_colon_mm}', (WidgetTester tester) async {
+      testWidgets('formats ${TimeOfDayFormat.HH_colon_mm}', (final WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('de'), const TimeOfDay(hour: 9, minute: 32)), '09:32');
         expect(await formatTimeOfDay(tester, const Locale('en', 'ZA'), const TimeOfDay(hour: 9, minute: 32)), '09:32');
       });
 
-      testWidgets('formats ${TimeOfDayFormat.H_colon_mm}', (WidgetTester tester) async {
+      testWidgets('formats ${TimeOfDayFormat.H_colon_mm}', (final WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('es'), const TimeOfDay(hour: 9, minute: 32)), '9:32');
         expect(await formatTimeOfDay(tester, const Locale('es'), const TimeOfDay(hour: 20, minute: 32)), '20:32');
 
@@ -107,29 +107,29 @@ void main() {
         expect(await formatTimeOfDay(tester, const Locale('ja'), const TimeOfDay(hour: 20, minute: 32)), '20:32');
       });
 
-      testWidgets('formats ${TimeOfDayFormat.HH_dot_mm}', (WidgetTester tester) async {
+      testWidgets('formats ${TimeOfDayFormat.HH_dot_mm}', (final WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 20, minute: 32)), '20.32');
         expect(await formatTimeOfDay(tester, const Locale('fi'), const TimeOfDay(hour: 9, minute: 32)), '09.32');
       });
 
-      testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (WidgetTester tester) async {
+      testWidgets('formats ${TimeOfDayFormat.frenchCanadian}', (final WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('fr', 'CA'), const TimeOfDay(hour: 9, minute: 32)), '09 h 32');
       });
 
-      testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (WidgetTester tester) async {
+      testWidgets('formats ${TimeOfDayFormat.a_space_h_colon_mm}', (final WidgetTester tester) async {
         expect(await formatTimeOfDay(tester, const Locale('zh'), const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
         expect(await formatTimeOfDay(tester, const Locale('ta'), const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
       });
     });
 
     group('date formatters', () {
-      Future<Map<DateType, String>> formatDate(WidgetTester tester, Locale locale, DateTime dateTime) async {
+      Future<Map<DateType, String>> formatDate(final WidgetTester tester, final Locale locale, final DateTime dateTime) async {
         final Completer<Map<DateType, String>> completer = Completer<Map<DateType, String>>();
         await tester.pumpWidget(MaterialApp(
           supportedLocales: <Locale>[locale],
           locale: locale,
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
-          home: Builder(builder: (BuildContext context) {
+          home: Builder(builder: (final BuildContext context) {
             final MaterialLocalizations localizations = MaterialLocalizations.of(context);
             completer.complete(<DateType, String>{
               DateType.year: localizations.formatYear(dateTime),
@@ -143,7 +143,7 @@ void main() {
         return completer.future;
       }
 
-      testWidgets('formats dates in English', (WidgetTester tester) async {
+      testWidgets('formats dates in English', (final WidgetTester tester) async {
         final Map<DateType, String> formatted = await formatDate(tester, const Locale('en'), DateTime(2018, 8));
         expect(formatted[DateType.year], '2018');
         expect(formatted[DateType.medium], 'Wed, Aug 1');
@@ -151,7 +151,7 @@ void main() {
         expect(formatted[DateType.monthYear], 'August 2018');
       });
 
-      testWidgets('formats dates in German', (WidgetTester tester) async {
+      testWidgets('formats dates in German', (final WidgetTester tester) async {
         final Map<DateType, String> formatted = await formatDate(tester, const Locale('de'), DateTime(2018, 8));
         expect(formatted[DateType.year], '2018');
         expect(formatted[DateType.medium], 'Mi., 1. Aug.');
@@ -159,7 +159,7 @@ void main() {
         expect(formatted[DateType.monthYear], 'August 2018');
       });
 
-      testWidgets('formats dates in Serbian', (WidgetTester tester) async {
+      testWidgets('formats dates in Serbian', (final WidgetTester tester) async {
         final Map<DateType, String> formatted = await formatDate(tester, const Locale('sr'), DateTime(2018, 8));
         expect(formatted[DateType.year], '2018.');
         expect(formatted[DateType.medium], 'сре 1. авг');
@@ -167,7 +167,7 @@ void main() {
         expect(formatted[DateType.monthYear], 'август 2018.');
       });
 
-      testWidgets('formats dates in Serbian (Latin)', (WidgetTester tester) async {
+      testWidgets('formats dates in Serbian (Latin)', (final WidgetTester tester) async {
         final Map<DateType, String> formatted = await formatDate(tester,
           const Locale.fromSubtags(languageCode:'sr', scriptCode: 'Latn'), DateTime(2018, 8));
         expect(formatted[DateType.year], '2018.');
@@ -179,13 +179,13 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/67644.
-  testWidgets('en_US is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
+  testWidgets('en_US is initialized correctly by Flutter when DateFormat is used', (final WidgetTester tester) async {
     late DateFormat dateFormat;
 
     await tester.pumpWidget(MaterialApp(
       locale: const Locale('en', 'US'),
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: Builder(builder: (BuildContext context) {
+      home: Builder(builder: (final BuildContext context) {
         dateFormat = DateFormat('EEE, d MMM yyyy HH:mm:ss', 'en_US');
         return Container();
       }),
@@ -194,13 +194,13 @@ void main() {
     expect(dateFormat.locale, 'en_US');
   });
 
-  testWidgets('cy is initialized correctly by Flutter when DateFormat is used', (WidgetTester tester) async {
+  testWidgets('cy is initialized correctly by Flutter when DateFormat is used', (final WidgetTester tester) async {
     late DateFormat dateFormat;
 
     await tester.pumpWidget(MaterialApp(
       locale: const Locale('cy'),
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: Builder(builder: (BuildContext context) {
+      home: Builder(builder: (final BuildContext context) {
         dateFormat = DateFormat.yMMMd('cy');
         return Container();
       }),

@@ -7,7 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('Nested Localizations', (WidgetTester tester) async {
+  testWidgets('Nested Localizations', (final WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp( // Creates the outer Localizations widget.
       home: ListView(
         children: <Widget>[
@@ -27,7 +27,7 @@ void main() {
     expect(innerTracker.bodySmallFontSize, 13.0);
   });
 
-  testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (WidgetTester tester) async {
+  testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (final WidgetTester tester) async {
     // PageView calls ScrollPosition.dispose() during didChangeDependencies.
     await tester.pumpWidget(
       MaterialApp(
@@ -48,7 +48,7 @@ void main() {
     await tester.pumpWidget(Container());
   });
 
-  testWidgets('Locale without countryCode', (WidgetTester tester) async {
+  testWidgets('Locale without countryCode', (final WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/pull/16782
     await tester.pumpWidget(
       MaterialApp(
@@ -73,13 +73,13 @@ void main() {
 /// used to trigger didChangeDependencies upon locale change.
 class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizations> {
   @override
-  Future<DummyLocalizations> load(Locale locale) async => DummyLocalizations();
+  Future<DummyLocalizations> load(final Locale locale) async => DummyLocalizations();
 
   @override
-  bool isSupported(Locale locale) => true;
+  bool isSupported(final Locale locale) => true;
 
   @override
-  bool shouldReload(_DummyLocalizationsDelegate old) => true;
+  bool shouldReload(final _DummyLocalizationsDelegate old) => true;
 }
 
 class DummyLocalizations { }
@@ -95,7 +95,7 @@ class LocalizationTrackerState extends State<LocalizationTracker> {
   late double bodySmallFontSize;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     bodySmallFontSize = Theme.of(context).textTheme.bodySmall!.fontSize!;
     return Container();
   }
