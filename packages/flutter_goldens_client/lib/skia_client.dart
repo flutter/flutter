@@ -48,7 +48,7 @@ class SkiaGoldClient {
     this.fs = const LocalFileSystem(),
     this.process = const LocalProcessManager(),
     this.platform = const LocalPlatform(),
-    io.HttpClient? httpClient,
+    final io.HttpClient? httpClient,
   }) : httpClient = httpClient ?? io.HttpClient();
 
   /// The file system to use for storing the local clone of the repository.
@@ -199,7 +199,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPostSubmitFileComparator].
-  Future<bool> imgtestAdd(String testName, File goldenFile) async {
+  Future<bool> imgtestAdd(final String testName, final File goldenFile) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -323,7 +323,7 @@ class SkiaGoldClient {
   ///
   /// The [testName] and [goldenFile] parameters reference the current
   /// comparison being evaluated by the [FlutterPreSubmitFileComparator].
-  Future<void> tryjobAdd(String testName, File goldenFile) async {
+  Future<void> tryjobAdd(final String testName, final File goldenFile) async {
     final List<String> imgtestCommand = <String>[
       _goldctl,
       'imgtest', 'add',
@@ -409,7 +409,7 @@ class SkiaGoldClient {
 
   /// Returns the latest positive digest for the given test known to Flutter
   /// Gold at head.
-  Future<String?> getExpectationForTest(String testName) async {
+  Future<String?> getExpectationForTest(final String testName) async {
     late String? expectation;
     final String traceID = getTraceID(testName);
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
@@ -448,7 +448,7 @@ class SkiaGoldClient {
   /// Flutter Gold dashboard.
   ///
   /// The provided image hash represents an expectation from Flutter Gold.
-  Future<List<int>>getImageBytes(String imageHash) async {
+  Future<List<int>>getImageBytes(final String imageHash) async {
     final List<int> imageBytes = <int>[];
     await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
       final Uri requestForImage = Uri.parse(
@@ -456,7 +456,7 @@ class SkiaGoldClient {
       );
       final io.HttpClientRequest request = await httpClient.getUrl(requestForImage);
       final io.HttpClientResponse response = await request.close();
-      await response.forEach((List<int> bytes) => imageBytes.addAll(bytes));
+      await response.forEach((final List<int> bytes) => imageBytes.addAll(bytes));
     },
       SkiaGoldHttpOverrides(),
     );
@@ -502,7 +502,7 @@ class SkiaGoldClient {
 
   /// Removes the file extension from the [fileName] to represent the test name
   /// properly.
-  String cleanTestName(String fileName) {
+  String cleanTestName(final String fileName) {
     return fileName.split(path.extension(fileName))[0];
   }
 
@@ -552,7 +552,7 @@ class SkiaGoldClient {
   /// Returns a trace id based on the current testing environment to lookup
   /// the latest positive digest on Flutter Gold with a hex-encoded md5 hash of
   /// the image keys.
-  String getTraceID(String testName) {
+  String getTraceID(final String testName) {
     final Map<String, dynamic> keys = <String, dynamic>{
       if (_isBrowserTest)
         'Browser' : _browserKey,
