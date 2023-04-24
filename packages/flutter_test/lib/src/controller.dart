@@ -340,14 +340,17 @@ abstract class WidgetController {
   ///   * [view] which returns the [TestFlutterView] used when only a single
   ///     view is being used.
   TestFlutterView viewOf(Finder finder) {
-    final View view = firstWidget<View>(
+    return _viewOf(finder) as TestFlutterView;
+  }
+
+  FlutterView _viewOf(Finder finder) {
+    // TODO(goderbauer): This logic is not correct. Update when we have RawView.
+    return firstWidget<View>(
       find.ancestor(
         of: finder,
         matching: find.byType(View),
-      )
-    );
-
-    return view.view as TestFlutterView;
+      ),
+    ).view;
   }
 
   /// Checks if `finder` exists in the tree.
@@ -1361,7 +1364,7 @@ abstract class WidgetController {
     final RenderBox box = element.renderObject! as RenderBox;
     final Offset location = box.localToGlobal(sizeToPoint(box.size));
     if (warnIfMissed) {
-      final FlutterView view = viewOf(finder);
+      final FlutterView view = _viewOf(finder);
       final HitTestResult result = HitTestResult();
       binding.hitTest(result, location, view.viewId as int);
       bool found = false;

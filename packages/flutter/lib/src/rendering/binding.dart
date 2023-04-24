@@ -211,7 +211,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// example, wires this up in [WidgetsBinding.wrapWithDefaultView], which is
   /// called indirectly from [runApp].
   ///
-  /// Apps, that don't use the [WidgetsBinding] or don't call [ranApp] (or
+  /// Apps, that don't use the [WidgetsBinding] or don't call [runApp] (or
   /// [WidgetsBinding.wrapWithDefaultView]) must manually add this pipeline owner
   /// to the pipeline owner tree rooted at [rootPipelineOwner] and assign a
   /// [RenderView] to it if the they want to use this deprecated property.
@@ -250,7 +250,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// [WidgetsBinding.wrapWithDefaultView], which is called indirectly from
   /// [runApp].
   ///
-  /// Apps, that don't use the [WidgetsBinding] or don't call [ranApp] (or
+  /// Apps, that don't use the [WidgetsBinding] or don't call [runApp] (or
   /// [WidgetsBinding.wrapWithDefaultView]) must manually assign a
   /// [PipelineOwner] to this [RenderView], make sure the pipeline owner is part
   /// of the pipeline owner tree rooted at [rootPipelineOwner], and call
