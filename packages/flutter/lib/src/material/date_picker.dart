@@ -71,17 +71,21 @@ const double _inputFormLandscapeHeight = 108.0;
 /// or [DatePickerEntryMode.input] (a text input field) mode.
 /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
 ///
+/// {@template flutter.material.date_picker.switchToInputEntryModeIcon}
 /// An optional [switchToInputEntryModeIcon] argument can be used to
 /// display a custom Icon in the corner of the dialog
 /// when [DatePickerEntryMode] is [DatePickerEntryMode.calendar]. Clicking on
 /// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.input].
 /// If null, `Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit)` is used.
+/// {@endtemplate}
 ///
+/// {@template flutter.material.date_picker.switchToCalendarEntryModeIcon}
 /// An optional [switchToCalendarEntryModeIcon] argument can be used to
 /// display a custom Icon in the corner of the dialog
 /// when [DatePickerEntryMode] is [DatePickerEntryMode.input]. Clicking on
 /// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.calendar].
 /// If null, `Icon(Icons.calendar_today)` is used.
+/// {@endtemplate}
 ///
 /// An optional [selectableDayPredicate] function can be passed in to only allow
 /// certain days for selection. If provided, only the days that
@@ -388,18 +392,10 @@ class DatePickerDialog extends StatefulWidget {
   /// `initialEntryMode` parameter the next time the date picker is shown.
   final ValueChanged<DatePickerEntryMode>? onDatePickerModeChange;
 
-  /// An optional [switchToInputEntryModeIcon] argument can be used to
-  /// display a custom Icon in the corner of the dialog
-  /// when [DatePickerEntryMode] is [DatePickerEntryMode.calendar]. Clicking on
-  /// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.input].
-  /// If null, `Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit)` is used.
+  /// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
   final Icon? switchToInputEntryModeIcon;
 
-  /// An optional [switchToCalendarEntryModeIcon] argument can be used to
-  /// display a custom Icon in the corner of the dialog
-  /// when [DatePickerEntryMode] is [DatePickerEntryMode.input]. Clicking on
-  /// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.calendar].
-  /// If null, `Icon(Icons.calendar_today)` is used.
+  /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
   final Icon? switchToCalendarEntryModeIcon;
 
   @override
@@ -938,17 +934,9 @@ class _DatePickerHeader extends StatelessWidget {
 /// grid) or [DatePickerEntryMode.input] (two text input fields) mode.
 /// It defaults to [DatePickerEntryMode.calendar] and must be non-null.
 ///
-/// An optional [switchToInputEntryModeIcon] argument can be used to
-/// display a custom Icon in the corner of the dialog
-/// when [DatePickerEntryMode] is [DatePickerEntryMode.calendar]. Clicking on
-/// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.input].
-/// If null, `Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit)` is used.
+/// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
 ///
-/// An optional [switchToCalendarEntryModeIcon] argument can be used to
-/// display a custom Icon in the corner of the dialog
-/// when [DatePickerEntryMode] is [DatePickerEntryMode.input]. Clicking on
-/// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.calendar].
-/// If null, `Icon(Icons.calendar_today)` is used.
+/// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
 ///
 /// The following optional string parameters allow you to override the default
 /// text used for various parts of the dialog:
@@ -1306,18 +1294,10 @@ class DateRangePickerDialog extends StatefulWidget {
   ///    Flutter.
   final String? restorationId;
 
-  /// An optional [switchToInputEntryModeIcon] argument can be used to
-  /// display a custom Icon in the corner of the dialog
-  /// when [DatePickerEntryMode] is [DatePickerEntryMode.calendar]. Clicking on
-  /// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.input].
-  /// If null, `Icon(useMaterial3 ? Icons.edit_outlined : Icons.edit)` is used.
+  /// {@macro flutter.material.date_picker.switchToInputEntryModeIcon}
   final Icon? switchToInputEntryModeIcon;
 
-  /// An optional [switchToCalendarEntryModeIcon] argument can be used to
-  /// display a custom Icon in the corner of the dialog
-  /// when [DatePickerEntryMode] is [DatePickerEntryMode.input]. Clicking on
-  /// icon changes the [DatePickerEntryMode] to [DatePickerEntryMode.calendar].
-  /// If null, `Icon(Icons.calendar_today)` is used.
+  /// {@macro flutter.material.date_picker.switchToCalendarEntryModeIcon}
   final Icon? switchToCalendarEntryModeIcon;
 
   @override
