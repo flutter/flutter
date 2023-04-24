@@ -10,10 +10,10 @@ import 'binding.dart';
 /// Processes text input events that were not handled by the framework.
 abstract class TestTextInputKeyHandler {
   /// Process key down event that was not handled by the framework.
-  Future<void> handleKeyDownEvent(LogicalKeyboardKey key);
+  Future<void> handleKeyDownEvent(final LogicalKeyboardKey key);
 
   /// Process key up event that was not handled by the framework.
-  Future<void> handleKeyUpEvent(LogicalKeyboardKey key);
+  Future<void> handleKeyUpEvent(final LogicalKeyboardKey key);
 }
 
 /// MacOS specific key input handler. This class translates standard macOS text editing shortcuts
@@ -25,7 +25,7 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   /// ClientId of TextInput
   final int client;
 
-  Future<void> _sendSelectors(List<String> selectors) async {
+  Future<void> _sendSelectors(final List<String> selectors) async {
     await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .handlePlatformMessage(
       SystemChannels.textInput.name,
@@ -33,7 +33,7 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
         MethodCall(
             'TextInputClient.performSelectors', <dynamic>[client, selectors]),
       ),
-      (ByteData? data) {/* response from framework is discarded */},
+      (final ByteData? data) {/* response from framework is discarded */},
     );
   }
 
@@ -218,7 +218,7 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   };
 
   @override
-  Future<void> handleKeyDownEvent(LogicalKeyboardKey key) async {
+  Future<void> handleKeyDownEvent(final LogicalKeyboardKey key) async {
     if (key == LogicalKeyboardKey.shift ||
         key == LogicalKeyboardKey.shiftLeft ||
         key == LogicalKeyboardKey.shiftRight) {
@@ -252,7 +252,7 @@ class MacOSTestTextInputKeyHandler extends TestTextInputKeyHandler {
   }
 
   @override
-  Future<void> handleKeyUpEvent(LogicalKeyboardKey key) async {
+  Future<void> handleKeyUpEvent(final LogicalKeyboardKey key) async {
     if (key == LogicalKeyboardKey.shift ||
         key == LogicalKeyboardKey.shiftLeft ||
         key == LogicalKeyboardKey.shiftRight) {

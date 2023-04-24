@@ -56,7 +56,7 @@ export 'package:test_api/scaffolding.dart'
 typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 
 // Return the last element that satisfies `test`, or return null if not found.
-E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
+E? _lastWhereOrNull<E>(final Iterable<E> list, final bool Function(E) test) {
   late E result;
   bool foundMatching = false;
   for (final E element in list) {
@@ -121,18 +121,18 @@ E? _lastWhereOrNull<E>(Iterable<E> list, bool Function(E) test) {
 /// ```
 @isTest
 void testWidgets(
-  String description,
-  WidgetTesterCallback callback, {
-  bool? skip,
-  test_package.Timeout? timeout,
+  final String description,
+  final WidgetTesterCallback callback, {
+  final bool? skip,
+  final test_package.Timeout? timeout,
   @Deprecated(
     'This parameter has no effect. Use `timeout` instead. '
     'This feature was deprecated after v2.6.0-1.0.pre.'
   )
-  Duration? initialTimeout,
-  bool semanticsEnabled = true,
-  TestVariant<Object?> variant = const DefaultTestVariant(),
-  dynamic tags,
+  final Duration? initialTimeout,
+  final bool semanticsEnabled = true,
+  final TestVariant<Object?> variant = const DefaultTestVariant(),
+  final dynamic tags,
 }) {
   assert(variant.values.isNotEmpty, 'There must be at least one value to test in the testing variant.');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
@@ -200,7 +200,7 @@ abstract class TestVariant<T> {
 
   /// Returns the string that will be used to both add to the test description, and
   /// be printed when a test fails for this variation.
-  String describeValue(T value);
+  String describeValue(final T value);
 
   /// A function that will be called before each value is tested, with the
   /// value that will be tested.
@@ -209,7 +209,7 @@ abstract class TestVariant<T> {
   /// environment back to its base state when [tearDown] is called in the
   /// `Object` that is returned. The returned object will then be passed to
   /// [tearDown] as a `memento` when the test is complete.
-  Future<Object?> setUp(T value);
+  Future<Object?> setUp(final T value);
 
   /// A function that is guaranteed to be called after a value is tested, even
   /// if it throws an exception.
@@ -217,7 +217,7 @@ abstract class TestVariant<T> {
   /// Calling this function must return the testing environment back to the base
   /// state it was in before [setUp] was called. The [memento] is the object
   /// returned from [setUp] when it was called.
-  Future<void> tearDown(T value, covariant Object? memento);
+  Future<void> tearDown(final T value, covariant final Object? memento);
 }
 
 /// The [TestVariant] that represents the "default" test that is run if no
@@ -233,13 +233,13 @@ class DefaultTestVariant extends TestVariant<void> {
   Iterable<void> get values => const <void>[null];
 
   @override
-  String describeValue(void value) => '';
+  String describeValue(final void value) => '';
 
   @override
-  Future<void> setUp(void value) async {}
+  Future<void> setUp(final void value) async {}
 
   @override
-  Future<void> tearDown(void value, void memento) async {}
+  Future<void> tearDown(final void value, final void memento) async {}
 }
 
 /// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
@@ -252,7 +252,7 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   /// the [TargetPlatform] enum. If [excluding] is provided, will test all platforms
   /// except those in [excluding].
   TargetPlatformVariant.all({
-    Set<TargetPlatform> excluding = const <TargetPlatform>{},
+    final Set<TargetPlatform> excluding = const <TargetPlatform>{},
   }) : values = TargetPlatform.values.toSet()..removeAll(excluding);
 
   /// Creates a [TargetPlatformVariant] that includes platforms that are
@@ -273,23 +273,23 @@ class TargetPlatformVariant extends TestVariant<TargetPlatform> {
 
   /// Creates a [TargetPlatformVariant] that tests only the given value of
   /// [TargetPlatform].
-  TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>{platform};
+  TargetPlatformVariant.only(final TargetPlatform platform) : values = <TargetPlatform>{platform};
 
   @override
   final Set<TargetPlatform> values;
 
   @override
-  String describeValue(TargetPlatform value) => value.toString();
+  String describeValue(final TargetPlatform value) => value.toString();
 
   @override
-  Future<TargetPlatform?> setUp(TargetPlatform value) async {
+  Future<TargetPlatform?> setUp(final TargetPlatform value) async {
     final TargetPlatform? previousTargetPlatform = debugDefaultTargetPlatformOverride;
     debugDefaultTargetPlatformOverride = value;
     return previousTargetPlatform;
   }
 
   @override
-  Future<void> tearDown(TargetPlatform value, TargetPlatform? memento) async {
+  Future<void> tearDown(final TargetPlatform value, final TargetPlatform? memento) async {
     debugDefaultTargetPlatformOverride = memento;
   }
 }
@@ -340,13 +340,13 @@ class ValueVariant<T> extends TestVariant<T> {
   final Set<T> values;
 
   @override
-  String describeValue(T value) => value.toString().replaceFirst('$T.', '');
+  String describeValue(final T value) => value.toString().replaceFirst('$T.', '');
 
   @override
-  Future<T> setUp(T value) async => _currentValue = value;
+  Future<T> setUp(final T value) async => _currentValue = value;
 
   @override
-  Future<void> tearDown(T value, T memento) async {}
+  Future<void> tearDown(final T value, final T memento) async {}
 }
 
 /// The warning message to show when a benchmark is performed with assert on.
@@ -408,9 +408,9 @@ const String kDebugWarning = '''
 ///       exit(0);
 ///     }
 Future<void> benchmarkWidgets(
-  WidgetTesterCallback callback, {
-  bool mayRunWithAsserts = false,
-  bool semanticsEnabled = false,
+  final WidgetTesterCallback callback, {
+  final bool mayRunWithAsserts = false,
+  final bool semanticsEnabled = false,
 }) {
   assert(() {
     if (mayRunWithAsserts) {
@@ -446,10 +446,10 @@ Future<void> benchmarkWidgets(
 ///
 ///  * [expectLater] for use with asynchronous matchers.
 void expect(
-  dynamic actual,
-  dynamic matcher, {
-  String? reason,
-  dynamic skip, // true or a String
+  final dynamic actual,
+  final dynamic matcher, {
+  final String? reason,
+  final dynamic skip, // true or a String
 }) {
   TestAsyncUtils.guardSync();
   matcher_expect.expect(actual, matcher, reason: reason, skip: skip);
@@ -465,9 +465,9 @@ void expect(
 /// Generally, it is better to use [expect], which does include checks to ensure
 /// that asynchronous APIs are not being called.
 void expectSync(
-  dynamic actual,
-  dynamic matcher, {
-  String? reason,
+  final dynamic actual,
+  final dynamic matcher, {
+  final String? reason,
 }) {
   matcher_expect.expect(actual, matcher, reason: reason);
 }
@@ -481,16 +481,16 @@ void expectSync(
 /// future where it can be handled by user code. If it is not handled by user
 /// code, the test will fail.
 Future<void> expectLater(
-  dynamic actual,
-  dynamic matcher, {
-  String? reason,
-  dynamic skip, // true or a String
+  final dynamic actual,
+  final dynamic matcher, {
+  final String? reason,
+  final dynamic skip, // true or a String
 }) {
   // We can't wrap the delegate in a guard, or we'll hit async barriers in
   // [TestWidgetsFlutterBinding] while we're waiting for the matcher to complete
   TestAsyncUtils.guardSync();
   return matcher_expect.expectLater(actual, matcher, reason: reason, skip: skip)
-           .then<void>((dynamic value) => null);
+           .then<void>((final dynamic value) => null);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.
@@ -565,9 +565,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
   Future<void> pumpWidget(
-    Widget widget, [
-    Duration? duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    final Widget widget, [
+    final Duration? duration,
+    final EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() {
       return _pumpWidget(
@@ -579,9 +579,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   Future<void> _pumpWidget(
-    Widget widget, [
-    Duration? duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    final Widget widget, [
+    final Duration? duration,
+    final EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     binding.attachRootWidget(widget);
     binding.scheduleFrame();
@@ -589,7 +589,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  Future<List<Duration>> handlePointerEventRecord(Iterable<PointerEventRecord> records) {
+  Future<List<Duration>> handlePointerEventRecord(final Iterable<PointerEventRecord> records) {
     assert(records.isNotEmpty);
     return TestAsyncUtils.guard<List<Duration>>(() async {
       final List<Duration> handleTimeStampDiff = <Duration>[];
@@ -640,8 +640,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// this method works when the test is run with `flutter run`.
   @override
   Future<void> pump([
-    Duration? duration,
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    final Duration? duration,
+    final EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard<void>(() => binding.pump(duration, phase));
   }
@@ -654,7 +654,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Similarly to [pump], this doesn't actually wait for `duration`, just
   /// advances the clock.
-  Future<void> pumpBenchmark(Duration duration) async {
+  Future<void> pumpBenchmark(final Duration duration) async {
     assert(() {
       final TestWidgetsFlutterBinding widgetsBinding = binding;
       return widgetsBinding is LiveTestWidgetsFlutterBinding &&
@@ -662,7 +662,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }());
 
     dynamic caughtException;
-    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
+    void handleError(final dynamic error, final StackTrace stackTrace) => caughtException ??= error;
 
     await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
     await idle();
@@ -676,9 +676,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Future<int> pumpAndSettle([
-    Duration duration = const Duration(milliseconds: 100),
-    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-    Duration timeout = const Duration(minutes: 10),
+    final Duration duration = const Duration(milliseconds: 100),
+    final EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    final Duration timeout = const Duration(minutes: 10),
   ]) {
     assert(duration > Duration.zero);
     assert(timeout > Duration.zero);
@@ -715,9 +715,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// The `maxDuration` argument is required. The `interval` argument defaults to
   /// 16.683 milliseconds (59.94 FPS).
   Future<void> pumpFrames(
-    Widget target,
-    Duration maxDuration, [
-    Duration interval = const Duration(milliseconds: 16, microseconds: 683),
+    final Widget target,
+    final Duration maxDuration, [
+    final Duration interval = const Duration(milliseconds: 16, microseconds: 683),
   ]) {
     // The interval following the last frame doesn't have to be within the fullDuration.
     Duration elapsed = Duration.zero;
@@ -775,7 +775,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// The data provided to this method is usually obtained from
   /// [getRestorationData].
-  Future<void> restoreFrom(TestRestorationData data) {
+  Future<void> restoreFrom(final TestRestorationData data) {
     binding.restorationManager.restoreFrom(data);
     return pump();
   }
@@ -813,8 +813,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// * Expose a [Future] in your application code that signals the readiness of
   ///   your widget tree, then await that future inside [callback].
   Future<T?> runAsync<T>(
-    Future<T> Function() callback, {
-    Duration additionalTime = const Duration(milliseconds: 1000),
+    final Future<T> Function() callback, {
+    final Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T?>(callback, additionalTime: additionalTime);
 
   /// Whether there are any transient callbacks scheduled.
@@ -840,7 +840,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  Future<void> sendEventToBinding(PointerEvent event) {
+  Future<void> sendEventToBinding(final PointerEvent event) {
     return TestAsyncUtils.guard<void>(() async {
       binding.handlePointerEventForSource(event, source: TestBindingEventSource.test);
     });
@@ -852,22 +852,22 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// showing possible [Finder]s that can be used to interact with the widget at
   /// the location of [result].
   @override
-  void dispatchEvent(PointerEvent event, HitTestResult result) {
+  void dispatchEvent(final PointerEvent event, final HitTestResult result) {
     if (event is PointerDownEvent) {
       final RenderObject innerTarget = result.path
-        .map((HitTestEntry candidate) => candidate.target)
+        .map((final HitTestEntry candidate) => candidate.target)
         .whereType<RenderObject>()
         .first;
       final Element? innerTargetElement = _lastWhereOrNull(
         collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
-        (Element element) => element.renderObject == innerTarget,
+        (final Element element) => element.renderObject == innerTarget,
       );
       if (innerTargetElement == null) {
         printToConsole('No widgets found at ${event.position}.');
         return;
       }
       final List<Element> candidates = <Element>[];
-      innerTargetElement.visitAncestorElements((Element element) {
+      innerTargetElement.visitAncestorElements((final Element element) {
         candidates.add(element);
         return true;
       });
@@ -960,7 +960,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     }
   }
 
-  bool _isPrivate(Type type) {
+  bool _isPrivate(final Type type) {
     // used above so that we don't suggest matchers for private types
     return '_'.matchAsPrefix(type.toString()) != null;
   }
@@ -995,14 +995,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Set<Ticker>? _tickers;
 
   @override
-  Ticker createTicker(TickerCallback onTick) {
+  Ticker createTicker(final TickerCallback onTick) {
     _tickers ??= <_TestTicker>{};
     final _TestTicker result = _TestTicker(onTick, _removeTicker);
     _tickers!.add(result);
     return result;
   }
 
-  void _removeTicker(_TestTicker ticker) {
+  void _removeTicker(final _TestTicker ticker) {
     assert(_tickers != null);
     assert(_tickers!.contains(ticker));
     _tickers!.remove(ticker);
@@ -1014,7 +1014,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// An argument can be specified to provide a string that will be used in the
   /// error message. It should be an adverbial phrase describing the current
   /// situation, such as "at the end of the test".
-  void verifyTickersWereDisposed([ String when = 'when none should have been' ]) {
+  void verifyTickersWereDisposed([ final String when = 'when none should have been' ]) {
     if (_tickers != null) {
       for (final Ticker ticker in _tickers!) {
         if (ticker.isActive) {
@@ -1086,7 +1086,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Tests that just need to add text to widgets like [TextField]
   /// or [TextFormField] only need to call [enterText].
-  Future<void> showKeyboard(Finder finder) async {
+  Future<void> showKeyboard(final Finder finder) async {
     return TestAsyncUtils.guard<void>(() async {
       final EditableTextState editable = state<EditableTextState>(
         find.descendant(
@@ -1121,7 +1121,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// that widget has an open connection (e.g. by using [tap] to focus it),
   /// then call `testTextInput.enterText` directly (see
   /// [TestTextInput.enterText]).
-  Future<void> enterText(Finder finder, String text) async {
+  Future<void> enterText(final Finder finder, final String text) async {
     return TestAsyncUtils.guard<void>(() async {
       await showKeyboard(finder);
       testTextInput.enterText(text);
@@ -1147,7 +1147,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   @override
-  void printToConsole(String message) {
+  void printToConsole(final String message) {
     binding.debugPrintOverride(message);
   }
 }

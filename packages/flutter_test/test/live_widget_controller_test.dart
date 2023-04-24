@@ -21,7 +21,7 @@ class TestBinding extends WidgetsFlutterBinding {
   }
 
   @override
-  bool debugCheckZone(String entryPoint) { return true; }
+  bool debugCheckZone(final String entryPoint) { return true; }
 
   static TestBinding get instance => BindingBase.checkInstance(_instance);
   static TestBinding? _instance;
@@ -44,7 +44,7 @@ class CountButton extends StatefulWidget {
 class _CountButtonState extends State<CountButton> {
   int counter = 0;
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return ElevatedButton(
       child: Text('Counter $counter'),
       onPressed: () {
@@ -83,10 +83,10 @@ class _AnimateSampleState extends State<AnimateSample>
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (BuildContext context, _) => Text('Value: ${_controller.value}'),
+      builder: (final BuildContext context, final _) => Text('Value: ${_controller.value}'),
     );
   }
 }
@@ -123,9 +123,9 @@ void main() {
     runApp(
       MaterialApp(
         home: Listener(
-          onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
-          onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
-          onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+          onPointerDown: (final PointerDownEvent event) => logs.add('down ${event.buttons}'),
+          onPointerMove: (final PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+          onPointerUp: (final PointerUpEvent event) => logs.add('up ${event.buttons}'),
           child: const Text('test'),
         ),
       ),

@@ -15,7 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('enterText works', (WidgetTester tester) async {
+  testWidgets('enterText works', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -33,7 +33,7 @@ void main() {
     expect(state.textEditingValue.selection.baseOffset, 17);
   });
 
-  testWidgets('receiveAction() forwards exception when exception occurs during action processing', (WidgetTester tester) async {
+  testWidgets('receiveAction() forwards exception when exception occurs during action processing', (final WidgetTester tester) async {
     // Setup a widget that can receive focus so that we can open the keyboard.
     const Widget widget = MaterialApp(
       home: Material(
@@ -47,7 +47,7 @@ void main() {
 
     // Register a handler for the text input channel that throws an error. This
     // error should be reported within a PlatformException by TestTextInput.
-    SystemChannels.textInput.setMethodCallHandler((MethodCall call) {
+    SystemChannels.textInput.setMethodCallHandler((final MethodCall call) {
       throw FlutterError('A fake error occurred during action processing.');
     });
 
@@ -57,11 +57,11 @@ void main() {
     );
   });
 
-  testWidgets('selectors are called on macOS', (WidgetTester tester) async {
+  testWidgets('selectors are called on macOS', (final WidgetTester tester) async {
     List<dynamic>? selectorNames;
     await SystemChannels.textInput.invokeMethod('TextInput.setClient', <dynamic>[1, <String, dynamic>{}]);
     await SystemChannels.textInput.invokeMethod('TextInput.show');
-    SystemChannels.textInput.setMethodCallHandler((MethodCall call) async {
+    SystemChannels.textInput.setMethodCallHandler((final MethodCall call) async {
       if (call.method == 'TextInputClient.performSelectors') {
         selectorNames = (call.arguments as List<dynamic>)[1] as List<dynamic>;
       }

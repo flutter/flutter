@@ -17,8 +17,8 @@ import 'package:flutter/widgets.dart';
 /// one, for example the results of calling `where` on this iterable
 /// are also cached.
 Iterable<Element> collectAllElementsFrom(
-  Element rootElement, {
-  required bool skipOffstage,
+  final Element rootElement, {
+  required final bool skipOffstage,
 }) {
   return CachingIterable<Element>(_DepthFirstChildIterator(rootElement, skipOffstage));
 }
@@ -47,7 +47,7 @@ Iterable<Element> collectAllElementsFrom(
 /// have been written (and developers clearly expect) that LTR order will be
 /// respected.
 class _DepthFirstChildIterator implements Iterator<Element> {
-  _DepthFirstChildIterator(Element rootElement, this.skipOffstage) {
+  _DepthFirstChildIterator(final Element rootElement, this.skipOffstage) {
     _fillChildren(rootElement);
   }
 
@@ -72,7 +72,7 @@ class _DepthFirstChildIterator implements Iterator<Element> {
     return true;
   }
 
-  void _fillChildren(Element element) {
+  void _fillChildren(final Element element) {
     // If we did not have to follow LTR order and could instead use RTL,
     // we could avoid reversing this and the operation would be measurably
     // faster. Unfortunately, a lot of tests depend on LTR order.

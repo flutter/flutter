@@ -20,4 +20,4 @@
 ///   final A a = nonconst(const A(null));
 /// }
 /// ```
-T nonconst<T>(T t) => t;
+T nonconst<T>(final T t) => t;

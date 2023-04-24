@@ -13,12 +13,12 @@ import 'goldens.dart';
 /// An unsupported [GoldenFileComparator] that exists for API compatibility.
 class LocalFileComparator extends GoldenFileComparator {
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+  Future<bool> compare(final Uint8List imageBytes, final Uri golden) {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
 
   @override
-  Future<void> update(Uri golden, Uint8List imageBytes) {
+  Future<void> update(final Uri golden, final Uint8List imageBytes) {
     throw UnsupportedError('LocalFileComparator is not supported on the web.');
   }
 }
@@ -27,7 +27,7 @@ class LocalFileComparator extends GoldenFileComparator {
 ///
 /// This method is not supported on the web and throws an [UnsupportedError]
 /// when called.
-Future<ComparisonResult> compareLists(List<int> test, List<int> master) async {
+Future<ComparisonResult> compareLists(final List<int> test, final List<int> master) async {
   throw UnsupportedError('Golden testing is not supported on the web.');
 }
 
@@ -56,7 +56,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   Uri testUri;
 
   @override
-  Future<bool> compare(double width, double height, Uri golden) async {
+  Future<bool> compare(final double width, final double height, final Uri golden) async {
     final String key = golden.toString();
     final html.HttpRequest request = await html.HttpRequest.request(
       'flutter_goldens',
@@ -76,7 +76,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
   }
 
   @override
-  Future<void> update(double width, double height, Uri golden) async {
+  Future<void> update(final double width, final double height, final Uri golden) async {
     // Update is handled on the server side, just use the same logic here
     await compare(width, height, golden);
   }

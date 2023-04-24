@@ -16,7 +16,7 @@ void main() {
     expect(testPlatformDispatcher.someNewProperty, null);
   });
 
-  testWidgets('TestPlatformDispatcher can fake locale', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake locale', (final WidgetTester tester) async {
     verifyPropertyFaked<Locale>(
       tester: tester,
       realValue: PlatformDispatcher.instance.locale,
@@ -24,13 +24,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.platformDispatcher.locale;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, Locale fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final Locale fakeValue) {
         binding.platformDispatcher.localeTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can fake locales', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake locales', (final WidgetTester tester) async {
     verifyPropertyFaked<List<Locale>>(
       tester: tester,
       realValue: PlatformDispatcher.instance.locales,
@@ -38,13 +38,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.platformDispatcher.locales;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, List<Locale> fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final List<Locale> fakeValue) {
         binding.platformDispatcher.localesTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can fake text scale factor', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake text scale factor', (final WidgetTester tester) async {
     verifyPropertyFaked<double>(
       tester: tester,
       realValue: PlatformDispatcher.instance.textScaleFactor,
@@ -52,13 +52,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.platformDispatcher.textScaleFactor;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final double fakeValue) {
         binding.platformDispatcher.textScaleFactorTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can fake clock format', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake clock format', (final WidgetTester tester) async {
     verifyPropertyFaked<bool>(
       tester: tester,
       realValue: PlatformDispatcher.instance.alwaysUse24HourFormat,
@@ -66,25 +66,25 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.platformDispatcher.alwaysUse24HourFormat;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final bool fakeValue) {
         binding.platformDispatcher.alwaysUse24HourFormatTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can fake brieflyShowPassword', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake brieflyShowPassword', (final WidgetTester tester) async {
     verifyPropertyFaked<bool>(
       tester: tester,
       realValue: PlatformDispatcher.instance.brieflyShowPassword,
       fakeValue: !PlatformDispatcher.instance.brieflyShowPassword,
       propertyRetriever: () => WidgetsBinding.instance.platformDispatcher.brieflyShowPassword,
-      propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final bool fakeValue) {
         binding.platformDispatcher.brieflyShowPasswordTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can fake default route name', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake default route name', (final WidgetTester tester) async {
     verifyPropertyFaked<String>(
       tester: tester,
       realValue: PlatformDispatcher.instance.defaultRouteName,
@@ -92,13 +92,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.platformDispatcher.defaultRouteName;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, String fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final String fakeValue) {
         binding.platformDispatcher.defaultRouteNameTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can fake accessibility features', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake accessibility features', (final WidgetTester tester) async {
     verifyPropertyFaked<AccessibilityFeatures>(
       tester: tester,
       realValue: PlatformDispatcher.instance.accessibilityFeatures,
@@ -106,13 +106,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.platformDispatcher.accessibilityFeatures;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, AccessibilityFeatures fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final AccessibilityFeatures fakeValue) {
         binding.platformDispatcher.accessibilityFeaturesTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can fake platform brightness', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can fake platform brightness', (final WidgetTester tester) async {
     verifyPropertyFaked<Brightness>(
       tester: tester,
       realValue: Brightness.light,
@@ -120,13 +120,13 @@ void main() {
       propertyRetriever: () {
         return WidgetsBinding.instance.platformDispatcher.platformBrightness;
       },
-      propertyFaker: (TestWidgetsFlutterBinding binding, Brightness fakeValue) {
+      propertyFaker: (final TestWidgetsFlutterBinding binding, final Brightness fakeValue) {
         binding.platformDispatcher.platformBrightnessTestValue = fakeValue;
       },
     );
   });
 
-  testWidgets('TestPlatformDispatcher can clear out fake properties all at once', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher can clear out fake properties all at once', (final WidgetTester tester) async {
     final Locale originalLocale = PlatformDispatcher.instance.locale;
     final double originalTextScaleFactor = PlatformDispatcher.instance.textScaleFactor;
     final TestPlatformDispatcher testPlatformDispatcher = retrieveTestBinding(tester).platformDispatcher;
@@ -143,7 +143,7 @@ void main() {
     expect(WidgetsBinding.instance.platformDispatcher.textScaleFactor, originalTextScaleFactor);
   });
 
-  testWidgets('TestPlatformDispatcher sends fake locales when WidgetsBindingObserver notifiers are called', (WidgetTester tester) async {
+  testWidgets('TestPlatformDispatcher sends fake locales when WidgetsBindingObserver notifiers are called', (final WidgetTester tester) async {
     final List<Locale> defaultLocales = WidgetsBinding.instance.platformDispatcher.locales;
     final TestObserver observer = TestObserver();
     retrieveTestBinding(tester).addObserver(observer);
@@ -158,7 +158,7 @@ class TestObserver with WidgetsBindingObserver {
   List<Locale>? locales;
 
   @override
-  void didChangeLocales(List<Locale>? locales) {
+  void didChangeLocales(final List<Locale>? locales) {
     this.locales = locales;
   }
 }

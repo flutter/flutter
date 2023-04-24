@@ -36,7 +36,7 @@ Future<void> main() async {
     await binding.runTest(() async {
       final DebugPrintCallback oldDebugPrint = debugPrint;
       try {
-        debugPrint = (String? message, {int? wrapWidth}) {};
+        debugPrint = (final String? message, {final int? wrapWidth}) {};
         debugPrintStack(
           stackTrace: await getMangledStack(),
         );
@@ -55,10 +55,10 @@ Future<StackTrace> getMangledStack() {
   final Completer<StackTrace> stackCompleter = Completer<StackTrace>();
   final Completer<void> completer = Completer<void>();
   completer.future.then(
-    (void value) {
+    (final void value) {
       assert(false);
     },
-    onError: (Object error, StackTrace stack) {
+    onError: (final Object error, final StackTrace stack) {
       expect(error, isA<CustomException>());
       expect(stack, isA<stack_trace.Chain>());
       stackCompleter.complete(stack);

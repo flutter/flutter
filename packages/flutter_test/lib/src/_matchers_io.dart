@@ -20,7 +20,7 @@ import 'goldens.dart';
 /// See also:
 ///
 ///  * [OffsetLayer.toImage] which is the actual method being called.
-Future<ui.Image> captureImage(Element element) {
+Future<ui.Image> captureImage(final Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
@@ -47,7 +47,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   const MatchesGoldenFile(this.key, this.version);
 
   /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
-  MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
+  MatchesGoldenFile.forStringPath(final String path, this.version) : key = Uri.parse(path);
 
   /// The [key] to the golden image.
   final Uri key;
@@ -56,7 +56,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   final int? version;
 
   @override
-  Future<String?> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(final dynamic item) async {
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     Uint8List? buffer;
@@ -118,7 +118,7 @@ class MatchesGoldenFile extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
     return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }

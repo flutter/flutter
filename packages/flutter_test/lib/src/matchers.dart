@@ -82,7 +82,7 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsAtLeastNWidgets], when you want the finder to find at least a specific number of widgets.
-Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
+Matcher findsNWidgets(final int n) => _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates at least a number of widgets in the widget tree.
 ///
@@ -98,7 +98,7 @@ Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
-Matcher findsAtLeastNWidgets(int n) => _FindsWidgetMatcher(n, null);
+Matcher findsAtLeastNWidgets(final int n) => _FindsWidgetMatcher(n, null);
 
 /// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
@@ -147,7 +147,7 @@ const Matcher isNotInCard = _IsNotInCard();
 ///
 /// Specifically this matcher checks the object is of type [Color] and its [Color.value]
 /// equals to that of the given [color].
-Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
+Matcher isSameColorAs(final Color color) => _ColorMatcher(targetColor: color);
 
 /// Asserts that an object's toString() is a plausible one-line description.
 ///
@@ -246,7 +246,7 @@ TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 ///    range.
 ///  * [rectMoreOrLessEquals] and [offsetMoreOrLessEquals], which do something
 ///    similar but for [Rect]s and [Offset]s respectively.
-Matcher moreOrLessEquals(double value, { double epsilon = precisionErrorTolerance }) {
+Matcher moreOrLessEquals(final double value, { final double epsilon = precisionErrorTolerance }) {
   return _MoreOrLessEquals(value, epsilon);
 }
 
@@ -260,7 +260,7 @@ Matcher moreOrLessEquals(double value, { double epsilon = precisionErrorToleranc
 ///  * [offsetMoreOrLessEquals], which is for [Offset]s.
 ///  * [within], which offers a generic version of this functionality that can
 ///    be used to match [Rect]s as well as other types.
-Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolerance }) {
+Matcher rectMoreOrLessEquals(final Rect value, { final double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
 }
 
@@ -272,7 +272,7 @@ Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolera
 ///
 ///  * [moreOrLessEquals], which is for [double]s.
 ///  * [offsetMoreOrLessEquals], which is for [Offset]s.
-Matcher matrixMoreOrLessEquals(Matrix4 value, { double epsilon = precisionErrorTolerance }) {
+Matcher matrixMoreOrLessEquals(final Matrix4 value, { final double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Matrix4>(_matrixDistance, value, epsilon);
 }
 
@@ -286,7 +286,7 @@ Matcher matrixMoreOrLessEquals(Matrix4 value, { double epsilon = precisionErrorT
 ///  * [rectMoreOrLessEquals], which is for [Rect]s.
 ///  * [within], which offers a generic version of this functionality that can
 ///    be used to match [Offset]s as well as other types.
-Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTolerance }) {
+Matcher offsetMoreOrLessEquals(final Offset value, { final double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Offset>(_offsetDistance, value, epsilon);
 }
 
@@ -306,7 +306,7 @@ Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTo
 ///    [String] based on [Object.hashCode].
 ///  * [DiagnosticableTree.toStringDeep], a method that returns a [String]
 ///    typically containing multiple hash codes.
-Matcher equalsIgnoringHashCodes(Object value) {
+Matcher equalsIgnoringHashCodes(final Object value) {
   assert(value is String || value is Iterable<String>, "Only String or Iterable<String> are allowed types for equalsIgnoringHashCodes, it doesn't accept ${value.runtimeType}");
   return _EqualsIgnoringHashCodes(value);
 }
@@ -315,7 +315,7 @@ Matcher equalsIgnoringHashCodes(Object value) {
 /// method [name] and [arguments].
 ///
 /// Arguments checking implements deep equality for [List] and [Map] types.
-Matcher isMethodCall(String name, { required dynamic arguments }) {
+Matcher isMethodCall(final String name, { required final dynamic arguments }) {
   return _IsMethodCall(name, arguments);
 }
 
@@ -328,7 +328,7 @@ Matcher isMethodCall(String name, { required dynamic arguments }) {
 /// When using this matcher you typically want to use a rectangle larger than
 /// the area you expect to paint in for [areaToCompare] to catch errors where
 /// the path draws outside the expected area.
-Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int sampleSize = 20 })
+Matcher coversSameAreaAs(final Path expectedPath, { required final Rect areaToCompare, final int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
@@ -450,7 +450,7 @@ Matcher coversSameAreaAs(Path expectedPath, { required Rect areaToCompare, int s
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
+AsyncMatcher matchesGoldenFile(final Object key, {final int? version}) {
   if (key is Uri) {
     return MatchesGoldenFile(key, version);
   } else if (key is String) {
@@ -491,7 +491,7 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
 ///
 ///  * [matchesGoldenFile], which should be used instead if you need to verify
 ///    that a [Finder] or [ui.Image] matches a golden image.
-AsyncMatcher matchesReferenceImage(ui.Image image) {
+AsyncMatcher matchesReferenceImage(final ui.Image image) {
   return _MatchesReferenceImage(image);
 }
 
@@ -518,79 +518,79 @@ AsyncMatcher matchesReferenceImage(ui.Image image) {
 ///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
 ///   * [containsSemantics], a similar matcher without default values for flags or actions.
 Matcher matchesSemantics({
-  String? label,
-  AttributedString? attributedLabel,
-  String? hint,
-  AttributedString? attributedHint,
-  String? value,
-  AttributedString? attributedValue,
-  String? increasedValue,
-  AttributedString? attributedIncreasedValue,
-  String? decreasedValue,
-  AttributedString? attributedDecreasedValue,
-  String? tooltip,
-  TextDirection? textDirection,
-  Rect? rect,
-  Size? size,
-  double? elevation,
-  double? thickness,
-  int? platformViewId,
-  int? maxValueLength,
-  int? currentValueLength,
+  final String? label,
+  final AttributedString? attributedLabel,
+  final String? hint,
+  final AttributedString? attributedHint,
+  final String? value,
+  final AttributedString? attributedValue,
+  final String? increasedValue,
+  final AttributedString? attributedIncreasedValue,
+  final String? decreasedValue,
+  final AttributedString? attributedDecreasedValue,
+  final String? tooltip,
+  final TextDirection? textDirection,
+  final Rect? rect,
+  final Size? size,
+  final double? elevation,
+  final double? thickness,
+  final int? platformViewId,
+  final int? maxValueLength,
+  final int? currentValueLength,
   // Flags //
-  bool hasCheckedState = false,
-  bool isChecked = false,
-  bool isCheckStateMixed = false,
-  bool isSelected = false,
-  bool isButton = false,
-  bool isSlider = false,
-  bool isKeyboardKey = false,
-  bool isLink = false,
-  bool isFocused = false,
-  bool isFocusable = false,
-  bool isTextField = false,
-  bool isReadOnly = false,
-  bool hasEnabledState = false,
-  bool isEnabled = false,
-  bool isInMutuallyExclusiveGroup = false,
-  bool isHeader = false,
-  bool isObscured = false,
-  bool isMultiline = false,
-  bool namesRoute = false,
-  bool scopesRoute = false,
-  bool isHidden = false,
-  bool isImage = false,
-  bool isLiveRegion = false,
-  bool hasToggledState = false,
-  bool isToggled = false,
-  bool hasImplicitScrolling = false,
+  final bool hasCheckedState = false,
+  final bool isChecked = false,
+  final bool isCheckStateMixed = false,
+  final bool isSelected = false,
+  final bool isButton = false,
+  final bool isSlider = false,
+  final bool isKeyboardKey = false,
+  final bool isLink = false,
+  final bool isFocused = false,
+  final bool isFocusable = false,
+  final bool isTextField = false,
+  final bool isReadOnly = false,
+  final bool hasEnabledState = false,
+  final bool isEnabled = false,
+  final bool isInMutuallyExclusiveGroup = false,
+  final bool isHeader = false,
+  final bool isObscured = false,
+  final bool isMultiline = false,
+  final bool namesRoute = false,
+  final bool scopesRoute = false,
+  final bool isHidden = false,
+  final bool isImage = false,
+  final bool isLiveRegion = false,
+  final bool hasToggledState = false,
+  final bool isToggled = false,
+  final bool hasImplicitScrolling = false,
   // Actions //
-  bool hasTapAction = false,
-  bool hasLongPressAction = false,
-  bool hasScrollLeftAction = false,
-  bool hasScrollRightAction = false,
-  bool hasScrollUpAction = false,
-  bool hasScrollDownAction = false,
-  bool hasIncreaseAction = false,
-  bool hasDecreaseAction = false,
-  bool hasShowOnScreenAction = false,
-  bool hasMoveCursorForwardByCharacterAction = false,
-  bool hasMoveCursorBackwardByCharacterAction = false,
-  bool hasMoveCursorForwardByWordAction = false,
-  bool hasMoveCursorBackwardByWordAction = false,
-  bool hasSetTextAction = false,
-  bool hasSetSelectionAction = false,
-  bool hasCopyAction = false,
-  bool hasCutAction = false,
-  bool hasPasteAction = false,
-  bool hasDidGainAccessibilityFocusAction = false,
-  bool hasDidLoseAccessibilityFocusAction = false,
-  bool hasDismissAction = false,
+  final bool hasTapAction = false,
+  final bool hasLongPressAction = false,
+  final bool hasScrollLeftAction = false,
+  final bool hasScrollRightAction = false,
+  final bool hasScrollUpAction = false,
+  final bool hasScrollDownAction = false,
+  final bool hasIncreaseAction = false,
+  final bool hasDecreaseAction = false,
+  final bool hasShowOnScreenAction = false,
+  final bool hasMoveCursorForwardByCharacterAction = false,
+  final bool hasMoveCursorBackwardByCharacterAction = false,
+  final bool hasMoveCursorForwardByWordAction = false,
+  final bool hasMoveCursorBackwardByWordAction = false,
+  final bool hasSetTextAction = false,
+  final bool hasSetSelectionAction = false,
+  final bool hasCopyAction = false,
+  final bool hasCutAction = false,
+  final bool hasPasteAction = false,
+  final bool hasDidGainAccessibilityFocusAction = false,
+  final bool hasDidLoseAccessibilityFocusAction = false,
+  final bool hasDismissAction = false,
   // Custom actions and overrides
-  String? onTapHint,
-  String? onLongPressHint,
-  List<CustomSemanticsAction>? customActions,
-  List<Matcher>? children,
+  final String? onTapHint,
+  final String? onLongPressHint,
+  final List<CustomSemanticsAction>? customActions,
+  final List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
     label: label,
@@ -691,79 +691,79 @@ Matcher matchesSemantics({
 ///   * [WidgetTester.getSemantics], the tester method which retrieves semantics.
 ///   * [matchesSemantics], a similar matcher with default values for flags and actions.
 Matcher containsSemantics({
-  String? label,
-  AttributedString? attributedLabel,
-  String? hint,
-  AttributedString? attributedHint,
-  String? value,
-  AttributedString? attributedValue,
-  String? increasedValue,
-  AttributedString? attributedIncreasedValue,
-  String? decreasedValue,
-  AttributedString? attributedDecreasedValue,
-  String? tooltip,
-  TextDirection? textDirection,
-  Rect? rect,
-  Size? size,
-  double? elevation,
-  double? thickness,
-  int? platformViewId,
-  int? maxValueLength,
-  int? currentValueLength,
+  final String? label,
+  final AttributedString? attributedLabel,
+  final String? hint,
+  final AttributedString? attributedHint,
+  final String? value,
+  final AttributedString? attributedValue,
+  final String? increasedValue,
+  final AttributedString? attributedIncreasedValue,
+  final String? decreasedValue,
+  final AttributedString? attributedDecreasedValue,
+  final String? tooltip,
+  final TextDirection? textDirection,
+  final Rect? rect,
+  final Size? size,
+  final double? elevation,
+  final double? thickness,
+  final int? platformViewId,
+  final int? maxValueLength,
+  final int? currentValueLength,
   // Flags
-  bool? hasCheckedState,
-  bool? isChecked,
-  bool? isCheckStateMixed,
-  bool? isSelected,
-  bool? isButton,
-  bool? isSlider,
-  bool? isKeyboardKey,
-  bool? isLink,
-  bool? isFocused,
-  bool? isFocusable,
-  bool? isTextField,
-  bool? isReadOnly,
-  bool? hasEnabledState,
-  bool? isEnabled,
-  bool? isInMutuallyExclusiveGroup,
-  bool? isHeader,
-  bool? isObscured,
-  bool? isMultiline,
-  bool? namesRoute,
-  bool? scopesRoute,
-  bool? isHidden,
-  bool? isImage,
-  bool? isLiveRegion,
-  bool? hasToggledState,
-  bool? isToggled,
-  bool? hasImplicitScrolling,
+  final bool? hasCheckedState,
+  final bool? isChecked,
+  final bool? isCheckStateMixed,
+  final bool? isSelected,
+  final bool? isButton,
+  final bool? isSlider,
+  final bool? isKeyboardKey,
+  final bool? isLink,
+  final bool? isFocused,
+  final bool? isFocusable,
+  final bool? isTextField,
+  final bool? isReadOnly,
+  final bool? hasEnabledState,
+  final bool? isEnabled,
+  final bool? isInMutuallyExclusiveGroup,
+  final bool? isHeader,
+  final bool? isObscured,
+  final bool? isMultiline,
+  final bool? namesRoute,
+  final bool? scopesRoute,
+  final bool? isHidden,
+  final bool? isImage,
+  final bool? isLiveRegion,
+  final bool? hasToggledState,
+  final bool? isToggled,
+  final bool? hasImplicitScrolling,
   // Actions
-  bool? hasTapAction,
-  bool? hasLongPressAction,
-  bool? hasScrollLeftAction,
-  bool? hasScrollRightAction,
-  bool? hasScrollUpAction,
-  bool? hasScrollDownAction,
-  bool? hasIncreaseAction,
-  bool? hasDecreaseAction,
-  bool? hasShowOnScreenAction,
-  bool? hasMoveCursorForwardByCharacterAction,
-  bool? hasMoveCursorBackwardByCharacterAction,
-  bool? hasMoveCursorForwardByWordAction,
-  bool? hasMoveCursorBackwardByWordAction,
-  bool? hasSetTextAction,
-  bool? hasSetSelectionAction,
-  bool? hasCopyAction,
-  bool? hasCutAction,
-  bool? hasPasteAction,
-  bool? hasDidGainAccessibilityFocusAction,
-  bool? hasDidLoseAccessibilityFocusAction,
-  bool? hasDismissAction,
+  final bool? hasTapAction,
+  final bool? hasLongPressAction,
+  final bool? hasScrollLeftAction,
+  final bool? hasScrollRightAction,
+  final bool? hasScrollUpAction,
+  final bool? hasScrollDownAction,
+  final bool? hasIncreaseAction,
+  final bool? hasDecreaseAction,
+  final bool? hasShowOnScreenAction,
+  final bool? hasMoveCursorForwardByCharacterAction,
+  final bool? hasMoveCursorBackwardByCharacterAction,
+  final bool? hasMoveCursorForwardByWordAction,
+  final bool? hasMoveCursorBackwardByWordAction,
+  final bool? hasSetTextAction,
+  final bool? hasSetSelectionAction,
+  final bool? hasCopyAction,
+  final bool? hasCutAction,
+  final bool? hasPasteAction,
+  final bool? hasDidGainAccessibilityFocusAction,
+  final bool? hasDidLoseAccessibilityFocusAction,
+  final bool? hasDismissAction,
   // Custom actions and overrides
-  String? onTapHint,
-  String? onLongPressHint,
-  List<CustomSemanticsAction>? customActions,
-  List<Matcher>? children,
+  final String? onTapHint,
+  final String? onLongPressHint,
+  final List<CustomSemanticsAction>? customActions,
+  final List<Matcher>? children,
 }) {
   return _MatchesSemanticsData(
     label: label,
@@ -862,7 +862,7 @@ Matcher containsSemantics({
 ///   * [iOSTapTargetGuideline], for iOS minimum tappable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
 ///   * [labeledTapTargetGuideline], for enforcing labels on tappable areas.
-AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
+AsyncMatcher meetsGuideline(final AccessibilityGuideline guideline) {
   return _MatchesAccessibilityGuideline(guideline);
 }
 
@@ -870,7 +870,7 @@ AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
 ///
 /// This is needed because the [isNot] matcher does not compose with an
 /// [AsyncMatcher].
-AsyncMatcher doesNotMeetGuideline(AccessibilityGuideline guideline) {
+AsyncMatcher doesNotMeetGuideline(final AccessibilityGuideline guideline) {
   return _DoesNotMatchAccessibilityGuideline(guideline);
 }
 
@@ -881,7 +881,7 @@ class _FindsWidgetMatcher extends Matcher {
   final int? max;
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final Finder finder, final Map<dynamic, dynamic> matchState) {
     assert(min != null || max != null);
     assert(min == null || max == null || min! <= max!);
     matchState[Finder] = finder;
@@ -907,7 +907,7 @@ class _FindsWidgetMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     assert(min != null || max != null);
     if (min == max) {
       if (min == 1) {
@@ -935,10 +935,10 @@ class _FindsWidgetMatcher extends Matcher {
 
   @override
   Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
+    final dynamic item,
+    final Description mismatchDescription,
+    final Map<dynamic, dynamic> matchState,
+    final bool verbose,
   ) {
     final Finder finder = matchState[Finder] as Finder;
     final int count = finder.evaluate().length;
@@ -963,13 +963,13 @@ class _FindsWidgetMatcher extends Matcher {
   }
 }
 
-bool _hasAncestorMatching(Finder finder, bool Function(Widget widget) predicate) {
+bool _hasAncestorMatching(final Finder finder, final bool Function(Widget widget) predicate) {
   final Iterable<Element> nodes = finder.evaluate();
   if (nodes.length != 1) {
     return false;
   }
   bool result = false;
-  nodes.single.visitAncestorElements((Element ancestor) {
+  nodes.single.visitAncestorElements((final Element ancestor) {
     if (predicate(ancestor.widget)) {
       result = true;
       return false;
@@ -979,16 +979,16 @@ bool _hasAncestorMatching(Finder finder, bool Function(Widget widget) predicate)
   return result;
 }
 
-bool _hasAncestorOfType(Finder finder, Type targetType) {
-  return _hasAncestorMatching(finder, (Widget widget) => widget.runtimeType == targetType);
+bool _hasAncestorOfType(final Finder finder, final Type targetType) {
+  return _hasAncestorMatching(finder, (final Widget widget) => widget.runtimeType == targetType);
 }
 
 class _IsOffstage extends Matcher {
   const _IsOffstage();
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
-    return _hasAncestorMatching(finder, (Widget widget) {
+  bool matches(covariant final Finder finder, final Map<dynamic, dynamic> matchState) {
+    return _hasAncestorMatching(finder, (final Widget widget) {
       if (widget is Offstage) {
         return widget.offstage;
       }
@@ -997,20 +997,20 @@ class _IsOffstage extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description.add('offstage');
+  Description describe(final Description description) => description.add('offstage');
 }
 
 class _IsOnstage extends Matcher {
   const _IsOnstage();
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final Finder finder, final Map<dynamic, dynamic> matchState) {
     final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1) {
       return false;
     }
     bool result = true;
-    nodes.single.visitAncestorElements((Element ancestor) {
+    nodes.single.visitAncestorElements((final Element ancestor) {
       final Widget widget = ancestor.widget;
       if (widget is Offstage) {
         result = !widget.offstage;
@@ -1022,34 +1022,34 @@ class _IsOnstage extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description.add('onstage');
+  Description describe(final Description description) => description.add('onstage');
 }
 
 class _IsInCard extends Matcher {
   const _IsInCard();
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(finder, Card);
+  bool matches(covariant final Finder finder, final Map<dynamic, dynamic> matchState) => _hasAncestorOfType(finder, Card);
 
   @override
-  Description describe(Description description) => description.add('in card');
+  Description describe(final Description description) => description.add('in card');
 }
 
 class _IsNotInCard extends Matcher {
   const _IsNotInCard();
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(finder, Card);
+  bool matches(covariant final Finder finder, final Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(finder, Card);
 
   @override
-  Description describe(Description description) => description.add('not in card');
+  Description describe(final Description description) => description.add('not in card');
 }
 
 class _HasOneLineDescription extends Matcher {
   const _HasOneLineDescription();
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic object, final Map<dynamic, dynamic> matchState) {
     final String description = object.toString();
     return description.isNotEmpty
         && !description.contains('\n')
@@ -1058,26 +1058,26 @@ class _HasOneLineDescription extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description.add('one line description');
+  Description describe(final Description description) => description.add('one line description');
 }
 
 class _EqualsIgnoringHashCodes extends Matcher {
-  _EqualsIgnoringHashCodes(Object v) : _value = _normalize(v);
+  _EqualsIgnoringHashCodes(final Object v) : _value = _normalize(v);
 
   final Object _value;
 
   static final Object _mismatchedValueKey = Object();
 
-  static String _normalizeString(String value) {
+  static String _normalizeString(final String value) {
     return value.replaceAll(RegExp(r'#[\da-fA-F]{5}'), '#00000');
   }
 
-  static Object _normalize(Object value, {bool expected = true}) {
+  static Object _normalize(final Object value, {final bool expected = true}) {
     if (value is String) {
       return _normalizeString(value);
     }
     if (value is Iterable<String>) {
-      return value.map<String>((dynamic item) => _normalizeString(item.toString()));
+      return value.map<String>((final dynamic item) => _normalizeString(item.toString()));
     }
     throw ArgumentError('The specified ${expected ? 'expected' : 'comparison'} value for '
         'equalsIgnoringHashCodes must be a String or an Iterable<String>, '
@@ -1085,7 +1085,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
   }
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic object, final Map<dynamic, dynamic> matchState) {
     final Object normalized = _normalize(object as Object, expected: false);
     if (!equals(_value).matches(normalized, matchState)) {
       matchState[_mismatchedValueKey] = normalized;
@@ -1095,7 +1095,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     if (_value is String) {
       return description.add('normalized value matches $_value');
     }
@@ -1104,10 +1104,10 @@ class _EqualsIgnoringHashCodes extends Matcher {
 
   @override
   Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
+    final dynamic item,
+    final Description mismatchDescription,
+    final Map<dynamic, dynamic> matchState,
+    final bool verbose,
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
       final Object actualValue = matchState[_mismatchedValueKey] as Object;
@@ -1125,7 +1125,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
 }
 
 /// Returns true if [c] represents a whitespace code unit.
-bool _isWhitespace(int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
+bool _isWhitespace(final int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
 
 /// Returns true if [c] represents a vertical line Unicode line art code unit.
 ///
@@ -1133,7 +1133,7 @@ bool _isWhitespace(int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
 /// specifies vertical line art code units currently used by Flutter line art.
 /// There are other line art characters that technically also represent vertical
 /// lines.
-bool _isVerticalLine(int c) {
+bool _isVerticalLine(final int c) {
   return c == 0x2502 || c == 0x2503 || c == 0x2551 || c == 0x254e;
 }
 
@@ -1142,7 +1142,7 @@ bool _isVerticalLine(int c) {
 /// Example vertical tree connector characters: `│ ║ ╎`.
 /// The last line of a text tree contains only vertical tree connector
 /// characters indicates a poorly formatted tree.
-bool _isAllTreeConnectorCharacters(String line) {
+bool _isAllTreeConnectorCharacters(final String line) {
   for (int i = 0; i < line.length; ++i) {
     final int c = line.codeUnitAt(i);
     if (!_isWhitespace(c) && !_isVerticalLine(c)) {
@@ -1158,7 +1158,7 @@ class _HasGoodToStringDeep extends Matcher {
   static final Object _toStringDeepErrorDescriptionKey = Object();
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic object, final Map<dynamic, dynamic> matchState) {
     final List<String> issues = <String>[];
     String description = object.toStringDeep() as String; // ignore: avoid_dynamic_calls
     if (description.endsWith('\n')) {
@@ -1246,10 +1246,10 @@ class _HasGoodToStringDeep extends Matcher {
 
   @override
   Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
+    final dynamic item,
+    final Description mismatchDescription,
+    final Map<dynamic, dynamic> matchState,
+    final bool verbose,
   ) {
     if (matchState.containsKey(_toStringDeepErrorDescriptionKey)) {
       return mismatchDescription.add(matchState[_toStringDeepErrorDescriptionKey] as String);
@@ -1258,7 +1258,7 @@ class _HasGoodToStringDeep extends Matcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add('multi line description');
   }
 }
@@ -1302,11 +1302,11 @@ const Map<Type, AnyDistanceFunction> _kStandardDistanceFunctions = <Type, AnyDis
   Size: _sizeDistance,
 };
 
-int _intDistance(int a, int b) => (b - a).abs();
-double _doubleDistance(double a, double b) => (b - a).abs();
-double _offsetDistance(Offset a, Offset b) => (b - a).distance;
+int _intDistance(final int a, final int b) => (b - a).abs();
+double _doubleDistance(final double a, final double b) => (b - a).abs();
+double _offsetDistance(final Offset a, final Offset b) => (b - a).distance;
 
-double _maxComponentColorDistance(Color a, Color b) {
+double _maxComponentColorDistance(final Color a, final Color b) {
   int delta = math.max<int>((a.red - b.red).abs(), (a.green - b.green).abs());
   delta = math.max<int>(delta, (a.blue - b.blue).abs());
   delta = math.max<int>(delta, (a.alpha - b.alpha).abs());
@@ -1315,7 +1315,7 @@ double _maxComponentColorDistance(Color a, Color b) {
 
 // Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
 // can be a similar error percentage per component.
-double _maxComponentHSVColorDistance(HSVColor a, HSVColor b) {
+double _maxComponentHSVColorDistance(final HSVColor a, final HSVColor b) {
   double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.value - b.value).abs());
   delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
   return math.max<double>(delta, (a.alpha - b.alpha).abs());
@@ -1323,20 +1323,20 @@ double _maxComponentHSVColorDistance(HSVColor a, HSVColor b) {
 
 // Compares hue by converting it to a 0.0 - 1.0 range, so that the comparison
 // can be a similar error percentage per component.
-double _maxComponentHSLColorDistance(HSLColor a, HSLColor b) {
+double _maxComponentHSLColorDistance(final HSLColor a, final HSLColor b) {
   double delta = math.max<double>((a.saturation - b.saturation).abs(), (a.lightness - b.lightness).abs());
   delta = math.max<double>(delta, ((a.hue - b.hue) / 360.0).abs());
   return math.max<double>(delta, (a.alpha - b.alpha).abs());
 }
 
-double _rectDistance(Rect a, Rect b) {
+double _rectDistance(final Rect a, final Rect b) {
   double delta = math.max<double>((a.left - b.left).abs(), (a.top - b.top).abs());
   delta = math.max<double>(delta, (a.right - b.right).abs());
   delta = math.max<double>(delta, (a.bottom - b.bottom).abs());
   return delta;
 }
 
-double _matrixDistance(Matrix4 a, Matrix4 b) {
+double _matrixDistance(final Matrix4 a, final Matrix4 b) {
   double delta = 0.0;
   for (int i = 0; i < 16; i += 1) {
     delta = math.max<double>((a[i] - b[i]).abs(), delta);
@@ -1344,7 +1344,7 @@ double _matrixDistance(Matrix4 a, Matrix4 b) {
   return delta;
 }
 
-double _sizeDistance(Size a, Size b) {
+double _sizeDistance(final Size a, final Size b) {
   // TODO(a14n): remove ignore when lint is updated, https://github.com/dart-lang/linter/issues/1843
   // ignore: unnecessary_parenthesis
   final Offset delta = (b - a) as Offset;
@@ -1376,8 +1376,8 @@ double _sizeDistance(Size a, Size b) {
 ///    specializes in [Rect]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
-  required num distance,
-  required T from,
+  required final num distance,
+  required final T from,
   DistanceFunction<T>? distanceFunction,
 }) {
   distanceFunction ??= _kStandardDistanceFunctions[T] as DistanceFunction<T>?;
@@ -1401,7 +1401,7 @@ class _IsWithinDistance<T> extends Matcher {
   final num epsilon;
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic object, final Map<dynamic, dynamic> matchState) {
     if (object is! T) {
       return false;
     }
@@ -1421,14 +1421,14 @@ class _IsWithinDistance<T> extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description.add('$value (±$epsilon)');
+  Description describe(final Description description) => description.add('$value (±$epsilon)');
 
   @override
   Description describeMismatch(
-    dynamic object,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
+    final dynamic object,
+    final Description mismatchDescription,
+    final Map<dynamic, dynamic> matchState,
+    final bool verbose,
   ) {
     mismatchDescription.add('was ${matchState['distance']} away from the desired value.');
     return mismatchDescription;
@@ -1443,7 +1443,7 @@ class _MoreOrLessEquals extends Matcher {
   final double epsilon;
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic object, final Map<dynamic, dynamic> matchState) {
     if (object is! double) {
       return false;
     }
@@ -1454,10 +1454,10 @@ class _MoreOrLessEquals extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description.add('$value (±$epsilon)');
+  Description describe(final Description description) => description.add('$value (±$epsilon)');
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(final dynamic item, final Description mismatchDescription, final Map<dynamic, dynamic> matchState, final bool verbose) {
     return super.describeMismatch(item, mismatchDescription, matchState, verbose)
       ..add('$item is not in the range of $value (±$epsilon).');
   }
@@ -1470,7 +1470,7 @@ class _IsMethodCall extends Matcher {
   final dynamic arguments;
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     if (item is! MethodCall) {
       return false;
     }
@@ -1480,7 +1480,7 @@ class _IsMethodCall extends Matcher {
     return _deepEquals(item.arguments, arguments);
   }
 
-  bool _deepEquals(dynamic a, dynamic b) {
+  bool _deepEquals(final dynamic a, final dynamic b) {
     if (a == b) {
       return true;
     }
@@ -1493,7 +1493,7 @@ class _IsMethodCall extends Matcher {
     return false;
   }
 
-  bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
+  bool _deepEqualsList(final List<dynamic> a, final List<dynamic> b) {
     if (a.length != b.length) {
       return false;
     }
@@ -1505,7 +1505,7 @@ class _IsMethodCall extends Matcher {
     return true;
   }
 
-  bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
+  bool _deepEqualsMap(final Map<dynamic, dynamic> a, final Map<dynamic, dynamic> b) {
     if (a.length != b.length) {
       return false;
     }
@@ -1518,7 +1518,7 @@ class _IsMethodCall extends Matcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description
         .add('has method name: ').addDescriptionOf(name)
         .add(' with arguments: ').addDescriptionOf(arguments);
@@ -1538,14 +1538,14 @@ const Matcher hasNoImmediateClip = _MatchAnythingExceptClip();
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipRRect] with no clipper set, and border radius equals to
 /// [borderRadius], or an equivalent [RenderClipPath].
-Matcher clipsWithBoundingRRect({ required BorderRadius borderRadius }) {
+Matcher clipsWithBoundingRRect({ required final BorderRadius borderRadius }) {
   return _ClipsWithBoundingRRect(borderRadius: borderRadius);
 }
 
 /// Asserts that a [Finder] locates a single object whose root RenderObject
 /// is a [RenderClipPath] with a [ShapeBorderClipper] that clips to
 /// [shape].
-Matcher clipsWithShapeBorder({ required ShapeBorder shape }) {
+Matcher clipsWithShapeBorder({ required final ShapeBorder shape }) {
   return _ClipsWithShapeBorder(shape: shape);
 }
 
@@ -1567,9 +1567,9 @@ Matcher clipsWithShapeBorder({ required ShapeBorder shape }) {
 ///    - If [elevation] is non null asserts that [RenderPhysicalModel.elevation] is equal to
 ///   [elevation].
 Matcher rendersOnPhysicalModel({
-  BoxShape? shape,
-  BorderRadius? borderRadius,
-  double? elevation,
+  final BoxShape? shape,
+  final BorderRadius? borderRadius,
+  final double? elevation,
 }) {
   return _RendersOnPhysicalModel(
     shape: shape,
@@ -1584,8 +1584,8 @@ Matcher rendersOnPhysicalModel({
 /// If [elevation] is non null asserts that [RenderPhysicalShape.elevation] is
 /// equal to [elevation].
 Matcher rendersOnPhysicalShape({
-  required ShapeBorder shape,
-  double? elevation,
+  required final ShapeBorder shape,
+  final double? elevation,
 }) {
   return _RendersOnPhysicalShape(
     shape: shape,
@@ -1596,17 +1596,17 @@ Matcher rendersOnPhysicalShape({
 abstract class _FailWithDescriptionMatcher extends Matcher {
   const _FailWithDescriptionMatcher();
 
-  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+  bool failWithDescription(final Map<dynamic, dynamic> matchState, final String description) {
     matchState['failure'] = description;
     return false;
   }
 
   @override
   Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
+    final dynamic item,
+    final Description mismatchDescription,
+    final Map<dynamic, dynamic> matchState,
+    final bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure'] as String);
   }
@@ -1616,7 +1616,7 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
   const _MatchAnythingExceptClip();
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final Finder finder, final Map<dynamic, dynamic> matchState) {
     final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1) {
       return failWithDescription(matchState, 'did not have a exactly one child element');
@@ -1635,7 +1635,7 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add('does not have a clip as an immediate child');
   }
 }
@@ -1643,11 +1643,11 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
 abstract class _MatchRenderObject<M extends RenderObject, T extends RenderObject> extends _FailWithDescriptionMatcher {
   const _MatchRenderObject();
 
-  bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, T renderObject);
-  bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, M renderObject);
+  bool renderObjectMatchesT(final Map<dynamic, dynamic> matchState, final T renderObject);
+  bool renderObjectMatchesM(final Map<dynamic, dynamic> matchState, final M renderObject);
 
   @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final Finder finder, final Map<dynamic, dynamic> matchState) {
     final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1) {
       return failWithDescription(matchState, 'did not have a exactly one child element');
@@ -1678,7 +1678,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   final double? elevation;
 
   @override
-  bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, RenderPhysicalModel renderObject) {
+  bool renderObjectMatchesT(final Map<dynamic, dynamic> matchState, final RenderPhysicalModel renderObject) {
     if (shape != null && renderObject.shape != shape) {
       return failWithDescription(matchState, 'had shape: ${renderObject.shape}');
     }
@@ -1695,7 +1695,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   @override
-  bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderPhysicalShape renderObject) {
+  bool renderObjectMatchesM(final Map<dynamic, dynamic> matchState, final RenderPhysicalShape renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
@@ -1724,7 +1724,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     return true;
   }
 
-  bool assertRoundedRectangle(ShapeBorderClipper shapeClipper, BorderRadius borderRadius, Map<dynamic, dynamic> matchState) {
+  bool assertRoundedRectangle(final ShapeBorderClipper shapeClipper, final BorderRadius borderRadius, final Map<dynamic, dynamic> matchState) {
     if (shapeClipper.shape.runtimeType != RoundedRectangleBorder) {
       return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
     }
@@ -1735,7 +1735,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
     return true;
   }
 
-  bool assertCircle(ShapeBorderClipper shapeClipper, Map<dynamic, dynamic> matchState) {
+  bool assertCircle(final ShapeBorderClipper shapeClipper, final Map<dynamic, dynamic> matchState) {
     if (shapeClipper.shape.runtimeType != CircleBorder) {
       return failWithDescription(matchState, 'had shape border: ${shapeClipper.shape}');
     }
@@ -1743,7 +1743,7 @@ class _RendersOnPhysicalModel extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     description.add('renders on a physical model');
     if (shape != null) {
       description.add(' with shape $shape');
@@ -1768,7 +1768,7 @@ class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Re
   final double? elevation;
 
   @override
-  bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderPhysicalShape renderObject) {
+  bool renderObjectMatchesM(final Map<dynamic, dynamic> matchState, final RenderPhysicalShape renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
@@ -1786,12 +1786,12 @@ class _RendersOnPhysicalShape extends _MatchRenderObject<RenderPhysicalShape, Re
   }
 
   @override
-  bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, RenderPhysicalModel renderObject) {
+  bool renderObjectMatchesT(final Map<dynamic, dynamic> matchState, final RenderPhysicalModel renderObject) {
     return false;
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     description.add('renders on a physical model with shape $shape');
     if (elevation != null) {
       description.add(' with elevation $elevation');
@@ -1804,7 +1804,7 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
   const _ClipsWithBoundingRect();
 
   @override
-  bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, RenderClipRect renderObject) {
+  bool renderObjectMatchesT(final Map<dynamic, dynamic> matchState, final RenderClipRect renderObject) {
     if (renderObject.clipper != null) {
       return failWithDescription(matchState, 'had a non null clipper ${renderObject.clipper}');
     }
@@ -1812,7 +1812,7 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
   }
 
   @override
-  bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderClipPath renderObject) {
+  bool renderObjectMatchesM(final Map<dynamic, dynamic> matchState, final RenderClipPath renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
@@ -1828,7 +1828,7 @@ class _ClipsWithBoundingRect extends _MatchRenderObject<RenderClipPath, RenderCl
   }
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
     description.add('clips with bounding rectangle');
 }
 
@@ -1839,7 +1839,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
 
 
   @override
-  bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, RenderClipRRect renderObject) {
+  bool renderObjectMatchesT(final Map<dynamic, dynamic> matchState, final RenderClipRRect renderObject) {
     if (renderObject.clipper != null) {
       return failWithDescription(matchState, 'had a non null clipper ${renderObject.clipper}');
     }
@@ -1852,7 +1852,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
   }
 
   @override
-  bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderClipPath renderObject) {
+  bool renderObjectMatchesM(final Map<dynamic, dynamic> matchState, final RenderClipPath renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
@@ -1868,7 +1868,7 @@ class _ClipsWithBoundingRRect extends _MatchRenderObject<RenderClipPath, RenderC
   }
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
     description.add('clips with bounding rounded rectangle with borderRadius: $borderRadius');
 }
 
@@ -1878,7 +1878,7 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderCli
   final ShapeBorder shape;
 
   @override
-  bool renderObjectMatchesM(Map<dynamic, dynamic> matchState, RenderClipPath renderObject) {
+  bool renderObjectMatchesM(final Map<dynamic, dynamic> matchState, final RenderClipPath renderObject) {
     if (renderObject.clipper.runtimeType != ShapeBorderClipper) {
       return failWithDescription(matchState, 'clipper was: ${renderObject.clipper}');
     }
@@ -1890,13 +1890,13 @@ class _ClipsWithShapeBorder extends _MatchRenderObject<RenderClipPath, RenderCli
   }
 
   @override
-  bool renderObjectMatchesT(Map<dynamic, dynamic> matchState, RenderClipRRect renderObject) {
+  bool renderObjectMatchesT(final Map<dynamic, dynamic> matchState, final RenderClipRRect renderObject) {
     return false;
   }
 
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
     description.add('clips with shape: $shape');
 }
 
@@ -1919,7 +1919,7 @@ class _CoversSameAreaAs extends Matcher {
   late math.Random random;
 
   @override
-  bool matches(covariant Path actualPath, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant final Path actualPath, final Map<dynamic, dynamic> matchState) {
     for (int i = 0; i < sampleSize; i += 1) {
       for (int j = 0; j < sampleSize; j += 1) {
         final Offset offset = Offset(
@@ -1944,7 +1944,7 @@ class _CoversSameAreaAs extends Matcher {
     return true;
   }
 
-  bool _samplePoint(Map<dynamic, dynamic> matchState, Path actualPath, Offset offset) {
+  bool _samplePoint(final Map<dynamic, dynamic> matchState, final Path actualPath, final Offset offset) {
     if (expectedPath.contains(offset) == actualPath.contains(offset)) {
       return true;
     }
@@ -1956,23 +1956,23 @@ class _CoversSameAreaAs extends Matcher {
     }
   }
 
-  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+  bool failWithDescription(final Map<dynamic, dynamic> matchState, final String description) {
     matchState['failure'] = description;
     return false;
   }
 
   @override
   Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
+    final dynamic item,
+    final Description mismatchDescription,
+    final Map<dynamic, dynamic> matchState,
+    final bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure'] as String);
   }
 
   @override
-  Description describe(Description description) =>
+  Description describe(final Description description) =>
     description.add('covers expected area and only expected area');
 }
 
@@ -1984,7 +1984,7 @@ class _ColorMatcher extends Matcher {
   final Color targetColor;
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     if (item is Color) {
       return item == targetColor || item.value == targetColor.value;
     }
@@ -1992,10 +1992,10 @@ class _ColorMatcher extends Matcher {
   }
 
   @override
-  Description describe(Description description) => description.add('matches color $targetColor');
+  Description describe(final Description description) => description.add('matches color $targetColor');
 }
 
-int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {
+int _countDifferentPixels(final Uint8List imageA, final Uint8List imageB) {
   assert(imageA.length == imageB.length);
   int delta = 0;
   for (int i = 0; i < imageA.length; i+=4) {
@@ -2015,7 +2015,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
   final ui.Image referenceImage;
 
   @override
-  Future<String?> matchAsync(dynamic item) async {
+  Future<String?> matchAsync(final dynamic item) async {
     Future<ui.Image> imageFuture;
     if (item is Future<ui.Image>) {
       imageFuture = item;
@@ -2058,7 +2058,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add('rasterized image matches that of a $referenceImage reference image');
   }
 }
@@ -2085,57 +2085,57 @@ class _MatchesSemanticsData extends Matcher {
     required this.maxValueLength,
     required this.currentValueLength,
     // Flags
-    required bool? hasCheckedState,
-    required bool? isChecked,
-    required bool? isCheckStateMixed,
-    required bool? isSelected,
-    required bool? isButton,
-    required bool? isSlider,
-    required bool? isKeyboardKey,
-    required bool? isLink,
-    required bool? isFocused,
-    required bool? isFocusable,
-    required bool? isTextField,
-    required bool? isReadOnly,
-    required bool? hasEnabledState,
-    required bool? isEnabled,
-    required bool? isInMutuallyExclusiveGroup,
-    required bool? isHeader,
-    required bool? isObscured,
-    required bool? isMultiline,
-    required bool? namesRoute,
-    required bool? scopesRoute,
-    required bool? isHidden,
-    required bool? isImage,
-    required bool? isLiveRegion,
-    required bool? hasToggledState,
-    required bool? isToggled,
-    required bool? hasImplicitScrolling,
+    required final bool? hasCheckedState,
+    required final bool? isChecked,
+    required final bool? isCheckStateMixed,
+    required final bool? isSelected,
+    required final bool? isButton,
+    required final bool? isSlider,
+    required final bool? isKeyboardKey,
+    required final bool? isLink,
+    required final bool? isFocused,
+    required final bool? isFocusable,
+    required final bool? isTextField,
+    required final bool? isReadOnly,
+    required final bool? hasEnabledState,
+    required final bool? isEnabled,
+    required final bool? isInMutuallyExclusiveGroup,
+    required final bool? isHeader,
+    required final bool? isObscured,
+    required final bool? isMultiline,
+    required final bool? namesRoute,
+    required final bool? scopesRoute,
+    required final bool? isHidden,
+    required final bool? isImage,
+    required final bool? isLiveRegion,
+    required final bool? hasToggledState,
+    required final bool? isToggled,
+    required final bool? hasImplicitScrolling,
     // Actions
-    required bool? hasTapAction,
-    required bool? hasLongPressAction,
-    required bool? hasScrollLeftAction,
-    required bool? hasScrollRightAction,
-    required bool? hasScrollUpAction,
-    required bool? hasScrollDownAction,
-    required bool? hasIncreaseAction,
-    required bool? hasDecreaseAction,
-    required bool? hasShowOnScreenAction,
-    required bool? hasMoveCursorForwardByCharacterAction,
-    required bool? hasMoveCursorBackwardByCharacterAction,
-    required bool? hasMoveCursorForwardByWordAction,
-    required bool? hasMoveCursorBackwardByWordAction,
-    required bool? hasSetTextAction,
-    required bool? hasSetSelectionAction,
-    required bool? hasCopyAction,
-    required bool? hasCutAction,
-    required bool? hasPasteAction,
-    required bool? hasDidGainAccessibilityFocusAction,
-    required bool? hasDidLoseAccessibilityFocusAction,
-    required bool? hasDismissAction,
+    required final bool? hasTapAction,
+    required final bool? hasLongPressAction,
+    required final bool? hasScrollLeftAction,
+    required final bool? hasScrollRightAction,
+    required final bool? hasScrollUpAction,
+    required final bool? hasScrollDownAction,
+    required final bool? hasIncreaseAction,
+    required final bool? hasDecreaseAction,
+    required final bool? hasShowOnScreenAction,
+    required final bool? hasMoveCursorForwardByCharacterAction,
+    required final bool? hasMoveCursorBackwardByCharacterAction,
+    required final bool? hasMoveCursorForwardByWordAction,
+    required final bool? hasMoveCursorBackwardByWordAction,
+    required final bool? hasSetTextAction,
+    required final bool? hasSetSelectionAction,
+    required final bool? hasCopyAction,
+    required final bool? hasCutAction,
+    required final bool? hasPasteAction,
+    required final bool? hasDidGainAccessibilityFocusAction,
+    required final bool? hasDidLoseAccessibilityFocusAction,
+    required final bool? hasDismissAction,
     // Custom actions and overrides
-    required String? onTapHint,
-    required String? onLongPressHint,
+    required final String? onTapHint,
+    required final String? onLongPressHint,
     required this.customActions,
     required this.children,
   })  : flags = <SemanticsFlag, bool>{
@@ -2230,7 +2230,7 @@ class _MatchesSemanticsData extends Matcher {
   final Map<SemanticsFlag, bool> flags;
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     description.add('has semantics');
     if (label != null) {
       description.add(' with label: $label');
@@ -2267,12 +2267,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (actions.isNotEmpty) {
       final List<SemanticsAction> expectedActions = actions.entries
-        .where((MapEntry<ui.SemanticsAction, bool> e) => e.value)
-        .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+        .where((final MapEntry<ui.SemanticsAction, bool> e) => e.value)
+        .map((final MapEntry<ui.SemanticsAction, bool> e) => e.key)
         .toList();
       final List<SemanticsAction> notExpectedActions = actions.entries
-        .where((MapEntry<ui.SemanticsAction, bool> e) => !e.value)
-        .map((MapEntry<ui.SemanticsAction, bool> e) => e.key)
+        .where((final MapEntry<ui.SemanticsAction, bool> e) => !e.value)
+        .map((final MapEntry<ui.SemanticsAction, bool> e) => e.key)
         .toList();
 
       if (expectedActions.isNotEmpty) {
@@ -2284,12 +2284,12 @@ class _MatchesSemanticsData extends Matcher {
     }
     if (flags.isNotEmpty) {
       final List<SemanticsFlag> expectedFlags = flags.entries
-        .where((MapEntry<ui.SemanticsFlag, bool> e) => e.value)
-        .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+        .where((final MapEntry<ui.SemanticsFlag, bool> e) => e.value)
+        .map((final MapEntry<ui.SemanticsFlag, bool> e) => e.key)
         .toList();
       final List<SemanticsFlag> notExpectedFlags = flags.entries
-        .where((MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
-        .map((MapEntry<ui.SemanticsFlag, bool> e) => e.key)
+        .where((final MapEntry<ui.SemanticsFlag, bool> e) => !e.value)
+        .map((final MapEntry<ui.SemanticsFlag, bool> e) => e.key)
         .toList();
 
       if (expectedFlags.isNotEmpty) {
@@ -2338,7 +2338,7 @@ class _MatchesSemanticsData extends Matcher {
     return description;
   }
 
-  bool _stringAttributesEqual(List<StringAttribute> first, List<StringAttribute> second) {
+  bool _stringAttributesEqual(final List<StringAttribute> first, final List<StringAttribute> second) {
     if (first.length != second.length) {
       return false;
     }
@@ -2359,7 +2359,7 @@ class _MatchesSemanticsData extends Matcher {
   }
 
   @override
-  bool matches(dynamic node, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic node, final Map<dynamic, dynamic> matchState) {
     if (node == null) {
       return failWithDescription(matchState, 'No SemanticsData provided. '
         'Maybe you forgot to enable semantics?');
@@ -2458,7 +2458,7 @@ class _MatchesSemanticsData extends Matcher {
       }
     }
     if (customActions != null || hintOverrides != null) {
-      final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds?.map<CustomSemanticsAction>((int id) {
+      final List<CustomSemanticsAction> providedCustomActions = data.customSemanticsActionIds?.map<CustomSemanticsAction>((final int id) {
         return CustomSemanticsAction.getAction(id)!;
       }).toList() ?? <CustomSemanticsAction>[];
       final List<CustomSemanticsAction> expectedCustomActions = customActions?.toList() ?? <CustomSemanticsAction>[];
@@ -2471,7 +2471,7 @@ class _MatchesSemanticsData extends Matcher {
       if (expectedCustomActions.length != providedCustomActions.length) {
         return failWithDescription(matchState, 'custom actions were: $providedCustomActions');
       }
-      int sortActions(CustomSemanticsAction left, CustomSemanticsAction right) {
+      int sortActions(final CustomSemanticsAction left, final CustomSemanticsAction right) {
         return CustomSemanticsAction.getIdentifier(left) - CustomSemanticsAction.getIdentifier(right);
       }
       expectedCustomActions.sort(sortActions);
@@ -2505,7 +2505,7 @@ class _MatchesSemanticsData extends Matcher {
     bool allMatched = true;
     if (children != null) {
       int i = 0;
-      (node as SemanticsNode).visitChildren((SemanticsNode child) {
+      (node as SemanticsNode).visitChildren((final SemanticsNode child) {
         allMatched = children![i].matches(child, matchState) && allMatched;
         i += 1;
         return allMatched;
@@ -2514,27 +2514,27 @@ class _MatchesSemanticsData extends Matcher {
     return allMatched;
   }
 
-  bool failWithDescription(Map<dynamic, dynamic> matchState, String description) {
+  bool failWithDescription(final Map<dynamic, dynamic> matchState, final String description) {
     matchState['failure'] = description;
     return false;
   }
 
   @override
   Description describeMismatch(
-    dynamic item,
-    Description mismatchDescription,
-    Map<dynamic, dynamic> matchState,
-    bool verbose,
+    final dynamic item,
+    final Description mismatchDescription,
+    final Map<dynamic, dynamic> matchState,
+    final bool verbose,
   ) {
     return mismatchDescription.add(matchState['failure'] as String);
   }
 
-  static String _createEnumsSummary<T extends Object>(List<T> enums) {
+  static String _createEnumsSummary<T extends Object>(final List<T> enums) {
     assert(T == SemanticsAction || T == SemanticsFlag, 'This method is only intended for lists of SemanticsActions or SemanticsFlags.');
     if (T == SemanticsAction) {
-      return '[${(enums as List<SemanticsAction>).map((SemanticsAction d) => d.name).join(', ')}]';
+      return '[${(enums as List<SemanticsAction>).map((final SemanticsAction d) => d.name).join(', ')}]';
     } else {
-      return '[${(enums as List<SemanticsFlag>).map((SemanticsFlag d) => d.name).join(', ')}]';
+      return '[${(enums as List<SemanticsFlag>).map((final SemanticsFlag d) => d.name).join(', ')}]';
     }
   }
 }
@@ -2545,12 +2545,12 @@ class _MatchesAccessibilityGuideline extends AsyncMatcher {
   final AccessibilityGuideline guideline;
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add(guideline.description);
   }
 
   @override
-  Future<String?> matchAsync(covariant WidgetTester tester) async {
+  Future<String?> matchAsync(covariant final WidgetTester tester) async {
     final Evaluation result = await guideline.evaluate(tester);
     if (result.passed) {
       return null;
@@ -2565,12 +2565,12 @@ class _DoesNotMatchAccessibilityGuideline extends AsyncMatcher {
   final AccessibilityGuideline guideline;
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     return description.add('Does not ${guideline.description}');
   }
 
   @override
-  Future<String?> matchAsync(covariant WidgetTester tester) async {
+  Future<String?> matchAsync(covariant final WidgetTester tester) async {
     final Evaluation result = await guideline.evaluate(tester);
     if (result.passed) {
       return 'Failed';

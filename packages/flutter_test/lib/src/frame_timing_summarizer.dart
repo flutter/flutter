@@ -18,44 +18,44 @@ class FrameTimingSummarizer {
   ///
   /// See [TimelineSummary.summaryJson] for detail.
   factory FrameTimingSummarizer(
-    List<FrameTiming> data, {
-    int? newGenGCCount,
-    int? oldGenGCCount,
+    final List<FrameTiming> data, {
+    final int? newGenGCCount,
+    final int? oldGenGCCount,
   }) {
     assert(data.isNotEmpty);
     final List<Duration> frameBuildTime = List<Duration>.unmodifiable(
-      data.map<Duration>((FrameTiming datum) => datum.buildDuration),
+      data.map<Duration>((final FrameTiming datum) => datum.buildDuration),
     );
     final List<Duration> frameBuildTimeSorted =
         List<Duration>.from(frameBuildTime)..sort();
     final List<Duration> frameRasterizerTime = List<Duration>.unmodifiable(
-      data.map<Duration>((FrameTiming datum) => datum.rasterDuration),
+      data.map<Duration>((final FrameTiming datum) => datum.rasterDuration),
     );
     final List<Duration> frameRasterizerTimeSorted =
         List<Duration>.from(frameRasterizerTime)..sort();
     final List<Duration> vsyncOverhead = List<Duration>.unmodifiable(
-      data.map<Duration>((FrameTiming datum) => datum.vsyncOverhead),
+      data.map<Duration>((final FrameTiming datum) => datum.vsyncOverhead),
     );
     final List<int> layerCacheCounts = List<int>.unmodifiable(
-      data.map<int>((FrameTiming datum) => datum.layerCacheCount),
+      data.map<int>((final FrameTiming datum) => datum.layerCacheCount),
     );
     final List<int> layerCacheCountsSorted = List<int>.from(layerCacheCounts)..sort();
     final List<int> layerCacheBytes = List<int>.unmodifiable(
-      data.map<int>((FrameTiming datum) => datum.layerCacheBytes),
+      data.map<int>((final FrameTiming datum) => datum.layerCacheBytes),
     );
     final List<int> layerCacheBytesSorted = List<int>.from(layerCacheBytes)..sort();
     final List<int> pictureCacheCounts = List<int>.unmodifiable(
-      data.map<int>((FrameTiming datum) => datum.pictureCacheCount),
+      data.map<int>((final FrameTiming datum) => datum.pictureCacheCount),
     );
     final List<int> pictureCacheCountsSorted = List<int>.from(pictureCacheCounts)..sort();
     final List<int> pictureCacheBytes = List<int>.unmodifiable(
-      data.map<int>((FrameTiming datum) => datum.pictureCacheBytes),
+      data.map<int>((final FrameTiming datum) => datum.pictureCacheBytes),
     );
     final List<int> pictureCacheBytesSorted = List<int>.from(pictureCacheBytes)..sort();
     final List<Duration> vsyncOverheadSorted =
         List<Duration>.from(vsyncOverhead)..sort();
-    Duration add(Duration a, Duration b) => a + b;
-    int addInts(int a, int b) => a + b;
+    Duration add(final Duration a, final Duration b) => a + b;
+    int addInts(final int a, final int b) => a + b;
     return FrameTimingSummarizer._(
       frameBuildTime: frameBuildTime,
       frameRasterizerTime: frameRasterizerTime,
@@ -283,10 +283,10 @@ class FrameTimingSummarizer {
         'missed_frame_rasterizer_budget_count': missedFrameRasterizerBudget,
         'frame_count': frameBuildTime.length,
         'frame_build_times': frameBuildTime
-            .map<int>((Duration datum) => datum.inMicroseconds)
+            .map<int>((final Duration datum) => datum.inMicroseconds)
             .toList(),
         'frame_rasterizer_times': frameRasterizerTime
-            .map<int>((Duration datum) => datum.inMicroseconds)
+            .map<int>((final Duration datum) => datum.inMicroseconds)
             .toList(),
         'new_gen_gc_count': newGenGCCount,
         'old_gen_gc_count': oldGenGCCount,
@@ -296,7 +296,7 @@ class FrameTimingSummarizer {
 /// Returns the 100*p-th percentile of [data].
 ///
 /// [data] must be sorted in ascending order.
-T _findPercentile<T>(List<T> data, double p) {
+T _findPercentile<T>(final List<T> data, final double p) {
   assert(p >= 0 && p <= 1);
   return data[((data.length - 1) * p).round()];
 }
@@ -304,8 +304,8 @@ T _findPercentile<T>(List<T> data, double p) {
 /// Returns the number of elements in [data] that exceed [threshold].
 ///
 /// [data] must be sorted in ascending order.
-int _countExceed<T extends Comparable<T>>(List<T> data, T threshold) {
-  final int exceedsThresholdIndex = data.indexWhere((T datum) => datum.compareTo(threshold) > 0);
+int _countExceed<T extends Comparable<T>>(final List<T> data, final T threshold) {
+  final int exceedsThresholdIndex = data.indexWhere((final T datum) => datum.compareTo(threshold) > 0);
   if (exceedsThresholdIndex == -1) {
     return 0;
   }

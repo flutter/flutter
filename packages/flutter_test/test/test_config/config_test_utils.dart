@@ -7,13 +7,13 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 
 void testConfig(
-  String description,
-  String? expectedStringValue, {
-  Map<Type, dynamic> otherExpectedValues = const <Type, dynamic>{int: isNull},
+  final String description,
+  final String? expectedStringValue, {
+  final Map<Type, dynamic> otherExpectedValues = const <Type, dynamic>{int: isNull},
 }) {
   final String? actualStringValue = Zone.current[String] as String?;
   final Map<Type, dynamic> otherActualValues = otherExpectedValues.map<Type, dynamic>(
-    (Type key, dynamic value) {
+    (final Type key, final dynamic value) {
       return MapEntry<Type, dynamic>(key, Zone.current[key]);
     },
   );

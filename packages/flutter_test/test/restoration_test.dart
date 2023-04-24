@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('restartAndRestore', (WidgetTester tester) async {
+  testWidgets('restartAndRestore', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -35,7 +35,7 @@ void main() {
     expect(restoredState.doubleValue, 1.0);
   });
 
-  testWidgets('restore from previous restoration data', (WidgetTester tester) async {
+  testWidgets('restore from previous restoration data', (final WidgetTester tester) async {
     await tester.pumpWidget(
       const RootRestorationScope(
         restorationId: 'root-child',
@@ -87,12 +87,12 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   double doubleValue = 1.0; // Not restorable.
 
   @override
-  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+  void restoreState(final RestorationBucket? oldBucket, final bool initialRestore) {
     registerForRestoration(stringValue, 'string');
     registerForRestoration(intValue, 'int');
   }
 
-  void setValues(String s, int i, double d) {
+  void setValues(final String s, final int i, final double d) {
     setState(() {
       stringValue.value = s;
       intValue.value = i;
@@ -101,7 +101,7 @@ class _RestorableWidgetState extends State<_RestorableWidget> with RestorationMi
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Text('${stringValue.value} ${intValue.value}', textDirection: TextDirection.ltr);
   }
 

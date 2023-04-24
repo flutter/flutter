@@ -9,8 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 final List<FlutterErrorDetails> errors = <FlutterErrorDetails>[];
 
-Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  reportTestException = (FlutterErrorDetails details, String testDescription) {
+Future<void> testExecutable(final FutureOr<void> Function() testMain) async {
+  reportTestException = (final FlutterErrorDetails details, final String testDescription) {
     errors.add(details);
   };
 
@@ -21,7 +21,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 }
 
 void pipelineOwnerTestRun() {
-  testWidgets('open SemanticsHandle from PipelineOwner fails test', (WidgetTester tester) async {
+  testWidgets('open SemanticsHandle from PipelineOwner fails test', (final WidgetTester tester) async {
     final int outstandingHandles = tester.binding.pipelineOwner.debugOutstandingSemanticsHandles;
     tester.binding.pipelineOwner.ensureSemantics();
     expect(tester.binding.pipelineOwner.debugOutstandingSemanticsHandles, outstandingHandles + 1);
@@ -36,7 +36,7 @@ void pipelineOwnerTestRun() {
 }
 
 void semanticsBindingTestRun() {
-  testWidgets('open SemanticsHandle from SemanticsBinding fails test', (WidgetTester tester) async {
+  testWidgets('open SemanticsHandle from SemanticsBinding fails test', (final WidgetTester tester) async {
     final int outstandingHandles = tester.binding.debugOutstandingSemanticsHandles;
     tester.binding.ensureSemantics();
     expect(tester.binding.debugOutstandingSemanticsHandles, outstandingHandles + 1);
@@ -51,7 +51,7 @@ void semanticsBindingTestRun() {
 }
 
 void failingTestTestRun() {
-  testWidgets('open SemanticsHandle from SemanticsBinding fails test', (WidgetTester tester) async {
+  testWidgets('open SemanticsHandle from SemanticsBinding fails test', (final WidgetTester tester) async {
     final int outstandingHandles = tester.binding.debugOutstandingSemanticsHandles;
     tester.binding.ensureSemantics();
     expect(tester.binding.debugOutstandingSemanticsHandles, outstandingHandles + 1);

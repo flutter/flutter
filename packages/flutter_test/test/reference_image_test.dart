@@ -6,7 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
 
-Future<ui.Image> createTestImage(int width, int height, ui.Color color) {
+Future<ui.Image> createTestImage(final int width, final int height, final ui.Color color) {
   final ui.Paint paint = ui.Paint()
     ..style = ui.PaintingStyle.stroke
     ..strokeWidth = 1.0
@@ -24,7 +24,7 @@ void main() {
   const ui.Color transparentRed = ui.Color.fromARGB(128, 255, 0, 0);
 
   group('succeeds', () {
-    testWidgets('when images have the same content', (WidgetTester tester) async {
+    testWidgets('when images have the same content', (final WidgetTester tester) async {
       await expectLater(
         await createTestImage(100, 100, red),
         matchesReferenceImage(await createTestImage(100, 100, red)),
@@ -40,14 +40,14 @@ void main() {
       );
     });
 
-    testWidgets('when images are identical', (WidgetTester tester) async {
+    testWidgets('when images are identical', (final WidgetTester tester) async {
       final ui.Image image = await createTestImage(100, 100, red);
       await expectLater(image, matchesReferenceImage(image));
     });
   });
 
   group('fails', () {
-    testWidgets('when image sizes do not match', (WidgetTester tester) async {
+    testWidgets('when image sizes do not match', (final WidgetTester tester) async {
       final ui.Image red50 = await createTestImage(50, 50, red);
       final ui.Image red100 = await createTestImage(100, 100, red);
       expect(
@@ -56,7 +56,7 @@ void main() {
       );
     });
 
-    testWidgets('when image pixels do not match', (WidgetTester tester) async {
+    testWidgets('when image pixels do not match', (final WidgetTester tester) async {
       final ui.Image red100 = await createTestImage(100, 100, red);
       final ui.Image transparentRed100 = await createTestImage(100, 100, transparentRed);
       expect(

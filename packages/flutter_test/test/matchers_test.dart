@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Class that makes it easy to mock common toStringDeep behavior.
 class _MockToStringDeep {
-  _MockToStringDeep(String str) : _lines = <String>[] {
+  _MockToStringDeep(final String str) : _lines = <String>[] {
     final List<String> lines = str.split('\n');
     for (int i = 0; i < lines.length - 1; ++i) {
       _lines.add('${lines[i]}\n');
@@ -33,7 +33,7 @@ class _MockToStringDeep {
   /// line break.
   final List<String> _lines;
 
-  String toStringDeep({ String prefixLineOne = '', String prefixOtherLines = '' }) {
+  String toStringDeep({ final String prefixLineOne = '', final String prefixOtherLines = '' }) {
     final StringBuffer sb = StringBuffer();
     if (_lines.isNotEmpty) {
       sb.write('$prefixLineOne${_lines.first}');
@@ -294,7 +294,7 @@ void main() {
     );
 
     expect(
-      () => within<int>(distance: 1, from: 2, distanceFunction: (int a, int b) => -1).matches(1, <dynamic, dynamic>{}),
+      () => within<int>(distance: 1, from: 2, distanceFunction: (final int a, final int b) => -1).matches(1, <dynamic, dynamic>{}),
       throwsArgumentError,
     );
   });
@@ -402,7 +402,7 @@ void main() {
   group('matchesGoldenFile', () {
     late _FakeComparator comparator;
 
-    Widget boilerplate(Widget child) {
+    Widget boilerplate(final Widget child) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: child,
@@ -415,7 +415,7 @@ void main() {
     });
 
     group('matches', () {
-      testWidgets('if comparator succeeds', (WidgetTester tester) async {
+      testWidgets('if comparator succeeds', (final WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         await expectLater(finder, matchesGoldenFile('foo.png'));
@@ -424,14 +424,14 @@ void main() {
         expect(comparator.golden, Uri.parse('foo.png'));
       });
 
-      testWidgets('list of integers', (WidgetTester tester) async {
+      testWidgets('list of integers', (final WidgetTester tester) async {
         await expectLater(<int>[1, 2], matchesGoldenFile('foo.png'));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, equals(<int>[1, 2]));
         expect(comparator.golden, Uri.parse('foo.png'));
       });
 
-      testWidgets('future list of integers', (WidgetTester tester) async {
+      testWidgets('future list of integers', (final WidgetTester tester) async {
         await expectLater(Future<List<int>>.value(<int>[1, 2]), matchesGoldenFile('foo.png'));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, equals(<int>[1, 2]));
@@ -440,14 +440,14 @@ void main() {
     });
 
     group('does not match', () {
-      testWidgets('if comparator returns false', (WidgetTester tester) async {
+      testWidgets('if comparator returns false', (final WidgetTester tester) async {
         comparator.behavior = _ComparatorBehavior.returnFalse;
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         await expectLater(
           () => expectLater(finder, matchesGoldenFile('foo.png')),
           throwsA(isA<TestFailure>().having(
-            (TestFailure error) => error.message,
+            (final TestFailure error) => error.message,
             'message',
             contains('does not match'),
           )),
@@ -455,14 +455,14 @@ void main() {
         expect(comparator.invocation, _ComparatorInvocation.compare);
       });
 
-      testWidgets('if comparator throws', (WidgetTester tester) async {
+      testWidgets('if comparator throws', (final WidgetTester tester) async {
         comparator.behavior = _ComparatorBehavior.throwTestFailure;
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         await expectLater(
           () => expectLater(finder, matchesGoldenFile('foo.png')),
           throwsA(isA<TestFailure>().having(
-            (TestFailure error) => error.message,
+            (final TestFailure error) => error.message,
             'message',
             contains('fake message'),
           )),
@@ -470,13 +470,13 @@ void main() {
         expect(comparator.invocation, _ComparatorInvocation.compare);
       });
 
-      testWidgets('if finder finds no widgets', (WidgetTester tester) async {
+      testWidgets('if finder finds no widgets', (final WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(Container()));
         final Finder finder = find.byType(Text);
         await expectLater(
           () => expectLater(finder, matchesGoldenFile('foo.png')),
           throwsA(isA<TestFailure>().having(
-            (TestFailure error) => error.message,
+            (final TestFailure error) => error.message,
             'message',
             contains('no widget was found'),
           )),
@@ -484,7 +484,7 @@ void main() {
         expect(comparator.invocation, isNull);
       });
 
-      testWidgets('if finder finds multiple widgets', (WidgetTester tester) async {
+      testWidgets('if finder finds multiple widgets', (final WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Column(
           children: <Widget>[Text('hello'), Text('world')],
         )));
@@ -492,7 +492,7 @@ void main() {
         await expectLater(
           () => expectLater(finder, matchesGoldenFile('foo.png')),
           throwsA(isA<TestFailure>().having(
-            (TestFailure error) => error.message,
+            (final TestFailure error) => error.message,
             'message',
             contains('too many widgets'),
           )),
@@ -501,7 +501,7 @@ void main() {
       });
     });
 
-    testWidgets('calls update on comparator if autoUpdateGoldenFiles is true', (WidgetTester tester) async {
+    testWidgets('calls update on comparator if autoUpdateGoldenFiles is true', (final WidgetTester tester) async {
       autoUpdateGoldenFiles = true;
       await tester.pumpWidget(boilerplate(const Text('hello')));
       final Finder finder = find.byType(Text);
@@ -514,7 +514,7 @@ void main() {
   });
 
   group('matchesSemanticsData', () {
-    testWidgets('matches SemanticsData', (WidgetTester tester) async {
+    testWidgets('matches SemanticsData', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       const Key key = Key('semantics');
       await tester.pumpWidget(Semantics(
@@ -609,7 +609,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('Can match all semantics flags and actions', (WidgetTester tester) async {
+    testWidgets('Can match all semantics flags and actions', (final WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
@@ -706,7 +706,7 @@ void main() {
       ));
     });
 
-    testWidgets('Can match child semantics', (WidgetTester tester) async {
+    testWidgets('Can match child semantics', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       const Key key = Key('a');
       await tester.pumpWidget(Semantics(
@@ -735,7 +735,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
+    testWidgets('failure does not throw unexpected errors', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
       const Key key = Key('semantics');
@@ -793,7 +793,7 @@ void main() {
   });
 
   group('containsSemantics', () {
-    testWidgets('matches SemanticsData', (WidgetTester tester) async {
+    testWidgets('matches SemanticsData', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
       const Key key = Key('semantics');
@@ -891,7 +891,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('can match all semantics flags and actions enabled', (WidgetTester tester) async {
+    testWidgets('can match all semantics flags and actions enabled', (final WidgetTester tester) async {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
@@ -990,7 +990,7 @@ void main() {
       );
     });
 
-    testWidgets('can match all flags and actions disabled', (WidgetTester tester) async {
+    testWidgets('can match all flags and actions disabled', (final WidgetTester tester) async {
       final SemanticsData data = SemanticsData(
         flags: 0,
         actions: 0,
@@ -1078,7 +1078,7 @@ void main() {
       );
     });
 
-    testWidgets('only matches given flags and actions', (WidgetTester tester) async {
+    testWidgets('only matches given flags and actions', (final WidgetTester tester) async {
       int allActions = 0;
       int allFlags = 0;
       for (final SemanticsAction action in SemanticsAction.values) {
@@ -1167,7 +1167,7 @@ void main() {
       );
     });
 
-    testWidgets('can match child semantics', (WidgetTester tester) async {
+    testWidgets('can match child semantics', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       const Key key = Key('a');
       await tester.pumpWidget(Semantics(
@@ -1200,7 +1200,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('can match only custom actions', (WidgetTester tester) async {
+    testWidgets('can match only custom actions', (final WidgetTester tester) async {
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
       final SemanticsData data = SemanticsData(
         flags: 0,
@@ -1231,7 +1231,7 @@ void main() {
       expect(node, containsSemantics(customActions: <CustomSemanticsAction>[action]));
     });
 
-    testWidgets('failure does not throw unexpected errors', (WidgetTester tester) async {
+    testWidgets('failure does not throw unexpected errors', (final WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
 
       const Key key = Key('semantics');
@@ -1287,7 +1287,7 @@ void main() {
   });
 
   group('findsAtLeastNWidgets', () {
-    Widget boilerplate(Widget child) {
+    Widget boilerplate(final Widget child) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: child,
@@ -1295,7 +1295,7 @@ void main() {
     }
 
     testWidgets('succeeds when finds more then the specified count',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(boilerplate(const Column(
         children: <Widget>[Text('1'), Text('2'), Text('3')],
       )));
@@ -1304,7 +1304,7 @@ void main() {
     });
 
     testWidgets('succeeds when finds the exact specified count',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(boilerplate(const Column(
         children: <Widget>[Text('1'), Text('2')],
       )));
@@ -1313,7 +1313,7 @@ void main() {
     });
 
     testWidgets('fails when finds less then specified count',
-        (WidgetTester tester) async {
+        (final WidgetTester tester) async {
       await tester.pumpWidget(boilerplate(const Column(
         children: <Widget>[Text('1'), Text('2')],
       )));
@@ -1341,7 +1341,7 @@ class _FakeComparator implements GoldenFileComparator {
   Uri? golden;
 
   @override
-  Future<bool> compare(Uint8List imageBytes, Uri golden) {
+  Future<bool> compare(final Uint8List imageBytes, final Uri golden) {
     invocation = _ComparatorInvocation.compare;
     this.imageBytes = imageBytes;
     this.golden = golden;
@@ -1356,7 +1356,7 @@ class _FakeComparator implements GoldenFileComparator {
   }
 
   @override
-  Future<void> update(Uri golden, Uint8List imageBytes) {
+  Future<void> update(final Uri golden, final Uint8List imageBytes) {
     invocation = _ComparatorInvocation.update;
     this.golden = golden;
     this.imageBytes = imageBytes;
@@ -1364,7 +1364,7 @@ class _FakeComparator implements GoldenFileComparator {
   }
 
   @override
-  Uri getTestUri(Uri key, int? version) {
+  Uri getTestUri(final Uri key, final int? version) {
     return key;
   }
 }
@@ -1383,7 +1383,7 @@ class _CustomColor extends Color {
   final bool? isEqual;
 
   @override
-  bool operator ==(Object other) => isEqual ?? super == other;
+  bool operator ==(final Object other) => isEqual ?? super == other;
 
   @override
   int get hashCode => Object.hash(super.hashCode, isEqual);

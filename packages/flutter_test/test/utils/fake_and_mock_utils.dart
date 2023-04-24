@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
+TestWidgetsFlutterBinding retrieveTestBinding(final WidgetTester tester) {
   final WidgetsBinding binding = tester.binding;
   assert(binding is TestWidgetsFlutterBinding);
   final TestWidgetsFlutterBinding testBinding = binding as TestWidgetsFlutterBinding;
@@ -15,12 +15,12 @@ TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
 }
 
 void verifyPropertyFaked<TProperty>({
-  required WidgetTester tester,
-  required TProperty realValue,
-  required TProperty fakeValue,
-  required TProperty Function() propertyRetriever,
-  required Function(TestWidgetsFlutterBinding, TProperty fakeValue) propertyFaker,
-  Matcher Function(TProperty) matcher = equals,
+  required final WidgetTester tester,
+  required final TProperty realValue,
+  required final TProperty fakeValue,
+  required final TProperty Function() propertyRetriever,
+  required final Function(TestWidgetsFlutterBinding, TProperty fakeValue) propertyFaker,
+  final Matcher Function(TProperty) matcher = equals,
 }) {
   TProperty propertyBeforeFaking;
   TProperty propertyAfterFaking;
@@ -42,12 +42,12 @@ void verifyPropertyFaked<TProperty>({
 }
 
 void verifyPropertyReset<TProperty>({
-  required WidgetTester tester,
-  required TProperty fakeValue,
-  required TProperty Function() propertyRetriever,
-  required Function() propertyResetter,
-  required Function(TProperty fakeValue) propertyFaker,
-  Matcher Function(TProperty) matcher = equals,
+  required final WidgetTester tester,
+  required final TProperty fakeValue,
+  required final TProperty Function() propertyRetriever,
+  required final Function() propertyResetter,
+  required final Function(TProperty fakeValue) propertyFaker,
+  final Matcher Function(TProperty) matcher = equals,
 }) {
   TProperty propertyBeforeFaking;
   TProperty propertyAfterFaking;
@@ -67,7 +67,7 @@ void verifyPropertyReset<TProperty>({
   expect(propertyAfterReset, matcher(propertyBeforeFaking));
 }
 
-Matcher matchesViewPadding(ViewPadding expected) => _FakeViewPaddingMatcher(expected);
+Matcher matchesViewPadding(final ViewPadding expected) => _FakeViewPaddingMatcher(expected);
 
 class _FakeViewPaddingMatcher extends Matcher {
   _FakeViewPaddingMatcher(this.expected);
@@ -75,13 +75,13 @@ class _FakeViewPaddingMatcher extends Matcher {
   final ViewPadding expected;
 
   @override
-  Description describe(Description description) {
+  Description describe(final Description description) {
     description.add('two ViewPadding instances match');
     return description;
   }
 
   @override
-  Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+  Description describeMismatch(final dynamic item, final Description mismatchDescription, final Map<dynamic, dynamic> matchState, final bool verbose) {
     assert(item is ViewPadding, 'Can only match against implementations of ViewPadding.');
     final ViewPadding actual = item as ViewPadding;
 
@@ -102,7 +102,7 @@ class _FakeViewPaddingMatcher extends Matcher {
   }
 
   @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+  bool matches(final dynamic item, final Map<dynamic, dynamic> matchState) {
     assert(item is ViewPadding, 'Can only match against implementations of ViewPadding.');
     final ViewPadding actual = item as ViewPadding;
 

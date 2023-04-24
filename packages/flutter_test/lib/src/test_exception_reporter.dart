@@ -23,11 +23,11 @@ typedef TestExceptionReporter = void Function(FlutterErrorDetails details, Strin
 /// contexts _other_ than via `flutter test`.
 TestExceptionReporter get reportTestException => _reportTestException;
 TestExceptionReporter _reportTestException = _defaultTestExceptionReporter;
-set reportTestException(TestExceptionReporter handler) {
+set reportTestException(final TestExceptionReporter handler) {
   _reportTestException = handler;
 }
 
-void _defaultTestExceptionReporter(FlutterErrorDetails errorDetails, String testDescription) {
+void _defaultTestExceptionReporter(final FlutterErrorDetails errorDetails, final String testDescription) {
   FlutterError.dumpErrorToConsole(errorDetails, forceReport: true);
   // test_package.registerException actually just calls the current zone's error handler (that
   // is to say, _parentZone's handleUncaughtError function). FakeAsync doesn't add one of those,
