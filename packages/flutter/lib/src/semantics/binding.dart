@@ -204,3 +204,18 @@ class SemanticsHandle {
     _onDispose();
   }
 }
+
+// TODO(goderbauer): This needs to move to the engine.
+extension _PlatformDispatcherExtention on PlatformDispatcher {
+  set onSemanticsActionEvent(_SemanticsActionEventCallback value) {
+    onSemanticsAction = (int nodeId, ui.SemanticsAction action, ByteData? args) {
+      value(SemanticsActionEvent(
+        type: action,
+        arguments: args != null ? const StandardMessageCodec().decodeMessage(args) : null,
+        nodeId: nodeId,
+        viewId: 0,
+      ));
+    };
+  }
+}
+typedef _SemanticsActionEventCallback = void Function(SemanticsActionEvent event);

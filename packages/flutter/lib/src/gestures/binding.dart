@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show PointerDataPacket;
+import 'dart:ui' as ui show FlutterView, PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -592,4 +592,16 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   /// The target object itself is given by the [HitTestEntry.target] property of
   /// the hitTestEntry object.
   final HitTestEntry? hitTestEntry;
+}
+
+// TODO(goderbauer): This needs to move to the engine.
+extension _PlatformDispatcherExtention on PlatformDispatcher {
+  ui.FlutterView? viewWithId(int viewId) {
+    for (final ui.FlutterView view in views) {
+      if (view.viewId == viewId) {
+        return view;
+      }
+    }
+    return null;
+  }
 }
