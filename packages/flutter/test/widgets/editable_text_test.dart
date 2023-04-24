@@ -15542,6 +15542,67 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
       skip: kIsWeb, // [intended]
     );
+
+    testWidgets('tapping on a misspelled word hides the handles', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      controller.value = const TextEditingValue(
+        // All misspellings of "test". One the same length, one shorter, and one
+        // longer.
+        text: 'test test testt',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            showSelectionHandles: true,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 10, end: 15), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+
+      await tester.tapAt(textOffsetToPosition(tester, 12));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: kIsWeb, // [intended]
+    );
   });
 
   group('magnifier', () {
