@@ -1809,6 +1809,24 @@ void main() {
     expect(material.textStyle!.color, colorScheme.onSurface.withOpacity(0.38));
     expect(iconColor(), equals(Colors.blue));
   });
+
+  testWidgets("TextButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/118071.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            enabledMouseCursor: SystemMouseCursors.text,
+          ),
+          onPressed: () {},
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 TextStyle? _iconStyle(WidgetTester tester, IconData icon) {

@@ -1947,6 +1947,24 @@ void main() {
     expect(controller.value, <MaterialState>{MaterialState.disabled});
     expect(count, 1);
   });
+
+  testWidgets("OutlinedButton.styleFrom doesn't throw exception on passing only one cursor", (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/118071.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            enabledMouseCursor: SystemMouseCursors.text,
+          ),
+          onPressed: () {},
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
