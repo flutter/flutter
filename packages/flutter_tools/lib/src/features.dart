@@ -239,21 +239,17 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name. '
-        'This setting will take effect on ');
+    final StringBuffer buffer = StringBuffer('Enable or disable $name.');
     final List<String> channels = <String>[
       if (master.available) 'master',
       if (beta.available) 'beta',
       if (stable.available) 'stable',
     ];
+    // Add channel info for settings only on some channels.
     if (channels.length == 1) {
-      buffer.write('the ${channels.single} channel.');
+      buffer.write('\nThis setting applies to only the ${channels.single} channel.');
     } else if (channels.length == 2) {
-      buffer.write('the ${channels.join(' and ')} channels.');
-    } else {
-      final String prefix = (channels.toList()
-        ..removeLast()).join(', ');
-      buffer.write('the $prefix, and ${channels.last} channels.');
+      buffer.write('\nThis setting applies to only the ${channels.join(' and ')} channels.');
     }
     if (extraHelpText != null) {
       buffer.write(' $extraHelpText');
