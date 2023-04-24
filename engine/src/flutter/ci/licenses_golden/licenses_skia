@@ -1,4 +1,4 @@
-Signature: a567f41ce241ea203b8cb67f76859dfd
+Signature: a2d634eaab108bc9cb468aea39477c7f
 
 ====================================================================================================
 LIBRARY: etc1
@@ -1129,7 +1129,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkEdgeClipper.cpp + ../../../third_pa
 ORIGIN: ../../../third_party/skia/src/core/SkEdgeClipper.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkQuadClipper.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkQuadClipper.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/encode/SkImageEncoder.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/codec/SkColorTable.cpp
 FILE: ../../../third_party/skia/src/core/SkCubicClipper.cpp
@@ -1138,7 +1137,6 @@ FILE: ../../../third_party/skia/src/core/SkEdgeClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkEdgeClipper.h
 FILE: ../../../third_party/skia/src/core/SkQuadClipper.cpp
 FILE: ../../../third_party/skia/src/core/SkQuadClipper.h
-FILE: ../../../third_party/skia/src/encode/SkImageEncoder.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2009 The Android Open Source Project
 
@@ -1408,7 +1406,6 @@ ORIGIN: ../../../third_party/skia/gm/tilemodes_scaled.cpp + ../../../third_party
 ORIGIN: ../../../third_party/skia/gm/tinybitmap.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/gm/xfermodes.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkData.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/include/core/SkImageEncoder.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkImageFilter.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/core/SkSize.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/include/effects/SkLayerDrawLooper.h + ../../../third_party/skia/LICENSE
@@ -1592,7 +1589,6 @@ FILE: ../../../third_party/skia/gm/tilemodes_scaled.cpp
 FILE: ../../../third_party/skia/gm/tinybitmap.cpp
 FILE: ../../../third_party/skia/gm/xfermodes.cpp
 FILE: ../../../third_party/skia/include/core/SkData.h
-FILE: ../../../third_party/skia/include/core/SkImageEncoder.h
 FILE: ../../../third_party/skia/include/core/SkImageFilter.h
 FILE: ../../../third_party/skia/include/core/SkSize.h
 FILE: ../../../third_party/skia/include/effects/SkLayerDrawLooper.h
