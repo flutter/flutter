@@ -131,8 +131,7 @@
                     "flutter",
                     "flutter/shell/platform/android:abi_jars"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -163,8 +162,7 @@
                     "flutter",
                     "flutter/shell/platform/android:abi_jars"
                 ]
-            },
-            "tests": []
+            }
         },
         {
             "archives": [
@@ -195,9 +193,7 @@
                     "flutter",
                     "flutter/shell/platform/android:abi_jars"
                 ]
-            },
-            "tests": []
+            }
         }
-    ],
-    "tests": []
+    ]
 }

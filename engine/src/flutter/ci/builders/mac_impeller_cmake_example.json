@@ -20,9 +20,7 @@
                 "config": "impeller-cmake-example",
                 "targets": [
                 ]
-            },
-            "tests": []
+            }
         }
-    ],
-    "tests": []
+    ]
 }
