@@ -75,8 +75,8 @@ const String optOutFlagEnabled = 'Skipping Android Studio Java-Gradle compatibil
 ///
 /// For more info see the Gradle-Java compatibility matrix:
 /// https://docs.gradle.org/current/userguide/compatibility.html
-class GradleJavaVersionConflictMigration extends ProjectMigrator {
-  GradleJavaVersionConflictMigration(
+class AndroidStudioFlamingoJavaConflictMigration extends ProjectMigrator {
+  AndroidStudioFlamingoJavaConflictMigration(
     super.logger,
     {required AndroidProject project,
     AndroidStudio? androidStudio,

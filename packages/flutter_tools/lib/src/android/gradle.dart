@@ -34,7 +34,7 @@ import 'android_sdk.dart';
 import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
-import 'migrations/gradle_java_version_conflict_migration.dart';
+import 'migrations/android_studio_flamingo_java_conflict_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
 
@@ -265,7 +265,7 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final List<ProjectMigrator> migrators = <ProjectMigrator>[
       TopLevelGradleBuildFileMigration(project.android, _logger),
-      GradleJavaVersionConflictMigration(_logger,
+      AndroidStudioFlamingoJavaConflictMigration(_logger,
           project: project.android,
           androidStudio: _androidStudio,
           fileSystem: _fileSystem,
