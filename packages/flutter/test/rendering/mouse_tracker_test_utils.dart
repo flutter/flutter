@@ -33,6 +33,11 @@ class TestMouseTrackerFlutterBinding extends BindingBase
   }
 
   void setHitTest(BoxHitTest hitTest) {
+    // TODO(goderbauer): Instantiate a new RenderView instead of using deprecated RenderView when mouse tracker has been updated to deal with multiple renderviews.
+    if (rootPipelineOwner.rootNode == null) {
+      rootPipelineOwner.rootNode = renderView;
+      addRenderView(renderView);
+    }
     renderView.child = _TestHitTester(hitTest);
   }
 
