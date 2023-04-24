@@ -2956,6 +2956,7 @@ targets:
 
   - name: Mac module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/125425
     timeout: 60
     properties:
       cpu: x86 # Codesigning fails on ARM https://github.com/flutter/flutter/issues/112033
@@ -2975,6 +2976,7 @@ targets:
 
   - name: Mac_arm64_ios module_test_ios
     recipe: devicelab/devicelab_drone
+    bringup: true # Flaky: https://github.com/flutter/flutter/issues/125425
     presubmit: false
     timeout: 60
     properties:
@@ -4642,6 +4644,7 @@ targets:
 
   - name: Windows windows_home_scroll_perf__timeline_summary
     recipe: devicelab/devicelab_drone
+    presubmit: false
     timeout: 60
     properties:
       tags: >
@@ -4842,7 +4845,7 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "windows"]
-      task_name: flutter_tool_startup__windows
+      task_name: flutter_tool_startup
 
   - name: Linux flutter_tool_startup__linux
     recipe: devicelab/devicelab_drone
@@ -4851,14 +4854,14 @@ targets:
     properties:
       tags: >
         ["devicelab", "hostonly", "linux"]
-      task_name: flutter_tool_startup__linux
+      task_name: flutter_tool_startup
 
   - name: Mac_benchmark flutter_tool_startup__macos
     presubmit: false
     recipe: devicelab/devicelab_drone
     timeout: 60
     properties:
-      task_name: flutter_tool_startup__macos
+      task_name: flutter_tool_startup
 
   - name: Linux flutter_packaging
     recipe: packaging/packaging
