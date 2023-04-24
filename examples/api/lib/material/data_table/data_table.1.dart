@@ -35,8 +35,7 @@ class _DataTableExampleState extends State<DataTableExample> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
+    return SingleChildScrollView(
       child: DataTable(
         columns: const <DataColumn>[
           DataColumn(
