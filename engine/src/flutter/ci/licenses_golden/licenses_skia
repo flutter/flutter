@@ -1,4 +1,4 @@
-Signature: a2d634eaab108bc9cb468aea39477c7f
+Signature: 87b9f6fd0df8b41fcc7200ee41e46f02
 
 ====================================================================================================
 LIBRARY: etc1
@@ -384,6 +384,7 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/skparagraph/test.html
 FILE: ../../../third_party/skia/package-lock.json
+FILE: ../../../third_party/skia/relnotes/skrp.md
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/gpu/gpu_workaround_list.txt
 FILE: ../../../third_party/skia/src/sksl/generated/sksl_compute.minified.sksl
@@ -3320,7 +3321,6 @@ ORIGIN: ../../../third_party/skia/src/image/SkImage_Lazy.cpp + ../../../third_pa
 ORIGIN: ../../../third_party/skia/src/opts/SkBlitMask_opts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/opts/SkBlitRow_opts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/opts/SkOpts_ssse3.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/opts/SkXfermode_opts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pathops/SkDConicLineIntersection.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pathops/SkDCubicToQuads.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/pathops/SkOpCoincidence.cpp + ../../../third_party/skia/LICENSE
@@ -3610,7 +3610,6 @@ FILE: ../../../third_party/skia/src/image/SkImage_Lazy.cpp
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts.h
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_ssse3.cpp
-FILE: ../../../third_party/skia/src/opts/SkXfermode_opts.h
 FILE: ../../../third_party/skia/src/pathops/SkDConicLineIntersection.cpp
 FILE: ../../../third_party/skia/src/pathops/SkDCubicToQuads.cpp
 FILE: ../../../third_party/skia/src/pathops/SkOpCoincidence.cpp
@@ -8206,9 +8205,6 @@ ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLInterfaceBlock.cpp + ../../../
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLLayout.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/sksl/ir/SkSLLiteral.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/text/gpu/SDFMaskFilter.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/utils/SkBlitterTrace.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/utils/SkBlitterTraceCommon.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/utils/SkCycles.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/gm/drawlines_with_local_matrix.cpp
 FILE: ../../../third_party/skia/gm/mirrortile.cpp
@@ -8236,9 +8232,6 @@ FILE: ../../../third_party/skia/src/sksl/ir/SkSLInterfaceBlock.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLLayout.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLLiteral.cpp
 FILE: ../../../third_party/skia/src/text/gpu/SDFMaskFilter.h
-FILE: ../../../third_party/skia/src/utils/SkBlitterTrace.h
-FILE: ../../../third_party/skia/src/utils/SkBlitterTraceCommon.h
-FILE: ../../../third_party/skia/src/utils/SkCycles.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2022 Google Inc.
 
@@ -8985,7 +8978,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkRSXform.cpp + ../../../third_party/
 ORIGIN: ../../../third_party/skia/src/core/SkReadPixelsRec.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkScan_SAAPath.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkWritePixelsRec.cpp + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkXfermode_Raster.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkEncoder.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkJpegEncoder_none.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/encode/SkPngEncoderImpl.h + ../../../third_party/skia/LICENSE
@@ -9074,7 +9066,6 @@ FILE: ../../../third_party/skia/src/core/SkRSXform.cpp
 FILE: ../../../third_party/skia/src/core/SkReadPixelsRec.cpp
 FILE: ../../../third_party/skia/src/core/SkScan_SAAPath.cpp
 FILE: ../../../third_party/skia/src/core/SkWritePixelsRec.cpp
-FILE: ../../../third_party/skia/src/core/SkXfermode_Raster.cpp
 FILE: ../../../third_party/skia/src/encode/SkEncoder.cpp
 FILE: ../../../third_party/skia/src/encode/SkJpegEncoder_none.cpp
 FILE: ../../../third_party/skia/src/encode/SkPngEncoderImpl.h
