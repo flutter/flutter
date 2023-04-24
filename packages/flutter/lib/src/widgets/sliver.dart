@@ -1365,3 +1365,99 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
     properties.add(DiagnosticsProperty<bool>('keepAlive', keepAlive));
   }
 }
+
+/// A sliver that constrains the cross axis extent of its sliver child.
+///
+/// The [SliverConstrainedCrossAxis] takes a [maxExtent] parameter and uses it as
+/// the cross axis extent of the [SliverConstraints] passed to the sliver child.
+/// The widget ensures that the [maxExtent] is a nonnegative value.
+///
+/// This is useful when you want to apply a custom cross-axis extent constraint
+/// to a sliver child, as slivers typically consume the full cross axis extent.
+///
+/// {@tool dartpad}
+/// In this sample the [SliverConstrainedCrossAxis] sizes its child so that the
+/// cross axis extent takes up less space than the actual viewport.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_constrained_cross_axis.0.dart **
+/// {@end-tool}
+class SliverConstrainedCrossAxis extends StatelessWidget {
+  /// Creates a sliver that constrains the cross axis extent of its sliver child.
+  ///
+  /// The [maxExtent] parameter is required and must be nonnegative.
+  const SliverConstrainedCrossAxis({
+    super.key,
+    required this.maxExtent,
+    required this.sliver,
+  });
+
+  /// The cross axis extent to apply to the sliver child.
+  ///
+  /// This value must be nonnegative.
+  final double maxExtent;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Must be a sliver.
+  final Widget sliver;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SliverZeroFlexParentDataWidget(
+      sliver: _SliverConstrainedCrossAxis(
+        maxExtent: maxExtent,
+        sliver: sliver,
+      )
+    );
+  }
+}
+class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalParentData> {
+  const _SliverZeroFlexParentDataWidget({
+    required Widget sliver,
+  }) : super(child: sliver);
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is SliverPhysicalParentData);
+    final SliverPhysicalParentData parentData = renderObject.parentData! as SliverPhysicalParentData;
+    bool needsLayout = false;
+    if (parentData.crossAxisFlex != 0) {
+      parentData.crossAxisFlex = 0;
+      needsLayout = true;
+    }
+
+    if (needsLayout) {
+      final AbstractNode? targetParent = renderObject.parent;
+      if (targetParent is RenderObject) {
+        targetParent.markNeedsLayout();
+      }
+
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => Widget;
+}
+
+class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
+  const _SliverConstrainedCrossAxis({
+    required this.maxExtent,
+    required Widget sliver,
+  }) : assert(maxExtent >= 0.0),
+       super(child: sliver);
+
+  /// The cross axis extent to apply to the sliver child.
+  ///
+  /// This value must be nonnegative.
+  final double maxExtent;
+
+  @override
+  RenderSliverConstrainedCrossAxis createRenderObject(BuildContext context) {
+    return RenderSliverConstrainedCrossAxis(maxExtent: maxExtent);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
+    renderObject.maxExtent = maxExtent;
+  }
+}
