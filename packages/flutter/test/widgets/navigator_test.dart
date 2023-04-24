@@ -6,7 +6,9 @@ import 'dart:ui' show FlutterView;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'observer_tester.dart';
@@ -4153,6 +4155,211 @@ void main() {
       expect(const RouteSettings().toString(), 'RouteSettings(none, null)');
     });
   });
+
+  group('Android Predictive Back', () {
+    final List<bool> calls = <bool>[];
+    setUp(() {
+      calls.clear();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (MethodCall methodCall) async {
+          if (methodCall.method == 'SystemNavigator.updateNavigationStackStatus') {
+            expect(methodCall.arguments, isA<bool>());
+            calls.add(methodCall.arguments as bool);
+          }
+          return;
+        });
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, null);
+      SystemNavigator.updateNavigationStackStatus(true);
+    });
+
+    // Simulates a system back, like a back gesture on Android.
+    Future<void> systemBack() {
+      return ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/navigation',
+        const JSONMessageCodec().encodeMessage(<String, dynamic>{
+          'method': 'popRoute',
+        }),
+        (ByteData? _) {},
+      );
+    }
+
+    testWidgets('a single route sets stack status on start', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Text('home'),
+          )
+        )
+      );
+
+      expect(calls, hasLength(1));
+      expect(calls[0], isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
+
+    testWidgets('navigating around a single Navigator with .pop', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => _LinksPage(
+              title: 'Home page',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one');
+                  },
+                  child: const Text('Go to one'),
+                ),
+              ],
+            ),
+            '/one': (BuildContext context) => _LinksPage(
+              title: 'Page one',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one/one');
+                  },
+                  child: const Text('Go to one/one'),
+                ),
+              ],
+            ),
+            '/one/one': (BuildContext context) => const _LinksPage(
+              title: 'Page one - one',
+            ),
+          },
+        ),
+      );
+
+      expect(calls, hasLength(1));
+      expect(calls[0], isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(2));
+      expect(calls.last, isTrue);
+
+      await tester.tap(find.text('Go back'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(3));
+      expect(calls.last, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await tester.tap(find.text('Go to one/one'));
+      await tester.pumpAndSettle();
+
+      // calls doesn't increment when the value is the same.
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await tester.tap(find.text('Go back'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await tester.tap(find.text('Go back'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(5));
+      expect(calls.last, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
+
+    testWidgets('navigating around a single Navigator with system back', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => _LinksPage(
+              title: 'Home page',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one');
+                  },
+                  child: const Text('Go to one'),
+                ),
+              ],
+            ),
+            '/one': (BuildContext context) => _LinksPage(
+              title: 'Page one',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one/one');
+                  },
+                  child: const Text('Go to one/one'),
+                ),
+              ],
+            ),
+            '/one/one': (BuildContext context) => const _LinksPage(
+              title: 'Page one - one',
+            ),
+          },
+        ),
+      );
+
+      expect(calls, hasLength(1));
+      expect(calls[0], isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(2));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(3));
+      expect(calls.last, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await tester.tap(find.text('Go to one/one'));
+      await tester.pumpAndSettle();
+
+      // calls doesn't increment when the value is the same.
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(5));
+      expect(calls.last, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
+  });
 }
 
 typedef AnnouncementCallBack = void Function(Route<dynamic>?);
@@ -4432,6 +4639,40 @@ class TestDependencies extends StatelessWidget {
         textDirection: TextDirection.ltr,
         child: child,
       )
+    );
+  }
+}
+
+class _LinksPage extends StatelessWidget {
+  const _LinksPage ({
+    this.buttons = const <Widget>[],
+    required this.title,
+    this.onBack,
+  });
+
+  final List<Widget> buttons;
+  final VoidCallback? onBack;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(title),
+            ...buttons,
+            if (Navigator.of(context).canPop())
+              TextButton(
+                onPressed: onBack ?? () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Go back'),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

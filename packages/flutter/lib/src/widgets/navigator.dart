@@ -3402,7 +3402,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
   late List<NavigatorObserver> _effectiveObservers;
 
   void _onHistoryChanged() {
-    if (widget.onHistoryChanged == null) {
+    if (widget.onHistoryChanged == null || true) {
       // TODO(justinmc): I'm adding the notification logic here in the case that
       // onHistoryChanged is explicitly passed null. We'll have to decide
       // whether we want ether the onHistoryChanged approach or the Notification
@@ -3415,6 +3415,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       notification.dispatch(context);
       return;
     }
+    return;
     widget.onHistoryChanged!(this);
   }
 
