@@ -80,14 +80,21 @@ abstract final class SystemNavigator {
   ///
   /// The `replace` flag defaults to false.
   static Future<void> routeInformationUpdated({
-    required String location,
+    @Deprecated(
+      'Pass Uri.parse(location) to uri parameter instead. '
+      'This feature was deprecated after v3.8.0-3.0.pre.'
+    )
+    String? location,
+    Uri? uri,
     Object? state,
     bool replace = false,
   }) {
+    assert((location != null) != (uri != null), 'One of uri or location must be provided, but not both.');
+    uri ??= Uri.parse(location!);
     return SystemChannels.navigation.invokeMethod<void>(
       'routeInformationUpdated',
       <String, dynamic>{
-        'location': location,
+        'uri': uri.toString(),
         'state': state,
         'replace': replace,
       },
