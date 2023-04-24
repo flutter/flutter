@@ -853,10 +853,12 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
         .map((HitTestEntry candidate) => candidate.target)
         .whereType<RenderObject>()
         .first;
-      final Element? innerTargetElement = _lastWhereOrNull(
-        collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
-        (Element element) => element.renderObject == innerTarget,
-      );
+      final Element? innerTargetElement = binding.renderViews.contains(innerTarget)
+          ? null
+          : _lastWhereOrNull(
+              collectAllElementsFrom(binding.rootElement!, skipOffstage: true),
+              (Element element) => element.renderObject == innerTarget,
+            );
       if (innerTargetElement == null) {
         printToConsole('No widgets found at ${event.position}.');
         return;
