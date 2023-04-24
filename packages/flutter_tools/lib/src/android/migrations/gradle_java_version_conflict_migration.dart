@@ -39,7 +39,7 @@ final Version flamingoBundledJava = Version(17, 0, 0);
 // These gradle versions were chosen because they
 // 1. Were output by 'flutter create' at some point in flutter's history and
 // 2. Are less than 7.3, the lowest supported gradle version for JDK 17
-const List<String> flutterCreateGradleVersionsBelowJDK17LowestSupported =
+const List<String> gradleVersionsToUpgradeFrom =
     <String>['5.6.2', '6.7'];
 
 // Define log messages as constants to re-use in testing.
@@ -148,7 +148,7 @@ class GradleJavaVersionConflictMigration extends ProjectMigrator {
       return fileContents;
     }
     final String existingVersionString = gradleDistributionUrl[1]!;
-    if (flutterCreateGradleVersionsBelowJDK17LowestSupported.contains(existingVersionString)) {
+    if (gradleVersionsToUpgradeFrom.contains(existingVersionString)) {
       logger.printStatus('Conflict detected between Android Studio Java version and Gradle version, '
           'upgrading Gradle version from $existingVersionString to $_gradleVersion7_4_2.');
       final String gradleDistributionUrlString = gradleDistributionUrl.group(0)!;
