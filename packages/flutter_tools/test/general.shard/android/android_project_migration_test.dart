@@ -236,6 +236,23 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.statusText, contains('Conflict detected between Android Studio Java version and Gradle version, '
             'upgrading Gradle version from 6.7 to 7.4.2.'));
       });
+
+      testWithoutContext('change is not made when opt out flag is set', () {
+        final GradleJavaVersionConflictMigration migration = GradleJavaVersionConflictMigration(
+          bufferLogger,
+          project: project,
+          androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
+          fileSystem: FakeFileSystem(),
+          processUtils: FakeProcessUtils(),
+          platform: FakePlatform(),
+          os: FakeOperatingSystemUtils(),
+          androidSdk: FakeAndroidSdk(javaVersion: '17'),
+        );
+        gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate + optOutFlag);
+        migration.migrate();
+        expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate + optOutFlag);
+        expect(bufferLogger.traceText, contains(optOutFlagEnabled));
+      });
     });
   });
 }

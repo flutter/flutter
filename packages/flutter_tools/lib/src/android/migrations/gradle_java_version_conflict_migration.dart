@@ -31,7 +31,8 @@ const String _gradleVersion7_4_2 = r'7.4.2';
 
 // String that can be placed in the gradle-wrapper.properties to opt out of this
 // migrator.
-const String _optOutFlag = 'NoFlutterGradleWrapperUpgrade';
+@visibleForTesting
+const String optOutFlag = 'NoFlutterGradleWrapperUpgrade';
 // Only the major version matters
 final Version flamingoBundledJava = Version(17, 0, 0);
 
@@ -66,7 +67,7 @@ const String gradleVersionNotFound = 'Failed to parse Gradle version from distri
     'skipping Gradle-Java version compatibility check.';
 @visibleForTesting
 const String optOutFlagEnabled = 'Skipping Android Studio Java-Gradle compatibility '
-    "because opt out flag: '$_optOutFlag' is enabled in gradle-wrapper.properties file.";
+    "because opt out flag: '$optOutFlag' is enabled in gradle-wrapper.properties file.";
 
 
 /// Migrate to a newer version of Gradle when the existing does not support
@@ -137,7 +138,7 @@ class GradleJavaVersionConflictMigration extends ProjectMigrator {
 
   @override
   String migrateFileContents(String fileContents) {
-    if (fileContents.contains(_optOutFlag)) {
+    if (fileContents.contains(optOutFlag)) {
       logger.printTrace(optOutFlagEnabled);
       return fileContents;
     }
