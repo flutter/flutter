@@ -316,28 +316,32 @@ void main() {
     });
   });
 
-    testUsingContext('runner disable telemetry with flag', () async {
-      io.setExitFunctionForTests((int exitCode) {});
+  group('unified_analytics', () {
+    testUsingContext(
+      'runner disable telemetry with flag',
+      () async {
+        io.setExitFunctionForTests((int exitCode) {});
 
-      expect(globals.analytics.telemetryEnabled, true);
-      expect(globals.analytics.shouldShowMessage, true);
+        expect(globals.analytics.telemetryEnabled, true);
+        expect(globals.analytics.shouldShowMessage, true);
 
-      await runner.run(
-        <String>['--disable-telemetry'],
-        () => <FlutterCommand>[],
-        // This flutterVersion disables crash reporting.
-        flutterVersion: '[user-branch]/',
-        shutdownHooks: ShutdownHooks(),
-      );
+        await runner.run(
+          <String>['--disable-telemetry'],
+          () => <FlutterCommand>[],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          shutdownHooks: ShutdownHooks(),
+        );
 
-      expect(globals.analytics.telemetryEnabled, false);
-    },
-    overrides: <Type, Generator>{
-      Analytics: () => FakeAnalytics(),
-      FileSystem: () => MemoryFileSystem.test(),
-      ProcessManager: () => FakeProcessManager.any(),
-    },
-  );
+        expect(globals.analytics.telemetryEnabled, false);
+      },
+      overrides: <Type, Generator>{
+        Analytics: () => FakeAnalytics(),
+        FileSystem: () => MemoryFileSystem.test(),
+        ProcessManager: () => FakeProcessManager.any(),
+      },
+    );
+  });
 }
 
 class CrashingFlutterCommand extends FlutterCommand {
