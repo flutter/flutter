@@ -3961,4 +3961,48 @@ void main() {
     expect(noPaddingSize.height, equals(paddedSize.height - padVertical * 2));
     expect(noPaddingSize.width, equals(paddedSize.width - padHorizontal * 2));
   });
+
+  testWidgets('DropdownButtonFormField onChanged to initialValue when Form reset', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String? value;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Form(
+            key: formKey,
+            child: DropdownButtonFormField<String>(
+              key: stateKey,
+              value: 'One',
+              items: <String>['One', 'Two', 'Free', 'Four']
+                .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+              }).toList(),
+              onChanged: (String? newValue) {
+                value = newValue;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(value, isNull);
+    expect(stateKey.currentState!.value, equals('One'));
+    //value chang to Two
+    await tester.tap(find.text('One'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Two').last);
+    await tester.pumpAndSettle();
+    expect(value, equals('Two'));
+    expect(stateKey.currentState!.value, equals('Two'));
+    // form to reset
+    formKey.currentState!.reset();
+    expect(value, equals('One'));
+    expect(stateKey.currentState!.value, equals('One'));
+  });
 }

@@ -1695,7 +1695,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   void reset() {
     final DropdownButtonFormField<T> dropdownButtonFormField = widget as DropdownButtonFormField<T>;
     assert(dropdownButtonFormField.onChanged != null);
-    dropdownButtonFormField.onChanged!(value);
+    dropdownButtonFormField.onChanged!(widget.initialValue);
     super.reset();
   }
 }

@@ -1193,4 +1193,37 @@ void main() {
     await tester.pump();
     expect(textField.cursorColor, errorColor);
   });
+
+  testWidgets('TextFormField onChanged to initialValue when Form reset', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+    String value='initialValue';
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Form(
+          key: formKey,
+          child: TextFormField(
+            key: stateKey,
+            initialValue: value,
+            onChanged: (String newValue) {
+              value = newValue;
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(stateKey.currentState!.value, 'initialValue');
+    expect(value, 'initialValue');
+    //change value to 'changedValue'
+    await tester.enterText(find.byType(TextField), 'changedValue');
+    expect(stateKey.currentState!.value,'changedValue');
+    expect(value, 'changedValue');
+    // form to reset
+    formKey.currentState!.reset();
+    await tester.pump();
+    expect(stateKey.currentState!.value,'initialValue');
+    expect(value, 'initialValue');
+  });
 }
