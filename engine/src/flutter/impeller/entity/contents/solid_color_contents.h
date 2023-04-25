@@ -46,10 +46,6 @@ class SolidColorContents final : public ColorSourceContents {
               const Entity& entity,
               RenderPass& pass) const override;
 
-  /// @brief Convert SrcOver blend modes into Src blend modes if the color has
-  ///        no opacity.
-  bool ConvertToSrc(const Entity& entity) const;
-
  private:
   Color color_;
 
