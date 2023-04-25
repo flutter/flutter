@@ -142,6 +142,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createCoreMockProjectFiles();
@@ -163,6 +164,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -184,6 +186,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     fileSystem.file('pubspec.yaml').createSync();
@@ -205,6 +208,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -234,6 +238,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -255,6 +260,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -277,6 +283,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -299,6 +306,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -320,6 +328,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -410,6 +419,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: fileSystem,
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
 
@@ -431,6 +441,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();
@@ -465,10 +476,11 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     ));
 
-    final bool supported = BuildMacosCommand(verboseHelp: false).supported;
+    final bool supported = BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).supported;
     expect(() => runner.run(<String>['build', 'macos', '--no-pub']),
       supported ? throwsToolExit() : throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
@@ -476,14 +488,14 @@ STDERR STUFF
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
-    expect(BuildMacosCommand(verboseHelp: false).hidden, true);
+    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, true);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(),
     Platform: () => macosPlatform,
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {
-    expect(BuildMacosCommand(verboseHelp: false).hidden, false);
+    expect(BuildMacosCommand(logger: BufferLogger.test(), verboseHelp: false).hidden, false);
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
     Platform: () => macosPlatform,
@@ -494,6 +506,7 @@ STDERR STUFF
       androidSdk: FakeAndroidSdk(),
       buildSystem: TestBuildSystem.all(BuildResult(success: true)),
       fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
       osUtils: FakeOperatingSystemUtils(),
     );
     createMinimalMockProjectFiles();

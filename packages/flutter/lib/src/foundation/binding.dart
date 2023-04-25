@@ -566,22 +566,16 @@ abstract class BindingBase {
             switch (parameters['value']) {
               case 'android':
                 debugDefaultTargetPlatformOverride = TargetPlatform.android;
-                break;
               case 'fuchsia':
                 debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-                break;
               case 'iOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-                break;
               case 'linux':
                 debugDefaultTargetPlatformOverride = TargetPlatform.linux;
-                break;
               case 'macOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
-                break;
               case 'windows':
                 debugDefaultTargetPlatformOverride = TargetPlatform.windows;
-                break;
               case 'default':
               default:
                 debugDefaultTargetPlatformOverride = null;
@@ -607,10 +601,8 @@ abstract class BindingBase {
             switch (parameters['value']) {
               case 'Brightness.light':
                 debugBrightnessOverride = ui.Brightness.light;
-                break;
               case 'Brightness.dark':
                 debugBrightnessOverride = ui.Brightness.dark;
-                break;
               default:
                 debugBrightnessOverride = null;
             }

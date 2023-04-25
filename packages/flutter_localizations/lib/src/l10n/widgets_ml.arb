@@ -1,0 +1,8 @@
+{
+  "reorderItemToStart": "തുടക്കത്തിലേക്ക് പോവുക",
+  "reorderItemToEnd": "അവസാന ഭാഗത്തേക്ക് പോവുക",
+  "reorderItemUp": "മുകളിലോട്ട് നീക്കുക",
+  "reorderItemDown": "താഴോട്ട് നീക്കുക",
+  "reorderItemLeft": "ഇടത്തോട്ട് നീക്കുക",
+  "reorderItemRight": "വലത്തോട്ട് നീക്കുക"
+}

@@ -306,10 +306,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       switch (widget.crossFadeState) {
         case CrossFadeState.showFirst:
           _controller.reverse();
-          break;
         case CrossFadeState.showSecond:
           _controller.forward();
-          break;
       }
     }
   }

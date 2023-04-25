@@ -40,14 +40,15 @@ void main() {
     testWidgets('mouse selection sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              focusNode: FocusNode(),
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: SelectionSpy(key: spy),
+          ),
+        ),
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
@@ -121,6 +122,8 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
+
       final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byKey(spy)));
       addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 500));
@@ -241,6 +244,7 @@ void main() {
             ),
           )
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0), kind: PointerDeviceKind.mouse);
@@ -260,6 +264,7 @@ void main() {
             ),
           )
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       renderSelectionSpy.events.clear();
@@ -284,6 +289,7 @@ void main() {
             ),
           )
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       renderSelectionSpy.events.clear();
@@ -315,6 +321,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final RenderSelectionSpy renderSelectionSpy = tester.renderObject<RenderSelectionSpy>(find.byKey(spy));
       renderSelectionSpy.events.clear();
@@ -348,6 +355,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph, 6)); // at the 'r'
@@ -378,14 +386,12 @@ void main() {
           log.last,
           isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.selectionClick'),
         );
-        break;
       case TargetPlatform.fuchsia:
       case TargetPlatform.iOS:
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(log, isEmpty);
-        break;
     }
     await gesture.up();
   }, variant: TargetPlatformVariant.all());
@@ -623,10 +629,12 @@ void main() {
         expect(paragraph1.selections.isEmpty, isTrue);
         expect(paragraph2.selections.isEmpty, isTrue);
 
-        // Reset selection and focus selectable region.
-        controller.selection = const TextSelection.collapsed(offset: -1);
+        // Focus selectable region.
         selectableRegionFocus.requestFocus();
         await tester.pump();
+
+        // Reset controller selection once the TextField is unfocused.
+        controller.selection = const TextSelection.collapsed(offset: -1);
 
         // Make sure keyboard select all will be handled by selectable region now.
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, control: true));
@@ -674,10 +682,12 @@ void main() {
         expect(paragraph1.selections.isEmpty, isTrue);
         expect(paragraph2.selections.isEmpty, isTrue);
 
-        // Reset selection and focus selectable region.
-        controller.selection = const TextSelection.collapsed(offset: -1);
+        // Focus selectable region.
         selectableRegionFocus.requestFocus();
         await tester.pump();
+
+        // Reset controller selection once the TextField is unfocused.
+        controller.selection = const TextSelection.collapsed(offset: -1);
 
         // Make sure keyboard select all will be handled by selectable region now.
         await sendKeyCombination(tester, const SingleActivator(LogicalKeyboardKey.keyA, meta: true));
@@ -706,6 +716,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       focusNode.requestFocus();
 
       // keyboard select all.
@@ -895,6 +906,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
       addTearDown(gesture.removePointer);
@@ -926,6 +938,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
@@ -962,6 +975,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph2 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Good, and you?'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph2, 7)); // at the 'a'
       addTearDown(gesture.removePointer);
@@ -996,6 +1010,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1037,6 +1052,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1073,6 +1089,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1109,6 +1126,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1144,6 +1162,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
       final RenderParagraph paragraph3 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('Fine, thank you.'), matching: find.byType(RichText)));
       final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph3, 7)); // at the 'h'
       addTearDown(gesture.removePointer);
@@ -1261,12 +1280,10 @@ void main() {
         case TargetPlatform.windows:
           alt = false;
           control = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           alt = true;
           control = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1371,12 +1388,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1462,12 +1477,10 @@ void main() {
         case TargetPlatform.windows:
           meta = false;
           alt = true;
-          break;
         case TargetPlatform.iOS:
         case TargetPlatform.macOS:
           meta = true;
           alt = false;
-          break;
       }
 
       // Ho[w ar]e you?
@@ -1625,6 +1638,7 @@ void main() {
             ),
           ),
         );
+        await tester.pumpAndSettle();
 
         final RenderParagraph paragraph = tester.renderObject<RenderParagraph>(
             find.descendant(
@@ -1680,6 +1694,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     final TestGesture gesture = await tester.startGesture(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1727,6 +1742,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1738,7 +1754,7 @@ void main() {
     expect(buttonItems[0].type, ContextMenuButtonType.copy);
 
     // Press `Copy` item
-    buttonItems[0].onPressed.call();
+    buttonItems[0].onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
@@ -1749,17 +1765,14 @@ void main() {
         expect(regionState.selectionOverlay, isNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNull);
-        break;
       case TargetPlatform.iOS:
         expect(regionState.selectionOverlay, isNotNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
         expect(regionState.selectionOverlay, isNotNull);
-        break;
     }
   },
     skip: kIsWeb, // [intended]
@@ -1783,6 +1796,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     final RenderParagraph paragraph1 = tester.renderObject<RenderParagraph>(find.descendant(of: find.text('How are you?'), matching: find.byType(RichText)));
     await tester.longPressAt(textOffsetToPosition(paragraph1, 6)); // at the 'r'
@@ -1794,7 +1808,7 @@ void main() {
     expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
 
     // Press `Select All` item
-    buttonItems[1].onPressed.call();
+    buttonItems[1].onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
@@ -1805,7 +1819,6 @@ void main() {
         expect(regionState.selectionOverlay, isNotNull);
         expect(regionState.selectionOverlay?.startHandleLayerLink, isNotNull);
         expect(regionState.selectionOverlay?.endHandleLayerLink, isNotNull);
-        break;
       case TargetPlatform.linux:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
@@ -1838,6 +1851,7 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
     expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
 
@@ -1895,7 +1909,7 @@ void main() {
 
   group('BrowserContextMenu', () {
     setUp(() async {
-      SystemChannels.contextMenu.setMockMethodCallHandler((MethodCall call) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, (MethodCall call) {
         // Just complete successfully, so that BrowserContextMenu thinks that
         // the engine successfully received its call.
         return Future<void>.value();
@@ -1905,7 +1919,7 @@ void main() {
 
     tearDown(() async {
       await BrowserContextMenu.enableContextMenu();
-      SystemChannels.contextMenu.setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.contextMenu, null);
     });
 
     testWidgets('web can show flutter context menu when the browser context menu is disabled', (WidgetTester tester) async {
@@ -1921,6 +1935,7 @@ void main() {
           ),
         ),
       );
+      await tester.pumpAndSettle();
 
       final SelectableRegionState state =
           tester.state<SelectableRegionState>(find.byType(SelectableRegion));
@@ -1995,16 +2010,15 @@ class RenderSelectionSpy extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  // TODO(goderbauer): Reevaluate the ignore when https://github.com/dart-lang/sdk/issues/51800 is fixed.
-  SelectionGeometry _value = SelectionGeometry( // ignore: prefer_const_constructors
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
@@ -2085,16 +2099,15 @@ class RenderSelectAll extends RenderProxyBox
 
   @override
   SelectionGeometry get value => _value;
-  // TODO(goderbauer): Reevaluate the ignore when https://github.com/dart-lang/sdk/issues/51800 is fixed.
-  SelectionGeometry _value = SelectionGeometry( // ignore: prefer_const_constructors
+  SelectionGeometry _value = const SelectionGeometry(
     hasContent: true,
     status: SelectionStatus.uncollapsed,
-    startSelectionPoint: const SelectionPoint(
+    startSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,
     ),
-    endSelectionPoint: const SelectionPoint(
+    endSelectionPoint: SelectionPoint(
       localPosition: Offset.zero,
       lineHeight: 0.0,
       handleType: TextSelectionHandleType.left,

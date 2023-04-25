@@ -19,6 +19,7 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand({
+    required super.logger,
     bool verboseHelp = false,
   }) : super(verboseHelp: verboseHelp) {
     addCommonDesktopBuildOptions(verboseHelp: verboseHelp);
@@ -51,6 +52,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     if (!globals.platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
+    displayNullSafetyMode(buildInfo);
     await buildWindows(
       flutterProject.windows,
       buildInfo,

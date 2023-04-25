@@ -927,7 +927,7 @@ Future<void> _runFrameworkTests() async {
     }
   }
 
-  Future<void> runFixTests() async {
+  Future<void> runFixTests(String package) async {
     final List<String> args = <String>[
       'fix',
       '--compare-to-golden',
@@ -935,7 +935,7 @@ Future<void> _runFrameworkTests() async {
     await runCommand(
       dart,
       args,
-      workingDirectory: path.join(flutterRoot, 'packages', 'flutter', 'test_fixes'),
+      workingDirectory: path.join(flutterRoot, 'packages', package, 'test_fixes'),
     );
   }
 
@@ -965,7 +965,8 @@ Future<void> _runFrameworkTests() async {
   Future<void> runSlow() async {
     printProgress('${green}Running slow package tests$reset for directories other than packages/flutter');
     await runTracingTests();
-    await runFixTests();
+    await runFixTests('flutter');
+    await runFixTests('flutter_test');
     await runPrivateTests();
   }
 
@@ -1130,6 +1131,7 @@ Future<void> _runWebUnitTests(String webRenderer) async {
 
 /// Coarse-grained integration tests running on the Web.
 Future<void> _runWebLongRunningTests() async {
+  final String engineVersion = File(engineVersionFile).readAsStringSync().trim();
   final List<ShardRunner> tests = <ShardRunner>[
     for (String buildMode in _kAllBuildModes) ...<ShardRunner>[
       () => _runFlutterDriverWebTest(
@@ -1223,6 +1225,10 @@ Future<void> _runWebLongRunningTests() async {
     () => _runWebDebugTest('lib/stack_trace.dart'),
     () => _runWebDebugTest('lib/framework_stack_trace.dart'),
     () => _runWebDebugTest('lib/web_directory_loading.dart'),
+    () => _runWebDebugTest('lib/web_resources_cdn_test.dart',
+      additionalArguments: <String>[
+        '--dart-define=TEST_FLUTTER_ENGINE_VERSION=$engineVersion',
+      ]),
     () => _runWebDebugTest('test/test.dart'),
     () => _runWebDebugTest('lib/null_safe_main.dart'),
     () => _runWebDebugTest('lib/web_define_loading.dart',

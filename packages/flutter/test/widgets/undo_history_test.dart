@@ -311,8 +311,9 @@ void main() {
 
     testWidgets('changes should send setUndoState to the UndoManagerConnection on iOS', (WidgetTester tester) async {
       final List<MethodCall> log = <MethodCall>[];
-      SystemChannels.undoManager.setMockMethodCallHandler((MethodCall methodCall) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.undoManager, (MethodCall methodCall) async {
         log.add(methodCall);
+        return null;
       });
       final FocusNode focusNode = FocusNode();
 

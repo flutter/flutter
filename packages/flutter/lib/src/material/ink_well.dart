@@ -41,8 +41,10 @@ abstract class InteractiveInkFeature extends InkFeature {
     required super.controller,
     required super.referenceBox,
     required Color color,
+    ShapeBorder? customBorder,
     super.onRemoved,
-  }) : _color = color;
+  }) : _color = color,
+       _customBorder = customBorder;
 
   /// Called when the user input that triggered this feature's appearance was confirmed.
   ///
@@ -64,6 +66,17 @@ abstract class InteractiveInkFeature extends InkFeature {
       return;
     }
     _color = value;
+    controller.markNeedsPaint();
+  }
+
+  /// The ink's optional custom border.
+  ShapeBorder? get customBorder => _customBorder;
+  ShapeBorder? _customBorder;
+  set customBorder(ShapeBorder? value) {
+    if (value == _customBorder) {
+      return;
+    }
+    _customBorder = value;
     controller.markNeedsPaint();
   }
 
@@ -854,10 +867,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       }
       initStatesController();
     }
-    if (widget.customBorder != oldWidget.customBorder ||
-        widget.radius != oldWidget.radius ||
-        widget.borderRadius != oldWidget.borderRadius ||
-        widget.highlightShape != oldWidget.highlightShape) {
+    if (widget.radius != oldWidget.radius ||
+        widget.highlightShape != oldWidget.highlightShape ||
+        widget.borderRadius != oldWidget.borderRadius) {
       final InkHighlight? hoverHighlight = _highlights[_HighlightType.hover];
       if (hoverHighlight != null) {
         hoverHighlight.dispose();
@@ -868,6 +880,9 @@ class _InkResponseState extends State<_InkResponseStateWidget>
         focusHighlight.dispose();
         // Do not call updateFocusHighlights() here because it is called below
       }
+    }
+    if (widget.customBorder != oldWidget.customBorder) {
+      _updateHighlightsAndSplashes();
     }
     if (enabled != isWidgetEnabled(oldWidget)) {
       statesController.update(MaterialState.disabled, !enabled);
@@ -920,12 +935,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (type) {
       case _HighlightType.pressed:
         statesController.update(MaterialState.pressed, value);
-        break;
       case _HighlightType.hover:
         if (callOnHover) {
           statesController.update(MaterialState.hovered, value);
         }
-        break;
       case _HighlightType.focus:
         // see handleFocusUpdate()
         break;
@@ -947,13 +960,10 @@ class _InkResponseState extends State<_InkResponseStateWidget>
           switch (type) {
             case _HighlightType.pressed:
               resolvedOverlayColor = widget.highlightColor ?? theme.highlightColor;
-              break;
             case _HighlightType.focus:
               resolvedOverlayColor = widget.focusColor ?? theme.focusColor;
-              break;
             case _HighlightType.hover:
               resolvedOverlayColor = widget.hoverColor ?? theme.hoverColor;
-              break;
           }
         }
         final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
@@ -982,18 +992,32 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (type) {
       case _HighlightType.pressed:
         widget.onHighlightChanged?.call(value);
-        break;
       case _HighlightType.hover:
         if (callOnHover) {
           widget.onHover?.call(value);
         }
-        break;
       case _HighlightType.focus:
         break;
     }
   }
 
-  InteractiveInkFeature _createInkFeature(Offset globalPosition) {
+  void _updateHighlightsAndSplashes() {
+    for (final InkHighlight? highlight in _highlights.values) {
+      if (highlight != null) {
+        highlight.customBorder = widget.customBorder;
+      }
+    }
+    if (_currentSplash != null) {
+      _currentSplash!.customBorder = widget.customBorder;
+    }
+    if (_splashes != null && _splashes!.isNotEmpty) {
+      for (final InteractiveInkFeature inkFeature in _splashes!) {
+        inkFeature.customBorder = widget.customBorder;
+      }
+    }
+  }
+
+  InteractiveInkFeature _createSplash(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
     final RenderBox referenceBox = context.findRenderObject()! as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
@@ -1055,10 +1079,8 @@ class _InkResponseState extends State<_InkResponseStateWidget>
     switch (FocusManager.instance.highlightMode) {
       case FocusHighlightMode.touch:
         showFocus = false;
-        break;
       case FocusHighlightMode.traditional:
         showFocus = _shouldShowFocus;
-        break;
     }
     updateHighlight(_HighlightType.focus, value: showFocus);
   }
@@ -1112,7 +1134,7 @@ class _InkResponseState extends State<_InkResponseStateWidget>
       globalPosition = details!.globalPosition;
     }
     statesController.update(MaterialState.pressed, true); // ... before creating the splash
-    final InteractiveInkFeature splash = _createInkFeature(globalPosition);
+    final InteractiveInkFeature splash = _createSplash(globalPosition);
     _splashes ??= HashSet<InteractiveInkFeature>();
     _splashes!.add(splash);
     _currentSplash?.cancel();
@@ -1192,17 +1214,26 @@ class _InkResponseState extends State<_InkResponseStateWidget>
   }
 
   bool isWidgetEnabled(_InkResponseStateWidget widget) {
+    return _primaryButtonEnabled(widget) || _secondaryButtonEnabled(widget);
+  }
+
+  bool _primaryButtonEnabled(_InkResponseStateWidget widget) {
     return widget.onTap != null
       || widget.onDoubleTap != null
       || widget.onLongPress != null
       || widget.onTapUp != null
-      || widget.onTapDown != null
-      || widget.onSecondaryTap != null
+      || widget.onTapDown != null;
+  }
+
+  bool _secondaryButtonEnabled(_InkResponseStateWidget widget) {
+    return widget.onSecondaryTap != null
       || widget.onSecondaryTapUp != null
       || widget.onSecondaryTapDown != null;
   }
 
   bool get enabled => isWidgetEnabled(widget);
+  bool get _primaryEnabled => _primaryButtonEnabled(widget);
+  bool get _secondaryEnabled => _secondaryButtonEnabled(widget);
 
   void handleMouseEnter(PointerEnterEvent event) {
     _hovering = true;
@@ -1279,23 +1310,26 @@ class _InkResponseState extends State<_InkResponseStateWidget>
             cursor: effectiveMouseCursor,
             onEnter: handleMouseEnter,
             onExit: handleMouseExit,
-            child: Semantics(
-              onTap: widget.excludeFromSemantics || widget.onTap == null ? null : simulateTap,
-              onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : simulateLongPress,
-              child: GestureDetector(
-                onTapDown: enabled ? handleTapDown : null,
-                onTapUp: enabled ? handleTapUp : null,
-                onTap: enabled ? handleTap : null,
-                onTapCancel: enabled ? handleTapCancel : null,
-                onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
-                onLongPress: widget.onLongPress != null ? handleLongPress : null,
-                onSecondaryTapDown: enabled ? handleSecondaryTapDown : null,
-                onSecondaryTapUp: enabled ? handleSecondaryTapUp: null,
-                onSecondaryTap: enabled ? handleSecondaryTap : null,
-                onSecondaryTapCancel: enabled ? handleSecondaryTapCancel : null,
-                behavior: HitTestBehavior.opaque,
-                excludeFromSemantics: true,
-                child: widget.child,
+            child: DefaultSelectionStyle.merge(
+              mouseCursor: effectiveMouseCursor,
+              child: Semantics(
+                onTap: widget.excludeFromSemantics || widget.onTap == null ? null : simulateTap,
+                onLongPress: widget.excludeFromSemantics || widget.onLongPress == null ? null : simulateLongPress,
+                child: GestureDetector(
+                  onTapDown: _primaryEnabled ? handleTapDown : null,
+                  onTapUp: _primaryEnabled ? handleTapUp : null,
+                  onTap: _primaryEnabled ? handleTap : null,
+                  onTapCancel: _primaryEnabled ? handleTapCancel : null,
+                  onDoubleTap: widget.onDoubleTap != null ? handleDoubleTap : null,
+                  onLongPress: widget.onLongPress != null ? handleLongPress : null,
+                  onSecondaryTapDown: _secondaryEnabled ? handleSecondaryTapDown : null,
+                  onSecondaryTapUp: _secondaryEnabled ? handleSecondaryTapUp: null,
+                  onSecondaryTap: _secondaryEnabled ? handleSecondaryTap : null,
+                  onSecondaryTapCancel: _secondaryEnabled ? handleSecondaryTapCancel : null,
+                  behavior: HitTestBehavior.opaque,
+                  excludeFromSemantics: true,
+                  child: widget.child,
+                ),
               ),
             ),
           ),

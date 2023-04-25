@@ -44,7 +44,6 @@ Future<String?> sharedSkSlWriter(Device device, Map<String, Object?>? data, {
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       targetPlatform = TargetPlatform.android;
-      break;
     case TargetPlatform.android:
     case TargetPlatform.darwin:
     case TargetPlatform.ios:

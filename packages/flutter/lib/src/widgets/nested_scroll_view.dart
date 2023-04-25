@@ -196,9 +196,7 @@ class NestedScrollView extends StatefulWidget {
   /// scroll view is scrolled.
   final ScrollController? controller;
 
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
+  /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
   /// Whether the scroll view scrolls in the reading direction.
@@ -1441,7 +1439,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   void updateCanDrag(double totalExtent) {
-    context.setCanDrag(totalExtent > (viewportDimension - maxScrollExtent) || minScrollExtent != maxScrollExtent);
+    context.setCanDrag(physics.allowUserScrolling &&
+        (totalExtent > (viewportDimension - maxScrollExtent) || minScrollExtent != maxScrollExtent));
   }
 
   @override
@@ -1635,7 +1634,6 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
     switch (_writers) {
       case 0:
         extra = ', orphan';
-        break;
       case 1:
         // normal case
         break;
@@ -1942,13 +1940,11 @@ class RenderSliverOverlapInjector extends RenderSliver {
             start = Offset(x, offset.dy);
             end = Offset(x, offset.dy + geometry!.paintExtent);
             delta = Offset(constraints.crossAxisExtent / 5.0, 0.0);
-            break;
           case Axis.horizontal:
             final double y = offset.dy + constraints.crossAxisExtent / 2.0;
             start = Offset(offset.dx, y);
             end = Offset(offset.dy + geometry!.paintExtent, y);
             delta = Offset(0.0, constraints.crossAxisExtent / 5.0);
-            break;
         }
         for (int index = -2; index <= 2; index += 1) {
           paintZigZag(

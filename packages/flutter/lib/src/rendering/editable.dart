@@ -131,7 +131,7 @@ class TextSelectionPoint {
 /// the [VerticalCaretMovementRun] must not be used. The [isValid] property must
 /// be checked before calling [movePrevious], [moveNext] and [moveByOffset],
 /// or accessing [current].
-class VerticalCaretMovementRun extends Iterator<TextPosition> {
+class VerticalCaretMovementRun implements Iterator<TextPosition> {
   VerticalCaretMovementRun._(
     this._editable,
     this._lineMetrics,
@@ -720,6 +720,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
     assert(selection != null);
+    if (!selection!.isValid) {
+      _selectionStartInViewport.value = false;
+      _selectionEndInViewport.value = false;
+      return;
+    }
     final Rect visibleRegion = Offset.zero & size;
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
@@ -1811,7 +1816,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           caretRect.width,
           caretRect.height,
         );
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -1825,7 +1829,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
           caretRect.width,
           caretHeight,
         );
-        break;
     }
 
     caretRect = caretRect.shift(_paintOffset);
@@ -2171,10 +2174,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TextAffinity.upstream:
         // upstream affinity is effectively -1 in text position.
         effectiveOffset = position.offset - 1;
-        break;
       case TextAffinity.downstream:
         effectiveOffset = position.offset;
-        break;
     }
 
     // On iOS, select the previous word if there is a previous word, or select
@@ -2216,7 +2217,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
               extentOffset: position.offset,
             );
           }
-          break;
         case TargetPlatform.fuchsia:
         case TargetPlatform.macOS:
         case TargetPlatform.linux:
@@ -2268,14 +2268,12 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
             baselineOffset = child.getDistanceToBaseline(
               _placeholderSpans[childIndex].baseline!,
             );
-            break;
           case ui.PlaceholderAlignment.aboveBaseline:
           case ui.PlaceholderAlignment.belowBaseline:
           case ui.PlaceholderAlignment.bottom:
           case ui.PlaceholderAlignment.middle:
           case ui.PlaceholderAlignment.top:
             baselineOffset = null;
-            break;
         }
       } else {
         assert(_placeholderSpans[childIndex].alignment != ui.PlaceholderAlignment.baseline);
@@ -2356,13 +2354,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
         _caretPrototype = Rect.fromLTWH(0.0, 0.0, cursorWidth, cursorHeight + 2);
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
       case TargetPlatform.windows:
         _caretPrototype = Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, cursorHeight - 2.0 * _kCaretHeightOffset);
-        break;
     }
   }
 
@@ -3019,8 +3015,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
     final TextSelection? selection = renderEditable.selection;
 
-    // TODO(LongCatIsLooong): skip painting the caret when the selection is
-    // (-1, -1).
+    // TODO(LongCatIsLooong): skip painting caret when selection is (-1, -1): https://github.com/flutter/flutter/issues/79495
     if (selection == null || !selection.isCollapsed) {
       return;
     }
