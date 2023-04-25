@@ -100,7 +100,7 @@ bool BlitCopyTextureToBufferCommandVK::Encode(CommandEncoderVK& encoder) const {
   // cast source and destination to TextureVK
   const auto& src = TextureVK::Cast(*source);
 
-  if (!encoder.Track(source)) {
+  if (!encoder.Track(source) || !encoder.Track(destination)) {
     return false;
   }
 
