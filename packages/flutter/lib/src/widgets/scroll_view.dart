@@ -2094,7 +2094,13 @@ class GridView extends BoxScrollView {
 ///
 /// [TwoDimensionalScrollView] helps orchestrate these pieces by creating the
 /// [TwoDimensionalScrollable] and deferring to its subclass to create the
-/// viewport and delegate.
+/// viewport and supply the [delegate].
+///
+/// A [TwoDimensionalScrollView] has two different [ScrollPosition]s, one for
+/// each [Axis]. This means that there are also two unique [ScrollController]s
+/// for these positions. To provide a ScrollController to access the
+/// ScrollPosition, use the [ScrollableDetails.controller] property of the
+/// associated axis that is provided to this scroll view.
 abstract class TwoDimensionalScrollView extends StatelessWidget {
   /// Creates a widget that scrolls in both dimensions.
   ///
