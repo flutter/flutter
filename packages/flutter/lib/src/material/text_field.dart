@@ -833,6 +833,25 @@ class TextField extends StatefulWidget {
     }
   }
 
+  /// Returns a new [SpellCheckConfiguration] where the given configuration has
+  /// had any missing values replaced with their defaults for the Android
+  /// platform.
+  static SpellCheckConfiguration inferAndroidSpellCheckConfiguration(
+    SpellCheckConfiguration? configuration,
+  ) {
+    if (configuration == null
+      || configuration == const SpellCheckConfiguration.disabled()) {
+      return const SpellCheckConfiguration.disabled();
+    }
+    return configuration.copyWith(
+      misspelledTextStyle: configuration.misspelledTextStyle
+        ?? TextField.materialMisspelledTextStyle,
+      spellCheckSuggestionsToolbarBuilder:
+        configuration.spellCheckSuggestionsToolbarBuilder
+          ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+    );
+  }
+
   @override
   State<TextField> createState() => _TextFieldState();
 
@@ -1236,19 +1255,24 @@ class _TextFieldState extends State<TextField> with RestorationMixin implements 
     ];
 
     // Set configuration as disabled if not otherwise specified. If specified,
-    // ensure that configuration uses Material text style for misspelled words
-    // unless a custom style is specified.
-    final SpellCheckConfiguration spellCheckConfiguration =
-      widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
-        ? widget.spellCheckConfiguration!.copyWith(
-            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? TextField.materialMisspelledTextStyle,
-            spellCheckSuggestionsToolbarBuilder:
-              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-                ?? TextField.defaultSpellCheckSuggestionsToolbarBuilder,
-          )
-        : const SpellCheckConfiguration.disabled();
+    // ensure that configuration uses the correct style for misspelled words for
+    // the current platform, unless a custom style is specified.
+    final SpellCheckConfiguration spellCheckConfiguration;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        spellCheckConfiguration =
+            CupertinoTextField.inferIOSSpellCheckConfiguration(
+              widget.spellCheckConfiguration,
+            );
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        spellCheckConfiguration = TextField.inferAndroidSpellCheckConfiguration(
+          widget.spellCheckConfiguration,
+        );
+    }
 
     TextSelectionControls? textSelectionControls = widget.selectionControls;
     final bool paintCursorAboveText;
