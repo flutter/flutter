@@ -15,5 +15,8 @@
 ///    describing how the `url_launcher` package was created using [flutter_web_plugins].
 library flutter_web_plugins;
 
-export 'src/non_web_exports.dart'
-    if (dart.library.ui_web) 'src/web_exports.dart';
+export 'src/navigation/url_strategy.dart';
+export 'src/navigation/utils.dart';
+export 'src/navigation_common/platform_location.dart';
+export 'src/plugin_event_channel.dart';
+export 'src/plugin_registry.dart';
