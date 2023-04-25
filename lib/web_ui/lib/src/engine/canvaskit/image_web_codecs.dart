@@ -14,7 +14,6 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 

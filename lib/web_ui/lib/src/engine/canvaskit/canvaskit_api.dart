@@ -16,7 +16,6 @@ import 'dart:js_interop';
 import 'dart:js_util' as js_util;
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 
@@ -3623,14 +3622,14 @@ void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
   // CommonJS is being used, and we shouldn't have any problems.
   if (exports == null) {
     final Object? exportsAccessor = js_util.jsify(<String, dynamic>{
-      'get': allowInterop(() {
+      'get': js_util.allowInterop(() {
         if (domDocument.currentScript == canvasKitScript) {
           return js_util.callConstructor(objectConstructor, <Object>[]);
         } else {
           return _flutterWebCachedExports;
         }
       }),
-      'set': allowInterop((dynamic value) {
+      'set': js_util.allowInterop((dynamic value) {
         _flutterWebCachedExports = value;
       }),
       'configurable': true,
@@ -3640,14 +3639,14 @@ void patchCanvasKitModule(DomHTMLScriptElement canvasKitScript) {
   }
   if (module == null) {
     final Object? moduleAccessor = js_util.jsify(<String, dynamic>{
-      'get': allowInterop(() {
+      'get': js_util.allowInterop(() {
         if (domDocument.currentScript == canvasKitScript) {
           return js_util.callConstructor(objectConstructor, <Object>[]);
         } else {
           return _flutterWebCachedModule;
         }
       }),
-      'set': allowInterop((dynamic value) {
+      'set': js_util.allowInterop((dynamic value) {
         _flutterWebCachedModule = value;
       }),
       'configurable': true,
