@@ -56,6 +56,7 @@ static NSString* const kFinishAutofillContextMethod = @"TextInput.finishAutofill
 static NSString* const kDeprecatedSetSelectionRectsMethod = @"TextInput.setSelectionRects";
 static NSString* const kSetSelectionRectsMethod = @"Scribble.setSelectionRects";
 static NSString* const kStartLiveTextInputMethod = @"TextInput.startLiveTextInput";
+static NSString* const kUpdateConfigMethod = @"TextInput.updateConfig";
 
 #pragma mark - TextInputConfiguration Field Names
 static NSString* const kSecureTextEntry = @"obscureText";
@@ -2124,6 +2125,9 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
   } else if ([method isEqualToString:kStartLiveTextInputMethod]) {
     [self startLiveTextInput];
     result(nil);
+  } else if ([method isEqualToString:kUpdateConfigMethod]) {
+    [self updateConfig:args];
+    result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }
@@ -2461,6 +2465,23 @@ static BOOL IsSelectionRectCloserToPoint(CGPoint point,
 - (void)clearTextInputClient {
   [_activeView setTextInputClient:0];
   _activeView.frame = CGRectZero;
+}
+
+- (void)updateConfig:(NSDictionary*)dictionary {
+  BOOL isSecureTextEntry = [dictionary[kSecureTextEntry] boolValue];
+  for (UIView* view in self.textInputViews) {
+    if ([view isKindOfClass:[FlutterTextInputView class]]) {
+      FlutterTextInputView* inputView = (FlutterTextInputView*)view;
+      // The feature of holding and draging spacebar to move cursor is affected by
+      // secureTextEntry, so when obscureText is updated, we need to update secureTextEntry
+      // and call reloadInputViews.
+      // https://github.com/flutter/flutter/issues/122139
+      if (inputView.isSecureTextEntry != isSecureTextEntry) {
+        inputView.secureTextEntry = isSecureTextEntry;
+        [inputView reloadInputViews];
+      }
+    }
+  }
 }
 
 #pragma mark UIIndirectScribbleInteractionDelegate

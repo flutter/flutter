@@ -164,6 +164,14 @@ FLUTTER_ASSERT_ARC
   return (FlutterTextRange*)range;
 }
 
+- (void)updateConfig:(NSDictionary*)config {
+  FlutterMethodCall* updateConfigCall =
+      [FlutterMethodCall methodCallWithMethodName:@"TextInput.updateConfig" arguments:config];
+  [textInputPlugin handleMethodCall:updateConfigCall
+                             result:^(id _Nullable result){
+                             }];
+}
+
 #pragma mark - Tests
 
 - (void)testWillNotCrashWhenViewControllerIsNil {
@@ -645,6 +653,29 @@ FLUTTER_ASSERT_ARC
                                              withEvent:[OCMArg isNotNil]]);
   OCMVerify(times(1), [mockViewController pressesEnded:[OCMArg isNotNil]
                                              withEvent:[OCMArg isNotNil]]);
+}
+
+- (void)testUpdateSecureTextEntry {
+  NSDictionary* config = self.mutableTemplateCopy;
+  [config setValue:@"YES" forKey:@"obscureText"];
+  [self setClientId:123 configuration:config];
+
+  NSArray<FlutterTextInputView*>* inputFields = self.installedInputViews;
+  FlutterTextInputView* inputView = OCMPartialMock(inputFields[0]);
+
+  __block int callCount = 0;
+  OCMStub([inputView reloadInputViews]).andDo(^(NSInvocation* invocation) {
+    callCount++;
+  });
+
+  XCTAssertTrue(inputView.isSecureTextEntry);
+
+  config = self.mutableTemplateCopy;
+  [config setValue:@"NO" forKey:@"obscureText"];
+  [self updateConfig:config];
+
+  XCTAssertEqual(callCount, 1);
+  XCTAssertFalse(inputView.isSecureTextEntry);
 }
 
 #pragma mark - TextEditingDelta tests
