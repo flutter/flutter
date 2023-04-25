@@ -1079,6 +1079,10 @@ class _ShortcutsState extends State<Shortcuts> {
 /// See also:
 ///  * [Shortcuts], a more powerful widget for defining key bindings.
 ///  * [Focus], a widget that defines which widgets can receive keyboard focus.
+///  * [FocusScope], a widget that restricts focus traversal to its sub-tree of
+///    focus nodes. Consider adding a [FocusScope] as the direct child to a
+///    [CallbackShortcuts] when shortcuts are expected to be available after a
+///    call to [FocusNode.unfocus] on a descendant [FocusNode].
 class CallbackShortcuts extends StatelessWidget {
   /// Creates a const [CallbackShortcuts] widget.
   const CallbackShortcuts({

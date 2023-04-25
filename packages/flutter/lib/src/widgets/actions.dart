@@ -1092,6 +1092,14 @@ class _ActionsScope extends InheritedWidget {
 /// provides focus and hover capabilities.
 ///
 /// It hosts its own [FocusNode] or uses [focusNode], if given.
+///
+/// See also:
+///  * [Shortcuts], a more powerful widget for defining key bindings.
+///  * [Focus], a widget that defines which widgets can receive keyboard focus.
+///  * [FocusScope], a widget that restricts focus traversal to its sub-tree of
+///    focus nodes. Consider adding a [FocusScope] as the direct child to a
+///    [FocusableActionDetector] when shortcuts are expected to be available
+///    after a call to [FocusNode.unfocus] on a descendant [FocusNode].
 class FocusableActionDetector extends StatefulWidget {
   /// Create a const [FocusableActionDetector].
   ///
