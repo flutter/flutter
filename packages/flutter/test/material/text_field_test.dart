@@ -9498,13 +9498,13 @@ void main() {
       await gesture.moveTo(hPos);
       await tester.pumpAndSettle();
 
-      final List<FadeTransition> transitions = find.descendant(
+      List<FadeTransition> transitions = find.descendant(
         of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
         matching: find.byType(FadeTransition),
       ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       expect(transitions.length, 2);
-      final FadeTransition left = transitions[0];
-      final FadeTransition right = transitions[1];
+      FadeTransition left = transitions[0];
+      FadeTransition right = transitions[1];
       expect(left.opacity.value, equals(0.0));
       expect(right.opacity.value, equals(0.0));
 
@@ -9515,8 +9515,17 @@ void main() {
 
       // Toolbar should re-appear after a drag.
       await gesture.up();
-      await tester.pump();
+      await tester.pumpAndSettle();
       expect(find.byType(TextButton), isContextMenuProvidedByPlatform ? findsNothing : findsNWidgets(4));
+      transitions = find.descendant(
+        of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_SelectionHandleOverlay'),
+        matching: find.byType(FadeTransition),
+      ).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
+      expect(transitions.length, 2);
+      left = transitions[0];
+      right = transitions[1];
+      expect(left.opacity.value, equals(1.0));
+      expect(right.opacity.value, equals(1.0));
     },
     variant: TargetPlatformVariant.only(TargetPlatform.android),
   );
