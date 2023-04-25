@@ -55,17 +55,6 @@ enum SelectionResult {
   none,
 }
 
-/// The mode of a [SelectionEdgeUpdateEvent].
-///
-/// Used by [SelectionEdgeUpdateEvent] to decide how to move the selection.
-enum SelectionMode {
-  /// The selection moves by character.
-  character,
-
-  /// The selection moves word-by-word.
-  words,
-}
-
 /// The abstract interface to handle [SelectionEvent]s.
 ///
 /// This interface is extended by [Selectable] and [SelectionContainerDelegate]
@@ -386,7 +375,7 @@ class SelectWordSelectionEvent extends SelectionEvent {
 ///
 /// The [globalPosition] contains the new offset of the edge.
 ///
-/// The [mode] contains the granularity that the selection edge should move by.
+/// The [granularity] contains the granularity that the selection edge should move by.
 ///
 /// This event is dispatched when the framework detects [TapDragStartDetails] in
 /// [SelectionArea]'s gesture recognizers for mouse devices, or the selection
@@ -396,29 +385,29 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   ///
   /// The [globalPosition] contains the location of the selection start edge.
   ///
-  /// The [mode] contains the granularity which the selection edge should move by.
+  /// The [granularity] contains the granularity which the selection edge should move by.
   const SelectionEdgeUpdateEvent.forStart({
     required this.globalPosition,
-    SelectionMode? selectionMode
-  }) : mode = selectionMode ?? SelectionMode.character, super._(SelectionEventType.startEdgeUpdate);
+    TextGranularity? textGranularity
+  }) : granularity = textGranularity ?? TextGranularity.character, super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
   /// The [globalPosition] contains the new location of the selection end edge.
   ///
-  /// The [mode] contains the granularity which the selection edge should move by.
+  /// The [granularity] contains the granularity which the selection edge should move by.
   const SelectionEdgeUpdateEvent.forEnd({
     required this.globalPosition,
-    SelectionMode? selectionMode
-  }) : mode = selectionMode ?? SelectionMode.character, super._(SelectionEventType.endEdgeUpdate);
+    TextGranularity? textGranularity
+  }) : granularity = textGranularity ?? TextGranularity.character, super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
 
-  /// The granularity that the selection edge should move by.
+  /// The granularity for which the selection moves.
   ///
-  /// Defaults to [SelectionMode.character].
-  final SelectionMode mode;
+  /// Defaults to [TextGranularity.character].
+  final TextGranularity granularity;
 }
 
 /// Extends the start or end of the selection by a given [TextGranularity].

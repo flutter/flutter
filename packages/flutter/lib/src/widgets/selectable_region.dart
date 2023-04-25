@@ -529,12 +529,12 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case 2:
         if (_shouldMoveEndEdge(details)) {
           // Hold the start edge at the word located at the beginning of the drag.
-          _selectStartTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, selectionMode: SelectionMode.words);
-          _selectEndTo(offset: details.globalPosition, continuous: true, selectionMode: SelectionMode.words);
+          _selectStartTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, textGranularity: TextGranularity.word);
+          _selectEndTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
         } else {
-          _selectStartTo(offset: details.globalPosition, continuous: true, selectionMode: SelectionMode.words);
+          _selectStartTo(offset: details.globalPosition, continuous: true, textGranularity: TextGranularity.word);
           // Hold the end edge at the word located at the beginning of the drag.
-          _selectEndTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, selectionMode: SelectionMode.words);
+          _selectEndTo(offset: details.globalPosition - details.offsetFromOrigin, continuous: true, textGranularity: TextGranularity.word);
         }
     }
   }
@@ -640,7 +640,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// If the selectable subtree returns a [SelectionResult.pending], this method
   /// continues to send [SelectionEdgeUpdateEvent]s every frame until the result
   /// is not pending or users end their gestures.
-  void _triggerSelectionEndEdgeUpdate({SelectionMode? selectionMode}) {
+  void _triggerSelectionEndEdgeUpdate({TextGranularity? textGranularity}) {
     // This method can be called when the drag is not in progress. This can
     // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
@@ -649,14 +649,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       return;
     }
     if (_selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!, selectionMode: selectionMode)) == SelectionResult.pending) {
+        SelectionEdgeUpdateEvent.forEnd(globalPosition: _selectionEndPosition!, textGranularity: textGranularity)) == SelectionResult.pending) {
       _scheduledSelectionEndEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectionEndEdgeUpdate) {
           return;
         }
         _scheduledSelectionEndEdgeUpdate = false;
-        _triggerSelectionEndEdgeUpdate(selectionMode: selectionMode);
+        _triggerSelectionEndEdgeUpdate(textGranularity: textGranularity);
       });
       return;
     }
@@ -694,7 +694,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   /// If the selectable subtree returns a [SelectionResult.pending], this method
   /// continues to send [SelectionEdgeUpdateEvent]s every frame until the result
   /// is not pending or users end their gestures.
-  void _triggerSelectionStartEdgeUpdate({SelectionMode? selectionMode}) {
+  void _triggerSelectionStartEdgeUpdate({TextGranularity? textGranularity}) {
     // This method can be called when the drag is not in progress. This can
     // happen if the child scrollable returns SelectionResult.pending, and
     // the selection area scheduled a selection update for the next frame, but
@@ -703,14 +703,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       return;
     }
     if (_selectable?.dispatchSelectionEvent(
-        SelectionEdgeUpdateEvent.forStart(globalPosition: _selectionStartPosition!, selectionMode: selectionMode)) == SelectionResult.pending) {
+        SelectionEdgeUpdateEvent.forStart(globalPosition: _selectionStartPosition!, textGranularity: textGranularity)) == SelectionResult.pending) {
       _scheduledSelectionStartEdgeUpdate = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         if (!_scheduledSelectionStartEdgeUpdate) {
           return;
         }
         _scheduledSelectionStartEdgeUpdate = false;
-        _triggerSelectionStartEdgeUpdate(selectionMode: selectionMode);
+        _triggerSelectionStartEdgeUpdate(textGranularity: textGranularity);
       });
       return;
     }
@@ -922,7 +922,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// The `offset` is in global coordinates.
   ///
-  /// Provide the `selectionMode` if the selection should not move the default
+  /// Provide the `textGranularity` if the selection should not move the default
   /// character by character.
   ///
   /// See also:
@@ -931,14 +931,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void _selectEndTo({required Offset offset, bool continuous = false, SelectionMode? selectionMode}) {
+  void _selectEndTo({required Offset offset, bool continuous = false, TextGranularity? textGranularity}) {
     if (!continuous) {
-      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset, selectionMode: selectionMode));
+      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: offset, textGranularity: textGranularity));
       return;
     }
     if (_selectionEndPosition != offset) {
       _selectionEndPosition = offset;
-      _triggerSelectionEndEdgeUpdate(selectionMode: selectionMode);
+      _triggerSelectionEndEdgeUpdate(textGranularity: textGranularity);
     }
   }
 
@@ -960,7 +960,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///
   /// The `offset` is in global coordinates.
   ///
-  /// Provide the `selectionMode` if the selection should not move the default
+  /// Provide the `textGranularity` if the selection should not move the default
   /// character by character.
   ///
   /// See also:
@@ -969,14 +969,14 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   ///  * [_clearSelection], which clear the ongoing selection.
   ///  * [_selectWordAt], which selects a whole word at the location.
   ///  * [selectAll], which selects the entire content.
-  void _selectStartTo({required Offset offset, bool continuous = false, SelectionMode? selectionMode}) {
+  void _selectStartTo({required Offset offset, bool continuous = false, TextGranularity? textGranularity}) {
     if (!continuous) {
-      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: offset, selectionMode: selectionMode));
+      _selectable?.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: offset, textGranularity: textGranularity));
       return;
     }
     if (_selectionStartPosition != offset) {
       _selectionStartPosition = offset;
-      _triggerSelectionStartEdgeUpdate(selectionMode: selectionMode);
+      _triggerSelectionStartEdgeUpdate(textGranularity: textGranularity);
     }
   }
 

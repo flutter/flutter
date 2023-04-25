@@ -1397,13 +1397,16 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
         final SelectionEdgeUpdateEvent edgeUpdate = event as SelectionEdgeUpdateEvent;
-        final SelectionMode selectionMode = event.mode;
+        final TextGranularity granularity = event.granularity;
 
-        switch (selectionMode) {
-          case SelectionMode.character:
+        switch (granularity) {
+          case TextGranularity.character:
             result = _updateSelectionEdge(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
-          case SelectionMode.words:
+          case TextGranularity.word:
             result = _updateSelectionEdgeByWord(edgeUpdate.globalPosition, isEnd: edgeUpdate.type == SelectionEventType.endEdgeUpdate);
+          case TextGranularity.document:
+          case TextGranularity.line:
+            assert(granularity == TextGranularity.document || granularity == TextGranularity.line, 'Moving the selection edge by line or document is not supported.');
         }
       case SelectionEventType.clear:
         result = _handleClearSelection();
