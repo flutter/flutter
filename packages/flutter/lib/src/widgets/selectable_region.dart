@@ -436,7 +436,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
-        // From observation, these platform's reset their tap count to 0 when
+        // From observation, these platforms reset their tap count to 0 when
         // the number of consecutive taps exceeds the max consecutive tap supported.
         // For example on Debian Linux with GTK, when going past a triple click,
         // on the fourth click the selection is moved to the precise click
@@ -446,7 +446,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
       case TargetPlatform.windows:
-        // From observation, these platform's either hold their tap count at the max
+        // From observation, these platforms either hold their tap count at the max
         // consecutive tap supported. For example on macOS, when going past a triple
         // click, the selection should be retained at the paragraph that was first
         // selected on triple click.
@@ -514,11 +514,7 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
       return false;
     }
 
-    if (isPositionAtOrBelowStartingBaseline) {
-      return true;
-    } else {
-      return false;
-    }
+    return isPositionAtOrBelowStartingBaseline;
   }
 
   void _handleMouseDragUpdate(TapDragUpdateDetails details) {
