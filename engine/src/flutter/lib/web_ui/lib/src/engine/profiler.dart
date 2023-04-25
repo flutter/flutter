@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:js_interop';
 
-import 'package:js/js.dart';
 import 'package:ui/ui.dart' as ui;
 
 import 'dom.dart';

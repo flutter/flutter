@@ -7,7 +7,6 @@ import 'dart:js_interop';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
 import 'package:js/js_util.dart' as js_util;
 import 'package:meta/meta.dart';
 

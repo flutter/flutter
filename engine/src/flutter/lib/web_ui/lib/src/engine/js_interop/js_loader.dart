@@ -5,7 +5,8 @@
 @JS()
 library js_loader;
 
-import 'package:js/js.dart';
+import 'dart:js_interop';
+
 import 'package:js/js_util.dart' as js_util;
 
 import '../configuration.dart';

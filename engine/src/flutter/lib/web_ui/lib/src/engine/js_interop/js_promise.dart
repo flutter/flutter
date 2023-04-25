@@ -5,7 +5,8 @@
 @JS()
 library js_promise;
 
-import 'package:js/js.dart';
+import 'dart:js_interop';
+
 import 'package:js/js_util.dart' as js_util;
 
 import '../util.dart';
@@ -38,7 +39,7 @@ abstract class Promise<T extends Object?> {
 typedef PromiseExecutor<T extends Object?> = void Function(PromiseResolver<T> resolve, PromiseRejecter reject);
 
 Promise<T> futureToPromise<T extends Object>(Future<T> future) {
-  return Promise<T>(allowInterop((PromiseResolver<T> resolver, PromiseRejecter rejecter) {
+  return Promise<T>(js_util.allowInterop((PromiseResolver<T> resolver, PromiseRejecter rejecter) {
     future.then(
       (T value) => resolver.resolve(value),
       onError: (Object? error) {

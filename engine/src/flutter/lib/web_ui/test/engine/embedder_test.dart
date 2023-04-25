@@ -5,7 +5,7 @@
 library embedder_test; // We need this to mess with the ShadowDOM.
 
 import 'dart:js_interop';
-import 'package:js/js.dart';
+
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';

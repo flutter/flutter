@@ -4,8 +4,6 @@
 
 import 'dart:js_interop';
 
-import 'package:js/js.dart';
-
 @JS()
 @staticInterop
 class SkwasmInstance {}

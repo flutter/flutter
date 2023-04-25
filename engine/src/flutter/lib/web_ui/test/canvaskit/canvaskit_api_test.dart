@@ -6,7 +6,6 @@ import 'dart:js_interop';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 

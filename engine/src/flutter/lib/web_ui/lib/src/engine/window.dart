@@ -6,9 +6,9 @@
 library window;
 
 import 'dart:async';
+import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:js/js.dart';
 import 'package:meta/meta.dart';
 import 'package:ui/ui.dart' as ui;
 import 'package:ui/ui_web/src/ui_web.dart' as ui_web;

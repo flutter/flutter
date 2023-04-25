@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
-import 'package:js/js.dart';
 
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';

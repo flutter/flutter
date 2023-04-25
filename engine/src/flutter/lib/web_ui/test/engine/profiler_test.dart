@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
-import 'package:js/js.dart';
+
+import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
 import 'package:ui/src/engine.dart';
@@ -45,7 +46,7 @@ void _profilerTests() {
 
   test('can listen to benchmarks', () {
     final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
-    onBenchmark = allowInterop((String name, num value) {
+    onBenchmark = js_util.allowInterop((String name, num value) {
       data.add(BenchmarkDatapoint(name, value));
     });
 
@@ -68,7 +69,7 @@ void _profilerTests() {
     final List<BenchmarkDatapoint> data = <BenchmarkDatapoint>[];
 
     // Wrong callback signature.
-    onBenchmark = allowInterop((num value) {
+    onBenchmark = js_util.allowInterop((num value) {
       data.add(BenchmarkDatapoint('bad', value));
     });
     expect(

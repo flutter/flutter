@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:js_interop';
-import 'package:js/js.dart';
+
 import 'package:js/js_util.dart' as js_util;
 import 'package:test/bootstrap/browser.dart';
 import 'package:test/test.dart';
@@ -21,7 +21,7 @@ void main() {
   // Prepare _flutter.loader.didCreateEngineInitializer, so it's ready in the page ASAP.
   loader = js_util.jsify(<String, Object>{
     'loader': <String, Object>{
-      'didCreateEngineInitializer': allowInterop(() { print('not mocked'); }),
+      'didCreateEngineInitializer': js_util.allowInterop(() { print('not mocked'); }),
     },
   });
   internalBootstrapBrowserTest(() => testMain);
@@ -36,7 +36,7 @@ void testMain() {
     }
 
     // Prepare the DOM for: _flutter.loader.didCreateEngineInitializer
-    didCreateEngineInitializer = allowInterop(didCreateEngineInitializerMock);
+    didCreateEngineInitializer = js_util.allowInterop(didCreateEngineInitializerMock);
 
     // Reset the engine
     engine.debugResetEngineInitializationState();

@@ -5,7 +5,8 @@
 @JS()
 library js_url_strategy;
 
-import 'package:js/js.dart';
+import 'dart:js_interop';
+
 import 'package:ui/ui.dart' as ui;
 
 import '../dom.dart';
