@@ -91,6 +91,12 @@ void main() {
     createCoreMockProjectFiles();
   }
 
+  void createMinimalMockProjectFilesWithCustomNaming() {
+    fileSystem.directory(fileSystem.path.join('macos', 'RenamedProj.xcodeproj')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('macos', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
+    createCoreMockProjectFiles();
+  }
+
   // Creates a FakeCommand for the xcodebuild call to build the app
   // in the given configuration.
   FakeCommand setUpFakeXcodeBuildHandler(String configuration, { bool verbose = false, void Function()? onRun }) {
@@ -152,6 +158,26 @@ STDERR STUFF
     ), throwsToolExit(message: 'No macOS desktop project configured. See '
       'https://docs.flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-app '
       'to learn about adding macOS support to a project.'));
+  }, overrides: <Type, Generator>{
+    Platform: () => macosPlatform,
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+  });
+
+  testUsingContext('macOS build successfully with renamed .xcproj/.xcworkspace files', () async {
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFilesWithCustomNaming();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'macos', '--no-pub']
+    );
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
     FileSystem: () => fileSystem,

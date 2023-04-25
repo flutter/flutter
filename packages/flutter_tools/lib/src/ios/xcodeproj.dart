@@ -472,33 +472,22 @@ class XcodeProjectInfo {
     return false;
   }
 
+  /// The expected scheme for [buildInfo].
+  @visibleForTesting
+  static String expectedSchemeFor(BuildInfo? buildInfo) {
+    return sentenceCase(buildInfo?.flavor ?? 'runner');
+  }
+
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique
   /// best match.
-  String? schemeFor({required String hostAppProjectName, String? flavor}) {
-    if (flavor != null) {
-      // if flavor exists, should take precedence over everything else
-      final String expectedScheme = sentenceCase(flavor);
-      if (schemes.contains(expectedScheme)) {
-        return expectedScheme;
-      }
-      return _uniqueMatch(schemes, (String candidate) {
-        return candidate.toLowerCase() == expectedScheme.toLowerCase();
-      });
-    }
-    // if theres no flavor, then regardless if the project
-    // is renamed or the default 'Runner', it should match one of the schemes
-    final String expectedScheme = sentenceCase(hostAppProjectName);
-    String? matchingScheme;
+  String? schemeFor(BuildInfo? buildInfo) {
+    final String expectedScheme = expectedSchemeFor(buildInfo);
     if (schemes.contains(expectedScheme)) {
       return expectedScheme;
     }
-    matchingScheme = _uniqueMatch(schemes, (String candidate) {
+    return _uniqueMatch(schemes, (String candidate) {
       return candidate.toLowerCase() == expectedScheme.toLowerCase();
     });
-    if (matchingScheme == null && schemes.contains('Runner')) {
-      return 'Runner';
-    }
-    return matchingScheme;
   }
 
   Never reportFlavorNotFoundAndExit() {

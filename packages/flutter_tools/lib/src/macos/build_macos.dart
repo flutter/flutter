@@ -97,7 +97,7 @@ Future<void> buildMacOS({
     xcodeProject.parent.path,
     projectFilename: xcodeProjectName,
   );
-  final String? scheme = projectInfo?.schemeFor(hostAppProjectName: flutterProject.macos.hostAppProjectName, flavor: buildInfo.flavor);
+  final String? scheme = projectInfo?.schemeFor(buildInfo);
   if (scheme == null) {
     projectInfo!.reportFlavorNotFoundAndExit();
   }

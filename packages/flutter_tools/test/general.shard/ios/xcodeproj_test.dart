@@ -618,9 +618,9 @@ Information about project "Runner":
   testWithoutContext('expected scheme for non-flavored build is sentence case project name', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release', 'Runner'], <String>['CustomName'], logger);
 
-    expect(info.schemeFor(hostAppProjectName: 'CustomName'), 'CustomName');
-    expect(info.schemeFor(hostAppProjectName: 'customname'), 'CustomName');
-    expect(info.schemeFor(hostAppProjectName: 'CUSTOMNAME'), 'CustomName');
+    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.debug), 'Runner');
+    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
+    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
   });
 
   testWithoutContext('expected build configuration for non-flavored build is derived from BuildMode', () {
@@ -632,9 +632,9 @@ Information about project "Runner":
   testWithoutContext('expected scheme for flavored build is the title-cased flavor', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Runner'], <String>['Hello'], logger);
 
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'hello'), 'Hello');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'Hello'), 'Hello');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'HELLO'), 'Hello');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false)), 'Hello');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)), 'HELLO');
+    expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)), 'Hello');
   });
 
   testWithoutContext('expected build configuration for flavored build is Mode-Flavor', () {
@@ -646,18 +646,11 @@ Information about project "Runner":
   testWithoutContext('scheme for default project is Runner', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
 
-    expect(info.schemeFor(hostAppProjectName: 'Runner'), 'Runner');
-  });
 
-  testWithoutContext('scheme for a custom project with flavor is still flavor', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(
-      <String>['Runner'],
-      <String>['Debug', 'Release'],
-      <String>['TestFlavor', 'Runner'],
-      logger,
-    );
-
-    expect(info.schemeFor(hostAppProjectName: 'CustomName', flavor: 'TestFlavor'), 'TestFlavor');
+    expect(info.schemeFor(BuildInfo.debug), 'Runner');
+    expect(info.schemeFor(BuildInfo.profile), 'Runner');
+    expect(info.schemeFor(BuildInfo.release), 'Runner');
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
   });
 
   testWithoutContext('build configuration for default project is matched against BuildMode', () {
@@ -676,10 +669,12 @@ Information about project "Runner":
       logger,
     );
 
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'Free'), 'Free');
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'Paid'), 'Paid');
-    expect(info.schemeFor(hostAppProjectName: 'Runner'), isNull);
-    expect(info.schemeFor(hostAppProjectName: 'Runner', flavor: 'unknown'), isNull);
+
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false)), 'Free');
+    expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false)), 'Free');
+    expect(info.schemeFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false)), 'Paid');
+    expect(info.schemeFor(BuildInfo.debug), isNull);
+    expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'unknown', treeShakeIcons: false)), isNull);
   });
 
   testWithoutContext('reports default scheme error and exit', () {
@@ -726,18 +721,6 @@ Information about project "Runner":
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.debug, 'Paid', treeShakeIcons: false), 'Paid'), 'Debug paid');
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.profile, 'FREE', treeShakeIcons: false), 'Free'), 'profile - Free');
     expect(info.buildConfigurationFor(const BuildInfo(BuildMode.release, 'paid', treeShakeIcons: false), 'Paid'), 'Release-Paid');
-  });
-
-  testWithoutContext('Test custom naming', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(
-      <String>['Runner'],
-      <String>['debug (free)', 'Debug paid', 'profile - Free', 'Profile-Paid', 'release - Free', 'Release-Paid'],
-      <String>['CustomName', 'Paid'],
-      logger,
-    );
-
-    expect(info.schemeFor(hostAppProjectName: 'CustomName'), 'CustomName');
-    expect(info.schemeFor(hostAppProjectName: 'WrongName'), isNull);
   });
 
   testWithoutContext('build configuration for project with inconsistent naming is null', () {

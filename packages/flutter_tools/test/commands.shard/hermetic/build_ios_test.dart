@@ -90,6 +90,13 @@ void main() {
     createCoreMockProjectFiles();
   }
 
+  void createMinimalMockProjectFilesWithCustomNaming() {
+    fileSystem.directory(fileSystem.path.join('ios', 'RenamedProj.xcodeproj')).createSync(recursive: true);
+    fileSystem.directory(fileSystem.path.join('ios', 'RenamedWorkspace.xcworkspace')).createSync(recursive: true);
+    fileSystem.file(fileSystem.path.join('ios', 'RenamedProj.xcodeproj', 'project.pbxproj')).createSync();
+    createCoreMockProjectFiles();
+  }
+
   const FakeCommand xattrCommand = FakeCommand(command: <String>[
     'xattr', '-r', '-d', 'com.apple.FinderInfo', '/',
   ]);
@@ -129,6 +136,7 @@ void main() {
   FakeCommand setUpFakeXcodeBuildHandler({
     bool verbose = false,
     bool simulator = false,
+    bool customNaming = false,
     String? deviceId,
     int exitCode = 0,
     String? stdout,
@@ -147,7 +155,11 @@ void main() {
           'VERBOSE_SCRIPT_LOGGING=YES'
         else
           '-quiet',
-        '-workspace', 'Runner.xcworkspace',
+        '-workspace',
+        if (customNaming)
+          'RenamedWorkspace.xcworkspace'
+        else
+          'Runner.xcworkspace',
         '-scheme', 'Runner',
         'BUILD_DIR=/build/ios',
         '-sdk',
@@ -264,6 +276,33 @@ void main() {
     ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
       xattrCommand,
       setUpFakeXcodeBuildHandler(onRun: () {
+        fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
+      }),
+      setUpRsyncCommand(),
+    ]),
+    Platform: () => macosPlatform,
+    XcodeProjectInterpreter: () => FakeXcodeProjectInterpreterWithBuildSettings(),
+  });
+
+  testUsingContext('ios build invokes xcode build with renamed xcodeproj and xcworkspace', () async {
+    final BuildCommand command = BuildCommand(
+      androidSdk: FakeAndroidSdk(),
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+      fileSystem: MemoryFileSystem.test(),
+      logger: BufferLogger.test(),
+      osUtils: FakeOperatingSystemUtils(),
+    );
+    createMinimalMockProjectFilesWithCustomNaming();
+
+    await createTestCommandRunner(command).run(
+        const <String>['build', 'ios', '--no-pub']
+    );
+    expect(testLogger.statusText, contains('build/ios/iphoneos/Runner.app'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => fileSystem,
+    ProcessManager: () => FakeProcessManager.list(<FakeCommand>[
+      xattrCommand,
+      setUpFakeXcodeBuildHandler(customNaming: true, onRun: () {
         fileSystem.directory('build/ios/Release-iphoneos/Runner.app').createSync(recursive: true);
       }),
       setUpRsyncCommand(),

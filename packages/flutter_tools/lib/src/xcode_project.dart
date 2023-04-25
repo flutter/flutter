@@ -21,13 +21,12 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform  {
+  final String defaultHostAppProjectName = 'Runner';
   late final String hostAppProjectName = () {
-    const String defaultHostAppProjectName = 'Runner';
-    List<FileSystemEntity> contents;
     if (!hostAppRoot.existsSync()) {
       return defaultHostAppProjectName;
     }
-    contents = hostAppRoot.listSync();
+    final List<FileSystemEntity> contents = hostAppRoot.listSync();
     final FileSystem fileSystem = hostAppRoot.fileSystem;
     for (final Directory entity in contents.whereType<Directory>()) {
       // On certain volume types, there is sometimes a stray `._Runner.xcworkspace` file.
@@ -46,7 +45,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   Directory get hostAppRoot;
 
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
-  File get defaultHostInfoPlist => hostAppRoot.childDirectory(hostAppProjectName).childFile('Info.plist');
+  File get defaultHostInfoPlist => hostAppRoot.childDirectory(defaultHostAppProjectName).childFile('Info.plist');
 
   /// The Xcode project (.xcodeproj directory) of the host app.
   Directory get xcodeProject => hostAppRoot.childDirectory('$hostAppProjectName.xcodeproj');
@@ -305,7 +304,7 @@ class IosProject extends XcodeBasedProject {
     }
 
     if (scheme == null) {
-      scheme = info.schemeFor(hostAppProjectName: hostAppProjectName, flavor: buildInfo?.flavor);
+      scheme = info.schemeFor(buildInfo);
       if (scheme == null) {
         info.reportFlavorNotFoundAndExit();
       }
@@ -412,7 +411,7 @@ class IosProject extends XcodeBasedProject {
       return false;
     }
 
-    final String? defaultScheme = projectInfo.schemeFor(hostAppProjectName: hostAppProjectName, flavor: buildInfo.flavor);
+    final String? defaultScheme = projectInfo.schemeFor(buildInfo);
     if (defaultScheme == null) {
       projectInfo.reportFlavorNotFoundAndExit();
     }
@@ -515,7 +514,7 @@ class IosProject extends XcodeBasedProject {
         ? _flutterLibRoot
             .childDirectory('Flutter')
             .childDirectory('FlutterPluginRegistrant')
-        : hostAppRoot.childDirectory(hostAppProjectName);
+        : hostAppRoot.childDirectory(defaultHostAppProjectName);
   }
 
   File get pluginRegistrantHeader {
