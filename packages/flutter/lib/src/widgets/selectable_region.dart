@@ -500,7 +500,6 @@ class SelectableRegionState extends State<SelectableRegion> with TextSelectionDe
   }
 
   SelectionPoint? _initialDragStartSelectionPoint;
-
   bool _shouldMoveEndEdge(TapDragUpdateDetails details) {
     assert(_selectionDelegate.value.startSelectionPoint != null);
     _initialDragStartSelectionPoint = _initialDragStartSelectionPoint ?? _selectionDelegate.value.startSelectionPoint!;
