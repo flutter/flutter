@@ -388,8 +388,8 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// The [granularity] contains the granularity which the selection edge should move by.
   const SelectionEdgeUpdateEvent.forStart({
     required this.globalPosition,
-    TextGranularity? textGranularity
-  }) : granularity = textGranularity ?? TextGranularity.character, super._(SelectionEventType.startEdgeUpdate);
+    TextGranularity? granularity
+  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.startEdgeUpdate);
 
   /// Creates a selection end edge update event.
   ///
@@ -398,8 +398,8 @@ class SelectionEdgeUpdateEvent extends SelectionEvent {
   /// The [granularity] contains the granularity which the selection edge should move by.
   const SelectionEdgeUpdateEvent.forEnd({
     required this.globalPosition,
-    TextGranularity? textGranularity
-  }) : granularity = textGranularity ?? TextGranularity.character, super._(SelectionEventType.endEdgeUpdate);
+    TextGranularity? granularity
+  }) : granularity = granularity ?? TextGranularity.character, super._(SelectionEventType.endEdgeUpdate);
 
   /// The new location of the selection edge.
   final Offset globalPosition;
