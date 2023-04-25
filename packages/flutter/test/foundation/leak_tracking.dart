@@ -17,7 +17,7 @@ import 'package:meta/meta.dart';
 /// * link bug about memory leak
 ///
 /// 2. Enable [testWidgets] to track leaks, disabled by default for users,
-/// and enabled by default for flutter framework.
+/// and may be enabled by default for flutter framework.
 ///
 /// 3. Replace [testWidgetsWithLeakTracking] with [testWidgets]
 ///
