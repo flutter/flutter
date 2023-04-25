@@ -1402,6 +1402,10 @@ static void SetEntryPoint(flutter::Settings* settings, NSString* entrypoint, NSS
   return _dartProject.get();
 }
 
+- (BOOL)isUsingImpeller {
+  return self.project.isImpellerEnabled;
+}
+
 @end
 
 @implementation FlutterEngineRegistrar {
