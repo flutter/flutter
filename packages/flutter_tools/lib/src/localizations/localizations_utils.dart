@@ -298,7 +298,7 @@ String generateString(String value) {
 /// would be a properly formatted dart string with escapes and/or interpolation. The purpose of this function is to
 /// concatenate these dart strings into a single dart string which can be returned.
 ///
-/// The following rules describe all the cases which needs to be handled:
+/// The following rules describe the kinds of string expressions that can be handled: 
 /// 1. String with only a single interpolated variable is converted to the variable itself e.g. ["'$expr'"] -> "expr".
 /// 2. If one string ends in an interpolation and the next begins with an alphanumeric character, then the former should
 ///    be wrapped in braces e.g. ["'$expr1'", "'another string'"] -> "'${expr1}another string'".
