@@ -118,6 +118,41 @@ void main() {
     expect(log, equals(<int>[1]));
   });
 
+  testWidgets('Radio selected semantics - platform adaptive', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(CupertinoApp(
+      home: Center(
+        child: CupertinoRadio<int>(
+          value: 1,
+          groupValue: 1,
+          onChanged: (int? i) { },
+        ),
+      ),
+    ));
+
+    final bool isApple = defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
+    expect(
+      semantics,
+      includesNodeWith(
+        flags: <SemanticsFlag>[
+          SemanticsFlag.isInMutuallyExclusiveGroup,
+          SemanticsFlag.hasCheckedState,
+          SemanticsFlag.hasEnabledState,
+          SemanticsFlag.isEnabled,
+          SemanticsFlag.isFocusable,
+          SemanticsFlag.isChecked,
+          if (isApple) SemanticsFlag.isSelected,
+        ],
+        actions: <SemanticsAction>[
+          SemanticsAction.tap,
+        ],
+      ),
+    );
+    semantics.dispose();
+  }, variant: TargetPlatformVariant.all());
+
   testWidgets('Radio semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
