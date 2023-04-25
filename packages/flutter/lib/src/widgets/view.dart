@@ -4,6 +4,7 @@
 
 // ignore_for_file: public_member_api_docs
 
+import 'dart:collection';
 import 'dart:ui' show FlutterView, SemanticsUpdate;
 
 import 'package:flutter/rendering.dart';
@@ -286,7 +287,7 @@ class _ViewRenderObjectWidgetElement extends RootSingleChildRenderObjectElementM
 class _ViewScope extends InheritedWidget {
   const _ViewScope({required this.view, required super.child});
 
-  final FlutterView view;
+  final FlutterView? view;
 
   @override
   bool updateShouldNotify(_ViewScope oldWidget) => view != oldWidget.view;
@@ -338,5 +339,157 @@ class ViewHooks {
     return other is ViewHooks
         && renderViewRepository == other.renderViewRepository
         && pipelineOwner == other.pipelineOwner;
+  }
+}
+
+class _MultiChildComponentWidget extends Widget {
+  const _MultiChildComponentWidget({
+    super.key,
+    List<Widget> views = const <Widget>[],
+    Widget? child,
+  }) : _views = views, _child = child;
+
+  // It is up to the subclasses to make the relevant properties public.
+  final List<Widget> _views;
+  final Widget? _child;
+
+  @override
+  Element createElement() => _MultiChildComponentElement(this);
+}
+
+class ViewCollection extends _MultiChildComponentWidget {
+  const ViewCollection({super.key, required super.views}) : assert(views.length > 0);
+
+  List<Widget> get view => _views;
+}
+
+class ViewAnchor extends StatelessWidget {
+  const ViewAnchor({
+    super.key,
+    this.view,
+    required this.child,
+  });
+
+  final Widget? view;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return _MultiChildComponentWidget(
+      views: <Widget>[
+        if (view != null)
+          _ViewScope(
+            view: null,
+            child: view!,
+          ),
+      ],
+      child: child,
+    );
+  }
+}
+
+class _MultiChildComponentElement extends Element {
+  _MultiChildComponentElement(super.widget);
+
+  List<Element> _viewElements = <Element>[];
+  final Set<Element> _forgottenViewElements = HashSet<Element>();
+  Element? _childElement;
+
+  bool _debugAssertChildren() {
+    final _MultiChildComponentWidget typedWidget = widget as _MultiChildComponentWidget;
+    // Each view widget must have a corresponding element.
+    assert(_viewElements.length == typedWidget._views.length);
+    // Iff there is a child widget, it must have a corresponding element.
+    assert((_childElement == null) == (typedWidget._child == null));
+    // The child element is not also a view element.
+    assert(!_viewElements.contains(_childElement));
+    return true;
+  }
+
+  @override
+  void mount(Element? parent, Object? newSlot) {
+    super.mount(parent, newSlot);
+    assert(_viewElements.isEmpty);
+    assert(_childElement == null);
+    rebuild();
+    assert(_debugAssertChildren());
+  }
+
+  @override
+  void update(Widget newWidget) {
+    super.update(newWidget);
+    rebuild(force: true);
+    assert(_debugAssertChildren());
+  }
+
+  @override
+  void performRebuild() {
+    final _MultiChildComponentWidget typedWidget = widget as _MultiChildComponentWidget;
+
+    _childElement = updateChild(_childElement, typedWidget._child, slot);
+
+    final List<Widget> views = typedWidget._views;
+    _viewElements = updateChildren(
+      _viewElements,
+      views,
+      forgottenChildren: _forgottenViewElements,
+      // TODO(goderbauer): figure out slots
+      // slots: List<Object>.generate(stages.length, (_) => View.viewSlot),
+    );
+    _forgottenViewElements.clear();
+
+    super.performRebuild(); // clears the dirty flag
+    assert(_debugAssertChildren());
+  }
+
+  @override
+  void forgetChild(Element child) {
+    if (child == _childElement) {
+      _childElement = null;
+    } else {
+      assert(_viewElements.contains(child));
+      assert(!_forgottenViewElements.contains(child));
+      _forgottenViewElements.add(child);
+    }
+    super.forgetChild(child);
+  }
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (_childElement != null) {
+      visitor(_childElement!);
+    }
+    for (final Element child in _viewElements) {
+      if (!_forgottenViewElements.contains(child)) {
+        visitor(child);
+      }
+    }
+  }
+
+  @override
+  bool get debugDoingBuild => false; // This element does not have a concept of "building".
+
+  @override
+  // TODO(window): Update documentation.
+  // TODO(goderbauer): The base class implementation doesn't consider this currently.
+  RenderObject? get renderObject {
+    // If we don't have a _childElement this returns null on purpose because
+    // nothing above this element has an associated render object.
+    return _childElement?.renderObject;
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    if (_childElement != null) {
+      children.add(_childElement!.toDiagnosticsNode());
+    }
+    for (int i = 0; i < _viewElements.length; i++) {
+      children.add(_viewElements[i].toDiagnosticsNode(
+        name: 'view ${i + 1}',
+        style: DiagnosticsTreeStyle.offstage,
+      ));
+    }
+    return children;
   }
 }
