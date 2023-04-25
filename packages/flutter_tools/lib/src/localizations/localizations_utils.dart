@@ -294,7 +294,14 @@ String generateString(String value) {
 /// Given a list of strings, placeholders, or helper function calls, concatenate
 /// them into one expression to be returned.
 ///
-/// If `isSingleStringVar` is passed, then we want to convert "'$expr'" to "expr".
+/// Each of the strings in [expressions] should be a raw string, which, if it were to be added to a dart file,
+/// would be a properly formatted dart string with escapes and/or interpolation. The purpose of this function is to
+/// concatenate these dart strings into a single dart string which can be returned.
+///
+/// The following rules describe all the cases which needs to be handled:
+/// 1. String with only a single interpolated variable is converted to the variable itself e.g. ["'$expr'"] -> "expr".
+/// 2. If one string ends in an interpolation and the next begins with an alphanumeric character, then the former should
+///    be wrapped in braces e.g. ["'$expr1'", "'another string'"] -> "'${expr1}another string'".
 String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
   if (expressions.isEmpty) {
     return "''";
@@ -304,7 +311,7 @@ String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = f
   } else {
     final String string = expressions.reversed.fold<String>('', (String string, String expression) {
       if (expression[0] != r'$') {
-        return generateString(expression) + string;
+        return expression + string;
       }
       final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
       if (alphanumeric.hasMatch(expression.substring(1)) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {
