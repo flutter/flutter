@@ -1436,7 +1436,7 @@ class _SliverZeroFlexParentDataWidget extends ParentDataWidget<SliverPhysicalPar
   }
 
   @override
-  Type get debugTypicalAncestorWidgetClass => Widget;
+  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
 }
 
 class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
@@ -1459,5 +1459,93 @@ class _SliverConstrainedCrossAxis extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSliverConstrainedCrossAxis renderObject) {
     renderObject.maxExtent = maxExtent;
+  }
+}
+
+/// Set a flex factor for allocating space in the cross axis direction.
+///
+/// This is a [ParentDataWidget] to be used in [SliverCrossAxisGroup].
+/// The remaining space (cross axis extent of the parent minus the extent of
+/// children with constrained cross axis) will be divided according to the flex values.
+class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerParentData> {
+  /// Creates an object that assigns a [flex] value to the child sliver.
+  ///
+  /// The provided [flex] value must be at least 0.
+  const SliverCrossAxisExpanded({
+    super.key,
+    required this.flex,
+    required Widget sliver,
+  }): assert(flex > 0 && flex < double.infinity),
+      super(child: sliver);
+
+  /// Flex value for allocating cross axis extent left after laying out the children with
+  /// constrained cross axis. The children with flex values will have the remaining extent
+  /// allocated proportionally to their flex value. This must an integer between
+  /// 0 and infinity, exclusive.
+  final int flex;
+
+  @override
+  void applyParentData(RenderObject renderObject) {
+    assert(renderObject.parentData is SliverPhysicalContainerParentData);
+    assert(renderObject.parent is RenderSliverCrossAxisGroup);
+    final SliverPhysicalParentData parentData = renderObject.parentData! as SliverPhysicalParentData;
+    bool needsLayout = false;
+
+    if (parentData.crossAxisFlex != flex) {
+      parentData.crossAxisFlex = flex;
+      needsLayout = true;
+    }
+
+    if (needsLayout) {
+      final AbstractNode? targetParent = renderObject.parent;
+      if (targetParent is RenderObject) {
+        targetParent.markNeedsLayout();
+      }
+    }
+  }
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => SliverCrossAxisGroup;
+}
+
+
+/// A sliver that places multiple sliver children in a linear array along
+/// the cross axis.
+///
+/// Each child has a flex value associated with them. By default, [SliverCrossAxisExpanded]
+/// will set these flex values to 1, but the [SliverConstrainedCrossAxis] widget can be used
+/// to explicitly set it to 0, or the [SliverCrossAxisExpanded] [ParentDataWidget] can be used
+/// to set it to a custom flex value greater than 0.
+///
+/// In the case where a flex value is 0, that child must determine their [SliverGeometry.crossAxisExtent]
+/// themselves. For example, the [SliverConstrainedCrossAxis] uses their [SliverConstrainedCrossAxis.maxExtent] as the
+/// [SliverGeometry.crossAxisExtent].
+///
+/// Keep in mind that none of the sliver children in the cross axis group are lazily loaded/destroyed.
+///
+/// See also:
+/// * [SliverCrossAxisExpanded], which is the [ParentDataWidget] for setting a flex
+///   value to a widget.
+/// * [SliverConstrainedCrossAxis], which is a [RenderObjectWidget] for setting
+///   a extent to constrain the widget to.
+///
+/// {@tool dartpad}
+/// In this sample the [SliverCrossAxisGroup] sizes its three [children] so that
+/// the first has a flex value of 1, the second has a max cross axis extent of 200,
+/// and the third has a flex value of 2.
+///
+/// ** See code in examples/api/lib/widgets/sliver/sliver_cross_axis_group.0.dart **
+/// {@end-tool}
+class SliverCrossAxisGroup extends MultiChildRenderObjectWidget {
+  /// Creates a sliver that places sliver children in a linear array along
+  /// the cross axis.
+  const SliverCrossAxisGroup({
+    super.key,
+    required List<Widget> slivers,
+  }): super(children: slivers);
+
+  @override
+  RenderSliverCrossAxisGroup createRenderObject(BuildContext context) {
+    return RenderSliverCrossAxisGroup();
   }
 }
