@@ -4,8 +4,8 @@
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
-import '../build_system/targets/web.dart';
 import '../features.dart';
 import '../globals.dart' as globals;
 import '../html_utils.dart';
@@ -13,6 +13,8 @@ import '../project.dart';
 import '../runner/flutter_command.dart'
     show DevelopmentArtifact, FlutterCommandResult, FlutterOptions;
 import '../web/compile.dart';
+import '../web/file_generators/flutter_service_worker_js.dart';
+import '../web/web_constants.dart';
 import 'build.dart';
 
 class BuildWebCommand extends BuildSubCommand {
@@ -43,22 +45,12 @@ class BuildWebCommand extends BuildSubCommand {
           'The value has to start and end with a slash "/". '
           'For more information: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base'
     );
-    argParser.addOption('pwa-strategy',
-      defaultsTo: kOfflineFirst,
+    argParser.addOption(
+      'pwa-strategy',
+      defaultsTo: ServiceWorkerStrategy.offlineFirst.cliName,
       help: 'The caching strategy to be used by the PWA service worker.',
-      allowed: <String>[
-        kOfflineFirst,
-        kNoneWorker,
-      ],
-      allowedHelp: <String, String>{
-        kOfflineFirst: 'Attempt to cache the application shell eagerly and '
-                       'then lazily cache all subsequent assets as they are loaded. When '
-                       'making a network request for an asset, the offline cache will be '
-                       'preferred.',
-        kNoneWorker:   'Generate a service worker with no body. This is useful for '
-                       'local testing or in cases where the service worker caching functionality '
-                       'is not desirable',
-      },
+      allowed: ServiceWorkerStrategy.values.map((ServiceWorkerStrategy e) => e.cliName),
+      allowedHelp: CliEnum.allowedHelp(ServiceWorkerStrategy.values),
     );
     usesWebRendererOption();
     usesWebResourcesCdnFlag();
@@ -100,13 +92,19 @@ class BuildWebCommand extends BuildSubCommand {
     }
     argParser.addFlag(
       FlutterOptions.kWebWasmFlag,
-      help: 'Compile to WebAssembly rather than JavaScript.\nSee $kWasmPreviewUri for more information.',
+      help: 'Compile to WebAssembly rather than JavaScript.\n$kWasmMoreInfo',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
     argParser.addFlag(
       'omit-type-checks',
       help: 'Omit type checks in Wasm output.',
+      negatable: false,
+      hide: !featureFlags.isFlutterWebWasmEnabled,
+    );
+    argParser.addFlag(
+      'wasm-opt',
+      help: 'Run wasm-opt on the output wasm module.',
       negatable: false,
       hide: !featureFlags.isFlutterWebWasmEnabled,
     );
@@ -142,6 +140,7 @@ class BuildWebCommand extends BuildSubCommand {
       }
       compilerConfig = WasmCompilerConfig(
         omitTypeChecks: boolArg('omit-type-checks'),
+        runWasmOpt: boolArg('wasm-opt'),
       );
     } else {
       compilerConfig = JsCompilerConfig(
@@ -196,7 +195,7 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      stringArg('pwa-strategy')!,
+      ServiceWorkerStrategy.fromCliName(stringArg('pwa-strategy')),
       compilerConfig: compilerConfig,
       baseHref: baseHref,
       outputDirectoryPath: outputDirectoryPath,

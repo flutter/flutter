@@ -7,7 +7,6 @@ import 'package:process/process.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -33,7 +32,7 @@ const String templateAndroidGradlePluginVersion = '7.3.0';
 const String templateDefaultGradleVersionForModule = '7.3.0';
 const String templateKotlinGradlePluginVersion = '1.7.10';
 
-// These versions should match the values in flutter.gradle (FlutterExtension).
+// These versions should match the values in Flutter Gradle Plugin (FlutterExtension).
 // The Flutter Gradle plugin is only applied to app projects, and modules that are built from source
 // using (include_flutter.groovy).
 // The remaining projects are: plugins, and modules compiled as AARs. In modules, the ephemeral directory
@@ -96,9 +95,8 @@ class GradleUtils {
     final Directory androidDir = project.android.hostAppGradleRoot;
     injectGradleWrapperIfNeeded(androidDir);
 
-    final File gradle = androidDir.childFile(
-      _platform.isWindows ? 'gradlew.bat' : 'gradlew',
-    );
+    final File gradle = androidDir.childFile(getGradlewFileName(_platform));
+
     if (gradle.existsSync()) {
       _logger.printTrace('Using gradle from ${gradle.absolute.path}.');
       // If the Gradle executable doesn't have execute permission,
@@ -704,4 +702,13 @@ class GradleForAgp {
   final String agpMin;
   final String agpMax;
   final String minRequiredGradle;
+}
+
+// Returns gradlew file name based on the platform.
+String getGradlewFileName(Platform platform) {
+  if (platform.isWindows) {
+    return 'gradlew.bat';
+  } else {
+    return 'gradlew';
+  }
 }

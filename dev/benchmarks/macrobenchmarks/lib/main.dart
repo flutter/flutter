@@ -34,6 +34,7 @@ import 'src/raster_cache_use_memory.dart';
 import 'src/shader_mask_cache.dart';
 import 'src/simple_animation.dart';
 import 'src/simple_scroll.dart';
+import 'src/sliders.dart';
 import 'src/stack_size.dart';
 import 'src/text.dart';
 
@@ -85,6 +86,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kListTextLayoutRouteName: (BuildContext context) => const ColumnOfText(),
         kAnimatedComplexImageFilteredPerfRouteName: (BuildContext context) => const AnimatedComplexImageFiltered(),
         kAnimatedBlurBackdropFilter: (BuildContext context) => const AnimatedBlurBackdropFilter(),
+        kSlidersRouteName: (BuildContext context) => const SlidersPage(),
       },
     );
   }
@@ -317,6 +319,13 @@ class HomePage extends StatelessWidget {
             child: const Text('An animating backdrop filter'),
             onPressed: () {
               Navigator.pushNamed(context, kAnimatedBlurBackdropFilter);
+            },
+          ),
+          ElevatedButton(
+            key: const Key(kSlidersRouteName),
+            child: const Text('Sliders'),
+            onPressed: () {
+              Navigator.pushNamed(context, kSlidersRouteName);
             },
           ),
         ],

@@ -52,6 +52,15 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(Container));
     expect(box.size.height, 50);
   });
+
+  testWidgets('SliverConstrainedCrossAxis sets its own flex to 0', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildSliverConstrainedCrossAxis(
+      maxExtent: 50,
+    ));
+
+    final RenderSliver sliver = tester.renderObject(find.byType(SliverConstrainedCrossAxis));
+    expect((sliver.parentData! as SliverPhysicalParentData).crossAxisFlex, equals(0));
+  });
 }
 
 Widget _buildSliverConstrainedCrossAxis({

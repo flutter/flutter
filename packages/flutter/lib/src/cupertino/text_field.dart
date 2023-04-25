@@ -123,6 +123,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   @override
   void onDragSelectionEnd(TapDragEndDetails details) {
     _state._requestKeyboard();
+    super.onDragSelectionEnd(details);
   }
 }
 
@@ -788,29 +789,29 @@ class CupertinoTextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.dotted,
   );
 
+  /// The color of the selection highlight when the spell check menu is visible.
+  ///
+  /// Eyeballed from a screenshot taken on an iPhone 11 running iOS 16.2.
+  @visibleForTesting
+  static const Color kMisspelledSelectionColor = Color(0x62ff9699);
+
   /// Default builder for the spell check suggestions toolbar in the Cupertino
   /// style.
   ///
   /// See also:
+  ///  * [spellCheckConfiguration], where this is typically specified for
+  ///    [CupertinoTextField].
   ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
-  ///     builder configured to show a spell check suggestions toolbar.
-  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], the builder
-  ///    configured to show the Material style spell check suggestions toolbar.
+  ///    parameter for which this is the default value for [CupertinoTextField].
+  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], which is like
+  ///    this but specifies the default for [CupertinoTextField].
   @visibleForTesting
   static Widget defaultSpellCheckSuggestionsToolbarBuilder(
     BuildContext context,
     EditableTextState editableTextState,
   ) {
-    final List<ContextMenuButtonItem>? buttonItems =
-      CupertinoSpellCheckSuggestionsToolbar.buildButtonItems(context, editableTextState);
-
-    if (buttonItems == null || buttonItems.isEmpty){
-      return const SizedBox.shrink();
-    }
-
-    return CupertinoSpellCheckSuggestionsToolbar(
-      anchors: editableTextState.contextMenuAnchors,
-      buttonItems: buttonItems,
+    return CupertinoSpellCheckSuggestionsToolbar.editableText(
+      editableTextState: editableTextState,
     );
   }
 
@@ -1302,6 +1303,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
         ? widget.spellCheckConfiguration!.copyWith(
             misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
               ?? CupertinoTextField.cupertinoMisspelledTextStyle,
+            misspelledSelectionColor: widget.spellCheckConfiguration!.misspelledSelectionColor
+              ?? CupertinoTextField.kMisspelledSelectionColor,
             spellCheckSuggestionsToolbarBuilder:
               widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
                 ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,

@@ -2720,8 +2720,8 @@ void main() {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                sliver: SliverAppBar.medium(
-                  title: const Text('AppBar Title'),
+                sliver: const SliverAppBar.medium(
+                  title: Text('AppBar Title'),
                 ),
               ),
             ];
@@ -2747,11 +2747,11 @@ void main() {
     ));
 
     // There are two widgets for the title.
-    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitle = find.text('AppBar Title').first;
     final Finder expandedTitleClip = find.ancestor(
       of: expandedTitle,
       matching: find.byType(ClipRect),
-    );
+    ).first;
 
     // Default, fully expanded app bar.
     expect(nestedScrollView.currentState?.outerController.offset, 0);
@@ -2830,11 +2830,11 @@ void main() {
     ));
 
     // There are two widgets for the title.
-    final Finder expandedTitle = find.text('AppBar Title').last;
+    final Finder expandedTitle = find.text('AppBar Title').first;
     final Finder expandedTitleClip = find.ancestor(
       of: expandedTitle,
       matching: find.byType(ClipRect),
-    );
+    ).first;
 
     // Default, fully expanded app bar.
     expect(nestedScrollView.currentState?.outerController.offset, 0);

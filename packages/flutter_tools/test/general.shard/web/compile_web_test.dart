@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
+import 'package:flutter_tools/src/web/file_generators/flutter_service_worker_js.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -44,8 +45,9 @@ void main() {
       expect(environment.defines, <String, String>{
         'TargetFile': 'target',
         'HasWebPlugins': 'false',
-        'ServiceWorkerStrategy': 'serviceWorkerStrategy',
+        'ServiceWorkerStrategy': ServiceWorkerStrategy.offlineFirst.cliName,
         'WasmOmitTypeChecks': 'false',
+        'RunWasmOpt': 'false',
         'BuildMode': 'debug',
         'DartObfuscation': 'false',
         'TrackWidgetCreation': 'true',
@@ -68,14 +70,27 @@ void main() {
       flutterProject,
       'target',
       BuildInfo.debug,
-      'serviceWorkerStrategy',
-      compilerConfig: const WasmCompilerConfig(omitTypeChecks: false),
+      ServiceWorkerStrategy.offlineFirst,
+      compilerConfig: const WasmCompilerConfig(
+        omitTypeChecks: false,
+        runWasmOpt: false
+      ),
     );
 
     expect(logger.statusText, contains('Compiling target for the Web...'));
     expect(logger.errorText, isEmpty);
     // Runs ScrubGeneratedPluginRegistrant migrator.
     expect(logger.traceText, contains('generated_plugin_registrant.dart not found. Skipping.'));
+
+    // Sends build config event
+    expect(testUsage.events, unorderedEquals(<TestUsageEvent>[
+      const TestUsageEvent(
+        'build',
+        'web',
+        label: 'web-compile',
+        parameters: CustomDimensions(buildEventSettings: 'wasm-compile: true; web-renderer: auto;')
+      ),
+    ]));
 
     // Sends timing event.
     final TestTimingEvent timingEvent = testUsage.timings.single;
@@ -108,7 +123,7 @@ void main() {
               flutterProject,
               'target',
               BuildInfo.debug,
-              'serviceWorkerStrategy',
+              ServiceWorkerStrategy.offlineFirst,
               compilerConfig: const JsCompilerConfig.run(nativeNullAssertions: true),
             ),
         throwsToolExit(message: 'Failed to compile application for the Web.'));
