@@ -3123,17 +3123,18 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: StatefulBuilder(
-            builder: (BuildContext context, StateSetter stateSetter) {
-          setState = stateSetter;
-          return EditableText(
-            obscureText: obscureText,
-            controller: controller,
-            backgroundCursorColor: Colors.grey,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor,
-          );
-        }),
+          builder: (BuildContext context, StateSetter stateSetter) {
+            setState = stateSetter;
+            return EditableText(
+              obscureText: obscureText,
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            );
+          },
+        ),
       ),
     );
 
