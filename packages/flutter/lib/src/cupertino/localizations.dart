@@ -51,6 +51,19 @@ enum DatePickerDateOrder {
   ydm,
 }
 
+/// Determines the order of the columns inside the [CupertinoDatePicker] in
+/// month and year mode.
+enum DatePickerMonthYearOrder {
+  /// Order of the columns, from left to right: month, year.
+  ///
+  /// Example: March | 1996.
+  my,
+  /// Order of the columns, from left to right: year, month.
+  ///
+  /// Example: 1996 | March.
+  ym,
+}
+
 /// Defines the localized resource values used by the Cupertino widgets.
 ///
 /// See also:
