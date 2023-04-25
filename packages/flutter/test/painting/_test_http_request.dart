@@ -76,7 +76,7 @@ class TestHttpRequest {
   JSVoid addEventListener(JSString type, DomEventListener listener) {
     if (type.toDart == mockEvent?.type) {
       final DartDomEventListener dartListener =
-        (listener as JSFunction).toDart as DartDomEventListener;
+        (listener as JSExportedDartFunction).toDart as DartDomEventListener;
       dartListener(mockEvent!.event);
     }
   }
