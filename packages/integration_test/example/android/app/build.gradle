@@ -53,6 +53,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    namespace 'com.example.integration_test_example'
 }
 
 flutter {
