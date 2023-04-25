@@ -317,11 +317,6 @@ void main() {
   });
 
   group('unified_analytics', () {
-    final Usage legacyAnalytics = TestUsage();
-    setUp(() {
-      legacyAnalytics.enabled = false;
-    });
-
     testUsingContext(
       'runner disable telemetry with flag',
       () async {
