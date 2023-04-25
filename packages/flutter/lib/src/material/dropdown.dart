@@ -1690,6 +1690,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
       setValue(widget.initialValue);
     }
   }
+
   @override
   void reset() {
     final DropdownButtonFormField<T> dropdownButtonFormField = widget as DropdownButtonFormField<T>;

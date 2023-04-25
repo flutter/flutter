@@ -336,8 +336,6 @@ class _CupertinoTextFormFieldRowState extends FormFieldState<String> {
       });
     }
     _cupertinoTextFormFieldRow.onChanged?.call(_effectiveController!.text);
-
-
   }
 
   void _handleControllerChanged() {
