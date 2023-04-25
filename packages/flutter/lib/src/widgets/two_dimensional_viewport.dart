@@ -25,6 +25,11 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 /// scrolling machinery. It displays a subset of its children according to its
 /// own dimensions and the given [horizontalOffset] an [verticalOffset]. As the
 /// offsets vary, different children are visible through the viewport.
+///
+/// See also:
+///
+///   * [Viewport], the equivalent of this widget that scrolls in only one
+///     dimension.
 abstract class TwoDimensionalViewport extends RenderObjectWidget {
   /// Creates a widget that is bigger on the inside.
   ///
@@ -275,6 +280,11 @@ class _TwoDimensionalViewportElement extends RenderObjectElement
 /// The parent data primarily describes where a child is in the viewport. The
 /// [layoutOffset] must be set by subclasses of [RenderTwoDimensionalViewport],
 /// which represents the position of the child in the viewport.
+///
+/// The [paintExtent] and [paintOffset] are computed by
+/// [RenderTwoDimensionalViewport]. If subclasses of RenderTwoDimensionalViewport
+/// override the paint method, the [paintOffset] should be used to position the
+/// child in the viewport in order to accoutn for a reversed [AxisDirection].
 class TwoDimensionalViewportParentData extends ParentData {
   /// The offset at which to paint the child in the parent's coordinate system.
   ///
@@ -770,6 +780,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
           }
         }
       case Axis.horizontal:
+        // Column major traversal
         // Minor
         for (int minorIndex = _leadingXIndex!; minorIndex <= _trailingXIndex!; minorIndex++) {
           // Major
@@ -782,6 +793,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   }
 
   void _checkVicinity(ChildVicinity vicinity) {
+    assert(vicinity != ChildVicinity.invalid);
     // It is possible and valid for an index to be skipped.
     // For example, a table can have merged cells, spanning multiple
     // indices, but only represented by one RenderBox.
@@ -866,8 +878,9 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     return child;
   }
 
-  /// Called after [layoutChildSequence] to update the layout offset for the
-  /// given child.
+  /// Called after [layoutChildSequence] to compute the
+  /// [TwoDimensionalViewportParentData.paintOffset] and
+  /// [TwoDimensionalViewportParentData.paintExtent] of the child.
   void updateChildPaintData(RenderBox child) {
     final TwoDimensionalViewportParentData childParentData = parentDataOf(child);
     assert(
@@ -936,8 +949,8 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// `child`.
   ///
   /// This is useful when the one or both of the axes of the viewport are
-  /// reversed. The normalized layout offset of the child is updated to reflect
-  /// the offset in relation to the [verticalAxisDirection] and
+  /// reversed. The normalized layout offset of the child is used to compute
+  /// the paint offset in relation to the [verticalAxisDirection] and
   /// [horizontalAxisDirection].
   @protected
   Offset computeAbsolutePaintOffsetFor(
@@ -1111,11 +1124,19 @@ abstract class _TwoDimensionalChildManager {
   void endLayout();
 }
 
-/// The relative positioning of children in a [TwoDimensionalViewport].
+/// The relative position of a child in a [TwoDimensionalViewport] in relation
+/// to other children of the viewport.
+///
+/// While children can be plotted arbitrarily in two dimensional space, the
+/// [ChildVicinity] is used to disambiguate their positions, determining how to
+/// traverse the children of the space.
+///
+/// Combined with the [RenderTwoDimensionalViewport.mainAxis], each child's
+/// vicinity determines its paint order amog all of the children.
 @immutable
 class ChildVicinity implements Comparable<ChildVicinity> {
-  /// Creates an reference to a child in a two dimensional plane, with the [xIndex]
-  /// and [yIndex] being relative to other children in the viewport.
+  /// Creates an reference to a child in a two dimensional plane, with the
+  /// [xIndex] and [yIndex] being relative to other children in the viewport.
   const ChildVicinity({required this.xIndex, required this.yIndex});
 
   /// Represents an unassigned child position. The given child may be in the
@@ -1127,7 +1148,7 @@ class ChildVicinity implements Comparable<ChildVicinity> {
   ///
   /// While children's offset and positioning may not be strictly defined in
   /// terms of rows and columns, like a table, [ChildVicinity.xIndex] and
-  /// [ChildVicinity.yIndex] can represent order of traversal in row or column
+  /// [ChildVicinity.yIndex] represents order of traversal in row or column
   /// major format.
   final int xIndex;
 
@@ -1136,7 +1157,7 @@ class ChildVicinity implements Comparable<ChildVicinity> {
   ///
   /// While children's offset and positioning may not be strictly defined in
   /// terms of rows and columns, like a table, [ChildVicinity.xIndex] and
-  /// [ChildVicinity.yIndex] can represent order of traversal in row or column
+  /// [ChildVicinity.yIndex] represents order of traversal in row or column
   /// major format.
   final int yIndex;
 

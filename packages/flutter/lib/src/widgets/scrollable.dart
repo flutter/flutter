@@ -1973,8 +1973,10 @@ enum DiagonalDragBehavior {
 /// A widget that scrolls in two dimensions.
 ///
 /// [TwoDimensionalScrollable] implements the interaction model for a scrollable
-/// widget, including gesture recognition, but does not have an opinion about
-/// how the viewport, which actually displays the children, is constructed.
+/// widget in both the vertical and horizontal axes, including gesture
+/// recognition, but does not have an opinion about how the
+/// [TwoDimensionalViewport], which actually displays the children, is
+/// constructed.
 ///
 /// It's rare to construct a [TwoDimensionalScrollable] directly. Instead,
 /// consider [TwoDimensionalScrollView], which combines scrolling, viewporting,

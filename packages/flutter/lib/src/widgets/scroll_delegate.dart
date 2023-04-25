@@ -871,12 +871,19 @@ Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
 /// [TwoDimensionalViewport]. Rather than receiving children as an
 /// explicit [List], it receives its children using a
 /// [TwoDimensionalChildDelegate].
+///
+/// See also:
+///
+///   * [TwoDimensionalChildBuilderDelegate], an abstract subclass of this that
+///     lazily builds children on demand.
+///   * [TwoDimensionalChildListDelegate], an abstract subclass of this that
+///     uses a two dimensional array to layout children.
 abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
   /// Returns the child with the given [ChildVicinity], which is described in
   /// terms of x and y indices.
   ///
-  /// Subclasses typically override this function and wrap their children in
-  /// [RepaintBoundary] widgets.
+  /// Subclasses must implement this function and will typically wrap their
+  /// children in [RepaintBoundary] widgets.
   ///
   /// The values returned by this method are cached. To indicate that the
   /// widgets have changed, a new delegate must be provided, and the new
@@ -905,7 +912,7 @@ abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
 /// See also:
 ///
 ///  * [TwoDimensionalChildListDelegate], which is a similar delegate that has an
-///    explicit list of children.
+///    explicit two dimensional array of children.
 abstract class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
   /// Creates a delegate that supplies children for a [TwoDimensionalScrollView]
   /// using the given builder callback.
@@ -920,8 +927,9 @@ abstract class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDel
 
   /// Called to build children on demand.
   ///
-  /// Will be called only for [ChildVicinity] indices greater than or equal to
-  /// zero up to [maxXIndex] and [maxYIndex] if non-null.
+  /// Subclasses can choose to only call the builder for [ChildVicinity] indices
+  /// greater than or equal to zero up to [maxXIndex] and [maxYIndex] if
+  /// non-null.
   ///
   /// Should return null if asked to build a widget with a greater index than
   /// exists in both dimensions.
@@ -948,7 +956,7 @@ abstract class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDel
   /// This value represents the greatest x index of all [ChildVicinity]s for the
   /// two dimensional scroll view.
   ///
-  /// If null, implementors can continue call on the [builder] until null has
+  /// If null, subclasses can continue call on the [builder] until null has
   /// been returned for each known index of x and y. In some cases, null may not
   /// be a terminating result, such as a table with a merged cell spanning
   /// multiple indices. Refer to the [TwoDimensionalViewport] subclass to learn
@@ -979,7 +987,7 @@ abstract class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDel
   /// This value represents the greatest y index of all [ChildVicinity]s for the
   /// two dimensional scroll view.
   ///
-  /// If null, implementors can continue call on the [builder] until null has
+  /// If null, subclasses can continue call on the [builder] until null has
   /// been returned for each known index of x and y. In some cases, null may not
   /// be a terminating result, such as a table with a merged cell spanning
   /// multiple indices. Refer to the [TwoDimensionalViewport] subclass to learn
@@ -1024,9 +1032,10 @@ abstract class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDel
   bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate) => true;
 }
 
-/// A delegate that supplies children for slivers using an explicit list.
+/// A delegate that supplies children for slivers using an explicit two
+/// dimensional array.
 ///
-/// In general building all the widgets in advance is not efficient. It is
+/// In general, building all the widgets in advance is not efficient. It is
 /// better to create a delegate that builds them on demand using
 /// [TwoDimensionalChildBuilderDelegate] or by subclassing
 /// [TwoDimensionalChildDelegate] directly.
@@ -1034,7 +1043,7 @@ abstract class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDel
 /// This class is provided for the cases where either the list of children is
 /// known well in advance (ideally the children are themselves compile-time
 /// constants, for example), and therefore will not be built each time the
-/// delegate itself is created, or the list is small, such that it's likely
+/// delegate itself is created, or the array is small, such that it's likely
 /// always visible (and thus there is nothing to be gained by building it on
 /// demand).
 ///
