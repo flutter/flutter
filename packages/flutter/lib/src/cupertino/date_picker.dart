@@ -1565,9 +1565,9 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
   }
 
   void _refreshEstimatedColumnWidths() {
-    estimatedColumnWidths[_PickerColumnType.dayOfMonth.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.dayOfMonth, localizations, context);
-    estimatedColumnWidths[_PickerColumnType.month.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context);
-    estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context);
+    estimatedColumnWidths[_PickerColumnType.dayOfMonth.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.dayOfMonth, localizations, context, false);
+    estimatedColumnWidths[_PickerColumnType.month.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.month, localizations, context, false);
+    estimatedColumnWidths[_PickerColumnType.year.index] = CupertinoDatePicker._getColumnWidth(_PickerColumnType.year, localizations, context, false);
   }
 
   Widget _buildMonthPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder, Widget selectionOverlay) {
@@ -1676,40 +1676,28 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
     List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[];
     List<double> columnWidths = <double>[];
 
-    final DatePickerDateOrder datePickerDateOrder = dateOrder ?? localizations.datePickerDateOrder;
+    final DatePickerDateOrder datePickerDateOrder =
+        dateOrder ?? localizations.datePickerDateOrder;
 
     switch (datePickerDateOrder) {
       case DatePickerDateOrder.mdy:
-        pickerBuilders = <_ColumnBuilder>[_buildMonthPicker, _buildYearPicker];
-        columnWidths = <double>[
-          estimatedColumnWidths[_PickerColumnType.month.index]!,
-          estimatedColumnWidths[_PickerColumnType.year.index]!,
-        ];
-        break;
       case DatePickerDateOrder.dmy:
         pickerBuilders = <_ColumnBuilder>[_buildMonthPicker, _buildYearPicker];
         columnWidths = <double>[
           estimatedColumnWidths[_PickerColumnType.month.index]!,
           estimatedColumnWidths[_PickerColumnType.year.index]!,
         ];
-        break;
       case DatePickerDateOrder.ymd:
-        pickerBuilders = <_ColumnBuilder>[_buildYearPicker, _buildMonthPicker];
-        columnWidths = <double>[
-          estimatedColumnWidths[_PickerColumnType.year.index]!,
-          estimatedColumnWidths[_PickerColumnType.month.index]!,
-        ];
-        break;
       case DatePickerDateOrder.ydm:
         pickerBuilders = <_ColumnBuilder>[_buildYearPicker, _buildMonthPicker];
         columnWidths = <double>[
           estimatedColumnWidths[_PickerColumnType.year.index]!,
           estimatedColumnWidths[_PickerColumnType.month.index]!,
         ];
-        break;
     }
 
     final List<Widget> pickers = <Widget>[];
+    double totalColumnWidths = 3 * _kDatePickerPadSize;
 
     for (int i = 0; i < columnWidths.length; i++) {
       final double offAxisFraction = (i - 1) * 0.3 * textDirectionFactor;
@@ -1725,6 +1713,8 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
       } else if (i == columnWidths.length - 1) {
         selectionOverlay = _endSelectionOverlay;
       }
+
+      totalColumnWidths += columnWidths[i] + (2 * _kDatePickerPadSize);
 
       pickers.add(LayoutId(
         id: i,
@@ -1746,6 +1736,8 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
       ));
     }
 
+    final double maxPickerWidth = totalColumnWidths > _kPickerWidth ? totalColumnWidths : _kPickerWidth;
+
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
@@ -1754,6 +1746,7 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
           delegate: _DatePickerLayoutDelegate(
             columnWidths: columnWidths,
             textDirectionFactor: textDirectionFactor,
+            maxWidth: maxPickerWidth,
           ),
           children: pickers,
         ),
