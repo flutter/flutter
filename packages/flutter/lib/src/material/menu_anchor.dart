@@ -342,7 +342,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // Needs to update the overlay entry on the next frame, since it's in the
       // overlay.
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        _overlayEntry!.markNeedsBuild();
+        _overlayEntry?.markNeedsBuild();
       });
     }
   }
@@ -556,8 +556,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // Notify that _childIsOpen changed state, but only if not
       // currently disposing.
       _parent?._childChangedOpenState();
+      widget.onClose?.call();
+      setState(() {});
     }
-    widget.onClose?.call();
   }
 
   void _closeChildren({bool inDispose = false}) {

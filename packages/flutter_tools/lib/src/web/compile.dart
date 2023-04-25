@@ -24,6 +24,7 @@ import '../version.dart';
 import 'compiler_config.dart';
 import 'file_generators/flutter_service_worker_js.dart';
 import 'migrations/scrub_generated_plugin_registrant.dart';
+import 'web_constants.dart';
 
 export 'compiler_config.dart';
 
@@ -63,7 +64,7 @@ class WebBuilder {
         title: 'Experimental feature',
         '''
   WebAssembly compilation is experimental.
-  See $kWasmPreviewUri for more information.''',
+  $kWasmMoreInfo''',
       );
     }
 
@@ -126,6 +127,16 @@ class WebBuilder {
     } finally {
       status.stop();
     }
+    BuildEvent(
+      'web-compile',
+      type: 'web',
+      settings: _buildEventAnalyticsSettings(
+        config: compilerConfig,
+        buildInfo: buildInfo,
+      ),
+      flutterUsage: _flutterUsage,
+    ).send();
+
     _flutterUsage.sendTiming(
       'build',
       compilerConfig.isWasm ? 'dart2wasm' : 'dart2js',
@@ -214,4 +225,19 @@ const Map<WebRendererMode, Map<NullSafetyMode, HostArtifact>> kDartSdkJsMapArtif
   },
 };
 
-const String kWasmPreviewUri = 'https://flutter.dev/wasm';
+String _buildEventAnalyticsSettings({
+  required WebCompilerConfig config,
+  required BuildInfo buildInfo,
+}) {
+  final Map<String, Object> values = <String, Object>{
+    ...config.buildEventAnalyticsValues,
+    'web-renderer': buildInfo.webRenderer.cliName,
+  };
+
+  final List<String> sortedList = values.entries
+      .map((MapEntry<String, Object> e) => '${e.key}: ${e.value};')
+      .toList()
+    ..sort();
+
+  return sortedList.join(' ');
+}

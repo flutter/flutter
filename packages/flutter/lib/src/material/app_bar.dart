@@ -2101,10 +2101,11 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
     late final ThemeData theme = Theme.of(context);
     late final AppBarTheme appBarTheme = AppBarTheme.of(context);
     final AppBarTheme defaults = theme.useMaterial3 ? _AppBarDefaultsM3(context) : _AppBarDefaultsM2(context);
+    final double textScaleFactor = math.min(MediaQuery.textScaleFactorOf(context), _kMaxTitleTextScaleFactor); // TODO(tahatesser): Add link to Material spec when available, https://github.com/flutter/flutter/issues/58769.
     final FlexibleSpaceBarSettings settings = context.dependOnInheritedWidgetOfExactType<FlexibleSpaceBarSettings>()!;
     final double topPadding = primary ? MediaQuery.viewPaddingOf(context).top : 0;
     final double collapsedHeight = settings.minExtent - topPadding - bottomHeight;
-    final double scrollUnderHeight = settings.maxExtent - settings.minExtent + bottomHeight;
+    final double scrollUnderHeight = settings.maxExtent - (settings.minExtent / textScaleFactor) + bottomHeight;
     final _ScrollUnderFlexibleConfig config;
     switch (variant) {
       case _ScrollUnderFlexibleVariant.medium:
@@ -2144,31 +2145,40 @@ class _ScrollUnderFlexibleSpace extends StatelessWidget {
           padding.left,
           0,
           padding.right,
-          adjustBottomPadding,
+          adjustBottomPadding / textScaleFactor,
         );
       }
       return padding;
     }
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(top: collapsedHeight + topPadding),
-        ),
-        Flexible(
-          child: ClipRect(
-            child: OverflowBox(
-              minHeight: scrollUnderHeight,
-              maxHeight: scrollUnderHeight,
-              alignment: Alignment.bottomLeft,
-              child: Container(
-                alignment: AlignmentDirectional.bottomStart,
-                padding: expandedTitlePadding(),
-                child: expandedTitle,
+
+    // Set maximum text scale factor to [_kMaxTitleTextScaleFactor] for the
+    // title to keep the visual hierarchy the same even with larger font
+    // sizes. To opt out, wrap the [title] widget in a [MediaQuery] widget
+    // with [MediaQueryData.textScaleFactor] set to
+    // `MediaQuery.textScaleFactorOf(context)`.
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(top: collapsedHeight + topPadding),
+          ),
+          Flexible(
+            child: ClipRect(
+              child: OverflowBox(
+                minHeight: scrollUnderHeight,
+                maxHeight: scrollUnderHeight,
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  alignment: AlignmentDirectional.bottomStart,
+                  padding: expandedTitlePadding(),
+                  child: expandedTitle,
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

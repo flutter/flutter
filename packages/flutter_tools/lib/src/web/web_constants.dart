@@ -2,10 +2,4 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
-void main() {
-  test('Trivial test', () {
-    expect(42, 42);
-  });
-}
+const String kWasmMoreInfo = 'See https://flutter.dev/wasm for more information.';
