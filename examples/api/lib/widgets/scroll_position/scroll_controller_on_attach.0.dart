@@ -12,10 +12,10 @@ class ScrollControllerDemo extends StatefulWidget {
   const ScrollControllerDemo({super.key});
 
   @override
-  State<ScrollControllerDemo> createState() => ScrollControllerDemoState();
+  State<ScrollControllerDemo> createState() => _ScrollControllerDemoState();
 }
 
-class ScrollControllerDemoState extends State<ScrollControllerDemo> {
+class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
   late final ScrollController _controller;
   bool isScrolling = false;
 
@@ -44,6 +44,9 @@ class ScrollControllerDemoState extends State<ScrollControllerDemo> {
   @override
   void initState() {
     _controller = ScrollController(
+      // These methods will be called in response to a scroll position
+      // being attached to or detached from this ScrollController. This happens
+      // when the Scrollable is built.
       onAttach: _handlePositionAttach,
       onDetach: _handlePositionDetach,
     );

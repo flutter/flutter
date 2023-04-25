@@ -12,21 +12,22 @@ class ScrollNotificationDemo extends StatefulWidget {
   const ScrollNotificationDemo({super.key});
 
   @override
-  State<ScrollNotificationDemo> createState() => ScrollNotificationDemoState();
+  State<ScrollNotificationDemo> createState() => _ScrollNotificationDemoState();
 }
 
-class ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
+class _ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
   ScrollNotification? _lastNotification;
   late final ScrollController _controller;
   bool _useController = true;
 
+  // This method handles the notification from the ScrollController.
   void _handleControllerNotification() {
     print('Notified through the scroll controller.');
     // Access the position directly through the controller for details on the
     // scroll position.
-    /* _controller.position... */
   }
 
+  // This method handles the notification from the NotificationListener.
   bool _handleScrollNotification(ScrollNotification notification) {
     print('Notified through scroll notification.');
     // The position can still be accessed through the scroll controller, but
@@ -38,7 +39,6 @@ class ScrollNotificationDemoState extends State<ScrollNotificationDemo> {
         _lastNotification = notification;
       });
     }
-    /* _controller.position... */
 
     // Returning false allows the notification to continue bubbling up to
     // ancestor listeners. If we wanted the notification to stop bubbling,
