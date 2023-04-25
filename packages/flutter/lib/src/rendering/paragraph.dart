@@ -1393,7 +1393,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
     late final SelectionResult result;
     final TextPosition? existingSelectionStart = _textSelectionStart;
     final TextPosition? existingSelectionEnd = _textSelectionEnd;
-    debugPrint('hello from renderParagraph dispatch selecton event $hashCode $existingSelectionStart $existingSelectionEnd');
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
       case SelectionEventType.endEdgeUpdate:
@@ -1483,7 +1482,6 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
   }
 
   SelectionResult _updateSelectionEdgeByWord(Offset globalPosition, {required bool isEnd}) {
-    debugPrint('updateSelectionEdgeByWord $hashCode $_textSelectionStart $_textSelectionEnd');
     _setSelectionPosition(null, isEnd: isEnd);
     final Matrix4 transform = paragraph.getTransformTo(null);
     transform.invert();
@@ -1496,20 +1494,14 @@ class _SelectableFragment with Selectable, ChangeNotifier implements TextLayoutM
       localPosition,
       direction: paragraph.textDirection,
     );
-    debugPrint('current rect $hashCode $_rect');
     final TextPosition position = _clampTextPosition(paragraph.getPositionForOffset(adjustedOffset));
-    debugPrint('$globalPosition');
-    debugPrint('${paragraph.globalToLocal(globalPosition)}');
-    debugPrint('$localPosition');
-    debugPrint('$adjustedOffset');
-    debugPrint('${paragraph.getPositionForOffset(adjustedOffset)}');
-    debugPrint('$_clampTextPosition(paragraph.getPositionForOffset(adjustedOffset)');
-    debugPrint('$position');
 
     final (TextPosition start, TextPosition end) wordBoundary = _getWordBoundaryAtPosition(position);
-    final TextPosition targetPosition = isEnd ? wordBoundary.$2 : wordBoundary.$1;
+    TextPosition targetPosition = isEnd ? wordBoundary.$2 : wordBoundary.$1;
+    if (!_rect.contains(localPosition)) {
+      targetPosition = position;
+    }
     _setSelectionPosition(targetPosition, isEnd: isEnd);
-    debugPrint('updateSelectionEdgeByWord 2 $hashCode $_textSelectionStart $_textSelectionEnd');
     if (targetPosition.offset == range.end) {
       return SelectionResult.next;
     }
