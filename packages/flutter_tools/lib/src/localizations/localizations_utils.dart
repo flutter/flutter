@@ -291,10 +291,25 @@ String generateString(String value) {
   return value;
 }
 
-/// Given a list of strings, placeholders, or helper function calls, concatenate
-/// them into one expression to be returned.
+/// Given a list of normal strings or interpolated variables, concatenate them
+/// into a single dart string to be returned. An example of a normal string
+/// would be "'Hello world!'" and an example of a interpolated variable would be
+/// "'$placeholder'".
 ///
-/// If `isSingleStringVar` is passed, then we want to convert "'$expr'" to "expr".
+/// Each of the strings in [expressions] should be a raw string, which, if it
+/// were to be added to a dart file, would be a properly formatted dart string
+/// with escapes and/or interpolation. The purpose of this function is to
+/// concatenate these dart strings into a single dart string which can be
+/// returned in the generated localization files.
+///
+/// The following rules describe the kinds of string expressions that can be
+/// handled:
+/// 1. If [expressions] is empty, return the empty string "''".
+/// 2. If [expressions] has only one [String] which is an interpolated variable,
+///    it is converted to the variable itself e.g. ["'$expr'"] -> "expr".
+/// 3. If one string in [expressions] is an interpolation and the next begins
+///    with an alphanumeric character, then the former interpolation should be
+///    wrapped in braces e.g. ["'$expr1'", "'another'"] -> "'${expr1}another'".
 String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = false }) {
   if (expressions.isEmpty) {
     return "''";
@@ -304,7 +319,7 @@ String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = f
   } else {
     final String string = expressions.reversed.fold<String>('', (String string, String expression) {
       if (expression[0] != r'$') {
-        return generateString(expression) + string;
+        return expression + string;
       }
       final RegExp alphanumeric = RegExp(r'^([0-9a-zA-Z]|_)+$');
       if (alphanumeric.hasMatch(expression.substring(1)) && !(string.isNotEmpty && alphanumeric.hasMatch(string[0]))) {

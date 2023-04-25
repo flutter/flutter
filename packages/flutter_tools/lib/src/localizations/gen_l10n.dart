@@ -1131,7 +1131,7 @@ class LocalizationsGenerator {
           case ST.message:
             final List<String> expressions = node.children.map<String>((Node node) {
               if (node.type == ST.string) {
-                return node.value!;
+                return generateString(node.value!);
               }
               return generateVariables(node);
             }).toList();
