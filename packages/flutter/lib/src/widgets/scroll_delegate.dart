@@ -9,6 +9,7 @@ import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'selection_container.dart';
+import 'two_dimensional_viewport.dart';
 
 export 'package:flutter/rendering.dart' show
   SliverGridDelegate,
@@ -860,4 +861,231 @@ Widget _createErrorWidget(Object exception, StackTrace stackTrace) {
   );
   FlutterError.reportError(details);
   return ErrorWidget.builder(details);
+}
+
+// TODO(Piinks): Come back and add keep alive support, <BUG>
+/// A delegate that supplies children for scrolling in two dimensions.
+///
+/// A [TwoDimensionalScrollView] lazily constructs its box children to avoid
+/// creating more children than are visible through the
+/// [TwoDimensionalViewport]. Rather than receiving children as an
+/// explicit [List], it receives its children using a
+/// [TwoDimensionalChildDelegate].
+abstract class TwoDimensionalChildDelegate extends ChangeNotifier {
+  /// Returns the child with the given [ChildVicinity], which is described in
+  /// terms of x and y indices.
+  ///
+  /// Subclasses typically override this function and wrap their children in
+  /// [RepaintBoundary] widgets.
+  ///
+  /// The values returned by this method are cached. To indicate that the
+  /// widgets have changed, a new delegate must be provided, and the new
+  /// delegate's [shouldRebuild] method must return true.
+  Widget? build(BuildContext context, ChildVicinity vicinity);
+
+  /// Called whenever a new instance of the child delegate class is
+  /// provided.
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If the method returns false, then the [build] call might be optimized
+  /// away.
+  bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate);
+}
+
+/// A delegate that supplies children for a [TwoDimensionalScrollView] using a
+/// builder callback.
+///
+/// The widgets returned from the builder callback are automatically wrapped in
+/// [RepaintBoundary] widgets if [addRepaintBoundaries] is true
+/// (also the default).
+///
+/// See also:
+///
+///  * [TwoDimensionalChildListDelegate], which is a similar delegate that has an
+///    explicit list of children.
+abstract class TwoDimensionalChildBuilderDelegate extends TwoDimensionalChildDelegate {
+  /// Creates a delegate that supplies children for a [TwoDimensionalScrollView]
+  /// using the given builder callback.
+  ///
+  /// The [builder] and [addRepaintBoundaries] arguments must not be null.
+  TwoDimensionalChildBuilderDelegate({
+    this.addRepaintBoundaries = true,
+    required this.builder,
+    this.maxXIndex,
+    this.maxYIndex,
+  });
+
+  /// Called to build children on demand.
+  ///
+  /// Will be called only for [ChildVicinity] indices greater than or equal to
+  /// zero up to [maxXIndex] and [maxYIndex] if non-null.
+  ///
+  /// Should return null if asked to build a widget with a greater index than
+  /// exists in both dimensions.
+  ///
+  /// The delegate wraps the children returned by this builder in
+  /// [RepaintBoundary] widgets.
+  final TwoDimensionalIndexedWidgetBuilder builder;
+
+  /// The maximum number of children in the x axis.
+  ///
+  /// For each [ChildVicinity], the child's relative location is described in
+  /// terms of x and y indices to facilitate a consistent visitor pattern for
+  /// all children in the viewport.
+  ///
+  /// This is fairly straightforward in the context of a table implementation,
+  /// where there is usually the same number of columns in every row and vice
+  /// versa, each aligned one after the other.
+  ///
+  /// When plotting children more abstractly in two dimensional space, there may
+  /// be more x indices for a given y index than another y index. An example of
+  /// this would be a scatter plot where there are more children at the top of
+  /// the graph than at the bottom.
+  ///
+  /// This value represents the greatest x index of all [ChildVicinity]s for the
+  /// two dimensional scroll view.
+  ///
+  /// If null, implementors can continue call on the [builder] until null has
+  /// been returned for each known index of x and y. In some cases, null may not
+  /// be a terminating result, such as a table with a merged cell spanning
+  /// multiple indices. Refer to the [TwoDimensionalViewport] subclass to learn
+  /// how this value is applied in the specific use case.
+  ///
+  /// See also:
+  ///
+  ///   * [RenderTwoDimensionalViewport.buildOrObtainChildFor], the method that
+  ///     leads to calling on the delegate to build a child of the given
+  ///     [ChildVicinity].
+  final int? maxXIndex;
+
+  /// The maximum number of children in the y axis.
+  ///
+  /// For each [ChildVicinity], the child's relative location is described in
+  /// terms of x and y indices to facilitate a consistent visitor pattern for
+  /// all children in the viewport.
+  ///
+  /// This is fairly straightforward in the context of a table implementation,
+  /// where there is usually the same number of rows in every column and vice
+  /// versa, each aligned one after the other.
+  ///
+  /// When plotting children more abstractly in two dimensional space, there may
+  /// be more y indices for a given x index than another x index. An example of
+  /// this would be a scatter plot where there are more children at the top of
+  /// the graph than at the bottom.
+  ///
+  /// This value represents the greatest y index of all [ChildVicinity]s for the
+  /// two dimensional scroll view.
+  ///
+  /// If null, implementors can continue call on the [builder] until null has
+  /// been returned for each known index of x and y. In some cases, null may not
+  /// be a terminating result, such as a table with a merged cell spanning
+  /// multiple indices. Refer to the [TwoDimensionalViewport] subclass to learn
+  /// how this value is applied in the specific use case.
+  ///
+  /// See also:
+  ///
+  ///   * [RenderTwoDimensionalViewport.buildOrObtainChildFor], the method that
+  ///     leads to calling on the delegate to build a child of the given
+  ///     [ChildVicinity].
+  final int? maxYIndex;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
+  final bool addRepaintBoundaries;
+
+  @override
+  Widget? build(BuildContext context, ChildVicinity vicinity) {
+    // If we have exceeded explicit upper bounds, return null.
+    if (vicinity.xIndex < 0 || (maxXIndex != null && vicinity.xIndex >= maxXIndex!)) {
+      return null;
+    }
+    if (vicinity.yIndex < 0 || (maxYIndex != null && vicinity.yIndex >= maxYIndex!)) {
+      return null;
+    }
+
+    Widget? child;
+    try {
+      child = builder(context, vicinity);
+    } catch (exception, stackTrace) {
+      child = _createErrorWidget(exception, stackTrace);
+    }
+    if (child == null) {
+      return null;
+    }
+    if (addRepaintBoundaries) {
+      child = RepaintBoundary(child: child);
+    }
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate) => true;
+}
+
+/// A delegate that supplies children for slivers using an explicit list.
+///
+/// In general building all the widgets in advance is not efficient. It is
+/// better to create a delegate that builds them on demand using
+/// [TwoDimensionalChildBuilderDelegate] or by subclassing
+/// [TwoDimensionalChildDelegate] directly.
+///
+/// This class is provided for the cases where either the list of children is
+/// known well in advance (ideally the children are themselves compile-time
+/// constants, for example), and therefore will not be built each time the
+/// delegate itself is created, or the list is small, such that it's likely
+/// always visible (and thus there is nothing to be gained by building it on
+/// demand).
+///
+/// The widgets in the given [children] list are automatically wrapped in
+/// [RepaintBoundary] widgets if [addRepaintBoundaries] is true
+/// (also the default).
+///
+/// See also:
+///
+///  * [TwoDimensionalChildBuilderDelegate], which is a delegate that uses a
+///    builder callback to construct the children.
+abstract class TwoDimensionalChildListDelegate extends TwoDimensionalChildDelegate {
+  /// Creates a delegate that supplies children for a [TwoDimensionalScrollView].
+  ///
+  /// The [children] and [addRepaintBoundaries] must not be
+  /// null.
+  TwoDimensionalChildListDelegate({
+    this.addRepaintBoundaries = true,
+    required this.children,
+  });
+
+  /// The widgets to display.
+  ///
+  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
+  /// [children] such as `someWidget.children.add(...)` or
+  /// passing a reference of the original list value to the [children] parameter
+  /// will result in incorrect behaviors. Whenever the
+  /// children list is modified, a new list object should be provided.
+  final List<List<Widget>> children;
+
+  /// {@macro flutter.widgets.SliverChildBuilderDelegate.addRepaintBoundaries}
+  final bool addRepaintBoundaries;
+
+  @override
+  Widget? build(BuildContext context, ChildVicinity vicinity) {
+    // If we have exceeded explicit upper bounds, return null.
+    if (vicinity.yIndex < 0 || vicinity.yIndex >= children.length) {
+      return null;
+    }
+    if (vicinity.xIndex < 0 || vicinity.xIndex >= children[vicinity.yIndex].length) {
+      return null;
+    }
+
+    Widget child = children[vicinity.yIndex][vicinity.xIndex];
+    if (addRepaintBoundaries) {
+      child = RepaintBoundary(child: child);
+    }
+
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant TwoDimensionalChildDelegate oldDelegate) => true;
 }
