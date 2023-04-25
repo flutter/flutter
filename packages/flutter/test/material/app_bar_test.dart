@@ -4717,8 +4717,8 @@ void main() {
     await tester.pumpWidget(buildAppBar());
 
     // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    //                A bug in the HTML renderer and/or Chrome 96+ causes a
-    //                discrepancy in the paragraph height.
+    // A bug in the HTML renderer and/or Chrome 96+ causes a
+    // discrepancy in the paragraph height.
     const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
     expect(
@@ -4810,8 +4810,8 @@ void main() {
 
     await tester.pumpWidget(buildAppBar());
     // TODO(tahatesser): https://github.com/flutter/flutter/issues/99933
-    //                A bug in the HTML renderer and/or Chrome 96+ causes a
-    //                discrepancy in the paragraph height.
+    // A bug in the HTML renderer and/or Chrome 96+ causes a
+    // discrepancy in the paragraph height.
     const bool hasIssue99933 = kIsWeb && !bool.fromEnvironment('FLUTTER_WEB_USE_SKIA');
     final Finder expandedTitle = find.text(title).first;
     Offset titleTop = tester.getTopLeft(expandedTitle);
