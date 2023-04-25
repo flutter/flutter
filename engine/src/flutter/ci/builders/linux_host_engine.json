@@ -60,8 +60,7 @@
                         "impeller-vulkan",
                         "--engine-capture-core-dump"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 }
             ]
         },
@@ -117,8 +116,7 @@
                         "dart",
                         "--engine-capture-core-dump"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 }
             ]
         },
@@ -166,8 +164,7 @@
                         "dart,engine",
                         "--engine-capture-core-dump"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 }
             ]
         },
@@ -224,8 +221,7 @@
                         "dart,engine,benchmarks",
                         "--engine-capture-core-dump"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 }
             ]
         }

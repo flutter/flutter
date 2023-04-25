@@ -44,8 +44,7 @@
                         "--android-variant",
                         "android_jit_release_x86"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 }
             ]
         },
@@ -97,8 +96,7 @@
                         "--android-variant",
                         "android_debug"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 }
             ]
         },
