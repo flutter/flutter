@@ -1835,7 +1835,6 @@ void main() {
     expect(controller.value, <MaterialState>{MaterialState.disabled});
     expect(count, 1);
   });
-
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
