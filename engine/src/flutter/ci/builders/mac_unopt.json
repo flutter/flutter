@@ -46,8 +46,7 @@
                         "dart,engine",
                         "--engine-capture-core-dump"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 }
             ]
         },
@@ -105,16 +104,14 @@
                         "--ios-variant",
                         "ios_debug_sim"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 },
                 {
                     "name": "Scenario App Integration Tests",
                     "parameters": [
                         "ios_debug_sim"
                     ],
-                    "script": "flutter/testing/scenario_app/run_ios_tests.sh",
-                    "type": "local"
+                    "script": "flutter/testing/scenario_app/run_ios_tests.sh"
                 }
             ]
         },
@@ -216,16 +213,14 @@
                         "--ios-variant",
                         "ios_debug_sim_arm64"
                     ],
-                    "script": "flutter/testing/run_tests.py",
-                    "type": "local"
+                    "script": "flutter/testing/run_tests.py"
                 },
                 {
                     "name": "Scenario App Integration Tests",
                     "parameters": [
                         "ios_debug_sim_arm64"
                     ],
-                    "script": "flutter/testing/scenario_app/run_ios_tests.sh",
-                    "type": "local"
+                    "script": "flutter/testing/scenario_app/run_ios_tests.sh"
                 }
 
             ]
