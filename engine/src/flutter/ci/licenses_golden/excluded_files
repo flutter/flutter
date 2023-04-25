@@ -144,6 +144,8 @@
 ../../../flutter/impeller/golden_tests_harvester/test
 ../../../flutter/impeller/image/README.md
 ../../../flutter/impeller/playground
+../../../flutter/impeller/renderer/backend/vulkan/blit_command_vk_unittests.cc
+../../../flutter/impeller/renderer/backend/vulkan/test
 ../../../flutter/impeller/renderer/capabilities_unittests.cc
 ../../../flutter/impeller/renderer/compute_subgroup_unittests.cc
 ../../../flutter/impeller/renderer/compute_unittests.cc

@@ -97,6 +97,10 @@ impeller_component("impeller_unittests") {
     ]
   }
 
+  if (impeller_enable_vulkan) {
+    deps += [ "//flutter/impeller/renderer/backend/vulkan:vulkan_unittests" ]
+  }
+
   if (impeller_enable_compute) {
     deps += [ "renderer:compute_tessellation_unittests" ]
   }
