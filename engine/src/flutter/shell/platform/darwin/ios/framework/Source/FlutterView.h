@@ -17,6 +17,8 @@
 
 @protocol FlutterViewEngineDelegate <NSObject>
 
+@property(nonatomic, readonly) BOOL isUsingImpeller;
+
 - (flutter::Rasterizer::Screenshot)takeScreenshot:(flutter::Rasterizer::ScreenshotType)type
                                   asBase64Encoded:(BOOL)base64Encode;
 

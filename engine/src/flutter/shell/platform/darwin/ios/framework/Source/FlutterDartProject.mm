@@ -439,4 +439,8 @@ flutter::Settings FLTDefaultSettingsForBundle(NSBundle* bundle, NSProcessInfo* p
   return _settings.enable_wide_gamut;
 }
 
+- (BOOL)isImpellerEnabled {
+  return _settings.enable_impeller;
+}
+
 @end
