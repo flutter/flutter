@@ -460,6 +460,12 @@ class XcodeProjectInfo {
     return '$baseConfiguration-$scheme';
   }
 
+  /// The expected scheme for [buildInfo].
+  @visibleForTesting
+  static String expectedSchemeFor(BuildInfo? buildInfo) {
+    return sentenceCase(buildInfo?.flavor ?? 'runner');
+  }
+
   /// Checks whether the [buildConfigurations] contains the specified string, without
   /// regard to case.
   bool hasBuildConfigurationForBuildMode(String buildMode) {
@@ -470,12 +476,6 @@ class XcodeProjectInfo {
       }
     }
     return false;
-  }
-
-  /// The expected scheme for [buildInfo].
-  @visibleForTesting
-  static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return sentenceCase(buildInfo?.flavor ?? 'runner');
   }
 
   /// Returns unique scheme matching [buildInfo], or null, if there is no unique

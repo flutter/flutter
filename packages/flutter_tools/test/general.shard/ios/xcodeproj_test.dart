@@ -615,12 +615,10 @@ Information about project "Runner":
     expect(info.buildConfigurations, <String>['Debug (Free)', 'Debug (Paid)', 'Release (Free)', 'Release (Paid)']);
   });
 
-  testWithoutContext('expected scheme for non-flavored build is sentence case project name', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release', 'Runner'], <String>['CustomName'], logger);
-
+  testWithoutContext('expected scheme for non-flavored build is Runner', () {
     expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.debug), 'Runner');
     expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
-    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.profile), 'Runner');
+    expect(XcodeProjectInfo.expectedSchemeFor(BuildInfo.release), 'Runner');
   });
 
   testWithoutContext('expected build configuration for non-flavored build is derived from BuildMode', () {
@@ -630,8 +628,6 @@ Information about project "Runner":
   });
 
   testWithoutContext('expected scheme for flavored build is the title-cased flavor', () {
-    final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Runner'], <String>['Hello'], logger);
-
     expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.debug, 'hello', treeShakeIcons: false)), 'Hello');
     expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.profile, 'HELLO', treeShakeIcons: false)), 'HELLO');
     expect(XcodeProjectInfo.expectedSchemeFor(const BuildInfo(BuildMode.release, 'Hello', treeShakeIcons: false)), 'Hello');
@@ -645,7 +641,6 @@ Information about project "Runner":
 
   testWithoutContext('scheme for default project is Runner', () {
     final XcodeProjectInfo info = XcodeProjectInfo(<String>['Runner'], <String>['Debug', 'Release'], <String>['Runner'], logger);
-
 
     expect(info.schemeFor(BuildInfo.debug), 'Runner');
     expect(info.schemeFor(BuildInfo.profile), 'Runner');
@@ -668,7 +663,6 @@ Information about project "Runner":
       <String>['Free', 'Paid'],
       logger,
     );
-
 
     expect(info.schemeFor(const BuildInfo(BuildMode.debug, 'free', treeShakeIcons: false)), 'Free');
     expect(info.schemeFor(const BuildInfo(BuildMode.profile, 'Free', treeShakeIcons: false)), 'Free');
