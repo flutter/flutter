@@ -5,6 +5,12 @@
 import 'context.dart';
 import 'platform.dart';
 
+/// Contains messages produced by Flutter tools.
+//
+// This allows partial reimplementations of the flutter tool to override
+// certain messages.
+// TODO(andrewkolos): It is unclear if this is worth keeping. See
+// https://github.com/flutter/flutter/issues/125155.
 UserMessages get userMessages => context.get<UserMessages>()!;
 
 /// Class containing message strings that can be produced by Flutter tools.
@@ -263,24 +269,15 @@ class UserMessages {
   String get flutterNoDevelopmentDevice =>
       "Unable to locate a development device; please run 'flutter doctor' "
       'for information about installing additional components.';
-  String flutterNoMatchingDevice(String deviceId) => 'No supported devices found with name or id '
-      "matching '$deviceId'.";
-  String get flutterNoDevicesFound => 'No devices found.';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
   String flutterMissPlatformProjects(List<String> unsupportedDevicesType) =>
       'If you would like your app to run on ${unsupportedDevicesType.join(' or ')}, consider running `flutter create .` to generate projects for these platforms.';
-  String get flutterFoundButUnsupportedDevices => 'The following devices were found, but are not supported by this project:';
-  String flutterFoundSpecifiedDevices(int count, String deviceId) =>
-      'Found $count devices with name or id matching $deviceId:';
-  String flutterChooseDevice(int option, String name, String deviceId) => '[$option]: $name ($deviceId)';
-  String get flutterChooseOne => 'Please choose one (or "q" to quit)';
   String get flutterSpecifyDeviceWithAllOption =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag, or use '-d all' to act on all devices.";
   String get flutterSpecifyDevice =>
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag.";
-  String get flutterNoConnectedDevices => 'No connected devices.';
   String get flutterNoPubspec =>
       'Error: No pubspec.yaml file found.\n'
       'This command should be run from the root of your Flutter project.';

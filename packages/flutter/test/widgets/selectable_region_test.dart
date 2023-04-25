@@ -40,13 +40,13 @@ void main() {
     testWidgets('mouse selection sends correct events', (WidgetTester tester) async {
       final UniqueKey spy = UniqueKey();
       await tester.pumpWidget(
-          MaterialApp(
-            home: SelectableRegion(
-              focusNode: FocusNode(),
-              selectionControls: materialTextSelectionControls,
-              child: SelectionSpy(key: spy),
-            ),
-          )
+        MaterialApp(
+          home: SelectableRegion(
+            focusNode: FocusNode(),
+            selectionControls: materialTextSelectionControls,
+            child: SelectionSpy(key: spy),
+          ),
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -1754,7 +1754,7 @@ void main() {
     expect(buttonItems[0].type, ContextMenuButtonType.copy);
 
     // Press `Copy` item
-    buttonItems[0].onPressed.call();
+    buttonItems[0].onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
@@ -1808,7 +1808,7 @@ void main() {
     expect(buttonItems[1].type, ContextMenuButtonType.selectAll);
 
     // Press `Select All` item
-    buttonItems[1].onPressed.call();
+    buttonItems[1].onPressed?.call();
 
     final SelectableRegionState regionState = tester.state<SelectableRegionState>(find.byType(SelectableRegion));
 
