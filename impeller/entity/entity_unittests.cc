@@ -2547,25 +2547,5 @@ TEST_P(EntityTest, CoverageForStrokePathWithNegativeValuesInTransform) {
   ASSERT_RECT_NEAR(coverage.value(), Rect::MakeXYWH(102.5, 342.5, 85, 155));
 }
 
-TEST_P(EntityTest, ConvertToSrcBlend) {
-  Entity entity;
-  entity.SetBlendMode(BlendMode::kSourceOver);
-
-  auto contents = SolidColorContents::Make(
-      PathBuilder{}.AddRect(Rect::MakeSize(Size(100, 100))).TakePath(),
-      Color::Red());
-
-  ASSERT_TRUE(contents->ConvertToSrc(entity));
-
-  // Color with alpha, should return false.
-  contents->SetInheritedOpacity(0.5);
-  ASSERT_FALSE(contents->ConvertToSrc(entity));
-
-  // Non source over blend mode, should return false.
-  contents->SetInheritedOpacity(1.0);
-  entity.SetBlendMode(BlendMode::kDestination);
-  ASSERT_FALSE(contents->ConvertToSrc(entity));
-}
-
 }  // namespace testing
 }  // namespace impeller
