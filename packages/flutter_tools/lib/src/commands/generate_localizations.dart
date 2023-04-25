@@ -220,7 +220,7 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Get all options associated with gen-l10n.
-    LocalizationOptions options;
+    final LocalizationOptions options;
     if (_fileSystem.file('l10n.yaml').existsSync()) {
       options = parseLocalizationsOptionsFromYAML(
         file: _fileSystem.file('l10n.yaml'),

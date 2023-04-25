@@ -42,6 +42,8 @@ void main() {
     "description": "Sample description"
   }
 }''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
     final GenerateLocalizationsCommand command = GenerateLocalizationsCommand(
       fileSystem: fileSystem,
       logger: logger,
@@ -192,6 +194,8 @@ void main() {
     "description": "Sample description"
   }
 }''');
+    final File pubspecFile = fileSystem.file('pubspec.yaml')..createSync();
+    pubspecFile.writeAsStringSync(BasicProjectWithFlutterGen().pubspec);
     processManager.addCommand(
       const FakeCommand(
         command: <String>[
