@@ -521,6 +521,7 @@ LocalizationOptions parseLocalizationsOptionsFromCommand({
     projectDir: command.stringArg('project-dir'),
     requiredResourceAttributes: command.boolArg('required-resource-attributes'),
     nullableGetter: command.boolArg('nullable-getter'),
+    format: command.boolArg('format'),
     useEscaping: command.boolArg('use-escaping'),
     suppressWarnings: command.boolArg('suppress-warnings'),
   );
