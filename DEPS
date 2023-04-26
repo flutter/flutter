@@ -39,7 +39,7 @@ vars = {
   # The list of revisions for these tools comes from Fuchsia, here:
   # https://fuchsia.googlesource.com/integration/+/HEAD/toolchain
   # If there are problems with the toolchain, contact fuchsia-toolchain@.
-  'clang_version': 'git_revision:20d06c833d833ef6b2d0f519cc4a7998d49a2803',
+  'clang_version': 'git_revision:5344d8e10bb7d8672d4bfae8adb010465470d51b',
 
   # The goma version and the clang version can be tightly coupled. If goma
   # stops working on a clang roll, this may need to be updated using the value
