@@ -37,7 +37,6 @@ std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     }
   }
 
-  auto capabilities = context->GetCapabilities();
   auto text_context = TextRenderContext::Create(std::move(context));
   if (!text_context || !text_context->IsValid()) {
     return nullptr;
@@ -51,8 +50,8 @@ std::shared_ptr<GlyphAtlas> LazyGlyphAtlas::CreateOrGetGlyphAtlas(
     i++;
     return &result;
   };
-  auto atlas = text_context->CreateGlyphAtlas(type, std::move(atlas_context),
-                                              capabilities, iterator);
+  auto atlas =
+      text_context->CreateGlyphAtlas(type, std::move(atlas_context), iterator);
   if (!atlas || !atlas->IsValid()) {
     VALIDATION_LOG << "Could not create valid atlas.";
     return nullptr;

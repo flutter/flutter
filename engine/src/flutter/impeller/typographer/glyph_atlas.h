@@ -10,7 +10,6 @@
 #include <unordered_map>
 
 #include "flutter/fml/macros.h"
-#include "impeller/core/device_buffer.h"
 #include "impeller/core/texture.h"
 #include "impeller/geometry/rect.h"
 #include "impeller/renderer/pipeline.h"
@@ -154,8 +153,7 @@ class GlyphAtlasContext {
 
   //----------------------------------------------------------------------------
   /// @brief      Retrieve the previous (if any) SkBitmap instance.
-  std::pair<std::shared_ptr<SkBitmap>, std::shared_ptr<DeviceBuffer>>
-  GetBitmap() const;
+  std::shared_ptr<SkBitmap> GetBitmap() const;
 
   //----------------------------------------------------------------------------
   /// @brief      Retrieve the previous (if any) rect packer.
@@ -165,8 +163,7 @@ class GlyphAtlasContext {
   /// @brief      Update the context with a newly constructed glyph atlas.
   void UpdateGlyphAtlas(std::shared_ptr<GlyphAtlas> atlas, ISize size);
 
-  void UpdateBitmap(std::shared_ptr<SkBitmap> bitmap,
-                    std::shared_ptr<DeviceBuffer> device_buffer);
+  void UpdateBitmap(std::shared_ptr<SkBitmap> bitmap);
 
   void UpdateRectPacker(std::shared_ptr<skgpu::Rectanizer> rect_packer);
 
@@ -174,7 +171,6 @@ class GlyphAtlasContext {
   std::shared_ptr<GlyphAtlas> atlas_;
   ISize atlas_size_;
   std::shared_ptr<SkBitmap> bitmap_;
-  std::shared_ptr<DeviceBuffer> device_buffer_;
   std::shared_ptr<skgpu::Rectanizer> rect_packer_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(GlyphAtlasContext);
