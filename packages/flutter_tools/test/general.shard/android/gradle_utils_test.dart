@@ -559,9 +559,19 @@ allprojects {
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), null);
       });
 
-      testWithoutContext('recognizable format returns correct version', () {
+      testWithoutContext("recognizable 'all' format returns correct version", () {
         const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-all.zip';
         expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
+      });
+
+      testWithoutContext("recognizable 'bin' format returns correct version", () {
+        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-6.7-bin.zip';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), '6.7');
+      });
+
+      testWithoutContext("recognizable 'rc' format returns correct version", () {
+        const String distributionUrl = r'distributionUrl=https\://services.gradle.org/distributions/gradle-8.1-rc-3-all.zip';
+        expect(parseGradleVersionFromDistributionUrl(distributionUrl), '8.1');
       });
     });
 

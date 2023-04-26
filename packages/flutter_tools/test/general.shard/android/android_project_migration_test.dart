@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/android/gradle_utils.dart';
 import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -38,13 +39,12 @@ zipStorePath=wrapper/dists
 const String gradleWrapperToMigrateTo = r'''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-all.zip
+distributionUrl=https\://services.gradle.org/distributions/gradle-7.6.1-all.zip
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 ''';
 
 final Version androidStudioDolphin = Version(2021, 3, 1);
-
 
 void main() {
   group('Android migration', () {
@@ -125,11 +125,13 @@ tasks.register("clean", Delete) {
         project = FakeAndroidProject(
           root: memoryFileSystem.currentDirectory.childDirectory('android')..createSync(),
         );
-        project.hostAppGradleRoot.childDirectory('gradle').childDirectory('wrapper').createSync(recursive: true);
+        project.hostAppGradleRoot.childDirectory(gradleDirectoryName)
+            .childDirectory(gradleWrapperDirectoryName)
+            .createSync(recursive: true);
         gradleWrapperPropertiesFile = project.hostAppGradleRoot
-            .childDirectory('gradle')
-            .childDirectory('wrapper')
-            .childFile('gradle-wrapper.properties');
+            .childDirectory(gradleDirectoryName)
+            .childDirectory(gradleWrapperDirectoryName)
+            .childFile(gradleWrapperPropertiesFilename);
       });
 
       testWithoutContext('skipped if files are missing', () {
@@ -183,7 +185,7 @@ tasks.register("clean", Delete) {
         expect(bufferLogger.traceText, contains(androidStudioVersionBelowFlamingo));
       });
 
-      testWithoutContext('skipped if bundled java version is not than 17', () {
+      testWithoutContext('skipped if bundled java version is less than 17', () {
         final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
@@ -234,7 +236,7 @@ tasks.register("clean", Delete) {
         migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrateTo);
         expect(bufferLogger.statusText, contains('Conflict detected between Android Studio Java version and Gradle version, '
-            'upgrading Gradle version from 6.7 to 7.4.2.'));
+            'upgrading Gradle version from 6.7 to 7.6.1.'));
       });
 
       testWithoutContext('change is not made when opt out flag is set', () {

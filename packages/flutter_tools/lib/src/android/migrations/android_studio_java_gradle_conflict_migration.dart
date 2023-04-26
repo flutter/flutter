@@ -20,20 +20,13 @@ import '../gradle_utils.dart';
 @visibleForTesting
 final Version androidStudioFlamingo = Version(2022, 2, 0);
 
-// Only match gradle.org urls so that we can guarantee that the modified url
-// actually points to a hosted zip.
-final RegExp _gradleVersionMatch =
-  RegExp(
-    r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(?:all|bin)\.zip',
-    multiLine: true
-  );
-const String _gradleVersion7_4_2 = r'7.4.2';
+const String _gradleVersion7_4_2 = r'7.6.1';
 
 // String that can be placed in the gradle-wrapper.properties to opt out of this
 // migrator.
 @visibleForTesting
 const String optOutFlag = 'NoFlutterGradleWrapperUpgrade';
-// Only the major version matters
+// Only the major version matters.
 final Version flamingoBundledJava = Version(17, 0, 0);
 
 // These gradle versions were chosen because they
@@ -143,7 +136,7 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
       logger.printTrace(optOutFlagEnabled);
       return fileContents;
     }
-    final RegExpMatch? gradleDistributionUrl = _gradleVersionMatch.firstMatch(fileContents);
+    final RegExpMatch? gradleDistributionUrl = gradleOrgVersionMatch.firstMatch(fileContents);
     if (gradleDistributionUrl == null || gradleDistributionUrl.groupCount < 1) {
       logger.printTrace(gradleVersionNotFound);
       return fileContents;
@@ -155,7 +148,7 @@ class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
       final String gradleDistributionUrlString = gradleDistributionUrl.group(0)!;
       final String upgradedDistributionUrl =
         gradleDistributionUrlString.replaceAll(existingVersionString, _gradleVersion7_4_2);
-      fileContents = fileContents.replaceFirst(_gradleVersionMatch, upgradedDistributionUrl);
+      fileContents = fileContents.replaceFirst(gradleOrgVersionMatch, upgradedDistributionUrl);
     }
     return fileContents;
   }

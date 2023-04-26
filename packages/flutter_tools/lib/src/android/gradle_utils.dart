@@ -66,6 +66,15 @@ final RegExp _androidGradlePluginRegExp =
 final RegExp distributionUrlRegex =
     RegExp(r'^\s*distributionUrl\s*=\s*.*\.zip', multiLine: true);
 
+// Modified version of the gradle distribution url match designed to only match
+// gradle.org urls so that we can guarantee any modifications to the url
+// still points to a hosted zip.
+final RegExp gradleOrgVersionMatch =
+RegExp(
+    r'^\s*distributionUrl\s*=\s*https\\://services\.gradle\.org/distributions/gradle-((?:\d|\.)+)-(.*)\.zip',
+    multiLine: true
+);
+
 // From https://docs.gradle.org/current/userguide/command_line_interface.html#command_line_interface
 const String gradleVersionFlag = r'--version';
 
