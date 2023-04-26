@@ -30,7 +30,7 @@ LocalizationsGenerator generateLocalizations({
     fileSystem: projectDir.fileSystem,
     logger: logger,
   );
-  if (options.useSyntheticPackage && (flutterManifest == null || !flutterManifest.generateSyntheticPackage)) {
+  if (options.syntheticPackage && (flutterManifest == null || !flutterManifest.generateSyntheticPackage)) {
     throwToolExit(
       'Attempted to generate localizations code without having '
       'the flutter: generate flag turned on.'
@@ -43,28 +43,25 @@ LocalizationsGenerator generateLocalizations({
 
   precacheLanguageAndRegionTags();
 
-  final String inputPathString = options.arbDirectory?.path ?? fileSystem.path.join('lib', 'l10n');
-  final String templateArbFileName = options.templateArbFile?.toFilePath() ?? 'app_en.arb';
-  final String outputFileString = options.outputLocalizationsFile?.toFilePath() ?? 'app_localizations.dart';
   LocalizationsGenerator generator;
   try {
     generator = LocalizationsGenerator(
       fileSystem: fileSystem,
       inputsAndOutputsListPath: dependenciesDir?.path,
       projectPathString: projectDir.path,
-      inputPathString: inputPathString,
-      templateArbFileName: templateArbFileName,
-      outputFileString: outputFileString,
-      outputPathString: options.outputDirectory?.path,
-      classNameString: options.outputClass ?? 'AppLocalizations',
+      inputPathString: options.arbDir,
+      templateArbFileName: options.templateArbFile,
+      outputFileString: options.outputLocalizationFile,
+      outputPathString: options.outputDir,
+      classNameString: options.outputClass,
       preferredSupportedLocales: options.preferredSupportedLocales,
       headerString: options.header,
-      headerFile: options.headerFile?.toFilePath(),
-      useDeferredLoading: options.deferredLoading ?? false,
-      useSyntheticPackage: options.useSyntheticPackage,
-      areResourceAttributesRequired: options.areResourceAttributesRequired,
-      untranslatedMessagesFile: options.untranslatedMessagesFile?.toFilePath(),
-      usesNullableGetter: options.usesNullableGetter,
+      headerFile: options.headerFile,
+      useDeferredLoading: options.useDeferredLoading,
+      useSyntheticPackage: options.syntheticPackage,
+      areResourceAttributesRequired: options.requiredResourceAttributes,
+      untranslatedMessagesFile: options.untranslatedMessagesFile,
+      usesNullableGetter: options.nullableGetter,
       useEscaping: options.useEscaping,
       logger: logger,
       suppressWarnings: options.suppressWarnings,
