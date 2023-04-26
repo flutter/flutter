@@ -112,10 +112,10 @@ vars = {
   # The vulnerabiity database being used in this scan can be browsed
   # using this UI https://osv.dev/list
   # If a new dependency needs to be added, the upstream (non-mirrored)
-  # git URL for that dependency should be added to this list 
+  # git URL for that dependency should be added to this list
   # with the key-value pair being:
   # 'upstream_[dep name from last slash and before .git in URL]':'[git URL]'
-  # example: 
+  # example:
   "upstream_abseil-cpp": "https://github.com/abseil/abseil-cpp.git",
   "upstream_angle": "https://github.com/google/angle.git",
   "upstream_archive": "https://github.com/brendan-duncan/archive.git",
@@ -244,7 +244,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '059d155b4d452efd9c4427c45cddfd9445144869',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '37fa2f05f6b009a1a92879c03b0871d97100aa2d',
 
    # Fuchsia compatibility
    #
@@ -271,7 +271,7 @@ deps = {
    Var('github_git') + '/google/shaderc.git' + '@' + '7ea834ecc59258a5c13c3d3e6fa0582bdde7c543',
 
   'src/third_party/vulkan-deps':
-   Var('chromium_git') + '/vulkan-deps' + '@' + 'a56166d59ebdb0208a7301d267460773df1a1adc',
+   Var('chromium_git') + '/vulkan-deps' + '@' + '40b75117a60b11c42a1fb87bf14c0f49bcdb8b3d',
 
   'src/third_party/flatbuffers':
    Var('github_git') + '/google/flatbuffers.git' + '@' + '0a80646371179f8a7a5c1f42c31ee1d44dcf6709',
