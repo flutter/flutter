@@ -3244,4 +3244,32 @@ NumberFormat.decimalPatternDigits(
 );
 '''));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/125461.
+  testWithoutContext('dollar signs are escaped properly when there is a select clause', () {
+    const String dollarSignWithSelect = r'''
+{
+  "dollarSignWithSelect": "$nice_bug\nHello Bug! Manifistation #1 {selectPlaceholder, select, case{message} other{messageOther}}"
+}''';
+    final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+      ..createSync(recursive: true);
+    l10nDirectory.childFile(defaultTemplateArbFileName)
+      .writeAsStringSync(dollarSignWithSelect);
+    LocalizationsGenerator(
+      fileSystem: fs,
+      inputPathString: defaultL10nPathString,
+      outputPathString: defaultL10nPathString,
+      templateArbFileName: defaultTemplateArbFileName,
+      outputFileString: defaultOutputFileString,
+      classNameString: defaultClassNameString,
+      logger: logger,
+      suppressWarnings: true,
+    )
+      ..loadResources()
+      ..writeOutputFiles();
+    final String localizationsFile = fs.file(
+      fs.path.join(syntheticL10nPackagePath, 'output-localization-file_en.dart'),
+    ).readAsStringSync();
+    expect(localizationsFile, contains(r'\$nice_bug\nHello Bug! Manifistation #1 $_temp0'));
+  });
 }
