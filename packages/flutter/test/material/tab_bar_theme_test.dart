@@ -465,6 +465,48 @@ void main() {
     );
   });
 
+  testWidgets('TabAlignment.fill from TabBarTheme only supports non-scrollable tab bar', (WidgetTester tester) async {
+    const TabBarTheme tabBarTheme = TabBarTheme(tabAlignment: TabAlignment.fill);
+
+    // Test TabAlignment.fill from TabBarTheme with non-scrollable tab bar.
+    await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
+
+    expect(tester.takeException(), isNull);
+
+    // Test TabAlignment.fill from TabBarTheme with scrollable tab bar.
+    await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets(
+    'TabAlignment.start & TabAlignment.startOffset from TabBarTheme only supports scrollable tab bar',
+    (WidgetTester tester) async {
+      TabBarTheme tabBarTheme = const TabBarTheme(tabAlignment: TabAlignment.start);
+
+      // Test TabAlignment.start from TabBarTheme with scrollable tab bar.
+      await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
+
+      expect(tester.takeException(), isNull);
+
+      // Test TabAlignment.start from TabBarTheme with non-scrollable tab bar.
+      await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
+
+      expect(tester.takeException(), isAssertionError);
+
+      tabBarTheme = const TabBarTheme(tabAlignment: TabAlignment.startOffset);
+
+      // Test TabAlignment.startOffset from TabBarTheme with scrollable tab bar.
+      await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme, isScrollable: true));
+
+      expect(tester.takeException(), isNull);
+
+      // Test TabAlignment.startOffset from TabBarTheme with non-scrollable tab bar.
+      await tester.pumpWidget(buildTabBar(tabBarTheme: tabBarTheme));
+
+      expect(tester.takeException(), isAssertionError);
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.

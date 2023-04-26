@@ -58,30 +58,29 @@ enum TabBarIndicatorSize {
 ///   * [TabBar.tabAlignment], which defines the horizontal alignment of the
 ///     tabs within the [TabBar].
 enum TabAlignment {
-  /// When [TabBar.isScrollable] is true, tabs are aligned to the
-  /// start of the [TabBar] with a horizontal offset of 56.0 pixels.
+  /// TODO(tahatesser): Add a link to the Material Design spec for
+  /// horizontal offset when it is available.
+  /// It's currently sourced from androidx/compose/material3/TabRow.kt.
   ///
-  /// If [TabBar.isScrollable] is false, this is ignored.
+  /// If [TabBar.isScrollable] is true, tabs are aligned to the
+  /// start of the [TabBar] with a horizontal offset of 52.0 pixels.
+  /// Otherwise throws an exception.
   ///
   /// It is not recommended to set [TabAlignment.start] when
   /// [ThemeData.useMaterial3] is false.
   start,
-  
-  /// When [TabBar.isScrollable] is true, tabs are aligned to the
-  /// start of the [TabBar].
-  ///
-  /// If [TabBar.isScrollable] is false, this is ignored.
+
+  /// If [TabBar.isScrollable] is true, tabs are aligned to the
+  /// start of the [TabBar]. Otherwise throws an exception.
   ///
   /// It is not recommended to set [TabAlignment.startOffset] when
   /// [ThemeData.useMaterial3] is false.
   startOffset,
-  
-  /// When [TabBar.isScrollable] is false, tabs are stretched to fill the
-  /// [TabBar].
-  ///
-  /// If [TabBar.isScrollable] is true, this is ignored.
+
+  /// If [TabBar.isScrollable] is false, tabs are stretched to fill the
+  /// [TabBar]. Otherwise throws an exception.
   fill,
-  
+
   /// Tabs are aligned to the center of the [TabBar].
   center,
 }
@@ -1068,6 +1067,12 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Specifies the horizontal alignment of the tabs within a [TabBar].
   ///
+  /// If [TabBar.isScrollable] is false, only [TabAlignment.fill] and
+  /// [TabAlignment.center] are supported. Otherwise an exception is thrown.
+  ///
+  /// If [TabBar.isScrollable] is true, only [TabAlignment.start], [TabAlignment.startOffset],
+  /// and [TabAlignment.center] are supported. Otherwise an exception is thrown.
+  ///
   /// If this is null, then the value of [TabBarTheme.tabAlignment] is used.
   ///
   /// If [TabBarTheme.tabAlignment] is null and [ThemeData.useMaterial3] is true,
@@ -1430,10 +1435,32 @@ class _TabBarState extends State<TabBar> {
     return true;
   }
 
+  bool _debugTabAlignmentIsValid(TabAlignment tabAlignment) {
+    assert(() {
+      if (widget.isScrollable && tabAlignment == TabAlignment.fill) {
+        throw FlutterError(
+          '$tabAlignment is only valid for non-scrollable tab bars.',
+        );
+      }
+      if (!widget.isScrollable
+        && (tabAlignment == TabAlignment.start
+          || tabAlignment == TabAlignment.startOffset)) {
+        throw FlutterError(
+          '$tabAlignment is only valid for scrollable tab bars.',
+        );
+      }
+      return true;
+    }());
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     assert(_debugScheduleCheckHasValidTabsCount());
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final TabAlignment effectiveTabAlignment = widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
+    assert(_debugTabAlignmentIsValid(effectiveTabAlignment));
 
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller!.length == 0) {
@@ -1442,8 +1469,6 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
-    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final TabAlignment effectiveTabAlignment = widget.tabAlignment ?? tabBarTheme.tabAlignment ?? _defaults.tabAlignment!;
 
     final List<Widget> wrappedTabs = List<Widget>.generate(widget.tabs.length, (int index) {
       const double verticalAdjustment = (_kTextAndIconTabHeight - _kTabHeight)/2.0;

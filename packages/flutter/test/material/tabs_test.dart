@@ -5756,6 +5756,64 @@ void main() {
     expect(tabTwoRect.right, equals(tabTwoRight));
   });
 
+  testWidgets('TabAlignment.fill only supports non-scrollable tab bar', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B'];
+
+    // Test TabAlignment.fill with non-scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.fill),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    // Test TabAlignment.fill with scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.fill, isScrollable: true),
+    ));
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
+  testWidgets('TabAlignment.start & TabAlignment.startOffset only supports scrollable tab bar', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(useMaterial3: true);
+    final List<String> tabs = <String>['A', 'B'];
+
+    // Test TabAlignment.start with scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.start, isScrollable: true),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    // Test TabAlignment.start with non-scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.start),
+    ));
+
+    expect(tester.takeException(), isAssertionError);
+
+    // Test TabAlignment.startOffset with scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.startOffset, isScrollable: true),
+    ));
+
+    expect(tester.takeException(), isNull);
+
+    // Test TabAlignment.startOffset with non-scrollable tab bar.
+    await tester.pumpWidget(MaterialApp(
+      theme: theme,
+      home: buildFrame(tabs: tabs,  value: 'B', tabAlignment: TabAlignment.startOffset),
+    ));
+
+    expect(tester.takeException(), isAssertionError);
+  });
+
   group('Material 2', () {
     // Tests that are only relevant for Material 2. Once ThemeData.useMaterial3
     // is turned on by default, these tests can be removed.
