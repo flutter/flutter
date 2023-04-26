@@ -608,6 +608,50 @@ void main() {
       );
     });
 
+    testWidgets('width of picker in monthAndYear mode is consistent', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthAndYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018, 1),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first column and the last column.
+      final double distance =
+          tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx;
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 800.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthAndYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018, 1),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Distance between the first and the last column should be the same.
+      expect(
+        tester.getCenter(find.text('January')).dx - tester.getCenter(find.text('2018')).dx,
+        distance,
+      );
+    });
+
     testWidgets('wheel does not bend outwards', (WidgetTester tester) async {
 
       final Widget dateWidget = CupertinoDatePicker(
