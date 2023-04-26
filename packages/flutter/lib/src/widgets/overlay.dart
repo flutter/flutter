@@ -64,11 +64,11 @@ import 'ticker_provider.dart';
 ///
 ///  * [OverlayPortal], an alternative API for inserting widgets into an
 ///    [Overlay] using a builder callback.
-///  * [Overlay], A stack of entries that can be managed independently.
-///  * [OverlayState], The current state of an Overlay.
-///  * [WidgetsApp], A convenience widget that wraps a number of widgets that
+///  * [Overlay], a stack of entries that can be managed independently.
+///  * [OverlayState], the current state of an Overlay.
+///  * [WidgetsApp], a convenience widget that wraps a number of widgets that
 ///    are commonly required for an application.
-///  * [MaterialApp], A convenience widget that wraps a number of widgets that
+///  * [MaterialApp], a convenience widget that wraps a number of widgets that
 ///    are commonly required for Material Design applications.
 class OverlayEntry implements Listenable {
   /// Creates an overlay entry.
