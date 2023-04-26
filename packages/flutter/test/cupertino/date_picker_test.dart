@@ -460,6 +460,27 @@ void main() {
       expect(find.text('AM'), findsOneWidget);
     });
 
+    testWidgets('monthAndYear picker has expected string', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.monthAndYear,
+                onDateTimeChanged: (_) { },
+                initialDateTime: DateTime(2018, 9),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('September'), findsOneWidget);
+      expect(find.text('2018'), findsOneWidget);
+    });
+
     testWidgets('width of picker in date and time mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
