@@ -21,10 +21,10 @@ import 'template.dart';
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject extends FlutterProjectPlatform  {
-  final String defaultHostAppProjectName = 'Runner';
+  final String _defaultHostAppProjectDirectoryName = 'Runner';
   late final String hostAppProjectName = () {
     if (!hostAppRoot.existsSync()) {
-      return defaultHostAppProjectName;
+      return _defaultHostAppProjectDirectoryName;
     }
     final List<FileSystemEntity> contents = hostAppRoot.listSync();
     final FileSystem fileSystem = hostAppRoot.fileSystem;
@@ -36,7 +36,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
         return fileSystem.path.basenameWithoutExtension(entity.path);
       }
     }
-    return defaultHostAppProjectName;
+    return _defaultHostAppProjectDirectoryName;
   }();
 
   /// The parent of this project.
@@ -45,7 +45,7 @@ abstract class XcodeBasedProject extends FlutterProjectPlatform  {
   Directory get hostAppRoot;
 
   /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
-  File get defaultHostInfoPlist => hostAppRoot.childDirectory(defaultHostAppProjectName).childFile('Info.plist');
+  File get defaultHostInfoPlist => hostAppRoot.childDirectory(_defaultHostAppProjectDirectoryName).childFile('Info.plist');
 
   /// The Xcode project (.xcodeproj directory) of the host app.
   Directory get xcodeProject => hostAppRoot.childDirectory('$hostAppProjectName.xcodeproj');
@@ -514,7 +514,7 @@ class IosProject extends XcodeBasedProject {
         ? _flutterLibRoot
             .childDirectory('Flutter')
             .childDirectory('FlutterPluginRegistrant')
-        : hostAppRoot.childDirectory(defaultHostAppProjectName);
+        : hostAppRoot.childDirectory(_defaultHostAppProjectDirectoryName);
   }
 
   File get pluginRegistrantHeader {

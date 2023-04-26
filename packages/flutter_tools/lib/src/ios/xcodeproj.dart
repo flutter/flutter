@@ -451,6 +451,12 @@ class XcodeProjectInfo {
 
   bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);
 
+  /// The expected scheme for [buildInfo].
+  @visibleForTesting
+  static String expectedSchemeFor(BuildInfo? buildInfo) {
+    return sentenceCase(buildInfo?.flavor ?? 'runner');
+  }
+
   /// The expected build configuration for [buildInfo] and [scheme].
   static String expectedBuildConfigurationFor(BuildInfo buildInfo, String scheme) {
     final String baseConfiguration = _baseConfigurationFor(buildInfo);
@@ -458,12 +464,6 @@ class XcodeProjectInfo {
       return baseConfiguration;
     }
     return '$baseConfiguration-$scheme';
-  }
-
-  /// The expected scheme for [buildInfo].
-  @visibleForTesting
-  static String expectedSchemeFor(BuildInfo? buildInfo) {
-    return sentenceCase(buildInfo?.flavor ?? 'runner');
   }
 
   /// Checks whether the [buildConfigurations] contains the specified string, without
