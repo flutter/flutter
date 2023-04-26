@@ -60,6 +60,7 @@ nullable-getter: false
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
     );
 
     expect(options.arbDir, Uri.parse('arb').path);
@@ -84,6 +85,7 @@ preferred-supported-locales: ['en_US', 'de']
     final LocalizationOptions options = parseLocalizationsOptionsFromYAML(
       file: configFile,
       logger: BufferLogger.test(),
+      defaultArbDir: fileSystem.path.join('lib', 'l10n'),
     );
 
     expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
@@ -104,6 +106,7 @@ use-deferred-loading: string
       () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
       ),
       throwsException,
     );
@@ -119,6 +122,7 @@ template-arb-file: {name}_en.arb
       () => parseLocalizationsOptionsFromYAML(
         file: configFile,
         logger: BufferLogger.test(),
+        defaultArbDir: fileSystem.path.join('lib', 'l10n'),
       ),
       throwsToolExit(),
     );

@@ -219,8 +219,13 @@ class GenerateLocalizationsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    // Get all options associated with gen-l10n.
+    // Keep in mind that this is also defined in the following locations:
+    // 1. flutter_tools/lib/src/build_system/targets/localizations.dart
+    // 2. flutter_tools/test/general.shard/build_system/targets/localizations_test.dart
+    // Keep the value consistent in all three locations to ensure behavior is the
+    // same across "flutter gen-l10n" and "flutter run".
     final String defaultArbDir = _fileSystem.path.join('lib', 'l10n');
+    // Get all options associated with gen-l10n.
     final LocalizationOptions options;
     if (_fileSystem.file('l10n.yaml').existsSync()) {
       options = parseLocalizationsOptionsFromYAML(
