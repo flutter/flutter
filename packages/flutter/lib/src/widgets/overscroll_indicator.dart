@@ -201,6 +201,11 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
+    if (notification.metrics.axis != widget.axis) {
+      // This widget is explicitly configured to one axis. If a notification
+      // from a different axis bubbles up, do nothing.
+      return false;
+    }
 
     // Update the paint offset with the current scroll position. This makes
     // sure that the glow effect correctly scrolls in line with the current
@@ -236,7 +241,6 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         }
       }
       assert(controller != null);
-      assert(notification.metrics.axis == widget.axis);
       if (_accepted[isLeading]!) {
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
@@ -251,22 +255,16 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             switch (notification.metrics.axis) {
               case Axis.horizontal:
                 controller!.pull(notification.overscroll.abs(), size.width, clampDouble(position.dy, 0.0, size.height), size.height);
-                break;
               case Axis.vertical:
                 controller!.pull(notification.overscroll.abs(), size.height, clampDouble(position.dx, 0.0, size.width), size.width);
-                break;
             }
           }
         }
       }
-    } else if (notification is ScrollEndNotification || notification is ScrollUpdateNotification) {
-      // Using dynamic here to avoid layer violations of importing
-      // drag_details.dart from gestures.
-      // ignore: avoid_dynamic_calls
-      if ((notification as dynamic).dragDetails != null) {
-        _leadingController!.scrollEnd();
-        _trailingController!.scrollEnd();
-      }
+    } else if ((notification is ScrollEndNotification && notification.dragDetails != null) ||
+               (notification is ScrollUpdateNotification && notification.dragDetails != null)) {
+      _leadingController!.scrollEnd();
+      _trailingController!.scrollEnd();
     }
     _lastNotificationType = notification.runtimeType;
     return false;
@@ -463,11 +461,9 @@ class _GlowController extends ChangeNotifier {
     switch (_state) {
       case _GlowState.absorb:
         _recede(_recedeTime);
-        break;
       case _GlowState.recede:
         _state = _GlowState.idle;
         _pullDistance = 0.0;
-        break;
       case _GlowState.pull:
       case _GlowState.idle:
         break;
@@ -524,7 +520,7 @@ class _GlowController extends ChangeNotifier {
 
   @override
   String toString() {
-    return '_GlowController(color: $color, axis: ${describeEnum(axis)})';
+    return '_GlowController(color: $color, axis: ${axis.name})';
   }
 }
 
@@ -558,28 +554,24 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
     switch (applyGrowthDirectionToAxisDirection(axisDirection, growthDirection)) {
       case AxisDirection.up:
         controller.paint(canvas, size);
-        break;
       case AxisDirection.down:
         canvas.save();
         canvas.translate(0.0, size.height);
         canvas.scale(1.0, -1.0);
         controller.paint(canvas, size);
         canvas.restore();
-        break;
       case AxisDirection.left:
         canvas.save();
         canvas.rotate(piOver2);
         canvas.scale(1.0, -1.0);
         controller.paint(canvas, Size(size.height, size.width));
         canvas.restore();
-        break;
       case AxisDirection.right:
         canvas.save();
         canvas.translate(size.width, 0.0);
         canvas.rotate(piOver2);
         controller.paint(canvas, Size(size.height, size.width));
         canvas.restore();
-        break;
     }
   }
 
@@ -707,6 +699,11 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
+    if (notification.metrics.axis != widget.axis) {
+      // This widget is explicitly configured to one axis. If a notification
+      // from a different axis bubbles up, do nothing.
+      return false;
+    }
 
     if (notification is OverscrollNotification) {
       _lastOverscrollNotification = notification;
@@ -716,7 +713,6 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
         _accepted = confirmationNotification.accepted;
       }
 
-      assert(notification.metrics.axis == widget.axis);
       if (_accepted) {
         _totalOverscroll += notification.overscroll;
 
@@ -792,11 +788,9 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
             case Axis.horizontal:
               x += stretch;
               mainAxisSize = size.width;
-              break;
             case Axis.vertical:
               y += stretch;
               mainAxisSize = size.height;
-              break;
           }
 
           final AlignmentGeometry alignment = _getAlignmentForAxisDirection(
@@ -925,11 +919,9 @@ class _StretchController extends ChangeNotifier {
     switch (_state) {
       case _StretchState.absorb:
         _recede(_stretchDuration);
-        break;
       case _StretchState.recede:
         _state = _StretchState.idle;
         _pullDistance = 0.0;
-        break;
       case _StretchState.pull:
       case _StretchState.idle:
         break;

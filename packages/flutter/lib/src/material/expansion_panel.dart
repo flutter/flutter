@@ -139,7 +139,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// expansions.
 ///
 /// The [expansionCallback] is called when the expansion state changes. For
-/// normal [ExpansionPanelList] widgets, it is the responsibilty of the parent
+/// normal [ExpansionPanelList] widgets, it is the responsibility of the parent
 /// widget to rebuild the [ExpansionPanelList] with updated values for
 /// [ExpansionPanel.isExpanded]. For [ExpansionPanelList.radio] widgets, the
 /// open state is tracked internally and the callback is invoked both for the

@@ -106,7 +106,7 @@ class InkSparkle extends InteractiveInkFeature {
     bool containedInkWell = true,
     RectCallback? rectCallback,
     BorderRadius? borderRadius,
-    ShapeBorder? customBorder,
+    super.customBorder,
     double? radius,
     super.onRemoved,
     double? turbulenceSeed,
@@ -114,7 +114,6 @@ class InkSparkle extends InteractiveInkFeature {
        _color = color,
        _position = position,
        _borderRadius = borderRadius ?? BorderRadius.zero,
-       _customBorder = customBorder,
        _textDirection = textDirection,
        _targetRadius = (radius ?? _getTargetRadius(
                                     referenceBox,
@@ -203,7 +202,7 @@ class InkSparkle extends InteractiveInkFeature {
       ],
     ).animate(_animationController);
 
-    // Creates an element of randomness so that ink eminating from the same
+    // Creates an element of randomness so that ink emanating from the same
     // pixel have slightly different rings and sparkles.
     _turbulenceSeed = turbulenceSeed ?? math.Random().nextDouble() * 1000.0;
   }
@@ -236,7 +235,6 @@ class InkSparkle extends InteractiveInkFeature {
   final Color _color;
   final Offset _position;
   final BorderRadius _borderRadius;
-  final ShapeBorder? _customBorder;
   final double _targetRadius;
   final RectCallback? _clipCallback;
   final TextDirection _textDirection;
@@ -292,7 +290,7 @@ class InkSparkle extends InteractiveInkFeature {
         canvas: canvas,
         clipCallback: _clipCallback!,
         textDirection: _textDirection,
-        customBorder: _customBorder,
+        customBorder: customBorder,
         borderRadius: _borderRadius,
       );
     }

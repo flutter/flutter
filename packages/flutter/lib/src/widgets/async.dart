@@ -442,8 +442,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// A widget that builds itself based on the latest snapshot of interaction with
 /// a [Future].
 ///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=ek8ZPdWj4Qo}
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=zEdw_1B7JHY}
 ///
 /// ## Managing the future
@@ -516,7 +514,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// ** See code in examples/api/lib/widgets/async/future_builder.0.dart **
 /// {@end-tool}
-// TODO(ianh): remove unreachable code above once https://github.com/dart-lang/sdk/issues/35520 is fixed
 class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
@@ -637,12 +634,11 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
           });
         }
         assert(() {
-          if(FutureBuilder.debugRethrowError) {
+          if (FutureBuilder.debugRethrowError) {
             Future<Object>.error(error, stackTrace);
           }
           return true;
         }());
-
       });
       // An implementation like `SynchronousFuture` may have already called the
       // .then closure. Do not overwrite it in that case.

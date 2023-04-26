@@ -264,16 +264,28 @@ void main() {
       );
     }
 
+    void expectFindsChild(int n) {
+      for (int i = 0; i < 3; i++) {
+        expect(find.text('$i', skipOffstage: false), findsOneWidget);
+
+        if (i == n) {
+          expect(find.text('$i'), findsOneWidget);
+        } else {
+          expect(find.text('$i'), findsNothing);
+        }
+      }
+    }
+
     await tester.pumpWidget(buildFrame(0));
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
+    expectFindsChild(0);
     expect(itemsPainted, equals(<int>[0]));
 
     await tester.pumpWidget(buildFrame(1));
+      expectFindsChild(1);
     expect(itemsPainted, equals(<int>[1]));
 
     await tester.pumpWidget(buildFrame(2));
+      expectFindsChild(2);
     expect(itemsPainted, equals(<int>[2]));
   });
 
@@ -306,6 +318,41 @@ void main() {
     expect(itemsTapped, isEmpty);
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[2]);
+  });
+
+  testWidgets('IndexedStack sets non-selected indexes to visible=false', (WidgetTester tester) async {
+    Widget buildStack({required int itemCount, required int? selectedIndex}) {
+      final List<Widget> children = List<Widget>.generate(itemCount, (int i) {
+        return _ShowVisibility(index: i);
+      });
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: IndexedStack(
+          index: selectedIndex,
+          children: children,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: null));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 0));
+    expect(find.text('index 0 is visible ? true', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 1));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? true', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? false', skipOffstage: false), findsOneWidget);
+
+    await tester.pumpWidget(buildStack(itemCount: 3, selectedIndex: 2));
+    expect(find.text('index 0 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 1 is visible ? false', skipOffstage: false), findsOneWidget);
+    expect(find.text('index 2 is visible ? true', skipOffstage: false), findsOneWidget);
   });
 
   testWidgets('Can set width and height', (WidgetTester tester) async {
@@ -436,6 +483,40 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(IndexedStack));
     expect(box.size, equals(const Size(200.0, 200.0)));
     expect(tapped, isNull);
+  });
+
+  testWidgets('IndexedStack reports hidden children as offstage', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[
+      for (int i = 0; i < 5; i++) Text('child $i'),
+    ];
+
+    Future<void> pumpIndexedStack(int? activeIndex) async{
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: IndexedStack(
+            index: activeIndex,
+            children: children,
+          ),
+        )
+      );
+    }
+
+    final Finder finder = find.byType(Text);
+    final Finder finderIncludingOffstage = find.byType(Text, skipOffstage: false);
+
+    await pumpIndexedStack(null);
+    expect(finder, findsNothing); // IndexedStack with null index shows nothing
+    expect(finderIncludingOffstage, findsNWidgets(5));
+
+    for (int i = 0; i < 5; i++) {
+      await pumpIndexedStack(i);
+
+      expect(finder, findsOneWidget);
+      expect(finderIncludingOffstage, findsNWidgets(5));
+
+      expect(find.text('child $i'), findsOneWidget);
+    }
   });
 
   testWidgets('Stack clip test', (WidgetTester tester) async {
@@ -865,4 +946,15 @@ void main() {
       'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)',
     ]);
   });
+}
+
+class _ShowVisibility extends StatelessWidget {
+  const _ShowVisibility({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('index $index is visible ? ${Visibility.of(context)}');
+  }
 }

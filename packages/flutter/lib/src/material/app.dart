@@ -825,6 +825,7 @@ class MaterialScrollBehavior extends ScrollBehavior {
           case TargetPlatform.linux:
           case TargetPlatform.macOS:
           case TargetPlatform.windows:
+            assert(details.controller != null);
             return Scrollbar(
               controller: details.controller,
               child: child,
@@ -864,16 +865,16 @@ class MaterialScrollBehavior extends ScrollBehavior {
               child: child,
             );
           case AndroidOverscrollIndicator.glow:
-            continue glow;
+            break;
         }
-      glow:
       case TargetPlatform.fuchsia:
-        return GlowingOverscrollIndicator(
-          axisDirection: details.direction,
-          color: Theme.of(context).colorScheme.secondary,
-          child: child,
-        );
+        break;
     }
+    return GlowingOverscrollIndicator(
+      axisDirection: details.direction,
+      color: Theme.of(context).colorScheme.secondary,
+      child: child,
+    );
   }
 }
 
@@ -910,15 +911,14 @@ class _MaterialAppState extends State<MaterialApp> {
     );
   }
 
-  Widget _materialBuilder(BuildContext context, Widget? child) {
+  ThemeData _themeBuilder(BuildContext context) {
+    ThemeData? theme;
     // Resolve which theme to use based on brightness and high contrast.
     final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
     final Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
     final bool useDarkTheme = mode == ThemeMode.dark
       || (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark);
     final bool highContrast = MediaQuery.highContrastOf(context);
-    ThemeData? theme;
-
     if (useDarkTheme && highContrast && widget.highContrastDarkTheme != null) {
       theme = widget.highContrastDarkTheme;
     } else if (useDarkTheme && widget.darkTheme != null) {
@@ -927,6 +927,11 @@ class _MaterialAppState extends State<MaterialApp> {
       theme = widget.highContrastTheme;
     }
     theme ??= widget.theme ?? ThemeData.light();
+    return theme;
+  }
+
+  Widget _materialBuilder(BuildContext context, Widget? child) {
+    final ThemeData theme = _themeBuilder(context);
     final Color effectiveSelectionColor = theme.textSelectionTheme.selectionColor ?? theme.colorScheme.primary.withOpacity(0.40);
     final Color effectiveCursorColor = theme.textSelectionTheme.cursorColor ?? theme.colorScheme.primary;
 

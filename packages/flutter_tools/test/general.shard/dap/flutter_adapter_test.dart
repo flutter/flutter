@@ -101,6 +101,44 @@ void main() {
         expect(adapter.pidsToTerminate, isNot(contains(123)));
       });
 
+
+      group('supportsRestartRequest', () {
+        void testRestartSupport(bool supportsRestart) {
+          test('notifies client for supportsRestart: $supportsRestart', () async {
+            final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
+              fileSystem: MemoryFileSystem.test(style: fsStyle),
+              platform: platform,
+              supportsRestart: supportsRestart,
+            );
+
+            final FlutterLaunchRequestArguments args = FlutterLaunchRequestArguments(
+              cwd: '/project',
+              program: 'foo.dart',
+            );
+
+            // Listen for a Capabilities event that modifies 'supportsRestartRequest'.
+            final Future<CapabilitiesEventBody> capabilitiesUpdate = adapter
+                .dapToClientMessages
+                .where((Map<String, Object?> message) => message['event'] == 'capabilities')
+                .map((Map<String, Object?> message) => message['body'] as Map<String, Object?>?)
+                .where((Map<String, Object?>? body) => body != null).cast<Map<String, Object?>>()
+                .map(CapabilitiesEventBody.fromJson)
+                .firstWhere((CapabilitiesEventBody body) => body.capabilities.supportsRestartRequest != null);
+
+            await adapter.configurationDoneRequest(MockRequest(), null, () {});
+            final Completer<void> launchCompleter = Completer<void>();
+            await adapter.launchRequest(MockRequest(), args, launchCompleter.complete);
+            await launchCompleter.future;
+
+            // Ensure the Capabilities update has the expected value.
+            expect((await capabilitiesUpdate).capabilities.supportsRestartRequest, supportsRestart);
+          });
+        }
+
+        testRestartSupport(true);
+        testRestartSupport(false);
+      });
+
       test('calls "app.stop" on terminateRequest', () async {
         final MockFlutterDebugAdapter adapter = MockFlutterDebugAdapter(
           fileSystem: MemoryFileSystem.test(style: fsStyle),

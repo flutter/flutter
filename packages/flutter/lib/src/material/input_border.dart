@@ -529,12 +529,10 @@ class OutlineInputBorder extends InputBorder {
         case TextDirection.rtl:
           final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart + gapPadding - extent), extent);
           canvas.drawPath(path, paint);
-          break;
 
         case TextDirection.ltr:
           final Path path = _gapBorderPath(canvas, center, math.max(0.0, gapStart - gapPadding), extent);
           canvas.drawPath(path, paint);
-          break;
       }
     }
   }

@@ -128,14 +128,6 @@ TaskFunction createCubicBezierPerfE2ETest() {
   ).run;
 }
 
-TaskFunction createFlutterGalleryTransitionsPerfSkSLWarmupTest() {
-  return PerfTestWithSkSL(
-    '${flutterDirectory.path}/dev/integration_tests/flutter_gallery',
-    'test_driver/transitions_perf.dart',
-    'transitions',
-  ).run;
-}
-
 TaskFunction createBackdropFilterPerfTest({
     bool measureCpuGpu = true,
     bool enableImpeller = false,
@@ -313,6 +305,15 @@ TaskFunction createTextfieldPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/textfield_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createSlidersPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'sliders_perf',
+    testDriver: 'test_driver/sliders_perf_test.dart',
   ).run;
 }
 
@@ -628,6 +629,19 @@ TaskFunction createGradientStaticPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createAnimatedBlurBackropFilterPerfTest({
+  bool enableImpeller = false,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animated_blur_backdrop_filter_perf',
+    enableImpeller: enableImpeller,
+    testDriver: 'test_driver/animated_blur_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
+  ).run;
+}
+
 TaskFunction createAnimatedComplexOpacityPerfE2ETest({
   bool enableImpeller = false,
 }) {
@@ -693,7 +707,6 @@ class StartupTest {
             '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm:
           await flutter('build', options: <String>[
             'apk',
@@ -703,7 +716,6 @@ class StartupTest {
             '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm64:
           await flutter('build', options: <String>[
             'apk',
@@ -713,7 +725,6 @@ class StartupTest {
             '--target=$target',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
@@ -728,7 +739,6 @@ class StartupTest {
           ]);
           final String buildRoot = path.join(testDirectory, 'build');
           applicationBinaryPath = _findDarwinAppInBuildDirectory(buildRoot);
-          break;
         case DeviceOperatingSystem.windows:
           await flutter('build', options: <String>[
             'windows',
@@ -745,7 +755,6 @@ class StartupTest {
             'Profile',
             '$basename.exe'
           );
-          break;
       }
 
       const int maxFailures = 3;
@@ -832,7 +841,6 @@ class DevtoolsStartupTest {
             '--target-platform=android-arm,android-arm64',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm:
           await flutter('build', options: <String>[
             'apk',
@@ -841,7 +849,6 @@ class DevtoolsStartupTest {
             '--target-platform=android-arm',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.androidArm64:
           await flutter('build', options: <String>[
             'apk',
@@ -850,7 +857,6 @@ class DevtoolsStartupTest {
             '--target-platform=android-arm64',
           ]);
           applicationBinaryPath = '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-          break;
         case DeviceOperatingSystem.ios:
           await flutter('build', options: <String>[
             'ios',
@@ -858,7 +864,6 @@ class DevtoolsStartupTest {
             '--profile',
           ]);
           applicationBinaryPath = _findDarwinAppInBuildDirectory('$testDirectory/build/ios/iphoneos');
-          break;
         case DeviceOperatingSystem.fake:
         case DeviceOperatingSystem.fuchsia:
         case DeviceOperatingSystem.linux:
@@ -867,17 +872,19 @@ class DevtoolsStartupTest {
           break;
       }
 
-      final Process process = await startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), <String>[
+      final Process process = await startFlutter(
         'run',
-        '--no-android-gradle-daemon',
-        '--no-publish-port',
-        '--verbose',
-        '--profile',
-        '-d',
-        device.deviceId,
-        if (applicationBinaryPath != null)
-          '--use-application-binary=$applicationBinaryPath',
-       ]);
+        options: <String>[
+          '--no-android-gradle-daemon',
+          '--no-publish-port',
+          '--verbose',
+          '--profile',
+          '-d',
+          device.deviceId,
+          if (applicationBinaryPath != null)
+            '--use-application-binary=$applicationBinaryPath',
+       ],
+      );
       final Completer<void> completer = Completer<void>();
       bool sawLine = false;
       process.stdout
@@ -1023,9 +1030,7 @@ class PerfTest {
 
   @protected
   Future<TaskResult> internalRun({
-      bool cacheSkSL = false,
       String? existingApp,
-      String? writeSkslFileName,
   }) {
     return inDirectory<TaskResult>(testDirectory, () async {
       late Device selectedDevice;
@@ -1061,9 +1066,6 @@ class PerfTest {
           ...<String>['--driver', testDriver!],
         if (existingApp != null)
           ...<String>['--use-existing-app', existingApp],
-        if (writeSkslFileName != null)
-          ...<String>['--write-sksl-on-exit', writeSkslFileName],
-        if (cacheSkSL) '--cache-sksl',
         if (dartDefine.isNotEmpty)
           ...<String>['--dart-define', dartDefine],
         if (enableImpeller) '--enable-impeller',
@@ -1152,149 +1154,6 @@ const List<String> _kCommonScoreKeys = <String>[
   'old_gen_gc_count',
 ];
 
-class PerfTestWithSkSL extends PerfTest {
-  PerfTestWithSkSL(
-    super.testDirectory,
-    super.testTarget,
-    String super.timelineFileName, {
-    super.measureCpuGpu = false,
-    super.testDriver,
-    super.needsFullTimeline,
-    super.benchmarkScoreKeys,
-  });
-
-
-  PerfTestWithSkSL.e2e(
-    super.testDirectory,
-    super.testTarget, {
-    String super.testDriver,
-    super.resultFilename,
-  }) : super.e2e(
-    needsFullTimeline: false,
-  );
-
-  @override
-  Future<TaskResult> run({int? timeoutSeconds}) async {
-    return inDirectory<TaskResult>(testDirectory, () async {
-      // Some initializations
-      _device = await devices.workingDevice;
-      _flutterPath = path.join(flutterDirectory.path, 'bin', 'flutter');
-
-      // Prepare the SkSL by running the driver test.
-      await _generateSkSL();
-
-      // Build the app with SkSL artifacts and run that app
-      final String observatoryUri = await _runApp(skslPath: _skslJsonFileName);
-
-      // Attach to the running app and run the final driver test to get metrics.
-      final TaskResult result = await internalRun(
-        existingApp: observatoryUri,
-      );
-
-      _runProcess.kill();
-      await _runProcess.exitCode;
-
-      return result;
-    });
-  }
-
-  Future<void> _generateSkSL() async {
-    // `flutter drive` without `flutter run`, and `flutter drive --existing-app`
-    // with `flutter run` may generate different SkSLs. Hence we run both
-    // versions to generate as many SkSLs as possible.
-    //
-    // 1st, `flutter drive --existing-app` with `flutter run`. The
-    // `--write-sksl-on-exit` option doesn't seem to be compatible with
-    // `flutter drive --existing-app` as it will complain web socket connection
-    // issues.
-    final String observatoryUri = await _runApp(cacheSkSL: true);
-    await super.internalRun(cacheSkSL: true, existingApp: observatoryUri);
-    _runProcess.kill();
-    await _runProcess.exitCode;
-
-    // 2nd, `flutter drive` without `flutter run`. The --no-build option ensures
-    // that we won't remove the SkSLs generated earlier.
-    await super.internalRun(
-      cacheSkSL: true,
-      writeSkslFileName: _skslJsonFileName,
-    );
-  }
-
-  Future<String> _runApp({String? appBinary, bool cacheSkSL = false, String? skslPath}) async {
-    if (File(_vmserviceFileName).existsSync()) {
-      File(_vmserviceFileName).deleteSync();
-    }
-    final String? localEngine = localEngineFromEnv;
-    final String? localEngineSrcPath = localEngineSrcPathFromEnv;
-    _runProcess = await startProcess(
-      _flutterPath,
-      <String>[
-        'run',
-        if (localEngine != null)
-          ...<String>['--local-engine', localEngine],
-        if (localEngineSrcPath != null)
-          ...<String>['--local-engine-src-path', localEngineSrcPath],
-        '--no-dds',
-        if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-          ...<String>[
-            '--device-timeout', '5',
-          ],
-        '--verbose',
-        '--verbose-system-logs',
-        '--purge-persistent-cache',
-        '--no-publish-port',
-        '--profile',
-        if (skslPath != null) '--bundle-sksl-path=$skslPath',
-        if (cacheSkSL) '--cache-sksl',
-        '-d', _device.deviceId,
-        '-t', testTarget,
-        '--endless-trace-buffer',
-        if (appBinary != null) ...<String>['--use-application-binary', _appBinary],
-        '--vmservice-out-file', _vmserviceFileName,
-      ],
-    );
-
-    final Stream<List<int>> broadcastOut = _runProcess.stdout.asBroadcastStream();
-    _forwardStream(broadcastOut, 'run stdout');
-    _forwardStream(_runProcess.stderr, 'run stderr');
-
-    final File file = await waitForFile(_vmserviceFileName);
-    return file.readAsStringSync();
-  }
-
-  String get _skslJsonFileName => '$testDirectory/flutter_01.sksl.json';
-  String get _vmserviceFileName => '$testDirectory/$_kVmserviceOutFileName';
-
-  bool get _isAndroid => deviceOperatingSystem == DeviceOperatingSystem.android;
-
-  String get _appBinary {
-    if (_isAndroid) {
-      return '$testDirectory/build/app/outputs/flutter-apk/app-profile.apk';
-    }
-    for (final FileSystemEntity entry in Directory('$testDirectory/build/ios/iphoneos/').listSync()) {
-      if (entry.path.endsWith('.app')) {
-        return entry.path;
-      }
-    }
-    throw 'No app found.';
-  }
-
-  Stream<String> _transform(Stream<List<int>> stream) =>
-      stream.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
-
-  void _forwardStream(Stream<List<int>> stream, String label) {
-    _transform(stream).listen((String line) {
-      print('$label: $line');
-    });
-  }
-
-  late String _flutterPath;
-  late Device _device;
-  late Process _runProcess;
-
-  static const String _kVmserviceOutFileName = 'vmservice.out';
-}
-
 /// Measures how long it takes to compile a Flutter app to JavaScript and how
 /// big the compiled code is.
 class WebCompileTest {
@@ -1342,6 +1201,7 @@ class WebCompileTest {
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
 
+      await flutter('clean');
       await flutter('packages', options: <String>['get']);
       final Stopwatch? watch = measureBuildTime ? Stopwatch() : null;
       watch?.start();
@@ -1350,6 +1210,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
+        '--no-web-resources-cdn',
       ]);
       watch?.stop();
       final String buildDir = path.join(directory, 'build', 'web');
@@ -1537,7 +1398,6 @@ class CompileTest {
           );
           metrics.addAll(sizeMetrics);
         }
-        break;
       case DeviceOperatingSystem.android:
       case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
@@ -1553,7 +1413,6 @@ class CompileTest {
         if (reportPackageContentSizes) {
           metrics.addAll(await getSizesFromApk(apkPath));
         }
-        break;
       case DeviceOperatingSystem.androidArm64:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm64');
@@ -1568,7 +1427,6 @@ class CompileTest {
         if (reportPackageContentSizes) {
           metrics.addAll(await getSizesFromApk(apkPath));
         }
-        break;
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
@@ -1596,7 +1454,6 @@ class CompileTest {
         // rather a directory containing an .exe and .dll files.
         // The release size is set to the size of the produced .exe file
         releaseSizeInBytes = exe.lengthSync();
-        break;
     }
 
     metrics.addAll(<String, dynamic>{
@@ -1624,16 +1481,13 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        break;
       case DeviceOperatingSystem.android:
       case DeviceOperatingSystem.androidArm:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
-        break;
       case DeviceOperatingSystem.androidArm64:
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm64');
-        break;
       case DeviceOperatingSystem.fake:
         throw Exception('Unsupported option for fake devices');
       case DeviceOperatingSystem.fuchsia:
@@ -1643,11 +1497,9 @@ class CompileTest {
       case DeviceOperatingSystem.macos:
         unawaited(stderr.flush());
         options.insert(0, 'macos');
-        break;
       case DeviceOperatingSystem.windows:
         unawaited(stderr.flush());
         options.insert(0, 'windows');
-        break;
     }
     watch.start();
     await flutter('build', options: options);
@@ -1675,7 +1527,6 @@ class CompileTest {
           'Flutter.framework',
           'Flutter',
         ));
-        break;
       case DeviceOperatingSystem.macos:
         frameworkDirectory = path.join(
           appPath,
@@ -1687,7 +1538,6 @@ class CompileTest {
           'FlutterMacOS.framework',
           'FlutterMacOS',
         )); // https://github.com/flutter/flutter/issues/70413
-        break;
       case DeviceOperatingSystem.android:
       case DeviceOperatingSystem.androidArm:
       case DeviceOperatingSystem.androidArm64:

@@ -77,7 +77,7 @@ class CupertinoTextMagnifier extends StatefulWidget {
 
 class _CupertinoTextMagnifierState extends State<CupertinoTextMagnifier>
     with SingleTickerProviderStateMixin {
-  // Initalize to dummy values for the event that the inital call to
+  // Initialize to dummy values for the event that the initial call to
   // _determineMagnifierPositionAndFocalPoint calls hide, and thus does not
   // set these values.
   Offset _currentAdjustedMagnifierPosition = Offset.zero;

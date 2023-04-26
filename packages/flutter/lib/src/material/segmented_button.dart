@@ -100,7 +100,7 @@ class SegmentedButton<T> extends StatelessWidget {
   /// more than five options, consider using [FilterChip] or [ChoiceChip]
   /// widgets.
   ///
-  /// If [onSelectionChanged] is null, then the entire segemented button will
+  /// If [onSelectionChanged] is null, then the entire segmented button will
   /// be disabled.
   ///
   /// By default [selected] must only contain one entry. However, if
@@ -163,7 +163,7 @@ class SegmentedButton<T> extends StatelessWidget {
 
   /// Determines if having no selected segments is allowed.
   ///
-  /// If true, then it is acceptable for none of the segements to be selected.
+  /// If true, then it is acceptable for none of the segments to be selected.
   /// This means that [selected] can be empty. If the user taps on a
   /// selected segment, it will be removed from the selection set passed into
   /// [onSelectionChanged].
@@ -183,7 +183,7 @@ class SegmentedButton<T> extends StatelessWidget {
   ///     dividers between segments.
   ///   * [ButtonStyle.shape]
   ///
-  /// The following style properties are applied to each of the invidual
+  /// The following style properties are applied to each of the individual
   /// button segments. For properties that are a [MaterialStateProperty],
   /// they will be resolved with the current state of the segment:
   ///
@@ -354,6 +354,7 @@ class SegmentedButton<T> extends StatelessWidget {
     final List<Widget> buttons = segments.map(buttonFor).toList();
 
     return Material(
+      type: MaterialType.transparency,
       shape: enabledBorder.copyWith(side: BorderSide.none),
       elevation: resolve<double?>((ButtonStyle? style) => style?.elevation)!,
       shadowColor: resolve<Color?>((ButtonStyle? style) => style?.shadowColor),
@@ -595,14 +596,12 @@ class _RenderSegmentedButton<T> extends RenderBox with
           lastChild,
           firstChild,
         );
-        break;
       case TextDirection.ltr:
         _layoutRects(
           childAfter,
           firstChild,
           lastChild,
         );
-        break;
     }
 
     size = _computeOverallSizeFromChildSize(childSize);
@@ -638,12 +637,10 @@ class _RenderSegmentedButton<T> extends RenderBox with
           segmentLeft = child == lastChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == firstChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentRight;
-          break;
         case TextDirection.ltr:
           segmentLeft = child == firstChild ? borderRect.left - borderOutset : childRect.left;
           segmentRight = child == lastChild ? borderRect.right + borderOutset : childRect.right;
           dividerPos = segmentLeft;
-          break;
       }
       final Rect segmentClipRect = Rect.fromLTRB(
         segmentLeft, borderRect.top - borderOutset,
@@ -717,7 +714,7 @@ class _RenderSegmentedButton<T> extends RenderBox with
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_158
+// Token database version: v0_162
 
 class _SegmentedButtonDefaultsM3 extends SegmentedButtonThemeData {
   _SegmentedButtonDefaultsM3(this.context);

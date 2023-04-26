@@ -129,9 +129,15 @@
   "keyboardKeyMetaMacOs": "Command",
   "keyboardKeyMetaWindows": "Win",
   "menuBarMenuLabel": "ਮੀਨੂ ਬਾਰ ਮੀਨੂ",
-  "currentDateLabel": "Date of today",
-  "scrimLabel": "Scrim",
-  "bottomSheetLabel": "Bottom Sheet",
-  "scrimOnTapHint": "Close $modalRouteName",
-  "keyboardKeyShift": "Shift"
+  "currentDateLabel": "ਅੱਜ",
+  "scrimLabel": "ਸਕ੍ਰਿਮ",
+  "bottomSheetLabel": "ਹੇਠਲੀ ਸ਼ੀਟ",
+  "scrimOnTapHint": "$modalRouteContentName ਨੂੰ ਬੰਦ ਕਰੋ",
+  "keyboardKeyShift": "Shift",
+  "expansionTileExpandedHint": "double tap to collapse'",
+  "expansionTileCollapsedHint": "double tap to expand",
+  "expansionTileExpandedTapHint": "Collapse",
+  "expansionTileCollapsedTapHint": "Expand for more details",
+  "expandedHint": "Collapsed",
+  "collapsedHint": "Expanded"
 }

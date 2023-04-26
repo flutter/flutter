@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [CupertinoFormRow].
-
 import 'package:flutter/cupertino.dart';
+
+/// Flutter code sample for [CupertinoFormRow].
 
 void main() => runApp(const CupertinoFormRowApp());
 
@@ -65,11 +65,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
               error: Text('Home network unavailable'),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: <Widget>[
-                  Text('Not connected'),
-                  SizedBox(width: 5),
-                  Icon(CupertinoIcons.forward)
-                ],
+                children: <Widget>[Text('Not connected'), SizedBox(width: 5), Icon(CupertinoIcons.forward)],
               ),
             ),
             const CupertinoFormRow(
@@ -93,7 +89,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
                 children: <Widget>[
                   Text('On'),
                   SizedBox(width: 5),
-                  Icon(CupertinoIcons.forward)
+                  Icon(CupertinoIcons.forward),
                 ],
               ),
             ),

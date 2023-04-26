@@ -473,7 +473,7 @@ void main() {
     });
 
     testWidgets('works when semantics are enabled', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = tester.ensureSemantics();
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
@@ -497,7 +497,7 @@ void main() {
     }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
-      final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
+      final SemanticsHandle semantics = tester.ensureSemantics();
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,

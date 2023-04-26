@@ -32,10 +32,8 @@ void main() {
         } else {
           axisDirection = reverse ? AxisDirection.left : AxisDirection.right;
         }
-        break;
       case Axis.vertical:
         axisDirection = reverse ? AxisDirection.up : AxisDirection.down;
-        break;
     }
 
     return Directionality(
@@ -77,6 +75,65 @@ void main() {
       ),
     );
   }
+
+  testWidgets('Stretch overscroll will do nothing when axes do not match', (WidgetTester tester) async {
+    final GlobalKey box1Key = GlobalKey();
+    final GlobalKey box2Key = GlobalKey();
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: ScrollConfiguration(
+            behavior: const ScrollBehavior().copyWith(overscroll: false),
+            child: StretchingOverscrollIndicator(
+              axisDirection: AxisDirection.right,
+              child: CustomScrollView(
+                controller: controller,
+                slivers: <Widget>[
+                  SliverToBoxAdapter(child: Container(
+                    color: const Color(0xD0FF0000),
+                    key: box1Key,
+                    height: 250.0,
+                  )),
+                  SliverToBoxAdapter(child: Container(
+                    color: const Color(0xFFFFFF00),
+                    key: box2Key,
+                    height: 250.0,
+                    width: 300.0,
+                  )),
+                ],
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    expect(find.byType(StretchingOverscrollIndicator), findsOneWidget);
+    expect(find.byType(GlowingOverscrollIndicator), findsNothing);
+    final RenderBox box1 = tester.renderObject(find.byKey(box1Key));
+    final RenderBox box2 = tester.renderObject(find.byKey(box2Key));
+
+    expect(controller.offset, 0.0);
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(CustomScrollView)));
+    // Overscroll the start, no stretching occurs.
+    await gesture.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero).dy, 250.0);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    // Overscroll released
+    expect(box1.localToGlobal(Offset.zero), Offset.zero);
+    expect(box2.localToGlobal(Offset.zero), const Offset(0.0, 250.0));
+  });
 
   testWidgets('Stretch overscroll vertically', (WidgetTester tester) async {
     final GlobalKey box1Key = GlobalKey();

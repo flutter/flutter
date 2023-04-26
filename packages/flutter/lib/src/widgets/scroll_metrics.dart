@@ -62,7 +62,7 @@ mixin ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value should typically be non-null and less than or equal to
+  /// This value is typically less than or equal to
   /// [maxScrollExtent]. It can be negative infinity, if the scroll is unbounded.
   double get minScrollExtent;
 
@@ -70,7 +70,7 @@ mixin ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value should typically be non-null and greater than or equal to
+  /// This value is typically greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
   double get maxScrollExtent;
 

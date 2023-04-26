@@ -57,7 +57,7 @@ dynamic getRenderChip(WidgetTester tester) {
   if (!tester.any(findRenderChipElement())) {
     return null;
   }
-  final Element element = tester.element(findRenderChipElement());
+  final Element element = tester.element(findRenderChipElement().first);
   return element.renderObject;
 }
 
@@ -576,7 +576,7 @@ void main() {
   );
 
   testWidgets('Chip in row works ok', (WidgetTester tester) async {
-    const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
+    const TextStyle style = TextStyle(fontSize: 10.0);
     await tester.pumpWidget(
       wrapForChip(
         child: const Row(
@@ -746,18 +746,16 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
     expect(
       tester.getSize(find.text('Chip A')),
-      anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)),
+      const Size(84.0, 14.0),
     );
     expect(
       tester.getSize(find.text('Chip B')),
-      anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)),
+      const Size(84.0, 14.0),
     );
-    expect(tester.getSize(find.byType(Chip).first), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
-    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
+    expect(tester.getSize(find.byType(Chip).first), const Size(132.0, 48.0));
+    expect(tester.getSize(find.byType(Chip).last), const Size(132.0, 48.0));
 
     await tester.pumpWidget(
       wrapForChip(
@@ -777,14 +775,10 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(310.0, 311.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
-    expect(tester.getSize(find.byType(Chip).last).width, anyOf(310.0, 311.0));
-    expect(tester.getSize(find.byType(Chip).last).height, equals(50.0));
+    expect(tester.getSize(find.text('Chip A')), const Size(252.0, 42.0));
+    expect(tester.getSize(find.text('Chip B')), const Size(252.0, 42.0));
+    expect(tester.getSize(find.byType(Chip).first), const Size(310.0, 50.0));
+    expect(tester.getSize(find.byType(Chip).last), const Size(310.0, 50.0));
 
     // Check that individual text scales are taken into account.
     await tester.pumpWidget(
@@ -804,13 +798,10 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
-    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(252.0, 42.0), const Size(251.0, 42.0)));
-    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)));
-    expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
-    expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
-    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
+    expect(tester.getSize(find.text('Chip A')), const Size(252.0, 42.0));
+    expect(tester.getSize(find.text('Chip B')), const Size(84.0, 14.0));
+    expect(tester.getSize(find.byType(Chip).first), const Size(318.0, 50.0));
+    expect(tester.getSize(find.byType(Chip).last), const Size(132.0, 48.0));
   });
 
   testWidgets('Labels can be non-text widgets', (WidgetTester tester) async {
@@ -833,17 +824,9 @@ void main() {
       ),
     );
 
-    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
-    // https://github.com/flutter/flutter/issues/12357
-    expect(
-      tester.getSize(find.byKey(keyA)),
-      anyOf(const Size(84.0, 14.0), const Size(83.0, 14.0)),
-    );
+    expect(tester.getSize(find.byKey(keyA)), const Size(84.0, 14.0));
     expect(tester.getSize(find.byKey(keyB)), const Size(10.0, 10.0));
-    expect(
-      tester.getSize(find.byType(Chip).first),
-      anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)),
-    );
+    expect(tester.getSize(find.byType(Chip).first), const Size(132.0, 48.0));
     expect(tester.getSize(find.byType(Chip).last), const Size(58.0, 48.0));
   });
 
@@ -3300,6 +3283,55 @@ void main() {
     ));
 
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Chip background color and shape are drawn on Ink', (WidgetTester tester) async {
+    const Color backgroundColor = Color(0xff00ff00);
+    const OutlinedBorder shape = ContinuousRectangleBorder();
+
+    await tester.pumpWidget(wrapForChip(
+      child: const RawChip(
+        label: Text('text'),
+        backgroundColor: backgroundColor,
+        shape: shape,
+      ),
+    ));
+
+    final Ink ink = tester.widget(find.descendant(
+      of: find.byType(RawChip),
+      matching: find.byType(Ink),
+    ));
+    final ShapeDecoration decoration = ink.decoration! as ShapeDecoration;
+    expect(decoration.color, backgroundColor);
+    expect(decoration.shape, shape);
+  });
+
+  testWidgets('Chip highlight color is drawn on top of the backgroundColor', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'RawChip');
+    tester.binding.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    const Color backgroundColor = Color(0xff00ff00);
+
+    await tester.pumpWidget(wrapForChip(
+      child: RawChip(
+        label: const Text('text'),
+        backgroundColor: backgroundColor,
+        autofocus: true,
+        focusNode: focusNode,
+        onPressed: () {},
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(
+      find.byType(Material).last,
+      paints
+        // Background color is drawn first.
+        ..rrect(color: backgroundColor)
+        // Highlight color is drawn on top of the background color.
+        ..rect(color: const Color(0x1f000000)),
+    );
   });
 }
 

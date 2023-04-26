@@ -1107,12 +1107,10 @@ void main() {
         case TargetPlatform.android:
         case TargetPlatform.iOS:
           expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.touch));
-          break;
         case TargetPlatform.linux:
         case TargetPlatform.macOS:
         case TargetPlatform.windows:
           expect(FocusManager.instance.highlightMode, equals(FocusHighlightMode.traditional));
-          break;
       }
     }, variant: TargetPlatformVariant.all());
 
@@ -1230,7 +1228,7 @@ void main() {
           ' │ primaryFocus: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← MediaQuery ←\n'
           ' │   _MediaQueryFromView ← _ViewScope ← View-[GlobalObjectKey\n'
-          ' │   TestWindow#00000] ← [root]\n'
+          ' │   TestFlutterView#00000] ← [root]\n'
           ' │\n'
           ' └─rootScope: FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           '   │ IN FOCUS PATH\n'

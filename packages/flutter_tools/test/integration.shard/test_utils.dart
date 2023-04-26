@@ -45,7 +45,7 @@ void writeFile(String path, String content, {bool writeFutureModifiedDate = fals
 void writeBytesFile(String path, List<int> content) {
   fileSystem.file(path)
     ..createSync(recursive: true)
-    ..writeAsBytesSync(content);
+    ..writeAsBytesSync(content, flush: true);
 }
 
 void writePackages(String folder) {
@@ -100,10 +100,7 @@ Future<void> pollForServiceExtensionValue<T>({
   );
 }
 
-class AppleTestUtils {
-  // static only
-  AppleTestUtils._();
-
+abstract final class AppleTestUtils {
   static const List<String> requiredSymbols = <String>[
     '_kDartIsolateSnapshotData',
     '_kDartIsolateSnapshotInstructions',
