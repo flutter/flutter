@@ -7,6 +7,7 @@
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/entity_pass.h"
+#include "impeller/geometry/color.h"
 #include "impeller/geometry/path_builder.h"
 
 namespace impeller {
@@ -72,6 +73,8 @@ bool OpacityPeepholePassDelegate::CanElide() {
 // |EntityPassDelgate|
 bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
     EntityPass* entity_pass) {
+  // OpacityPeepholePassDelegate will only get used if the pass's blend mode is
+  // SourceOver, so no need to check here.
   if (paint_.color.alpha <= 0.0 || paint_.color.alpha >= 1.0 ||
       paint_.image_filter.has_value() || paint_.color_filter.has_value()) {
     return false;
@@ -97,7 +100,7 @@ bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
   auto had_subpass = entity_pass->IterateUntilSubpass(
       [&all_coverages, &all_can_accept](Entity& entity) {
         auto contents = entity.GetContents();
-        if (!contents->CanInheritOpacity(entity)) {
+        if (!entity.CanInheritOpacity()) {
           all_can_accept = false;
           return false;
         }
@@ -119,7 +122,7 @@ bool OpacityPeepholePassDelegate::CanCollapseIntoParentPass(
   }
   auto alpha = paint_.color.alpha;
   entity_pass->IterateUntilSubpass([&alpha](Entity& entity) {
-    entity.GetContents()->SetInheritedOpacity(alpha);
+    entity.SetInheritedOpacity(alpha);
     return true;
   });
   return true;

@@ -2136,5 +2136,32 @@ TEST_P(AiksTest, CanRenderOffscreenCheckerboard) {
   ASSERT_TRUE(OpenPlaygroundHere(canvas.EndRecordingAsPicture()));
 }
 
+TEST_P(AiksTest, OpaqueEntitiesGetCoercedToSource) {
+  Canvas canvas;
+  canvas.Scale(Vector2(1.618, 1.618));
+  canvas.DrawCircle(Point(), 10,
+                    {
+                        .color = Color::CornflowerBlue(),
+                        .blend_mode = BlendMode::kSourceOver,
+                    });
+  Picture picture = canvas.EndRecordingAsPicture();
+
+  // Extract the SolidColorSource.
+  Entity entity;
+  std::shared_ptr<SolidColorContents> contents;
+  picture.pass->IterateAllEntities([&e = entity, &contents](Entity& entity) {
+    if (ScalarNearlyEqual(entity.GetTransformation().GetScale().x, 1.618f)) {
+      e = entity;
+      contents =
+          std::static_pointer_cast<SolidColorContents>(entity.GetContents());
+      return false;
+    }
+    return true;
+  });
+
+  ASSERT_TRUE(contents->IsOpaque());
+  ASSERT_EQ(entity.GetBlendMode(), BlendMode::kSource);
+}
+
 }  // namespace testing
 }  // namespace impeller

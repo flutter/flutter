@@ -88,6 +88,10 @@ class Entity {
 
   static bool IsBlendModeDestructive(BlendMode blend_mode);
 
+  bool CanInheritOpacity() const;
+
+  bool SetInheritedOpacity(Scalar alpha);
+
  private:
   Matrix transformation_;
   std::shared_ptr<Contents> contents_;
