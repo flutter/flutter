@@ -1911,17 +1911,7 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_v2_chrome_run_test
 
-  - name: Linux_android flutter_gallery_v2_web_compile_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: flutter_gallery_v2_web_compile_test
-
   - name: Linux flutter_gallery_v2_web_compile_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
@@ -2351,17 +2341,7 @@ targets:
           {"dependency": "open_jdk", "version": "version:11"}
         ]
 
-  - name: Linux_android web_size__compile_test
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "android", "linux"]
-      task_name: web_size__compile_test
-
   - name: Linux web_size__compile_test
-    bringup: true
     recipe: devicelab/devicelab_drone
     presubmit: false
     timeout: 60
