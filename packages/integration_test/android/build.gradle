@@ -50,4 +50,5 @@ android {
 
         implementation 'com.google.guava:guava:28.1-android'
     }
+    namespace 'dev.flutter.integration_test'
 }
