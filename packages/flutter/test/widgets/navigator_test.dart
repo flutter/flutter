@@ -4657,7 +4657,168 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    // TODO(justinmc): Router.
+    testWidgets('Navigator page API', (WidgetTester tester) async {
+      late StateSetter setState;
+      final List<_Page> pages = <_Page>[_Page.home];
+      bool popEnabled() => pages.length <= 1;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
+              return CanPopScope(
+                popEnabled: popEnabled(),
+                onPop: () {
+                  if (popEnabled()) {
+                    return;
+                  }
+                  setState(() {
+                    pages.removeLast();
+                  });
+                },
+                child: Navigator(
+                  onPopPage: (Route<void> route, void result) {
+                    if (!route.didPop(null)) {
+                      return false;
+                    }
+                    setState(() {
+                      pages.removeLast();
+                    });
+                    return true;
+                  },
+                  pages: pages.map((_Page page) {
+                    switch (page) {
+                      case _Page.home:
+                        return MaterialPage<void>(
+                          child: _LinksPage(
+                            title: 'Home page',
+                            buttons: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    pages.add(_Page.one);
+                                  });
+                                },
+                                child: const Text('Go to _Page.one'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    pages.add(_Page.noPop);
+                                  });
+                                },
+                                child: const Text('Go to _Page.noPop'),
+                              ),
+                            ],
+                          ),
+                        );
+                      case _Page.one:
+                        return const MaterialPage<void>(
+                          child: _LinksPage(
+                            title: 'Page one',
+                          ),
+                        );
+                      case _Page.noPop:
+                        return const MaterialPage<void>(
+                          child: _LinksPage(
+                            title: 'Cannot pop page',
+                            popEnabled: false,
+                          ),
+                        );
+                    }
+                  }).toList(),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(calls, hasLength(1));
+      expect(calls.last, isFalse);
+
+      print('justin first tap.');
+      await tester.tap(find.text('Go to _Page.one'));
+      await tester.pumpAndSettle();
+      print('justin done first tap\'s pumpAndSettle.');
+
+      expect(find.text('Page one'), findsOneWidget);
+      expect(calls, hasLength(2));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(calls, hasLength(3));
+      expect(calls.last, isFalse);
+
+      await tester.tap(find.text('Go to _Page.noPop'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cannot pop page'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cannot pop page'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      /*
+      await tester.tap(find.text('Go to nested/canpopscope'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - CanPopScope'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      setState(() {
+        popEnabled = false;
+      });
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      // Now going back doesn't work because popEnabled is false, but it still
+      // has no effect on the system navigator due to all of the other routes.
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - CanPopScope'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      setState(() {
+        popEnabled = true;
+      });
+      await tester.pump();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      // And going back works again after switching popEnabled back to true.
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - home'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Home page'), findsOneWidget);
+      expect(calls, hasLength(5));
+      expect(calls.last, isFalse);
+      */
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
   });
 }
 
@@ -4945,6 +5106,12 @@ class TestDependencies extends StatelessWidget {
 enum _BackType {
   systemBack,
   navigatorPop,
+}
+
+enum _Page {
+  home,
+  one,
+  noPop,
 }
 
 class _LinksPage extends StatelessWidget {
