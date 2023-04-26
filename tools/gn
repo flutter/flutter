@@ -199,12 +199,32 @@ def get_target_cpu(args):
   return 'x64'
 
 
+def buildtools_dir():
+  host_os = get_host_os()
+  host_cpu = get_host_cpu()
+  if host_os == 'win':
+    host_os = 'windows'
+  if host_os == 'mac' and host_cpu == 'arm64':
+    host_cpu = 'x64'
+  return '%s-%s' % (host_os, host_cpu)
+
+
 def setup_goma(args):
   goma_gn_args = {}
 
-  goma_dir = os.environ.get('GOMA_DIR')
-  goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
+  # When running in CI, the recipes use their own goma install, and take
+  # care of starting and stopping the compiler proxy.
+  running_on_luci = os.environ.get('LUCI_CONTEXT') is not None
 
+  # Prefer the goma fetched by gclient if it exists.
+  cipd_goma_dir = os.path.join(SRC_ROOT, 'buildtools', buildtools_dir(), 'goma')
+
+  # Next, if GOMA_DIR is set, use that install.
+  goma_dir = os.environ.get('GOMA_DIR')
+
+  # Finally, look for goma in the install location recommended in our
+  # documentation.
+  goma_home_dir = os.path.join(os.getenv('HOME', ''), 'goma')
   # GOMA has a different default (home) path on gWindows.
   if not os.path.exists(goma_home_dir) and sys.platform.startswith(
       ('cygwin', 'win')):
@@ -214,6 +234,9 @@ def setup_goma(args):
     goma_gn_args['use_goma'] = False
     goma_gn_args['goma_dir'] = None
     print('Disabling GOMA for wasm builds, it is not supported yet.')
+  elif args.goma and not running_on_luci and os.path.exists(cipd_goma_dir):
+    goma_gn_args['use_goma'] = True
+    goma_gn_args['goma_dir'] = cipd_goma_dir
   elif args.goma and goma_dir and os.path.exists(goma_dir):
     goma_gn_args['use_goma'] = True
     goma_gn_args['goma_dir'] = goma_dir
@@ -233,7 +256,7 @@ def setup_goma(args):
     goma_gn_args['goma_dir'] = None
 
   if goma_gn_args['use_goma'] and sys.platform == 'darwin':
-    if (os.environ.get('LUCI_CONTEXT') is None or args.xcode_symlinks or
+    if (not running_on_luci or args.xcode_symlinks or
         os.getenv('FLUTTER_GOMA_CREATE_XCODE_SYMLINKS', '0') == '1'):
       goma_gn_args['create_xcode_symlinks'] = True
 
