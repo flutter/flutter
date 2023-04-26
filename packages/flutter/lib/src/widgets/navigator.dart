@@ -5106,6 +5106,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       case RoutePopDisposition.doNotPop:
         // TODO(justinmc): Should I pass a boolean indicating whether or not the
         // pop was successful?
+        // TODO(justinmc): Yeah probably should change this name since it sounds
+        // like a pop happened, not that a pop was attempted.
         lastEntry.route.onPop();
         return true;
     }

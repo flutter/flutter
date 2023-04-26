@@ -4238,30 +4238,35 @@ void main() {
         ),
       );
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(1));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(2));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(3));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go to one/one'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one - one'), findsOneWidget);
       // calls doesn't increment when the value is the same.
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
@@ -4269,12 +4274,14 @@ void main() {
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go back'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(5));
       expect(calls.last, isFalse);
     },
@@ -4317,30 +4324,35 @@ void main() {
         ),
       );
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(1));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(2));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(3));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
       await tester.tap(find.text('Go to one/one'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one - one'), findsOneWidget);
       // calls doesn't increment when the value is the same.
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
@@ -4348,12 +4360,14 @@ void main() {
       await systemBack();
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(5));
       expect(calls.last, isFalse);
     },
@@ -4404,83 +4418,247 @@ void main() {
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
 
-    testWidgets('navigating around nested Navigators with Navigator.pop', (WidgetTester tester) async {
+    // Test both system back gestures and Navigator.pop.
+    for (final _BackType backType in _BackType.values) {
+      testWidgets('navigating around nested Navigators', (WidgetTester tester) async {
+        final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+        final GlobalKey<NavigatorState> nestedNav = GlobalKey<NavigatorState>();
+        Future<void> goBack() async {
+          switch (backType) {
+            case _BackType.systemBack:
+              return systemBack();
+            case _BackType.navigatorPop:
+              if (nestedNav.currentState != null) {
+                if (nestedNav.currentState!.mounted && nestedNav.currentState!.canPop()) {
+                  return nestedNav.currentState?.pop();
+                }
+              }
+              return nav.currentState?.pop();
+          }
+        }
+        await tester.pumpWidget(
+          MaterialApp(
+            navigatorKey: nav,
+            initialRoute: '/',
+            routes: <String, WidgetBuilder>{
+              '/': (BuildContext context) => _LinksPage(
+                title: 'Home page',
+                buttons: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/one');
+                    },
+                    child: const Text('Go to one'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/nested');
+                    },
+                    child: const Text('Go to nested'),
+                  ),
+                ],
+              ),
+              '/one': (BuildContext context) => _LinksPage(
+                title: 'Page one',
+                buttons: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/one/one');
+                    },
+                    child: const Text('Go to one/one'),
+                  ),
+                ],
+              ),
+              '/nested': (BuildContext context) => _NestedNavigatorsPage(
+                navigatorKey: nestedNav,
+              ),
+            },
+          ),
+        );
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(calls, hasLength(1));
+        expect(calls.last, isFalse);
+
+        await tester.tap(find.text('Go to one'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Page one'), findsOneWidget);
+        expect(calls, hasLength(2));
+        expect(calls.last, isTrue);
+
+        await goBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(calls, hasLength(3));
+        expect(calls.last, isFalse);
+
+        await tester.tap(find.text('Go to nested'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Nested - home'), findsOneWidget);
+        expect(calls, hasLength(4));
+        expect(calls.last, isTrue);
+
+        await tester.tap(find.text('Go to nested/one'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Nested - page one'), findsOneWidget);
+        expect(calls, hasLength(4));
+        expect(calls.last, isTrue);
+
+        await goBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Nested - home'), findsOneWidget);
+        expect(calls, hasLength(4));
+        expect(calls.last, isTrue);
+
+        await goBack();
+        await tester.pumpAndSettle();
+
+        expect(find.text('Home page'), findsOneWidget);
+        expect(calls, hasLength(5));
+        expect(calls.last, isFalse);
+      },
+        variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      );
+    }
+
+    testWidgets('nested Navigators with a nested CanPopScope', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      bool popEnabled = true;
+      late StateSetter setState;
       await tester.pumpWidget(
-        MaterialApp(
-          navigatorKey: nav,
-          initialRoute: '/',
-          routes: <String, WidgetBuilder>{
-            '/': (BuildContext context) => _LinksPage(
-              title: 'Home page',
-              buttons: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/one');
-                  },
-                  child: const Text('Go to one'),
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MaterialApp(
+              navigatorKey: nav,
+              initialRoute: '/',
+              routes: <String, WidgetBuilder>{
+                '/': (BuildContext context) => _LinksPage(
+                  title: 'Home page',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one');
+                      },
+                      child: const Text('Go to one'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/nested');
+                      },
+                      child: const Text('Go to nested'),
+                    ),
+                  ],
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/nested');
-                  },
-                  child: const Text('Go to nested'),
+                '/one': (BuildContext context) => _LinksPage(
+                  title: 'Page one',
+                  buttons: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/one/one');
+                      },
+                      child: const Text('Go to one/one'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            '/one': (BuildContext context) => _LinksPage(
-              title: 'Page one',
-              buttons: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/one/one');
-                  },
-                  child: const Text('Go to one/one'),
+                '/nested': (BuildContext context) => _NestedNavigatorsPage(
+                  canPopScopePageEnabled: popEnabled,
                 ),
-              ],
-            ),
-            '/nested': (BuildContext context) => const _NestedNavigatorsPage(
-            ),
+              },
+            );
           },
         ),
       );
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(1));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Page one'), findsOneWidget);
       expect(calls, hasLength(2));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(3));
       expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to nested'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Nested - home'), findsOneWidget);
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
-      await tester.tap(find.text('Go to nested/one'));
+      await tester.tap(find.text('Go to nested/canpopscope'));
       await tester.pumpAndSettle();
 
+      expect(find.text('Nested - CanPopScope'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      // Going back works because popEnabled is true.
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - home'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await tester.tap(find.text('Go to nested/canpopscope'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - CanPopScope'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      setState(() {
+        popEnabled = false;
+      });
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      // Now going back doesn't work because popEnabled is false, but it still
+      // has no effect on the system navigator due to all of the other routes.
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - CanPopScope'), findsOneWidget);
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      setState(() {
+        popEnabled = true;
+      });
+      await tester.pump();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      // And going back works again after switching popEnabled back to true.
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nested - home'), findsOneWidget);
       expect(calls, hasLength(4));
       expect(calls.last, isTrue);
 
       await systemBack();
       await tester.pumpAndSettle();
 
-      expect(calls, hasLength(4));
-      expect(calls.last, isTrue);
-
-      await systemBack();
-      await tester.pumpAndSettle();
-
+      expect(find.text('Home page'), findsOneWidget);
       expect(calls, hasLength(5));
       expect(calls.last, isFalse);
     },
@@ -4772,6 +4950,11 @@ class TestDependencies extends StatelessWidget {
   }
 }
 
+enum _BackType {
+  systemBack,
+  navigatorPop,
+}
+
 class _LinksPage extends StatelessWidget {
   const _LinksPage ({
     this.buttons = const <Widget>[],
@@ -4787,7 +4970,6 @@ class _LinksPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('justin build linkspage canPop? $popEnabled');
     return Scaffold(
       body: Center(
         child: Column(
@@ -4815,15 +4997,31 @@ class _LinksPage extends StatelessWidget {
 }
 
 class _NestedNavigatorsPage extends StatefulWidget {
-  const _NestedNavigatorsPage();
+  const _NestedNavigatorsPage({
+    this.canPopScopePageEnabled,
+    this.navigatorKey,
+  });
+
+  /// Whether the CanPopScope on the /canpopscope page is enabled.
+  ///
+  /// If null, then no CanPopScope is built at all.
+  final bool? canPopScopePageEnabled;
+
+  final GlobalKey<NavigatorState>? navigatorKey;
 
   @override
   State<_NestedNavigatorsPage> createState() => _NestedNavigatorsPageState();
 }
 
 class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
-  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
+  late final GlobalKey<NavigatorState> _navigatorKey;
   bool _popEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _navigatorKey = widget.navigatorKey ?? GlobalKey<NavigatorState>();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -4831,10 +5029,10 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
     return CanPopScope(
       popEnabled: _popEnabled,
       onPop: () {
-        if (_popEnabled) {
+        if (_popEnabled || widget.canPopScopePageEnabled == false) {
           return;
         }
-        _nestedNavigatorKey.currentState!.pop();
+        _navigatorKey.currentState!.pop();
       },
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
@@ -4847,7 +5045,7 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
           return false;
         },
         child: Navigator(
-          key: _nestedNavigatorKey,
+          key: _navigatorKey,
           onHistoryChanged: null,
           initialRoute: '/',
           onGenerateRoute: (RouteSettings settings) {
@@ -4869,6 +5067,12 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
                         ),
                         TextButton(
                           onPressed: () {
+                            Navigator.of(context).pushNamed('/canpopscope');
+                          },
+                          child: const Text('Go to nested/canpopscope'),
+                        ),
+                        TextButton(
+                          onPressed: () {
                             Navigator.of(rootContext).pop();
                           },
                           child: const Text('Go back out of nested nav'),
@@ -4882,6 +5086,15 @@ class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
                   builder: (BuildContext context) {
                     return const _LinksPage(
                       title: 'Nested - page one',
+                    );
+                  },
+                );
+              case '/canpopscope':
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return _LinksPage(
+                      popEnabled: widget.canPopScopePageEnabled,
+                      title: 'Nested - CanPopScope',
                     );
                   },
                 );
