@@ -1026,7 +1026,16 @@ void main() {
 
         expect(
           date,
-          DateTime(2017, 2),
+          DateTime(2018, 12),
+        );
+
+        await tester.drag(find.text('2016'), const Offset(0.0, 32.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        expect(
+          date,
+          DateTime(2017, 12),
         );
       },
     );
