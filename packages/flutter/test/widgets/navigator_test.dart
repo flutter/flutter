@@ -4203,10 +4203,8 @@ void main() {
     );
 
     testWidgets('navigating around a single Navigator with .pop', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
-          navigatorKey: nav,
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
             '/': (BuildContext context) => _LinksPage(
@@ -4289,10 +4287,8 @@ void main() {
     );
 
     testWidgets('navigating around a single Navigator with system back', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
-          navigatorKey: nav,
           initialRoute: '/',
           routes: <String, WidgetBuilder>{
             '/': (BuildContext context) => _LinksPage(
@@ -4375,7 +4371,6 @@ void main() {
     );
 
     testWidgets('a single Navigator with a CanPopScope', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
       bool popEnabled = true;
       late StateSetter setState;
       await tester.pumpWidget(
@@ -4383,7 +4378,6 @@ void main() {
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
             return MaterialApp(
-              navigatorKey: nav,
               initialRoute: '/',
               routes: <String, WidgetBuilder>{
                 '/': (BuildContext context) => _LinksPage(
@@ -4527,7 +4521,6 @@ void main() {
     }
 
     testWidgets('nested Navigators with a nested CanPopScope', (WidgetTester tester) async {
-      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
       bool popEnabled = true;
       late StateSetter setState;
       await tester.pumpWidget(
@@ -4535,7 +4528,6 @@ void main() {
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
             return MaterialApp(
-              navigatorKey: nav,
               initialRoute: '/',
               routes: <String, WidgetBuilder>{
                 '/': (BuildContext context) => _LinksPage(
