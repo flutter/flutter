@@ -4,7 +4,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "manual_tests")
 set(APPLICATION_ID "dev.flutter.manual_tests")
 
-cmake_policy(VERSION 2.4...3.25)
+cmake_policy(SET CMP0063 NEW)
 
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 
