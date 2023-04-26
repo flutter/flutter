@@ -28,7 +28,7 @@ Widget buildSimpleTest({
         cacheExtent: cacheExtent,
         diagonalDragBehavior: diagonalDrag ?? DiagonalDragBehavior.none,
         clipBehavior: clipBehavior ?? Clip.hardEdge,
-        delegate: delegate ?? SimpleTableDelegate(
+        delegate: delegate ?? TwoDimensionalChildBuilderDelegate(
           builder: (BuildContext context, ChildVicinity vicinity) {
             return Container(
               color: vicinity.xIndex.isEven && vicinity.yIndex.isEven
@@ -45,10 +45,6 @@ Widget buildSimpleTest({
       ),
     ),
   );
-}
-
-class SimpleTableDelegate extends TwoDimensionalChildBuilderDelegate {
-  SimpleTableDelegate({ required super.builder });
 }
 
 class SimpleTableView extends TwoDimensionalScrollView {
@@ -93,9 +89,6 @@ class SimpleTableViewport extends TwoDimensionalViewport {
     super.cacheExtent,
     super.clipBehavior = Clip.hardEdge,
   });
-
-  @override
-  SimpleTableDelegate get delegate => super.delegate as SimpleTableDelegate;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -178,55 +171,9 @@ class RenderSimpleTableViewport extends RenderTwoDimensionalViewport {
   }
 }
 
-class SimpleTwoDimensionalChildBuilderDelegate extends TwoDimensionalChildBuilderDelegate {
-  SimpleTwoDimensionalChildBuilderDelegate({
-    required super.builder,
-    super.addRepaintBoundaries,
-    super.maxXIndex,
-    super.maxYIndex,
-  });
-}
-
-class SimpleTwoDimensionalChildListDelegate extends TwoDimensionalChildListDelegate {
-  SimpleTwoDimensionalChildListDelegate({
-    required super.children,
-    super.addRepaintBoundaries,
-  });
-}
-
 void main() {
-  group('TwoDimensionalScrollView',(){
-    testWidgets('asserts the axis directions do not conflict with one another', (WidgetTester tester) async {
-      // Horizontal mismatch
-
-      // Vertical mismatch
-
-    }, variant: TargetPlatformVariant.all());
-
-    testWidgets('ScrollableDetails.controller can set initial scroll positions', (WidgetTester tester) async {
-
-    }, variant: TargetPlatformVariant.all());
-
-    testWidgets('Properly assigns the PrimaryScrollController to the main axis on the correct platform', (WidgetTester tester) async {
-      // Horizontal
-
-      // Vertical
-
-      // Asserts ScrollableDetails.controller has not been provided if primary
-      // is explicitly set
-
-    }, variant: TargetPlatformVariant.all());
-
-    testWidgets('Scrollables receive the correct details from TwoDimensionalScrollView', (WidgetTester tester) async {
-      // Default
-
-      // Customized
-
-    }, variant: TargetPlatformVariant.all());
-  });
-
-  group('TwoDimensionalChildDelegate', (){
-    group('TwoDimensionalChildBuilderDelegate', (){
+  group('TwoDimensionalChildDelegate', () {
+    group('TwoDimensionalChildBuilderDelegate', () {
       testWidgets('repaintBoundaries', (WidgetTester tester) async {
         // Default
 
@@ -250,7 +197,7 @@ void main() {
       }, variant: TargetPlatformVariant.all());
     });
 
-    group('TwoDimensionalChildListDelegate', (){
+    group('TwoDimensionalChildListDelegate', () {
       testWidgets('repaintBoundaries', (WidgetTester tester) async {
         // Default
 
@@ -271,7 +218,7 @@ void main() {
     });
   });
 
-  group('TwoDimensionalScrollable', (){
+  group('TwoDimensionalScrollable', () {
     testWidgets('.of, .maybeOf', (WidgetTester tester) async {
 
     }, variant: TargetPlatformVariant.all());

@@ -149,6 +149,7 @@ export 'src/widgets/ticker_provider.dart';
 export 'src/widgets/title.dart';
 export 'src/widgets/transitions.dart';
 export 'src/widgets/tween_animation_builder.dart';
+export 'src/widgets/two_dimensional_scroll_view.dart';
 export 'src/widgets/two_dimensional_viewport.dart';
 export 'src/widgets/undo_history.dart';
 export 'src/widgets/unique_widget.dart';
