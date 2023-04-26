@@ -95,7 +95,16 @@ std::shared_ptr<ContextVK> ContextVK::Create(Settings settings) {
   return context;
 }
 
-ContextVK::ContextVK() = default;
+namespace {
+thread_local uint64_t tls_context_count = 0;
+uint64_t CalculateHash(void* ptr) {
+  // You could make a context once per nanosecond for 584 years on one thread
+  // before this overflows.
+  return ++tls_context_count;
+}
+}  // namespace
+
+ContextVK::ContextVK() : hash_(CalculateHash(this)) {}
 
 ContextVK::~ContextVK() {
   if (device_) {
