@@ -44,7 +44,7 @@ abstract final class SystemNavigator {
         // calls to this method don't cause duplicate calls to the platform.
         _frameworkHandlesPop = frameworkHandlesPop;
         try {
-          print('justin telling platform to do predictive back: ${!frameworkHandlesPop}');
+          print('justin telling platform frameworkHandlesPop: $frameworkHandlesPop');
           await SystemChannels.platform.invokeMethod<void>(
             'SystemNavigator.updateNavigationStackStatus',
             frameworkHandlesPop,

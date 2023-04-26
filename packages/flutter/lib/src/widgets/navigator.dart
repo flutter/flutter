@@ -32,6 +32,8 @@ class NavigationNotification extends Notification {
     required this.canPop,
   });
 
+  /// Indicates that the originator of this [Notification] is capable of
+  /// handling a navigation pop.
   final bool canPop;
 }
 
@@ -3412,6 +3414,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
       final NavigationNotification notification = NavigationNotification(
         canPop: canPop(),
       );
+      print('justin _onHistoryChanged dispatching canPop ${notification.canPop}. isRoot? $_isRoot');
       notification.dispatch(context);
       return;
     }
@@ -5395,7 +5398,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
     return HeroControllerScope.none(
       child: NotificationListener<NavigationNotification>(
         onNotification: (NavigationNotification notification) {
-          print('justin notified! canPop? ${canPop()}/${notification.canPop}. isRoot? $_isRoot.');
+          print('justin received notification in Navigator. canPop here: ${canPop()}, canPop from notification: ${notification.canPop}');//, isRoot? $_isRoot');
           // If the state of this Navigator does not change whether or not the
           // whole framework can pop, propagate the Notification.
           if (notification.canPop || !canPop()) {
@@ -5406,6 +5409,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin, Res
           const NavigationNotification nextNotification = NavigationNotification(
             canPop: true,
           );
+          print('justin Navigator re-dispatching with canPop true');
           nextNotification.dispatch(context);
           return true;
         },

@@ -4197,7 +4197,7 @@ void main() {
       );
 
       expect(calls, hasLength(1));
-      expect(calls[0], isFalse);
+      expect(calls.last, isFalse);
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
@@ -4239,7 +4239,7 @@ void main() {
       );
 
       expect(calls, hasLength(1));
-      expect(calls[0], isFalse);
+      expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
@@ -4318,7 +4318,7 @@ void main() {
       );
 
       expect(calls, hasLength(1));
-      expect(calls[0], isFalse);
+      expect(calls.last, isFalse);
 
       await tester.tap(find.text('Go to one'));
       await tester.pumpAndSettle();
@@ -4359,6 +4359,135 @@ void main() {
     },
       variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
     );
+
+    testWidgets('a single Navigator with a CanPopScope', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      bool popEnabled = true;
+      late StateSetter setState;
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (BuildContext context, StateSetter setter) {
+            setState = setter;
+            return MaterialApp(
+              navigatorKey: nav,
+              initialRoute: '/',
+              routes: <String, WidgetBuilder>{
+                '/': (BuildContext context) => _LinksPage(
+                  title: 'Home page',
+                  popEnabled: popEnabled,
+                ),
+              },
+            );
+          },
+        ),
+      );
+
+      expect(calls, hasLength(1));
+      expect(calls.last, isFalse);
+
+      setState(() {
+        popEnabled = false;
+      });
+      await tester.pump();
+
+      expect(calls, hasLength(2));
+      expect(calls.last, isTrue);
+
+      setState(() {
+        popEnabled = true;
+      });
+      await tester.pump();
+
+      expect(calls, hasLength(3));
+      expect(calls.last, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
+
+    testWidgets('navigating around nested Navigators with Navigator.pop', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> nav = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          navigatorKey: nav,
+          initialRoute: '/',
+          routes: <String, WidgetBuilder>{
+            '/': (BuildContext context) => _LinksPage(
+              title: 'Home page',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one');
+                  },
+                  child: const Text('Go to one'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/nested');
+                  },
+                  child: const Text('Go to nested'),
+                ),
+              ],
+            ),
+            '/one': (BuildContext context) => _LinksPage(
+              title: 'Page one',
+              buttons: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/one/one');
+                  },
+                  child: const Text('Go to one/one'),
+                ),
+              ],
+            ),
+            '/nested': (BuildContext context) => const _NestedNavigatorsPage(
+            ),
+          },
+        ),
+      );
+
+      expect(calls, hasLength(1));
+      expect(calls.last, isFalse);
+
+      await tester.tap(find.text('Go to one'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(2));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(3));
+      expect(calls.last, isFalse);
+
+      await tester.tap(find.text('Go to nested'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await tester.tap(find.text('Go to nested/one'));
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(4));
+      expect(calls.last, isTrue);
+
+      await systemBack();
+      await tester.pumpAndSettle();
+
+      expect(calls, hasLength(5));
+      expect(calls.last, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+    );
+
+    // TODO(justinmc): Router.
   });
 }
 
@@ -4646,16 +4775,19 @@ class TestDependencies extends StatelessWidget {
 class _LinksPage extends StatelessWidget {
   const _LinksPage ({
     this.buttons = const <Widget>[],
+    this.popEnabled,
     required this.title,
     this.onBack,
   });
 
   final List<Widget> buttons;
+  final bool? popEnabled;
   final VoidCallback? onBack;
   final String title;
 
   @override
   Widget build(BuildContext context) {
+    print('justin build linkspage canPop? $popEnabled');
     return Scaffold(
       body: Center(
         child: Column(
@@ -4670,7 +4802,93 @@ class _LinksPage extends StatelessWidget {
                 },
                 child: const Text('Go back'),
               ),
+            if (popEnabled != null)
+              CanPopScope(
+                popEnabled: popEnabled!,
+                child: const SizedBox.shrink(),
+              ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NestedNavigatorsPage extends StatefulWidget {
+  const _NestedNavigatorsPage();
+
+  @override
+  State<_NestedNavigatorsPage> createState() => _NestedNavigatorsPageState();
+}
+
+class _NestedNavigatorsPageState extends State<_NestedNavigatorsPage> {
+  final GlobalKey<NavigatorState> _nestedNavigatorKey = GlobalKey<NavigatorState>();
+  bool _popEnabled = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final BuildContext rootContext = context;
+    return CanPopScope(
+      popEnabled: _popEnabled,
+      onPop: () {
+        if (_popEnabled) {
+          return;
+        }
+        _nestedNavigatorKey.currentState!.pop();
+      },
+      child: NotificationListener<NavigationNotification>(
+        onNotification: (NavigationNotification notification) {
+          final bool nextPopEnabled = !notification.canPop;
+          if (nextPopEnabled != _popEnabled) {
+            setState(() {
+              _popEnabled = nextPopEnabled;
+            });
+          }
+          return false;
+        },
+        child: Navigator(
+          key: _nestedNavigatorKey,
+          onHistoryChanged: null,
+          initialRoute: '/',
+          onGenerateRoute: (RouteSettings settings) {
+            switch (settings.name) {
+              case '/':
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return _LinksPage(
+                      title: 'Nested - home',
+                      onBack: () {
+                        Navigator.of(rootContext).pop();
+                      },
+                      buttons: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pushNamed('/one');
+                          },
+                          child: const Text('Go to nested/one'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(rootContext).pop();
+                          },
+                          child: const Text('Go back out of nested nav'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              case '/one':
+                return MaterialPageRoute<void>(
+                  builder: (BuildContext context) {
+                    return const _LinksPage(
+                      title: 'Nested - page one',
+                    );
+                  },
+                );
+              default:
+                throw Exception('Invalid route: ${settings.name}');
+            }
+          },
         ),
       ),
     );

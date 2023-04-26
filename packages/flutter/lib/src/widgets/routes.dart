@@ -1675,6 +1675,18 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // Tells the SystemNavigator whether or not a system pop should have effect.
   void _updateSystemNavigator() {
+    // TODO(justinmc): I'm slightly confused by the existence of 2 bubbling
+    // systems now...
+    final NavigationNotification notification = NavigationNotification(
+      // canPop indicates that the originator of the Notification can handle a
+      // pop. In the case of CanPopScope, it handles pops when popEnabled is
+      // false. Hence the seemingly backward logic here.
+      canPop: popEnabled() == RoutePopDisposition.doNotPop,
+    );
+    print('justin CanPopScope\'s _updateSystemNavigator is dispatching with canPop ${notification.canPop}');
+    notification.dispatch(subtreeContext);
+
+    /*
     final bool popDisabled = popEnabled() == RoutePopDisposition.doNotPop;
 
     // TODO(justinmc): These two calls to updateNavigationStackStatus are also
@@ -1702,6 +1714,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       return;
     }
     SystemNavigator.updateNavigationStackStatus(rootNavigatorState.canPop());
+    */
   }
 
   /// True if one or more [WillPopCallback] callbacks exist.
