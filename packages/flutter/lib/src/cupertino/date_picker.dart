@@ -175,7 +175,7 @@ enum CupertinoDatePickerMode {
   /// Column order is subject to internationalization.
   ///
   /// Example: ` July | 2012 `.
-  monthAndYear,
+  monthYear,
 }
 
 // Different types of column in CupertinoDatePicker.
@@ -241,7 +241,7 @@ class CupertinoDatePicker extends StatefulWidget {
   /// the year, month and day will be the same as [initialDateTime]. When in
   /// [CupertinoDatePickerMode.date] mode, this callback will always report the
   /// start time of the currently selected day. When in
-  /// [CupertinoDatePickerMode.monthAndYear] mode, the day and time will be the
+  /// [CupertinoDatePickerMode.monthYear] mode, the day and time will be the
   /// start time of the first day of the month.
   ///
   /// [initialDateTime] is the initial date time of the picker. Defaults to the
@@ -286,7 +286,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.minuteInterval = 1,
     this.use24hFormat = false,
     this.dateOrder,
-    this.monthAndYearOrder,
+    this.monthYearOrder,
     this.backgroundColor,
     this.showDayOfWeek = false
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
@@ -303,19 +303,19 @@ class CupertinoDatePicker extends StatefulWidget {
       'initial date is after maximum date',
     );
     assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthAndYear) || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || (minimumYear >= 1 && this.initialDateTime.year >= minimumYear),
       'initial year is not greater than minimum year, or minimum year is not positive',
     );
     assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthAndYear) || maximumYear == null || this.initialDateTime.year <= maximumYear!,
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumYear == null || this.initialDateTime.year <= maximumYear!,
       'initial year is not smaller than maximum year',
     );
     assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthAndYear) || minimumDate == null || !minimumDate!.isAfter(this.initialDateTime),
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || minimumDate == null || !minimumDate!.isAfter(this.initialDateTime),
       'initial date ${this.initialDateTime} is not greater than or equal to minimumDate $minimumDate',
     );
     assert(
-      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthAndYear) || maximumDate == null || !maximumDate!.isBefore(this.initialDateTime),
+      (mode != CupertinoDatePickerMode.date && mode != CupertinoDatePickerMode.monthYear) || maximumDate == null || !maximumDate!.isBefore(this.initialDateTime),
       'initial date ${this.initialDateTime} is not less than or equal to maximumDate $maximumDate',
     );
     assert(
@@ -386,9 +386,9 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to the locale's default date format/order.
   final DatePickerDateOrder? dateOrder;
 
-  /// Determines the order of the columns inside [CupertinoDatePicker] in MonthAndYear mode.
+  /// Determines the order of the columns inside [CupertinoDatePicker] in MonthYear mode.
   /// Defaults to the locale's default date format/order.
-  final DatePickerMonthAndYearOrder? monthAndYearOrder;
+  final DatePickerMonthYearOrder? monthYearOrder;
 
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
@@ -417,8 +417,8 @@ class CupertinoDatePicker extends StatefulWidget {
         return _CupertinoDatePickerDateTimeState();
       case CupertinoDatePickerMode.date:
         return _CupertinoDatePickerDateState(dateOrder: dateOrder);
-      case CupertinoDatePickerMode.monthAndYear:
-        return _CupertinoDatePickerMonthAndYearState(dateOrder: monthAndYearOrder);
+      case CupertinoDatePickerMode.monthYear:
+        return _CupertinoDatePickerMonthYearState(dateOrder: monthYearOrder);
     }
   }
 
@@ -531,7 +531,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         return 0;
       case CupertinoDatePickerMode.date:
         break;
-      case CupertinoDatePickerMode.monthAndYear:
+      case CupertinoDatePickerMode.monthYear:
         break;
     }
     assert(
@@ -1494,12 +1494,12 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
   }
 }
 
-class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
-  _CupertinoDatePickerMonthAndYearState({
+class _CupertinoDatePickerMonthYearState extends State<CupertinoDatePicker> {
+  _CupertinoDatePickerMonthYearState({
     required this.dateOrder,
   });
 
-  final DatePickerMonthAndYearOrder? dateOrder;
+  final DatePickerMonthYearOrder? dateOrder;
 
   late int textDirectionFactor;
   late CupertinoLocalizations localizations;
@@ -1722,17 +1722,17 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
     List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[];
     List<double> columnWidths = <double>[];
 
-    final DatePickerMonthAndYearOrder datePickerMonthAndYearOrder =
-        dateOrder ?? localizations.datePickerMonthAndYearOrder;
+    final DatePickerMonthYearOrder datePickerMonthYearOrder =
+        dateOrder ?? localizations.datePickerMonthYearOrder;
 
-    switch (datePickerMonthAndYearOrder) {
-      case DatePickerMonthAndYearOrder.my:
+    switch (datePickerMonthYearOrder) {
+      case DatePickerMonthYearOrder.my:
         pickerBuilders = <_ColumnBuilder>[_buildMonthPicker, _buildYearPicker];
         columnWidths = <double>[
           estimatedColumnWidths[_PickerColumnType.month.index]!,
           estimatedColumnWidths[_PickerColumnType.year.index]!,
         ];
-      case DatePickerMonthAndYearOrder.ym:
+      case DatePickerMonthYearOrder.ym:
         pickerBuilders = <_ColumnBuilder>[_buildYearPicker, _buildMonthPicker];
         columnWidths = <double>[
           estimatedColumnWidths[_PickerColumnType.year.index]!,

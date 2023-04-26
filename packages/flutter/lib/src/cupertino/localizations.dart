@@ -53,7 +53,7 @@ enum DatePickerDateOrder {
 
 /// Determines the order of the columns inside the [CupertinoDatePicker] in
 /// month and year mode.
-enum DatePickerMonthAndYearOrder {
+enum DatePickerMonthYearOrder {
   /// Order of the columns, from left to right: month, year.
   ///
   /// Example: March | 1996.
@@ -151,7 +151,7 @@ abstract class CupertinoLocalizations {
 
   /// The order of the date elements that will be shown in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
-  DatePickerMonthAndYearOrder get datePickerMonthAndYearOrder;
+  DatePickerMonthYearOrder get datePickerMonthYearOrder;
 
   /// The order of the time elements that will be shown in [CupertinoDatePicker].
   // The global version uses the translated string from the arb file.
@@ -405,7 +405,7 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   DatePickerDateOrder get datePickerDateOrder => DatePickerDateOrder.mdy;
 
   @override
-  DatePickerMonthAndYearOrder get datePickerMonthAndYearOrder => DatePickerMonthAndYearOrder.my;
+  DatePickerMonthYearOrder get datePickerMonthYearOrder => DatePickerMonthYearOrder.my;
 
   @override
   DatePickerDateTimeOrder get datePickerDateTimeOrder => DatePickerDateTimeOrder.date_time_dayPeriod;

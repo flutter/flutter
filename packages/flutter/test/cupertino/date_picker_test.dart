@@ -460,7 +460,7 @@ void main() {
       expect(find.text('AM'), findsOneWidget);
     });
 
-    testWidgets('monthAndYear picker has expected string', (WidgetTester tester) async {
+    testWidgets('monthYear picker has expected string', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -468,7 +468,7 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.monthAndYear,
+                mode: CupertinoDatePickerMode.monthYear,
                 onDateTimeChanged: (_) { },
                 initialDateTime: DateTime(2018, 9),
               ),
@@ -608,7 +608,7 @@ void main() {
       );
     });
 
-    testWidgets('width of picker in monthAndYear mode is consistent', (WidgetTester tester) async {
+    testWidgets('width of picker in monthYear mode is consistent', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -616,7 +616,7 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.monthAndYear,
+                mode: CupertinoDatePickerMode.monthYear,
                 onDateTimeChanged: (_) { },
                 initialDateTime: DateTime(2018),
               ),
@@ -636,7 +636,7 @@ void main() {
               height: 400.0,
               width: 800.0,
               child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.monthAndYear,
+                mode: CupertinoDatePickerMode.monthYear,
                 onDateTimeChanged: (_) { },
                 initialDateTime: DateTime(2018),
               ),
@@ -982,7 +982,7 @@ void main() {
     );
 
     testWidgets(
-      'monthAndYear picker automatically scrolls away from invalid date, '
+      'monthYear picker automatically scrolls away from invalid date, '
       "and onDateTimeChanged doesn't report these dates",
       (WidgetTester tester) async {
         late DateTime date;
@@ -995,7 +995,7 @@ void main() {
                 height: 400.0,
                 width: 400.0,
                 child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.monthAndYear,
+                  mode: CupertinoDatePickerMode.monthYear,
                   minimumDate: minimum,
                   maximumDate: maximum,
                   onDateTimeChanged: (DateTime newDate) {
@@ -1397,11 +1397,11 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.monthAndYear));
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.monthYear));
       if (!skipPerspectiveTextGoldens) {
         await expectLater(
           find.byType(CupertinoDatePicker),
-          matchesGoldenFile('date_picker_test.monthandyear.initial.png'),
+          matchesGoldenFile('date_picker_test.monthyear.initial.png'),
         );
       }
 
@@ -1454,7 +1454,7 @@ void main() {
       );
     });
 
-    testWidgets('monthAndYear DatePicker displays the date in correct order', (WidgetTester tester) async {
+    testWidgets('monthYear DatePicker displays the date in correct order', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
@@ -1462,8 +1462,8 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                monthAndYearOrder: DatePickerMonthAndYearOrder.ym,
-                mode: CupertinoDatePickerMode.monthAndYear,
+                monthYearOrder: DatePickerMonthYearOrder.ym,
+                mode: CupertinoDatePickerMode.monthYear,
                 onDateTimeChanged: (DateTime newDate) {},
                 initialDateTime: DateTime(2018, 1, 14, 10, 30),
               ),
