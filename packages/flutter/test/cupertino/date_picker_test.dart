@@ -618,7 +618,7 @@ void main() {
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.monthAndYear,
                 onDateTimeChanged: (_) { },
-                initialDateTime: DateTime(2018, 1),
+                initialDateTime: DateTime(2018),
               ),
             ),
           ),
@@ -638,7 +638,7 @@ void main() {
               child: CupertinoDatePicker(
                 mode: CupertinoDatePickerMode.monthAndYear,
                 onDateTimeChanged: (_) { },
-                initialDateTime: DateTime(2018, 1),
+                initialDateTime: DateTime(2018),
               ),
             ),
           ),
@@ -1450,6 +1450,30 @@ void main() {
 
       expect(
         tester.getTopLeft(find.text('14')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
+    });
+
+    testWidgets('monthAndYear DatePicker displays the date in correct order', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                dateOrder: DatePickerDateOrder.ydm,
+                mode: CupertinoDatePickerMode.monthAndYear,
+                onDateTimeChanged: (DateTime newDate) {},
+                initialDateTime: DateTime(2018, 1, 14, 10, 30),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
         lessThan(tester.getTopLeft(find.text('January')).dx),
       );
     });
