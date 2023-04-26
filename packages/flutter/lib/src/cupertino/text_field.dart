@@ -887,6 +887,27 @@ class CupertinoTextField extends StatefulWidget {
         return null;
     }
   });
+
+  /// Returns a new [SpellCheckConfiguration] where the given configuration has
+  /// had any missing values replaced with their defaults for the iOS platform.
+  static SpellCheckConfiguration inferIOSSpellCheckConfiguration(
+    SpellCheckConfiguration? configuration,
+  ) {
+    if (configuration == null
+      || configuration == const SpellCheckConfiguration.disabled()) {
+      return const SpellCheckConfiguration.disabled();
+    }
+
+    return configuration.copyWith(
+      misspelledTextStyle: configuration.misspelledTextStyle
+        ?? CupertinoTextField.cupertinoMisspelledTextStyle,
+      misspelledSelectionColor: configuration.misspelledSelectionColor
+        ?? CupertinoTextField.kMisspelledSelectionColor,
+      spellCheckSuggestionsToolbarBuilder:
+        configuration.spellCheckSuggestionsToolbarBuilder
+          ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+    );
+  }
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
@@ -1298,18 +1319,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     // ensure that configuration uses Cupertino text style for misspelled words
     // unless a custom style is specified.
     final SpellCheckConfiguration spellCheckConfiguration =
-      widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
-        ? widget.spellCheckConfiguration!.copyWith(
-            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? CupertinoTextField.cupertinoMisspelledTextStyle,
-            misspelledSelectionColor: widget.spellCheckConfiguration!.misspelledSelectionColor
-              ?? CupertinoTextField.kMisspelledSelectionColor,
-            spellCheckSuggestionsToolbarBuilder:
-              widget.spellCheckConfiguration!.spellCheckSuggestionsToolbarBuilder
-                ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
-          )
-        : const SpellCheckConfiguration.disabled();
+        CupertinoTextField.inferIOSSpellCheckConfiguration(
+          widget.spellCheckConfiguration,
+        );
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
