@@ -91,8 +91,16 @@ class FrameDamage {
 
   // See Damage::buffer_damage.
   std::optional<SkIRect> GetBufferDamage() {
-    return damage_ ? std::make_optional(damage_->buffer_damage) : std::nullopt;
+    return (damage_ && !ignore_damage_)
+               ? std::make_optional(damage_->buffer_damage)
+               : std::nullopt;
   }
+
+  // Remove reported buffer_damage to inform clients that a partial repaint
+  // should not be performed on this frame.
+  // frame_damage is required to correctly track accumulated damage for
+  // subsequent frames.
+  void Reset() { ignore_damage_ = true; }
 
  private:
   SkIRect additional_damage_ = SkIRect::MakeEmpty();
@@ -100,6 +108,7 @@ class FrameDamage {
   const LayerTree* prev_layer_tree_ = nullptr;
   int vertical_clip_alignment_ = 1;
   int horizontal_clip_alignment_ = 1;
+  bool ignore_damage_ = false;
 };
 
 class CompositorContext {
@@ -144,6 +153,15 @@ class CompositorContext {
                                 FrameDamage* frame_damage);
 
    private:
+    void PaintLayerTreeSkia(flutter::LayerTree& layer_tree,
+                            std::optional<SkRect> clip_rect,
+                            bool needs_save_layer,
+                            bool ignore_raster_cache);
+
+    void PaintLayerTreeImpeller(flutter::LayerTree& layer_tree,
+                                std::optional<SkRect> clip_rect,
+                                bool ignore_raster_cache);
+
     CompositorContext& context_;
     GrDirectContext* gr_context_;
     DlCanvas* canvas_;
@@ -204,6 +222,12 @@ class CompositorContext {
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
 
   void EndFrame(ScopedFrame& frame, bool enable_instrumentation);
+
+  /// @brief  Whether Impeller shouild attempt a partial repaint.
+  ///         The Impeller backend requires an additional blit pass, which may
+  ///         not be worthwhile if the damage region is large.
+  static bool ShouldPerformPartialRepaint(std::optional<SkRect> damage_rect,
+                                          SkISize layer_tree_size);
 
   FML_DISALLOW_COPY_AND_ASSIGN(CompositorContext);
 };

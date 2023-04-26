@@ -33,7 +33,14 @@ GPUSurfaceMetalImpeller::GPUSurfaceMetalImpeller(GPUSurfaceMetalDelegate* delega
     : delegate_(delegate),
       impeller_renderer_(CreateImpellerRenderer(context)),
       aiks_context_(
-          std::make_shared<impeller::AiksContext>(impeller_renderer_ ? context : nullptr)) {}
+          std::make_shared<impeller::AiksContext>(impeller_renderer_ ? context : nullptr)) {
+  // If this preference is explicitly set, we allow for disabling partial repaint.
+  NSNumber* disablePartialRepaint =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisablePartialRepaint"];
+  if (disablePartialRepaint != nil) {
+    disable_partial_repaint_ = disablePartialRepaint.boolValue;
+  }
+}
 
 GPUSurfaceMetalImpeller::~GPUSurfaceMetalImpeller() = default;
 
@@ -59,16 +66,18 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
 
   auto* mtl_layer = (CAMetalLayer*)layer;
 
-  auto surface = impeller::SurfaceMTL::WrapCurrentMetalLayerDrawable(
+  auto drawable = impeller::SurfaceMTL::GetMetalDrawableAndValidate(
       impeller_renderer_->GetContext(), mtl_layer);
   if (Settings::kSurfaceDataAccessible) {
-    last_drawable_.reset([surface->drawable() retain]);
+    last_drawable_.reset([drawable retain]);
   }
 
+  id<CAMetalDrawable> metal_drawable = static_cast<id<CAMetalDrawable>>(last_drawable_);
   SurfaceFrame::SubmitCallback submit_callback =
-      fml::MakeCopyable([renderer = impeller_renderer_,  //
+      fml::MakeCopyable([this,                           //
+                         renderer = impeller_renderer_,  //
                          aiks_context = aiks_context_,   //
-                         surface = std::move(surface)    //
+                         metal_drawable                  //
   ](SurfaceFrame& surface_frame, DlCanvas* canvas) mutable -> bool {
         if (!aiks_context) {
           return false;
@@ -78,6 +87,35 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
         if (!display_list) {
           FML_LOG(ERROR) << "Could not build display list for surface frame.";
           return false;
+        }
+
+        if (!disable_partial_repaint_) {
+          uintptr_t texture = reinterpret_cast<uintptr_t>(metal_drawable.texture);
+
+          for (auto& entry : damage_) {
+            if (entry.first != texture) {
+              // Accumulate damage for other framebuffers
+              if (surface_frame.submit_info().frame_damage) {
+                entry.second.join(*surface_frame.submit_info().frame_damage);
+              }
+            }
+          }
+          // Reset accumulated damage for current framebuffer
+          damage_[texture] = SkIRect::MakeEmpty();
+        }
+
+        std::optional<impeller::IRect> clip_rect;
+        if (surface_frame.submit_info().buffer_damage.has_value()) {
+          auto buffer_damage = surface_frame.submit_info().buffer_damage;
+          clip_rect = impeller::IRect::MakeXYWH(buffer_damage->x(), buffer_damage->y(),
+                                                buffer_damage->width(), buffer_damage->height());
+        }
+
+        auto surface = impeller::SurfaceMTL::WrapCurrentMetalLayerDrawable(
+            impeller_renderer_->GetContext(), metal_drawable, clip_rect);
+
+        if (clip_rect && (clip_rect->size.width == 0 || clip_rect->size.height == 0)) {
+          return surface->Present();
         }
 
         impeller::DlDispatcher impeller_dispatcher;
@@ -92,12 +130,26 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetalImpeller::AcquireFrame(const SkISiz
             }));
       });
 
-  return std::make_unique<SurfaceFrame>(nullptr,                          // surface
-                                        SurfaceFrame::FramebufferInfo{},  // framebuffer info
-                                        submit_callback,                  // submit callback
-                                        frame_info,                       // frame size
-                                        nullptr,                          // context result
-                                        true                              // display list fallback
+  SurfaceFrame::FramebufferInfo framebuffer_info;
+  framebuffer_info.supports_readback = true;
+
+  if (!disable_partial_repaint_) {
+    // Provide accumulated damage to rasterizer (area in current framebuffer that lags behind
+    // front buffer)
+    uintptr_t texture = reinterpret_cast<uintptr_t>(metal_drawable.texture);
+    auto i = damage_.find(texture);
+    if (i != damage_.end()) {
+      framebuffer_info.existing_damage = i->second;
+    }
+    framebuffer_info.supports_partial_repaint = true;
+  }
+
+  return std::make_unique<SurfaceFrame>(nullptr,           // surface
+                                        framebuffer_info,  // framebuffer info
+                                        submit_callback,   // submit callback
+                                        frame_info,        // frame size
+                                        nullptr,           // context result
+                                        true               // display list fallback
   );
 }
 
