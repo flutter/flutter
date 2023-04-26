@@ -1397,6 +1397,14 @@ void main() {
         );
       }
 
+      await tester.pumpWidget(buildApp(CupertinoDatePickerMode.monthAndYear));
+      if (!skipPerspectiveTextGoldens) {
+        await expectLater(
+          find.byType(CupertinoDatePicker),
+          matchesGoldenFile('date_picker_test.monthandyear.initial.png'),
+        );
+      }
+
       await tester.pumpWidget(buildApp(CupertinoDatePickerMode.dateAndTime));
       if (!skipPerspectiveTextGoldens) {
         await expectLater(
