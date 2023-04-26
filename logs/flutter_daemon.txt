@@ -1,180 +1,0 @@
-!! PLEASE REVIEW THIS LOG FOR SENSITIVE INFORMATION BEFORE SHARING !!
-
-Dart Code extension: 3.62.0
-Flutter extension: 3.62.0 (not activated)
-
-App: Visual Studio Code
-Version: 1.77.3
-Platform: mac
-
-HTTP_PROXY: undefined
-NO_PROXY: undefined
-
-Logging Categories:
-    FlutterDaemon
-
-Thu Apr 27 2023 [00:03:56 GMT+0200 (Central European Summer Time)] Log file started
-[12:03:56 AM] [FlutterDaemon] [Info] Spawning /Users/plg/Developer/flutter-dev/bin/flutter with args ["daemon"]
-[12:03:56 AM] [FlutterDaemon] [Info] ..  in /Users/plg/Developer/flutter-dev
-[12:03:56 AM] [FlutterDaemon] [Info] ..  with {"toolEnv":{"FLUTTER_HOST":"VSCode","PUB_ENVIRONMENT":"vscode.dart-code"}}
-[12:03:56 AM] [FlutterDaemon] [Info]     PID: 50903
-[12:03:56 AM] [FlutterDaemon] [Info] ==> [{"id":"1","method":"emulator.getEmulators"}]
-[12:03:56 AM] [FlutterDaemon] [Error] Downloading Darwin arm64 Dart SDK from Flutter engine fddd5add8b628f94e00a77ba16ffe63487a7b305...
-[12:03:57 AM] [FlutterDaemon] [Info] <==   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-[12:03:57 AM] [FlutterDaemon] [Info] <==                                  Dload  Upload   Total   Spent    Left  Speed
-[12:04:25 AM] [FlutterDaemon] [Info] <==   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  1  187M    1 2942k    0     0  2965k      0  0:01:04 --:--:--  0:01:04 2975k  5  187M    5 9886k    0     0  5024k      0  0:00:38  0:00:01  0:00:37 5033k  8  187M    8 16.1M    0     0  5571k      0  0:00:34  0:00:02  0:00:32 5577k 12  187M   12 22.5M    0     0  5824k      0  0:00:32  0:00:03  0:00:29 5829k 15  187M   15 29.1M    0     0  6012k      0  0:00:31  0:00:04  0:00:27 6016k 18  187M   18 35.0M    0     0  6019k      0  0:00:31  0:00:05  0:00:26 6627k 22  187M   22 41.8M    0     0  6149k      0  0:00:31  0:00:06  0:00:25 6592k 25  187M   25 48.6M    0     0  6246k      0  0:00:30  0:00:07  0:00:23 6647k 29  187M   29 55.3M    0     0  6320k      0  0:00:30  0:00:08  0:00:22 6713k 33  187M   33 62.1M    0     0  6380k      0  0:00:30  0:00:09  0:00:21 6745k 36  187M   36 68.1M    0     0  6362k      0  0:00:30  0:00:10  0:00:20 6771k 39  187M   39 74.8M    0     0  6401k      0  0:00:29  0:00:11  0:00:18 6753k 43  187M   43 81.5M    0     0  6441k      0  0:00:29  0:00:12  0:00:17 6752k 47  187M   47 88.2M    0     0  6470k      0  0:00:29  0:00:13  0:00:16 6739k 50  187M   50 95.0M    0     0  6502k      0  0:00:29  0:00:14  0:00:15 6745k 54  187M   54  101M    0     0  6529k      0  0:00:29  0:00:15  0:00:14 6894k 57  187M   57  107M    0     0  6502k      0  0:00:29  0:00:16  0:00:13 6742k 61  187M   61  114M    0     0  6526k      0  0:00:29  0:00:17  0:00:12 6747k 64  187M   64  121M    0     0  6544k      0  0:00:29  0:00:18  0:00:11 6752k 68  187M   68  127M    0     0  6562k      0  0:00:29  0:00:19  0:00:10 6741k 71  187M   71  134M    0     0  6581k      0  0:00:29  0:00:20  0:00:09 6747k 75  187M   75  140M    0     0  6557k      0  0:00:29  0:00:21  0:00:08 6742k 78  187M   78  147M    0     0  6554k      0  0:00:29  0:00:22  0:00:07 6654k 82  187M   82  153M    0     0  6570k      0  0:00:29  0:00:23  0:00:06 6665k 85  187M   85  160M…
-[12:04:30 AM] [FlutterDaemon] [Error] Building flutter tool...
-[12:04:31 AM] [FlutterDaemon] [Info] <== Resolving dependencies...
-[12:04:33 AM] [FlutterDaemon] [Info] <== Got dependencies.
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"event":"daemon.connected","params":{"version":"0.6.1","pid":50904}}]
-[12:04:55 AM] [FlutterDaemon] [Info] ==> [{"id":"2","method":"device.enable"}]
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"event":"daemon.logMessage","params":{"level":"status","message":"Downloading package sky_engine..."}}]
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"event":"daemon.logMessage","params":{"level":"status","message":"Downloading flutter_patched_sdk tools..."}}]
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"event":"daemon.logMessage","params":{"level":"status","message":"Downloading flutter_patched_sdk_product tools..."}}]
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"event":"daemon.logMessage","params":{"level":"status","message":"Downloading darwin-arm64 tools..."}}]
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"event":"daemon.logMessage","params":{"level":"status","message":"Downloading darwin-arm64/font-subset tools..."}}]
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"event":"daemon.logMessage","params":{"level":"status","message":"Starting device daemon..."}}]
-[12:04:55 AM] [FlutterDaemon] [Info] <== [{"id":"2"}]
-[12:04:56 AM] [FlutterDaemon] [Info] <== [{"id":"1","result":[{"id":"apple_ios_simulator","name":"iOS Simulator","category":"mobile","platformType":"ios"},{"id":"Pixel_6_Pro_API_U","name":"Pixel 6 Pro API U","category":"mobile","platformType":"android"}]}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"event":"device.added","params":{"id":"macos","name":"macOS","platform":"darwin","emulator":false,"category":"desktop","platformType":"macos","ephemeral":false,"emulatorId":null,"sdk":"macOS 13.4 22F5037d darwin-arm64","capabilities":{"hotReload":true,"hotRestart":true,"screenshot":false,"fastStart":false,"flutterExit":true,"hardwareRendering":true,"startPaused":true}}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"3","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"4","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/automated_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"5","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/bots"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"6","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/customer_testing"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"7","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/devicelab"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"8","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/forbidden_from_release_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"9","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/manual_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"10","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/missing_dependency_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"11","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/tools"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"12","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/tracing_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"13","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/api"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"14","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/flutter_view"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"15","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/hello_world"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"16","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/image_list"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"17","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/layers"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"18","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/platform_channel"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"19","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/platform_channel_swift"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"20","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/platform_view"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"21","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/examples/splash"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"22","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"23","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter_driver"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"24","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter_goldens"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"25","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter_goldens_client"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"26","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter_localizations"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"27","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"28","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter_tools"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"29","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter_web_plugins"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"30","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/fuchsia_remote_debug_protocol"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"31","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/integration_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"32","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/complex_layout"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"33","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/macrobenchmarks"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"34","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/microbenchmarks"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"35","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/platform_channels_benchmarks"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"36","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/platform_views_layout"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"37","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/platform_views_layout_hybrid_composition"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"38","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/conductor/core"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"39","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/docs/platform_integration"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"40","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/abstract_method_smoke_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"41","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/android_embedding_v2_smoke_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"42","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/android_semantics_testing"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"43","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/android_views"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"44","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/channels"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"45","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/deferred_components_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"46","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/external_ui"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"47","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/flavors"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"48","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/flutter_gallery"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"49","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/gradle_deprecated_settings"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"50","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/hybrid_android_views"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"51","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/ios_app_with_extensions"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"52","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/ios_platform_view_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"53","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/non_nullable"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"54","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/platform_interaction"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"55","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/release_smoke_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"56","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/spell_check"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"57","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/ui"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"58","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/web"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"59","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/web_compile_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"60","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/web_e2e_tests"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"61","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/wide_gamut_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"62","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/windows_startup_test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"63","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/tools/gen_defaults"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"64","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/tools/gen_keycodes"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"65","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/tools/vitool"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"66","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter/test_private"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"67","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/integration_test/example"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"68","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/integration_test/integration_test_macos"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"69","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/multiple_flutters/module"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"70","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/benchmarks/test_apps/stocks"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"71","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/dev/integration_tests/ios_add2app_life_cycle/flutterapp"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] ==> [{"id":"72","method":"daemon.getSupportedPlatforms","params":{"projectRoot":"/Users/plg/Developer/flutter-dev/packages/flutter/test_private/test"}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"3","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"4","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"5","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"6","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"7","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"8","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"9","result":{"platforms":["linux","macos","windows","ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"10","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"11","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"12","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"13","result":{"platforms":["linux","macos","windows","ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"14","result":{"platforms":["macos","windows","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"15","result":{"platforms":["linux","macos","windows","ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"16","result":{"platforms":["macos","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"17","result":{"platforms":["macos","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"18","result":{"platforms":["linux","macos","windows","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"19","result":{"platforms":["ios"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"20","result":{"platforms":["macos","windows","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"21","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"22","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"23","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"24","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"25","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"26","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"27","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"28","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"29","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"30","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"31","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"32","result":{"platforms":["macos","windows","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"33","result":{"platforms":["macos","ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"34","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"35","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"36","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"37","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"38","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"39","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"40","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"41","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"42","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"43","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"44","result":{"platforms":["macos","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"45","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"46","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"47","result":{"platforms":["macos","ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"48","result":{"platforms":["linux","macos","windows","ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"49","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"50","result":{"platforms":["android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"51","result":{"platforms":["ios"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"52","result":{"platforms":["ios"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"53","result":{"platforms":["ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"54","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"55","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"56","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"57","result":{"platforms":["linux","macos","windows","ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"58","result":{"platforms":["web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"59","result":{"platforms":["web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"60","result":{"platforms":["web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"61","result":{"platforms":["ios"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"62","result":{"platforms":["windows"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"63","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"64","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"65","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"66","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"67","result":{"platforms":["ios","android","web"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"68","result":{"platforms":["macos","ios"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"69","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"70","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"71","result":{"platforms":["ios","android"]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"id":"72","result":{"platforms":[]}}]
-[12:05:00 AM] [FlutterDaemon] [Info] <== [{"event":"device.added","params":{"id":"chrome","name":"Chrome","platform":"web-javascript","emulator":false,"category":"web","platformType":"web","ephemeral":false,"emulatorId":null,"sdk":"Google Chrome 112.0.5615.137","capabilities":{"hotReload":true,"hotRestart":true,"screenshot":false,"fastStart":false,"flutterExit":false,"hardwareRendering":true,"startPaused":true}}}]
