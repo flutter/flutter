@@ -737,6 +737,7 @@ void main() {
                   expect(newRect.left, lessThan(rect.left));
                 }
               }
+              break;
             case TextDirection.ltr:
               expect(newRect.left, rect.left);
               if (doneHorizontally) {
@@ -748,6 +749,7 @@ void main() {
                   expect(newRect.right, greaterThan(rect.right));
                 }
               }
+              break;
           }
           rect = newRect;
         } while (tester.binding.hasScheduledFrame);
@@ -779,6 +781,7 @@ void main() {
               }
               expect(newRect.top, rect.top);
               expect(newRect.bottom, greaterThan(rect.bottom));
+              break;
             case 1:
               if (newRect.top == rect.top) {
                 verticalStage = 2;
@@ -787,9 +790,11 @@ void main() {
               }
               expect(newRect.top, lessThan(rect.top));
               expect(newRect.bottom, rect.bottom);
+              break;
             case 2:
               expect(newRect.bottom, rect.bottom);
               expect(newRect.top, rect.top);
+              break;
             default:
               assert(false);
           }
@@ -805,6 +810,7 @@ void main() {
                   expect(newRect.left, lessThan(rect.left));
                 }
               }
+              break;
             case TextDirection.ltr:
               expect(newRect.left, rect.left);
               if (doneHorizontally) {
@@ -816,6 +822,7 @@ void main() {
                   expect(newRect.right, greaterThan(rect.right));
                 }
               }
+              break;
           }
           rect = newRect;
         } while (tester.binding.hasScheduledFrame);
