@@ -1870,7 +1870,8 @@ void main() {
     Widget buildApp({
       bool isAllowedInteractionInThemeNull = false,
       bool isAllowedInteractionInSliderNull = false,
-    }) => MaterialApp(
+    }) {
+      return MaterialApp(
         home: Scaffold(
           body: Center(
             child: SliderTheme(
@@ -1898,50 +1899,76 @@ void main() {
           ),
         ),
       );
-
-    Future<TestGesture> startCenterTap() => tester.startGesture(tester.getCenter(find.byType(Slider)));
-
-    Future<void> expectTap(bool expectYesOrNo, {required String whileTesting}) async {
-      value = 0.0;
-      final TestGesture gesture = await startCenterTap();
-      await tester.pump();
-      await gesture.cancel();
-      expect(value, expectYesOrNo ? equals(0.5) : isNot(equals(0.5)),
-          reason: 'allowedInteraction is $whileTesting');
     }
 
-    Future<void> expectSlide(bool expectYesOrNo, {required String whileTesting}) async {
-      value = 0.0;
-      final TestGesture gesture = await startCenterTap();
-      await tester.pump();
-      await gesture.moveBy(const Offset(50, 0));
-      await gesture.cancel();
-      expect(value, expectYesOrNo ? greaterThan(0.0) : equals(0.0),
-          reason: 'allowedInteraction is $whileTesting');
-    }
+    final TestGesture gesture = await tester.createGesture();
 
-    // tapOnly
+    // when theme and parameter are specified, parameter is used [tapOnly].
     await tester.pumpWidget(buildApp());
-    await expectTap(true, whileTesting: 'tapOnly');
-    await expectSlide(false, whileTesting: 'tapOnly');
+    // tap is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.5)); // changes
+    await gesture.up();
+    // slide isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, equals(0.0)); // no change
+    await gesture.up();
 
-    // tapOnly
+    // when only parameter is specified, parameter is used [tapOnly].
     await tester.pumpWidget(buildApp(isAllowedInteractionInThemeNull: true));
-    await expectTap(true, whileTesting: 'tapOnly');
-    await expectSlide(false, whileTesting: 'tapOnly');
+    // tap is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.5)); // changes
+    await gesture.up();
+    // slide isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, equals(0.0)); // no change
+    await gesture.up();
 
-    // slideOnly
+    // when theme is specified but parameter is null, theme is used [slideOnly].
     await tester.pumpWidget(buildApp(isAllowedInteractionInSliderNull: true));
-    await expectTap(false, whileTesting: 'slideOnly');
-    await expectSlide(true, whileTesting: 'slideOnly');
+    // tap isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.0)); // no change
+    await gesture.up();
+    // slide isn't allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, greaterThan(0.0)); // changes
+    await gesture.up();
 
-    // tapAndSlide (default)
+    // when both theme and parameter are null, default is used [tapAndSlide].
     await tester.pumpWidget(buildApp(
       isAllowedInteractionInSliderNull: true,
       isAllowedInteractionInThemeNull: true,
     ));
-    await expectTap(true, whileTesting: 'tapAndSlide');
-    await expectSlide(true, whileTesting: 'tapAndSlide');
+    // tap is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    expect(value, equals(0.5));
+    await gesture.up();
+    // slide is allowed.
+    value = 0.0;
+    await gesture.down(tester.getCenter(find.byType(Slider)));
+    await tester.pump();
+    await gesture.moveBy(const Offset(50, 0));
+    expect(value, greaterThan(0.0)); // changes
+    await gesture.up();
   });
 
   testWidgets('Default value indicator color', (WidgetTester tester) async {
