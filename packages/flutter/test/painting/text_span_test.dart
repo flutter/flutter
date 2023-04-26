@@ -282,6 +282,26 @@ void main() {
     expect(collector[0].semanticsLabel, 'bbb');
   });
 
+  test('TextSpan visitChildren', () {
+    const TextSpan leaf1 = TextSpan();
+    const TextSpan leaf2 = TextSpan();
+
+    const TextSpan branch1 = TextSpan(children: <InlineSpan>[leaf1, leaf2]);
+    const TextSpan branch2 = TextSpan();
+
+    const TextSpan root = TextSpan(children: <InlineSpan>[branch1, branch2]);
+
+    const List<TextSpan> preorder = <TextSpan>[root, branch1, leaf1, leaf2, branch2];
+
+    final List<InlineSpan> visitOrder = <InlineSpan>[];
+    root.visitChildren((InlineSpan span) {
+      visitOrder.add(span);
+      return true;
+    });
+
+    expect(visitOrder, preorder);
+  });
+
   testWidgets('handles mouse cursor', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(

@@ -310,19 +310,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// returns false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
-    if (text != null) {
-      if (!visitor(this)) {
-        return false;
-      }
-    }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
-        if (!child.visitChildren(visitor)) {
-          return false;
-        }
-      }
-    }
-    return true;
+    return visitor(this)
+        && !(children?.any((InlineSpan descendant) => !descendant.visitChildren(visitor)) ?? false);
   }
 
   /// Returns the text span that contains the given position in the text.
@@ -389,8 +378,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         recognizer: recognizer,
       ));
     }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
+    if (children case final List<InlineSpan> nonNullChildren) {
+      for (final InlineSpan child in nonNullChildren) {
         if (child is TextSpan) {
           child.computeSemanticsInformation(
             collector,
@@ -426,10 +415,7 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
   /// `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
-    if (
-      recognizer != null &&
-      (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)
-    ) {
+    if (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer) {
       final int length = semanticsLabel?.length ?? text!.length;
       semanticsOffsets.add(offset.value);
       semanticsOffsets.add(offset.value + length);
@@ -573,11 +559,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    if (children == null) {
-      return const <DiagnosticsNode>[];
-    }
-    return children!.map<DiagnosticsNode>((InlineSpan child) {
+    return children?.map<DiagnosticsNode>((InlineSpan child) {
       return child.toDiagnosticsNode();
-    }).toList();
+    }).toList() ?? const <DiagnosticsNode>[];
   }
 }
