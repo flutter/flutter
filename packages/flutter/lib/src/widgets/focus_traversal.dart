@@ -35,17 +35,6 @@ BuildContext? _getAncestor(BuildContext context, {int count = 1}) {
   return target;
 }
 
-void _focusAndEnsureVisible(
-  FocusNode node, {
-  ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
-  double alignment = 1.0,
-  Duration duration = Duration.zero,
-  Curve curve = Curves.ease,
-}) {
-  node.requestFocus();
-  Scrollable.ensureVisible(node.context!, alignment: alignment, alignmentPolicy: alignmentPolicy, duration: duration, curve: curve);
-}
-
 /// Signature for the callback that's called when a traversal policy is
 /// requesting focus.
 typedef TraversalRequestFocusCallback = void Function(
@@ -1856,7 +1845,7 @@ class RequestFocusIntent extends Intent {
 class RequestFocusAction extends Action<RequestFocusIntent> {
   @override
   void invoke(RequestFocusIntent intent) {
-    _focusAndEnsureVisible(intent.focusNode);
+    FocusTraversalPolicy.defaultTraversalRequestFocusCallback(intent.focusNode);
   }
 }
 
