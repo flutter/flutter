@@ -84,7 +84,7 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   color0.resolve_texture = resolve_tex;
 
   TextureDescriptor stencil_tex_desc;
-  stencil_tex_desc.storage_mode = StorageMode::kDeviceTransient;
+  stencil_tex_desc.storage_mode = StorageMode::kDevicePrivate;
   stencil_tex_desc.type = TextureType::kTexture2DMultisample;
   stencil_tex_desc.sample_count = SampleCount::kCount4;
   stencil_tex_desc.format =

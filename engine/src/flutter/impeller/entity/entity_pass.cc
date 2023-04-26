@@ -148,6 +148,15 @@ EntityPass* EntityPass::AddSubpass(std::unique_ptr<EntityPass> pass) {
   return subpass_pointer;
 }
 
+static RenderTarget::AttachmentConfig GetDefaultStencilConfig(bool readable) {
+  return RenderTarget::AttachmentConfig{
+      .storage_mode = readable ? StorageMode::kDevicePrivate
+                               : StorageMode::kDeviceTransient,
+      .load_action = LoadAction::kDontCare,
+      .store_action = StoreAction::kDontCare,
+  };
+}
+
 static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
                                            ISize size,
                                            bool readable,
@@ -170,13 +179,8 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
             .resolve_storage_mode = StorageMode::kDevicePrivate,
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kMultisampleResolve,
-            .clear_color = clear_color},  // color_attachment_config
-        RenderTarget::AttachmentConfig{
-            .storage_mode = readable ? StorageMode::kDevicePrivate
-                                     : StorageMode::kDeviceTransient,
-            .load_action = LoadAction::kDontCare,
-            .store_action = StoreAction::kDontCare,
-        }  // stencil_attachment_config
+            .clear_color = clear_color},   // color_attachment_config
+        GetDefaultStencilConfig(readable)  // stencil_attachment_config
     );
   } else {
     target = RenderTarget::CreateOffscreen(
@@ -187,13 +191,8 @@ static EntityPassTarget CreateRenderTarget(ContentContext& renderer,
             .storage_mode = StorageMode::kDevicePrivate,
             .load_action = LoadAction::kDontCare,
             .store_action = StoreAction::kDontCare,
-        },  // color_attachment_config
-        RenderTarget::AttachmentConfig{
-            .storage_mode = readable ? StorageMode::kDevicePrivate
-                                     : StorageMode::kDeviceTransient,
-            .load_action = LoadAction::kDontCare,
-            .store_action = StoreAction::kDontCare,
-        }  // stencil_attachment_config
+        },                                 // color_attachment_config
+        GetDefaultStencilConfig(readable)  // stencil_attachment_config
     );
   }
 
@@ -215,16 +214,28 @@ bool EntityPass::Render(ContentContext& renderer,
     return false;
   }
 
+  if (!render_target.GetStencilAttachment().has_value()) {
+    VALIDATION_LOG << "The root RenderTarget must have a stencil attachment.";
+    return false;
+  }
+
+  auto stencil_texture = render_target.GetStencilAttachment()->texture;
+  if (!stencil_texture) {
+    VALIDATION_LOG << "The root RenderTarget must have a stencil texture.";
+    return false;
+  }
+
   StencilCoverageStack stencil_coverage_stack = {StencilCoverageLayer{
       .coverage = Rect::MakeSize(render_target.GetRenderTargetSize()),
       .stencil_depth = 0}};
 
-  //
   bool supports_root_pass_reads =
       renderer.GetDeviceCapabilities().SupportsReadFromOnscreenTexture() &&
       // If the backend doesn't have `SupportsReadFromResolve`, we need to flip
       // between two textures when restoring a previous MSAA pass.
-      renderer.GetDeviceCapabilities().SupportsReadFromResolve();
+      renderer.GetDeviceCapabilities().SupportsReadFromResolve() &&
+      stencil_texture->GetTextureDescriptor().storage_mode !=
+          StorageMode::kDeviceTransient;
   if (!supports_root_pass_reads && GetTotalPassReads(renderer) > 0) {
     auto offscreen_target =
         CreateRenderTarget(renderer, render_target.GetRenderTargetSize(), true,
