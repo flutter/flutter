@@ -18,8 +18,31 @@ export 'package:flutter/rendering.dart' show AxisDirection;
 // late final RenderBox child;
 // late final BoxConstraints constraints;
 
-/// A widget that is bigger on the inside, in both the horizontal and vertical
-/// axes.
+/// Signature for a function that creates a widget for a given [ChildVicinity],
+/// e.g., in a [TwoDimensionalScrollView], but may return null.
+///
+/// Used by [TwoDimensionalChildBuilderDelegate.builder] and other APIs that
+/// use lazily-generated widgets where the child count may not be known
+/// ahead of time.
+///
+/// Unlike most builders, this callback can return null, indicating the
+/// [ChildVicinity.xIndex] or [ChildVicinity.yIndex] is out of range. Whether
+/// and when this is valid depends on the semantics of the builder. For example,
+/// [TwoDimensionalChildBuilderDelegate.builder] returns
+/// null when the index is out of range, where the range is defined by the
+/// [TwoDimensionalChildBuilderDelegate.maxXIndex] or
+/// [TwoDimensionalChildBuilderDelegate.maxYIndex]; so in that case the
+/// vicinity values may determine whether returning null is valid or not.
+///
+/// See also:
+///
+///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
+///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
+///  * [IndexedWidgetBuilder], which is similar but not nullable.
+typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext, ChildVicinity vicinity);
+
+/// A widget through which a portion of larger content can be viewed, typically
+/// in combination with a [TwoDimensionalScrollable].
 ///
 /// [TwoDimensionalViewport] is the visual workhorse of the two dimensional
 /// scrolling machinery. It displays a subset of its children according to its

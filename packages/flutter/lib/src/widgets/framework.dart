@@ -14,7 +14,6 @@ import 'debug.dart';
 import 'focus_manager.dart';
 import 'inherited_model.dart';
 import 'notification_listener.dart';
-import 'two_dimensional_viewport.dart';
 import 'widget_inspector.dart';
 
 export 'package:flutter/foundation.dart' show
@@ -5024,29 +5023,6 @@ typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 ///  * [TransitionBuilder], which is similar but also takes a child.
 ///  * [IndexedWidgetBuilder], which is similar but not nullable.
 typedef NullableIndexedWidgetBuilder = Widget? Function(BuildContext context, int index);
-
-/// Signature for a function that creates a widget for a given [ChildVicinity],
-/// e.g., in a [TwoDimensionalScrollView], but may return null.
-///
-/// Used by [TwoDimensionalChildBuilderDelegate.builder] and other APIs that
-/// use lazily-generated widgets where the child count may not be known
-/// ahead of time.
-///
-/// Unlike most builders, this callback can return null, indicating the
-/// [ChildVicinity.xIndex] or [ChildVicinity.yIndex] is out of range. Whether
-/// and when this is valid depends on the semantics of the builder. For example,
-/// [TwoDimensionalChildBuilderDelegate.builder] returns
-/// null when the index is out of range, where the range is defined by the
-/// [TwoDimensionalChildBuilderDelegate.maxXIndex] or
-/// [TwoDimensionalChildBuilderDelegate.maxYIndex]; so in that case the
-/// vicinity values may determine whether returning null is valid or not.
-///
-/// See also:
-///
-///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-///  * [NullableIndexedWidgetBuilder], which is similar but may return null.
-///  * [IndexedWidgetBuilder], which is similar but not nullable.
-typedef TwoDimensionalIndexedWidgetBuilder = Widget? Function(BuildContext, ChildVicinity vicinity);
 
 /// A builder that builds a widget given a child.
 ///
