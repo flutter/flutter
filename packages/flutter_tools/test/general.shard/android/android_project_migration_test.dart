@@ -6,7 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
-import 'package:flutter_tools/src/android/migrations/android_studio_flamingo_java_conflict_migration.dart';
+import 'package:flutter_tools/src/android/migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'package:flutter_tools/src/android/migrations/top_level_gradle_build_file_migration.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
@@ -133,7 +133,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if files are missing', () {
-        final AndroidStudioFlamingoJavaConflictMigration migration = AndroidStudioFlamingoJavaConflictMigration(
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
@@ -150,7 +150,7 @@ tasks.register("clean", Delete) {
 
 
       testWithoutContext('skipped if android studio is null', () {
-        final AndroidStudioFlamingoJavaConflictMigration migration = AndroidStudioFlamingoJavaConflictMigration(
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
           fileSystem: FakeFileSystem(),
@@ -167,7 +167,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('skipped if android studio version is less than flamingo', () {
-        final AndroidStudioFlamingoJavaConflictMigration migration = AndroidStudioFlamingoJavaConflictMigration(
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioDolphin),
@@ -180,11 +180,11 @@ tasks.register("clean", Delete) {
         gradleWrapperPropertiesFile.writeAsStringSync(gradleWrapperToMigrate);
         migration.migrate();
         expect(gradleWrapperPropertiesFile.readAsStringSync(), gradleWrapperToMigrate);
-        expect(bufferLogger.traceText, contains(androidStudioVersionNotFlamingo));
+        expect(bufferLogger.traceText, contains(androidStudioVersionBelowFlamingo));
       });
 
       testWithoutContext('skipped if bundled java version is not than 17', () {
-        final AndroidStudioFlamingoJavaConflictMigration migration = AndroidStudioFlamingoJavaConflictMigration(
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
@@ -202,7 +202,7 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('nothing is changed if gradle version not one that was '
           'used by flutter create', () {
-        final AndroidStudioFlamingoJavaConflictMigration migration = AndroidStudioFlamingoJavaConflictMigration(
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
@@ -220,7 +220,7 @@ tasks.register("clean", Delete) {
 
       testWithoutContext('change is made with one of the specific gradle versions'
           ' we migrate for', () {
-        final AndroidStudioFlamingoJavaConflictMigration migration = AndroidStudioFlamingoJavaConflictMigration(
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),
@@ -238,7 +238,7 @@ tasks.register("clean", Delete) {
       });
 
       testWithoutContext('change is not made when opt out flag is set', () {
-        final AndroidStudioFlamingoJavaConflictMigration migration = AndroidStudioFlamingoJavaConflictMigration(
+        final AndroidStudioJavaGradleConflictMigration migration = AndroidStudioJavaGradleConflictMigration(
           bufferLogger,
           project: project,
           androidStudio: FakeAndroidStudio(version: androidStudioFlamingo),

@@ -51,8 +51,9 @@ const String androidStudioNotFound =
     'Android Studio version could not be detected, '
     'skipping Gradle-Java version compatibility check.';
 @visibleForTesting
-const String androidStudioVersionNotFlamingo =
-    'Version of Android Studio is different than impacted version, no migration attempted.';
+const String androidStudioVersionBelowFlamingo =
+    'Version of Android Studio is less than Flamingo (the first impacted version),'
+    ' no migration attempted.';
 @visibleForTesting
 const String javaVersionNot17 =
     'Version of Java is different than impacted version, no migration attempted.';
@@ -70,13 +71,13 @@ const String optOutFlagEnabled = 'Skipping Android Studio Java-Gradle compatibil
     "because opt out flag: '$optOutFlag' is enabled in gradle-wrapper.properties file.";
 
 
-/// Migrate to a newer version of Gradle when the existing does not support
+/// Migrate to a newer version of Gradle when the existing one does not support
 /// the version of Java provided by the detected Android Studio version.
 ///
 /// For more info see the Gradle-Java compatibility matrix:
 /// https://docs.gradle.org/current/userguide/compatibility.html
-class AndroidStudioFlamingoJavaConflictMigration extends ProjectMigrator {
-  AndroidStudioFlamingoJavaConflictMigration(
+class AndroidStudioJavaGradleConflictMigration extends ProjectMigrator {
+  AndroidStudioJavaGradleConflictMigration(
     super.logger,
     {required AndroidProject project,
     AndroidStudio? androidStudio,
@@ -110,8 +111,8 @@ class AndroidStudioFlamingoJavaConflictMigration extends ProjectMigrator {
     if (_androidStudio == null) {
       logger.printTrace(androidStudioNotFound);
       return;
-    } else if (_androidStudio!.version!.major != androidStudioFlamingo.major) {
-      logger.printTrace(androidStudioVersionNotFlamingo);
+    } else if (_androidStudio!.version!.major < androidStudioFlamingo.major) {
+      logger.printTrace(androidStudioVersionBelowFlamingo);
       return;
     }
 
