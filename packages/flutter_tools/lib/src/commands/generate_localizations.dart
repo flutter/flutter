@@ -220,11 +220,13 @@ class GenerateLocalizationsCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     // Get all options associated with gen-l10n.
+    final String defaultArbDir = _fileSystem.path.join('lib', 'l10n');
     final LocalizationOptions options;
     if (_fileSystem.file('l10n.yaml').existsSync()) {
       options = parseLocalizationsOptionsFromYAML(
         file: _fileSystem.file('l10n.yaml'),
         logger: _logger,
+        defaultArbDir: defaultArbDir,
       );
       _logger.printStatus(
         'Because l10n.yaml exists, the options defined there will be used '
@@ -233,7 +235,10 @@ class GenerateLocalizationsCommand extends FlutterCommand {
         'Flutter project.\n\n'
       );
     } else {
-      options = parseLocalizationsOptionsFromCommand(command: this);
+      options = parseLocalizationsOptionsFromCommand(
+        command: this,
+        defaultArbDir: defaultArbDir
+      );
     }
 
     // Run the localizations generator.

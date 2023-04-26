@@ -8,7 +8,6 @@ import 'package:yaml/yaml.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'gen_l10n_types.dart';
 import 'language_subtag_registry.dart';
@@ -322,7 +321,7 @@ String generateReturnExpr(List<String> expressions, { bool isSingleStringVar = f
 /// Typed configuration from the localizations config file.
 class LocalizationOptions {
   LocalizationOptions({
-    String? arbDir,
+    required this.arbDir,
     this.outputDir,
     String? templateArbFile,
     String? outputLocalizationFile,
@@ -340,8 +339,7 @@ class LocalizationOptions {
     bool? format,
     bool? useEscaping,
     bool? suppressWarnings,
-  }) : arbDir = arbDir ?? globals.fs.path.join('lib', 'l10n'),
-       templateArbFile = templateArbFile ?? 'app_en.arb',
+  }) : templateArbFile = templateArbFile ?? 'app_en.arb',
        outputLocalizationFile = outputLocalizationFile ?? 'app_localizations.dart',
        outputClass = outputClass ?? 'AppLocalizations',
        useDeferredLoading = useDeferredLoading ?? false,
@@ -452,10 +450,11 @@ class LocalizationOptions {
 LocalizationOptions parseLocalizationsOptionsFromYAML({
   required File file,
   required Logger logger,
+  required String defaultArbDir,
 }) {
   final String contents = file.readAsStringSync();
   if (contents.trim().isEmpty) {
-    return LocalizationOptions();
+    return LocalizationOptions(arbDir: defaultArbDir);
   }
   final YamlNode yamlNode;
   try {
@@ -468,7 +467,7 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
     throw Exception();
   }
   return LocalizationOptions(
-    arbDir: _tryReadUri(yamlNode, 'arb-dir', logger)?.path,
+    arbDir: _tryReadUri(yamlNode, 'arb-dir', logger)?.path ?? defaultArbDir,
     outputDir: _tryReadUri(yamlNode, 'output-dir', logger)?.path,
     templateArbFile: _tryReadUri(yamlNode, 'template-arb-file', logger)?.path,
     outputLocalizationFile: _tryReadUri(yamlNode, 'output-localization-file', logger)?.path,
@@ -490,9 +489,10 @@ LocalizationOptions parseLocalizationsOptionsFromYAML({
 /// Parse the localizations configuration from [FlutterCommand].
 LocalizationOptions parseLocalizationsOptionsFromCommand({
   required FlutterCommand command,
+  required String defaultArbDir,
 }) {
   return LocalizationOptions(
-    arbDir: command.stringArg('arb-dir'),
+    arbDir: command.stringArg('arb-dir') ?? defaultArbDir,
     outputDir: command.stringArg('output-dir'),
     outputLocalizationFile: command.stringArg('output-localization-file'),
     templateArbFile: command.stringArg('template-arb-file'),
