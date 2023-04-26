@@ -11,17 +11,9 @@ import 'package:flutter_tools/src/build_system/targets/localizations.dart';
 import 'package:flutter_tools/src/localizations/localizations_utils.dart';
 
 import '../../../src/common.dart';
-import '../../../src/context.dart';
+import '../../../src/fake_process_manager.dart';
 
 void main() {
-  late FileSystem fileSystem;
-  late FakeProcessManager processManager;
-
-  setUp(() {
-    fileSystem = MemoryFileSystem.test();
-    processManager = FakeProcessManager.empty();
-  });
-
   testWithoutContext('generateLocalizations is skipped if l10n.yaml does not exist.', () async {
     final FileSystem fileSystem = MemoryFileSystem.test();
     final Environment environment = Environment.test(
@@ -77,7 +69,8 @@ nullable-getter: false
     expect(options.nullableGetter, false);
   });
 
-  testUsingContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
+  testWithoutContext('parseLocalizationsOptions handles preferredSupportedLocales as list', () async {
+    final FileSystem fileSystem = MemoryFileSystem.test();
     final File configFile = fileSystem.file('l10n.yaml')..writeAsStringSync('''
 preferred-supported-locales: ['en_US', 'de']
 ''');
@@ -89,9 +82,6 @@ preferred-supported-locales: ['en_US', 'de']
     );
 
     expect(options.preferredSupportedLocales, <String>['en_US', 'de']);
-  }, overrides: <Type, Generator>{
-    FileSystem: () => fileSystem,
-    ProcessManager: () => processManager,
   });
 
   testWithoutContext(
