@@ -348,14 +348,8 @@ bool CapabilitiesVK::SupportsReadFromOnscreenTexture() const {
   return false;
 }
 
-// |Capabilities|
 bool CapabilitiesVK::SupportsDecalTileMode() const {
   return true;
-}
-
-// |Capabilities|
-bool CapabilitiesVK::SupportsSharedDeviceBufferTextureMemory() const {
-  return false;
 }
 
 // |Capabilities|
