@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'object.dart';
@@ -53,22 +54,41 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
 
     // First, layout each child with flex == 0 or null.
     int totalFlex = 0;
-    double usedUpExtent = 0.0;
+    double remainingExtent = crossAxisExtent;
     RenderSliver? child = firstChild;
     while (child != null) {
       final SliverPhysicalParentData childParentData = child.parentData! as SliverPhysicalParentData;
       final int flex = childParentData.crossAxisFlex ?? 0;
       if (flex == 0) {
         // If flex is 0 or null, then the child sliver must provide their own crossAxisExtent.
-        child.layout(constraints, parentUsesSize: true);
-        assert(child.geometry!.crossAxisExtent != null);
-        usedUpExtent += child.geometry!.crossAxisExtent!;
+        assert(() {
+          if(remainingExtent == 0.0) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('SliverCrossAxisGroup ran out of extent before child could be laid out.'),
+              ErrorDescription(
+                'SliverCrossAxisGroup lays out any slivers with a constrained cross '
+                'axis before laying out those which expand. In this case, cross axis '
+                'extent was used up before a constrained sliver could be laid out.'
+              ),
+              ErrorHint(
+                'Make sure that the total amount of extent allocated by constrained '
+                'child slivers does not exceed the cross axis extent that is available '
+                'for the SliverCrossAxisGroup.'
+              ),
+            ]);
+          }
+          return true;
+        }());
+        child.layout(constraints.copyWith(crossAxisExtent: remainingExtent), parentUsesSize: true);
+        final double? childCrossAxisExtent = child.geometry!.crossAxisExtent;
+        assert(childCrossAxisExtent != null);
+        remainingExtent = math.max(0.0, remainingExtent - childCrossAxisExtent!);
       } else {
         totalFlex += flex;
       }
       child = childAfter(child);
     }
-    final double extentPerFlexValue = (crossAxisExtent - usedUpExtent) / totalFlex;
+    final double extentPerFlexValue = remainingExtent / totalFlex;
 
     child = firstChild;
     double offset = 0.0;
@@ -82,6 +102,24 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
       double childExtent;
       if (flex != 0) {
         childExtent = extentPerFlexValue * flex;
+        assert(() {
+          if(childExtent == 0.0) {
+            throw FlutterError.fromParts(<DiagnosticsNode>[
+              ErrorSummary('SliverCrossAxisGroup ran out of extent before child could be laid out.'),
+              ErrorDescription(
+                'SliverCrossAxisGroup lays out any slivers with a constrained cross '
+                'axis before laying out those which expand. In this case, cross axis '
+                'extent was used up before an expanding sliver could be laid out.'
+              ),
+              ErrorHint(
+                'Make sure that the total amount of extent allocated by constrained '
+                'child slivers does not exceed the cross axis extent that is available '
+                'for the SliverCrossAxisGroup.'
+              ),
+            ]);
+          }
+          return true;
+        }());
         child.layout(constraints.copyWith(
           crossAxisExtent: extentPerFlexValue * flex,
         ), parentUsesSize: true);
