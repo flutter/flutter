@@ -718,7 +718,7 @@ void main() {
       expect(paragraph3.selections.isEmpty, true);
 
       await gesture.up();
-    });
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can reverse selection across multiple widgets on double click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
