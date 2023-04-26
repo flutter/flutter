@@ -1920,6 +1920,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: flutter_gallery_v2_web_compile_test
 
+  - name: Linux flutter_gallery_v2_web_compile_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "linux"]
+      task_name: flutter_gallery_v2_web_compile_test
+
   - name: Linux_android flutter_test_performance
     recipe: devicelab/devicelab_drone
     presubmit: false
@@ -2348,6 +2358,16 @@ targets:
     properties:
       tags: >
         ["devicelab", "android", "linux"]
+      task_name: web_size__compile_test
+
+  - name: Linux web_size__compile_test
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "hostonly", "linux"]
       task_name: web_size__compile_test
 
   - name: Linux_android opacity_peephole_one_rect_perf__e2e_summary
