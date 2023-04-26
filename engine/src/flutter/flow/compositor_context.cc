@@ -43,9 +43,8 @@ std::optional<SkRect> FrameDamage::ComputeClipRect(
         context.ComputeDamage(additional_damage_, horizontal_clip_alignment_,
                               vertical_clip_alignment_);
     return SkRect::Make(damage_->buffer_damage);
-  } else {
-    return std::nullopt;
   }
+  return std::nullopt;
 }
 
 CompositorContext::CompositorContext()
@@ -125,10 +124,16 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     FrameDamage* frame_damage) {
   TRACE_EVENT0("flutter", "CompositorContext::ScopedFrame::Raster");
 
-  std::optional<SkRect> clip_rect =
-      frame_damage
-          ? frame_damage->ComputeClipRect(layer_tree, !ignore_raster_cache)
-          : std::nullopt;
+  std::optional<SkRect> clip_rect;
+  if (frame_damage) {
+    clip_rect = frame_damage->ComputeClipRect(layer_tree, !ignore_raster_cache);
+
+    if (aiks_context_ &&
+        !ShouldPerformPartialRepaint(clip_rect, layer_tree.frame_size())) {
+      clip_rect = std::nullopt;
+      frame_damage->Reset();
+    }
+  }
 
   bool root_needs_readback = layer_tree.Preroll(
       *this, ignore_raster_cache, clip_rect ? *clip_rect : kGiantRect);
@@ -146,10 +151,22 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     return RasterStatus::kSkipAndRetry;
   }
 
+  if (aiks_context_) {
+    PaintLayerTreeImpeller(layer_tree, clip_rect, ignore_raster_cache);
+  } else {
+    PaintLayerTreeSkia(layer_tree, clip_rect, needs_save_layer,
+                       ignore_raster_cache);
+  }
+  return RasterStatus::kSuccess;
+}
+
+void CompositorContext::ScopedFrame::PaintLayerTreeSkia(
+    flutter::LayerTree& layer_tree,
+    std::optional<SkRect> clip_rect,
+    bool needs_save_layer,
+    bool ignore_raster_cache) {
   DlAutoCanvasRestore restore(canvas(), clip_rect.has_value());
 
-  // Clearing canvas after preroll reduces one render target switch when preroll
-  // paints some raster cache.
   if (canvas()) {
     if (clip_rect) {
       canvas()->ClipRect(*clip_rect);
@@ -164,9 +181,48 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     }
     canvas()->Clear(DlColor::kTransparent());
   }
-  layer_tree.Paint(*this, ignore_raster_cache);
+
   // The canvas()->Restore() is taken care of by the DlAutoCanvasRestore
-  return RasterStatus::kSuccess;
+  layer_tree.Paint(*this, ignore_raster_cache);
+}
+
+void CompositorContext::ScopedFrame::PaintLayerTreeImpeller(
+    flutter::LayerTree& layer_tree,
+    std::optional<SkRect> clip_rect,
+    bool ignore_raster_cache) {
+  if (canvas() && clip_rect) {
+    canvas()->Translate(-clip_rect->x(), -clip_rect->y());
+  }
+
+  layer_tree.Paint(*this, ignore_raster_cache);
+}
+
+/// @brief The max ratio of pixel width or height to size that is dirty which
+///        results in a partial repaint.
+///
+///        Performing a partial repaint has a small overhead - Impeller needs to
+///        allocate a fairly large resolve texture for the root pass instead of
+///        using the drawable texture, and a final blit must be performed. At a
+///        minimum, if the damage rect is the entire buffer, we must not perform
+///        a partial repaint. Beyond that, we could only experimentally
+///        determine what this value should be. From looking at the Flutter
+///        Gallery, we noticed that there are occassionally small partial
+///        repaints which shave off trivial numbers of pixels.
+constexpr float kImpellerRepaintRatio = 0.7f;
+
+bool CompositorContext::ShouldPerformPartialRepaint(
+    std::optional<SkRect> damage_rect,
+    SkISize layer_tree_size) {
+  if (!damage_rect.has_value()) {
+    return false;
+  }
+  if (damage_rect->width() >= layer_tree_size.width() &&
+      damage_rect->height() >= layer_tree_size.height()) {
+    return false;
+  }
+  auto rx = damage_rect->width() / layer_tree_size.width();
+  auto ry = damage_rect->height() / layer_tree_size.height();
+  return rx <= kImpellerRepaintRatio || ry <= kImpellerRepaintRatio;
 }
 
 void CompositorContext::OnGrContextCreated() {

@@ -34,6 +34,10 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetalImpeller : public Surface {
   std::shared_ptr<impeller::Renderer> impeller_renderer_;
   std::shared_ptr<impeller::AiksContext> aiks_context_;
   fml::scoped_nsprotocol<id<MTLDrawable>> last_drawable_;
+  bool disable_partial_repaint_ = false;
+  // Accumulated damage for each framebuffer; Key is address of underlying
+  // MTLTexture for each drawable
+  std::map<uintptr_t, SkIRect> damage_;
 
   // |Surface|
   std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;

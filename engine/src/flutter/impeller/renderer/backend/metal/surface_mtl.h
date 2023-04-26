@@ -7,6 +7,7 @@
 #include <QuartzCore/CAMetalLayer.h>
 
 #include "flutter/fml/macros.h"
+#include "impeller/geometry/rect.h"
 #include "impeller/renderer/context.h"
 #include "impeller/renderer/surface.h"
 
@@ -32,9 +33,14 @@ class SurfaceMTL final : public Surface {
   ///
   /// @return     A pointer to the wrapped surface or null.
   ///
-  static std::unique_ptr<SurfaceMTL> WrapCurrentMetalLayerDrawable(
+  static id<CAMetalDrawable> GetMetalDrawableAndValidate(
       const std::shared_ptr<Context>& context,
       CAMetalLayer* layer);
+
+  static std::unique_ptr<SurfaceMTL> WrapCurrentMetalLayerDrawable(
+      const std::shared_ptr<Context>& context,
+      id<CAMetalDrawable> drawable,
+      std::optional<IRect> clip_rect = std::nullopt);
 #pragma GCC diagnostic pop
 
   // |Surface|
@@ -42,16 +48,24 @@ class SurfaceMTL final : public Surface {
 
   id<MTLDrawable> drawable() const { return drawable_; }
 
+  // |Surface|
+  bool Present() const override;
+
  private:
   std::weak_ptr<Context> context_;
-  id<MTLDrawable> drawable_ = nil;
+  std::shared_ptr<Texture> resolve_texture_;
+  id<CAMetalDrawable> drawable_ = nil;
+  bool requires_blit_ = false;
+  std::optional<IRect> clip_rect_;
+
+  static bool ShouldPerformPartialRepaint(std::optional<IRect> damage_rect);
 
   SurfaceMTL(const std::weak_ptr<Context>& context,
              const RenderTarget& target,
-             id<MTLDrawable> drawable);
-
-  // |Surface|
-  bool Present() const override;
+             std::shared_ptr<Texture> resolve_texture,
+             id<CAMetalDrawable> drawable,
+             bool requires_blit,
+             std::optional<IRect> clip_rect);
 
   FML_DISALLOW_COPY_AND_ASSIGN(SurfaceMTL);
 };
