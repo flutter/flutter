@@ -614,7 +614,7 @@ void main() {
       await tester.pump();
       expect(paragraph.selections[0], const TextSelection(baseOffset: 4, extentOffset: 11));
       await gesture.up();
-    });
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on double click drag', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -660,7 +660,7 @@ void main() {
       expect(paragraph3.selections[0], const TextSelection(baseOffset: 0, extentOffset: 11));
 
       await gesture.up();
-    });
+    }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/125582.
 
     testWidgets('mouse can select multiple widgets on double click drag and return to origin word', (WidgetTester tester) async {
       await tester.pumpWidget(
