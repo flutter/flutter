@@ -422,7 +422,7 @@ void main() {
     expect(clickedTile, equals('Group 1 Tile 2'));
   });
 
-   testWidgets('constrained sliver takes up remaining space', (WidgetTester tester) async {
+   testWidgets('Constrained sliver takes up remaining space', (WidgetTester tester) async {
     final List<int> items = List<int>.generate(20, (int i) => i);
     await tester.pumpWidget(_buildSliverCrossAxisGroup(
       slivers: <Widget>[
@@ -496,6 +496,21 @@ void main() {
     );
   });
 
+  testWidgets('applyPaintTransform is implemented properly', (WidgetTester tester) async {
+    await tester.pumpWidget(_buildSliverCrossAxisGroup(
+      slivers: <Widget>[
+        const SliverToBoxAdapter(child: Text('first box')),
+        const SliverToBoxAdapter(child: Text('second box')),
+      ]),
+    );
+    await tester.pumpAndSettle();
+
+    // localToGlobal calculates offset via applyPaintTransform
+    final RenderBox first = tester.renderObject(find.text('first box'));
+    final RenderBox second = tester.renderObject(find.text('second box'));
+    expect(first.localToGlobal(Offset.zero), Offset.zero);
+    expect(second.localToGlobal(Offset.zero), const Offset(VIEWPORT_WIDTH / 2, 0));
+  });
 }
 
 Widget _buildSliverList({
@@ -538,7 +553,8 @@ Widget _buildSliverCrossAxisGroup({
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,
-    child: Center(
+    child: Align(
+      alignment: Alignment.topLeft,
       child: SizedBox(
         height: viewportHeight,
         width: viewportWidth,

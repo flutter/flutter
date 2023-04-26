@@ -27,6 +27,7 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverPhysicalContainerParentData) {
       child.parentData = SliverPhysicalContainerParentData();
+      (child.parentData! as SliverPhysicalParentData).crossAxisFlex = 1;
     }
   }
 
