@@ -154,16 +154,17 @@ abstract class FocusTraversalPolicy with Diagnosticable {
   /// const constructors so that they can be used in const expressions.
   ///
   /// {@template flutter.widgets.FocusTraversalPolicy.requestFocusCallback}
-  /// The `requestFocusCallback` can be used to overwrite the default behaviour
+  /// The `requestFocusCallback` can be used to override the default behaviour
   /// of the focus requests. If `requestFocusCallback`
-  /// is null, defaults to [defaultTraversalRequestFocusCallback].
+  /// is null, it defaults to [defaultTraversalRequestFocusCallback].
   /// {@endtemplate}
   const FocusTraversalPolicy({
     TraversalRequestFocusCallback? requestFocusCallback
   }) : requestFocusCallback = requestFocusCallback ?? defaultTraversalRequestFocusCallback;
 
   /// The callback used to move the focus from one focus node to another when
-  /// traversing them using a keyboard.
+  /// traversing them using a keyboard. By default it requests focus on the next
+  /// node and ensures the node is visible if it's in a scrollable.
   final TraversalRequestFocusCallback requestFocusCallback;
 
   /// The default value for [requestFocusCallback].
