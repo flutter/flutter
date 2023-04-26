@@ -981,6 +981,56 @@ void main() {
       },
     );
 
+    testWidgets(
+      'monthAndYear picker automatically scrolls away from invalid date, '
+      "and onDateTimeChanged doesn't report these dates",
+      (WidgetTester tester) async {
+        late DateTime date;
+        final DateTime minimum = DateTime(2016, 2);
+        final DateTime maximum = DateTime(2018, 12);
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: SizedBox(
+                height: 400.0,
+                width: 400.0,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.monthAndYear,
+                  minimumDate: minimum,
+                  maximumDate: maximum,
+                  onDateTimeChanged: (DateTime newDate) {
+                    date = newDate;
+                    // Callback doesn't transiently go into invalid dates.
+                    expect(newDate.isAtSameMomentAs(minimum) || newDate.isAfter(minimum), isTrue);
+                    expect(newDate.isAtSameMomentAs(maximum) || newDate.isBefore(maximum), isTrue);
+                  },
+                  initialDateTime: DateTime(2017, 2),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.drag(find.text('2017'), const Offset(0.0, 100.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump();
+        await tester.pumpAndSettle(); // Now the autoscrolling should happen.
+
+        expect(
+          date,
+          DateTime(2016, 2),
+        );
+
+        await tester.drag(find.text('2016'), const Offset(0.0, -100.0), touchSlopY: 0.0, warnIfMissed: false); // see top of file
+        await tester.pump(); // Once to trigger the post frame animate call.
+        await tester.pumpAndSettle();
+
+        expect(
+          date,
+          DateTime(2017, 2),
+        );
+      },
+    );
+
     testWidgets('picker automatically scrolls away from invalid date on day change', (WidgetTester tester) async {
       late DateTime date;
       await tester.pumpWidget(
