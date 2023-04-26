@@ -55,6 +55,7 @@ static std::unique_ptr<Capabilities> InferMetalCapabilities(
       .SetSupportsBufferToTextureBlits(true)
       .SetSupportsTextureToTextureBlits(true)
       .SetSupportsDecalTileMode(true)
+      .SetSupportsSharedDeviceBufferTextureMemory(true)
       .SetSupportsFramebufferFetch(DeviceSupportsFramebufferFetch(device))
       .SetDefaultColorFormat(color_format)
       .SetDefaultStencilFormat(PixelFormat::kS8UInt)
