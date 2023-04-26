@@ -58,10 +58,9 @@ enum TabBarIndicatorSize {
 ///   * [TabBar.tabAlignment], which defines the horizontal alignment of the
 ///     tabs within the [TabBar].
 enum TabAlignment {
-  /// TODO(tahatesser): Add a link to the Material Design spec for
-  /// horizontal offset when it is available.
-  /// It's currently sourced from androidx/compose/material3/TabRow.kt.
-  ///
+  // TODO(tahatesser): Add a link to the Material Design spec for
+  // horizontal offset when it is available.
+  // It's currently sourced from androidx/compose/material3/TabRow.kt.
   /// If [TabBar.isScrollable] is true, tabs are aligned to the
   /// start of the [TabBar] with a horizontal offset of 52.0 pixels.
   /// Otherwise throws an exception.
