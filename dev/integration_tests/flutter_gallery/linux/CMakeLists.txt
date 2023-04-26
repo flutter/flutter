@@ -4,7 +4,7 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "flutter_gallery")
 set(APPLICATION_ID "io.flutter.demo.flutter_gallery")
 
-cmake_policy(SET CMP0063 NEW)
+cmake_policy(VERSION 2.4...3.25)
 
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 
