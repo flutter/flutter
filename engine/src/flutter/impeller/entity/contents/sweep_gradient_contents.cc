@@ -50,6 +50,18 @@ const std::vector<Scalar>& SweepGradientContents::GetStops() const {
   return stops_;
 }
 
+bool SweepGradientContents::IsOpaque() const {
+  if (GetOpacity() < 1) {
+    return false;
+  }
+  for (auto color : colors_) {
+    if (!color.IsOpaque()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool SweepGradientContents::Render(const ContentContext& renderer,
                                    const Entity& entity,
                                    RenderPass& pass) const {

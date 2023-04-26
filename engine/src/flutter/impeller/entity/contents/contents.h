@@ -56,6 +56,12 @@ class Contents {
   /// @brief Get the screen space bounding rectangle that this contents affects.
   virtual std::optional<Rect> GetCoverage(const Entity& entity) const = 0;
 
+  /// @brief Whether this Contents only emits opaque source colors from the
+  ///        fragment stage. This value does not account for any entity
+  ///        properties (e.g. the blend mode), clips/visibility culling, or
+  ///        inherited opacity.
+  virtual bool IsOpaque() const;
+
   /// @brief Given the current screen space bounding rectangle of the stencil,
   ///        return the expected stencil coverage after this draw call. This
   ///        should only be implemented for contents that may write to the

@@ -44,6 +44,18 @@ void LinearGradientContents::SetTileMode(Entity::TileMode tile_mode) {
   tile_mode_ = tile_mode;
 }
 
+bool LinearGradientContents::IsOpaque() const {
+  if (GetOpacity() < 1) {
+    return false;
+  }
+  for (auto color : colors_) {
+    if (!color.IsOpaque()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool LinearGradientContents::Render(const ContentContext& renderer,
                                     const Entity& entity,
                                     RenderPass& pass) const {

@@ -25,6 +25,9 @@ class RadialGradientContents final : public ColorSourceContents {
   ~RadialGradientContents() override;
 
   // |Contents|
+  bool IsOpaque() const override;
+
+  // |Contents|
   bool Render(const ContentContext& renderer,
               const Entity& entity,
               RenderPass& pass) const override;

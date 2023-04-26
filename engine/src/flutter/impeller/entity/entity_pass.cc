@@ -48,6 +48,11 @@ void EntityPass::SetDelegate(std::unique_ptr<EntityPassDelegate> delegate) {
 }
 
 void EntityPass::AddEntity(Entity entity) {
+  if (entity.GetBlendMode() == BlendMode::kSourceOver &&
+      entity.GetContents()->IsOpaque()) {
+    entity.SetBlendMode(BlendMode::kSource);
+  }
+
   if (entity.GetBlendMode() > Entity::kLastPipelineBlendMode) {
     advanced_blend_reads_from_pass_texture_ += 1;
   }

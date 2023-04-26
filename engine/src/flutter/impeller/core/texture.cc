@@ -14,7 +14,8 @@ Texture::~Texture() = default;
 
 bool Texture::SetContents(const uint8_t* contents,
                           size_t length,
-                          size_t slice) {
+                          size_t slice,
+                          bool is_opaque) {
   if (!IsSliceValid(slice)) {
     VALIDATION_LOG << "Invalid slice for texture.";
     return false;
@@ -23,11 +24,13 @@ bool Texture::SetContents(const uint8_t* contents,
     return false;
   }
   intent_ = TextureIntent::kUploadFromHost;
+  is_opaque_ = is_opaque;
   return true;
 }
 
 bool Texture::SetContents(std::shared_ptr<const fml::Mapping> mapping,
-                          size_t slice) {
+                          size_t slice,
+                          bool is_opaque) {
   if (!IsSliceValid(slice)) {
     VALIDATION_LOG << "Invalid slice for texture.";
     return false;
@@ -39,7 +42,12 @@ bool Texture::SetContents(std::shared_ptr<const fml::Mapping> mapping,
     return false;
   }
   intent_ = TextureIntent::kUploadFromHost;
+  is_opaque_ = is_opaque;
   return true;
+}
+
+bool Texture::IsOpaque() const {
+  return is_opaque_;
 }
 
 size_t Texture::GetMipCount() const {

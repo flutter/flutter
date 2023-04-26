@@ -15,15 +15,18 @@
 #include "gtest/gtest.h"
 #include "impeller/entity/contents/atlas_contents.h"
 #include "impeller/entity/contents/clip_contents.h"
+#include "impeller/entity/contents/conical_gradient_contents.h"
 #include "impeller/entity/contents/contents.h"
 #include "impeller/entity/contents/filters/blend_filter_contents.h"
 #include "impeller/entity/contents/filters/color_filter_contents.h"
 #include "impeller/entity/contents/filters/filter_contents.h"
 #include "impeller/entity/contents/filters/inputs/filter_input.h"
 #include "impeller/entity/contents/linear_gradient_contents.h"
+#include "impeller/entity/contents/radial_gradient_contents.h"
 #include "impeller/entity/contents/rrect_shadow_contents.h"
 #include "impeller/entity/contents/runtime_effect_contents.h"
 #include "impeller/entity/contents/solid_color_contents.h"
+#include "impeller/entity/contents/sweep_gradient_contents.h"
 #include "impeller/entity/contents/text_contents.h"
 #include "impeller/entity/contents/texture_contents.h"
 #include "impeller/entity/contents/tiled_texture_contents.h"
@@ -2545,6 +2548,56 @@ TEST_P(EntityTest, CoverageForStrokePathWithNegativeValuesInTransform) {
   EXPECT_LT(transform.e[0][0], 0.f);
   auto coverage = geometry->GetCoverage(transform);
   ASSERT_RECT_NEAR(coverage.value(), Rect::MakeXYWH(102.5, 342.5, 85, 155));
+}
+
+TEST_P(EntityTest, SolidColorContentsIsOpaque) {
+  SolidColorContents contents;
+  contents.SetColor(Color::CornflowerBlue());
+  ASSERT_TRUE(contents.IsOpaque());
+  contents.SetColor(Color::CornflowerBlue().WithAlpha(0.5));
+  ASSERT_FALSE(contents.IsOpaque());
+}
+
+TEST_P(EntityTest, ConicalGradientContentsIsOpaque) {
+  ConicalGradientContents contents;
+  contents.SetColors({Color::CornflowerBlue()});
+  ASSERT_TRUE(contents.IsOpaque());
+  contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
+  ASSERT_FALSE(contents.IsOpaque());
+}
+
+TEST_P(EntityTest, LinearGradientContentsIsOpaque) {
+  LinearGradientContents contents;
+  contents.SetColors({Color::CornflowerBlue()});
+  ASSERT_TRUE(contents.IsOpaque());
+  contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
+  ASSERT_FALSE(contents.IsOpaque());
+}
+
+TEST_P(EntityTest, RadialGradientContentsIsOpaque) {
+  RadialGradientContents contents;
+  contents.SetColors({Color::CornflowerBlue()});
+  ASSERT_TRUE(contents.IsOpaque());
+  contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
+  ASSERT_FALSE(contents.IsOpaque());
+}
+
+TEST_P(EntityTest, SweepGradientContentsIsOpaque) {
+  RadialGradientContents contents;
+  contents.SetColors({Color::CornflowerBlue()});
+  ASSERT_TRUE(contents.IsOpaque());
+  contents.SetColors({Color::CornflowerBlue().WithAlpha(0.5)});
+  ASSERT_FALSE(contents.IsOpaque());
+}
+
+TEST_P(EntityTest, TiledTextureContentsIsOpaque) {
+  auto bay_bridge = CreateTextureForFixture("bay_bridge.jpg");
+  TiledTextureContents contents;
+  contents.SetTexture(bay_bridge);
+  // This is a placeholder test. Images currently never decompress as opaque
+  // (whether in Flutter or the playground), and so this should currently always
+  // return false in practice.
+  ASSERT_FALSE(contents.IsOpaque());
 }
 
 }  // namespace testing

@@ -24,6 +24,10 @@ Color SolidColorContents::GetColor() const {
   return color_.WithAlpha(color_.alpha * GetOpacity());
 }
 
+bool SolidColorContents::IsOpaque() const {
+  return GetColor().IsOpaque();
+}
+
 std::optional<Rect> SolidColorContents::GetCoverage(
     const Entity& entity) const {
   if (GetColor().IsTransparent()) {

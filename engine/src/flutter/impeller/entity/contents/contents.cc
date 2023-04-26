@@ -45,6 +45,10 @@ Contents::Contents() = default;
 
 Contents::~Contents() = default;
 
+bool Contents::IsOpaque() const {
+  return false;
+}
+
 Contents::StencilCoverage Contents::GetStencilCoverage(
     const Entity& entity,
     const std::optional<Rect>& current_stencil_coverage) const {

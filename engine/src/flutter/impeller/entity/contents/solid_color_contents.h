@@ -35,6 +35,9 @@ class SolidColorContents final : public ColorSourceContents {
   Color GetColor() const;
 
   // |Contents|
+  bool IsOpaque() const override;
+
+  // |Contents|
   std::optional<Rect> GetCoverage(const Entity& entity) const override;
 
   // |Contents|
