@@ -14,9 +14,11 @@
 
 namespace impeller {
 
-using CommandPoolMap =
-    std::map<const ContextVK*, std::shared_ptr<CommandPoolVK>>;
+using CommandPoolMap = std::map<uint64_t, std::shared_ptr<CommandPoolVK>>;
 
+// TODO(tbd): This is storing tons of CommandPoolVK's in the test runner since
+//            many contexts are created on the same thread. We need to come up
+//            with a different way to clean these up.
 FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<CommandPoolMap> tls_command_pool;
 
 static Mutex g_all_pools_mutex;
@@ -33,7 +35,7 @@ std::shared_ptr<CommandPoolVK> CommandPoolVK::GetThreadLocal(
     tls_command_pool.reset(new CommandPoolMap());
   }
   CommandPoolMap& pool_map = *tls_command_pool.get();
-  auto found = pool_map.find(context);
+  auto found = pool_map.find(context->GetHash());
   if (found != pool_map.end() && found->second->IsValid()) {
     return found->second;
   }
@@ -41,7 +43,7 @@ std::shared_ptr<CommandPoolVK> CommandPoolVK::GetThreadLocal(
   if (!pool->IsValid()) {
     return nullptr;
   }
-  pool_map[context] = pool;
+  pool_map[context->GetHash()] = pool;
   {
     Lock pool_lock(g_all_pools_mutex);
     g_all_pools[context].push_back(pool);
