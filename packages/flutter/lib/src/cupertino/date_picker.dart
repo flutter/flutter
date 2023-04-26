@@ -286,6 +286,7 @@ class CupertinoDatePicker extends StatefulWidget {
     this.minuteInterval = 1,
     this.use24hFormat = false,
     this.dateOrder,
+    this.monthAndYearOrder,
     this.backgroundColor,
     this.showDayOfWeek = false
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
@@ -385,6 +386,10 @@ class CupertinoDatePicker extends StatefulWidget {
   /// Defaults to the locale's default date format/order.
   final DatePickerDateOrder? dateOrder;
 
+  /// Determines the order of the columns inside [CupertinoDatePicker] in MonthAndYear mode.
+  /// Defaults to the locale's default date format/order.
+  final DatePickerMonthAndYearOrder? monthAndYearOrder;
+
   /// Callback called when the selected date and/or time changes. If the new
   /// selected [DateTime] is not valid, or is not in the [minimumDate] through
   /// [maximumDate] range, this callback will not be called.
@@ -413,7 +418,7 @@ class CupertinoDatePicker extends StatefulWidget {
       case CupertinoDatePickerMode.date:
         return _CupertinoDatePickerDateState(dateOrder: dateOrder);
       case CupertinoDatePickerMode.monthAndYear:
-        return _CupertinoDatePickerMonthAndYearState(dateOrder: dateOrder);
+        return _CupertinoDatePickerMonthAndYearState(dateOrder: monthAndYearOrder);
     }
   }
 
@@ -1494,7 +1499,7 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
     required this.dateOrder,
   });
 
-  final DatePickerDateOrder? dateOrder;
+  final DatePickerMonthAndYearOrder? dateOrder;
 
   late int textDirectionFactor;
   late CupertinoLocalizations localizations;
@@ -1717,19 +1722,17 @@ class _CupertinoDatePickerMonthAndYearState extends State<CupertinoDatePicker> {
     List<_ColumnBuilder> pickerBuilders = <_ColumnBuilder>[];
     List<double> columnWidths = <double>[];
 
-    final DatePickerDateOrder datePickerDateOrder =
-        dateOrder ?? localizations.datePickerDateOrder;
+    final DatePickerMonthAndYearOrder datePickerMonthAndYearOrder =
+        dateOrder ?? localizations.datePickerMonthAndYearOrder;
 
-    switch (datePickerDateOrder) {
-      case DatePickerDateOrder.mdy:
-      case DatePickerDateOrder.dmy:
+    switch (datePickerMonthAndYearOrder) {
+      case DatePickerMonthAndYearOrder.my:
         pickerBuilders = <_ColumnBuilder>[_buildMonthPicker, _buildYearPicker];
         columnWidths = <double>[
           estimatedColumnWidths[_PickerColumnType.month.index]!,
           estimatedColumnWidths[_PickerColumnType.year.index]!,
         ];
-      case DatePickerDateOrder.ymd:
-      case DatePickerDateOrder.ydm:
+      case DatePickerMonthAndYearOrder.ym:
         pickerBuilders = <_ColumnBuilder>[_buildYearPicker, _buildMonthPicker];
         columnWidths = <double>[
           estimatedColumnWidths[_PickerColumnType.year.index]!,

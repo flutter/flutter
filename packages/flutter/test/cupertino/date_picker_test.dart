@@ -1462,7 +1462,7 @@ void main() {
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                dateOrder: DatePickerDateOrder.ydm,
+                monthAndYearOrder: DatePickerMonthAndYearOrder.ym,
                 mode: CupertinoDatePickerMode.monthAndYear,
                 onDateTimeChanged: (DateTime newDate) {},
                 initialDateTime: DateTime(2018, 1, 14, 10, 30),
