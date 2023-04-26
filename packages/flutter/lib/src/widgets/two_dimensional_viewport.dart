@@ -367,11 +367,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     required RenderObjectElement childManager,
     double? cacheExtent,
     Clip clipBehavior = Clip.hardEdge,
-  }) : _childManager = childManager as _TwoDimensionalChildManager,
+  }) : assert(verticalAxisDirection == AxisDirection.down || verticalAxisDirection == AxisDirection.up),
+       assert(horizontalAxisDirection == AxisDirection.left || horizontalAxisDirection == AxisDirection.right),
+       _childManager = childManager as _TwoDimensionalChildManager,
        _horizontalOffset = horizontalOffset,
        _horizontalAxisDirection = horizontalAxisDirection,
        _verticalOffset = verticalOffset,
-        _verticalAxisDirection = verticalAxisDirection,
+       _verticalAxisDirection = verticalAxisDirection,
        _delegate = delegate,
        _mainAxis = mainAxis,
        _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
@@ -790,6 +792,11 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
           }
         }
     }
+    // Reset for next layout pass.
+    _leadingXIndex = null;
+    _trailingXIndex = null;
+    _leadingYIndex = null;
+    _trailingYIndex = null;
   }
 
   void _checkVicinity(ChildVicinity vicinity) {
@@ -840,14 +847,14 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
   /// it if it already exists.
   RenderBox? buildOrObtainChildFor(ChildVicinity vicinity) {
     assert(vicinity != ChildVicinity.invalid);
-    if (_children.isEmpty) {
-      // First child. Set leading and trailing trackers.
+    if (_leadingXIndex == null || _trailingXIndex == null || _leadingXIndex == null || _trailingYIndex == null) {
+      // First child of this layout pass. Set leading and trailing trackers.
       _leadingXIndex = vicinity.xIndex;
       _trailingXIndex = vicinity.xIndex;
       _leadingYIndex = vicinity.yIndex;
       _trailingYIndex = vicinity.yIndex;
     } else {
-      // If any of these are null, we missed a child.
+      // If any of these are still null, we missed a child.
       assert(_leadingXIndex != null);
       assert(_trailingXIndex != null);
       assert(_leadingYIndex != null);
