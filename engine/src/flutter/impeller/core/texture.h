@@ -22,14 +22,18 @@ class Texture {
 
   [[nodiscard]] bool SetContents(const uint8_t* contents,
                                  size_t length,
-                                 size_t slice = 0);
+                                 size_t slice = 0,
+                                 bool is_opaque = false);
 
   [[nodiscard]] bool SetContents(std::shared_ptr<const fml::Mapping> mapping,
-                                 size_t slice = 0);
+                                 size_t slice = 0,
+                                 bool is_opaque = false);
 
   virtual bool IsValid() const = 0;
 
   virtual ISize GetSize() const = 0;
+
+  bool IsOpaque() const;
 
   size_t GetMipCount() const;
 
@@ -59,6 +63,7 @@ class Texture {
  private:
   TextureIntent intent_ = TextureIntent::kRenderToTexture;
   const TextureDescriptor desc_;
+  bool is_opaque_ = false;
 
   bool IsSliceValid(size_t slice) const;
 

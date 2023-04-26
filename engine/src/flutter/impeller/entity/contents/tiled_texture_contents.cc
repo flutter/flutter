@@ -93,6 +93,17 @@ bool TiledTextureContents::UsesEmulatedTileMode(
          !TileModeToAddressMode(y_tile_mode_, capabilities).has_value();
 }
 
+// |Contents|
+bool TiledTextureContents::IsOpaque() const {
+  if (GetOpacity() < 1) {
+    return false;
+  }
+  if (color_filter_.has_value()) {
+    return false;
+  }
+  return texture_->IsOpaque();
+}
+
 bool TiledTextureContents::Render(const ContentContext& renderer,
                                   const Entity& entity,
                                   RenderPass& pass) const {
