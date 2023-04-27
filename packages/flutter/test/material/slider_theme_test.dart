@@ -1448,7 +1448,7 @@ void main() {
     expect(
       material,
       paints
-      // active track RRect. Starts 10 pixels from left of screen.
+        // active track RRect. Starts 10 pixels from left of screen.
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           10.0,
           298.0,
