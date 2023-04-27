@@ -1017,7 +1017,7 @@ class SliverPhysicalParentData extends ParentData {
   /// how to allocate its [SliverConstraints.crossAxisExtent] to its children.
   ///
   /// See also:
-  /// 
+  ///
   ///   * [SliverCrossAxisGroup], which lays out multiple slivers along the
   ///     cross axis direction.
   int? crossAxisFlex;
