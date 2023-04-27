@@ -12,7 +12,7 @@ import 'sliver.dart';
 /// axis.
 ///
 /// Since the extent of the viewport in the cross axis direction is finite,
-/// this extent will be divided up and allocated to the children sliver.
+/// this extent will be divided up and allocated to the children slivers.
 ///
 /// The algorithm for dividing up the cross axis extent is as follows.
 /// Every widget has a [SliverPhysicalParentData.crossAxisFlex] value associated with them.
