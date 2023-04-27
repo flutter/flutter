@@ -111,6 +111,15 @@ platform_properties:
       device_type: none
       cpu: x86
       xcode: 14e222b
+  mac_build_test:
+    properties:
+      dependencies: >-
+        [
+          {"dependency": "apple_signing", "version": "version:2022_to_2023"}
+        ]
+      os: Mac-12
+      device_type: none
+      xcode: 14e222b
   mac_android:
     properties:
       dependencies: >-
@@ -3949,28 +3958,6 @@ targets:
       tags: >
         ["devicelab", "ios", "mac"]
       task_name: animated_blur_backdrop_filter_perf_ios__timeline_summary
-
-  - name: Mac_build_test flutter_gallery__transition_perf_e2e_impeller_ios
-    recipe: devicelab/devicelab_drone_build_test
-    bringup: true # New target: https://github.com/flutter/flutter/pull/111164
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery__transition_perf_e2e_impeller_ios
-      drone_dimensions: >
-        ["device_os=iOS-16","os=Mac-12", "cpu=x86"]
-
-  - name: Mac_ios flutter_gallery_ios_sksl_warmup__transition_perf
-    bringup: true # Flaky https://github.com/flutter/flutter/issues/121231
-    recipe: devicelab/devicelab_drone
-    presubmit: false
-    timeout: 60
-    properties:
-      tags: >
-        ["devicelab", "ios", "mac"]
-      task_name: flutter_gallery_ios_sksl_warmup__transition_perf
 
   - name: Mac_ios spell_check_test
     recipe: devicelab/devicelab_drone
