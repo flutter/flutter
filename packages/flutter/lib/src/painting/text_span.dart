@@ -275,9 +275,9 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
     if (hasStyle) {
       builder.pushStyle(style!.getTextStyle(textScaleFactor: textScaleFactor));
     }
-    if (text != null) {
+    if (text case final String text) {
       try {
-        builder.addText(text!);
+        builder.addText(text);
       } on ArgumentError catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetails(
           exception: exception,
@@ -289,8 +289,8 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
         builder.addText('\uFFFD');
       }
     }
-    if (children != null) {
-      for (final InlineSpan child in children!) {
+    if (children case final List<InlineSpan> children) {
+      for (final InlineSpan child in children) {
         child.build(
           builder,
           textScaleFactor: textScaleFactor,
@@ -310,9 +310,12 @@ class TextSpan extends InlineSpan implements HitTestTarget, MouseTrackerAnnotati
   /// returns false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
-    return visitor(this)
+    return (text == null || visitor(this))
         && !(children?.any((InlineSpan descendant) => !descendant.visitChildren(visitor)) ?? false);
   }
+
+  @override
+  bool visitDirectChildren(InlineSpanVisitor visitor) => !(children?.any((InlineSpan child) => !visitor(child)) ?? false);
 
   /// Returns the text span that contains the given position in the text.
   @override

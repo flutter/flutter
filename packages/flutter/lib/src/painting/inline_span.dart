@@ -227,6 +227,18 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// false, then the walk will end.
   bool visitChildren(InlineSpanVisitor visitor);
 
+  /// Calls `visitor` for each immediate child of this [InlineSpan].
+  ///
+  /// The immediate children are visited in the same order they are added to
+  /// a [ui.ParagraphBuilder] in the [build] method, which is also the logical
+  /// order of the child [InlineSpan]s in the text.
+  ///
+  /// The traversal stops when all immediate children are visited, or when the
+  /// `visitor` callback returns `false` on an immediate child. This method
+  /// itself returns a `bool` indicating whether the visitor callback returned
+  /// `true` on all immediate children.
+  bool visitDirectChildren(InlineSpanVisitor visitor);
+
   /// Returns the [InlineSpan] that contains the given position in the text.
   InlineSpan? getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
