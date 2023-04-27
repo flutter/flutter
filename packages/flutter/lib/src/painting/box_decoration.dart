@@ -464,10 +464,10 @@ class _BoxDecorationPainter extends BoxPainter {
       final Border border = _decoration.border! as Border;
 
       final EdgeInsets insets = EdgeInsets.fromLTRB(
-        border.left.color.alpha == 255 ? border.left.strokeInset : 0,
-        border.top.color.alpha == 255 ? border.top.strokeInset : 0,
-        border.right.color.alpha == 255 ? border.right.strokeInset : 0,
-        border.bottom.color.alpha == 255 ? border.bottom.strokeInset : 0,
+        border.left.color.alpha == 255 && border.left.style == BorderStyle.solid ? border.left.strokeInset : 0,
+        border.top.color.alpha == 255 && border.top.style == BorderStyle.solid ? border.top.strokeInset : 0,
+        border.right.color.alpha == 255 && border.right.style == BorderStyle.solid ? border.right.strokeInset : 0,
+        border.bottom.color.alpha == 255 && border.bottom.style == BorderStyle.solid ? border.bottom.strokeInset : 0,
       ) / 2;
 
       return Rect.fromLTRB(
@@ -482,10 +482,10 @@ class _BoxDecorationPainter extends BoxPainter {
       final BorderSide rightBorder = textDirection == TextDirection.rtl ? border.start : border.end;
 
       final EdgeInsets insets = EdgeInsets.fromLTRB(
-        leftBorder.color.alpha == 255 ? leftBorder.strokeInset : 0,
-        border.top.color.alpha == 255 ? border.top.strokeInset : 0,
-        rightBorder.color.alpha == 255 ? rightBorder.strokeInset : 0,
-        border.bottom.color.alpha == 255 ? border.bottom.strokeInset : 0,
+        leftBorder.color.alpha == 255 && leftBorder.style == BorderStyle.solid ? leftBorder.strokeInset : 0,
+        border.top.color.alpha == 255 && border.top.style == BorderStyle.solid ? border.top.strokeInset : 0,
+        rightBorder.color.alpha == 255 && rightBorder.style == BorderStyle.solid ? rightBorder.strokeInset : 0,
+        border.bottom.color.alpha == 255 && border.bottom.style == BorderStyle.solid ? border.bottom.strokeInset : 0,
       ) / 2;
 
       return Rect.fromLTRB(
