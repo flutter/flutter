@@ -1400,10 +1400,10 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
     switch (event.type) {
       case SelectionEventType.startEdgeUpdate:
         _selectableStartEdgeUpdateRecords[selectable] = state.position.pixels;
-        ensureChildUpdated(selectable, (event as SelectionEdgeUpdateEvent).granularity);
+        ensureChildUpdated(selectable);
       case SelectionEventType.endEdgeUpdate:
         _selectableEndEdgeUpdateRecords[selectable] = state.position.pixels;
-        ensureChildUpdated(selectable, (event as SelectionEdgeUpdateEvent).granularity);
+        ensureChildUpdated(selectable);
       case SelectionEventType.granularlyExtendSelection:
       case SelectionEventType.directionallyExtendSelection:
         ensureChildUpdated(selectable);
@@ -1421,7 +1421,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
   }
 
   @override
-  void ensureChildUpdated(Selectable selectable, [TextGranularity? granularity]) {
+  void ensureChildUpdated(Selectable selectable) {
     final double newRecord = state.position.pixels;
     final double? previousStartRecord = _selectableStartEdgeUpdateRecords[selectable];
     if (_currentDragStartRelatedToOrigin != null &&
@@ -1429,7 +1429,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       // Make sure the selectable has up to date events.
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset startOffset = _currentDragStartRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset, granularity: granularity));
+      selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forStart(globalPosition: startOffset));
     }
     final double? previousEndRecord = _selectableEndEdgeUpdateRecords[selectable];
     if (_currentDragEndRelatedToOrigin != null &&
@@ -1437,7 +1437,7 @@ class _ScrollableSelectionContainerDelegate extends MultiSelectableSelectionCont
       // Make sure the selectable has up to date events.
       final Offset deltaToOrigin = _getDeltaToScrollOrigin(state);
       final Offset endOffset = _currentDragEndRelatedToOrigin!.translate(-deltaToOrigin.dx, -deltaToOrigin.dy);
-      selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset, granularity: granularity));
+      selectable.dispatchSelectionEvent(SelectionEdgeUpdateEvent.forEnd(globalPosition: endOffset));
     }
   }
 
