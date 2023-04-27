@@ -728,6 +728,7 @@ class _SnackBarState extends State<SnackBar> {
       shape: shape,
       elevation: elevation,
       color: backgroundColor,
+      clipBehavior: widget.clipBehavior,
       child: Theme(
         data: effectiveTheme,
         child: accessibleNavigation || theme.useMaterial3
