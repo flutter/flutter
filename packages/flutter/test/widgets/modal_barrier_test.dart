@@ -399,8 +399,8 @@ void main() {
       expect(dismissCallbackCalled, true);
     });
 
-    testWidgets('when onDismiss throws, should have correct context', (tester) async {
-      final barrierKey = UniqueKey();
+    testWidgets('when onDismiss throws, should have correct context', (WidgetTester tester) async {
+      final UniqueKey barrierKey = UniqueKey();
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: ModalBarrier(
