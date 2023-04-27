@@ -39,7 +39,7 @@ const String templateKotlinGradlePluginVersion = '1.7.10';
 // `.android` is always regenerated after flutter pub get, so new versions are picked up after a
 // Flutter upgrade.
 const String compileSdkVersion = '33';
-const String minSdkVersion = '16';
+const String minSdkVersion = '19';
 const String targetSdkVersion = '33';
 const String ndkVersion = '23.1.7779620';
 
