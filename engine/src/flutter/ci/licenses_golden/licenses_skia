@@ -1,4 +1,4 @@
-Signature: 0c70a4a482940b49a95e42ad239eea4a
+Signature: 21964bf8086ae0bad9adfd64ea3eb035
 
 ====================================================================================================
 LIBRARY: etc1
@@ -3206,7 +3206,6 @@ ORIGIN: ../../../third_party/skia/src/core/SkOpts.cpp + ../../../third_party/ski
 ORIGIN: ../../../third_party/skia/src/core/SkOpts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPathBuilder.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPathPriv.h + ../../../third_party/skia/LICENSE
-ORIGIN: ../../../third_party/skia/src/core/SkPictureImageGenerator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPixmap.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkPoint3.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/core/SkRecord.cpp + ../../../third_party/skia/LICENSE
@@ -3317,6 +3316,7 @@ ORIGIN: ../../../third_party/skia/src/gpu/vk/VulkanInterface.h + ../../../third_
 ORIGIN: ../../../third_party/skia/src/gpu/vk/VulkanMemory.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/gpu/vk/VulkanMemory.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_Lazy.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkPictureImageGenerator.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/opts/SkBlitMask_opts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/opts/SkBlitRow_opts.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/opts/SkOpts_ssse3.cpp + ../../../third_party/skia/LICENSE
@@ -3495,7 +3495,6 @@ FILE: ../../../third_party/skia/src/core/SkOpts.cpp
 FILE: ../../../third_party/skia/src/core/SkOpts.h
 FILE: ../../../third_party/skia/src/core/SkPathBuilder.cpp
 FILE: ../../../third_party/skia/src/core/SkPathPriv.h
-FILE: ../../../third_party/skia/src/core/SkPictureImageGenerator.cpp
 FILE: ../../../third_party/skia/src/core/SkPixmap.cpp
 FILE: ../../../third_party/skia/src/core/SkPoint3.cpp
 FILE: ../../../third_party/skia/src/core/SkRecord.cpp
@@ -3606,6 +3605,7 @@ FILE: ../../../third_party/skia/src/gpu/vk/VulkanInterface.h
 FILE: ../../../third_party/skia/src/gpu/vk/VulkanMemory.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/VulkanMemory.h
 FILE: ../../../third_party/skia/src/image/SkImage_Lazy.cpp
+FILE: ../../../third_party/skia/src/image/SkPictureImageGenerator.cpp
 FILE: ../../../third_party/skia/src/opts/SkBlitMask_opts.h
 FILE: ../../../third_party/skia/src/opts/SkBlitRow_opts.h
 FILE: ../../../third_party/skia/src/opts/SkOpts_ssse3.cpp
@@ -9017,8 +9017,11 @@ ORIGIN: ../../../third_party/skia/src/image/SkImageGeneratorPriv.h + ../../../th
 ORIGIN: ../../../third_party/skia/src/image/SkImage_AndroidFactories.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_Base.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_LazyFactories.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkImage_Picture.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkImage_Picture.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_Raster.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkImage_RasterFactories.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/src/image/SkPictureImageGenerator.h + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkSurface_Base.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/image/SkSurface_Null.cpp + ../../../third_party/skia/LICENSE
 ORIGIN: ../../../third_party/skia/src/ports/fontations/src/main.rs + ../../../third_party/skia/LICENSE
@@ -9105,8 +9108,11 @@ FILE: ../../../third_party/skia/src/image/SkImageGeneratorPriv.h
 FILE: ../../../third_party/skia/src/image/SkImage_AndroidFactories.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_Base.cpp
 FILE: ../../../third_party/skia/src/image/SkImage_LazyFactories.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_Picture.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_Picture.h
 FILE: ../../../third_party/skia/src/image/SkImage_Raster.h
 FILE: ../../../third_party/skia/src/image/SkImage_RasterFactories.cpp
+FILE: ../../../third_party/skia/src/image/SkPictureImageGenerator.h
 FILE: ../../../third_party/skia/src/image/SkSurface_Base.cpp
 FILE: ../../../third_party/skia/src/image/SkSurface_Null.cpp
 FILE: ../../../third_party/skia/src/ports/fontations/src/main.rs
