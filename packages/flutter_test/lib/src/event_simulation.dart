@@ -707,15 +707,6 @@ abstract final class KeyEventSimulator {
 
   static String get _defaultPlatform => kIsWeb ? 'web' : Platform.operatingSystem;
 
-  /// Waits until key event handling is ready.
-  static Future<void> ensureKeyboardInitialized() async {
-    if (!kIsWeb) {
-      while (ServicesBinding.instance.platformDispatcher.onKeyData == null) {
-        await TestWidgetsFlutterBinding.instance.pump(const Duration(milliseconds: 10));
-      }
-    }
-  }
-
   /// Simulates sending a hardware key down event.
   ///
   /// This only simulates key presses coming from a physical keyboard, not from a
@@ -738,7 +729,6 @@ abstract final class KeyEventSimulator {
     PhysicalKeyboardKey? physicalKey,
     String? character,
   }) async {
-    await ensureKeyboardInitialized();
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
@@ -783,7 +773,6 @@ abstract final class KeyEventSimulator {
     String? platform,
     PhysicalKeyboardKey? physicalKey,
   }) async {
-    await ensureKeyboardInitialized();
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
@@ -829,7 +818,6 @@ abstract final class KeyEventSimulator {
     PhysicalKeyboardKey? physicalKey,
     String? character,
   }) async {
-    await ensureKeyboardInitialized();
     Future<bool> simulateByRawEvent() {
       return _simulateKeyEventByRawEvent(() {
         platform ??= _defaultPlatform;
