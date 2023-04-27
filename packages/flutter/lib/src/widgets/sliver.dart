@@ -1512,7 +1512,7 @@ class SliverCrossAxisExpanded extends ParentDataWidget<SliverPhysicalContainerPa
 /// A sliver that places multiple sliver children in a linear array along
 /// the cross axis.
 ///
-/// Each child has a flex value associated with them. By default, [SliverCrossAxisExpanded]
+/// Each child has an associated flex value. By default, [SliverCrossAxisExpanded]
 /// will set these flex values to 1, but the [SliverConstrainedCrossAxis] widget can be used
 /// to explicitly set it to 0, or the [SliverCrossAxisExpanded] [ParentDataWidget] can be used
 /// to set it to a custom flex value greater than 0.
