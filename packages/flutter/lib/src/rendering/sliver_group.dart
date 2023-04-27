@@ -16,7 +16,7 @@ import 'sliver.dart';
 ///
 /// The algorithm for dividing up the cross axis extent is as follows.
 /// Every widget has a [SliverPhysicalParentData.crossAxisFlex] value associated with them.
-/// First, lay out all of the slivers with flex of 0, in which case the slivers themselves will
+/// First, lay out all of the slivers with flex of 0 or null, in which case the slivers themselves will
 /// figure out how much cross axis extent to take up. For example, [SliverConstrainedCrossAxis]
 /// is an example of a widget which sets its own flex to 0. Then [RenderSliverCrossAxisGroup] will
 /// divide up the remaining space to all the remaining children proportionally
