@@ -31,8 +31,10 @@ import '../project.dart';
 import '../reporting/reporting.dart';
 import 'android_builder.dart';
 import 'android_sdk.dart';
+import 'android_studio.dart';
 import 'gradle_errors.dart';
 import 'gradle_utils.dart';
+import 'migrations/android_studio_java_gradle_conflict_migration.dart';
 import 'migrations/top_level_gradle_build_file_migration.dart';
 import 'multidex.dart';
 
@@ -137,13 +139,16 @@ class AndroidGradleBuilder implements AndroidBuilder {
     required Usage usage,
     required GradleUtils gradleUtils,
     required Platform platform,
+    required AndroidStudio? androidStudio,
   }) : _logger = logger,
        _fileSystem = fileSystem,
        _artifacts = artifacts,
        _usage = usage,
        _gradleUtils = gradleUtils,
+       _androidStudio = androidStudio,
        _fileSystemUtils = FileSystemUtils(fileSystem: fileSystem, platform: platform),
-       _processUtils = ProcessUtils(logger: logger, processManager: processManager);
+       _processUtils = ProcessUtils(logger: logger, processManager: processManager),
+       _platform = platform;
 
   final Logger _logger;
   final ProcessUtils _processUtils;
@@ -152,6 +157,8 @@ class AndroidGradleBuilder implements AndroidBuilder {
   final Usage _usage;
   final GradleUtils _gradleUtils;
   final FileSystemUtils _fileSystemUtils;
+  final AndroidStudio? _androidStudio;
+  final Platform _platform;
 
   /// Builds the AAR and POM files for the current Flutter module or plugin.
   @override
@@ -258,6 +265,15 @@ class AndroidGradleBuilder implements AndroidBuilder {
 
     final List<ProjectMigrator> migrators = <ProjectMigrator>[
       TopLevelGradleBuildFileMigration(project.android, _logger),
+      AndroidStudioJavaGradleConflictMigration(_logger,
+          project: project.android,
+          androidStudio: _androidStudio,
+          fileSystem: _fileSystem,
+          processUtils: _processUtils,
+          platform: _platform,
+          os: globals.os,
+          androidSdk: globals.androidSdk)
+      ,
     ];
 
     final ProjectMigration migration = ProjectMigration(migrators);
