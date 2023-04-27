@@ -1455,23 +1455,43 @@ void main() {
     });
 
     testWidgets('monthYear DatePicker displays the date in correct order', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
+      Widget buildApp(DatePickerDateOrder order) {
+        return CupertinoApp(
           home: Center(
             child: SizedBox(
               height: 400.0,
               width: 400.0,
               child: CupertinoDatePicker(
-                dateOrder: DatePickerDateOrder.ydm,
+                key: ValueKey<DatePickerDateOrder>(order),
+                dateOrder: order,
                 mode: CupertinoDatePickerMode.monthYear,
                 onDateTimeChanged: (DateTime newDate) {},
                 initialDateTime: DateTime(2018, 1, 14, 10, 30),
               ),
             ),
           ),
-        ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.dmy));
+      expect(
+        tester.getTopLeft(find.text('January')).dx,
+        lessThan(tester.getTopLeft(find.text('2018')).dx),
       );
 
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.mdy));
+      expect(
+        tester.getTopLeft(find.text('January')).dx,
+        lessThan(tester.getTopLeft(find.text('2018')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.ydm));
+      expect(
+        tester.getTopLeft(find.text('2018')).dx,
+        lessThan(tester.getTopLeft(find.text('January')).dx),
+      );
+
+      await tester.pumpWidget(buildApp(DatePickerDateOrder.ymd));
       expect(
         tester.getTopLeft(find.text('2018')).dx,
         lessThan(tester.getTopLeft(find.text('January')).dx),
