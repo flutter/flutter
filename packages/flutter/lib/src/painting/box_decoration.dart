@@ -455,7 +455,12 @@ class _BoxDecorationPainter extends BoxPainter {
     }
   }
 
-  bool _isSideVisible(BorderSide side) => side.color.alpha == 255 && side.style == BorderStyle.solid;
+  double _calculateAdjustedSide(BorderSide side) {
+    if (side.color.alpha == 255 && side.style == BorderStyle.solid) {
+      return side.strokeInset;
+    }
+    return 0;
+  }
 
   Rect _adjustRectOnOutlinedBorder(Rect rect, TextDirection? textDirection) {
     if (_decoration.border == null) {
@@ -466,10 +471,10 @@ class _BoxDecorationPainter extends BoxPainter {
       final Border border = _decoration.border! as Border;
 
       final EdgeInsets insets = EdgeInsets.fromLTRB(
-        _isSideVisible(border.left) ? border.left.strokeInset : 0,
-        _isSideVisible(border.top) ? border.top.strokeInset : 0,
-        _isSideVisible(border.right) ? border.right.strokeInset : 0,
-        _isSideVisible(border.bottom) ? border.bottom.strokeInset : 0,
+        _calculateAdjustedSide(border.left),
+        _calculateAdjustedSide(border.top),
+        _calculateAdjustedSide(border.right),
+        _calculateAdjustedSide(border.bottom),
       ) / 2;
 
       return Rect.fromLTRB(
@@ -484,10 +489,10 @@ class _BoxDecorationPainter extends BoxPainter {
       final BorderSide rightSide = textDirection == TextDirection.rtl ? border.start : border.end;
 
       final EdgeInsets insets = EdgeInsets.fromLTRB(
-        _isSideVisible(leftSide) ? leftSide.strokeInset : 0,
-        _isSideVisible(border.top) ? border.top.strokeInset : 0,
-        _isSideVisible(rightSide) ? rightSide.strokeInset : 0,
-        _isSideVisible(border.bottom) ? border.bottom.strokeInset : 0,
+        _calculateAdjustedSide(leftSide),
+        _calculateAdjustedSide(border.top),
+        _calculateAdjustedSide(rightSide),
+        _calculateAdjustedSide(border.bottom),
       ) / 2;
 
       return Rect.fromLTRB(
