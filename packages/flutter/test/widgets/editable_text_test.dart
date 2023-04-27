@@ -2424,7 +2424,7 @@ void main() {
       final ContextMenuButtonItem cutButton = items!.first;
       expect(cutButton.type, ContextMenuButtonType.cut);
 
-      cutButton.onPressed();
+      cutButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, isEmpty);
@@ -2492,7 +2492,7 @@ void main() {
       final ContextMenuButtonItem copyButton = items!.first;
       expect(copyButton.type, ContextMenuButtonType.copy);
 
-      copyButton.onPressed();
+      copyButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, equals(text));
@@ -2560,7 +2560,7 @@ void main() {
       // Setting data which will be pasted into the clipboard.
       await Clipboard.setData(const ClipboardData(text: text));
 
-      pasteButton.onPressed();
+      pasteButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, equals(text + text));
@@ -2619,7 +2619,7 @@ void main() {
       final ContextMenuButtonItem selectAllButton = items!.first;
       expect(selectAllButton.type, ContextMenuButtonType.selectAll);
 
-      selectAllButton.onPressed();
+      selectAllButton.onPressed?.call();
       await tester.pump();
 
       expect(controller.text, equals(text));
@@ -5394,6 +5394,80 @@ void main() {
 
     // There should be a new platform message updating the selection rects.
     expect(log.where((MethodCall m) => m.method == 'TextInput.setSelectionRects').length, 0);
+
+    // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
+  }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
+
+  testWidgets('selection rects sent even when character corners are outside of paintBounds', (WidgetTester tester) async {
+    final List<List<SelectionRect>> log = <List<SelectionRect>>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.textInput, (MethodCall methodCall) {
+      if (methodCall.method == 'TextInput.setSelectionRects') {
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        final List<SelectionRect> selectionRects = <SelectionRect>[];
+        for (final dynamic rect in args) {
+          selectionRects.add(SelectionRect(
+            position: (rect as List<dynamic>)[4] as int,
+            bounds: Rect.fromLTWH(rect[0] as double, rect[1] as double, rect[2] as double, rect[3] as double),
+          ));
+        }
+        log.add(selectionRects);
+      }
+      return null;
+    });
+
+    final TextEditingController controller = TextEditingController();
+    final ScrollController scrollController = ScrollController();
+    controller.text = 'Text1';
+
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey();
+
+    Future<void> pumpEditableText({ double? width, double? height, TextAlign textAlign = TextAlign.start }) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: SizedBox(
+                width: width,
+                height: height,
+                child: EditableText(
+                  controller: controller,
+                  textAlign: textAlign,
+                  scrollController: scrollController,
+                  maxLines: null,
+                  focusNode: focusNode,
+                  cursorWidth: 0,
+                  key: editableTextKey,
+                  style: Typography.material2018().black.titleMedium!,
+                  cursorColor: Colors.blue,
+                  backgroundCursorColor: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Set height to 1 pixel less than full height.
+    await pumpEditableText(height: 13);
+    expect(log, isEmpty);
+
+    // Scroll so that the top of each character is above the top of the renderEditable
+    // and the bottom of each character is below the bottom of the renderEditable.
+    editableTextKey.currentState!.renderEditable.offset = ViewportOffset.fixed(0.5);
+
+    await tester.showKeyboard(find.byType(EditableText));
+    // We should get all the rects.
+    expect(log.single, const <SelectionRect>[
+      SelectionRect(position: 0, bounds: Rect.fromLTRB(0.0, -0.5, 14.0, 13.5)),
+      SelectionRect(position: 1, bounds: Rect.fromLTRB(14.0, -0.5, 28.0, 13.5)),
+      SelectionRect(position: 2, bounds: Rect.fromLTRB(28.0, -0.5, 42.0, 13.5)),
+      SelectionRect(position: 3, bounds: Rect.fromLTRB(42.0, -0.5, 56.0, 13.5)),
+      SelectionRect(position: 4, bounds: Rect.fromLTRB(56.0, -0.5, 70.0, 13.5))
+    ]);
+    log.clear();
 
     // On web, we should rely on the browser's implementation of Scribble, so we will not send selection rects.
   }, skip: kIsWeb, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS })); // [intended]
@@ -15169,6 +15243,68 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
       expect(find.text('DELETE'), matcher);
     });
 
+    testWidgets('can show spell check suggestions toolbar when there are no spell check results on iOS', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      const TextEditingValue value = TextEditingValue(
+        text: 'tset test test',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      controller.value = value;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      // Can't show the toolbar when there's no focus.
+      expect(state.showSpellCheckSuggestionsToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
+
+      // Can't show the toolbar when there are no spell check results.
+      expect(state.showSpellCheckSuggestionsToolbar(), false);
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoTextSelectionToolbarButton), findsNothing);
+
+      // Shows 'No Replacements Found' when there are spell check results but no
+      // suggestions.
+      state.spellCheckResults = const SpellCheckResults('test tset test', <SuggestionSpan>[SuggestionSpan(TextRange(start: 0, end: 4), <String>[])]);
+      state.renderEditable.selectWordsInRange(
+        from: Offset.zero,
+        cause: SelectionChangedCause.tap,
+      );
+
+      await tester.pumpAndSettle();
+      // Toolbar will only show on non-web platforms.
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CupertinoTextSelectionToolbarButton), findsOneWidget);
+      expect(find.byType(CupertinoButton), findsOneWidget);
+      expect(find.text('No Replacements Found'), findsOneWidget);
+      final CupertinoButton button = tester.widget(find.byType(CupertinoButton));
+      expect(button.enabled, isFalse);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS }),
+      skip: kIsWeb, // [intended]
+    );
+
     testWidgets('cupertino spell check suggestions toolbar buttons correctly change the composing region', (WidgetTester tester) async {
       tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
         true;
@@ -15294,6 +15430,179 @@ testWidgets('Floating cursor ending with selection', (WidgetTester tester) async
         expect(state.currentTextEditingValue.selection.baseOffset, equals(0));
       }
     });
+
+    testWidgets('replacing puts cursor at the end of the word', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      controller.value = const TextEditingValue(
+        // All misspellings of "test". One the same length, one shorter, and one
+        // longer.
+        text: 'tset tst testt',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: CupertinoTextField.cupertinoMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 0, end: 4), <String>['test']),
+          SuggestionSpan(TextRange(start: 5, end: 8), <String>['test']),
+          SuggestionSpan(TextRange(start: 9, end: 13), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+
+      // Replacing a word of the same length as the replacement puts the cursor
+      // at the end of the new word.
+      await tester.tap(find.text('test'));
+      await tester.pumpAndSettle();
+      expect(
+        controller.value,
+        equals(const TextEditingValue(
+          text: 'test tst testt',
+          selection: TextSelection.collapsed(
+            offset: 4,
+          ),
+        )),
+      );
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 5, end: 8), <String>['test']),
+          SuggestionSpan(TextRange(start: 9, end: 13), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+
+      // Replacing a word of less length as the replacement puts the cursor at
+      // the end of the new word.
+      await tester.tap(find.text('test'));
+      await tester.pumpAndSettle();
+      expect(
+        controller.value,
+        equals(const TextEditingValue(
+          text: 'test test testt',
+          selection: TextSelection.collapsed(
+            offset: 9,
+          ),
+        )),
+      );
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 10, end: 15), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 10));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+
+      // Replacing a word of greater length as the replacement puts the cursor
+      // at the end of the new word.
+      await tester.tap(find.text('test'));
+      await tester.pumpAndSettle();
+      expect(
+        controller.value,
+        equals(const TextEditingValue(
+          text: 'test test test',
+          selection: TextSelection.collapsed(
+            offset: 14,
+          ),
+        )),
+      );
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.android }),
+      skip: kIsWeb, // [intended]
+    );
+
+    testWidgets('tapping on a misspelled word hides the handles', (WidgetTester tester) async {
+      tester.binding.platformDispatcher.nativeSpellCheckServiceDefinedTestValue =
+        true;
+      controller.value = const TextEditingValue(
+        // All misspellings of "test". One the same length, one shorter, and one
+        // longer.
+        text: 'test test testt',
+        selection: TextSelection(affinity: TextAffinity.upstream, baseOffset: 0, extentOffset: 4),
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            showSelectionHandles: true,
+            spellCheckConfiguration:
+              const SpellCheckConfiguration(
+                misspelledTextStyle: TextField.materialMisspelledTextStyle,
+                spellCheckSuggestionsToolbarBuilder: TextField.defaultSpellCheckSuggestionsToolbarBuilder,
+              ),
+          ),
+        ),
+      );
+
+      final EditableTextState state =
+          tester.state<EditableTextState>(find.byType(EditableText));
+
+      state.spellCheckResults = SpellCheckResults(
+        controller.value.text,
+        const <SuggestionSpan>[
+          SuggestionSpan(TextRange(start: 10, end: 15), <String>['test']),
+        ]);
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+
+      await tester.tapAt(textOffsetToPosition(tester, 12));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isTrue);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsOneWidget);
+      expect(state.selectionOverlay!.handlesAreVisible, isFalse);
+
+      await tester.tapAt(textOffsetToPosition(tester, 5));
+      await tester.pumpAndSettle();
+      expect(state.showSpellCheckSuggestionsToolbar(), isFalse);
+      await tester.pumpAndSettle();
+      expect(find.text('test'), findsNothing);
+      expect(state.selectionOverlay!.handlesAreVisible, isTrue);
+    },
+      variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.android }),
+      skip: kIsWeb, // [intended]
+    );
   });
 
   group('magnifier', () {
@@ -15804,7 +16113,7 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     return const SizedBox();
@@ -15833,10 +16142,8 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
   int pasteCount = 0;
   int copyCount = 0;
 
-  // TODO(chunhtai): remove optional parameter once migration is done.
-  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCopy(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+  void handleCopy(TextSelectionDelegate delegate) {
     copyCount += 1;
   }
 
@@ -15845,10 +16152,8 @@ class MockTextSelectionControls extends Fake implements TextSelectionControls {
     pasteCount += 1;
   }
 
-  // TODO(chunhtai): remove optional parameter once migration is done.
-  // https://github.com/flutter/flutter/issues/99360
   @override
-  void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
+  void handleCut(TextSelectionDelegate delegate) {
     cutCount += 1;
   }
 
@@ -15888,7 +16193,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
-    ClipboardStatusNotifier? clipboardStatus,
+    ValueListenable<ClipboardStatus>? clipboardStatus,
     Offset? lastSecondaryTapDownPosition,
   ) {
     final Offset selectionMidpoint = position;
@@ -15946,7 +16251,7 @@ class _CustomTextSelectionControls extends TextSelectionControls {
   @override
   void handleCut(TextSelectionDelegate delegate, [ClipboardStatusNotifier? clipboardStatus]) {
     onCut?.call();
-    return super.handleCut(delegate, clipboardStatus);
+    return super.handleCut(delegate);
   }
 }
 
