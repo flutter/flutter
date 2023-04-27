@@ -1415,7 +1415,7 @@ class OverlayPortalController {
 ///
 /// The main difference between [OverlayEntry] and [OverlayPortal] is that
 /// [OverlayEntry] builds its widget subtree as a child of the target [Overlay],
-/// while [OverlayPortal] uses [OverlayPortal.overlayChildBuilder] to build a
+/// while [OverlayPortal] uses [overlayChildBuilder] to build a
 /// child widget of itself. This allows [OverlayPortal]'s overlay child to
 /// depend on the same set of [InheritedWidget]s as [OverlayPortal], and it's
 /// also guaranteed that the overlay child will not outlive its [OverlayPortal].
