@@ -1459,7 +1459,7 @@ void main() {
         ))
       // active track RRect Start 10 pixels from left screen.
         ..rect(rect:const Rect.fromLTRB(10.0, 297.0, 790.0, 303.0),)
-      // inactive track RRect. Ends 10 pixels from right of screen.
+        // inactive track RRect. Ends 10 pixels from right of screen.
         ..rrect(rrect: RRect.fromLTRBAndCorners(
           790.0,
           298.0,
