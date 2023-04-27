@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind, kSecondaryButton;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -400,6 +401,12 @@ void main() {
     });
 
     testWidgets('when onDismiss throws, should have correct context', (WidgetTester tester) async {
+      final FlutterExceptionHandler? handler = FlutterError.onError;
+      FlutterErrorDetails? error;
+      FlutterError.onError = (FlutterErrorDetails details) {
+        error = details;
+      };
+
       final UniqueKey barrierKey = UniqueKey();
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
@@ -411,9 +418,10 @@ void main() {
       ));
       await tester.tap(find.byKey(barrierKey));
       await tester.pump();
-      expect(tester.binding.takeException(), 'TODO_assert_the_error_context');
-    });
 
+      expect(error?.context.toString(), contains('handling a gesture'));
+      FlutterError.onError = handler;
+    });
 
     testWidgets('will not pop when given an onDismiss callback', (WidgetTester tester) async {
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
