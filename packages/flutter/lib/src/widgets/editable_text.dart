@@ -3848,7 +3848,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (paintBounds.bottom <= box.top) {
           break;
         }
-        if (paintBounds.contains(Offset(box.left, box.top)) || paintBounds.contains(Offset(box.right, box.bottom))) {
+        // Include any TextBox which intersects with the RenderEditable.
+        if (paintBounds.left <= box.right &&
+            box.left <= paintBounds.right &&
+            paintBounds.top <= box.bottom) {
+          // At least some part of the letter is visible within the text field.
           rects.add(SelectionRect(position: graphemeStart, bounds: box.toRect(), direction: box.direction));
         }
       }
@@ -3990,7 +3994,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         || platformNotSupported
         || widget.readOnly
         || _selectionOverlay == null
-        || !_spellCheckResultsReceived) {
+        || !_spellCheckResultsReceived
+        || findSuggestionSpanAtCursorIndex(textEditingValue.selection.extentOffset) == null) {
       // Only attempt to show the spell check suggestions toolbar if there
       // is a toolbar specified and spell check suggestions available to show.
       return false;
@@ -4597,7 +4602,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             minLines: widget.minLines,
                             expands: widget.expands,
                             strutStyle: widget.strutStyle,
-                            selectionColor: widget.selectionColor,
+                            selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                : widget.selectionColor,
                             textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                             textAlign: widget.textAlign,
                             textDirection: _textDirection,
