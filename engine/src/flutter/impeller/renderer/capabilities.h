@@ -37,6 +37,8 @@ class Capabilities {
 
   virtual bool SupportsDecalTileMode() const = 0;
 
+  virtual bool SupportsSharedDeviceBufferTextureMemory() const = 0;
+
   virtual PixelFormat GetDefaultColorFormat() const = 0;
 
   virtual PixelFormat GetDefaultStencilFormat() const = 0;
@@ -79,6 +81,8 @@ class CapabilitiesBuilder {
 
   CapabilitiesBuilder& SetSupportsDecalTileMode(bool value);
 
+  CapabilitiesBuilder& SetSupportsSharedDeviceBufferTextureMemory(bool value);
+
   std::unique_ptr<Capabilities> Build();
 
  private:
@@ -93,6 +97,7 @@ class CapabilitiesBuilder {
   bool supports_read_from_onscreen_texture_ = false;
   bool supports_read_from_resolve_ = false;
   bool supports_decal_tile_mode_ = false;
+  bool supports_shared_device_buffer_texture_memory_ = false;
   std::optional<PixelFormat> default_color_format_ = std::nullopt;
   std::optional<PixelFormat> default_stencil_format_ = std::nullopt;
 
