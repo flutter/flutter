@@ -1772,7 +1772,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 }
 
 
-/// Base track shape that provides an implementation of [getPreferredRect] for
+/// Base range slider track shape that provides an implementation of [getPreferredRect] for
 /// default sizing.
 ///
 /// The height is set from [SliderThemeData.trackHeight] and the width of the
