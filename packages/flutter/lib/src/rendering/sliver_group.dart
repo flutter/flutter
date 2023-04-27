@@ -108,7 +108,7 @@ class RenderSliverCrossAxisGroup extends RenderSliver with ContainerRenderObject
       child = childAfter(child);
     }
 
-    // Update the child's geometry with the correct crossAxisExtent.
+    // Set the geometry with the proper crossAxisExtent.
     geometry = geometry!.copyWith(crossAxisExtent: constraints.crossAxisExtent);
   }
 
