@@ -521,10 +521,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     final ScrollMetrics currentMetrics = copyWith();
 
     return _lastMetrics == null ||
-      !(currentMetrics.extentBefore == _lastMetrics!.extentBefore
-      && currentMetrics.extentInside == _lastMetrics!.extentInside
-      && currentMetrics.extentAfter == _lastMetrics!.extentAfter
-      && currentMetrics.axisDirection == _lastMetrics!.axisDirection);
+           !(currentMetrics.extentBefore == _lastMetrics!.extentBefore &&
+             currentMetrics.extentInside == _lastMetrics!.extentInside &&
+             currentMetrics.extentAfter == _lastMetrics!.extentAfter &&
+             currentMetrics.axisDirection == _lastMetrics!.axisDirection);
   }
 
   @override
@@ -554,9 +554,10 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(!_didChangeViewportDimensionOrReceiveCorrection, 'Use correctForNewDimensions() (and return true) to change the scroll offset during applyContentDimensions().');
 
     if (_isMetricsChanged()) {
-      // It isn't safe to trigger the ScrollMetricsNotification if we are in
-      // the middle of rendering the frame, the developer is likely to schedule
-      // a new frame(build scheduled during frame is illegal).
+      // It is too late to send useful notifications, because the potential
+      // listeners have, by definition, already been built this frame. To make
+      // sure the notification is sent at all, we delay it until after the frame
+      // is complete.
       if (!_haveScheduledUpdateNotification) {
         scheduleMicrotask(didUpdateScrollMetrics);
         _haveScheduledUpdateNotification = true;
@@ -1010,6 +1011,17 @@ class ScrollMetricsNotification extends Notification with ViewportNotificationMi
   /// This can be used to find the scrollable widget's render objects to
   /// determine the size of the viewport, for instance.
   final BuildContext context;
+
+  /// Convert this notification to a [ScrollNotification].
+  ///
+  /// This allows it to be used with [ScrollNotificationPredicate]s.
+  ScrollUpdateNotification asScrollUpdate() {
+    return ScrollUpdateNotification(
+      metrics: metrics,
+      context: context,
+      depth: depth,
+    );
+  }
 
   @override
   void debugFillDescription(List<String> description) {

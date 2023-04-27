@@ -489,6 +489,9 @@ abstract class Finder {
 
   /// Returns all the [Element]s that will be considered by this finder.
   ///
+  /// This is the internal API for the [Finder]. To obtain the elements from
+  /// a [Finder] in a test, consider [WidgetTester.elementList].
+  ///
   /// See [collectAllElementsFrom].
   @protected
   Iterable<Element> get allCandidates {
