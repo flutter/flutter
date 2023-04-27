@@ -2238,6 +2238,16 @@ targets:
         ["devicelab", "android", "linux"]
       task_name: android_picture_cache_complexity_scoring_perf__timeline_summary
 
+  - name: Linux_android slider_perf_android
+    bringup: true
+    recipe: devicelab/devicelab_drone
+    presubmit: false
+    timeout: 60
+    properties:
+      tags: >
+        ["devicelab", "android", "linux"]
+      task_name: slider_perf_android
+
   - name: Linux_android platform_channels_benchmarks
     recipe: devicelab/devicelab_drone
     presubmit: false
