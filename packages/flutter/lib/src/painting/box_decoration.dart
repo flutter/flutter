@@ -455,6 +455,8 @@ class _BoxDecorationPainter extends BoxPainter {
     }
   }
 
+  bool _isSideVisible(BorderSide side) => side.color.alpha == 255 && side.style == BorderStyle.solid;
+
   Rect _adjustRectOnOutlinedBorder(Rect rect, TextDirection? textDirection) {
     if (_decoration.border == null) {
       return rect;
@@ -464,10 +466,10 @@ class _BoxDecorationPainter extends BoxPainter {
       final Border border = _decoration.border! as Border;
 
       final EdgeInsets insets = EdgeInsets.fromLTRB(
-        border.left.color.alpha == 255 && border.left.style == BorderStyle.solid ? border.left.strokeInset : 0,
-        border.top.color.alpha == 255 && border.top.style == BorderStyle.solid ? border.top.strokeInset : 0,
-        border.right.color.alpha == 255 && border.right.style == BorderStyle.solid ? border.right.strokeInset : 0,
-        border.bottom.color.alpha == 255 && border.bottom.style == BorderStyle.solid ? border.bottom.strokeInset : 0,
+        _isSideVisible(border.left) ? border.left.strokeInset : 0,
+        _isSideVisible(border.top) ? border.top.strokeInset : 0,
+        _isSideVisible(border.right) ? border.right.strokeInset : 0,
+        _isSideVisible(border.bottom) ? border.bottom.strokeInset : 0,
       ) / 2;
 
       return Rect.fromLTRB(
@@ -478,14 +480,14 @@ class _BoxDecorationPainter extends BoxPainter {
       );
     } else if (_decoration.border is BorderDirectional && textDirection != null) {
       final BorderDirectional border = _decoration.border! as BorderDirectional;
-      final BorderSide leftBorder = textDirection == TextDirection.rtl ? border.end : border.start;
-      final BorderSide rightBorder = textDirection == TextDirection.rtl ? border.start : border.end;
+      final BorderSide leftSide = textDirection == TextDirection.rtl ? border.end : border.start;
+      final BorderSide rightSide = textDirection == TextDirection.rtl ? border.start : border.end;
 
       final EdgeInsets insets = EdgeInsets.fromLTRB(
-        leftBorder.color.alpha == 255 && leftBorder.style == BorderStyle.solid ? leftBorder.strokeInset : 0,
-        border.top.color.alpha == 255 && border.top.style == BorderStyle.solid ? border.top.strokeInset : 0,
-        rightBorder.color.alpha == 255 && rightBorder.style == BorderStyle.solid ? rightBorder.strokeInset : 0,
-        border.bottom.color.alpha == 255 && border.bottom.style == BorderStyle.solid ? border.bottom.strokeInset : 0,
+        _isSideVisible(leftSide) ? leftSide.strokeInset : 0,
+        _isSideVisible(border.top) ? border.top.strokeInset : 0,
+        _isSideVisible(rightSide) ? rightSide.strokeInset : 0,
+        _isSideVisible(border.bottom) ? border.bottom.strokeInset : 0,
       ) / 2;
 
       return Rect.fromLTRB(
