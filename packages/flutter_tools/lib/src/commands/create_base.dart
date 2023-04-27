@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:uuid/uuid.dart';
 
 import '../android/android.dart' as android_common;
@@ -253,7 +252,7 @@ abstract class CreateBase extends FlutterCommand {
   /// If `--org` is not specified, returns the organization from the existing project.
   @protected
   Future<String> getOrganization() async {
-    String? organization = stringArgDeprecated('org');
+    String? organization = stringArg('org');
     if (!argResults!.wasParsed('org')) {
       final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = await project.organizationNames;
@@ -326,14 +325,13 @@ abstract class CreateBase extends FlutterCommand {
   @protected
   String get projectName {
     final String projectName =
-        stringArgDeprecated('project-name') ?? globals.fs.path.basename(projectDirPath);
-    if (!boolArgDeprecated('skip-name-checks')) {
+        stringArg('project-name') ?? globals.fs.path.basename(projectDirPath);
+    if (!boolArg('skip-name-checks')) {
       final String? error = _validateProjectName(projectName);
       if (error != null) {
         throwToolExit(error);
       }
     }
-    assert(projectName != null);
     return projectName;
   }
 
@@ -382,12 +380,6 @@ abstract class CreateBase extends FlutterCommand {
     // https://developer.gnome.org/gio/stable/GApplication.html#g-application-id-is-valid
     final String linuxIdentifier = androidIdentifier;
 
-    // TODO(dacoharkes): Replace with hardcoded version in template when Flutter 2.11 is released.
-    final Version ffiPluginStableRelease = Version(2, 11, 0);
-    final String minFrameworkVersionFfiPlugin = Version.parse(globals.flutterVersion.frameworkVersion) < ffiPluginStableRelease
-        ? globals.flutterVersion.frameworkVersion
-        : ffiPluginStableRelease.toString();
-
     return <String, Object?>{
       'organization': organization,
       'projectName': projectName,
@@ -417,7 +409,6 @@ abstract class CreateBase extends FlutterCommand {
       'iosDevelopmentTeam': iosDevelopmentTeam ?? '',
       'flutterRevision': globals.flutterVersion.frameworkRevision,
       'flutterChannel': globals.flutterVersion.channel,
-      'minFrameworkVersionFfiPlugin': minFrameworkVersionFfiPlugin,
       'ios': ios,
       'android': android,
       'web': web,
@@ -528,7 +519,7 @@ abstract class CreateBase extends FlutterCommand {
     final bool windowsPlatform = templateContext['windows'] as bool? ?? false;
     final bool webPlatform = templateContext['web'] as bool? ?? false;
 
-    if (boolArgDeprecated('pub')) {
+    if (boolArg('pub')) {
       final Environment environment = Environment(
         artifacts: globals.artifacts!,
         logger: globals.logger,
@@ -588,7 +579,7 @@ abstract class CreateBase extends FlutterCommand {
         platforms: platformsForMigrateConfig,
         projectDirectory: directory,
         update: false,
-        currentRevision: stringArgDeprecated('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
+        currentRevision: stringArg('initial-create-revision') ?? globals.flutterVersion.frameworkRevision,
         createRevision: globals.flutterVersion.frameworkRevision,
         logger: globals.logger,
       );
@@ -688,7 +679,7 @@ abstract class CreateBase extends FlutterCommand {
       onFileCopied: (File sourceFile, File destinationFile) {
         filesCreated++;
         final String modes = sourceFile.statSync().modeString();
-        if (modes != null && modes.contains('x')) {
+        if (modes.contains('x')) {
           globals.os.makeExecutable(destinationFile);
         }
       },

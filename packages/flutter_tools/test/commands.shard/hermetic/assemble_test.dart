@@ -291,6 +291,24 @@ void main() {
     });
   });
 
+  testUsingContext('test --dart-define-from-file option with err file format', () {
+    globals.fs.directory('config').createSync();
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand(
+      buildSystem: TestBuildSystem.all(BuildResult(success: true)),
+    ));
+
+    expect(commandRunner.run(<String>['assemble',
+      '-o Output',
+      'debug_macos_bundle_flutter_assets',
+      '--dart-define=k=v',
+      '--dart-define-from-file=config']),
+        throwsToolExit(message: 'Json config define file "--dart-define-from-file=config" is not a file, please fix first!'));
+  }, overrides: <Type, Generator>{
+    Cache: () => Cache.test(processManager: FakeProcessManager.any()),
+    FileSystem: () => MemoryFileSystem.test(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
+
   testUsingContext('test --dart-define-from-file option with err json format', () async {
     await globals.fs.file('config.json').writeAsString(
         '''
@@ -317,6 +335,4 @@ void main() {
     FileSystem: () => MemoryFileSystem.test(),
     ProcessManager: () => FakeProcessManager.any(),
   });
-
-
 }

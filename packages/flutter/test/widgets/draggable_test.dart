@@ -1752,9 +1752,9 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
         home: Column(
-            children: const <Widget>[
+            children: <Widget>[
               Draggable<int>(
                   data: 1,
                   feedback: Text('Dragging'),
@@ -2284,9 +2284,9 @@ void main() {
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(const MaterialApp(
       home: Column(
-        children: const <Widget>[
+        children: <Widget>[
           Draggable<int>(
             data: 1,
             feedback: Text('Dragging'),
@@ -3061,9 +3061,9 @@ void main() {
     const HitTestBehavior hitTestBehavior = HitTestBehavior.deferToChild;
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Draggable<int>(
               feedback: SizedBox(height: 50.0, child: Text('Draggable')),
               child: SizedBox(height: 50.0, child: Text('Target')),
@@ -3079,9 +3079,9 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/92083
   testWidgets('feedback respect the MouseRegion cursor configure', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Column(
-          children: const <Widget>[
+          children: <Widget>[
             Draggable<int>(
               ignoringFeedbackPointer: false,
               feedback: MouseRegion(

@@ -187,12 +187,6 @@ class DeferredComponentsGenSnapshotValidator extends DeferredComponentsValidator
     loadingUnitComparisonResults = <String, Object>{};
     final Set<LoadingUnit> unmatchedLoadingUnits = <LoadingUnit>{};
     final List<LoadingUnit> newLoadingUnits = <LoadingUnit>[];
-    if (generatedLoadingUnits == null || cachedLoadingUnits == null) {
-      loadingUnitComparisonResults!['new'] = newLoadingUnits;
-      loadingUnitComparisonResults!['missing'] = unmatchedLoadingUnits;
-      loadingUnitComparisonResults!['match'] = false;
-      return false;
-    }
     unmatchedLoadingUnits.addAll(cachedLoadingUnits);
     final Set<int> addedNewIds = <int>{};
     for (final LoadingUnit genUnit in generatedLoadingUnits) {
@@ -335,7 +329,7 @@ loading-units:
         continue;
       }
       buffer.write('  - id: ${unit.id}\n');
-      if (unit.libraries != null && unit.libraries.isNotEmpty) {
+      if (unit.libraries.isNotEmpty) {
         buffer.write('    libraries:\n');
         for (final String lib in unit.libraries) {
           buffer.write('      - $lib\n');

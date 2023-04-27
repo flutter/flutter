@@ -237,6 +237,10 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
+    if (debuggingOptions.serveObservatory) {
+      await enableObservatory();
+    }
+
     if (enableDevTools) {
       // The method below is guaranteed never to return a failing future.
       unawaited(residentDevtoolsHandler!.serveAndAnnounceDevTools(
@@ -249,7 +253,10 @@ class HotRunner extends ResidentRunner {
       await device!.initLogReader();
       device
         .developmentShaderCompiler
-        .configureCompiler(device.targetPlatform, enableImpeller: debuggingOptions.enableImpeller);
+        .configureCompiler(
+          device.targetPlatform,
+          impellerStatus: debuggingOptions.enableImpeller,
+        );
     }
     try {
       final List<Uri?> baseUris = await _initDevFS();
@@ -519,9 +526,13 @@ class HotRunner extends ResidentRunner {
         // We ignore any errors, because it's not clear what we would do anyway.
         futures.add(device.devFS!.destroy()
           .timeout(const Duration(milliseconds: 250))
-          .catchError((Object? error) {
-            globals.printTrace('Ignored error while cleaning up DevFS: $error');
-          }));
+          .then<void>(
+            (Object? _) {},
+            onError: (Object? error, StackTrace stackTrace) {
+              globals.printTrace('Ignored error while cleaning up DevFS: $error\n$stackTrace');
+            }
+          ),
+        );
       }
       device.devFS = null;
     }
@@ -635,16 +646,22 @@ class HotRunner extends ResidentRunner {
           // Since we never check the value of this Future, only await its
           // completion, make its type nullable so we can return null when
           // catching errors.
-          .then<vm_service.Success?>((vm_service.Success success) => success)
-          .catchError((dynamic error, StackTrace stackTrace) {
-            // Do nothing on a SentinelException since it means the isolate
-            // has already been killed.
-            // Error code 105 indicates the isolate is not yet runnable, and might
-            // be triggered if the tool is attempting to kill the asset parsing
-            // isolate before it has finished starting up.
-            return null;
-          }, test: (dynamic error) => error is vm_service.SentinelException
-            || (error is vm_service.RPCError && error.code == 105)));
+          .then<vm_service.Success?>(
+            (vm_service.Success success) => success,
+            onError: (Object error, StackTrace stackTrace) {
+              if (error is vm_service.SentinelException ||
+                  (error is vm_service.RPCError && error.code == 105)) {
+                // Do nothing on a SentinelException since it means the isolate
+                // has already been killed.
+                // Error code 105 indicates the isolate is not yet runnable, and might
+                // be triggered if the tool is attempting to kill the asset parsing
+                // isolate before it has finished starting up.
+                return null;
+              }
+              return Future<vm_service.Success?>.error(error, stackTrace);
+            },
+          ),
+        );
       }
     }
     await Future.wait(operations);
@@ -1025,10 +1042,8 @@ class HotRunner extends ResidentRunner {
     }
     commandHelp.c.print();
     commandHelp.q.print();
-    globals.printStatus('');
-    if (debuggingOptions.buildInfo.nullSafetyMode ==  NullSafetyMode.sound) {
-      globals.printStatus('💪 Running with sound null safety 💪', emphasis: true);
-    } else {
+    if (debuggingOptions.buildInfo.nullSafetyMode !=  NullSafetyMode.sound) {
+      globals.printStatus('');
       globals.printStatus(
         'Running without sound null safety ⚠️',
         emphasis: true,
@@ -1307,10 +1322,16 @@ Future<ReassembleResult> _defaultReassembleHelper(
             isolateId: view.uiIsolate!.id!,
           );
         }
-        reassembleFutures.add(reassembleWork.catchError((dynamic error) {
-          failedReassemble = true;
-          globals.printError('Reassembling ${view.uiIsolate!.name} failed: $error');
-        }, test: (dynamic error) => error is Exception));
+        reassembleFutures.add(reassembleWork.then(
+          (Object? obj) => obj,
+          onError: (Object error, StackTrace stackTrace) {
+            if (error is! Exception) {
+              return Future<Object?>.error(error, stackTrace);
+            }
+            failedReassemble = true;
+            globals.printError('Reassembling ${view.uiIsolate!.name} failed: $error\n$stackTrace');
+          },
+        ));
       }
     }
   }
@@ -1380,29 +1401,21 @@ String _describePausedIsolates(int pausedIsolatesFound, String serviceEventKind)
     message.write('$pausedIsolatesFound isolates are ');
     plural = true;
   }
-  assert(serviceEventKind != null);
   switch (serviceEventKind) {
     case vm_service.EventKind.kPauseStart:
       message.write('paused (probably due to --start-paused)');
-      break;
     case vm_service.EventKind.kPauseExit:
       message.write('paused because ${ plural ? 'they have' : 'it has' } terminated');
-      break;
     case vm_service.EventKind.kPauseBreakpoint:
       message.write('paused in the debugger on a breakpoint');
-      break;
     case vm_service.EventKind.kPauseInterrupted:
       message.write('paused due in the debugger');
-      break;
     case vm_service.EventKind.kPauseException:
       message.write('paused in the debugger after an exception was thrown');
-      break;
     case vm_service.EventKind.kPausePostRequest:
       message.write('paused');
-      break;
     case '':
       message.write('paused for various reasons');
-      break;
     default:
       message.write('paused');
   }
@@ -1453,8 +1466,6 @@ class ProjectFileInvalidator {
     required PackageConfig packageConfig,
     bool asyncScanning = false,
   }) async {
-    assert(urisToMonitor != null);
-    assert(packagesPath != null);
 
     if (lastCompiled == null) {
       // Initial load.
@@ -1484,7 +1495,7 @@ class ProjectFileInvalidator {
             :  _fileSystem.stat(uri.toFilePath(windows: _platform.isWindows)))
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
-              if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+              if (updatedAt.isAfter(lastCompiled)) {
                 invalidatedFiles.add(uri);
               }
             })
@@ -1498,7 +1509,7 @@ class ProjectFileInvalidator {
         final DateTime updatedAt = uri.hasScheme && uri.scheme != 'file'
           ? _fileSystem.file(uri).statSync().modified
           : _fileSystem.statSync(uri.toFilePath(windows: _platform.isWindows)).modified;
-        if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+        if (updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }
       }
@@ -1507,7 +1518,7 @@ class ProjectFileInvalidator {
     final File packageFile = _fileSystem.file(packagesPath);
     final Uri packageUri = packageFile.uri;
     final DateTime updatedAt = packageFile.statSync().modified;
-    if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
+    if (updatedAt.isAfter(lastCompiled)) {
       invalidatedFiles.add(packageUri);
       packageConfig = await _createPackageConfig(packagesPath);
       // The frontend_server might be monitoring the package_config.json file,

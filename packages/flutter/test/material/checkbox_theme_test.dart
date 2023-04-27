@@ -15,6 +15,12 @@ void main() {
     expect(const CheckboxThemeData().hashCode, const CheckboxThemeData().copyWith().hashCode);
   });
 
+  test('CheckboxThemeData lerp special cases', () {
+    expect(CheckboxThemeData.lerp(null, null, 0), const CheckboxThemeData());
+    const CheckboxThemeData data = CheckboxThemeData();
+    expect(identical(CheckboxThemeData.lerp(data, data, 0.5), data), true);
+  });
+
   test('CheckboxThemeData defaults', () {
     const CheckboxThemeData themeData = CheckboxThemeData();
     expect(themeData.mouseCursor, null);

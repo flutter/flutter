@@ -26,6 +26,8 @@ const double _kIndicatorWidth = 64;
 
 /// Material 3 Navigation Bar component.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=DVGYddFaLv0}
+///
 /// Navigation bars offer a persistent and convenient way to switch between
 /// primary destinations in an app.
 ///
@@ -97,7 +99,7 @@ class NavigationBar extends StatelessWidget {
     this.indicatorShape,
     this.height,
     this.labelBehavior,
-  }) :  assert(destinations != null && destinations.length >= 2),
+  }) :  assert(destinations.length >= 2),
         assert(0 <= selectedIndex && selectedIndex < destinations.length);
 
   /// Determines the transition time for each destination as it goes between
@@ -167,7 +169,7 @@ class NavigationBar extends StatelessWidget {
   /// is used. Otherwise, [ColorScheme.secondary] with an opacity of 0.24 is used.
   final Color? indicatorColor;
 
-  /// The shape of the selected inidicator.
+  /// The shape of the selected indicator.
   ///
   /// If null, [NavigationBarThemeData.indicatorShape] is used. If that
   /// is also null and [ThemeData.useMaterial3] is true, [StadiumBorder] is used.
@@ -412,7 +414,7 @@ class NavigationDestination extends StatelessWidget {
 /// animation value of 0 is unselected and 1 is selected.
 ///
 /// See [NavigationDestination] for an example.
-class _NavigationDestinationBuilder extends StatelessWidget {
+class _NavigationDestinationBuilder extends StatefulWidget {
   /// Builds a destination (icon + label) to use in a Material 3 [NavigationBar].
   const _NavigationDestinationBuilder({
     required this.buildIcon,
@@ -458,30 +460,33 @@ class _NavigationDestinationBuilder extends StatelessWidget {
   final String? tooltip;
 
   @override
+  State<_NavigationDestinationBuilder> createState() => _NavigationDestinationBuilderState();
+}
+
+class _NavigationDestinationBuilderState extends State<_NavigationDestinationBuilder> {
+  final GlobalKey iconKey = GlobalKey();
+
+  @override
   Widget build(BuildContext context) {
     final _NavigationDestinationInfo info = _NavigationDestinationInfo.of(context);
     final NavigationBarThemeData navigationBarTheme = NavigationBarTheme.of(context);
     final NavigationBarThemeData defaults = _defaultsFor(context);
-    final GlobalKey labelKey = GlobalKey();
 
-    final bool selected = info.selectedIndex == info.index;
     return _NavigationBarDestinationSemantics(
       child: _NavigationBarDestinationTooltip(
-        message: tooltip ?? label,
+        message: widget.tooltip ?? widget.label,
         child: _IndicatorInkWell(
-          key: UniqueKey(),
-          labelKey: labelKey,
+          iconKey: iconKey,
           labelBehavior: info.labelBehavior,
-          selected: selected,
           customBorder: navigationBarTheme.indicatorShape ?? defaults.indicatorShape,
           onTap: info.onTap,
           child: Row(
             children: <Widget>[
               Expanded(
                 child: _NavigationBarDestinationLayout(
-                  icon: buildIcon(context),
-                  labelKey: labelKey,
-                  label: buildLabel(context),
+                  icon: widget.buildIcon(context),
+                  iconKey: iconKey,
+                  label: widget.buildLabel(context),
                 ),
               ),
             ],
@@ -494,10 +499,8 @@ class _NavigationDestinationBuilder extends StatelessWidget {
 
 class _IndicatorInkWell extends InkResponse {
   const _IndicatorInkWell({
-    super.key,
-    required this.labelKey,
+    required this.iconKey,
     required this.labelBehavior,
-    required this.selected,
     super.customBorder,
     super.onTap,
     super.child,
@@ -506,35 +509,15 @@ class _IndicatorInkWell extends InkResponse {
     highlightColor: Colors.transparent,
   );
 
-  final GlobalKey labelKey;
+  final GlobalKey iconKey;
   final NavigationDestinationLabelBehavior labelBehavior;
-  final bool selected;
 
   @override
   RectCallback? getRectCallback(RenderBox referenceBox) {
-    final RenderBox labelBox = labelKey.currentContext!.findRenderObject()! as RenderBox;
-    final Rect labelRect = labelBox.localToGlobal(Offset.zero) & labelBox.size;
-    final double labelPadding;
-    switch (labelBehavior) {
-      case NavigationDestinationLabelBehavior.alwaysShow:
-        labelPadding = labelRect.height / 2;
-        break;
-      case NavigationDestinationLabelBehavior.onlyShowSelected:
-        labelPadding = selected ? labelRect.height / 2 : 0;
-        break;
-      case NavigationDestinationLabelBehavior.alwaysHide:
-        labelPadding = 0;
-        break;
-    }
-    final double indicatorOffsetX = referenceBox.size.width / 2;
-    final double indicatorOffsetY = referenceBox.size.height / 2 - labelPadding;
-
     return () {
-      return Rect.fromCenter(
-        center: Offset(indicatorOffsetX, indicatorOffsetY),
-        width: _kIndicatorWidth,
-        height: _kIndicatorHeight,
-      );
+      final RenderBox iconBox = iconKey.currentContext!.findRenderObject()! as RenderBox;
+      final Rect iconRect = iconBox.localToGlobal(Offset.zero) & iconBox.size;
+      return referenceBox.globalToLocal(iconRect.topLeft) & iconBox.size;
     };
   }
 }
@@ -595,7 +578,7 @@ class _NavigationDestinationInfo extends InheritedWidget {
   /// when label behavior is [NavigationDestinationLabelBehavior.onlyShowSelected].
   final int selectedIndex;
 
-  /// How many total destinations are are in this navigation bar.
+  /// How many total destinations are in this navigation bar.
   ///
   /// This is required for semantics, so that each destination can have a label
   /// "Tab 1 of 4", for example.
@@ -775,7 +758,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// 3 [NavigationBar].
   const _NavigationBarDestinationLayout({
     required this.icon,
-    required this.labelKey,
+    required this.iconKey,
     required this.label,
   });
 
@@ -784,10 +767,10 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.icon].
   final Widget icon;
 
-  /// The global key for the label of this destination.
+  /// The global key for the icon of this destination.
   ///
-  /// This is used to determine the position of the label relative to the icon.
-  final GlobalKey labelKey;
+  /// This is used to determine the position of the icon.
+  final GlobalKey iconKey;
 
   /// The label widget that sits below the icon.
   ///
@@ -797,7 +780,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
   /// See [NavigationDestination.label].
   final Widget label;
 
-  static final Key _iconKey = UniqueKey();
+  static final Key _labelKey = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -811,7 +794,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
             LayoutId(
               id: _NavigationDestinationLayoutDelegate.iconId,
               child: RepaintBoundary(
-                key: _iconKey,
+                key: iconKey,
                 child: icon,
               ),
             ),
@@ -821,7 +804,7 @@ class _NavigationBarDestinationLayout extends StatelessWidget {
                 alwaysIncludeSemantics: true,
                 opacity: animation,
                 child: RepaintBoundary(
-                  key: labelKey,
+                  key: _labelKey,
                   child: label,
                 ),
               ),
@@ -943,9 +926,6 @@ class _NavigationBarDestinationTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message == null) {
-      return child;
-    }
     return Tooltip(
       message: message,
       // TODO(johnsonmh): Make this value configurable/themable.
@@ -1369,7 +1349,7 @@ class _NavigationBarDefaultsM2 extends NavigationBarThemeData {
 // Design token database by the script:
 //   dev/tools/gen_defaults/bin/gen_defaults.dart.
 
-// Token database version: v0_152
+// Token database version: v0_162
 
 class _NavigationBarDefaultsM3 extends NavigationBarThemeData {
   _NavigationBarDefaultsM3(this.context)

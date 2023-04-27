@@ -85,18 +85,16 @@ class BundleBuilder {
       }
       throwToolExit('Failed to build bundle.');
     }
-    if (depfilePath != null) {
-      final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
-      final File outputDepfile = globals.fs.file(depfilePath);
-      if (!outputDepfile.parent.existsSync()) {
-        outputDepfile.parent.createSync(recursive: true);
-      }
-      final DepfileService depfileService = DepfileService(
-        fileSystem: globals.fs,
-        logger: globals.logger,
-      );
-      depfileService.writeToFile(depfile, outputDepfile);
+    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final File outputDepfile = globals.fs.file(depfilePath);
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
     }
+    final DepfileService depfileService = DepfileService(
+      fileSystem: globals.fs,
+      logger: globals.logger,
+    );
+    depfileService.writeToFile(depfile, outputDepfile);
 
     // Work around for flutter_tester placing kernel artifacts in odd places.
     if (applicationKernelFilePath != null) {
@@ -196,13 +194,11 @@ Future<void> writeBundle(
                 target: ShaderTarget.sksl, // TODO(zanderso): configure impeller target when enabled.
                 json: targetPlatform == TargetPlatform.web_javascript,
               );
-              break;
             case AssetKind.model:
               doCopy = !await sceneImporter.importScene(
                 input: input,
                 outputPath: file.path,
               );
-              break;
           }
           if (doCopy) {
             input.copySync(file.path);

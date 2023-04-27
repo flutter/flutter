@@ -96,8 +96,11 @@ void main() {
   });
 
   testWidgets('debugCheckHasMediaQuery control test', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      Builder(
+    // Cannot use tester.pumpWidget here because it wraps the widget in a View,
+    // which introduces a MediaQuery ancestor.
+    await pumpWidgetWithoutViewWrapper(
+      tester: tester,
+      widget: Builder(
         builder: (BuildContext context) {
           late FlutterError error;
           try {
@@ -113,10 +116,9 @@ void main() {
               error.diagnostics.last.toStringDeep(),
               equalsIgnoringHashCodes(
                 'No MediaQuery ancestor could be found starting from the context\n'
-                'that was passed to MediaQuery.of(). This can happen because you\n'
-                'have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '(those widgets introduce a MediaQuery), or it can happen if the\n'
-                'context you use comes from a widget above those widgets.\n',
+                'that was passed to MediaQuery.of(). This can happen because the\n'
+                'context used is not a descendant of a View widget, which\n'
+                'introduces a MediaQuery.\n'
               ),
             );
             expect(
@@ -136,10 +138,9 @@ void main() {
               endsWith(
                 '[root]"\n' // End of ownership chain.
                 '   No MediaQuery ancestor could be found starting from the context\n'
-                '   that was passed to MediaQuery.of(). This can happen because you\n'
-                '   have not added a WidgetsApp, CupertinoApp, or MaterialApp widget\n'
-                '   (those widgets introduce a MediaQuery), or it can happen if the\n'
-                '   context you use comes from a widget above those widgets.\n',
+                '   that was passed to MediaQuery.of(). This can happen because the\n'
+                '   context used is not a descendant of a View widget, which\n'
+                '   introduces a MediaQuery.\n'
               ),
             );
           }
@@ -338,4 +339,10 @@ void main() {
     renderObject = tester.firstRenderObject(find.byType(CompositedTransformFollower));
     expect(renderObject.debugLayer?.debugCreator, isNotNull);
   });
+}
+
+Future<void> pumpWidgetWithoutViewWrapper({required WidgetTester tester, required  Widget widget}) {
+  tester.binding.attachRootWidget(widget);
+  tester.binding.scheduleFrame();
+  return tester.binding.pump();
 }

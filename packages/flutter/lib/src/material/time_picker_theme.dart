@@ -299,8 +299,9 @@ class TimePickerThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static TimePickerThemeData lerp(TimePickerThemeData? a, TimePickerThemeData? b, double t) {
-    assert(t != null);
-
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     // Workaround since BorderSide's lerp does not allow for null arguments.
     BorderSide? lerpedBorderSide;
     if (a?.dayPeriodBorderSide == null && b?.dayPeriodBorderSide == null) {
@@ -437,7 +438,7 @@ class TimePickerTheme extends InheritedTheme {
     super.key,
     required this.data,
     required super.child,
-  }) : assert(data != null);
+  });
 
   /// The properties for descendant time picker widgets.
   final TimePickerThemeData data;

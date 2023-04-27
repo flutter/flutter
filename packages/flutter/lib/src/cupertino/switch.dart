@@ -76,8 +76,7 @@ class CupertinoSwitch extends StatefulWidget {
     this.applyTheme,
     this.focusColor,
     this.dragStartBehavior = DragStartBehavior.start,
-  }) : assert(value != null),
-       assert(dragStartBehavior != null);
+  });
 
   /// Whether this switch is on or off.
   ///
@@ -128,7 +127,7 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use for the focus highlight for keyboard interactions.
   ///
-  /// Defaults to a a slightly transparent [activeColor].
+  /// Defaults to a slightly transparent [activeColor].
   final Color? focusColor;
 
   /// {@template flutter.cupertino.CupertinoSwitch.applyTheme}
@@ -304,10 +303,8 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       switch (Directionality.of(context)) {
         case TextDirection.rtl:
           _positionController.value -= delta;
-          break;
         case TextDirection.ltr:
           _positionController.value += delta;
-          break;
       }
     }
   }
@@ -326,7 +323,6 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
-        break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       case TargetPlatform.linux:
@@ -365,7 +361,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
             activeColor: activeColor,
             trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
             thumbColor: CupertinoDynamicColor.resolve(widget.thumbColor ?? CupertinoColors.white, context),
-            // Opacity, lightness, and saturation values were aproximated with
+            // Opacity, lightness, and saturation values were approximated with
             // color pickers on the switches in the macOS settings.
             focusColor: CupertinoDynamicColor.resolve(
               widget.focusColor ??
@@ -473,10 +469,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     required TextDirection textDirection,
     required bool isFocused,
     required _CupertinoSwitchState state,
-  }) : assert(value != null),
-       assert(activeColor != null),
-       assert(state != null),
-       _value = value,
+  }) : _value = value,
        _activeColor = activeColor,
        _trackColor = trackColor,
        _focusColor = focusColor,
@@ -495,7 +488,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get value => _value;
   bool _value;
   set value(bool value) {
-    assert(value != null);
     if (value == _value) {
       return;
     }
@@ -506,7 +498,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get activeColor => _activeColor;
   Color _activeColor;
   set activeColor(Color value) {
-    assert(value != null);
     if (value == _activeColor) {
       return;
     }
@@ -517,7 +508,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get trackColor => _trackColor;
   Color _trackColor;
   set trackColor(Color value) {
-    assert(value != null);
     if (value == _trackColor) {
       return;
     }
@@ -528,7 +518,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get thumbColor => _thumbPainter.color;
   CupertinoThumbPainter _thumbPainter;
   set thumbColor(Color value) {
-    assert(value != null);
     if (value == thumbColor) {
       return;
     }
@@ -539,7 +528,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   Color get focusColor => _focusColor;
   Color _focusColor;
   set focusColor(Color value) {
-    assert(value != null);
     if (value == _focusColor) {
       return;
     }
@@ -564,7 +552,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (_textDirection == value) {
       return;
     }
@@ -575,7 +562,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
-    assert(value != null);
     if(value == _isFocused) {
       return;
     }
@@ -620,10 +606,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - currentValue;
-        break;
       case TextDirection.ltr:
         visualPosition = currentValue;
-        break;
     }
 
     final Paint paint = Paint()

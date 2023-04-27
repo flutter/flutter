@@ -82,10 +82,7 @@ class ExpansionPanel {
     this.isExpanded = false,
     this.canTapOnHeader = false,
     this.backgroundColor,
-  }) : assert(headerBuilder != null),
-       assert(body != null),
-       assert(isExpanded != null),
-       assert(canTapOnHeader != null);
+  });
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
@@ -121,7 +118,6 @@ class ExpansionPanel {
 ///
 /// See [ExpansionPanelList.radio] for a sample implementation.
 class ExpansionPanelRadio extends ExpansionPanel {
-
   /// An expansion panel that allows for radio functionality.
   ///
   /// A unique [value] must be passed into the constructor. The
@@ -132,7 +128,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
     required super.body,
     super.canTapOnHeader,
     super.backgroundColor,
-  }) : assert(value != null);
+  });
 
   /// The value that uniquely identifies a radio panel so that the currently
   /// selected radio panel can be identified.
@@ -142,19 +138,24 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// A material expansion panel list that lays out its children and animates
 /// expansions.
 ///
-/// Note that [expansionCallback] behaves differently for [ExpansionPanelList]
-/// and [ExpansionPanelList.radio].
+/// The [expansionCallback] is called when the expansion state changes. For
+/// normal [ExpansionPanelList] widgets, it is the responsibility of the parent
+/// widget to rebuild the [ExpansionPanelList] with updated values for
+/// [ExpansionPanel.isExpanded]. For [ExpansionPanelList.radio] widgets, the
+/// open state is tracked internally and the callback is invoked both for the
+/// previously open panel, which is closing, and the previously closed panel,
+/// which is opening.
 ///
 /// {@tool dartpad}
-/// Here is a simple example of how to implement ExpansionPanelList.
+/// Here is a simple example of how to use [ExpansionPanelList].
 ///
 /// ** See code in examples/api/lib/material/expansion_panel/expansion_panel_list.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [ExpansionPanel]
-///  * [ExpansionPanelList.radio]
+///  * [ExpansionPanel], which is used in the [children] property.
+///  * [ExpansionPanelList.radio], a variant of this widget where only one panel is open at a time.
 ///  * <https://material.io/design/components/lists.html#types>
 class ExpansionPanelList extends StatefulWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
@@ -170,9 +171,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
-  }) : assert(children != null),
-       assert(animationDuration != null),
-       _allowOnlyOnePanelOpen = false,
+  }) : _allowOnlyOnePanelOpen = false,
        initialOpenPanelValue = null;
 
   /// Creates a radio expansion panel list widget.
@@ -198,9 +197,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.dividerColor,
     this.elevation = 2,
     this.expandIconColor,
-  }) : assert(children != null),
-       assert(animationDuration != null),
-       _allowOnlyOnePanelOpen = true;
+  }) : _allowOnlyOnePanelOpen = true;
 
   /// The children of the expansion panel list. They are laid out in a similar
   /// fashion to [ListBody].
@@ -215,10 +212,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// passed to the second callback are the index of the panel that will close
   /// and false, marking that it will be closed.
   ///
-  /// For [ExpansionPanelList], the callback needs to setState when it's notified
-  /// about the closing/opening panel. On the other hand, the callback for
-  /// [ExpansionPanelList.radio] is intended to inform the parent widget of
-  /// changes, as the radio panels' open/close states are managed internally.
+  /// For [ExpansionPanelList], the callback should call [State.setState] when
+  /// it is notified about the closing/opening panel. On the other hand, the
+  /// callback for [ExpansionPanelList.radio] is intended to inform the parent
+  /// widget of changes, as the radio panels' open/close states are managed
+  /// internally.
   ///
   /// This callback is useful in order to keep track of the expanded/collapsed
   /// panels in a parent widget that may need to react to these changes.

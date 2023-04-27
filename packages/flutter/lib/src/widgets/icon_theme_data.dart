@@ -167,7 +167,9 @@ class IconThemeData with Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static IconThemeData lerp(IconThemeData? a, IconThemeData? b, double t) {
-    assert(t != null);
+    if (identical(a, b) && a != null) {
+      return a;
+    }
     return IconThemeData(
       size: ui.lerpDouble(a?.size, b?.size, t),
       fill: ui.lerpDouble(a?.fill, b?.fill, t),

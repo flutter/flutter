@@ -152,17 +152,17 @@ void main() {
       '     AnimatedBuilder\n'
       '     _ModalScope<dynamic>-[LabeledGlobalKey<_ModalScopeState<dynamic>>#00000]\n'
       '     Semantics\n'
+      '     _RenderTheaterMarker\n'
       '     _EffectiveTickerMode\n'
       '     TickerMode\n'
       '     _OverlayEntryWidget-[LabeledGlobalKey<_OverlayEntryWidgetState>#00000]\n'
-      '     _Theatre\n'
+      '     _Theater\n'
       '     Overlay-[LabeledGlobalKey<OverlayState>#00000]\n'
       '     UnmanagedRestorationScope\n'
       '     _FocusInheritedScope\n'
       '     Focus\n'
       '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusTraversalGroupScope\n'
       '     FocusTraversalGroup\n'
       '     AbsorbPointer\n'
       '     Listener\n'
@@ -192,8 +192,6 @@ void main() {
       '     _LocalizationsScope-[GlobalKey#00000]\n'
       '     Semantics\n'
       '     Localizations\n'
-      '     MediaQuery\n'
-      '     _MediaQueryFromWindow\n'
       '     Semantics\n'
       '     _FocusInheritedScope\n'
       '     Focus\n'
@@ -203,7 +201,6 @@ void main() {
       '     TapRegionSurface\n'
       '     _FocusInheritedScope\n'
       '     Focus\n'
-      '     _FocusTraversalGroupScope\n'
       '     FocusTraversalGroup\n'
       '     _ActionsScope\n'
       '     Actions\n'
@@ -235,7 +232,10 @@ void main() {
       '     HeroControllerScope\n'
       '     ScrollConfiguration\n'
       '     MaterialApp\n'
-      '     View-[GlobalObjectKey TestWindow#00000]\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
+      '     View-[GlobalObjectKey TestFlutterView#00000]\n'
       '     [root]\n'
       '   Typically, the Scaffold widget is introduced by the MaterialApp\n'
       '   or WidgetsApp widget at the top of your application widget tree.\n'
@@ -251,18 +251,15 @@ void main() {
     );
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: ScaffoldMessenger(
-          key: scaffoldMessengerKey,
-          child: Builder(
-            builder: (BuildContext context) {
-              return Scaffold(
-                key: scaffoldKey,
-                body: Container(),
-              );
-            },
-          ),
+      child: ScaffoldMessenger(
+        key: scaffoldMessengerKey,
+        child: Builder(
+          builder: (BuildContext context) {
+            return Scaffold(
+              key: scaffoldKey,
+              body: Container(),
+            );
+          },
         ),
       ),
     ));
@@ -278,12 +275,9 @@ void main() {
     // Pump widget to rebuild without ScaffoldMessenger
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(),
-        child: Scaffold(
-          key: scaffoldKey,
-          body: Container(),
-        ),
+      child: Scaffold(
+        key: scaffoldKey,
+        body: Container(),
       ),
     ));
     // Tap SnackBarAction to dismiss.
@@ -378,9 +372,11 @@ void main() {
       '     ScrollNotificationObserver\n'
       '     _ScaffoldScope\n'
       '     Scaffold-[LabeledGlobalKey<ScaffoldState>#00000]\n'
-      '     MediaQuery\n'
       '     Directionality\n'
-      '     View-[GlobalObjectKey TestWindow#00000]\n'
+      '     MediaQuery\n'
+      '     _MediaQueryFromView\n'
+      '     _ViewScope\n'
+      '     View-[GlobalObjectKey TestFlutterView#00000]\n'
       '     [root]\n'
       '   Typically, the ScaffoldMessenger widget is introduced by the\n'
       '   MaterialApp at the top of your application widget tree.\n'

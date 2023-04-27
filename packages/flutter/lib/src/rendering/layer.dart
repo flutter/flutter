@@ -168,9 +168,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     assert(delta != 0);
     _compositionCallbackCount += delta;
     assert(_compositionCallbackCount >= 0);
-    if (parent != null) {
-      parent!._updateSubtreeCompositionObserverCount(delta);
-    }
+    parent?._updateSubtreeCompositionObserverCount(delta);
   }
 
   void _fireCompositionCallbacks({required bool includeChildren}) {
@@ -903,7 +901,7 @@ class TextureLayer extends Layer {
   ///
   /// This is used for resizing embedded Android views: when resizing there
   /// is a short period during which the framework cannot tell if the newest
-  /// texture frame has the previous or new size, to workaround this the
+  /// texture frame has the previous or new size; to work around this, the
   /// framework "freezes" the texture just before resizing the Android view and
   /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;

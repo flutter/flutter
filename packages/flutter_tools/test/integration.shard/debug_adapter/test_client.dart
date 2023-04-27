@@ -27,7 +27,10 @@ class DapTestClient {
     vmServiceUri = event('dart.debuggerUris').then<Uri?>((Event event) {
       final Map<String, Object?> body = event.body! as Map<String, Object?>;
       return Uri.parse(body['vmServiceUri']! as String);
-    }).catchError((Object? e) => null);
+    }).then(
+      (Uri? uri) => uri,
+      onError: (Object? e) => null,
+    );
 
     _subscription = _channel.listen(
       _handleMessage,
@@ -354,12 +357,18 @@ extension DapTestClientExtension on DapTestClient {
 
     final List<OutputEventBody> output = await outputEventsFuture;
 
-    // TODO(dantup): Integration tests currently trigger "flutter pub get" at
-    //   the start due to some timestamp manipulation writing the pubspec.
-    //   It may be possible to remove this if
-    //   https://github.com/flutter/flutter/pull/91300 lands.
+    // Integration tests may trigger "flutter pub get" at the start based of
+    // `pubspec/yaml` and `.dart_tool/package_config.json`.
+    // See
+    //  https://github.com/flutter/flutter/pull/91300
+    //  https://github.com/flutter/flutter/issues/120015
     return skipInitialPubGetOutput
-        ? output.skipWhile((OutputEventBody output) => output.output.startsWith('Running "flutter pub get"')).toList()
+        ? output
+            .skipWhile((OutputEventBody output) =>
+                output.output.startsWith('Running "flutter pub get"') ||
+                output.output.startsWith('Resolving dependencies') ||
+                output.output.startsWith('Got dependencies'))
+            .toList()
         : output;
   }
 

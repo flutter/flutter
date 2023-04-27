@@ -25,8 +25,7 @@ class DragDownDetails {
   DragDownDetails({
     this.globalPosition = Offset.zero,
     Offset? localPosition,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   ///
@@ -73,8 +72,7 @@ class DragStartDetails {
     this.globalPosition = Offset.zero,
     Offset? localPosition,
     this.kind,
-  }) : assert(globalPosition != null),
-       localPosition = localPosition ?? globalPosition;
+  }) : localPosition = localPosition ?? globalPosition;
 
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
@@ -142,8 +140,7 @@ class DragUpdateDetails {
     this.primaryDelta,
     required this.globalPosition,
     Offset? localPosition,
-  }) : assert(delta != null),
-       assert(
+  }) : assert(
          primaryDelta == null
            || (primaryDelta == delta.dx && delta.dy == 0.0)
            || (primaryDelta == delta.dy && delta.dx == 0.0),
@@ -219,15 +216,18 @@ typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
 class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
+  /// If [primaryVelocity] is non-null, its value must match one of the
+  /// coordinates of `velocity.pixelsPerSecond` and the other coordinate
+  /// must be zero.
+  ///
   /// The [velocity] argument must not be null.
   DragEndDetails({
     this.velocity = Velocity.zero,
     this.primaryVelocity,
-  }) : assert(velocity != null),
-       assert(
+  }) : assert(
          primaryVelocity == null
-           || primaryVelocity == velocity.pixelsPerSecond.dx
-           || primaryVelocity == velocity.pixelsPerSecond.dy,
+           || (primaryVelocity == velocity.pixelsPerSecond.dx && velocity.pixelsPerSecond.dy == 0)
+           || (primaryVelocity == velocity.pixelsPerSecond.dy && velocity.pixelsPerSecond.dx == 0),
        );
 
   /// The velocity the pointer was moving when it stopped contacting the screen.

@@ -82,7 +82,7 @@ void main() {
   }
 
   setUp(() async {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       mockClipboard.handleMethodCall,
     );
@@ -92,7 +92,7 @@ void main() {
   });
 
   tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger.setMockMethodCallHandler(
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       null,
     );
@@ -200,12 +200,16 @@ void main() {
               data: const MediaQueryData(size: Size(800.0, 600.0)),
               child: Center(
                 child: CupertinoTextField(
+                  autofocus: true,
                   controller: controller,
                 ),
               ),
             ),
           ),
       ));
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       // Initially, the menu isn't shown at all.
       expect(find.text('Cut'), findsNothing);
@@ -246,8 +250,8 @@ void main() {
 
     testWidgets("When a menu item doesn't fit, a second page is used.", (WidgetTester tester) async {
       // Set the screen size to more narrow, so that Paste can't fit.
-      tester.binding.window.physicalSizeTestValue = const Size(800, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.view.physicalSize = const Size(800, 800);
+      addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
@@ -318,8 +322,8 @@ void main() {
     testWidgets('A smaller menu puts each button on its own page.', (WidgetTester tester) async {
       // Set the screen size to more narrow, so that two buttons can't fit on
       // the same page.
-      tester.binding.window.physicalSizeTestValue = const Size(640, 800);
-      addTearDown(tester.binding.window.clearPhysicalSizeTestValue);
+      tester.view.physicalSize = const Size(640, 800);
+      addTearDown(tester.view.reset);
 
       final TextEditingController controller = TextEditingController(text: 'abc def ghi');
       await tester.pumpWidget(CupertinoApp(
@@ -432,12 +436,16 @@ void main() {
               data: const MediaQueryData(size: Size(800.0, 600.0)),
               child: Center(
                 child: CupertinoTextField(
+                  autofocus: true,
                   controller: controller,
                 ),
               ),
             ),
           ),
       ));
+
+      // This extra pump is so autofocus can propagate to renderEditable.
+      await tester.pump();
 
       // Initially, the menu isn't shown at all.
       expect(find.text(_longLocalizations.cutButtonLabel), findsNothing);
@@ -546,6 +554,7 @@ void main() {
                 data: const MediaQueryData(size: Size(800.0, 600.0)),
                 child: Center(
                   child: CupertinoTextField(
+                    autofocus: true,
                     padding: const EdgeInsets.all(8.0),
                     controller: controller,
                     maxLines: 2,
@@ -554,6 +563,9 @@ void main() {
               ),
             ),
         ));
+
+        // This extra pump is so autofocus can propagate to renderEditable.
+        await tester.pump();
 
         // Initially, the menu isn't shown at all.
         expect(find.text('Cut'), findsNothing);

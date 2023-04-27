@@ -29,6 +29,12 @@ void main() {
     expect(logo, isNull);
   });
 
+  test('FlutterLogoDecoration.lerp identical a,b', () {
+    expect(FlutterLogoDecoration.lerp(null, null, 0), null);
+    const FlutterLogoDecoration logo = FlutterLogoDecoration();
+    expect(identical(FlutterLogoDecoration.lerp(logo, logo, 0.5), logo), true);
+  });
+
   test('FlutterLogoDecoration lerp from non-null to null lerps margin', () {
     final FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(start, null, 0.4)!;
     expect(logo.textColor, start.textColor);

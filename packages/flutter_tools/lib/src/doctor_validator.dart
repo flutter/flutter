@@ -120,17 +120,14 @@ class GroupedValidator extends DoctorValidator {
           if (mergedType == ValidationType.missing) {
             mergedType = ValidationType.partial;
           }
-          break;
         case ValidationType.notAvailable:
         case ValidationType.partial:
           mergedType = ValidationType.partial;
-          break;
         case ValidationType.crash:
         case ValidationType.missing:
           if (mergedType == ValidationType.success) {
             mergedType = ValidationType.partial;
           }
-          break;
       }
       mergedMessages.addAll(result.messages);
     }
@@ -165,7 +162,6 @@ class ValidationResult {
   final List<ValidationMessage> messages;
 
   String get leadingBox {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return '[☠]';
@@ -180,7 +176,6 @@ class ValidationResult {
   }
 
   String get coloredLeadingBox {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return globals.terminal.color(leadingBox, TerminalColor.red);
@@ -196,7 +191,6 @@ class ValidationResult {
 
   /// The string representation of the type.
   String get typeStr {
-    assert(type != null);
     switch (type) {
       case ValidationType.crash:
         return 'crash';
@@ -209,6 +203,11 @@ class ValidationResult {
       case ValidationType.partial:
         return 'partial';
     }
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($type, $messages, $statusInfo)';
   }
 }
 

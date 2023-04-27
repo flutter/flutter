@@ -169,7 +169,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 ///   been laid out during that layout pass.
 /// * Children cannot be added except during a call to [childManager], and
 ///   then only if there is no child corresponding to that index (or the child
-///   child corresponding to that index was first removed).
+///   corresponding to that index was first removed).
 ///
 /// See also:
 ///
@@ -615,25 +615,21 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset + Offset(0.0, geometry!.paintExtent);
         addExtent = true;
-        break;
       case AxisDirection.right:
         mainAxisUnit = const Offset(1.0, 0.0);
         crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset;
         addExtent = false;
-        break;
       case AxisDirection.down:
         mainAxisUnit = const Offset(0.0, 1.0);
         crossAxisUnit = const Offset(1.0, 0.0);
         originOffset = offset;
         addExtent = false;
-        break;
       case AxisDirection.left:
         mainAxisUnit = const Offset(-1.0, 0.0);
         crossAxisUnit = const Offset(0.0, 1.0);
         originOffset = offset + Offset(geometry!.paintExtent, 0.0);
         addExtent = true;
-        break;
     }
     RenderBox? child = firstChild;
     while (child != null) {

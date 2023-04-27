@@ -7,9 +7,12 @@
 
 import 'dart:ui' as ui;
 
+// The FlutterView into which this example will draw; set in the main method.
+late final ui.FlutterView view;
+
 void beginFrame(Duration timeStamp) {
-  final double devicePixelRatio = ui.window.devicePixelRatio;
-  final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
+  final double devicePixelRatio = view.devicePixelRatio;
+  final ui.Size logicalSize = view.physicalSize / devicePixelRatio;
 
   final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
     ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
@@ -35,12 +38,16 @@ void beginFrame(Duration timeStamp) {
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
 
-  ui.window.render(sceneBuilder.build());
+  view.render(sceneBuilder.build());
 }
 
 // This function is the primary entry point to your application. The engine
 // calls main() as soon as it has loaded your code.
 void main() {
+  // TODO(goderbauer): Create a window if embedder doesn't provide an implicit view to draw into.
+  assert(ui.PlatformDispatcher.instance.implicitView != null);
+  view = ui.PlatformDispatcher.instance.implicitView!;
+
   // The engine calls onBeginFrame whenever it wants us to produce a frame.
   ui.PlatformDispatcher.instance.onBeginFrame = beginFrame;
   // Here we kick off the whole process by asking the engine to schedule a new

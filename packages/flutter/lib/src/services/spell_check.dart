@@ -15,9 +15,9 @@ import 'system_channels.dart';
 /// to "Hello, wrold!" may be:
 /// ```dart
 /// SuggestionSpan suggestionSpan =
-///   SuggestionSpan(
-///     const TextRange(start: 7, end: 12),
-///     List<String>.of(<String>['word', 'world', 'old']),
+///   const SuggestionSpan(
+///     TextRange(start: 7, end: 12),
+///     <String>['word', 'world', 'old'],
 /// );
 /// ```
 @immutable
@@ -27,9 +27,7 @@ class SuggestionSpan {
   ///
   /// The [range] and replacement [suggestions] must all not
   /// be null.
-  const SuggestionSpan(this.range, this.suggestions)
-      : assert(range != null),
-        assert(suggestions != null);
+  const SuggestionSpan(this.range, this.suggestions);
 
   /// The misspelled range of text.
   final TextRange range;
@@ -58,9 +56,7 @@ class SuggestionSpan {
 @immutable
 class SpellCheckResults {
   /// Creates results based off those received by spell checking some text input.
-  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans)
-      : assert(spellCheckedText != null),
-        assert(suggestionSpans != null);
+  const SpellCheckResults(this.spellCheckedText, this.suggestionSpans);
 
   /// The text that the [suggestionSpans] correspond to.
   final String spellCheckedText;
@@ -170,8 +166,6 @@ class DefaultSpellCheckService implements SpellCheckService {
   @override
   Future<List<SuggestionSpan>?> fetchSpellCheckSuggestions(
       Locale locale, String text) async {
-    assert(locale != null);
-    assert(text != null);
 
     final List<dynamic> rawResults;
     final String languageTag = locale.toLanguageTag();

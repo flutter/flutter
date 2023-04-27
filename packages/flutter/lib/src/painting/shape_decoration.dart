@@ -98,7 +98,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = const CircleBorder();
         }
-        break;
       case BoxShape.rectangle:
         if (source.borderRadius != null) {
           assert(source.border == null || source.border!.isUniform);
@@ -109,7 +108,6 @@ class ShapeDecoration extends Decoration {
         } else {
           shape = source.border ?? const Border();
         }
-        break;
     }
     return ShapeDecoration(
       color: source.color,
@@ -225,8 +223,8 @@ class ShapeDecoration extends Decoration {
   ///    and which use [ShapeDecoration.lerp] when interpolating two
   ///    [ShapeDecoration]s or a [ShapeDecoration] to or from null.
   static ShapeDecoration? lerp(ShapeDecoration? a, ShapeDecoration? b, double t) {
-    if (a == null && b == null) {
-      return null;
+    if (identical(a, b)) {
+      return a;
     }
     if (a != null && b != null) {
       if (t == 0.0) {

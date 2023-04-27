@@ -13,9 +13,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test_api/src/expect/async_matcher.dart'; // ignore: implementation_imports
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' as test_package;
+import 'package:matcher/expect.dart' as matcher;
+import 'package:matcher/src/expect/async_matcher.dart'; // ignore: implementation_imports
 
 const List<Widget> fooBarTexts = <Text>[
   Text('foo', textDirection: TextDirection.ltr),
@@ -31,12 +30,12 @@ void main() {
       future.then<void>((void value) {
         result = '123';
       });
-      test_package.expect(result, isNull);
+      matcher.expect(result, isNull);
       completer.complete();
-      test_package.expect(result, isNull);
+      matcher.expect(result, isNull);
       await future;
       await tester.pump();
-      test_package.expect(result, '123');
+      matcher.expect(result, '123');
     });
 
     testWidgets('respects the skip flag', (WidgetTester tester) async {
@@ -46,9 +45,9 @@ void main() {
       future.then<void>((_) {
         completed = true;
       });
-      test_package.expect(completed, isFalse);
+      matcher.expect(completed, isFalse);
       await future;
-      test_package.expect(completed, isTrue);
+      matcher.expect(completed, isTrue);
     });
   });
 
@@ -99,7 +98,7 @@ void main() {
       final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr)>\n'));
+      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo": Text("foo", textDirection: ltr, dependencies: [MediaQuery])>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
 
@@ -117,7 +116,7 @@ void main() {
       final String? message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
-      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr)>\n'));
+      expect(message, contains('Actual: _TextFinder:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo", textDirection: ltr, dependencies: [MediaQuery])>\n'));
       expect(message, contains('Which: means one was found but none were expected\n'));
     });
   });
@@ -216,7 +215,7 @@ void main() {
 
   group('find.descendant', () {
     testWidgets('finds one descendant', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -230,7 +229,7 @@ void main() {
     });
 
     testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -245,11 +244,11 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          const Text('bar', textDirection: TextDirection.ltr),
+          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+          Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
 
@@ -275,7 +274,7 @@ void main() {
 
   group('find.ancestor', () {
     testWidgets('finds one ancestor', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -290,7 +289,7 @@ void main() {
 
     testWidgets('finds two matching ancestors, one descendant', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Directionality(
+        const Directionality(
           textDirection: TextDirection.ltr,
           child: Row(
             children: <Widget>[
@@ -307,11 +306,11 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          Column(children: const <Text>[Text('foo', textDirection: TextDirection.ltr)]),
-          const Text('bar', textDirection: TextDirection.ltr),
+          Column(children: <Text>[Text('foo', textDirection: TextDirection.ltr)]),
+          Text('bar', textDirection: TextDirection.ltr),
         ],
       ));
 
@@ -335,7 +334,7 @@ void main() {
     });
 
     testWidgets('Root not matched by default', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -349,7 +348,7 @@ void main() {
     });
 
     testWidgets('Match the root', (WidgetTester tester) async {
-      await tester.pumpWidget(Row(
+      await tester.pumpWidget(const Row(
         textDirection: TextDirection.ltr,
         children: <Widget>[
           Column(children: fooBarTexts),
@@ -373,7 +372,7 @@ void main() {
               children: <Widget>[
                 _deepWidgetTree(
                   depth: 1000,
-                  child: Column(children: fooBarTexts),
+                  child: const Column(children: fooBarTexts),
                 ),
               ],
             ),
@@ -827,7 +826,7 @@ void main() {
     testWidgets('Returns the list of announcements', (WidgetTester tester) async {
 
       // Make sure the handler is properly set
-      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null), isFalse);
 
       await SemanticsService.announce('announcement 1', TextDirection.ltr);
@@ -863,7 +862,7 @@ void main() {
         log.add(message);
       }
 
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, handleMessage);
 
@@ -883,14 +882,14 @@ void main() {
       ]));
 
       // Remove the handler
-      TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockDecodedMessageHandler<dynamic>(
               SystemChannels.accessibility, null);
     });
 
     tearDown(() {
       // Make sure that the handler is removed in [TestWidgetsFlutterBinding.postTest]
-      expect(TestDefaultBinaryMessengerBinding.instance!.defaultBinaryMessenger
+      expect(TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .checkMockMessageHandler(SystemChannels.accessibility.name, null), isTrue);
     });
   });

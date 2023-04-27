@@ -134,7 +134,7 @@ void main() {
   test('should not crash if the first event is a Removed event', () {
     final List<PointerEvent> events = <PointerEvent>[];
     setUpWithOneAnnotation(logEvents: events);
-    ui.window.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
+    binding.platformDispatcher.onPointerDataPacket!(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.remove, Offset.zero),
     ]));
     events.clear();
@@ -592,10 +592,11 @@ ui.PointerData _pointerData(
   int device = 0,
   PointerDeviceKind kind = PointerDeviceKind.mouse,
 }) {
+  final double devicePixelRatio = RendererBinding.instance.platformDispatcher.implicitView!.devicePixelRatio;
   return ui.PointerData(
     change: change,
-    physicalX: logicalPosition.dx * RendererBinding.instance.window.devicePixelRatio,
-    physicalY: logicalPosition.dy * RendererBinding.instance.window.devicePixelRatio,
+    physicalX: logicalPosition.dx * devicePixelRatio,
+    physicalY: logicalPosition.dy * devicePixelRatio,
     kind: kind,
     device: device,
   );

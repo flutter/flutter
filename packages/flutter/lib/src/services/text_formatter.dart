@@ -121,8 +121,7 @@ typedef TextInputFormatFunction = TextEditingValue Function(
 
 /// Wiring for [TextInputFormatter.withFunction].
 class _SimpleTextInputFormatter extends TextInputFormatter {
-  _SimpleTextInputFormatter(this.formatFunction)
-    : assert(formatFunction != null);
+  _SimpleTextInputFormatter(this.formatFunction);
 
   final TextInputFormatFunction formatFunction;
 
@@ -271,9 +270,7 @@ class FilteringTextInputFormatter extends TextInputFormatter {
     this.filterPattern, {
     required this.allow,
     this.replacementString = '',
-  }) : assert(filterPattern != null),
-       assert(allow != null),
-       assert(replacementString != null);
+  });
 
   /// Creates a formatter that only allows characters matching a pattern.
   ///

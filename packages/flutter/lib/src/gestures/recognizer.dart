@@ -78,16 +78,9 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// {@endtemplate}
   GestureRecognizer({
     this.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    PointerDeviceKind? kind,
-    Set<PointerDeviceKind>? supportedDevices,
+    this.supportedDevices,
     AllowedButtonsFilter? allowedButtonsFilter,
-  }) : assert(kind == null || supportedDevices == null),
-       _supportedDevices = kind == null ? supportedDevices : <PointerDeviceKind>{ kind },
-       _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
+  }) : _allowedButtonsFilter = allowedButtonsFilter ?? _defaultButtonAcceptBehavior;
 
   /// The recognizer's owner.
   ///
@@ -103,7 +96,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// `supportedDevices` in the constructor, or the currently deprecated `kind`.
   /// These cannot both be set. If both are null, events from all device kinds will be
   /// tracked and recognized.
-  final Set<PointerDeviceKind>? _supportedDevices;
+  Set<PointerDeviceKind>? supportedDevices;
 
   /// {@template flutter.gestures.multidrag._allowedButtonsFilter}
   /// Called when interaction starts. This limits the dragging behavior
@@ -215,8 +208,8 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Checks whether or not a pointer is allowed to be tracked by this recognizer.
   @protected
   bool isPointerAllowed(PointerDownEvent event) {
-    return (_supportedDevices == null ||
-            _supportedDevices!.contains(event.kind)) &&
+    return (supportedDevices == null ||
+            supportedDevices!.contains(event.kind)) &&
         _allowedButtonsFilter(event.buttons);
   }
 
@@ -229,7 +222,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// Checks whether or not a pointer pan/zoom is allowed to be tracked by this recognizer.
   @protected
   bool isPointerPanZoomAllowed(PointerPanZoomStartEvent event) {
-    return _supportedDevices == null || _supportedDevices!.contains(event.kind);
+    return supportedDevices == null || supportedDevices!.contains(event.kind);
   }
 
   /// For a given pointer ID, returns the device kind associated with it.
@@ -267,7 +260,6 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   @protected
   @pragma('vm:notify-debugger-on-exception')
   T? invokeCallback<T>(String name, RecognizerCallback<T> callback, { String Function()? debugReport }) {
-    assert(callback != null);
     T? result;
     try {
       assert(() {
@@ -322,11 +314,6 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   /// {@macro flutter.gestures.GestureRecognizer.supportedDevices}
   OneSequenceGestureRecognizer({
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   });
@@ -536,11 +523,6 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     this.preAcceptSlopTolerance = kTouchSlop,
     this.postAcceptSlopTolerance = kTouchSlop,
     super.debugOwner,
-    @Deprecated(
-      'Migrate to supportedDevices. '
-      'This feature was deprecated after v2.3.0-1.0.pre.',
-    )
-    super.kind,
     super.supportedDevices,
     super.allowedButtonsFilter,
   }) : assert(

@@ -90,21 +90,12 @@ class InteractiveViewer extends StatefulWidget {
     this.alignment,
     this.trackpadScrollCausesScale = false,
     required Widget this.child,
-  }) : assert(alignPanAxis != null),
-       assert(panAxis != null),
-       assert(child != null),
-       assert(constrained != null),
-       assert(minScale != null),
-       assert(minScale > 0),
+  }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
-       assert(maxScale != null),
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       assert(panEnabled != null),
-       assert(scaleEnabled != null),
-       assert(trackpadScrollCausesScale != null),
        // boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
@@ -147,19 +138,12 @@ class InteractiveViewer extends StatefulWidget {
     this.alignment,
     this.trackpadScrollCausesScale = false,
     required InteractiveViewerWidgetBuilder this.builder,
-  }) : assert(panAxis != null),
-       assert(builder != null),
-       assert(minScale != null),
-       assert(minScale > 0),
+  }) : assert(minScale > 0),
        assert(interactionEndFrictionCoefficient > 0),
        assert(minScale.isFinite),
-       assert(maxScale != null),
        assert(maxScale > 0),
        assert(!maxScale.isNaN),
        assert(maxScale >= minScale),
-       assert(panEnabled != null),
-       assert(scaleEnabled != null),
-       assert(trackpadScrollCausesScale != null),
        // boundaryMargin must be either fully infinite or fully finite, but not
        // a mix of both.
        assert(
@@ -627,16 +611,12 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
       switch(widget.panAxis){
         case PanAxis.horizontal:
           alignedTranslation = _alignAxis(translation, Axis.horizontal);
-          break;
         case PanAxis.vertical:
           alignedTranslation = _alignAxis(translation, Axis.vertical);
-          break;
         case PanAxis.aligned:
           alignedTranslation = _alignAxis(translation, _currentAxis!);
-          break;
         case PanAxis.free:
           alignedTranslation = translation;
-          break;
       }
     } else {
       alignedTranslation = translation;
@@ -879,7 +859,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         if (_round(_referenceFocalPoint!) != _round(focalPointSceneCheck)) {
           _referenceFocalPoint = focalPointSceneCheck;
         }
-        break;
 
       case _GestureType.rotate:
         if (details.rotation == 0.0) {
@@ -893,7 +872,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
           details.localFocalPoint,
         );
         _currentRotation = desiredRotation;
-        break;
 
       case _GestureType.pan:
         assert(_referenceFocalPoint != null);
@@ -915,7 +893,6 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _referenceFocalPoint = _transformationController!.toScene(
           details.localFocalPoint,
         );
-        break;
     }
     widget.onInteractionUpdate?.call(details);
   }

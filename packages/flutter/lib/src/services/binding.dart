@@ -149,7 +149,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     switch (type) {
       case 'memoryPressure':
         handleMemoryPressure();
-        break;
     }
     return;
   }
@@ -263,28 +262,116 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
     return null;
   }
 
-  Future<void> _handlePlatformMessage(MethodCall methodCall) async {
+  Future<dynamic> _handlePlatformMessage(MethodCall methodCall) async {
     final String method = methodCall.method;
-    // There is only one incoming method call currently possible.
-    assert(method == 'SystemChrome.systemUIChange');
-    final List<dynamic> args = methodCall.arguments as List<dynamic>;
-    if (_systemUiChangeCallback != null) {
-      await _systemUiChangeCallback!(args[0] as bool);
+    assert(method == 'SystemChrome.systemUIChange' || method == 'System.requestAppExit');
+    switch (method) {
+      case 'SystemChrome.systemUIChange':
+        final List<dynamic> args = methodCall.arguments as List<dynamic>;
+        if (_systemUiChangeCallback != null) {
+          await _systemUiChangeCallback!(args[0] as bool);
+        }
+      case 'System.requestAppExit':
+        return <String, dynamic>{'response': (await handleRequestAppExit()).name};
     }
   }
 
   static AppLifecycleState? _parseAppLifecycleMessage(String message) {
     switch (message) {
-      case 'AppLifecycleState.paused':
-        return AppLifecycleState.paused;
       case 'AppLifecycleState.resumed':
         return AppLifecycleState.resumed;
       case 'AppLifecycleState.inactive':
         return AppLifecycleState.inactive;
+      case 'AppLifecycleState.paused':
+        return AppLifecycleState.paused;
       case 'AppLifecycleState.detached':
         return AppLifecycleState.detached;
     }
     return null;
+  }
+
+  /// Handles any requests for application exit that may be received on the
+  /// [SystemChannels.platform] method channel.
+  ///
+  /// By default, returns [ui.AppExitResponse.exit].
+  ///
+  /// {@template flutter.services.binding.ServicesBinding.requestAppExit}
+  /// Not all exits are cancelable, so not all exits will call this function. Do
+  /// not rely on this function as a place to save critical data, because you
+  /// will be disappointed. There are a number of ways that the application can
+  /// exit without letting the application know first: power can be unplugged,
+  /// the battery removed, the application can be killed in a task manager or
+  /// command line, or the device could have a rapid unplanned disassembly (i.e.
+  /// it could explode). In all of those cases (and probably others), no
+  /// notification will be given to the application that it is about to exit.
+  /// {@endtemplate}
+  ///
+  /// {@tool sample}
+  /// This examples shows how an application can cancel (or not) OS requests for
+  /// quitting an application. Currently this is only supported on macOS and
+  /// Linux.
+  ///
+  /// ** See code in examples/api/lib/services/binding/handle_request_app_exit.0.dart **
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [WidgetsBindingObserver.didRequestAppExit], which can be overridden to
+  ///   respond to this message.
+  /// * [WidgetsBinding.handleRequestAppExit] which overrides this method to
+  ///   notify its observers.
+  Future<ui.AppExitResponse> handleRequestAppExit() async {
+    return ui.AppExitResponse.exit;
+  }
+
+  /// Exits the application by calling the native application API method for
+  /// exiting an application cleanly.
+  ///
+  /// This differs from calling `dart:io`'s [exit] function in that it gives the
+  /// engine a chance to clean up resources so that it doesn't crash on exit, so
+  /// calling this is always preferred over calling [exit]. It also optionally
+  /// gives handlers of [handleRequestAppExit] a chance to cancel the
+  /// application exit.
+  ///
+  /// The [exitType] indicates what kind of exit to perform. For
+  /// [ui.AppExitType.cancelable] exits, the application is queried through a
+  /// call to [handleRequestAppExit], where the application can optionally
+  /// cancel the request for exit. If the [exitType] is
+  /// [ui.AppExitType.required], then the application exits immediately without
+  /// querying the application.
+  ///
+  /// For [ui.AppExitType.cancelable] exits, the returned response value is the
+  /// response obtained from the application as to whether the exit was canceled
+  /// or not. Practically, the response will never be [ui.AppExitResponse.exit],
+  /// since the application will have already exited by the time the result
+  /// would have been received.
+  ///
+  /// The optional [exitCode] argument will be used as the application exit code
+  /// on platforms where an exit code is supported. On other platforms it may be
+  /// ignored. It defaults to zero.
+  ///
+  /// See also:
+  ///
+  /// * [WidgetsBindingObserver.didRequestAppExit] for a handler you can
+  ///   override on a [WidgetsBindingObserver] to receive exit requests.
+  @mustCallSuper
+  Future<ui.AppExitResponse> exitApplication(ui.AppExitType exitType, [int exitCode = 0]) async {
+    final Map<String, Object?>? result = await SystemChannels.platform.invokeMethod<Map<String, Object?>>(
+      'System.exitApplication',
+      <String, Object?>{'type': exitType.name, 'exitCode': exitCode},
+    );
+    if (result == null ) {
+      return ui.AppExitResponse.cancel;
+    }
+    switch (result['response']) {
+      case 'cancel':
+        return ui.AppExitResponse.cancel;
+      case 'exit':
+      default:
+        // In practice, this will never get returned, because the application
+        // will have exited before it returns.
+        return ui.AppExitResponse.exit;
+    }
   }
 
   /// The [RestorationManager] synchronizes the restoration data between
@@ -326,7 +413,6 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
   void setSystemUiChangeCallback(SystemUiChangeCallback? callback) {
     _systemUiChangeCallback = callback;
   }
-
 }
 
 /// Signature for listening to changes in the [SystemUiMode].

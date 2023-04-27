@@ -330,7 +330,6 @@ abstract class RawKeyEvent with Diagnosticable {
           if (message.containsKey('character')) {
             character = message['character'] as String?;
           }
-          break;
         case 'fuchsia':
           final int codePoint = message['codePoint'] as int? ?? 0;
           data = RawKeyEventDataFuchsia(
@@ -341,7 +340,6 @@ abstract class RawKeyEvent with Diagnosticable {
           if (codePoint != 0) {
             character = String.fromCharCode(codePoint);
           }
-          break;
         case 'macos':
           data = RawKeyEventDataMacOs(
             characters: message['characters'] as String? ?? '',
@@ -351,7 +349,6 @@ abstract class RawKeyEvent with Diagnosticable {
             specifiedLogicalKey: message['specifiedLogicalKey'] as int?,
           );
           character = message['characters'] as String?;
-          break;
         case 'ios':
           data = RawKeyEventDataIos(
             characters: message['characters'] as String? ?? '',
@@ -359,7 +356,6 @@ abstract class RawKeyEvent with Diagnosticable {
             keyCode: message['keyCode'] as int? ?? 0,
             modifiers: message['modifiers'] as int? ?? 0,
           );
-          break;
         case 'linux':
           final int unicodeScalarValues = message['unicodeScalarValues'] as int? ?? 0;
           data = RawKeyEventDataLinux(
@@ -374,7 +370,6 @@ abstract class RawKeyEvent with Diagnosticable {
           if (unicodeScalarValues != 0) {
             character = String.fromCharCode(unicodeScalarValues);
           }
-          break;
         case 'windows':
           final int characterCodePoint = message['characterCodePoint'] as int? ?? 0;
           data = RawKeyEventDataWindows(
@@ -386,10 +381,8 @@ abstract class RawKeyEvent with Diagnosticable {
           if (characterCodePoint != 0) {
             character = String.fromCharCode(characterCodePoint);
           }
-          break;
         case 'web':
           data = dataFromWeb();
-          break;
         default:
           /// This exception would only be hit on platforms that haven't yet
           /// implemented raw key events, but will only be triggered if the
@@ -432,10 +425,10 @@ abstract class RawKeyEvent with Diagnosticable {
   /// Returns true if a ALT modifier key is pressed, regardless of which side
   /// of the keyboard it is on.
   ///
-  /// Note that the ALTGR key that appears on some keyboards is considered to be
+  /// The `AltGr` key that appears on some keyboards is considered to be
   /// the same as [LogicalKeyboardKey.altRight] on some platforms (notably
   /// Android). On platforms that can distinguish between `altRight` and
-  /// `altGr`, a press of `altGr` will not return true here, and will need to be
+  /// `altGr`, a press of `AltGr` will not return true here, and will need to be
   /// tested for separately.
   ///
   /// Use [isKeyPressed] if you need to know which alt key was pressed.
@@ -864,7 +857,7 @@ class RawKeyboard {
     // exist in the modifier list. Enforce the pressing state.
     if (event is RawKeyDownEvent && thisKeyModifier != null
         && !_keysPressed.containsKey(event.physicalKey)) {
-      // This inconsistancy is found on Linux GTK for AltRight:
+      // This inconsistency is found on Linux GTK for AltRight:
       // https://github.com/flutter/flutter/issues/93278
       // And also on Android and iOS:
       // https://github.com/flutter/flutter/issues/101090
