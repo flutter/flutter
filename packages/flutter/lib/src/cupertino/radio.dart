@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -232,9 +233,24 @@ class _CupertinoRadioState<T> extends State<CupertinoRadio<T>> with TickerProvid
 
     final Color effectiveFillColor = widget.fillColor ?? CupertinoColors.white;
 
+    final bool? accessibilitySelected;
+    // Apple devices also use `selected` to annotate radio button's semantics
+    // state.
+    switch(defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        accessibilitySelected = null;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        accessibilitySelected = widget._selected;
+    }
+
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: widget._selected,
+      selected: accessibilitySelected,
       child: buildToggleable(
         focusNode: widget.focusNode,
         autofocus: widget.autofocus,
