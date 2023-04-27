@@ -720,6 +720,11 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin, 
 
   void _updateSelectionExtentsVisibility(Offset effectiveOffset) {
     assert(selection != null);
+    if (!selection!.isValid) {
+      _selectionStartInViewport.value = false;
+      _selectionEndInViewport.value = false;
+      return;
+    }
     final Rect visibleRegion = Offset.zero & size;
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
@@ -3010,8 +3015,7 @@ class _FloatingCursorPainter extends RenderEditablePainter {
 
     final TextSelection? selection = renderEditable.selection;
 
-    // TODO(LongCatIsLooong): skip painting the caret when the selection is
-    // (-1, -1).
+    // TODO(LongCatIsLooong): skip painting caret when selection is (-1, -1): https://github.com/flutter/flutter/issues/79495
     if (selection == null || !selection.isCollapsed) {
       return;
     }

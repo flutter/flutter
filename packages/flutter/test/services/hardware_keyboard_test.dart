@@ -224,7 +224,7 @@ void main() {
       LogicalKeyboardKey.shiftLeft,
       platform: 'web',
     )..['metaState'] = 0;
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
       SystemChannels.keyEvent.codec.encodeMessage(data2),
       (ByteData? data) {},

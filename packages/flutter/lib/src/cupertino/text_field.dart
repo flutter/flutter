@@ -15,6 +15,7 @@ import 'colors.dart';
 import 'desktop_text_selection.dart';
 import 'icons.dart';
 import 'magnifier.dart';
+import 'spell_check_suggestions_toolbar.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -122,6 +123,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
   @override
   void onDragSelectionEnd(TapDragEndDetails details) {
     _state._requestKeyboard();
+    super.onDragSelectionEnd(details);
   }
 }
 
@@ -787,6 +789,32 @@ class CupertinoTextField extends StatefulWidget {
       decorationStyle: TextDecorationStyle.dotted,
   );
 
+  /// The color of the selection highlight when the spell check menu is visible.
+  ///
+  /// Eyeballed from a screenshot taken on an iPhone 11 running iOS 16.2.
+  @visibleForTesting
+  static const Color kMisspelledSelectionColor = Color(0x62ff9699);
+
+  /// Default builder for the spell check suggestions toolbar in the Cupertino
+  /// style.
+  ///
+  /// See also:
+  ///  * [spellCheckConfiguration], where this is typically specified for
+  ///    [CupertinoTextField].
+  ///  * [SpellCheckConfiguration.spellCheckSuggestionsToolbarBuilder], the
+  ///    parameter for which this is the default value for [CupertinoTextField].
+  ///  * [TextField.defaultSpellCheckSuggestionsToolbarBuilder], which is like
+  ///    this but specifies the default for [CupertinoTextField].
+  @visibleForTesting
+  static Widget defaultSpellCheckSuggestionsToolbarBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) {
+    return CupertinoSpellCheckSuggestionsToolbar.editableText(
+      editableTextState: editableTextState,
+    );
+  }
+
   /// {@macro flutter.widgets.undoHistory.controller}
   final UndoHistoryController? undoController;
 
@@ -859,6 +887,27 @@ class CupertinoTextField extends StatefulWidget {
         return null;
     }
   });
+
+  /// Returns a new [SpellCheckConfiguration] where the given configuration has
+  /// had any missing values replaced with their defaults for the iOS platform.
+  static SpellCheckConfiguration inferIOSSpellCheckConfiguration(
+    SpellCheckConfiguration? configuration,
+  ) {
+    if (configuration == null
+      || configuration == const SpellCheckConfiguration.disabled()) {
+      return const SpellCheckConfiguration.disabled();
+    }
+
+    return configuration.copyWith(
+      misspelledTextStyle: configuration.misspelledTextStyle
+        ?? CupertinoTextField.cupertinoMisspelledTextStyle,
+      misspelledSelectionColor: configuration.misspelledSelectionColor
+        ?? CupertinoTextField.kMisspelledSelectionColor,
+      spellCheckSuggestionsToolbarBuilder:
+        configuration.spellCheckSuggestionsToolbarBuilder
+          ?? CupertinoTextField.defaultSpellCheckSuggestionsToolbarBuilder,
+    );
+  }
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with RestorationMixin, AutomaticKeepAliveClientMixin<CupertinoTextField> implements TextSelectionGestureDetectorBuilderDelegate, AutofillClient {
@@ -1270,12 +1319,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
     // ensure that configuration uses Cupertino text style for misspelled words
     // unless a custom style is specified.
     final SpellCheckConfiguration spellCheckConfiguration =
-      widget.spellCheckConfiguration != null &&
-      widget.spellCheckConfiguration != const SpellCheckConfiguration.disabled()
-        ? widget.spellCheckConfiguration!.copyWith(
-            misspelledTextStyle: widget.spellCheckConfiguration!.misspelledTextStyle
-              ?? CupertinoTextField.cupertinoMisspelledTextStyle)
-        : const SpellCheckConfiguration.disabled();
+        CupertinoTextField.inferIOSSpellCheckConfiguration(
+          widget.spellCheckConfiguration,
+        );
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -1286,7 +1332,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with Restoratio
             key: editableTextKey,
             controller: controller,
             undoController: widget.undoController,
-            readOnly: widget.readOnly,
+            readOnly: widget.readOnly || !enabled,
             toolbarOptions: widget.toolbarOptions,
             showCursor: widget.showCursor,
             showSelectionHandles: _showSelectionHandles,

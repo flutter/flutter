@@ -5,7 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:js/js.dart';
 
 import '../services/dom.dart';
 import 'basic.dart';
@@ -115,7 +114,7 @@ class PlatformSelectableRegionContextMenu extends StatelessWidget {
       sheet.insertRule(_kClassRule, 0);
       sheet.insertRule(_kClassSelectionRule, 1);
 
-      htmlElement.addEventListener('mousedown', allowInterop((DomEvent event) {
+      htmlElement.addEventListener('mousedown', createDomEventListener((DomEvent event) {
         final DomMouseEvent mouseEvent = event as DomMouseEvent;
         if (mouseEvent.button != _kRightClickButton) {
           return;

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
@@ -14,9 +13,12 @@ import 'system_channels.dart';
 @immutable
 class ClipboardData {
   /// Creates data for the system clipboard.
-  const ClipboardData({ this.text });
+  const ClipboardData({ required String this.text });
 
   /// Plain text variant of this clipboard data.
+  // This is nullable as other clipboard data variants, like images, may be
+  // added in the future. Currently, plain text is the only supported variant
+  // and this is guaranteed to be non-null.
   final String? text;
 }
 
@@ -54,7 +56,7 @@ abstract final class Clipboard {
     if (result == null) {
       return null;
     }
-    return ClipboardData(text: result['text'] as String?);
+    return ClipboardData(text: result['text'] as String);
   }
 
   /// Returns a future that resolves to true iff the clipboard contains string

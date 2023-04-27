@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Flutter code sample for [SharedAppData].
-
 import 'package:flutter/material.dart';
 
+/// Flutter code sample for [SharedAppData].
+
 class ShowSharedValue extends StatelessWidget {
-  const ShowSharedValue({ super.key, required this.appDataKey });
+  const ShowSharedValue({super.key, required this.appDataKey});
 
   final String appDataKey;
 
@@ -25,7 +25,7 @@ class ShowSharedValue extends StatelessWidget {
 // widgets to be rebuilt. In this case that's the ShowSharedValue widget that's
 // displaying the value of a key whose value has been updated.
 class Home extends StatefulWidget {
-  const Home({ super.key });
+  const Home({super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -52,7 +52,8 @@ class _HomeState extends State<Home> {
                 _fooVersion += 1;
                 // Changing the SharedAppData's value for 'foo' causes the
                 // widgets that depend on 'foo' to be rebuilt.
-                SharedAppData.setValue<String, String?>(context, 'foo', 'FOO $_fooVersion'); // no need to call setState()
+                SharedAppData.setValue<String, String?>(
+                    context, 'foo', 'FOO $_fooVersion'); // no need to call setState()
               },
             ),
             const SizedBox(height: 16),
@@ -60,7 +61,8 @@ class _HomeState extends State<Home> {
               child: const Text('change bar'),
               onPressed: () {
                 _barVersion += 1;
-                SharedAppData.setValue<String, String?>(context, 'bar', 'BAR $_barVersion');  // no need to call setState()
+                SharedAppData.setValue<String, String?>(
+                    context, 'bar', 'BAR $_barVersion'); // no need to call setState()
               },
             ),
           ],

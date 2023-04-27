@@ -461,6 +461,119 @@ void main() {
       await tester.tap(find.text('OK'));
       await tester.pumpAndSettle();
     });
+
+    testWidgets('honors switchToInputEntryModeIcon', (WidgetTester tester) async {
+      Widget buildApp({bool? useMaterial3, Icon? switchToInputEntryModeIcon}) {
+       return MaterialApp(
+          theme: ThemeData(
+            useMaterial3: useMaterial3 ?? false,
+          ),
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('Click X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                      switchToInputEntryModeIcon: switchToInputEntryModeIcon,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.edit), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildApp(useMaterial3: true));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(
+        buildApp(
+          switchToInputEntryModeIcon: const Icon(Icons.keyboard),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.keyboard), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('honors switchToCalendarEntryModeIcon', (WidgetTester tester) async {
+      Widget buildApp({bool? useMaterial3, Icon? switchToCalendarEntryModeIcon}) {
+       return MaterialApp(
+          theme: ThemeData(
+            useMaterial3: useMaterial3 ?? false,
+          ),
+          home: Material(
+            child: Builder(
+              builder: (BuildContext context) {
+                return ElevatedButton(
+                  child: const Text('Click X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2018),
+                      lastDate: DateTime(2030),
+                      switchToCalendarEntryModeIcon: switchToCalendarEntryModeIcon,
+                      initialEntryMode: DatePickerEntryMode.input,
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      }
+
+      await tester.pumpWidget(buildApp());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(buildApp(useMaterial3: true));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.calendar_today), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+
+      await tester.pumpWidget(
+        buildApp(
+          switchToCalendarEntryModeIcon: const Icon(Icons.favorite),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(ElevatedButton));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.favorite), findsOneWidget);
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+    });
   });
 
   group('Calendar mode', () {
@@ -1385,6 +1498,36 @@ void main() {
       expect(currentMode, DatePickerEntryMode.calendar);
       await tester.pumpAndSettle();
       expect(find.byType(TextField), findsNothing);
+    });
+  });
+
+  group('Landscape input-only date picker headers use headlineSmall', () {
+    // Regression test for https://github.com/flutter/flutter/issues/122056
+
+    // Common screen size roughly based on a Pixel 1
+    const Size kCommonScreenSizePortrait = Size(1070, 1770);
+    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+
+    Future<void> showPicker(WidgetTester tester, Size size) async {
+      addTearDown(tester.view.reset);
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      initialEntryMode = DatePickerEntryMode.input;
+      await prepareDatePicker(tester, (Future<DateTime?> date) async { }, useMaterial3: true);
+    }
+
+    testWidgets('portrait', (WidgetTester tester) async {
+      await showPicker(tester, kCommonScreenSizePortrait);
+      expect(tester.widget<Text>(find.text('Fri, Jan 15')).style?.fontSize, 32);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('landscape', (WidgetTester tester) async {
+      await showPicker(tester, kCommonScreenSizeLandscape);
+      expect(tester.widget<Text>(find.text('Fri, Jan 15')).style?.fontSize, 24);
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
     });
   });
 }

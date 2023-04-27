@@ -308,6 +308,15 @@ TaskFunction createTextfieldPerfE2ETest() {
   ).run;
 }
 
+TaskFunction createSlidersPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'sliders_perf',
+    testDriver: 'test_driver/sliders_perf_test.dart',
+  ).run;
+}
+
 TaskFunction createStackSizeTest() {
   final String testDirectory =
       '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks';
@@ -617,6 +626,19 @@ TaskFunction createGradientStaticPerfE2ETest() {
   return PerfTest.e2e(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test/gradient_static_perf_e2e.dart',
+  ).run;
+}
+
+TaskFunction createAnimatedBlurBackropFilterPerfTest({
+  bool enableImpeller = false,
+}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/run_app.dart',
+    'animated_blur_backdrop_filter_perf',
+    enableImpeller: enableImpeller,
+    testDriver: 'test_driver/animated_blur_backdrop_filter_perf_test.dart',
+    saveTraceFile: true,
   ).run;
 }
 
@@ -1179,6 +1201,7 @@ class WebCompileTest {
     return inDirectory<Map<String, int>>(directory, () async {
       final Map<String, int> metrics = <String, int>{};
 
+      await flutter('clean');
       await flutter('packages', options: <String>['get']);
       final Stopwatch? watch = measureBuildTime ? Stopwatch() : null;
       watch?.start();
@@ -1187,6 +1210,7 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
+        '--no-web-resources-cdn',
       ]);
       watch?.stop();
       final String buildDir = path.join(directory, 'build', 'web');

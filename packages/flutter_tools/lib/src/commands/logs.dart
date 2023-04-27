@@ -19,6 +19,7 @@ class LogsCommand extends FlutterCommand {
       help: 'Clear log history before reading from logs.',
     );
     usesDeviceTimeoutOption();
+    usesDeviceConnectionOption();
   }
 
   @override
@@ -29,6 +30,9 @@ class LogsCommand extends FlutterCommand {
 
   @override
   final String category = FlutterCommandCategory.tools;
+
+  @override
+  bool get refreshWirelessDevices => true;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};

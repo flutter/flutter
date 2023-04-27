@@ -914,8 +914,8 @@ mixin WidgetInspectorService {
   @protected
   Future<void> forceRebuild() {
     final WidgetsBinding binding = WidgetsBinding.instance;
-    if (binding.renderViewElement != null) {
-      binding.buildOwner!.reassemble(binding.renderViewElement!, null);
+    if (binding.rootElement != null) {
+      binding.buildOwner!.reassemble(binding.rootElement!, null);
       return binding.endOfFrame;
     }
     return Future<void>.value();
@@ -1154,10 +1154,6 @@ mixin WidgetInspectorService {
       callback: _getRootWidget,
     );
     _registerObjectGroupServiceExtension(
-      name: WidgetInspectorServiceExtensions.getRootRenderObject.name,
-      callback: _getRootRenderObject,
-    );
-    _registerObjectGroupServiceExtension(
       name: WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       callback: _getRootWidgetSummaryTree,
     );
@@ -1178,10 +1174,6 @@ mixin WidgetInspectorService {
           ),
         };
       },
-    );
-    _registerServiceExtensionWithArg(
-      name: WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
-      callback: _getSelectedRenderObject,
     );
     _registerServiceExtensionWithArg(
       name: WidgetInspectorServiceExtensions.getSelectedWidget.name,
@@ -1832,7 +1824,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object?>? _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
+    return _nodeToJson(WidgetsBinding.instance.rootElement?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1846,7 +1838,7 @@ mixin WidgetInspectorService {
     Map<String, Object>? Function(DiagnosticsNode, InspectorSerializationDelegate)? addAdditionalPropertiesCallback,
   }) {
     return _nodeToJson(
-      WidgetsBinding.instance.renderViewElement?.toDiagnosticsNode(),
+      WidgetsBinding.instance.rootElement?.toDiagnosticsNode(),
       InspectorSerializationDelegate(
         groupName: groupName,
         subtreeDepth: 1000000,
@@ -1879,17 +1871,6 @@ mixin WidgetInspectorService {
     return Future<Map<String, dynamic>>.value(<String, dynamic>{
       'result': result,
     });
-  }
-
-  /// Returns a JSON representation of the [DiagnosticsNode] for the root
-  /// [RenderObject].
-  @protected
-  String getRootRenderObject(String groupName) {
-    return _safeJsonEncode(_getRootRenderObject(groupName));
-  }
-
-  Map<String, Object?>? _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance.renderView.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -1930,23 +1911,6 @@ mixin WidgetInspectorService {
         service: this,
       ),
     );
-  }
-
-  /// Returns a [DiagnosticsNode] representing the currently selected
-  /// [RenderObject].
-  ///
-  /// If the currently selected [RenderObject] is identical to the
-  /// [RenderObject] referenced by `previousSelectionId` then the previous
-  /// [DiagnosticsNode] is reused.
-  @protected
-  String getSelectedRenderObject(String previousSelectionId, String groupName) {
-    return _safeJsonEncode(_getSelectedRenderObject(previousSelectionId, groupName));
-  }
-
-  Map<String, Object?>? _getSelectedRenderObject(String? previousSelectionId, String groupName) {
-    final DiagnosticsNode? previousSelection = toObject(previousSelectionId) as DiagnosticsNode?;
-    final RenderObject? current = selection.current;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), InspectorSerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
@@ -2817,7 +2781,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
         child: IgnorePointer(
           ignoring: isSelectMode,
           key: _ignorePointerKey,
-          ignoringSemantics: false,
           child: widget.child,
         ),
       ),

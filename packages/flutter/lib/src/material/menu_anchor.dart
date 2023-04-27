@@ -127,7 +127,7 @@ class MenuAnchor extends StatefulWidget {
     this.childFocusNode,
     this.style,
     this.alignmentOffset = Offset.zero,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     this.anchorTapClosesMenu = false,
     this.onOpen,
     this.onClose,
@@ -183,7 +183,7 @@ class MenuAnchor extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// Whether the menus will be closed if the anchor area is tapped.
@@ -342,7 +342,7 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // Needs to update the overlay entry on the next frame, since it's in the
       // overlay.
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        _overlayEntry!.markNeedsBuild();
+        _overlayEntry?.markNeedsBuild();
       });
     }
   }
@@ -556,8 +556,9 @@ class _MenuAnchorState extends State<MenuAnchor> {
       // Notify that _childIsOpen changed state, but only if not
       // currently disposing.
       _parent?._childChangedOpenState();
+      widget.onClose?.call();
+      setState(() {});
     }
-    widget.onClose?.call();
   }
 
   void _closeChildren({bool inDispose = false}) {
@@ -810,6 +811,7 @@ class MenuItemButton extends StatefulWidget {
     this.clipBehavior = Clip.none,
     this.leadingIcon,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -870,6 +872,14 @@ class MenuItemButton extends StatefulWidget {
 
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
+
+  /// {@template flutter.material.menu_anchor.closeOnActivate}
+  /// Determines if the menu will be closed when a [MenuItemButton]
+  /// is pressed.
+  ///
+  /// Defaults to true.
+  /// {@endtemplate}
+  final bool closeOnActivate;
 
   /// The widget displayed in the center of this button.
   ///
@@ -1089,7 +1099,9 @@ class _MenuItemButtonState extends State<MenuItemButton> {
   void _handleSelect() {
     assert(_debugMenuInfo('Selected ${widget.child} menu'));
     widget.onPressed?.call();
-    _MenuAnchorState._maybeOf(context)?._root._close();
+    if (widget.closeOnActivate) {
+      _MenuAnchorState._maybeOf(context)?._root._close();
+    }
   }
 
   void _createInternalFocusNodeIfNeeded() {
@@ -1140,6 +1152,7 @@ class CheckboxMenuButton extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1242,6 +1255,9 @@ class CheckboxMenuButton extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
+  final bool closeOnActivate;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1292,6 +1308,7 @@ class CheckboxMenuButton extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
@@ -1332,6 +1349,7 @@ class RadioMenuButton<T> extends StatelessWidget {
     this.statesController,
     this.clipBehavior = Clip.none,
     this.trailingIcon,
+    this.closeOnActivate = true,
     required this.child,
   });
 
@@ -1436,6 +1454,9 @@ class RadioMenuButton<T> extends StatelessWidget {
   /// An optional icon to display after the [child] label.
   final Widget? trailingIcon;
 
+  /// {@macro flutter.material.menu_anchor.closeOnActivate}
+  final bool closeOnActivate;
+
   /// The widget displayed in the center of this button.
   ///
   /// Typically this is the button's label, using a [Text] widget.
@@ -1483,6 +1504,7 @@ class RadioMenuButton<T> extends StatelessWidget {
       ),
       clipBehavior: clipBehavior,
       trailingIcon: trailingIcon,
+      closeOnActivate: closeOnActivate,
       child: child,
     );
   }
@@ -1527,10 +1549,11 @@ class SubmenuButton extends StatefulWidget {
     this.onFocusChange,
     this.onOpen,
     this.onClose,
+    this.controller,
     this.style,
     this.menuStyle,
     this.alignmentOffset,
-    this.clipBehavior = Clip.none,
+    this.clipBehavior = Clip.hardEdge,
     this.focusNode,
     this.statesController,
     this.leadingIcon,
@@ -1556,6 +1579,9 @@ class SubmenuButton extends StatefulWidget {
 
   /// A callback that is invoked when the menu is closed.
   final VoidCallback? onClose;
+
+  /// An optional [MenuController] for this submenu.
+  final MenuController? controller;
 
   /// Customizes this button's appearance.
   ///
@@ -1584,7 +1610,7 @@ class SubmenuButton extends StatefulWidget {
 
   /// {@macro flutter.material.Material.clipBehavior}
   ///
-  /// Defaults to [Clip.none].
+  /// Defaults to [Clip.hardEdge].
   final Clip clipBehavior;
 
   /// {@macro flutter.widgets.Focus.focusNode}
@@ -1739,7 +1765,8 @@ class SubmenuButton extends StatefulWidget {
 class _SubmenuButtonState extends State<SubmenuButton> {
   FocusNode? _internalFocusNode;
   bool _waitingToFocusMenu = false;
-  final MenuController _menuController = MenuController();
+  MenuController? _internalMenuController;
+  MenuController get _menuController => widget.controller ?? _internalMenuController!;
   _MenuAnchorState? get _anchor => _MenuAnchorState._maybeOf(context);
   FocusNode get _buttonFocusNode => widget.focusNode ?? _internalFocusNode!;
   bool get _enabled => widget.menuChildren.isNotEmpty;
@@ -1756,12 +1783,15 @@ class _SubmenuButtonState extends State<SubmenuButton> {
         return true;
       }());
     }
+    if (widget.controller == null) {
+      _internalMenuController = MenuController();
+    }
     _buttonFocusNode.addListener(_handleFocusChange);
   }
 
   @override
   void dispose() {
-    _internalFocusNode?.removeListener(_handleFocusChange);
+    _buttonFocusNode.removeListener(_handleFocusChange);
     _internalFocusNode?.dispose();
     _internalFocusNode = null;
     super.dispose();
@@ -1789,6 +1819,9 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       }
       _buttonFocusNode.addListener(_handleFocusChange);
     }
+    if (widget.controller != oldWidget.controller) {
+      _internalMenuController = (oldWidget.controller == null) ? null : MenuController();
+    }
   }
 
   @override
@@ -1815,7 +1848,16 @@ class _SubmenuButtonState extends State<SubmenuButton> {
       alignmentOffset: menuPaddingOffset,
       clipBehavior: widget.clipBehavior,
       onClose: widget.onClose,
-      onOpen: widget.onOpen,
+      onOpen: () {
+        if (!_waitingToFocusMenu) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            _menuController._anchor?._focusButton();
+            _waitingToFocusMenu = false;
+          });
+          _waitingToFocusMenu = true;
+        }
+        widget.onOpen?.call();
+      },
       style: widget.menuStyle,
       builder: (BuildContext context, MenuController controller, Widget? child) {
         // Since we don't want to use the theme style or default style from the
@@ -1836,16 +1878,6 @@ class _SubmenuButtonState extends State<SubmenuButton> {
             controller.close();
           } else {
             controller.open();
-            if (!_waitingToFocusMenu) {
-              // Only schedule this if it's not already scheduled.
-              SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-                // This has to happen in the next frame because the menu bar is
-                // not focusable until the first menu is open.
-                controller._anchor?._focusButton();
-                _waitingToFocusMenu = false;
-              });
-              _waitingToFocusMenu = true;
-            }
           }
         }
 
@@ -3122,7 +3154,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.left;
         } else {
-          final double newX = anchorRect.right;
+          final double newX = anchorRect.right + alignmentOffset.dx;
           if (!offRightSide(newX)) {
             x = newX;
           } else {
@@ -3133,7 +3165,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         if (parentOrientation != orientation) {
           x = allowedRect.right - childSize.width;
         } else {
-          final double newX = anchorRect.left - childSize.width;
+          final double newX = anchorRect.left - childSize.width - alignmentOffset.dx;
           if (!offLeftSide(newX)) {
             x = newX;
           } else {
@@ -3156,7 +3188,12 @@ class _MenuLayout extends SingleChildLayoutDelegate {
       } else if (offBottom(y)) {
         final double newY = anchorRect.top - childSize.height;
         if (!offTop(newY)) {
-          y = newY;
+          // Only move the menu up if its parent is horizontal (MenuAchor/MenuBar).
+          if (parentOrientation == Axis.horizontal) {
+            y = newY - alignmentOffset.dy;
+          } else {
+            y = newY;
+          }
         } else {
           y = allowedRect.bottom - childSize.height;
         }
@@ -3312,7 +3349,7 @@ class _MenuPanelState extends State<_MenuPanel> {
         shadowColor: shadowColor,
         surfaceTintColor: surfaceTintColor,
         type: backgroundColor == null ? MaterialType.transparency : MaterialType.canvas,
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: widget.clipBehavior,
         child: Padding(
           padding: resolvedPadding,
           child: SingleChildScrollView(

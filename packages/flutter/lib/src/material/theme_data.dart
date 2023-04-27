@@ -54,6 +54,7 @@ import 'progress_indicator_theme.dart';
 import 'radio_theme.dart';
 import 'scrollbar_theme.dart';
 import 'search_bar_theme.dart';
+import 'search_view_theme.dart';
 import 'segmented_button_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
@@ -375,6 +376,7 @@ class ThemeData with Diagnosticable {
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
     SearchBarThemeData? searchBarTheme,
+    SearchViewThemeData? searchViewTheme,
     SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
@@ -446,7 +448,7 @@ class ThemeData with Diagnosticable {
     }
     pageTransitionsTheme ??= const PageTransitionsTheme();
     scrollbarTheme ??= const ScrollbarThemeData();
-    visualDensity ??= VisualDensity.adaptivePlatformDensity;
+    visualDensity ??= VisualDensity.defaultDensityForPlatform(platform);
     useMaterial3 ??= false;
     final bool useInkSparkle = platform == TargetPlatform.android && !kIsWeb;
     splashFactory ??= useMaterial3
@@ -590,6 +592,7 @@ class ThemeData with Diagnosticable {
     progressIndicatorTheme ??= const ProgressIndicatorThemeData();
     radioTheme ??= const RadioThemeData();
     searchBarTheme ??= const SearchBarThemeData();
+    searchViewTheme ??= const SearchViewThemeData();
     segmentedButtonTheme ??= const SegmentedButtonThemeData();
     sliderTheme ??= const SliderThemeData();
     snackBarTheme ??= const SnackBarThemeData();
@@ -688,6 +691,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme: progressIndicatorTheme,
       radioTheme: radioTheme,
       searchBarTheme: searchBarTheme,
+      searchViewTheme: searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme,
       sliderTheme: sliderTheme,
       snackBarTheme: snackBarTheme,
@@ -800,6 +804,7 @@ class ThemeData with Diagnosticable {
     required this.progressIndicatorTheme,
     required this.radioTheme,
     required this.searchBarTheme,
+    required this.searchViewTheme,
     required this.segmentedButtonTheme,
     required this.sliderTheme,
     required this.snackBarTheme,
@@ -1492,6 +1497,9 @@ class ThemeData with Diagnosticable {
   /// A theme for customizing the appearance and layout of [SearchBar] widgets.
   final SearchBarThemeData searchBarTheme;
 
+  /// A theme for customizing the appearance and layout of search views created by [SearchAnchor] widgets.
+  final SearchViewThemeData searchViewTheme;
+
   /// A theme for customizing the appearance and layout of [SegmentedButton] widgets.
   final SegmentedButtonThemeData segmentedButtonTheme;
 
@@ -1704,6 +1712,7 @@ class ThemeData with Diagnosticable {
     ProgressIndicatorThemeData? progressIndicatorTheme,
     RadioThemeData? radioTheme,
     SearchBarThemeData? searchBarTheme,
+    SearchViewThemeData? searchViewTheme,
     SegmentedButtonThemeData? segmentedButtonTheme,
     SliderThemeData? sliderTheme,
     SnackBarThemeData? snackBarTheme,
@@ -1839,6 +1848,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme: progressIndicatorTheme ?? this.progressIndicatorTheme,
       radioTheme: radioTheme ?? this.radioTheme,
       searchBarTheme: searchBarTheme ?? this.searchBarTheme,
+      searchViewTheme: searchViewTheme ?? this.searchViewTheme,
       segmentedButtonTheme: segmentedButtonTheme ?? this.segmentedButtonTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
@@ -2034,6 +2044,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme: ProgressIndicatorThemeData.lerp(a.progressIndicatorTheme, b.progressIndicatorTheme, t)!,
       radioTheme: RadioThemeData.lerp(a.radioTheme, b.radioTheme, t),
       searchBarTheme: SearchBarThemeData.lerp(a.searchBarTheme, b.searchBarTheme, t)!,
+      searchViewTheme: SearchViewThemeData.lerp(a.searchViewTheme, b.searchViewTheme, t)!,
       segmentedButtonTheme: SegmentedButtonThemeData.lerp(a.segmentedButtonTheme, b.segmentedButtonTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
@@ -2141,6 +2152,7 @@ class ThemeData with Diagnosticable {
         other.progressIndicatorTheme == progressIndicatorTheme &&
         other.radioTheme == radioTheme &&
         other.searchBarTheme == searchBarTheme &&
+        other.searchViewTheme == searchViewTheme &&
         other.segmentedButtonTheme == segmentedButtonTheme &&
         other.sliderTheme == sliderTheme &&
         other.snackBarTheme == snackBarTheme &&
@@ -2245,6 +2257,7 @@ class ThemeData with Diagnosticable {
       progressIndicatorTheme,
       radioTheme,
       searchBarTheme,
+      searchViewTheme,
       segmentedButtonTheme,
       sliderTheme,
       snackBarTheme,
@@ -2351,6 +2364,7 @@ class ThemeData with Diagnosticable {
     properties.add(DiagnosticsProperty<ProgressIndicatorThemeData>('progressIndicatorTheme', progressIndicatorTheme, defaultValue: defaultData.progressIndicatorTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<RadioThemeData>('radioTheme', radioTheme, defaultValue: defaultData.radioTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SearchBarThemeData>('searchBarTheme', searchBarTheme, defaultValue: defaultData.searchBarTheme, level: DiagnosticLevel.debug));
+    properties.add(DiagnosticsProperty<SearchViewThemeData>('searchViewTheme', searchViewTheme, defaultValue: defaultData.searchViewTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SegmentedButtonThemeData>('segmentedButtonTheme', segmentedButtonTheme, defaultValue: defaultData.segmentedButtonTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.debug));
@@ -2632,12 +2646,32 @@ class VisualDensity with Diagnosticable {
   /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
 
-  /// Returns a visual density that is adaptive based on the [defaultTargetPlatform].
+  /// Returns a [VisualDensity] that is adaptive based on the current platform
+  /// on which the framework is executing, from [defaultTargetPlatform].
   ///
-  /// For desktop platforms, this returns [compact], and for other platforms,
-  /// it returns a default-constructed [VisualDensity].
-  static VisualDensity get adaptivePlatformDensity {
-    switch (defaultTargetPlatform) {
+  /// When [defaultTargetPlatform] is a desktop platform, this returns
+  /// [compact], and for other platforms, it returns a default-constructed
+  /// [VisualDensity].
+  ///
+  /// See also:
+  ///
+  /// * [defaultDensityForPlatform] which returns a [VisualDensity] that is
+  ///   adaptive based on the platform given to it.
+  /// * [defaultTargetPlatform] which returns the platform on which the
+  ///   framework is currently executing.
+  static VisualDensity get adaptivePlatformDensity => defaultDensityForPlatform(defaultTargetPlatform);
+
+  /// Returns a [VisualDensity] that is adaptive based on the given [platform].
+  ///
+  /// For desktop platforms, this returns [compact], and for other platforms, it
+  /// returns a default-constructed [VisualDensity].
+  ///
+  /// See also:
+  ///
+  /// * [adaptivePlatformDensity] which returns a [VisualDensity] that is
+  ///   adaptive based on [defaultTargetPlatform].
+  static VisualDensity defaultDensityForPlatform(TargetPlatform platform) {
+    switch (platform) {
       case TargetPlatform.android:
       case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:

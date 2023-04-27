@@ -5,7 +5,10 @@
 import 'template.dart';
 
 class BottomSheetTemplate extends TokenTemplate {
-  const BottomSheetTemplate(super.blockName, super.fileName, super.tokens, {
+  const BottomSheetTemplate(
+    super.blockName,
+    super.fileName,
+    super.tokens, {
     super.colorSchemePrefix = '_colors.',
   });
 
@@ -37,6 +40,9 @@ class _${blockName}DefaultsM3 extends BottomSheetThemeData {
 
   @override
   Size? get dragHandleSize => ${size("md.comp.sheet.bottom.docked.drag-handle")};
+
+  @override
+  BoxConstraints? get constraints => const BoxConstraints(maxWidth: 640.0);
 }
 ''';
 }

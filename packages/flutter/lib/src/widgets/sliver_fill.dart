@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
+import 'scroll_delegate.dart';
 import 'sliver.dart';
 
 /// A sliver that contains multiple box children that each fills the viewport.

@@ -582,7 +582,7 @@ void main() {
     );
     expect(result.exitCode, 0);
     expect(result.stderr, isEmpty);
-    expect(result.stdout, <Object>[
+    expect(result.stdout, containsAllInOrder(<Object>[
       startsWith('Launching '),
       startsWith('Syncing files to device Flutter test device...'),
       '',
@@ -604,6 +604,7 @@ void main() {
       'w Dump widget hierarchy to the console.                                               (debugDumpApp)',
       't Dump rendering tree to the console.                                          (debugDumpRenderTree)',
       'L Dump layer tree to the console.                                               (debugDumpLayerTree)',
+      'f Dump focus tree to the console.                                               (debugDumpFocusTree)',
       'S Dump accessibility tree in traversal order.                                   (debugDumpSemantics)',
       'U Dump accessibility tree in inverse hit test order.                            (debugDumpSemantics)',
       'i Toggle widget inspector.                                  (WidgetsApp.showWidgetInspectorOverride)',
@@ -625,6 +626,6 @@ void main() {
       startsWith('The Flutter DevTools debugger and profiler on Flutter test device is available at: http://'),
       '',
       'Application finished.',
-    ]);
+    ]));
   });
 }

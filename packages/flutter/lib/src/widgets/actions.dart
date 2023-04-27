@@ -43,6 +43,8 @@ BuildContext _getParent(BuildContext context) {
 ///
 /// See also:
 ///
+///  * [Shortcuts], a widget used to bind key combinations to [Intent]s.
+///  * [Actions], a widget used to map [Intent]s to [Action]s.
 ///  * [Actions.invoke], which invokes the action associated with a specified
 ///    [Intent] using the [Actions] widget that most tightly encloses the given
 ///    [BuildContext].
@@ -67,13 +69,14 @@ abstract class Intent with Diagnosticable {
 /// To register an action listener, call [Action.addActionListener].
 typedef ActionListenerCallback = void Function(Action<Intent> action);
 
-/// Base class for actions.
+/// Base class for an action or command to be performed.
 ///
-/// As the name implies, an [Action] is an action or command to be performed.
-/// They are typically invoked as a result of a user action, such as a keyboard
-/// shortcut in a [Shortcuts] widget, which is used to look up an [Intent],
-/// which is given to an [ActionDispatcher] to map the [Intent] to an [Action]
-/// and invoke it.
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XawP1i314WM}
+///
+/// [Action]s are typically invoked as a result of a user action. For example,
+/// the [Shortcuts] widget will map a keyboard shortcut into an [Intent], which
+/// is given to an [ActionDispatcher] to map the [Intent] to an [Action] and
+/// invoke it.
 ///
 /// The [ActionDispatcher] can invoke an [Action] on the primary focus, or
 /// without regard for focus.
@@ -612,13 +615,13 @@ class ActionDispatcher with Diagnosticable {
   }
 }
 
-/// A widget that establishes an [ActionDispatcher] and a map of [Intent] to
-/// [Action] to be used by its descendants when invoking an [Action].
+/// A widget that maps [Intent]s to [Action]s to be used by its descendants
+/// when invoking an [Action].
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=XawP1i314WM}
 ///
-/// Actions are typically invoked using [Actions.invoke] with the context
-/// containing the ambient [Actions] widget.
+/// Actions are typically invoked using [Shortcuts]. They can also be invoked
+/// using [Actions.invoke] on a context containing an ambient [Actions] widget.
 ///
 /// {@tool dartpad}
 /// This example creates a custom [Action] subclass `ModifyAction` for modifying
@@ -641,12 +644,12 @@ class ActionDispatcher with Diagnosticable {
 ///
 /// See also:
 ///
-///  * [ActionDispatcher], the object that this widget uses to manage actions.
+///  * [Shortcuts], a widget used to bind key combinations to [Intent]s.
+///  * [Intent], a class that contains configuration information for running an
+///    [Action].
 ///  * [Action], a class for containing and defining an invocation of a user
 ///    action.
-///  * [Intent], a class that holds a unique [LocalKey] identifying an action,
-///    as well as configuration information for running the [Action].
-///  * [Shortcuts], a widget used to bind key combinations to [Intent]s.
+///  * [ActionDispatcher], the object that this widget uses to manage actions.
 class Actions extends StatefulWidget {
   /// Creates an [Actions] widget.
   ///
@@ -664,7 +667,7 @@ class Actions extends StatefulWidget {
   ///
   /// If this [dispatcher] is null, then [Actions.of] and [Actions.invoke] will
   /// look up the tree until they find an Actions widget that has a dispatcher
-  /// set. If not such widget is found, then they will return/use a
+  /// set. If no such widget is found, then they will return/use a
   /// default-constructed [ActionDispatcher].
   final ActionDispatcher? dispatcher;
 

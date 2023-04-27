@@ -2347,24 +2347,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  /// Replace composing region with specified text.
-  void replaceComposingRegion(SelectionChangedCause cause, String text) {
-    // Replacement cannot be performed if the text is read only or obscured.
-    assert(!widget.readOnly && !widget.obscureText);
-
-    _replaceText(ReplaceTextIntent(textEditingValue, text, textEditingValue.composing, cause));
-
-    if (cause == SelectionChangedCause.toolbar) {
-      // Schedule a call to bringIntoView() after renderEditable updates.
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          bringIntoView(textEditingValue.selection.extent);
-        }
-      });
-      hideToolbar();
-    }
-  }
-
   /// Finds specified [SuggestionSpan] that matches the provided index using
   /// binary search.
   ///
@@ -2409,21 +2391,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// If spell check is enabled, this will try to infer a value for
   /// the [SpellCheckService] if left unspecified.
   static SpellCheckConfiguration _inferSpellCheckConfiguration(SpellCheckConfiguration? configuration) {
-    if (configuration == null || configuration == const SpellCheckConfiguration.disabled()) {
+    final SpellCheckService? spellCheckService = configuration?.spellCheckService;
+    final bool spellCheckAutomaticallyDisabled = configuration == null || configuration == const SpellCheckConfiguration.disabled();
+    final bool spellCheckServiceIsConfigured = spellCheckService != null || spellCheckService == null && WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined;
+    if (spellCheckAutomaticallyDisabled || !spellCheckServiceIsConfigured) {
+      // Only enable spell check if a non-disabled configuration is provided
+      // and if that configuration does not specify a spell check service,
+      // a native spell checker must be supported.
+      assert(() {
+        if (!spellCheckAutomaticallyDisabled && !spellCheckServiceIsConfigured) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'Spell check was enabled with spellCheckConfiguration, but the '
+                'current platform does not have a supported spell check '
+                'service, and none was provided. Consider disabling spell '
+                'check for this platform or passing a SpellCheckConfiguration '
+                'with a specified spell check service.',
+              ),
+              library: 'widget library',
+              stack: StackTrace.current,
+            ),
+          );
+        }
+        return true;
+      }());
       return const SpellCheckConfiguration.disabled();
     }
 
-    SpellCheckService? spellCheckService = configuration.spellCheckService;
-
-    assert(
-      spellCheckService != null
-      || WidgetsBinding.instance.platformDispatcher.nativeSpellCheckServiceDefined,
-      'spellCheckService must be specified for this platform because no default service available',
-    );
-
-    spellCheckService = spellCheckService ?? DefaultSpellCheckService();
-
-    return configuration.copyWith(spellCheckService: spellCheckService);
+    return configuration.copyWith(spellCheckService: spellCheckService ?? DefaultSpellCheckService());
   }
 
   /// Returns the [ContextMenuButtonItem]s for the given [ToolbarOptions].
@@ -3246,7 +3242,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _textInputConnection!.connectionClosedReceived();
       _textInputConnection = null;
       _lastKnownRemoteTextEditingValue = null;
-      _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
+      if (kIsWeb) {
+        _finalizeEditing(TextInputAction.done, shouldUnfocus: true);
+      } else {
+        widget.focusNode.unfocus();
+      }
     }
   }
 
@@ -3710,6 +3710,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _didChangeTextEditingValue() {
+    if (_hasFocus && !_value.selection.isValid) {
+      // If this field is focused and the selection is invalid, place the cursor at
+      // the end. Does not rely on _handleFocusChanged because it makes selection
+      // handles visible on Android.
+      // Unregister as a listener to the text controller while making the change.
+      widget.controller.removeListener(_didChangeTextEditingValue);
+      widget.controller.selection = _adjustedSelectionWhenFocused()!;
+      widget.controller.addListener(_didChangeTextEditingValue);
+    }
     _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
@@ -3730,27 +3739,33 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (!widget.readOnly) {
         _scheduleShowCaretOnScreen(withAnimation: true);
       }
-      final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
-          && !_isMultiline && !_nextFocusChangeIsInternal;
-      if (shouldSelectAll) {
-        // On native web, single line <input> tags select all when receiving
-        // focus.
-        _handleSelectionChanged(
-          TextSelection(
-            baseOffset: 0,
-            extentOffset: _value.text.length,
-          ),
-          null,
-        );
-      } else if (!_value.selection.isValid) {
-        // Place cursor at the end if the selection is invalid when we receive focus.
-        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), null);
+      final TextSelection? updatedSelection = _adjustedSelectionWhenFocused();
+      if (updatedSelection != null) {
+        _handleSelectionChanged(updatedSelection, null);
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
       setState(() { _currentPromptRectRange = null; });
     }
     updateKeepAlive();
+  }
+
+  TextSelection? _adjustedSelectionWhenFocused() {
+    TextSelection? selection;
+    final bool shouldSelectAll = widget.selectionEnabled && kIsWeb
+        && !_isMultiline && !_nextFocusChangeIsInternal;
+    if (shouldSelectAll) {
+      // On native web, single line <input> tags select all when receiving
+      // focus.
+      selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _value.text.length,
+      );
+    } else if (!_value.selection.isValid) {
+      // Place cursor at the end if the selection is invalid when we receive focus.
+      selection = TextSelection.collapsed(offset: _value.text.length);
+    }
+    return selection;
   }
 
   void _compositeCallback(Layer layer) {
@@ -3833,7 +3848,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         if (paintBounds.bottom <= box.top) {
           break;
         }
-        if (paintBounds.contains(Offset(box.left, box.top)) || paintBounds.contains(Offset(box.right, box.bottom))) {
+        // Include any TextBox which intersects with the RenderEditable.
+        if (paintBounds.left <= box.right &&
+            box.left <= paintBounds.right &&
+            paintBounds.top <= box.bottom) {
+          // At least some part of the letter is visible within the text field.
           rects.add(SelectionRect(position: graphemeStart, bounds: box.toRect(), direction: box.direction));
         }
       }
@@ -3966,10 +3985,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// Shows toolbar with spell check suggestions of misspelled words that are
   /// available for click-and-replace.
   bool showSpellCheckSuggestionsToolbar() {
+    // Spell check suggestions toolbars are intended to be shown on non-web
+    // platforms. Additionally, the Cupertino style toolbar can't be drawn on
+    // the web with the HTML renderer due to
+    // https://github.com/flutter/flutter/issues/123560.
+    final bool platformNotSupported = kIsWeb && BrowserContextMenu.enabled;
     if (!spellCheckEnabled
+        || platformNotSupported
         || widget.readOnly
         || _selectionOverlay == null
-        || !_spellCheckResultsReceived) {
+        || !_spellCheckResultsReceived
+        || findSuggestionSpanAtCursorIndex(textEditingValue.selection.extentOffset) == null) {
       // Only attempt to show the spell check suggestions toolbar if there
       // is a toolbar specified and spell check suggestions available to show.
       return false;
@@ -4576,7 +4602,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                             minLines: widget.minLines,
                             expands: widget.expands,
                             strutStyle: widget.strutStyle,
-                            selectionColor: widget.selectionColor,
+                            selectionColor: _selectionOverlay?.spellCheckToolbarIsVisible ?? false
+                                ? _spellCheckConfiguration.misspelledSelectionColor ?? widget.selectionColor
+                                : widget.selectionColor,
                             textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
                             textAlign: widget.textAlign,
                             textDirection: _textDirection,

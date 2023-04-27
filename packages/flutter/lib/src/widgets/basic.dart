@@ -15,6 +15,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'visibility.dart';
 import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
@@ -378,7 +379,10 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///       tileMode: TileMode.mirror,
 ///     ).createShader(bounds);
 ///   },
-///   child: const Text('I’m burning the memories'),
+///   child: const Text(
+///     'I’m burning the memories',
+///     style: TextStyle(color: Colors.white),
+///   ),
 /// )
 /// ```
 /// {@end-tool}
@@ -1700,17 +1704,18 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 /// {@youtube 560 315 https://www.youtube.com/watch?v=T4Uehk3_wlY}
 ///
 /// {@tool dartpad}
-/// In this example, the image is stretched to fill the entire [Container], which would
-/// not happen normally without using FittedBox.
+/// In this example, the [Placeholder] is stretched to fill the entire
+/// [Container]. Try changing the fit types to see the effect on the layout of
+/// the [Placeholder].
 ///
 /// ** See code in examples/api/lib/widgets/basic/fitted_box.0.dart **
 /// {@end-tool}
 ///
 /// See also:
 ///
-///  * [Transform], which applies an arbitrary transform to its child widget at
-///    paint time.
-///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+/// * [Transform], which applies an arbitrary transform to its child widget at
+///   paint time.
+/// * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class FittedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that scales and positions its child within itself according to [fit].
   ///
@@ -1981,13 +1986,6 @@ class Padding extends SingleChildRenderObjectWidget {
 /// dimension and the size factor. For example if widthFactor is 2.0 then
 /// the width of this widget will always be twice its child's width.
 ///
-/// ## How it works
-///
-/// The [alignment] property describes a point in the `child`'s coordinate system
-/// and a different point in the coordinate system of this widget. The [Align]
-/// widget positions the `child` such that both points are lined up on top of
-/// each other.
-///
 /// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [Alignment.topRight]. This places the [FlutterLogo] in the top
@@ -2012,15 +2010,27 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## How it works
+///
+/// The [alignment] property describes a point in the `child`'s coordinate system
+/// and a different point in the coordinate system of this widget. The [Align]
+/// widget positions the `child` such that both points are lined up on top of
+/// each other.
+///
 /// {@tool snippet}
-/// The [Alignment] used in the following example defines a single point:
+/// The [Alignment] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
-///   of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0).
+///     of [FlutterLogo]/2 + height of [FlutterLogo]/2) = (36.0, 48.0) in the
+///     coordinate system of the [FlutterLogo].
+///   * (0.2 * width of [Align]/2 + width of [Align]/2, 0.6 * height
+///     of [Align]/2 + height of [Align]/2) = (72.0, 96.0) in the
+///     coordinate system of the [Align] widget (blue area).
 ///
-/// The [Alignment] class uses a coordinate system with an origin in the center
-/// of the [Container], as shown with the [Icon] above. [Align] will place the
-/// [FlutterLogo] at (36.0, 48.0) according to this coordinate system.
+/// The [Align] widget positions the [FlutterLogo] such that the two points are on
+/// top of each other. In this example, the top left of the [FlutterLogo] will
+/// be placed at (72.0, 96.0) - (36.0, 48.0) = (36.0, 48.0) from the top left of
+/// the [Align] widget.
 ///
 /// ![A blue square container with the Flutter logo positioned according to the
 /// Alignment specified above. A point is marked at the center of the container
@@ -2047,9 +2057,9 @@ class Padding extends SingleChildRenderObjectWidget {
 /// The [FractionalOffset] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
-///     in the coordinate system of the blue container.
+///     in the coordinate system of the [FlutterLogo].
 ///   * (0.2 * width of [Align], 0.6 * height of [Align]) = (24.0, 72.0) in the
-///     coordinate system of the [Align] widget.
+///     coordinate system of the [Align] widget (blue area).
 ///
 /// The [Align] widget positions the [FlutterLogo] such that the two points are on
 /// top of each other. In this example, the top left of the [FlutterLogo] will
@@ -3962,12 +3972,80 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 ///  * [Stack], for more details about stacks.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
-class IndexedStack extends Stack {
+class IndexedStack extends StatelessWidget {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
   const IndexedStack({
     super.key,
+    this.alignment = AlignmentDirectional.topStart,
+    this.textDirection,
+    this.clipBehavior = Clip.hardEdge,
+    this.sizing = StackFit.loose,
+    this.index = 0,
+    this.children = const <Widget>[],
+  });
+
+  /// How to align the non-positioned and partially-positioned children in the
+  /// stack.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See [Stack.alignment] for more information.
+  final AlignmentGeometry alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection? textDirection;
+
+  /// {@macro flutter.material.Material.clipBehavior}
+  ///
+  /// Defaults to [Clip.hardEdge].
+  final Clip clipBehavior;
+
+  /// How to size the non-positioned children in the stack.
+  ///
+  /// Defaults to [StackFit.loose].
+  ///
+  /// See [Stack.fit] for more information.
+  final StackFit sizing;
+
+  /// The index of the child to show.
+  ///
+  /// If this is null, none of the children will be shown.
+  final int? index;
+
+  /// The child widgets of the stack.
+  ///
+  /// Only the child at index [index] will be shown.
+  ///
+  /// See [Stack.children] for more information.
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> wrappedChildren = List<Widget>.generate(children.length, (int i) {
+      return Visibility.maintain(
+        visible: i == index,
+        child: children[i],
+      );
+    });
+    return _RawIndexedStack(
+      alignment: alignment,
+      textDirection: textDirection,
+      clipBehavior: clipBehavior,
+      sizing: sizing,
+      index: index,
+      children: wrappedChildren,
+    );
+  }
+}
+
+/// The render object widget that backs [IndexedStack].
+class _RawIndexedStack extends Stack {
+  /// Creates a [Stack] widget that paints a single child.
+  const _RawIndexedStack({
     super.alignment,
     super.textDirection,
     super.clipBehavior,
@@ -3984,7 +4062,7 @@ class IndexedStack extends Stack {
     assert(_debugCheckHasDirectionality(context));
     return RenderIndexedStack(
       index: index,
-      fit:fit,
+      fit: fit,
       clipBehavior: clipBehavior,
       alignment: alignment,
       textDirection: textDirection ?? Directionality.maybeOf(context),
@@ -4000,6 +4078,28 @@ class IndexedStack extends Stack {
       ..clipBehavior = clipBehavior
       ..alignment = alignment
       ..textDirection = textDirection ?? Directionality.maybeOf(context);
+  }
+
+  @override
+  MultiChildRenderObjectElement createElement() {
+    return _IndexedStackElement(this);
+  }
+}
+
+class _IndexedStackElement extends MultiChildRenderObjectElement {
+  _IndexedStackElement(_RawIndexedStack super.widget);
+
+  @override
+  _RawIndexedStack get widget => super.widget as _RawIndexedStack;
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    final int? index = widget.index;
+    // If the index is null, no child is onstage. Otherwise, only the child at
+    // the selected index is.
+    if (index != null && children.isNotEmpty) {
+      visitor(children.elementAt(index));
+    }
   }
 }
 
@@ -6643,10 +6743,6 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// as usual. It just cannot be the target of located events, because it returns
 /// false from [RenderBox.hitTest].
 ///
-/// When [ignoringSemantics] is true, the subtree will be invisible to
-/// the semantics layer (and thus e.g. accessibility tools). If
-/// [ignoringSemantics] is null, it uses the value of [ignoring].
-///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=qV9pqHWxYgI}
 ///
 /// {@tool dartpad}
@@ -6659,6 +6755,24 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 /// ** See code in examples/api/lib/widgets/basic/ignore_pointer.0.dart **
 /// {@end-tool}
 ///
+/// ## Semantics
+///
+/// Using this widget may also affect how the semantics subtree underneath this
+/// widget is collected.
+///
+/// {@template flutter.widgets.IgnorePointer.Semantics}
+/// If [ignoringSemantics] is true, the semantics subtree is dropped. Therefore,
+/// the subtree will be invisible to assistive technologies.
+///
+/// If [ignoringSemantics] is false, the semantics subtree is collected as
+/// usual.
+///
+/// If [ignoringSemantics] is not set, then [ignoring] decides how the
+/// semantics subtree is collected. If [ignoring] is true, pointer-related
+/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
+/// subtree remains untouched.
+/// {@endtemplate}
+///
 /// See also:
 ///
 ///  * [AbsorbPointer], which also prevents its children from receiving pointer
@@ -6667,11 +6781,14 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
 class IgnorePointer extends SingleChildRenderObjectWidget {
   /// Creates a widget that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
-  /// this render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null.
   const IgnorePointer({
     super.key,
     this.ignoring = true,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
     super.child,
   });
@@ -6680,13 +6797,22 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   ///
   /// Regardless of whether this widget is ignored during hit testing, it will
   /// still consume space during layout and be visible during painting.
+  ///
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
+  ///
+  /// Defaults to true.
   final bool ignoring;
 
-  /// Whether the semantics of this widget is ignored when compiling the semantics tree.
+  /// Whether the semantics of this widget is ignored when compiling the
+  /// semantics subtree.
   ///
-  /// If null, defaults to value of [ignoring].
+  /// {@macro flutter.widgets.IgnorePointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom ignore pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override
@@ -6720,6 +6846,9 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 /// from being the target of located events, because it returns true from
 /// [RenderBox.hitTest].
 ///
+/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// the semantics layer (and thus e.g. accessibility tools).
+///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=65HoWqBboI8}
 ///
 /// {@tool dartpad}
@@ -6729,6 +6858,23 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 ///
 /// ** See code in examples/api/lib/widgets/basic/absorb_pointer.0.dart **
 /// {@end-tool}
+///
+/// ## Semantics
+///
+/// Using this widget may also affect how the semantics subtree underneath this
+/// widget is collected.
+///
+/// {@template flutter.widgets.AbsorbPointer.Semantics}
+/// If [ignoringSemantics] is true, the semantics subtree is dropped.
+///
+/// If [ignoringSemantics] is false, the semantics subtree is collected as
+/// usual.
+///
+/// If [ignoringSemantics] is not set, then [absorbing] decides how the
+/// semantics subtree is collected. If [absorbing] is true, pointer-related
+/// [SemanticsAction]s are removed from the semantics subtree. Otherwise, the
+/// subtree remains untouched.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -6741,8 +6887,12 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   const AbsorbPointer({
     super.key,
     this.absorbing = true,
-    super.child,
+    @Deprecated(
+      'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+      'This feature was deprecated after v3.8.0-12.0.pre.'
+    )
     this.ignoringSemantics,
+    super.child,
   });
 
   /// Whether this widget absorbs pointers during hit testing.
@@ -6750,14 +6900,22 @@ class AbsorbPointer extends SingleChildRenderObjectWidget {
   /// Regardless of whether this render object absorbs pointers during hit
   /// testing, it will still consume space during layout and be visible during
   /// painting.
+  ///
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
+  ///
+  /// Defaults to true.
   final bool absorbing;
 
   /// Whether the semantics of this render object is ignored when compiling the
   /// semantics tree.
   ///
-  /// If null, defaults to the value of [absorbing].
+  /// {@macro flutter.widgets.AbsorbPointer.Semantics}
   ///
   /// See [SemanticsNode] for additional information about the semantics tree.
+  @Deprecated(
+    'Use ExcludeSemantics or create a custom absorb pointer widget instead. '
+    'This feature was deprecated after v3.8.0-12.0.pre.'
+  )
   final bool? ignoringSemantics;
 
   @override
@@ -6871,6 +7029,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool container = false,
     bool explicitChildNodes = false,
     bool excludeSemantics = false,
+    bool blockUserActions = false,
     bool? enabled,
     bool? checked,
     bool? mixed,
@@ -6936,6 +7095,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     container: container,
     explicitChildNodes: explicitChildNodes,
     excludeSemantics: excludeSemantics,
+    blockUserActions: blockUserActions,
     properties: SemanticsProperties(
       enabled: enabled,
       checked: checked,
@@ -7011,6 +7171,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.container = false,
     this.explicitChildNodes = false,
     this.excludeSemantics = false,
+    this.blockUserActions = false,
     required this.properties,
   });
 
@@ -7054,12 +7215,48 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// an [ExcludeSemantics] widget and then another [Semantics] widget.
   final bool excludeSemantics;
 
+  /// Whether to block user interactions for the rendering subtree.
+  ///
+  /// Setting this to true will prevent users from interacting with The
+  /// rendering object configured by this widget and its subtree through
+  /// pointer-related [SemanticsAction]s in assistive technologies.
+  ///
+  /// The [SemanticsNode] created from this widget is still focusable by
+  /// assistive technologies. Only pointer-related [SemanticsAction]s, such as
+  /// [SemanticsAction.tap] or its friends, are blocked.
+  ///
+  /// If this widget is merged into a parent semantics node, only the
+  /// [SemanticsAction]s of this widget and the widgets in the subtree are
+  /// blocked.
+  ///
+  /// For example:
+  /// ```dart
+  /// void _myTap() { }
+  /// void _myLongPress() { }
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Semantics(
+  ///     onTap: _myTap,
+  ///     child: Semantics(
+  ///       blockUserActions: true,
+  ///       onLongPress: _myLongPress,
+  ///       child: const Text('label'),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// The result semantics node will still have `_myTap`, but the `_myLongPress`
+  /// will be blocked.
+  final bool blockUserActions;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
       excludeSemantics: excludeSemantics,
+      blockUserActions: blockUserActions,
       properties: properties,
       textDirection: _getTextDirection(context),
     );
@@ -7089,6 +7286,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..container = container
       ..explicitChildNodes = explicitChildNodes
       ..excludeSemantics = excludeSemantics
+      ..blockUserActions = blockUserActions
       ..properties = properties
       ..textDirection = _getTextDirection(context);
   }
