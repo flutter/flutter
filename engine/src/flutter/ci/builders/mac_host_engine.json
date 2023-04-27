@@ -10,7 +10,8 @@
                         "out/host_debug/zip_archives/darwin-x64/FlutterEmbedder.framework.zip",
                         "out/host_debug/zip_archives/dart-sdk-darwin-x64.zip"
                     ],
-                    "name": "host_debug"
+                    "name": "host_debug",
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -66,7 +67,8 @@
                     "include_paths": [
                         "out/host_profile/zip_archives/darwin-x64-profile/artifacts.zip"
                     ],
-                    "name": "host_profile"
+                    "name": "host_profile",
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -120,7 +122,8 @@
                         "out/host_release/zip_archives/darwin-x64-release/artifacts.zip",
                         "out/host_release/zip_archives/darwin-x64/font-subset.zip"
                     ],
-                    "name": "host_release"
+                    "name": "host_release",
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -181,7 +184,8 @@
                         "out/mac_debug_arm64/zip_archives/darwin-arm64/artifacts.zip",
                         "out/mac_debug_arm64/zip_archives/dart-sdk-darwin-arm64.zip"
                     ],
-                    "name": "mac_debug_arm64"
+                    "name": "mac_debug_arm64",
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -221,7 +225,8 @@
                     "include_paths": [
                         "out/mac_profile_arm64/zip_archives/darwin-arm64-profile/artifacts.zip"
                     ],
-                    "name": "mac_profile_arm64"
+                    "name": "mac_profile_arm64",
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -259,7 +264,8 @@
                         "out/mac_release_arm64/zip_archives/darwin-arm64/font-subset.zip",
                         "out/mac_release_arm64/zip_archives/darwin-arm64-release/artifacts.zip"
                     ],
-                    "name": "mac_release_arm64"
+                    "name": "mac_release_arm64",
+                    "realm": "production"
                 }
             ],
             "drone_dimensions": [
@@ -385,31 +391,38 @@
     "archives": [
         {
             "source": "out/release/framework/FlutterMacOS.dSYM.zip",
-            "destination": "darwin-x64-release/FlutterMacOS.dSYM.zip"
+            "destination": "darwin-x64-release/FlutterMacOS.dSYM.zip",
+            "realm": "production"
         },
         {
             "source": "out/debug/framework/FlutterMacOS.framework.zip",
-            "destination": "darwin-x64/FlutterMacOS.framework.zip"
+            "destination": "darwin-x64/FlutterMacOS.framework.zip",
+            "realm": "production"
         },
         {
             "source": "out/profile/framework/FlutterMacOS.framework.zip",
-            "destination": "darwin-x64-profile/FlutterMacOS.framework.zip"
+            "destination": "darwin-x64-profile/FlutterMacOS.framework.zip",
+            "realm": "production"
         },
         {
             "source": "out/release/framework/FlutterMacOS.framework.zip",
-            "destination": "darwin-x64-release/FlutterMacOS.framework.zip"
+            "destination": "darwin-x64-release/FlutterMacOS.framework.zip",
+            "realm": "production"
         },
         {
             "source": "out/debug/snapshot/gen_snapshot.zip",
-            "destination": "darwin-x64/gen_snapshot.zip"
+            "destination": "darwin-x64/gen_snapshot.zip",
+            "realm": "production"
         },
         {
             "source": "out/profile/snapshot/gen_snapshot.zip",
-            "destination": "darwin-x64-profile/gen_snapshot.zip"
+            "destination": "darwin-x64-profile/gen_snapshot.zip",
+            "realm": "production"
         },
         {
             "source": "out/release/snapshot/gen_snapshot.zip",
-            "destination": "darwin-x64-release/gen_snapshot.zip"
+            "destination": "darwin-x64-release/gen_snapshot.zip",
+            "realm": "production"
         }
     ]
 }
