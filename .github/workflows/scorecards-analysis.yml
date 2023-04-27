@@ -9,22 +9,6 @@ on:
 permissions: read-all
 
 jobs:
-  vuln-scan:
-    name: Vulnerability scanning
-    runs-on: ubuntu-20.04
-    if: ${{ github.repository == 'flutter/engine' }}
-    steps:
-      - name: "Checkout code"
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
-        with:
-          persist-credentials: false
-      - name: "setup python"
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b
-        with:
-          python-version: '3.7.7' # install the python version needed
-      - name: "execute py script"
-        run: python ci/deps_parser.py
-
   scorecards:
     name: Scorecards analysis
     runs-on: ubuntu-latest
