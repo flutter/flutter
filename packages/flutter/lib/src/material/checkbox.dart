@@ -673,8 +673,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   BorderSide get activeSide => _activeSide!;
   BorderSide? _activeSide;
-  set activeSide(BorderSide? value) {
-    assert(value != null);
+  set activeSide(BorderSide value) {
     if (_activeSide == value) {
       return;
     }
@@ -684,8 +683,7 @@ class _CheckboxPainter extends ToggleablePainter {
 
   BorderSide get inactiveSide => _inactiveSide!;
   BorderSide? _inactiveSide;
-  set inactiveSide(BorderSide? value) {
-    assert(value != null);
+  set inactiveSide(BorderSide value) {
     if (_inactiveSide == value) {
       return;
     }
