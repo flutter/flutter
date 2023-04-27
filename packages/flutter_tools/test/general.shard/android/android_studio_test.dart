@@ -653,8 +653,6 @@ void main() {
       FileSystem: () => fileSystem,
       FileSystemUtils: () => fsUtils,
       ProcessManager: () => processManager,
-      // Custom home paths are not supported on macOS nor Windows yet,
-      // so we force the platform to fake Linux here.
       Platform: () => platform,
       PlistParser: () => plistUtils,
     });
