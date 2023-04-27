@@ -79,7 +79,8 @@ std::unique_ptr<SurfaceMTL> SurfaceMTL::WrapCurrentMetalLayerDrawable(
   TextureDescriptor resolve_tex_desc;
   resolve_tex_desc.format = color_format;
   resolve_tex_desc.size = msaa_tex_desc.size;
-  resolve_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget);
+  resolve_tex_desc.usage = static_cast<uint64_t>(TextureUsage::kRenderTarget) |
+                           static_cast<uint64_t>(TextureUsage::kShaderRead);
   resolve_tex_desc.sample_count = SampleCount::kCount1;
   resolve_tex_desc.storage_mode = StorageMode::kDevicePrivate;
 
