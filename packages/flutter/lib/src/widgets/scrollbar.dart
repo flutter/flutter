@@ -1886,17 +1886,13 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
   }
 
   bool _handleScrollMetricsNotification(ScrollMetricsNotification notification) {
-    if (!widget.notificationPredicate(ScrollUpdateNotification(
-          metrics: notification.metrics,
-          context: notification.context,
-          depth: notification.depth,
-        ))) {
+    if (!widget.notificationPredicate(notification.asScrollUpdate())) {
       return false;
     }
 
     if (showScrollbar) {
-      if (_fadeoutAnimationController.status != AnimationStatus.forward
-          && _fadeoutAnimationController.status != AnimationStatus.completed) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward &&
+          _fadeoutAnimationController.status != AnimationStatus.completed) {
         _fadeoutAnimationController.forward();
       }
     }
@@ -1916,8 +1912,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     final ScrollMetrics metrics = notification.metrics;
     if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
       // Hide the bar when the Scrollable widget has no space to scroll.
-      if (_fadeoutAnimationController.status != AnimationStatus.dismissed
-          && _fadeoutAnimationController.status != AnimationStatus.reverse) {
+      if (_fadeoutAnimationController.status != AnimationStatus.dismissed &&
+          _fadeoutAnimationController.status != AnimationStatus.reverse) {
         _fadeoutAnimationController.reverse();
       }
 
@@ -1930,8 +1926,8 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     if (notification is ScrollUpdateNotification ||
       notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.
-      if (_fadeoutAnimationController.status != AnimationStatus.forward
-          && _fadeoutAnimationController.status != AnimationStatus.completed) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward &&
+          _fadeoutAnimationController.status != AnimationStatus.completed) {
         _fadeoutAnimationController.forward();
       }
 
@@ -1993,7 +1989,7 @@ class RawScrollbarState<T extends RawScrollbar> extends State<T> with TickerProv
     }
     final Offset localOffset = _getLocalOffset(_scrollbarPainterKey, position);
     return scrollbarPainter.hitTestInteractive(localOffset, kind)
-      && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
+       && !scrollbarPainter.hitTestOnlyThumbInteractive(localOffset, kind);
   }
   /// Returns true if the provided [Offset] is located over the thumb of the
   /// [RawScrollbar].

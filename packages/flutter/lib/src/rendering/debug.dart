@@ -260,8 +260,17 @@ void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color c
 
 /// Paint a diagram showing the given area as padding.
 ///
-/// Called by [RenderPadding.debugPaintSize] when [debugPaintSizeEnabled] is
-/// true.
+/// The `innerRect` argument represents the position of the child, if any.
+///
+/// When `innerRect` is null, the method draws the entire `outerRect` in a
+/// grayish color representing _spacing_.
+///
+/// When `innerRect` is non-null, the method draws the padding region around the
+/// `innerRect` in a tealish color, with a solid outline around the inner
+/// region.
+///
+/// This method is used by [RenderPadding.debugPaintSize] when
+/// [debugPaintSizeEnabled] is true.
 void debugPaintPadding(Canvas canvas, Rect outerRect, Rect? innerRect, { double outlineWidth = 2.0 }) {
   assert(() {
     if (innerRect != null && !innerRect.isEmpty) {

@@ -654,7 +654,16 @@ abstract class BindingBase {
       _lockCount -= 1;
       if (!locked) {
         timelineTask.finish();
-        unlocked();
+        try {
+          unlocked();
+        } catch (error, stack) {
+          FlutterError.reportError(FlutterErrorDetails(
+            exception: error,
+            stack: stack,
+            library: 'foundation',
+            context: ErrorDescription('while handling pending events'),
+          ));
+        }
       }
     });
     return future;
