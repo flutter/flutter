@@ -1468,9 +1468,9 @@ void main() {
           topRight: const Radius.circular(2.0),
           bottomRight: const Radius.circular(2.0),
         ))
-      // The thumb Left.
+        // The thumb Left.
         ..circle(x: 10.0, y: 300.0, radius: 10.0)
-      // The thumb Right.
+        // The thumb Right.
         ..circle(x: 790.0, y: 300.0, radius: 10.0),
     );
   });
