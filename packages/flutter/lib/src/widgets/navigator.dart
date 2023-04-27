@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:ui' as ui;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -5710,4 +5709,25 @@ class RestorableRouteFuture<T> extends RestorableProperty<String?> {
   }
 
   static NavigatorState _defaultNavigatorFinder(BuildContext context) => Navigator.of(context);
+}
+
+extension <T> on Iterable<T> {
+  T? firstWhereOrNull(bool Function(T element) test) {
+    for (final T element in this) {
+      if (test(element)) {
+        return element;
+      }
+    }
+    return null;
+  }
+
+  T? lastWhereOrNull(bool Function(T element) test) {
+    T? result;
+    for (final T element in this) {
+      if (test(element)) {
+        result = element;
+      }
+    }
+    return result;
+  }
 }
