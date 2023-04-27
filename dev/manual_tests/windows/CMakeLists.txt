@@ -3,7 +3,7 @@ project(manual_tests LANGUAGES CXX)
 
 set(BINARY_NAME "manual_tests")
 
-cmake_policy(VERSION 2.4...3.25)
+cmake_policy(VERSION 3.14...3.25)
 
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 
