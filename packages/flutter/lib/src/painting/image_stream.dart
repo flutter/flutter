@@ -587,6 +587,10 @@ abstract class ImageStreamCompleter with Diagnosticable {
     }
   }
 
+  /// Whether the image is disposed.
+  @protected
+  @visibleForTesting
+  bool get isDisposed => _disposed;
   bool _disposed = false;
 
   @mustCallSuper

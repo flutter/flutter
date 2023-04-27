@@ -1063,7 +1063,7 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
     if (TickerMode.of(context)) {
       _listenToStream();
     } else {
-      _stopListeningToStream(keepStreamAlive: true);
+      _stopListeningToStream();
     }
 
     super.didChangeDependencies();

@@ -1901,8 +1901,9 @@ void main() {
     expect(image.debugGetOpenHandleStackTraces()!.length, 0);
   }, skip: kIsWeb); // https://github.com/flutter/flutter/issues/87442
 
-  testWidgets('Keeps stream alive when ticker mode is disabled',  (WidgetTester tester) async {
+  testWidgets('Timely dispose unavailable image when ticker mode is disabled',  (WidgetTester tester) async {
     imageCache.maximumSize = 0;
+    // Ensure `ImageCache` is disabled.
     final ui.Image image = (await tester.runAsync(() => createTestImage(cache: false)))!;
     final _TestImageProvider provider = _TestImageProvider();
     provider.complete(image);
@@ -1922,12 +1923,8 @@ void main() {
     );
     expect(find.byType(Image), findsOneWidget);
 
-    await tester.pumpWidget(TickerMode(
-        enabled: true,
-        child: Image(image: provider),
-      ),
-    );
-    expect(find.byType(Image), findsOneWidget);
+    // Timely release the memory of unavailable images evicted by `ImageCache`.
+    expect(provider._streamCompleter.isDisposed, true);
   });
 
   testWidgets('Load a good image after a bad image was loaded should not call errorBuilder', (WidgetTester tester) async {
