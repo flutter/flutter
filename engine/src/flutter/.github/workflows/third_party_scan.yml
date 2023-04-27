@@ -1,56 +1,26 @@
-name: Third party dependency scan
+name: Third party deps scan
 on:
   # Only the default branch is supported.
   branch_protection_rule:
+  push:
     branches: [ main ]
-    schedule:
-      - cron: "0 8 * * *" # runs daily at 08:00
-
 
 # Declare default permissions as read only.
 permissions: read-all
 
 jobs:
-  analysis:
-    name: Third party dependency scan
-    runs-on: ubuntu-latest
-    permissions:
-      # Needed to upload the results to code-scanning dashboard.
-      security-events: write
-      actions: read
-      contents: read
-
+  vuln-scan:
+    name: Vulnerability scanning
+    runs-on: ubuntu-20.04
+    if: ${{ github.repository == 'flutter/engine' }}
     steps:
       - name: "Checkout code"
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
         with:
           persist-credentials: false
-
-      - name: setup python
+      - name: "setup python"
         uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b
         with:
           python-version: '3.7.7' # install the python version needed
-
-      - name: install dependency
-        run: pip install git+https://github.com/psf/requests.git@4d394574f5555a8ddcc38f707e0c9f57f55d9a3b
-
-      - name: execute py script
-        run: python ci/deps_parser.py 
-      
-      - name: parse deps_parser output.txt
-        run: python ci/scan_flattened_deps.py 
-
-      # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
-      # format to the repository Actions tab.
-      - name: "Upload artifact"
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
-        with:
-          name: SARIF file
-          path: osvReport.sarif
-          retention-days: 5
-
-      # Upload the results to GitHub's code scanning dashboard.
-      - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@d186a2a36cc67bfa1b860e6170d37fb9634742c7
-        with:
-          sarif_file: osvReport.sarif
+      - name: "execute py script"
+        run: python ci/deps_parser.py
