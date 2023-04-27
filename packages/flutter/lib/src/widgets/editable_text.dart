@@ -4240,7 +4240,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   // --------------------------- Text Editing Actions ---------------------------
 
-  TextBoundary _characterBoundary() => CharacterBoundary(_value.text);
+  TextBoundary _characterBoundary() => widget.obscureText ? _CodePointBoundary(_value.text) : CharacterBoundary(_value.text);
   TextBoundary _nextWordBoundary() => widget.obscureText ? _documentBoundary() : renderEditable.wordBoundaries.moveByWordBoundary;
   TextBoundary _linebreak() => widget.obscureText ? _documentBoundary() : LineBoundary(renderEditable);
   TextBoundary _paragraphBoundary() => ParagraphBoundary(_value.text);
@@ -5067,6 +5067,39 @@ class _ScribblePlaceholder extends WidgetSpan {
     if (hasStyle) {
       builder.pop();
     }
+  }
+}
+
+/// A text boundary that uses code points as logical boundaries.
+///
+/// A code point represents a single character. This may be smaller than what is
+/// represented by a user-perceived character, or grapheme. For example, a
+/// single grapheme (in this case a Unicode extended grapheme cluster) like
+/// "👨‍👩‍👦" consists of five code points: the man emoji, a zero
+/// width joiner, the woman emoji, another zero width joiner, and the boy emoji.
+/// The [String] has a length of eight because each emoji consists of two code
+/// units.
+///
+/// See also:
+///
+///  * [String.runes], which deals with code points like this class.
+///  * [String.characters], which deals with graphemes.
+///  * [CharacterBoundary], which is a [TextBoundary] like this class, but whose
+///    boundaries are graphemes instead of code points.
+class _CodePointBoundary extends TextBoundary {
+  const _CodePointBoundary(this._text);
+
+  final String _text;
+
+  @override
+  int? getLeadingTextBoundaryAt(int position) {
+    // TODO(justinmc): Iterate through the string and find the closest rune.
+    // Can you cache some of the info so you don't have to recalculate for dupcliate
+    // calls or calls to getTrailingTextBoundaryAt?
+  }
+
+  @override
+  int getTrailingTextBoundaryAt(int position) {
   }
 }
 
