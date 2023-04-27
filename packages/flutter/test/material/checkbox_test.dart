@@ -438,17 +438,21 @@ void main() {
 
     await tester.pumpWidget(buildFrame(false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), isNot(paints..path())); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(), paints..path(color: Colors.transparent)); // paint transparent border
     expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
     expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
 
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path()); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(),
+      paints
+        ..path(color: theme.useMaterial3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+        ..path(color: theme.useMaterial3 ? theme.colorScheme.onPrimary : const Color(0xFFFFFFFF))
+    ); // checkmark is rendered as a path
 
     await tester.pumpWidget(buildFrame(false));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), isNot(paints..path())); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(), paints..path(color: Colors.transparent)); // paint transparent border
     expect(getCheckboxRenderer(), isNot(paints..line())); // null is rendered as a line (a "dash")
     expect(getCheckboxRenderer(), paints..drrect()); // empty checkbox
 
@@ -458,7 +462,11 @@ void main() {
 
     await tester.pumpWidget(buildFrame(true));
     await tester.pumpAndSettle();
-    expect(getCheckboxRenderer(), paints..path()); // checkmark is rendered as a path
+    expect(getCheckboxRenderer(),
+      paints
+        ..path(color: theme.useMaterial3 ? theme.colorScheme.primary : theme.colorScheme.secondary)
+        ..path(color: theme.useMaterial3 ? theme.colorScheme.onPrimary : const Color(0xFFFFFFFF))
+    ); // checkmark is rendered as a path
 
     await tester.pumpWidget(buildFrame(null));
     await tester.pumpAndSettle();
@@ -1497,10 +1505,12 @@ void main() {
 
     await tester.pumpWidget(buildApp(value: true));
     await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..drrect(color: Colors.transparent));
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
 
     await tester.pumpWidget(buildApp());
     await tester.pumpAndSettle();
+    expect(getCheckboxRenderer(), paints..drrect(color: Colors.transparent));
     expect(getCheckboxRenderer(), paints..path(color: activeColor)); // checkbox fill
   });
 
