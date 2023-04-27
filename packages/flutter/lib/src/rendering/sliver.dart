@@ -762,6 +762,8 @@ class SliverGeometry with Diagnosticable {
   ///
   ///   * [SliverConstrainedCrossAxis] for an example of a sliver which takes up
   ///     a smaller cross axis extent than the provided constraint.
+  ///   * [SliverCrossAxisGroup] for an example of a sliver which makes use of this
+  ///   [crossAxisExtent] to lay out their children.
   final double? crossAxisExtent;
 
   /// Asserts that this geometry is internally consistent.
@@ -1004,7 +1006,19 @@ class SliverPhysicalParentData extends ParentData {
 
   /// The [crossAxisFlex] factor to use for this sliver child.
   ///
+  /// If used outside of a [SliverCrossAxisGroup] widget, this value has no meaning.
+  ///
   /// If null or zero, the child is inflexible and determines its own size in the cross axis.
+  /// If non-zero, the amount of space the child can occupy in the cross axis is
+  /// determined by dividing the free space (after placeing the inflexible children)
+  /// according to the flex factors of the flexible children.
+  ///
+  /// This value is only used by the [SliverCrossAxisGroup] widget to determine
+  /// how to allocate its [SliverConstraints.crossAxisExtent] to its children.
+  ///
+  /// See also:
+  /// * [SliverCrossAxisGroup], which lays out multiple slivers along the
+  ///   cross axis direction.
   int? crossAxisFlex;
 
   /// Apply the [paintOffset] to the given [transform].
