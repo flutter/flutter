@@ -1787,9 +1787,8 @@ mixin BaseRangeSliderTrackShape {
   /// Returns a rect that represents the track bounds that fits within the
   /// [Slider].
   ///
-  /// The width is the width of the [Slider] or [RangeSlider], but padded by
-  /// the max of the overlay and thumb radius. The height is defined by the
-  /// [SliderThemeData.trackHeight].
+  /// The width is the width of the [RangeSlider], but padded by the max
+  /// of the overlay and thumb radius. The height is defined by the  [SliderThemeData.trackHeight].
   ///
   /// The [Rect] is centered both horizontally and vertically within the slider
   /// bounds.
