@@ -35,10 +35,12 @@ class DeviceBufferMTL final : public DeviceBuffer,
   // |DeviceBuffer|
   uint8_t* OnGetContents() const override;
 
+#ifndef FML_OS_IOS_SIMULATOR
   // |DeviceBuffer|
   std::shared_ptr<Texture> AsTexture(Allocator& allocator,
                                      const TextureDescriptor& descriptor,
                                      uint16_t row_bytes) const override;
+#endif  // FML_OS_IOS_SIMULATOR
 
   // |DeviceBuffer|
   bool OnCopyHostBuffer(const uint8_t* source,
