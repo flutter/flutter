@@ -104,7 +104,7 @@ class Checkbox extends StatefulWidget {
   /// design [Checkbox].
   ///
   /// If a [CupertinoCheckbox] is created, the following parameters are ignored:
-  /// [mouseCursor], [hoverColor], [overlayColor], [splashRadius],
+  /// [mouseCursor], [fillColor], [hoverColor], [overlayColor], [splashRadius],
   /// [materialTapTargetSize], [visualDensity], [isError]. However, [shape] and
   /// [side] will still affect the [CupertinoCheckbox] and should be handled if
   /// native fidelity is important.
